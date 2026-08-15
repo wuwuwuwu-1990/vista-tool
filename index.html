@@ -325,7 +325,7 @@
   .about-log .log-item .lt{color:rgba(238,242,251,.85);}
 </style>
 </head>
-<body>
+<body data-theme="business">
 <div class="bg-shoot"><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div></div>
 <div class="bg-halo h1"></div>
 <div class="bg-halo h2"></div>
@@ -887,6 +887,16 @@ var CARD_META = {
 })();
 // 页面加载：检测更新日志角标（有未读更新则「关于」显示绿点）
 updateLogBadge();
+// ===== 主题初始化：恢复用户上次选择（默认商务深蓝），首次加载即应用特效 =====
+(function(){
+  var t = 'business';
+  try {
+    var saved = localStorage.getItem('vista_theme');
+    var ver = localStorage.getItem('vista_theme_ver');
+    if (saved && ver === THEME_VER && (saved === 'space' || saved === 'business')) t = saved;
+  } catch(e){}
+  setTheme(t, false);  // 不重复写 localStorage
+})();
 </script>
 </body>
 </html>
