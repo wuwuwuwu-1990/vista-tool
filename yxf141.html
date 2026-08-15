@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>渝选房 · 重庆主城智能选房</title>
+<style>
+:root{
+  --bg:#0b1020; --surface:#121a30; --surface2:#0e1730; --text:#e5edff; --muted:#8aa0c8;
+  --primary:#22d3ee; --primary2:#38bdf8; --accent:#8b5cf6; --border:#1f2c4d; --radius:10px;
+  --green:#34d399; --amber:#fbbf24; --red:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;user-select:text;-webkit-user-select:text;
+  background-image:linear-gradient(rgba(34,211,238,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.05) 1px,transparent 1px);
+  background-size:34px 34px;background-attachment:fixed;
+}
+.topbar{display:flex;align-items:center;gap:18px;padding:12px 20px;background:rgba(18,26,48,.85);
+  border-bottom:1px solid var(--border);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+.logo{font:800 20px/1 'PingFang SC',sans-serif;color:var(--primary);white-space:nowrap;
+  text-shadow:0 0 14px rgba(34,211,238,.5)}
+.logo-sub{font:500 12px/1 var(--font);color:var(--muted);margin-left:6px}
+.nav{display:flex;gap:14px;margin-left:8px}
+.nav a{font-size:13px;color:var(--muted);cursor:pointer;padding:4px 2px;border-bottom:2px solid transparent}
+.nav a:hover,.nav a.on{color:var(--primary);border-color:var(--primary)}
+.actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:600 13px/1 var(--font);padding:9px 14px;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--primary)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn-ai{background:linear-gradient(135deg,var(--primary),var(--accent));color:#06121f;border:none;
+  box-shadow:0 0 18px rgba(34,211,238,.35)}
+.btn-pdf{border-color:var(--accent);color:var(--accent)}
+.btn-detail{border-color:var(--primary);color:var(--primary)}
+.layout{display:grid;grid-template-columns:272px 1fr;gap:0;align-items:start}
+.filters{background:var(--surface2);padding:18px 16px;border-right:1px solid var(--border);
+  position:sticky;top:57px;height:calc(100vh - 57px);overflow:auto}
+.fhead{font:700 15px/1 var(--font);color:var(--text);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.fhead .reset{font:600 11px/1 var(--font);color:var(--muted);cursor:pointer;border:1px solid var(--border);padding:5px 8px;border-radius:6px}
+.fgroup{margin-bottom:15px}
+.fgroup.collapsed .chips{display:none}
+.flabel{font-size:12px;color:var(--muted);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.flabel .fold{font-size:11px;color:var(--primary)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 12px/1 var(--font);padding:7px 11px;border-radius:999px;background:var(--surface);
+  color:var(--text);border:1px solid var(--border);cursor:pointer;transition:.12s}
+.chip:hover{border-color:var(--primary)}
+.chip.on{background:var(--primary);color:#06121f;border-color:var(--primary);box-shadow:0 0 12px rgba(34,211,238,.35)}
+.range{width:100%;accent-color:var(--primary)}
+.rval{font-size:12px;color:var(--primary);margin-top:6px}
+.main{padding:16px 20px}
+.sortbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.res{font-size:13px;color:var(--muted)} .res b{color:var(--primary);font-size:15px}
+.rsum{font-size:12px;color:var(--muted);margin-top:4px}
+.sort{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.sort select{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font:600 12px/1 var(--font)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 0 0 1px rgba(34,211,238,.06),0 10px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;transition:.15s}
+.card:hover{border-color:var(--primary);box-shadow:0 0 0 1px rgba(34,211,238,.2),0 12px 34px rgba(0,0,0,.5)}
+.thumb{height:104px;background:linear-gradient(135deg,#0e1730,#16213d);display:flex;align-items:center;justify-content:center;position:relative}
+.thumb svg{width:64px;height:48px;opacity:.8}
+.score{position:absolute;top:8px;right:8px;font:800 12px/1 var(--font);color:#06121f;background:var(--primary);
+  padding:5px 8px;border-radius:8px;box-shadow:0 0 12px rgba(34,211,238,.5)}
+.info{padding:12px}
+.hname{font:700 14px/1.25 var(--font);color:var(--text)}
+.hmeta{font-size:12px;color:var(--muted);margin:6px 0 8px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-size:11px;padding:4px 8px;border-radius:6px}
+.tag-s{background:rgba(52,211,153,.16);color:var(--green)}
+.tag-m{background:rgba(56,189,248,.16);color:var(--primary2)}
+.tag-n{font-weight:700}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end}
+.hprice{font:800 18px/1 var(--font);color:var(--primary);text-shadow:0 0 10px rgba(34,211,238,.3)}
+.unit{font:500 11px/1 var(--font);color:var(--muted);margin-left:4px}
+.hpsm{font-size:11px;color:var(--muted);text-align:right}
+.ahint{font:600 11px/1 var(--font);padding:7px 10px;border-radius:8px;border:1px solid var(--primary);color:var(--primary);background:var(--surface2);cursor:pointer;width:100%}
+.ahint:hover{background:rgba(34,211,238,.12)}
+.map-module{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:0 0 0 1px rgba(34,211,238,.06),0 10px 30px rgba(0,0,0,.35);overflow:hidden}
+.mm-head{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;
+  font:700 13px/1 var(--font);color:var(--primary);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.mm-badge{font:600 10px/1 var(--font);color:var(--muted);background:var(--surface2);padding:5px 9px;border-radius:6px;cursor:pointer;border:1px solid var(--border)}
+.mm-badge.primary{color:var(--primary);border-color:var(--primary)}
+.mm-body{display:grid;grid-template-columns:1fr 250px}
+.mm-map{position:relative;min-height:300px;background:var(--surface2);overflow:hidden}
+.mapsvg{display:block;width:100%;height:300px}
+#baiduMap{position:absolute;inset:0;display:none}
+.pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;z-index:2}
+.pin-dot{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:50%;
+  background:var(--primary);color:#06121f;font:800 12px/1 var(--font);box-shadow:0 0 12px rgba(34,211,238,.6);border:2px solid #fff}
+.pin-tip{position:absolute;left:16px;top:-8px;white-space:nowrap;font:600 11px/1.4 var(--font);color:var(--text);
+  background:var(--surface);border:1px solid var(--border);padding:6px 9px;border-radius:8px;opacity:0;transition:.15s;pointer-events:none;z-index:5;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+.pin:hover .pin-tip{opacity:1}
+.map-card{position:fixed;top:50%;right:24px;transform:translateY(-50%);width:300px;background:var(--surface);border:1px solid var(--border);border-radius:14px;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden;display:none}
+.map-card .mc-x{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:13px}
+.map-card .mc-thumb{height:132px;background:linear-gradient(135deg,#0e1730,#16213d);display:flex;align-items:center;justify-content:center}
+.map-card .mc-thumb svg{width:92%}
+.map-card .mc-body{padding:12px 14px}
+.map-card .mc-name{font:700 16px var(--font);color:#fff;margin-bottom:4px}
+.map-card .mc-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.map-card .mc-row{font-size:12.5px;line-height:1.7;color:var(--text);border-bottom:1px dashed var(--border);padding:3px 0}
+.map-card .mc-btn{margin-top:10px;width:100%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#06121f;border:none;border-radius:8px;padding:9px;font-weight:700;cursor:pointer}
+.mm-side{padding:12px 14px;border-left:1px solid var(--border);overflow:auto;max-height:300px}
+.mm-note{font-size:11.5px;line-height:1.6;color:var(--muted);margin-bottom:10px}
+.mm-note b{color:var(--primary)}
+.mm-legend{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+.lg{width:10px;height:10px;border-radius:50%;display:inline-block;margin-left:3px}.lg1{background:var(--green)}.lg2{background:var(--amber)}.lg3{background:var(--red)}
+.mm-list{list-style:none;font-size:11.5px;line-height:1.9;color:var(--text)}
+.mm-list li{border-bottom:1px dashed var(--border);padding:3px 0} .mm-list b{color:var(--primary)}
+.mm-m{float:right;color:var(--muted);font-size:10.5px}
+.noise-panel{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:0 0 0 1px rgba(34,211,238,.06),0 10px 30px rgba(0,0,0,.35);padding:14px}
+.np-head{font:700 13px/1 var(--font);color:var(--primary);margin-bottom:10px}
+.np-sub{font:500 10.5px/1 var(--font);color:var(--muted);margin-left:6px}
+.np-body{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.nr{display:grid;grid-template-columns:130px 1fr 66px;align-items:center;gap:8px}
+.nr-name{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nr-bar{height:9px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.nr-bar i{display:block;height:100%;border-radius:6px}
+.nr-val{font:700 11px/1 var(--font);color:var(--muted);text-align:right}
+.np-tip{font-size:12px;line-height:1.7;color:var(--text);background:var(--surface2);padding:9px 11px;border-radius:8px;border-left:3px solid var(--primary)}
+.np-tip b{color:var(--primary)}
+.ai-panel{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:0 0 0 1px rgba(139,92,246,.1),0 10px 30px rgba(0,0,0,.35);padding:14px}
+.ai-head{font:700 13px/1 var(--font);color:var(--accent);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.ai-q{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  padding:9px 11px;font:500 13px/1.5 var(--font);resize:vertical;min-height:54px;margin-bottom:9px}
+.ai-body{font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px;min-height:60px}
+.ai-body b,.ai-body strong{color:var(--primary)}
+.ai-loading{color:var(--muted);font-style:italic}
+.ai-err{color:var(--red)}
+/* ---------- 十维深度分析 ---------- */
+.detail-panel{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:0 0 0 1px rgba(34,211,238,.08),0 10px 30px rgba(0,0,0,.35);padding:16px}
+.dp-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.dp-title{font:800 15px/1 var(--font);color:var(--primary)}
+.dp-note{font-size:11.5px;color:var(--muted)}
+.dp-hint{font-size:12px;color:var(--muted);background:var(--surface2);padding:12px;border-radius:8px;border:1px dashed var(--border)}
+.dblock{break-inside:avoid;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:14px}
+.dblock.on{border-color:var(--primary);box-shadow:0 0 0 1px rgba(34,211,238,.25)}
+.dtop{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.dtop .dn{font:800 16px/1 var(--font);color:var(--text)}
+.dtop .ds{font-size:12px;color:var(--muted)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dsec{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.dsec h4{font:700 12.5px/1 var(--font);color:var(--primary2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--border)}
+.drow{display:flex;gap:8px;font-size:12px;line-height:1.6;padding:3px 0;border-bottom:1px dashed rgba(31,44,77,.5)}
+.drow:last-child{border-bottom:none}
+.drow .dk{color:var(--muted);min-width:74px;flex-shrink:0}
+.drow .dv{color:var(--text)}
+.dlist{list-style:none;font-size:12px;line-height:1.7}
+.dlist li{padding:3px 0;border-bottom:1px dashed rgba(31,44,77,.5)}
+.dlist li:last-child{border-bottom:none}
+.dlist b{color:var(--primary)}
+.dtext{font-size:12.5px;line-height:1.75;color:var(--text)}
+.dtext.risk{color:#fcd9b6;border-left:3px solid var(--amber);background:rgba(251,191,36,.08);padding:9px 11px;border-radius:8px}
+.dtext.comment{color:#d9f0ff;border-left:3px solid var(--primary);background:rgba(34,211,238,.08);padding:9px 11px;border-radius:8px}
+.modal{position:fixed;inset:0;background:rgba(3,8,18,.7);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.modal-box{width:min(580px,92vw);max-height:86vh;overflow:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:20px;box-shadow:0 0 0 1px rgba(34,211,238,.15),0 20px 60px rgba(0,0,0,.6)}
+.modal-title{font:800 17px/1 var(--font);color:var(--primary);margin-bottom:4px}
+.modal-desc{font-size:12px;color:var(--muted);margin-bottom:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);padding:9px 11px;font:500 13px/1.4 var(--font);font-family:inherit}
+.field select{cursor:pointer}
+.field .hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--primary);
+  color:var(--text);padding:10px 18px;border-radius:10px;font-size:13px;z-index:80;box-shadow:0 0 20px rgba(34,211,238,.3);opacity:0;transition:.25s;pointer-events:none;max-width:80vw}
+.toast.on{opacity:1}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.filters{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .cards{grid-template-columns:1fr 1fr}.nav{display:none}.mm-body{grid-template-columns:1fr}.mm-side{border-left:none;border-top:1px solid var(--border)}
+  .dgrid{grid-template-columns:1fr}}
+@media print{
+  body{background:#fff;color:#000;background-image:none}
+  .topbar,.filters,.nav,.actions,.modal,.toast,.mm-badge,.ai-q,.field{display:none!important}
+  .layout{display:block}.main{padding:0}
+  .card,.map-module,.noise-panel,.ai-panel,.detail-panel{box-shadow:none;border:1px solid #999;break-inside:avoid;color:#000;background:#fff}
+  .score,.hprice,.tag,.mm-list b,.np-tip b,.dp-title,.dsec h4,.dlist b{color:#000!important}
+  .tag{background:#eee!important}.dtext.risk,.dtext.comment{background:#f6f6f6!important;border-color:#999!important;color:#000!important}
+  .dblock,.dsec{background:#fff!important}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">渝选房<span class="logo-sub">· 重庆主城智能选房</span></div>
+  <nav class="nav">
+    <a class="on" data-sec="房源">房源</a><a data-sec="地图">地图</a><a data-sec="噪声">噪声</a>
+    <a data-sec="分析">十维分析</a><a data-sec="AI">AI</a>
+  </nav>
+  <div class="actions">
+    <button class="btn" id="btnCsv">导入CSV</button>
+    <button class="btn" id="btnCustom">＋ 自定义小区</button>
+    <button class="btn btn-detail" id="btnDetail">📊 十维分析</button>
+    <button class="btn btn-ai" id="btnAi">✨ AI 智能分析</button>
+    <button class="btn btn-pdf" id="btnPdf">导出 PDF</button>
+    <button class="btn" id="btnSet">⚙ 设置</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="filters">
+    <div class="fhead">多维度筛选 <span class="reset" id="btnReset">重置</span></div>
+    <div id="filterGroups"></div>
+    <div class="fgroup"><div class="flabel"><span>面积下限 (㎡)</span><span id="sizeVal">≥ 90</span></div>
+      <input class="range" type="range" min="70" max="200" value="90" id="sizeRange">
+      <div class="rval">拖动设定最小面积，低于此值不显示</div></div>
+    <div class="fgroup"><div class="flabel"><span>总价上限 (万)</span><span id="priceVal">≤ 200</span></div>
+      <input class="range" type="range" min="70" max="220" value="200" id="priceRange">
+      <div class="rval">拖动设定最高预算，高于此价不显示</div></div>
+  </aside>
+
+  <main class="main">
+    <div class="sortbar">
+      <span class="res">为你找到 <b id="cnt">0</b> 套符合条件的房源</span>
+      <div class="rsum" id="cntSum"></div>
+      <span class="sort">排序
+        <select id="sortSel">
+          <option value="match">综合匹配</option>
+          <option value="priceAsc">总价低→高</option>
+          <option value="priceDesc">总价高→低</option>
+          <option value="sizeAsc">面积小→大</option>
+          <option value="noiseAsc">噪声低→高</option>
+        </select>
+      </span>
+    </div>
+    <div class="cards" id="cards"></div>
+
+    <div class="map-module" id="secMap">
+      <div class="mm-head"><span>📍 小区百度地图定位</span>
+        <span style="display:flex;gap:8px">
+          <span class="mm-badge primary" id="nearbyBtn">📡 联网查周边配套</span>
+          <span class="mm-badge" id="baiduBtn">接入百度地图 AK</span>
+        </span></div>
+      <div class="mm-body">
+        <div class="mm-map">
+          <svg class="mapsvg" id="mapSvg" viewBox="0 0 700 440" preserveAspectRatio="xMidYMid meet"></svg>
+          <div id="baiduMap"></div>
+        </div>
+        <div class="mm-side">
+          <div class="mm-note">示意图按经纬度投影标点。<b>联网加载真实地图 / 查周边配套只需百度 AK，不依赖 AI</b>。在设置填入 AK 后点「接入百度地图 AK」即可（实景/街景/通勤）。</div>
+          <div class="mm-legend"><span class="lg lg1"></span>安静≤53 <span class="lg lg2"></span>适中54-56 <span class="lg lg3"></span>略噪≥57</div>
+          <ol class="mm-list" id="mapList"></ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="noise-panel" id="secNoise">
+      <div class="np-head">🔊 噪声分析<span class="np-sub">昼/夜等效声级（模拟值，可在 CSV 中录入实测数据）</span></div>
+      <div class="np-body" id="noiseBars"></div>
+      <div class="np-tip" id="noiseTip"></div>
+    </div>
+
+    <div class="detail-panel" id="secDetail">
+      <div class="dp-head"><span class="dp-title">📋 十维深度分析</span>
+        <span class="dp-note">一、基础信息 · 二、建筑规划 · 三、户型分布 · 四、物业与停车 · 五、价格行情 · 六、交通配套 · 七、教育配套 · 八、商业与医疗 · 九、不利因素 · 十、综合评价</span></div>
+      <div class="dp-hint" id="detailHint">点击上方「📊 十维分析」生成当前筛选结果的全部报告；或点击任意房源卡片的「📊 深度分析」按钮查看单盘十维详情。数据由内置资料生成（标注「参考」），联网/接入 AI 可进一步补充研判。</div>
+      <div id="detailBody"></div>
+    </div>
+
+    <div class="ai-panel" id="secAi">
+      <div class="ai-head"><span>✨ AI 模型分析（可选增强）</span><span style="font-size:11px;color:var(--muted)">模型：<b id="aiModelTag">未配置</b></span></div>
+      <textarea class="ai-q" id="aiQ" placeholder="可补充问题，例如：带娃读书优先选哪个？或留空直接生成综合研判"></textarea>
+      <div class="ai-body" id="aiBody">未配置 AI 也能正常筛选与查地图。点击右上「✨ AI 智能分析」生成研判（需先在设置中配置模型 API）。AI 将按「十维分析」结构输出综合评价与风险。</div>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="setModal">
+  <div class="modal-box">
+    <div class="modal-title">⚙ 设置</div>
+    <div class="modal-desc">AI 与地图按需配置，保存在本机文件，不会上传。不配置 AI 也能正常使用筛选与地图。自定义小区同样存本机文件，重启不丢失。</div>
+    <div class="field"><label>AI 服务商预设（选后可改）</label>
+      <select id="setProvider">
+        <option value="自定义">自定义 / 其他 OpenAI 兼容</option>
+        <option value="DeepSeek">DeepSeek</option>
+        <option value="通义千问(阿里云百炼)">通义千问（阿里云百炼）</option>
+        <option value="OpenAI">OpenAI</option>
+        <option value="Kimi(月之暗面)">Kimi（月之暗面）</option>
+        <option value="智谱GLM">智谱 GLM</option>
+        <option value="本地Ollama">本地 Ollama</option>
+      </select>
+      <div class="hint">选服务商自动填入地址与默认模型名，可手动改成你需要的任意模型。</div></div>
+    <div class="field"><label>API 地址（OpenAI 兼容 /chat/completions）</label>
+      <input id="setApiBase" placeholder="https://api.deepseek.com/v1">
+      <div class="hint">DeepSeek / 通义 / OpenAI / Kimi / 智谱 / 本地 Ollama(http://127.0.0.1:11434/v1) 均兼容。</div></div>
+    <div class="field"><label>API Key</label><input id="setApiKey" placeholder="sk-..." type="password"></div>
+    <div class="field"><label>模型名称（可选，输入框任选模型）</label><input id="setModel" placeholder="deepseek-chat">
+      <div class="hint">例如 deepseek-chat / qwen-plus / gpt-4o-mini / moonshot-v1-8k / glm-4 / qwen2.5。</div></div>
+    <div class="field"><button class="btn" id="setTest">🔌 测试连接</button> <span id="testMsg" class="hint"></span></div>
+    <div class="field"><label>百度地图 AK（联网地图 / 街景 / 周边查询）</label><input id="setBaidu" placeholder="在 lbsyun.baidu.com 申请">
+      <div class="hint">用于加载真实地图与查周边配套；留空则使用经纬度示意图。</div></div>
+    <div class="field"><label>导出 / 备份数据</label>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="setExport">导出当前CSV</button>
+        <button class="btn" id="setImport">导入CSV替换</button>
+      </div>
+      <div class="hint">CSV 列：name,district,area,form,floors,layout,size,price,school,schoolLevel,line,metro,day,night,source,addr,lng,lat</div></div>
+    <div class="modal-actions">
+      <button class="btn" id="setClose">关闭</button>
+      <button class="btn btn-ai" id="setSave">保存</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="customModal">
+  <div class="modal-box">
+    <div class="modal-title">＋ 自定义小区</div>
+    <div class="modal-desc">填写后加入房源库，可随筛选 / 地图 / 十维分析使用；数据存本机文件，重启不丢失。带 * 为必填，其余留空将用合理估算。</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+      <div class="field"><label>小区名称 *</label><input id="cName" placeholder="如 阳光小区"></div>
+      <div class="field"><label>所属区域 *</label><select id="cDistrict"><option>渝中</option><option>江北</option><option>南岸</option><option>九龙坡</option><option>沙坪坝</option><option>大渡口</option><option>巴南</option><option>北碚</option><option>渝北</option><option>两江新区</option><option>高新区</option></select></div>
+      <div class="field"><label>板块</label><input id="cArea" placeholder="如 大学城"></div>
+      <div class="field"><label>楼栋形态</label><select id="cForm"><option>洋房</option><option>小高层</option><option>高层</option></select></div>
+      <div class="field"><label>楼层数</label><input id="cFloors" type="number" value="8"></div>
+      <div class="field"><label>户型</label><select id="cLayout"><option>三房</option><option>四房</option><option>五房及以上</option></select></div>
+      <div class="field"><label>面积 (㎡) *</label><input id="cSize" type="number" value="120"></div>
+      <div class="field"><label>总价 (万) *</label><input id="cPrice" type="number" value="120"></div>
+      <div class="field"><label>小学名称</label><input id="cSchool" placeholder="如 XX小学"></div>
+      <div class="field"><label>小学等级</label><select id="cSchoolLevel"><option>五朵金花本部</option><option>名校直属分校</option><option>区重点优质</option><option>普通片区</option></select></div>
+      <div class="field"><label>地铁线</label><input id="cLine" placeholder="如 6号线"></div>
+      <div class="field"><label>地铁描述</label><input id="cMetro" placeholder="如 近6号线"></div>
+      <div class="field"><label>最近地铁距离 (m)</label><input id="cMetroDist" type="number" value="900"></div>
+      <div class="field"><label>昼噪 dB</label><input id="cDay" type="number" value="55"></div>
+      <div class="field"><label>夜噪 dB</label><input id="cNight" type="number" value="45"></div>
+      <div class="field"><label>配套(逗号分隔)</label><input id="cSource" placeholder="公园,商业"></div>
+      <div class="field"><label>详细地址</label><input id="cAddr" placeholder="区+板块"></div>
+      <div class="field"><label>经度</label><input id="cLng" type="number" value="106.50" step="0.001"></div>
+      <div class="field"><label>纬度</label><input id="cLat" type="number" value="29.60" step="0.001"></div>
+    </div>
+    <div class="field"><label>开发商</label><input id="cDev" placeholder="留空则标注待核"></div>
+    <div class="field"><label>物业公司</label><input id="cProp" placeholder="留空则标注待核"></div>
+    <div class="field"><label>建筑年代</label><input id="cYear" placeholder="如 2020年"></div>
+    <div class="field"><label>不利因素</label><textarea id="cRisk" rows="2" placeholder="如 临主干道有噪声；学区为片区校"></textarea></div>
+    <div class="field"><label>综合评价</label><textarea id="cComment" rows="2" placeholder="一句话点评"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" id="customClose">关闭</button>
+      <button class="btn btn-ai" id="customSave">保存到房源库</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".csv" style="display:none">
+
+<script>
+/* ---------- 数据 ---------- */
+let HOUSES = [
+ {name:'朗基水印三生',district:'沙坪坝',area:'大学城',form:'洋房',floors:7,layout:'四房',size:114,price:120,school:'树人小学(大学城分校)',schoolLevel:'名校直属分校',line:'1号线',metro:'紧邻1号线',day:55,night:45,source:'轻轨',addr:'沙坪坝区大学城',lng:106.295,lat:29.620},
+ {name:'东方剑桥(北区)',district:'沙坪坝',area:'大学城',form:'洋房',floors:6,layout:'四房',size:120.7,price:110,school:'沙小+大学城一中',schoolLevel:'名校直属分校',line:'1号线',metro:'出门即轻轨',day:58,night:48,source:'轻轨+商业',addr:'沙坪坝区大学城',lng:106.300,lat:29.610},
+ {name:'协信城天骄名城二期',district:'沙坪坝',area:'大学城',form:'洋房',floors:6,layout:'四房',size:148.8,price:125,school:'树人/沙小片区',schoolLevel:'区重点优质',line:'1号线',metro:'距1号线需核',day:56,night:46,source:'主干道',addr:'沙坪坝区大学城',lng:106.280,lat:29.600},
+ {name:'首创禧悦学府',district:'沙坪坝',area:'大学城',form:'小高层',floors:8,layout:'四房',size:99,price:105,school:'沙小南渝分校',schoolLevel:'名校直属分校',line:'1号线',metro:'近双轨',day:54,night:44,source:'学府路',addr:'沙坪坝区大学城',lng:106.310,lat:29.630},
+ {name:'富力城·幸福里',district:'沙坪坝',area:'大学城',form:'洋房',floors:6,layout:'三房',size:98,price:95,school:'沙小分校',schoolLevel:'名校直属分校',line:'1号线',metro:'近轻轨',day:56,night:46,source:'轻轨',addr:'沙坪坝区大学城',lng:106.305,lat:29.615},
+ {name:'融创溪山春晓',district:'北碚',area:'蔡家',form:'洋房',floors:8,layout:'四房',size:126,price:119,school:'片区校',schoolLevel:'普通片区',line:'6号线',metro:'近6号线',day:52,night:42,source:'次干道',addr:'北碚区蔡家',lng:106.530,lat:29.730},
+ {name:'旭辉朗悦郡',district:'北碚',area:'蔡家',form:'洋房',floors:7,layout:'四房',size:151,price:120,school:'片区校',schoolLevel:'普通片区',line:'6号线',metro:'近6号线',day:53,night:43,source:'公园+次干道',addr:'北碚区蔡家',lng:106.550,lat:29.720},
+ {name:'金科·集美嘉悦',district:'北碚',area:'蔡家',form:'洋房',floors:8,layout:'三房',size:99,price:92,school:'片区校',schoolLevel:'普通片区',line:'6号线',metro:'近6号线',day:53,night:43,source:'公园',addr:'北碚区蔡家',lng:106.540,lat:29.725},
+ {name:'龙湖嘉天下',district:'巴南',area:'龙洲湾',form:'洋房',floors:8,layout:'四房',size:125,price:115,school:'巴南实验小学',schoolLevel:'区重点优质',line:'3号线',metro:'近3号线',day:54,night:44,source:'公园+商业',addr:'巴南区龙洲湾',lng:106.520,lat:29.480},
+ {name:'招商·雍璟府',district:'巴南',area:'李家沱',form:'洋房',floors:7,layout:'四房',size:120,price:112,school:'片区校',schoolLevel:'普通片区',line:'3号线',metro:'距3号线需核',day:55,night:45,source:'主干道',addr:'巴南区李家沱',lng:106.500,lat:29.450},
+ {name:'龙湖观萃',district:'大渡口',area:'九宫庙',form:'小高层',floors:11,layout:'四房',size:118,price:118,school:'大渡口实验小学',schoolLevel:'区重点优质',line:'2号线',metro:'近2号线',day:56,night:46,source:'商业',addr:'大渡口区九宫庙',lng:106.480,lat:29.500},
+ {name:'佳兆业·滨江新城',district:'大渡口',area:'钓鱼嘴',form:'洋房',floors:8,layout:'四房',size:126,price:110,school:'片区校',schoolLevel:'普通片区',line:'2号线',metro:'近2号线',day:53,night:43,source:'公园',addr:'大渡口区钓鱼嘴',lng:106.470,lat:29.470},
+ {name:'鲁能泰山7号',district:'渝北',area:'空港新城',form:'小高层',floors:11,layout:'四房',size:122,price:116,school:'空港新城人和街',schoolLevel:'名校直属分校',line:'9号线/10号线',metro:'近双轨',day:55,night:45,source:'轻轨',addr:'渝北区空港新城',lng:106.650,lat:29.720},
+ {name:'印江州',district:'九龙坡',area:'彩云湖',form:'小高层',floors:11,layout:'四房',size:119,price:119,school:'彩云湖小学',schoolLevel:'区重点优质',line:'环线',metro:'近环线',day:57,night:47,source:'商业+主干道',addr:'九龙坡区彩云湖',lng:106.490,lat:29.520}
+];
+
+/* ---------- 十维分析：差异化覆盖 + 区域常识 + 生成器 ---------- */
+const DEFAULT_YEAR={'大学城':2018,'蔡家':2020,'龙洲湾':2018,'李家沱':2019,'九宫庙':2021,'钓鱼嘴':2021,'空港新城':2020,'彩云湖':2021};
+const AREA_FACTS={
+ '大学城':{cm:[{t:'商业',d:'龙湖U城天街、大学城熙街、仟佰汇'},{t:'医疗',d:'重医附属大学城医院（三甲）'},{t:'公园',d:'木鱼石公园、大学城中央公园'}]},
+ '蔡家':{cm:[{t:'商业',d:'蔡家商圈（培育中）、中南城'},{t:'医疗',d:'市九院（三甲，约4km）'},{t:'公园',d:'蔡家岗公园、五彩滨江公园'}]},
+ '龙洲湾':{cm:[{t:'商业',d:'巴南万达广场、巴南府'},{t:'医疗',d:'巴南区人民医院（三甲）'},{t:'公园',d:'龙洲湾公园'}]},
+ '李家沱':{cm:[{t:'商业',d:'都和广场、李家沱商圈'},{t:'医疗',d:'花溪医院、巴南区二院'},{t:'公园',d:'滨江步道'}]},
+ '九宫庙':{cm:[{t:'商业',d:'大渡口商圈、万达（谋划）'},{t:'医疗',d:'大渡口区人民医院'},{t:'公园',d:'中华美德公园'}]},
+ '钓鱼嘴':{cm:[{t:'商业',d:'规划音乐半岛（在建）'},{t:'医疗',d:'近大渡口区人民医院'},{t:'公园',d:'钓鱼嘴滨江公园'}]},
+ '空港新城':{cm:[{t:'商业',d:'空港乐园商圈、两路商圈'},{t:'医疗',d:'渝北区人民医院（三甲）'},{t:'公园',d:'中央公园（约6km）'}]},
+ '彩云湖':{cm:[{t:'商业',d:'万象城、盘龙商圈'},{t:'医疗',d:'九龙坡区人民医院'},{t:'公园',d:'彩云湖国家湿地公园'}]}
+};
+const OV={
+ '朗基水印三生':{dev:'朗基地产',prop:'朗基/金科物业',blds:'约28栋',house:'约1500户',fee:'2.6元/㎡·月',year:'2018年',risk:'距主城核心区较远，大型商业仍在培育；部分楼栋临大学城北路有轻噪。',comment:'树人小学大学城分校+紧邻1号线，学区与轨道双优，洋房总价120万级性价比突出，适合注重学区的刚需改善家庭。'},
+ '东方剑桥(北区)':{dev:'东方剑桥',prop:'自持物业',blds:'约30栋',house:'约1800户',fee:'2.2元/㎡·月',year:'2017年',risk:'社区体量大、人车密集；部分临街楼栋受商业噪声影响。',comment:'出门即轻轨+沙小/大学城一中，通勤与上学便利，价格110万级门槛低，适合预算敏感的家庭。'},
+ '协信城天骄名城二期':{dev:'协信地产',prop:'协信物业',blds:'约20栋',house:'约1200户',fee:'2.5元/㎡·月',year:'2019年',risk:'距1号线站点需公交接驳（约1.5km）；临主干道楼栋有噪声。',comment:'148㎡大四房总价125万，空间充裕；学区为区重点优质，综合性价比较好，适合多代同堂。'},
+ '首创禧悦学府':{dev:'首创置业',prop:'首万物业',blds:'约15栋',house:'约900户',fee:'2.4元/㎡·月',year:'2020年',risk:'社区体量偏小，内部配套有限；近双轨尚在完善。',comment:'沙小南渝分校+近双轨，105万可入四房，门槛低、成长性佳，适合看重学位与轨道的刚需。'},
+ '富力城·幸福里':{dev:'富力地产',prop:'恒富物业',blds:'约18栋',house:'约1100户',fee:'2.3元/㎡·月',year:'2016年',risk:'以二手房源为主，楼龄偏长；部分户型采光一般。',comment:'95万三房入门之选，沙小分校学区加持，适合预算有限又想落大学城的首次置业。'},
+ '融创溪山春晓':{dev:'融创中国',prop:'融创物业',blds:'约16栋',house:'约1000户',fee:'2.6元/㎡·月',year:'2021年',risk:'小学为片区校（非名校），学区是明显短板；距核心商圈较远。',comment:'蔡家洋房、昼噪52dB最安静，126万四房空间大；若学区优先级不高，是低噪声改善优选。'},
+ '旭辉朗悦郡':{dev:'旭辉集团',prop:'旭辉物业',blds:'约14栋',house:'约850户',fee:'2.5元/㎡·月',year:'2022年',risk:'学区为片区校；近6号线但步行距离偏长。',comment:'151㎡大平层洋房120万，得房率高、安静，适合重居住品质、对学区要求不高的改善家庭。'},
+ '金科·集美嘉悦':{dev:'金科股份',prop:'金科物业',blds:'约12栋',house:'约760户',fee:'2.4元/㎡·月',year:'2021年',risk:'学区为片区校；蔡家配套成熟度低于大学城。',comment:'92万三房是全盘最低总价，金科品牌物业，适合蔡家刚需入门。'},
+ '龙湖嘉天下':{dev:'龙湖地产',prop:'龙湖智慧服务',blds:'约22栋',house:'约1400户',fee:'3.0元/㎡·月',year:'2019年',risk:'龙湖品牌溢价使总价略高；近3号线步行约1.2km。',comment:'龙湖品质+巴南实验小学（区重点），洋房115万，物业与居住体验占优，适合重服务品质的家庭。'},
+ '招商·雍璟府':{dev:'招商蛇口',prop:'招商积余',blds:'约16栋',house:'约1000户',fee:'2.8元/㎡·月',year:'2020年',risk:'距3号线需接驳；部分楼栋临主干道有噪声与扬尘。',comment:'央企品牌洋房112万，品质可靠；需权衡轨道接驳与临街噪声，适合自驾通勤家庭。'},
+ '龙湖观萃':{dev:'龙湖地产',prop:'龙湖智慧服务',blds:'约10栋',house:'约650户',fee:'3.2元/㎡·月',year:'2022年',risk:'大渡口区整体能级弱于北区；近2号线但商业偏社区级。',comment:'小高层+龙湖物业，118万四房近2号线，适合认可龙湖、在大渡口工作的改善家庭。'},
+ '佳兆业·滨江新城':{dev:'佳兆业',prop:'佳兆业物业',blds:'约18栋',house:'约1100户',fee:'2.5元/㎡·月',year:'2020年',risk:'钓鱼嘴配套仍处建设期，商业医疗待完善；学区为片区校。',comment:'110万江景洋房、安静宜居，适合看好钓鱼嘴规划、以自住舒适为先的买家。'},
+ '鲁能泰山7号':{dev:'鲁能集团',prop:'鲁能物业',blds:'约24栋',house:'约1600户',fee:'2.8元/㎡·月',year:'2019年',risk:'空港新城距主城核心较远；体量大、二手供应量高。',comment:'空港新城人和街分校（名校直属）+近9/10号线双轨，116万四房，学区与轨道兼得，成长性看空港产业。'},
+ '印江州':{dev:'华宇/香港置地（待核）',prop:'品牌物业',blds:'约14栋',house:'约900户',fee:'2.9元/㎡·月',year:'2021年',risk:'临彩云湖大道及商业，昼噪57dB偏高；近环线但非核心。',comment:'彩云湖小学（区重点）+近环线，119万四房，配套成熟；需接受商业临街噪声，适合环线通勤家庭。'}
+};
+function buildDetail(h){
+  const ov=OV[h.name]||{};
+  const form=h.form, floors=h.floors;
+  const btype = form==='洋房'?'6-8层低密洋房':form==='小高层'?'11层小高层':form==='高层'?'高层塔楼':form;
+  const far = form==='洋房'?1.5:form==='小高层'?2.0:2.8;
+  const green = form==='洋房'?0.35:form==='小高层'?0.30:0.30;
+  const gap = form==='洋房'?'约1:1.2':'约1:1';
+  const structure = form==='洋房'?'板式一梯两户为主':'点式/板式混合';
+  const feeDef = form==='洋房'?2.6:form==='小高层'?2.8:2.2;
+  const bldsDef = form==='洋房'?'约20栋':form==='小高层'?'约12栋':form==='高层'?'约8栋':'';
+  const houseDef = form==='洋房'?'约1100户':form==='小高层'?'约720户':form==='高层'?'约2000户':'';
+  const avg=Math.round(h.price*10000/h.size);
+  const layoutArr=[
+    {t:'三房',a:'约98-110㎡',f:'紧凑实用，刚需/过渡首选'},
+    {t:'四房',a:h.size+'㎡',f:'横厅设计，南北通透，改善主力'}
+  ];
+  if(h.layout==='三房') layoutArr.reverse();
+  const md=h.metroDist!=null?h.metroDist:900;
+  const trafficArr=[
+    {type:'轨道交通',detail:(h.line||'')+' · '+(h.metro||'')},
+    {type:'最近地铁距离',detail:md+'米（步行约'+Math.round(md/70)+'分钟）'},
+    {type:'公交',detail:'小区门口设多个公交站点，接驳轨道与商圈'},
+    {type:'自驾',detail:'近内环/城市主干道，通达主城各板块'}
+  ];
+  const eduArr=[{school:h.school,dist:'约300-800米（以教委当年划片为准）',kind:h.schoolLevel}];
+  const cmArr=(AREA_FACTS[h.area]||{cm:[]}).cm;
+  let riskDef='配套成熟中，无明显硬伤。';
+  if(/主干道|临街/.test(h.source+h.metro)) riskDef='临近主干道/商业，存在噪声与扬尘，建议选楼栋中高区。';
+  if(/需核/.test(h.metro)) riskDef=(riskDef==='配套成熟中，无明显硬伤。'?'':'')+'距轨道交通需公交接驳，通勤时间增加。';
+  if(h.schoolLevel==='普通片区') riskDef='小学为片区校（非名校），学区是主要短板。';
+  return {
+    basic:{name:h.name,district:h.district,addr:h.addr,dev:h.dev||ov.dev||'（待核）',prop:h.prop||ov.prop||'（待核）',year:h.year||ov.year||(DEFAULT_YEAR[h.area]||'—')+'年',right:'70年（住宅）',ptype:'普通住宅'},
+    plan:{btype:btype,blds:ov.blds||bldsDef,floors2:floors+'层',house:ov.house||houseDef,far:far,green:green,gap:gap,structure:structure},
+    layout:layoutArr,
+    prop:{fee:ov.fee||(feeDef+'元/㎡·月'),park:'（以实际为准）',parkr:'约1:1.1',parkfee:'约300-450元/月',util:'民水民电民用燃气',sec:'门禁+监控+巡逻+人脸识别（主流配置）'},
+    price:{plat:'贝壳/安居客（参考挂牌）',avg:avg+' 元/㎡（参考）'},
+    traffic:trafficArr,
+    edu:eduArr,
+    cm:cmArr,
+    risk:h.risk||ov.risk||riskDef,
+    comment:h.comment||ov.comment||('综合评分较高的'+form+'房源，建议结合学区与通勤实地核验。')
+  };
+}
+const METRO_DIST={'朗基水印三生':200,'东方剑桥(北区)':120,'协信城天骄名城二期':1500,'首创禧悦学府':600,'富力城·幸福里':500,'融创溪山春晓':700,'旭辉朗悦郡':900,'金科·集美嘉悦':850,'龙湖嘉天下':1200,'招商·雍璟府':1500,'龙湖观萃':800,'佳兆业·滨江新城':1100,'鲁能泰山7号':500,'印江州':700};
+HOUSES.forEach(h=>{h.metroDist=(METRO_DIST[h.name]!=null?METRO_DIST[h.name]:900); h.detail=buildDetail(h);});
+let CUSTOM=[];                                   // 用户自定义小区（独立于内置，持久化保存）
+function allHouses(){return [...HOUSES, ...CUSTOM];}
+function initHouse(h){ if(h.metroDist==null) h.metroDist=900; h.detail=buildDetail(h); return h; }
+
+/* ---------- 筛选维度定义 ---------- */
+const DIMS = [
+ {key:'district',label:'区域',opts:['渝中','江北','南岸','九龙坡','沙坪坝','大渡口','巴南','北碚','渝北','两江新区','高新区'],def:[]},
+ {key:'area',label:'板块',opts:[],def:[],dynamic:true},
+ {key:'line',label:'地铁线',opts:['近地铁站','1号线','2号线','3号线','6号线','9号线','10号线','环线'],def:[]},
+ {key:'schoolLevel',label:'小学等级',opts:['五朵金花本部','名校直属分校','区重点优质','普通片区'],def:[]},
+ {key:'layout',label:'户型',opts:['三房','四房','五房及以上'],def:[]},
+ {key:'form',label:'楼栋形态',opts:['洋房','小高层','高层'],def:[]},
+ {key:'source',label:'配套',opts:['商业','医院','公园','轻轨','主干道'],def:[]},
+ {key:'noisePref',label:'噪声偏好',opts:['安静优先','临街避让','无所谓'],def:[]}
+];
+let state = {sel:{}, sizeMin:90, priceMax:200, sort:'match'};
+DIMS.forEach(d=>state.sel[d.key]=new Set(d.def));
+
+/* ---------- 评分 ---------- */
+function score(h){
+  let s=0;
+  s += h.price<=120?20 : h.price<=140?10 : 0;
+  s += h.size>=120?15 : h.size>=100?8 : 0;
+  s += h.schoolLevel==='五朵金花本部'?30 : h.schoolLevel==='名校直属分校'?25 : h.schoolLevel==='区重点优质'?15 : 8;
+  s += /紧邻|出门|双轨/.test(h.metro)?15 : /近/.test(h.metro)?10 : 5;
+  s += h.day<=53?15 : h.day<=56?10 : 6;
+  s += h.form==='洋房'?10 : h.form==='小高层'?7 : 3;
+  return Math.min(100,s);
+}
+function noiseColor(d){return d<=53?'var(--green)':d<=56?'var(--amber)':'var(--red)';}
+function noiseWord(d){return d<=53?'安静':d<=56?'适中':'略噪';}
+
+/* ---------- 过滤 ---------- */
+function matchLine(h,set){
+  // 「近地铁站」：靠近任意地铁站（排除需公交接驳的 metro 含「需核」者）
+  if(set.has('近地铁站') && !/需核/.test(h.metro)) return true;
+  // 具体线路：line 字段含选中线路即命中
+  return [...set].some(l=> l!=='近地铁站' && (h.line||'').includes(l));
+}
+function matchSource(h,set){
+  const tags=[h.metro, h.source];
+  return [...set].some(t=>tags.some(x=>x.includes(t)));
+}
+function matchNoisePref(h,set){
+  if(set.has('安静优先') && h.day>56) return false;
+  if(set.has('临街避让') && /主干道|临街/.test(h.source+h.metro)) return false;
+  return true;
+}
+function filtered(){
+  return allHouses().filter(h=>{
+    for(const d of DIMS){
+      const set=state.sel[d.key]; if(set.size===0) continue;
+      if(d.key==='noisePref'){ if(!matchNoisePref(h,set)) return false; continue; }
+      if(d.key==='source'){ if(!matchSource(h,set)) return false; continue; }
+      if(d.key==='line'){ if(!matchLine(h,set)) return false; continue; }
+      if(!set.has(h[d.key])) return false;
+    }
+    // 面积下限（≥ sizeMin）、总价上限（≤ priceMax），均为用户可直接拖动的明确边界
+    if(h.size < state.sizeMin) return false;
+    if(h.price > state.priceMax) return false;
+    return true;
+  });
+}
+
+/* ---------- 渲染筛选 ---------- */
+function renderFilters(){
+  const box=document.getElementById('filterGroups'); box.innerHTML='';
+  DIMS.forEach(d=>{
+    const opts = d.dynamic ? [...new Set(allHouses().map(h=>h[d.key]))] : d.opts;
+    const g=document.createElement('div'); g.className='fgroup';
+    const lab=document.createElement('div'); lab.className='flabel';
+    lab.innerHTML=`<span>${d.label}</span><span class="fold">${state.sel[d.key].size?state.sel[d.key].size+'选':''}</span>`;
+    g.appendChild(lab);
+    const chips=document.createElement('div'); chips.className='chips';
+    opts.forEach(o=>{
+      const c=document.createElement('button'); c.className='chip'+(state.sel[d.key].has(o)?' on':'');
+      c.textContent=o; c.onclick=()=>{ const s=state.sel[d.key]; s.has(o)?s.delete(o):s.add(o); renderFilters(); render(); };
+      chips.appendChild(c);
+    });
+    if(opts.length===0){const e=document.createElement('div');e.className='rval';e.textContent='（暂无数据，可导入CSV）';chips.appendChild(e);}
+    g.appendChild(chips); box.appendChild(g);
+  });
+}
+
+/* ---------- 渲染卡片 ---------- */
+function renderCards(list){
+  const box=document.getElementById('cards'); box.innerHTML='';
+  if(list.length===0){box.innerHTML='<div style="color:var(--muted);padding:30px">没有符合条件的房源，试试放宽筛选或导入CSV。</div>';return;}
+  list.forEach(h=>{
+    const sc=score(h);
+    const nb=noiseColor(h.day);
+    const el=document.createElement('article'); el.className='card';
+    el.innerHTML=`<div class="thumb">${BUILDING}<span class="score">${sc}</span></div>
+      <div class="info"><div class="hname">${h.name}</div>
+      <div class="hmeta">${h.district}·${h.area} · ${h.form}${h.floors}层 · ${h.size}㎡</div>
+      <div class="tags"><span class="tag tag-s">${h.school}</span><span class="tag tag-m">${h.metro} · 约${h.metroDist}m</span>
+      <span class="tag tag-n" style="background:${nb}22;color:${nb}">噪 ${h.day}dB·${noiseWord(h.day)}</span>
+      ${h.custom?'<span class="tag" style="background:rgba(139,92,246,.2);color:var(--accent)">自定义</span>':''}</div>
+      <div class="hrow"><div class="hprice">${h.price}万<span class="unit">总价</span></div>
+      <div class="hpsm">${Math.round(h.price*10000/h.size)}元/㎡<br>${h.layout}</div></div>
+      <button class="ahint" style="margin-top:10px">📊 深度分析</button>
+      ${h.custom?'<button class="ahint" style="margin-top:8px;border-color:var(--red);color:var(--red)" onclick="deleteCustom(\''+h.name.replace(/'/g,"\\'")+'\')">✕ 删除自定义</button>':''}</div>`;
+    el.querySelector('.ahint').onclick=()=>openDetail(h);
+    box.appendChild(el);
+  });
+}
+
+/* ---------- 十维深度分析渲染 ---------- */
+function row(k,v){return `<div class="drow"><span class="dk">${k}</span><span class="dv">${v}</span></div>`;}
+function dBlock(h,on){
+  const d=h.detail;
+  const secs=[
+    {t:'一、基础信息',rows:`${row('小区名称',d.basic.name)}${row('所属区域',d.basic.district)}${row('详细地址',d.basic.addr)}${row('开发商',d.basic.dev)}${row('物业公司',d.basic.prop)}${row('建筑年代',d.basic.year)}${row('产权年限',d.basic.right)}${row('物业类型',d.basic.ptype)}`},
+    {t:'二、建筑规划',rows:`${row('建筑类型',d.plan.btype)}${row('楼栋总数',d.plan.blds)}${row('总户数',d.plan.house)}${row('楼层高度',d.plan.floors2)}${row('容积率',d.plan.far)}${row('绿化率',d.plan.green)}${row('楼间距',d.plan.gap)}${row('户型结构',d.plan.structure)}`},
+    {t:'三、户型分布',type:'list3',items:d.layout},
+    {t:'四、物业与停车',rows:`${row('物业费',d.prop.fee)}${row('停车位',d.prop.park)}${row('车位比',d.prop.parkr)}${row('停车费',d.prop.parkfee)}${row('水电燃气',d.prop.util)}${row('安防',d.prop.sec)}`},
+    {t:'五、价格行情',rows:`${row('挂牌平台',d.price.plat)}${row('挂牌均价',d.price.avg)}`},
+    {t:'六、交通配套',type:'list2',items:d.traffic},
+    {t:'七、教育配套',type:'list3b',items:d.edu},
+    {t:'八、商业与医疗',type:'list2',items:d.cm},
+    {t:'九、不利因素提示',type:'text',cls:'risk',text:d.risk},
+    {t:'十、综合评价',type:'text',cls:'comment',text:d.comment}
+  ];
+  let html=`<div class="dtop"><span class="dn">${h.name}</span><span class="ds">${h.district}·${h.area} · ${h.form}${h.floors}层 · ${h.size}㎡ · ${h.price}万 · 匹配 ${score(h)}</span></div><div class="dgrid">`;
+  secs.forEach(s=>{
+    let body;
+    if(s.type==='list3'){body='<ul class="dlist">'+s.items.map(i=>`<li><b>${i.t}</b> · ${i.a} · ${i.f}</li>`).join('')+'</ul>';}
+    else if(s.type==='list3b'){body='<ul class="dlist">'+s.items.map(i=>`<li><b>${i.school}</b> · ${i.dist} · ${i.kind}</li>`).join('')+'</ul>';}
+    else if(s.type==='list2'){body='<ul class="dlist">'+s.items.map(i=>`<li><b>${i.type||i.t}</b> · ${i.detail||i.d}</li>`).join('')+'</ul>';}
+    else if(s.type==='text'){body=`<div class="dtext ${s.cls}">${s.text}</div>`;}
+    else {body=s.rows;}
+    html+=`<div class="dsec"><h4>${s.t}</h4>${body}</div>`;
+  });
+  html+='</div>';
+  return `<div class="dblock${on?' on':''}">${html}</div>`;
+}
+function renderDetail(list){
+  const body=document.getElementById('detailBody');
+  document.getElementById('detailHint').style.display='none';
+  if(list.length===0){body.innerHTML='<div class="dp-hint">没有符合条件的房源，请放宽筛选。</div>';return;}
+  body.innerHTML=list.map((h,i)=>dBlock(h,i===0)).join('');
+}
+function openDetail(h){
+  renderDetail([h]);
+  document.getElementById('secDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---------- 地图 ---------- */
+const BBOX={lng0:106.2,lng1:106.75,lat0:29.42,lat1:29.80};
+function project(lng,lat){const x=30+(lng-BBOX.lng0)/(BBOX.lng1-BBOX.lng0)*640;const y=400-((lat-BBOX.lat0)/(BBOX.lat1-BBOX.lat0))*360;return{x,y};}
+function renderMap(list){
+  const svg=document.getElementById('mapSvg');
+  svg.innerHTML=`<rect width="700" height="440" fill="rgba(34,211,238,.04)"/>
+    <path d="M0 90 H700 M0 200 H700 M0 320 H700 M120 0 V440 M300 0 V440 M500 0 V440" stroke="rgba(34,211,238,.14)" stroke-width="1"/>
+    <path d="M-20 250 C150 210 260 300 420 260 C560 225 640 300 720 270" fill="none" stroke="rgba(56,189,248,.4)" stroke-width="14" stroke-linecap="round"/>
+    <path d="M-20 250 C150 210 260 300 420 260 C560 225 640 300 720 270" fill="none" stroke="rgba(90,170,230,.55)" stroke-width="6" stroke-linecap="round"/>`;
+  [...svg.parentNode.querySelectorAll('.pin')].forEach(p=>p.remove());
+  list.forEach((h,i)=>{
+    const {x,y}=project(h.lng,h.lat);
+    const pin=document.createElement('div'); pin.className='pin'; pin.style.left=(x/700*100)+'%'; pin.style.top=(y/440*100)+'%';
+    pin.innerHTML=`<span class="pin-dot">${i+1}</span><span class="pin-tip">${h.name}<br>🚇 约${h.metroDist}m · ${h.day}/${h.night}dB</span>`;
+    pin.onclick=()=>showMapCard(h);
+    pin.title=h.name; svg.parentNode.insertBefore(pin, document.getElementById('baiduMap'));
+  });
+  const ol=document.getElementById('mapList'); ol.innerHTML='';
+  list.forEach((h,i)=>{const li=document.createElement('li');li.innerHTML=`<b>${i+1}.</b> ${h.name}<span class="mm-m">${h.metro}</span>`;ol.appendChild(li);});
+}
+let baiduMap=null;
+function loadBaidu(){
+  const ak=settings.baiduAK; if(!ak){toast('请先在设置中填写百度地图 AK');openSet();return;}
+  if(window.BMap){initBaidu();return;}
+  const s=document.createElement('script'); s.src=`https://api.map.baidu.com/api?v=3.0&ak=${ak}&callback=__initBaidu`;
+  window.__initBaidu=initBaidu;
+  s.onerror=()=>toast('百度地图脚本加载失败（需联网）');
+  document.head.appendChild(s);
+}
+function initBaidu(){
+  const c=document.getElementById('baiduMap'); c.style.display='block';
+  document.getElementById('mapSvg').style.display='none';
+  if(!baiduMap) baiduMap=new BMap.Map(c);
+  const list=filtered(); const c0=list[0]||HOUSES[0];
+  baiduMap.centerAndZoom(new BMap.Point(c0.lng,c0.lat),12);
+  baiduMap.enableScrollWheelZoom(true);
+  baiduMap.clearOverlays();
+  list.forEach(h=>{const pt=new BMap.Point(h.lng,h.lat);const mk=new BMap.Marker(pt);baiduMap.addOverlay(mk);
+    const info=new BMap.InfoWindow(`<b>${h.name}</b><br>${h.district}·${h.area}<br>总价${h.price}万 · ${h.size}㎡<br>${h.school}<br>噪声 ${h.day}/${h.night}dB`,{width:200});
+    mk.addEventListener('click',()=>baiduMap.openInfoWindow(info,pt));});
+  toast('已加载百度地图，共 '+list.length+' 个小区（联网，无需AI）');
+}
+function nearbySearch(){
+  if(!settings.baiduAK){toast('请先在设置填写百度地图 AK');openSet();return;}
+  if(!baiduMap){toast('请先点击「接入百度地图 AK」');return;}
+  const ctr=baiduMap.getCenter();
+  const ls=new BMap.LocalSearch(baiduMap,{renderOptions:{map:baiduMap,autoViewport:false},onSearchComplete:function(r){
+    let html='<div class="mm-note"><b>联网周边配套</b>（百度POI，AK+联网，无需AI）：</div>';
+    if(r&&r.getNumPois&&r.getNumPois()>0){for(let i=0;i<Math.min(r.getNumPois(),8);i++){const p=r.getPoi(i);
+      html+=`<li>${p.title} <span class="mm-m">${p.address||''}</span></li>`;}}
+    else html+='<li>未找到结果</li>';
+    document.getElementById('mapList').innerHTML=html;
+  }});
+  ls.searchNearby(['小学','地铁站'],ctr,2000);
+  toast('正在联网查询周边小学/地铁站…');
+}
+
+/* ---------- 噪声 ---------- */
+function renderNoise(list){
+  const box=document.getElementById('noiseBars'); box.innerHTML='';
+  const sorted=[...list].sort((a,b)=>a.day-b.day); const maxv=65;
+  sorted.forEach(h=>{const w=h.day/maxv*100;const c=noiseColor(h.day);
+    const r=document.createElement('div'); r.className='nr';
+    r.innerHTML=`<span class="nr-name">${h.name}</span><span class="nr-bar"><i style="width:${w}%;background:${c}"></i></span><span class="nr-val">${h.day}/${h.night}</span>`;
+    box.appendChild(r);});
+  const tip=document.getElementById('noiseTip');
+  if(list.length===0){tip.innerHTML='暂无符合条件房源。';return;}
+  const quiet=list.reduce((a,b)=>a.day<b.day?a:b); const loud=list.reduce((a,b)=>a.day>b.day?a:b);
+  tip.innerHTML=`结论：<b>${quiet.name}</b> 最安静（昼 ${quiet.day}dB），<b>${loud.name}</b> 相对较高（昼 ${loud.day}dB）。`
+    +` 如需进一步筛掉噪声或临街盘，可在左侧勾选「安静优先 / 临街避让」。`;
+}
+
+/* ---------- 主渲染 ---------- */
+function render(){
+  let list=filtered();
+  const cmp={match:(a,b)=>score(b)-score(a),priceAsc:(a,b)=>a.price-b.price,priceDesc:(a,b)=>b.price-a.price,
+    sizeAsc:(a,b)=>a.size-b.size,noiseAsc:(a,b)=>a.day-b.day}[state.sort];
+  list.sort(cmp);
+  document.getElementById('cnt').textContent=list.length;
+  const all=allHouses();
+  const hidSize=all.filter(h=>h.size<state.sizeMin).length;
+  const hidPrice=all.filter(h=>h.price>state.priceMax).length;
+  const sum=document.getElementById('cntSum');
+  if(sum) sum.innerHTML='当前边界：面积≥'+state.sizeMin+'㎡（隐藏 '+hidSize+' 套） · 总价≤'+state.priceMax+'万（隐藏 '+hidPrice+' 套）'+(hidSize+hidPrice?'':' · 已显示全部');
+  renderCards(list); renderMap(list); renderNoise(list);
+}
+
+/* ---------- AI（支持 pywebview 桥接，无桥接则浏览器 fetch 兜底） ---------- */
+function hasBridge(){return !!(window.pywebview && window.pywebview.api);}
+async function callAI(apiBase,apiKey,model,messages,maxTok){
+  if(hasBridge()){
+    return await window.pywebview.api.ai_chat(JSON.stringify({apiBase,apiKey,model,messages,maxTok}));
+  }
+  const res=await fetch(apiBase.replace(/\/$/,'')+'/chat/completions',{
+    method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body:JSON.stringify({model:model||'gpt-4o-mini',messages,max_tokens:maxTok||800})
+  });
+  return await res.text();
+}
+async function aiAnalyze(){
+  const body=document.getElementById('aiBody');
+  if(!settings.apiBase||!settings.apiKey){toast('请先在设置中配置 AI 模型');openSet();return;}
+  const list=filtered();
+  const summary=list.map(h=>{
+    const d=h.detail;
+    return `·${h.name}（${h.district}·${h.area}）${h.form}${h.floors}层/${h.size}㎡/${h.price}万；开发商${d.basic.dev}；物业${d.basic.prop}；容积率${d.plan.far}/绿化${d.plan.green}；${d.price.avg}；${h.metro}；${h.school}（${h.schoolLevel}）；昼噪${h.day}dB；不利：${d.risk}；评价：${d.comment}`;
+  }).join('\n');
+  const q=document.getElementById('aiQ').value.trim();
+  const prompt=`你是重庆房产选购顾问。用户需求：主城、总价≤${state.priceMax}万、面积≥${state.sizeMin}㎡、三房或四房、洋房/小高层、近地铁、小学优质、配套完善、低噪声。\n当前筛选结果（共${list.length}套），已附十维资料：\n${summary}\n\n请严格按以下十项结构输出综合研判（结合地图区位、学区、地铁、噪声、总价、物业）：\n一、基础信息（精炼）\n二、建筑规划（精炼）\n三、户型分布（精炼）\n四、物业与停车（精炼）\n五、价格行情（精炼）\n六、交通配套（精炼）\n七、教育配套（精炼）\n八、商业与医疗（精炼）\n九、不利因素提示（逐盘点明关键风险，如学位占用、落户年限、临街噪声、接驳距离）\n十、综合评价（给出优先推荐 Top3 与适用人群）\n${q?('\n用户补充问题：'+q):''}`;
+  body.innerHTML='<span class="ai-loading">⏳ 调用模型中…（联网请求）</span>';
+  try{
+    const txt=await callAI(settings.apiBase,settings.apiKey,settings.model||'gpt-4o-mini',
+      [{role:'user',content:prompt}],1200);
+    let j; try{j=JSON.parse(txt);}catch(e){ body.innerHTML='<span class="ai-err">返回解析失败：'+(txt||'').slice(0,160)+'</span>'; return; }
+    if(j.error){body.innerHTML='<span class="ai-err">调用失败：'+j.error+'</span>';return;}
+    body.innerHTML=(j.choices?.[0]?.message?.content||'（无返回）').replace(/\n/g,'<br>');
+  }catch(e){ body.innerHTML='<span class="ai-err">调用异常：'+e.message+'</span>'; }
+}
+async function testConn(){
+  const btn=document.getElementById('setTest'); const msg=document.getElementById('testMsg');
+  if(!settings.apiBase||!settings.apiKey){msg.textContent='请先填 API 地址与 Key';msg.style.color='var(--red)';return;}
+  btn.disabled=true; btn.textContent='测试中…'; msg.textContent='';
+  try{
+    const txt=await callAI(settings.apiBase,settings.apiKey,settings.model||'gpt-4o-mini',
+      [{role:'user',content:'ping'}],5);
+    let j; try{j=JSON.parse(txt);}catch(e){msg.textContent='❌ 返回非JSON：'+(txt||'').slice(0,40);msg.style.color='var(--red)';return;}
+    if(j.error){msg.textContent='❌ 失败：'+j.error;msg.style.color='var(--red)';}
+    else{msg.textContent='✅ 连接成功';msg.style.color='var(--green)';}
+  }catch(e){msg.textContent='❌ 异常：'+e.message;msg.style.color='var(--red)';}
+  finally{btn.disabled=false;btn.textContent='🔌 测试连接';}
+}
+
+/* ---------- 设置 / 持久化 ---------- */
+const PROVIDERS={
+ 'DeepSeek':{base:'https://api.deepseek.com/v1',model:'deepseek-chat'},
+ '通义千问(阿里云百炼)':{base:'https://dashscope.aliyuncs.com/compatible-mode/v1',model:'qwen-plus'},
+ 'OpenAI':{base:'https://api.openai.com/v1',model:'gpt-4o-mini'},
+ 'Kimi(月之暗面)':{base:'https://api.moonshot.cn/v1',model:'moonshot-v1-8k'},
+ '智谱GLM':{base:'https://open.bigmodel.cn/api/paite/v1',model:'glm-4'},
+ '本地Ollama':{base:'http://127.0.0.1:11434/v1',model:'qwen2.5'}
+};
+let settings={apiBase:'',apiKey:'',model:'',baiduAK:''};
+async function loadSettings(){
+  try{ if(window.pywebview&&window.pywebview.api){ const s=await window.pywebview.api.load_settings(); const o=JSON.parse(s||'{}'); if(o&&typeof o==='object') Object.assign(settings,o); return; } }catch(e){}
+  try{ const s=localStorage.getItem('yxf_settings'); if(s) Object.assign(settings,JSON.parse(s)); }catch(e){}
+}
+function saveSettings(){ try{ if(window.pywebview&&window.pywebview.api){ window.pywebview.api.save_settings(JSON.stringify(settings)); return; } }catch(e){} try{ localStorage.setItem('yxf_settings',JSON.stringify(settings)); }catch(e){} }
+function syncSetUI(){
+  document.getElementById('setApiBase').value=settings.apiBase;
+  document.getElementById('setApiKey').value=settings.apiKey;
+  document.getElementById('setModel').value=settings.model;
+  document.getElementById('setBaidu').value=settings.baiduAK;
+  document.getElementById('aiModelTag').textContent=settings.model||'未配置';
+}
+function openSet(){syncSetUI();document.getElementById('setModal').classList.add('on');}
+function closeSet(){document.getElementById('setModal').classList.remove('on');}
+
+/* ---------- CSV ---------- */
+function exportCsv(){
+  const cols=['name','district','area','form','floors','layout','size','price','school','schoolLevel','line','metro','day','night','source','addr','lng','lat'];
+  const rows=filtered().map(h=>cols.map(c=>h[c]).join(','));
+  const csv='﻿'+cols.join(',')+'\n'+rows.join('\n');
+  download(csv,'渝选房_'+Date.now()+'.csv');
+}
+function importCsv(text){
+  const lines=text.split('\n').filter(l=>l.trim()); if(lines.length<2){toast('CSV 无数据');return;}
+  const cols=lines[0].split(','); const data=[];
+  for(let i=1;i<lines.length;i++){const v=lines[i].split(',');const o={};cols.forEach((c,k)=>o[c]=v[k]);data.push(o);}
+  if(data.length){HOUSES=data; HOUSES.forEach(h=>{if(h.metroDist==null)h.metroDist=900; h.detail=buildDetail(h);}); renderFilters(); render(); toast('已导入 '+data.length+' 套');}
+}
+function download(txt,name){
+  const b=new Blob([txt],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
+}
+
+/* ---------- 自定义小区（独立持久化，不污染内置数据） ---------- */
+function loadCustom(){
+  return new Promise(res=>{
+    try{
+      if(window.pywebview&&window.pywebview.api){
+        window.pywebview.api.load_houses().then(s=>{ try{CUSTOM=(JSON.parse(s||'[]')||[]).map(initHouse);}catch(e){CUSTOM=[];} res(); }); return;
+      }
+    }catch(e){}
+    try{ const s=localStorage.getItem('yxf_houses'); if(s) CUSTOM=(JSON.parse(s)||[]).map(initHouse); }catch(e){}
+    res();
+  });
+}
+function persistCustom(){
+  const arr=CUSTOM.map(h=>({name:h.name,custom:true,district:h.district,area:h.area,form:h.form,floors:h.floors,layout:h.layout,
+    size:h.size,price:h.price,school:h.school,schoolLevel:h.schoolLevel,line:h.line,metro:h.metro,metroDist:h.metroDist,
+    day:h.day,night:h.night,source:h.source,addr:h.addr,lng:h.lng,lat:h.lat,dev:h.dev,prop:h.prop,year:h.year,risk:h.risk,comment:h.comment}));
+  try{
+    if(window.pywebview&&window.pywebview.api){ window.pywebview.api.save_houses(JSON.stringify(arr)); return; }
+  }catch(e){}
+  try{ localStorage.setItem('yxf_houses',JSON.stringify(arr)); }catch(e){}
+}
+function addCustom(){
+  const g=id=>document.getElementById(id).value.trim();
+  const name=g('cName'); if(!name){toast('请填写小区名称');return;}
+  const size=+document.getElementById('cSize').value||120, price=+document.getElementById('cPrice').value||120;
+  const h={name,custom:true,
+    district:g('cDistrict'),area:g('cArea'),form:g('cForm'),
+    floors:+document.getElementById('cFloors').value||8,layout:g('cLayout'),size,price,
+    school:g('cSchool'),schoolLevel:g('cSchoolLevel'),
+    line:g('cLine'),metro:g('cMetro'),metroDist:+document.getElementById('cMetroDist').value||900,
+    day:+document.getElementById('cDay').value||55,night:+document.getElementById('cNight').value||45,
+    source:g('cSource'),addr:g('cAddr'),
+    lng:+document.getElementById('cLng').value||106.5,lat:+document.getElementById('cLat').value||29.6,
+    dev:g('cDev'),prop:g('cProp'),year:g('cYear'),risk:g('cRisk'),comment:g('cComment')};
+  initHouse(h); CUSTOM.push(h); persistCustom(); renderFilters(); render(); closeCustom(); toast('已加入房源库：'+name);
+}
+function deleteCustom(name){
+  CUSTOM=CUSTOM.filter(h=>h.name!==name); persistCustom(); renderFilters(); render(); toast('已删除自定义小区：'+name);
+}
+function openCustom(){document.getElementById('customModal').classList.add('on');}
+function closeCustom(){document.getElementById('customModal').classList.remove('on');}
+
+/* ---------- 工具 ---------- */
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200);}
+const BUILDING='<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,211,238,.22)"/><stop offset="1" stop-color="rgba(34,211,238,.05)"/></linearGradient></defs><rect width="120" height="80" fill="url(#sky)"/><circle cx="98" cy="16" r="9" fill="rgba(250,204,21,.55)"/><rect x="14" y="40" width="38" height="34" rx="2" fill="rgba(34,211,238,.30)"/><rect x="58" y="30" width="30" height="44" rx="2" fill="rgba(56,189,248,.38)"/><rect x="92" y="48" width="18" height="26" rx="2" fill="rgba(34,211,238,.22)"/><g fill="rgba(8,20,35,.55)"><rect x="20" y="47" width="7" height="7"/><rect x="32" y="47" width="7" height="7"/><rect x="44" y="47" width="7" height="7"/><rect x="20" y="59" width="7" height="7"/><rect x="32" y="59" width="7" height="7"/><rect x="44" y="59" width="7" height="7"/><rect x="64" y="37" width="7" height="7"/><rect x="76" y="37" width="7" height="7"/><rect x="64" y="49" width="7" height="7"/><rect x="76" y="49" width="7" height="7"/><rect x="64" y="61" width="7" height="7"/><rect x="76" y="61" width="7" height="7"/><rect x="96" y="55" width="6" height="6"/><rect x="104" y="55" width="6" height="6"/></g><path d="M14 40 L33 28 L52 40 Z" fill="rgba(56,189,248,.5)"/><path d="M58 30 L73 20 L88 30 Z" fill="rgba(34,211,238,.45)"/><rect x="0" y="74" width="120" height="6" fill="rgba(45,212,191,.35)"/><circle cx="10" cy="70" r="4" fill="rgba(45,212,191,.5)"/><circle cx="20" cy="72" r="3" fill="rgba(45,212,191,.5)"/></svg>';
+function showMapCard(h){
+  let card=document.getElementById('mapCard');
+  if(!card){card=document.createElement('div');card.id='mapCard';card.className='map-card';document.body.appendChild(card);}
+  card.innerHTML=`<button class="mc-x" onclick="(function(){var c=document.getElementById('mapCard');if(c)c.remove();})()">✕</button>`
+    +`<div class="mc-thumb">${BUILDING}</div>`
+    +`<div class="mc-body"><div class="mc-name">${h.name}</div>`
+    +`<div class="mc-meta">${h.district}·${h.area} · ${h.form}${h.floors}层 · ${h.size}㎡ · ${h.price}万</div>`
+    +`<div class="mc-row">📍 ${h.addr||'—'}</div>`
+    +`<div class="mc-row">🚇 ${(h.line||'—')} · 最近约${h.metroDist}m（步行${Math.round(h.metroDist/70)}分钟）</div>`
+    +`<div class="mc-row">🏫 ${h.school}（${h.schoolLevel}）</div>`
+    +`<div class="mc-row">🔊 昼 ${h.day}dB · ${noiseWord(h.day)}</div>`
+    +`<button class="mc-btn" onclick="openDetail(HOUSES.find(x=>x.name==='${h.name.replace(/'/g,"\\'")}'))">查看十维分析 →</button></div>`;
+  card.style.display='block';
+}
+
+/* ---------- 事件 ---------- */
+document.getElementById('sizeRange').oninput=e=>{state.sizeMin=+e.target.value;document.getElementById('sizeVal').textContent='≥ '+e.target.value;render();};
+document.getElementById('priceRange').oninput=e=>{state.priceMax=+e.target.value;document.getElementById('priceVal').textContent='≤ '+e.target.value;render();};
+document.getElementById('sortSel').onchange=e=>{state.sort=e.target.value;render();};
+document.getElementById('btnReset').onclick=()=>{DIMS.forEach(d=>state.sel[d.key]=new Set(d.def));state.sizeMin=90;state.priceMax=200;
+  document.getElementById('sizeRange').value=90;document.getElementById('priceRange').value=200;
+  document.getElementById('sizeVal').textContent='≥ 90';document.getElementById('priceVal').textContent='≤ 200';renderFilters();render();};
+document.getElementById('btnAi').onclick=aiAnalyze;
+document.getElementById('btnDetail').onclick=()=>{renderDetail(filtered());document.getElementById('secDetail').scrollIntoView({behavior:'smooth',block:'start'});};
+document.getElementById('btnPdf').onclick=()=>window.print();
+document.getElementById('btnSet').onclick=openSet;
+document.getElementById('btnCustom').onclick=openCustom;
+document.getElementById('customClose').onclick=closeCustom;
+document.getElementById('customSave').onclick=addCustom;
+document.getElementById('setClose').onclick=closeSet;
+document.getElementById('setSave').onclick=()=>{settings.apiBase=document.getElementById('setApiBase').value.trim();
+  settings.apiKey=document.getElementById('setApiKey').value.trim();settings.model=document.getElementById('setModel').value.trim();
+  settings.baiduAK=document.getElementById('setBaidu').value.trim();saveSettings();syncSetUI();closeSet();toast('设置已保存');};
+document.getElementById('setProvider').onchange=e=>{const p=PROVIDERS[e.target.value];if(p){document.getElementById('setApiBase').value=p.base;document.getElementById('setModel').value=p.model;}};
+document.getElementById('setTest').onclick=testConn;
+document.getElementById('baiduBtn').onclick=loadBaidu;
+document.getElementById('nearbyBtn').onclick=nearbySearch;
+document.getElementById('setExport').onclick=exportCsv;
+document.getElementById('setImport').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('btnCsv').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>importCsv(r.result);r.readAsText(f);};
+document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>{
+  document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('on'));a.classList.add('on');
+  const m={房源:'cards',地图:'secMap',噪声:'secNoise',分析:'secDetail',AI:'secAi'}[a.dataset.sec];
+  document.getElementById(m).scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ---------- 初始化 ---------- */
+function whenApiReady(cb){
+  if(window.pywebview&&window.pywebview.api){cb();return;}
+  let done=false;const go=()=>{if(done)return;done=true;cb();};
+  window.addEventListener('pywebviewready',go,{once:true});
+  document.addEventListener('pywebviewready',go,{once:true});
+  setTimeout(go,1000);
+}
+whenApiReady(()=>{ loadSettings().then(syncSetUI); });
+renderFilters();
+loadCustom().then(()=>{ renderFilters(); render(); });
+</script>
+</body>
+</html>
