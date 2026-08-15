@@ -113,8 +113,21 @@
   }
 
   /* ===== 深空科技专属：星座连线动态背景 ===== */
-  .bg-const{display:none;position:fixed;inset:0;pointer-events:none;z-index:0;}
-  body[data-theme="space"] .bg-const{display:block;}
+  /* ===== 深空科技专属：流星雨动态背景（低占用 3%） ===== */
+  .bg-shoot{display:none;position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  body[data-theme="space"] .bg-shoot{display:block;}
+  .bg-shoot .shoot{position:absolute;width:140px;height:2px;border-radius:2px;
+       background:linear-gradient(90deg,#fff,transparent);opacity:0;
+       transform:rotate(135deg);animation:shoot 3.5s linear infinite;}
+  .bg-shoot .shoot::after{content:"";position:absolute;right:-3px;top:-2px;width:6px;height:6px;
+       border-radius:50%;background:#fff;box-shadow:0 0 10px #fff;}
+  .bg-shoot .shoot:nth-child(1){top:15%;left:65%;animation-delay:0s;}
+  .bg-shoot .shoot:nth-child(2){top:38%;left:80%;animation-delay:-1.2s;}
+  .bg-shoot .shoot:nth-child(3){top:5%;left:35%;animation-delay:-2.3s;}
+  .bg-shoot .shoot:nth-child(4){top:55%;left:92%;animation-delay:-.7s;}
+  .bg-shoot .shoot:nth-child(5){top:25%;left:15%;animation-delay:-2.9s;}
+  @keyframes shoot{0%{transform:rotate(135deg) translateX(0);opacity:0;}8%{opacity:1;}
+       35%{transform:rotate(135deg) translateX(-500px);opacity:0;}100%{opacity:0;}}
 
   .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
   .bg-halo.h1{width:58vmin;height:58vmin;left:50%;top:42%;transform:translate(-50%,-50%);
@@ -380,7 +393,7 @@
 <body>
 <div class="bg-sun s1"></div>
 <div class="bg-sun s2"></div>
-<div class="bg-const"><canvas id="spaceCanvas"></canvas></div>
+<div class="bg-shoot"><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div></div>
 <div class="bg-halo h1"></div>
 <div class="bg-halo h2"></div>
 <div class="wrap">
@@ -720,87 +733,10 @@ function setTheme(t, save){
       localStorage.setItem('vista_theme_ver', THEME_VER);
     } catch(e){}
   }
-  // 星座连线动画：仅深空科技主题运行
-  if (t === 'space') startConstellation();
-  else stopConstellation();
+  // 流星雨为 CSS 动画，随主题自动显隐，无需 JS 启停
 }
 
-// ===== 星座连线（Canvas 粒子） =====
-var _constRunning = false;
-var _constFrame = null;
-function startConstellation(){
-  var cv = document.getElementById('spaceCanvas');
-  if (!cv) return;
-  var ctx = cv.getContext('2d');
-  var W = cv.width = window.innerWidth;
-  var H = cv.height = window.innerHeight;
-  var pts = [];
-  var COUNT = 25;  // GPU 优化：60→40→25 粒子
-  for (var i = 0; i < COUNT; i++){
-    pts.push({x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3});
-  }
-  _constRunning = true;
-  function frame(){
-    if (!_constRunning || document.hidden) { _constFrame = requestAnimationFrame(frame); return; }  // GPU 优化：标签页隐藏时暂停绘制
-    ctx.clearRect(0, 0, W, H);
-    for (var i = 0; i < COUNT; i++){
-      var p = pts[i];
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0 || p.x > W) p.vx *= -1;
-      if (p.y < 0 || p.y > H) p.vy *= -1;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(125,211,252,.8)';
-      ctx.fill();
-      for (var j = i + 1; j < COUNT; j++){
-        var q = pts[j];
-        var dx = p.x - q.x, dy = p.y - q.y;
-        var d2 = dx * dx + dy * dy;
-        if (d2 < 90 * 90){
-          var a = (1 - Math.sqrt(d2) / 90) * .4;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(q.x, q.y);
-          ctx.strokeStyle = 'rgba(139,124,246,' + a + ')';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-    }
-    _constFrame = requestAnimationFrame(frame);
-  }
-  frame();
-  window.addEventListener('resize', function(){
-    if (_constRunning){
-      cv.width = window.innerWidth;
-      cv.height = window.innerHeight;
-      W = cv.width; H = cv.height;
-    }
-  });
-}
-function stopConstellation(){
-  _constRunning = false;
-  if (_constFrame) cancelAnimationFrame(_constFrame);
-  _constFrame = null;
-  var cv = document.getElementById('spaceCanvas');
-  if (cv && cv.getContext){
-    var ctx = cv.getContext('2d');
-    ctx.clearRect(0, 0, cv.width, cv.height);
-  }
-}
-(function(){
-  var saved = null;
-  try {
-    var ver = localStorage.getItem('vista_theme_ver');
-    if (ver === THEME_VER) saved = localStorage.getItem('vista_theme');
-  } catch(e){}
-  if (saved && THEMES.indexOf(saved) >= 0) setTheme(saved, false);
-  else setTheme('business', false);
-})();
 
-
-
-// ===== 关于弹窗 =====
 function openAbout(){
   renderLog();
   try { localStorage.setItem(LOG_SEEN_KEY, getLastLogDate()); } catch(e){}
