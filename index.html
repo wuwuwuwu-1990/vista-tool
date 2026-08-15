@@ -97,15 +97,15 @@
          linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);}
   /* ===== 雅致水墨专属：暖阳呼吸动态背景 ===== */
   .bg-sun{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
-  .bg-sun.s1{width:72vmin;height:72vmin;left:50%;top:38%;transform:translate(-50%,-50%);
+  .bg-sun.s1{width:56vmin;height:56vmin;left:50%;top:38%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(199,139,77,.5),rgba(199,139,77,.16) 45%,transparent 68%);
        animation:sunBreathe 6s ease-in-out infinite;}
   .bg-sun.s1::after{content:"";position:absolute;inset:14%;border-radius:50%;
        background:radial-gradient(circle,rgba(235,190,120,.5),transparent 62%);animation:sunBreathe 6s ease-in-out 3s infinite;}
-  .bg-sun.s2{width:48vmin;height:48vmin;left:26%;top:68%;transform:translate(-50%,-50%);
+  .bg-sun.s2{width:38vmin;height:38vmin;left:26%;top:68%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(138,75,45,.35),transparent 62%);
        animation:sunBreathe 7.5s ease-in-out 1.5s infinite;}
-  .bg-sun.s3{width:40vmin;height:40vmin;left:78%;top:26%;transform:translate(-50%,-50%);
+  .bg-sun.s3{width:32vmin;height:32vmin;left:78%;top:26%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(185,138,94,.3),transparent 62%);
        animation:sunBreathe 8.5s ease-in-out 2.5s infinite;}
   body[data-theme="ink"] .bg-sun{display:block;}
@@ -120,15 +120,15 @@
 
   /* ===== 波形尾迹动态鼠标（全局） ===== */
   #cursorFx{position:fixed;inset:0;z-index:60;pointer-events:none;}
-  .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
-  .bg-halo.h1{width:78vmin;height:78vmin;left:50%;top:42%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(245,166,35,.42),rgba(245,166,35,.14) 45%,transparent 70%);
+  .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
+  .bg-halo.h1{width:58vmin;height:58vmin;left:50%;top:42%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(245,166,35,.4),rgba(245,166,35,.13) 45%,transparent 70%);
        animation:haloBreathe 6s ease-in-out infinite;}
-  .bg-halo.h2{width:55vmin;height:55vmin;left:28%;top:66%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(30,111,217,.5),rgba(30,111,217,.16) 45%,transparent 68%);
+  .bg-halo.h2{width:42vmin;height:42vmin;left:28%;top:66%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(30,111,217,.48),rgba(30,111,217,.15) 45%,transparent 68%);
        animation:haloBreathe 7.5s ease-in-out 1.4s infinite;}
-  .bg-halo.h3{width:46vmin;height:46vmin;left:76%;top:24%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(77,163,255,.42),transparent 66%);
+  .bg-halo.h3{width:36vmin;height:36vmin;left:76%;top:24%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(77,163,255,.4),transparent 66%);
        animation:haloBreathe 8.5s ease-in-out 2.6s infinite;}
   body[data-theme="business"] .bg-halo{display:block;}
   @keyframes haloBreathe{
@@ -226,7 +226,7 @@
   .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:16px;}
   .card{position:relative;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;overflow:hidden;
-       background:var(--card);border:1px solid var(--card-b);backdrop-filter:blur(12px);
+       background:var(--card);border:1px solid var(--card-b);backdrop-filter:blur(8px);
        transform-style:preserve-3d;will-change:transform;opacity:0;
        transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease;}
   .card.in{opacity:1;}
@@ -339,7 +339,7 @@
   /* ===== 工具搜索框 ===== */
   .tool-search{max-width:480px;margin:0 auto 26px;position:relative;}
   .tool-search input{width:100%;padding:11px 44px 11px 18px;border-radius:26px;border:1px solid var(--card-b);
-       background:var(--card);color:var(--txt);font-size:14px;outline:none;backdrop-filter:blur(12px);
+       background:var(--card);color:var(--txt);font-size:14px;outline:none;backdrop-filter:blur(8px);
        -webkit-backdrop-filter:blur(12px);transition:border-color .25s,box-shadow .25s;}
   .tool-search input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.2);}
   .tool-search .ico{position:absolute;right:17px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
@@ -743,13 +743,13 @@ function startConstellation(){
   var W = cv.width = window.innerWidth;
   var H = cv.height = window.innerHeight;
   var pts = [];
-  var COUNT = 60;
+  var COUNT = 40;  // GPU 优化：60→40 粒子
   for (var i = 0; i < COUNT; i++){
     pts.push({x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3});
   }
   _constRunning = true;
   function frame(){
-    if (!_constRunning) return;
+    if (!_constRunning || document.hidden) { _constFrame = requestAnimationFrame(frame); return; }  // GPU 优化：标签页隐藏时暂停绘制
     ctx.clearRect(0, 0, W, H);
     for (var i = 0; i < COUNT; i++){
       var p = pts[i];
@@ -821,7 +821,7 @@ function stopConstellation(){
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     pts = [];
   }
-  function onMove(x, y){ mx = x; my = y; hasMoved = true; inView = true; }
+  function onMove(x, y){ mx = x; my = y; hasMoved = true; inView = true; resumeFx(); }
   document.addEventListener('mouseenter', function(e){ onMove(e.clientX, e.clientY); });
   document.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
   document.addEventListener('mouseleave', function(){ inView = false; pts = []; });
@@ -832,11 +832,19 @@ function stopConstellation(){
     if (e.touches.length) onMove(e.touches[0].clientX, e.touches[0].clientY);
   }, {passive:true});
   window.addEventListener('resize', rs);
+  // ===== GPU 优化：静止时暂停 rAF（鼠标不动零绘制） =====
+  var idleFrames = 0, stopped = false, rafId = null;
+  function resumeFx(){
+    if (stopped && hasMoved && inView){
+      stopped = false;
+      rafId = requestAnimationFrame(loop);
+    }
+  }
   rs();
   function loop(now){
     ctx.clearRect(0, 0, W, H);
-    // 鼠标未移动过：不绘制任何内容（避免光晕初始错位在页面中心）
-    if (!inView || !hasMoved){ requestAnimationFrame(loop); return; }
+    // 鼠标未移动过/离开页面：不绘制任何内容（避免光晕初始错位）
+    if (!inView || !hasMoved){ rafId = requestAnimationFrame(loop); return; }
     // 路径记录：波形头部精确咬合指针
     var tailP = pts.length ? pts[pts.length - 1] : null;
     if (!tailP || Math.hypot(tailP.x - mx, tailP.y - my) >= 0.5){
@@ -844,14 +852,22 @@ function stopConstellation(){
       if (pts.length > MAXP) pts.shift();
     }
     // 智能消散：静止每2帧去1点 ≈0.8s 消散完
+    var moving = false;
     if (pts.length){
       var tail = pts[pts.length - 1];
-      var moving = Math.hypot(tail.x - mx, tail.y - my) >= 0.5;
+      moving = Math.hypot(tail.x - mx, tail.y - my) >= 0.5;
       if (moving){ staticFrames = 0; }
       else {
         staticFrames++;
         if (staticFrames >= 2){ pts.shift(); staticFrames = 0; }
       }
+    }
+    // 静止累计超过 90 帧（≈1.5s，尾迹已消散）→ 暂停循环省 GPU
+    if (!moving && !pts.length){
+      idleFrames++;
+      if (idleFrames > 90){ stopped = true; return; }
+    } else {
+      idleFrames = 0;
     }
     // 三波带：全部从指针尖端发出、尾部渐隐
     var n = pts.length;
@@ -880,9 +896,9 @@ function stopConstellation(){
     g.addColorStop(1, 'rgba(56,189,248,0)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(mx, my, 16, 0, Math.PI * 2); ctx.fill();
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
   }
-  requestAnimationFrame(loop);
+  rafId = requestAnimationFrame(loop);
 })();
 
 // ===== 关于弹窗 =====
