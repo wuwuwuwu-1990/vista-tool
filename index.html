@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%234f8ef7%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b7cf6%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20font-size%3D%2234%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%20font-family%3D%22Microsoft%20YaHei%2Csans-serif%22%20font-weight%3D%22bold%22%3E%E5%85%83%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>元枢工具箱 Vista Hub</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  /* ===== 主题 1：深空科技（默认） ===== */
+  :root, body[data-theme="space"]{
+    --bg1:#0a0f22; --bg2:#131a36;
+    --bg-extra1:rgba(79,142,247,.22); --bg-extra2:rgba(139,124,246,.18); --bg-extra3:rgba(56,211,240,.14);
+    --card:rgba(255,255,255,.055); --card-b:rgba(255,255,255,.10);
+    --txt:#eef2fb; --muted:#9aa7c7;
+    --blue:#4f8ef7; --cyan:#38d3f0; --violet:#8b7cf6; --teal:#2fd4a8;
+    --title-grad:linear-gradient(120deg,#ffffff 20%,#a8c8ff 55%,#8b7cf6 90%);
+    --kicker-c:#38d3f0; --kicker-b:rgba(56,211,240,.08); --kicker-bd:rgba(56,211,240,.35);
+    --card-hover:0 18px 44px rgba(10,15,34,.55);
+    --card-hover-bd:rgba(79,142,247,.5);
+    --sec-bar:linear-gradient(180deg,#38d3f0,#4f8ef7);
+    --chip-def-bd:rgba(255,255,255,.14); --chip-def-c:#9aa7c7; --chip-def-bg:rgba(255,255,255,.05);
+    --mark-grad:linear-gradient(135deg,#4f8ef7,#8b7cf6);
+    --mark-shadow:0 6px 22px rgba(79,142,247,.45);
+    --btn-ok:linear-gradient(135deg,#4f8ef7,#8b7cf6);
+    --sp-mark:linear-gradient(135deg,#2fd4a8,#38d3f0);
+    --sp-bar:linear-gradient(180deg,#2fd4a8,#38d3f0);
+    --foot-c:#9aa7c7;
+  }
+  /* ===== 主题 2：商务深蓝 ===== */
+  body[data-theme="business"]{
+    --bg1:#0d2440; --bg2:#16345c;
+    --bg-extra1:rgba(30,111,217,.25); --bg-extra2:rgba(255,200,97,.08); --bg-extra3:rgba(30,111,217,.15);
+    --card:rgba(255,255,255,.055); --card-b:rgba(255,255,255,.10);
+    --txt:#f0f6ff; --muted:#9db8d8;
+    --blue:#1e6fd9; --cyan:#4da3ff; --violet:#0f4a94; --teal:#f5a623;
+    --title-grad:linear-gradient(120deg,#ffffff 30%,#ffc861 90%);
+    --kicker-c:#ffc861; --kicker-b:rgba(255,200,97,.08); --kicker-bd:rgba(255,200,97,.4);
+    --card-hover:0 16px 40px rgba(4,20,40,.5);
+    --card-hover-bd:rgba(255,200,97,.5);
+    --sec-bar:linear-gradient(180deg,#ffc861,#f5a623);
+    --chip-def-bd:rgba(255,200,97,.3); --chip-def-c:#ffd98a; --chip-def-bg:rgba(255,200,97,.08);
+    --mark-grad:linear-gradient(135deg,#1e6fd9,#0f4a94);
+    --mark-shadow:0 6px 20px rgba(30,111,217,.4);
+    --btn-ok:linear-gradient(135deg,#1e6fd9,#f5a623);
+    --sp-mark:linear-gradient(135deg,#f5a623,#ffc861);
+    --sp-bar:linear-gradient(180deg,#ffc861,#f5a623);
+    --foot-c:#7e9cc0;
+  }
+  /* ===== 主题 3：雅致水墨 ===== */
+  body[data-theme="ink"]{
+    --bg1:#f2efe8; --bg2:#e6e2d8;
+    --bg-extra1:rgba(138,75,45,.05); --bg-extra2:transparent; --bg-extra3:transparent;
+    --card:rgba(255,255,255,.6); --card-b:rgba(47,58,66,.1);
+    --txt:#2f2a22; --muted:#8a8375;
+    --blue:#5c6b73; --cyan:#8a6b4d; --violet:#3a4a52; --teal:#8a4b2d;
+    --title-grad:linear-gradient(120deg,#2f2a22 40%,#8a4b2d 100%);
+    --kicker-c:#8a4b2d; --kicker-b:rgba(138,75,45,.06); --kicker-bd:rgba(138,75,45,.3);
+    --card-hover:0 12px 30px rgba(47,58,66,.12);
+    --card-hover-bd:rgba(138,75,45,.3);
+    --sec-bar:linear-gradient(180deg,#8a4b2d,#b98a5e);
+    --chip-def-bd:rgba(138,75,45,.18); --chip-def-c:#8a6b4d; --chip-def-bg:rgba(138,75,45,.05);
+    --mark-grad:linear-gradient(135deg,#5c6b73,#2f3a42);
+    --mark-shadow:0 4px 14px rgba(47,58,66,.25);
+    --btn-ok:linear-gradient(135deg,#5c6b73,#8a4b2d);
+    --sp-mark:linear-gradient(135deg,#8a4b2d,#b98a5e);
+    --sp-bar:linear-gradient(180deg,#8a4b2d,#b98a5e);
+    --foot-c:#a09a8c;
+  }
+  /* ===== 主题 3：新拟态 ===== */
+  body[data-theme="neo"]{
+    --bg1:#e8ecf4; --bg2:#dde3ee;
+    --bg-extra1:transparent; --bg-extra2:transparent; --bg-extra3:transparent;
+    --card:#e8ecf4; --card-b:transparent;
+    --txt:#2a3350; --muted:#7b86a5;
+    --blue:#4f6ef7; --cyan:#38b6e8; --violet:#7c5cf0; --teal:#2fa88a;
+    --title-grad:linear-gradient(120deg,#2a3350 30%,#4f6ef7 100%);
+    --kicker-c:#4f6ef7; --kicker-b:#e8ecf4; --kicker-bd:transparent;
+    --card-hover:8px 8px 18px #b9c2d6,-8px -8px 18px #fff;
+    --card-hover-bd:#c8d2e4;
+    --sec-bar:linear-gradient(180deg,#4f6ef7,#38b6e8);
+    --chip-def-bd:#d4dbe8; --chip-def-c:#5b6480; --chip-def-bg:#eef2f9;
+    --mark-grad:linear-gradient(145deg,#d5dce9,#c2cbdd);
+    --mark-shadow:5px 5px 12px #c3cbdc,-5px -5px 12px #fff;
+    --btn-ok:linear-gradient(135deg,#4f6ef7,#38b6e8);
+    --sp-mark:linear-gradient(135deg,#4f6ef7,#38b6e8);
+    --sp-bar:linear-gradient(180deg,#4f6ef7,#38b6e8);
+    --foot-c:#7b86a5;
+  }
+  html{scroll-behavior:smooth;}
+  body{min-height:100vh;font-family:"Microsoft YaHei","PingFang SC",-apple-system,sans-serif;
+       color:var(--txt);overflow-x:hidden;transition:background .3s;
+       background:
+         radial-gradient(900px 500px at 85% -10%,var(--bg-extra1),transparent 60%),
+         radial-gradient(800px 480px at -10% 30%,var(--bg-extra2),transparent 60%),
+         radial-gradient(700px 500px at 60% 115%,var(--bg-extra3),transparent 60%),
+         linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);}
+  /* ===== 雅致水墨专属：暖阳呼吸动态背景 ===== */
+  .bg-sun{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+  .bg-sun.s1{width:72vmin;height:72vmin;left:50%;top:38%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(199,139,77,.5),rgba(199,139,77,.16) 45%,transparent 68%);
+       animation:sunBreathe 6s ease-in-out infinite;}
+  .bg-sun.s1::after{content:"";position:absolute;inset:14%;border-radius:50%;
+       background:radial-gradient(circle,rgba(235,190,120,.5),transparent 62%);animation:sunBreathe 6s ease-in-out 3s infinite;}
+  .bg-sun.s2{width:48vmin;height:48vmin;left:26%;top:68%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(138,75,45,.35),transparent 62%);
+       animation:sunBreathe 7.5s ease-in-out 1.5s infinite;}
+  .bg-sun.s3{width:40vmin;height:40vmin;left:78%;top:26%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(185,138,94,.3),transparent 62%);
+       animation:sunBreathe 8.5s ease-in-out 2.5s infinite;}
+  body[data-theme="ink"] .bg-sun{display:block;}
+  @keyframes sunBreathe{
+    0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.92);}
+    50%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}
+  }
+
+  /* ===== 深空科技专属：星座连线动态背景 ===== */
+  .bg-const{display:none;position:fixed;inset:0;pointer-events:none;z-index:0;}
+  body[data-theme="space"] .bg-const{display:block;}
+
+  /* ===== 波形尾迹动态鼠标（全局） ===== */
+  #cursorFx{position:fixed;inset:0;z-index:60;pointer-events:none;}
+  .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+  .bg-halo.h1{width:78vmin;height:78vmin;left:50%;top:42%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(245,166,35,.42),rgba(245,166,35,.14) 45%,transparent 70%);
+       animation:haloBreathe 6s ease-in-out infinite;}
+  .bg-halo.h2{width:55vmin;height:55vmin;left:28%;top:66%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(30,111,217,.5),rgba(30,111,217,.16) 45%,transparent 68%);
+       animation:haloBreathe 7.5s ease-in-out 1.4s infinite;}
+  .bg-halo.h3{width:46vmin;height:46vmin;left:76%;top:24%;transform:translate(-50%,-50%);
+       background:radial-gradient(circle,rgba(77,163,255,.42),transparent 66%);
+       animation:haloBreathe 8.5s ease-in-out 2.6s infinite;}
+  body[data-theme="business"] .bg-halo{display:block;}
+  @keyframes haloBreathe{
+    0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(.9);}
+    50%{opacity:1;transform:translate(-50%,-50%) scale(1.18);}
+  }
+
+  .wrap{position:relative;z-index:1;max-width:2000px;margin:0 auto;padding:40px 28px 70px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;margin-bottom:26px;flex-wrap:wrap;gap:10px;
+       position:sticky;top:0;z-index:50;border-radius:14px;
+       background:var(--card);border:1px solid var(--card-b);
+       backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+       box-shadow:0 6px 24px rgba(10,15,34,.18);}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+       background:var(--mark-grad);box-shadow:var(--mark-shadow);}
+  .brand .mark svg{width:22px;height:22px;}
+  .brand .bt{line-height:1.2;}
+  .brand .bt b{font-size:17px;letter-spacing:.5px;font-weight:600;}
+  .brand .bt span{display:block;font-size:11px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+  .nav-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .theme-picker{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--card-b);
+       border-radius:20px;padding:3px;backdrop-filter:blur(8px);}
+  .theme-picker .tp{font-size:11.5px;padding:5px 12px;border-radius:16px;cursor:pointer;color:var(--muted);
+       border:none;background:transparent;transition:all .18s;white-space:nowrap;font-family:inherit;}
+  .theme-picker .tp:hover{color:var(--txt);}
+  .theme-picker .tp.on{background:var(--btn-ok);color:#fff;box-shadow:0 3px 10px rgba(79,142,247,.3);}
+  nav .ver{font-size:12px;color:var(--muted);border:1px solid var(--card-b);background:var(--card);
+       padding:6px 14px;border-radius:20px;backdrop-filter:blur(8px);flex-shrink:0;white-space:nowrap;}
+  .secret-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
+       border:1px solid var(--card-b);background:var(--card);padding:6px 14px;border-radius:20px;
+       cursor:pointer;backdrop-filter:blur(8px);transition:all .22s cubic-bezier(.4,0,.2,1);user-select:none;
+       -webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;
+       white-space:nowrap;flex-shrink:0;}
+  /* A 悬停流光描边 */
+  .secret-btn::before{content:"";position:absolute;inset:-1px;border-radius:21px;padding:1px;
+       background:conic-gradient(transparent 0%,rgba(56,211,240,.85) 18%,transparent 36%,rgba(139,124,246,.85) 62%,transparent 82%);
+       -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+       -webkit-mask-composite:xor;mask-composite:exclude;
+       opacity:0;transition:opacity .3s;pointer-events:none;z-index:1;}
+  .secret-btn:hover::before{opacity:1;animation:secretFlow 2.4s linear infinite;}
+  @keyframes secretFlow{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  /* B 锁扣开锁动画 */
+  .secret-btn .lock-arc{transform-origin:12px 7px;transition:transform .28s cubic-bezier(.34,1.56,.64,1);}
+  .secret-btn:hover .lock-arc{transform:translateY(-1.6px) rotate(-9deg);}
+  /* C 微浮起 + 青色光晕 */
+  .secret-btn:hover{color:var(--cyan);border-color:var(--kicker-bd);background:var(--kicker-b);
+       transform:translateY(-2px);box-shadow:0 5px 18px rgba(56,211,240,.35);}
+  /* D 图标放大 + 文字滑动 */
+  .secret-btn:hover svg{transform:scale(1.16);}
+  .secret-btn .sb-txt{display:inline-block;transition:transform .25s;}
+  .secret-btn:hover .sb-txt{transform:translateX(2px);}
+  /* E 彩色水波（点击点扩散） */
+  .secret-btn::after{content:"";position:absolute;left:var(--px,50%);top:var(--py,50%);width:130px;height:130px;border-radius:50%;
+       background:radial-gradient(circle,rgba(56,211,240,.55),transparent 62%);
+       transform:translate(-50%,-50%) scale(0);opacity:0;pointer-events:none;z-index:2;}
+  .secret-btn.ripple::after{animation:secretRipple .55s ease-out forwards;}
+  @keyframes secretRipple{to{transform:translate(-50%,-50%) scale(2.3);opacity:0}}
+  /* F 按压深度增强 */
+  .secret-btn:active{transform:scale(.9);box-shadow:inset 0 2px 7px rgba(0,0,0,.28);}
+  /* G 点击脉冲一次 */
+  .secret-btn.pulse{animation:secretPulse .4s ease;}
+  @keyframes secretPulse{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
+  .about-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);
+       border:1px solid var(--card-b);background:var(--card);padding:6px 14px;border-radius:20px;
+       cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;user-select:none;
+       white-space:nowrap;flex-shrink:0;}
+  .about-btn:hover{color:var(--cyan);border-color:var(--kicker-bd);background:var(--kicker-b);}
+  .secret-btn svg{width:14px;height:14px;transition:transform .25s;}
+  /* H 解锁态金色常驻 */
+  .secret-btn.unlocked{color:#fbbf24;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.12);}
+  .secret-btn.unlocked svg{color:#fbbf24;}
+  /* I 解锁脉冲提醒 */
+  .secret-btn.unlocked{animation:secretUnlockPulse .9s ease-out 2;}
+  @keyframes secretUnlockPulse{0%{box-shadow:0 0 0 0 rgba(251,191,36,.55)}70%{box-shadow:0 0 0 12px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
+  header{text-align:center;padding:34px 0 44px;}
+  header .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--kicker-c);
+       letter-spacing:3px;border:1px solid var(--kicker-bd);background:var(--kicker-b);
+       padding:6px 16px;border-radius:20px;margin-bottom:22px;}
+  header h1{font-size:clamp(34px,6vw,52px);font-weight:700;letter-spacing:2px;line-height:1.15;
+       background:var(--title-grad);
+       -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  header h1 small{display:block;font-size:clamp(13px,2.4vw,17px);font-weight:400;letter-spacing:6px;
+       color:var(--muted);-webkit-text-fill-color:var(--muted);margin-top:12px;}
+  header p{color:var(--muted);font-size:14px;margin-top:14px;letter-spacing:.5px;}
+  .sec-title{display:flex;align-items:center;gap:12px;margin:8px 0 20px;}
+  .sec-title .bar{width:4px;height:18px;border-radius:2px;background:var(--sec-bar);}
+  .sec-title h2{font-size:16px;font-weight:600;letter-spacing:1px;}
+  .sec-count{font-size:11.5px;color:var(--muted);font-weight:400;letter-spacing:.5px;margin-left:10px;vertical-align:1px;}
+  .sec-title span{font-size:12px;color:var(--muted);margin-left:auto;}
+  .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:16px;}
+  .card{position:relative;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
+       padding:20px 18px 18px;overflow:hidden;
+       background:var(--card);border:1px solid var(--card-b);backdrop-filter:blur(12px);
+       transform-style:preserve-3d;will-change:transform;opacity:0;
+       transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease;}
+  .card.in{opacity:1;}
+  .card::after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;pointer-events:none;z-index:2;
+       background:radial-gradient(circle,rgba(255,255,255,.18),transparent 62%);
+       left:var(--mx,50%);top:var(--my,50%);transform:translate(-50%,-50%) translateZ(26px);
+       opacity:0;transition:opacity .3s;}
+  .card:hover::after{opacity:1;}
+  .card.dragging{opacity:.55;transform:scale(.96);cursor:grabbing;}
+  .card{cursor:grab;}
+  .card::before{content:"";position:absolute;inset:0;border-radius:16px;padding:1px;opacity:0;transition:opacity .25s;
+       background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+       -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+  .card:hover{transform:translateY(-5px);box-shadow:var(--card-hover);border-color:var(--card-hover-bd);}
+  .card:hover::before{opacity:1;}
+  .card .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .card .icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+       background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 8px 22px var(--gs);}
+  .card .icon svg{width:24px;height:24px;}
+  .card .arrow{width:32px;height:32px;border-radius:50%;border:1px solid var(--card-b);display:flex;
+       align-items:center;justify-content:center;color:var(--muted);transition:all .22s ease;flex-shrink:0;}
+  .card:hover .arrow{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;transform:translateX(2px);}
+  .card h3{font-size:15.5px;font-weight:600;letter-spacing:.3px;margin-bottom:7px;line-height:1.4;}
+  .card .desc{font-size:12px;color:var(--muted);line-height:1.7;flex:1;}
+  .card .foot{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .card .chip{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--cb,var(--chip-def-bd));color:var(--cc,var(--chip-def-c));
+       background:var(--cbg,var(--chip-def-bg));letter-spacing:.5px;}
+  footer{text-align:center;color:var(--foot-c);font-size:12px;margin-top:56px;letter-spacing:1px;}
+  .theme-picker,.tp,.ver,.about-btn,.secret-btn,.chip,.sec-title h2,.sec-title span,.kicker,header p,footer{
+       transition:background .4s ease,color .4s ease,border-color .4s ease;}
+  header h1{transition:color .4s ease;}
+  footer .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);
+       box-shadow:0 0 10px var(--teal);margin-right:8px;vertical-align:1px;}
+  /* 密码弹窗 */
+  .modal-mask{position:fixed;inset:0;background:rgba(6,10,25,.7);backdrop-filter:blur(6px);
+       display:flex;align-items:center;justify-content:center;z-index:99;
+       opacity:0;visibility:hidden;transition:opacity .28s ease,visibility .28s;}
+  .modal-mask.show{opacity:1;visibility:visible;}
+  .modal{transform:translateY(14px) scale(.94);transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .modal-mask.show .modal{transform:translateY(0) scale(1);}
+  .modal{width:380px;max-width:92vw;background:linear-gradient(160deg,#131a36,#1a2348);
+       border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:30px 28px 24px;
+       box-shadow:0 24px 70px rgba(0,0,0,.6);text-align:center;}
+  .modal .lock{width:58px;height:58px;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;
+       background:var(--btn-ok);box-shadow:0 8px 26px rgba(139,124,246,.45);}
+  .modal .lock svg{width:28px;height:28px;}
+  .modal h3{font-size:17px;font-weight:600;letter-spacing:1px;margin-bottom:6px;color:#eef2fb;}
+  .modal p{font-size:12px;color:#9aa7c7;margin-bottom:20px;}
+  .modal input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+       background:rgba(255,255,255,.07);color:#eef2fb;font-size:15px;text-align:center;letter-spacing:6px;
+       outline:none;transition:border .2s;}
+  .modal input:focus{border-color:#38d3f0;}
+  .modal .btns{display:flex;gap:10px;margin-top:16px;}
+  .modal .btns button{flex:1;padding:10px 0;border:none;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .modal .ok{background:var(--btn-ok);color:#fff;}
+  .modal .ok:hover{filter:brightness(1.15);}
+  .modal .cancel{background:rgba(255,255,255,.08);color:#9aa7c7;}
+  .modal .cancel:hover{background:rgba(255,255,255,.14);color:#eef2fb;}
+  .modal .err{color:#f87171;font-size:12px;margin-top:10px;min-height:18px;}
+  /* 私密导航页 */
+  .secret-panel{position:fixed;inset:0;flex-direction:column;z-index:98;overflow-y:auto;
+       background:rgba(13,18,38,.45);backdrop-filter:blur(26px) saturate(1.5);
+       -webkit-backdrop-filter:blur(26px) saturate(1.5);
+       opacity:0;visibility:hidden;transition:opacity .32s ease,visibility .32s;}
+  .secret-panel.show{opacity:1;visibility:visible;display:flex;}
+  .secret-panel .sp-inner{opacity:0;transform:translateY(18px) scale(.98);
+       transition:opacity .35s ease .06s,transform .35s cubic-bezier(.34,1.56,.64,1) .06s;}
+  .secret-panel.show .sp-inner{opacity:1;transform:translateY(0) scale(1);}
+  .secret-panel .sp-head{display:flex;align-items:center;justify-content:space-between;
+       padding:26px 34px 0;max-width:1280px;width:100%;margin:0 auto;}
+  .secret-panel .sp-brand{display:flex;align-items:center;gap:12px;}
+  .secret-panel .sp-brand .mark{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+       background:var(--sp-mark);box-shadow:var(--mark-shadow);}
+  .secret-panel .sp-brand b{font-size:16px;letter-spacing:1px;color:#eef2fb;}
+  .secret-panel .sp-brand span{display:block;font-size:10.5px;color:rgba(238,242,251,.55);letter-spacing:2px;margin-top:2px;}
+  .secret-panel .sp-close{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.22);
+       display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(238,242,251,.7);transition:all .2s;background:rgba(255,255,255,.1);}
+  .secret-panel .sp-close:hover{color:#fff;border-color:rgba(248,113,113,.6);background:rgba(248,113,113,.2);}
+  .secret-panel .sp-body{max-width:1280px;width:100%;margin:0 auto;padding:34px 34px 70px;}
+  .secret-panel .sp-sec{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .secret-panel .sp-sec .bar{width:4px;height:16px;border-radius:2px;background:var(--sp-bar);}
+  .secret-panel .sp-sec h2{font-size:15px;font-weight:600;color:#eef2fb;}
+  .secret-panel .sp-sec span{font-size:11.5px;color:rgba(238,242,251,.55);margin-left:auto;}
+  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .secret-panel .sp-card{display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
+       padding:20px 18px 18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);
+       transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;}
+  .secret-panel .sp-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.45);border-color:rgba(255,255,255,.4);}
+  .secret-panel .sp-card .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+       background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 8px 20px var(--gs);margin-bottom:12px;}
+  .secret-panel .sp-card .ic svg{width:23px;height:23px;}
+  .secret-panel .sp-card h4{font-size:14.5px;font-weight:600;margin-bottom:6px;color:#eef2fb;}
+  .secret-panel .sp-card p{font-size:12px;color:rgba(238,242,251,.6);line-height:1.7;flex:1;}
+  .secret-panel .sp-card .tag{margin-top:12px;font-size:10.5px;padding:3px 10px;border-radius:20px;align-self:flex-start;
+       border:1px solid var(--cb);color:var(--cc);background:var(--cbg);}
+  .secret-panel .sp-empty{border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:40px;text-align:center;color:rgba(238,242,251,.55);font-size:13px;line-height:2;background:rgba(255,255,255,.04);}
+  @media (max-width:1700px){.grid{grid-template-columns:repeat(6,1fr);}}
+  @media (max-width:1300px){.grid{grid-template-columns:repeat(4,1fr);}}
+  @media (max-width:1000px){.grid{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:720px){
+    .secret-panel .sp-head{padding:20px 16px 0;}
+    .secret-panel .sp-body{padding:24px 16px 60px;}
+    .secret-panel .sp-grid{grid-template-columns:1fr 1fr;gap:12px;}
+    .nav-right .ver{display:none;}
+    .theme-picker .tp{padding:5px 9px;font-size:11px;}
+  }
+
+  /* ===== 工具搜索框 ===== */
+  .tool-search{max-width:480px;margin:0 auto 26px;position:relative;}
+  .tool-search input{width:100%;padding:11px 44px 11px 18px;border-radius:26px;border:1px solid var(--card-b);
+       background:var(--card);color:var(--txt);font-size:14px;outline:none;backdrop-filter:blur(12px);
+       -webkit-backdrop-filter:blur(12px);transition:border-color .25s,box-shadow .25s;}
+  .tool-search input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.2);}
+  .tool-search .ico{position:absolute;right:17px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+  .search-empty{display:none;text-align:center;color:var(--muted);font-size:13px;padding:26px 0;letter-spacing:1px;}
+  /* ===== 卡片入场动画 ===== */
+  @keyframes cardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .card{animation:cardIn .55s cubic-bezier(.22,.9,.3,1) both;}
+
+  /* ===== 收藏按钮 ===== */
+  .fav-btn{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;
+       display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;
+       color:rgba(154,167,199,.7);background:rgba(255,255,255,.08);border:1px solid var(--card-b);
+       transition:all .2s;}
+  .card:hover .fav-btn{opacity:1;}
+  .fav-btn:hover{transform:scale(1.12);}
+  .fav-btn.on{opacity:1;color:#fbbf24;background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.45);}
+  /* ===== 卡片元信息 ===== */
+  .card .meta{font-size:10.5px;color:var(--muted);opacity:.75;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
+  /* ===== 公告栏 ===== */
+  .notice{max-width:820px;margin:0 auto 22px;display:flex;align-items:center;gap:10px;
+       padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);
+       backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:12.5px;color:var(--txt);}
+  .notice .n-ico{flex-shrink:0;color:var(--blue);display:flex;}
+  .notice .n-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .notice .n-more{flex-shrink:0;color:var(--blue);cursor:pointer;font-weight:600;font-size:12px;}
+  .notice .n-more:hover{text-decoration:underline;}
+  .notice .n-close{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
+       justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s;font-size:12px;}
+  .notice .n-close:hover{background:rgba(248,113,113,.15);color:#f87171;}
+  /* 日志弹窗列表 */
+  .log-list{max-height:340px;overflow-y:auto;text-align:left;margin-top:4px;}
+  .log-item{display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid var(--card-b);line-height:1.55;}
+  .log-item:last-child{border-bottom:none;}
+  .log-item .ld{flex-shrink:0;font-size:11.5px;color:var(--blue);font-weight:600;padding-top:1px;}
+  .log-item .lt{font-size:12.5px;color:var(--txt);}
+</style>
+</head>
+<body>
+<div class="bg-sun s1"></div>
+<div class="bg-sun s2"></div>
+<div class="bg-sun s3"></div>
+<div class="bg-const"><canvas id="spaceCanvas"></canvas></div>
+<canvas id="cursorFx"></canvas>
+<div class="bg-halo h1"></div>
+<div class="bg-halo h2"></div>
+<div class="bg-halo h3"></div>
+<div class="wrap">
+  <nav>
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="bt"><b>元枢工具箱</b><span>VISTA HUB</span></div>
+    </div>
+    <div class="nav-right">
+    <div class="theme-picker" id="themePicker" title="切换界面主题">
+      <button class="tp" data-t="space" onclick="setTheme('space')">深空科技</button>
+      <button class="tp on" data-t="business" onclick="setTheme('business')">商务深蓝</button>
+      <button class="tp" data-t="ink" onclick="setTheme('ink')">雅致水墨</button>
+      <button class="tp" data-t="neo" onclick="setTheme('neo')">新拟态</button>
+    </div>
+
+      <div class="secret-btn" id="secretBtn" onclick="openSecret()" title="我的私密空间">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path class="lock-arc" d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="sb-txt">我的私密</span>
+      </div>
+      <div class="about-btn" id="aboutBtn" onclick="openAbout()" title="关于本网站">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor"/></svg>
+        关于
+      </div>
+    </div>
+  </nav>
+  <header>
+    <div class="kicker">VISTA HUB · 工程数字工具集</div>
+    <h1>元枢工具箱<small>一站式工程在线工具</small></h1>
+    <p>浏览器即开即用 · 无需安装 · 数据本地处理</p>
+  </header>
+  
+  <!-- 公告栏 -->
+  <div class="notice" id="noticeBar">
+    <span class="n-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M4 12a8 8 0 0 1 16 0v5h-2v-3h2M4 14v3h2v-3M4 12h2M18 12h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    <span class="n-txt" id="noticeTxt">元枢工具箱更新：新增卡片入场动画 · 3D倾斜光晕 · 工具搜索 · 拖拽排序 · 收藏置顶</span>
+    <span class="n-more" onclick="openLog()">更新日志</span>
+    <span class="n-close" onclick="closeNotice()" title="关闭">✕</span>
+  </div>
+<div class="tool-search">
+    <input id="toolSearch" type="text" placeholder="搜索工具（名称 / 功能关键词）…" oninput="filterTools(this.value)">
+    <span class="ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+  </div>
+  <div class="search-empty" id="searchEmpty">未找到匹配的工具</div>
+
+  <div class="sec-title">
+    <div class="bar"></div>
+    <h2>全部工具<span class="sec-count">共 7 款</span></h2>
+  </div>
+  <div class="grid">
+    <a class="card" href="sgjht.html" style="--g1:#3a8ee6;--g2:#5f5ef0;--gs:rgba(74,124,235,.5);--a1:#4f8ef7;--a2:#8b7cf6;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 4v16M3 8h18M3 13h18M3 18h18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><rect x="6" y="9.2" width="5" height="3" rx="1" fill="#fff" opacity=".95"/><rect x="13" y="9.2" width="7" height="3" rx="1" fill="#fff" opacity=".65"/><rect x="6" y="14.2" width="8" height="3" rx="1" fill="#fff" opacity=".8"/><rect x="16" y="14.2" width="4" height="3" rx="1" fill="#fff" opacity=".55"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>施工计划图软件</h3>
+      <div class="desc">施工横道图（甘特图）＋双代号时标网络图，自动计算 CPM 关键线路，支持 Excel / Word / SVG 导入导出。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(79,142,247,.4);--cc:#8fb6ff;--cbg:rgba(79,142,247,.12)">v1.5.21</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">施工进度</span>
+      </div>
+    </a>
+    <a class="card" href="murus.html" style="--g1:#18b598;--g2:#38d3f0;--gs:rgba(40,200,175,.5);--a1:#2fd4a8;--a2:#38d3f0;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V5l7 5V5l9 7-7 5v-5l-8-6M4 20h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>剖筑挡墙断面成图系统</h3>
+      <div class="desc">挡土墙断面参数化快速成图，内置挡墙参数标准表，助力边坡与支挡工程设计出图。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(47,212,168,.4);--cc:#6fe6c8;--cbg:rgba(47,212,168,.12)">Murus</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">支挡结构</span>
+      </div>
+    </a>
+    <a class="card" href="cqcost428.html" style="--g1:#f59e0b;--g2:#f97316;--gs:rgba(245,158,11,.5);--a1:#f59e0b;--a2:#f97316;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>重庆造价咨询收费计算器（428号文）</h3>
+      <div class="desc">按渝价〔2013〕428号 累进分档费率测算造价咨询收费，支持清单/定额计价、公路水电70%计收、审减效益费、3000元保底。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(245,158,11,.4);--cc:#fbbf24;--cbg:rgba(245,158,11,.12)">v2.2.13</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">造价收费</span>
+      </div>
+    </a>
+    <a class="card" href="cqcost19.html" style="--g1:#e879f9;--g2:#a855f7;--gs:rgba(232,121,249,.5);--a1:#e879f9;--a2:#a855f7;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 17l5-6 4 4 6-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 21h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>重庆造价咨询收费计算器（19号文）</h3>
+      <div class="desc">按渝建价发〔2023〕19号 附件1参考费用标准累进分档测算，差异化监管项目绿/黄/橙/红分色自动判定，合同收费反算下浮。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(232,121,249,.4);--cc:#f0abfc;--cbg:rgba(232,121,249,.12)">v1.0.3</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">差异化监管</span>
+      </div>
+    </a>
+    <a class="card" href="cq24q.html" style="--g1:#10b981;--g2:#059669;--gs:rgba(16,185,129,.5);--a1:#10b981;--a2:#059669;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 10h16M4 15h10M4 20h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M18 15l3 3-3 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>重庆24清单计算规则查询系统</h3>
+      <div class="desc">按 GB/T 50500-2024 及 GB/T 50854～50862-2024 九本专业工程量计算标准，查询清单项目编码、特征、计算规则与工作内容，488 条计价条款全文检索。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(16,185,129,.4);--cc:#34d399;--cbg:rgba(16,185,129,.12)">v2.0.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">清单规则</span>
+      </div>
+    </a>
+    <a class="card" href="stampgen.html" style="--g1:#e11d48;--g2:#be123c;--gs:rgba(225,29,72,.5);--a1:#e11d48;--a2:#be123c;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="1.8"/><path d="M12 7.5l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.5-2.5 1.5.6-2.8-2.1-1.9 2.8-.3z" fill="#fff"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>竣工章生成器</h3>
+      <div class="desc">建设工程 / 水利工程竣工章在线生成，支持建设单位、施工单位、监理单位填写，字体字号字距精细调节，导出透明底 PNG。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(225,29,72,.4);--cc:#fb7185;--cbg:rgba(225,29,72,.12)">v1.1.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">竣工图章</span>
+      </div>
+    </a>
+    <a class="card" href="evalwrite.html" style="--g1:#6366f1;--g2:#8b5cf6;--gs:rgba(99,102,241,.5);--a1:#6366f1;--a2:#8b5cf6;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6v4h4v14H5V7h4z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 3v4H5l4-4z" fill="#fff" opacity=".6"/><path d="M9 13l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>工程智审助手 EvalWrite</h3>
+      <div class="desc">导入广联达审核对比表（xlsx），智能解析送审/审定清单，审减明细树形展示，规则识别 + AI 兜底，一键导出审计文本与明细。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v2.14.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">工程智审</span>
+      </div>
+    </a>
+  </div>
+  <footer><span class="dot"></span>元枢工具箱 Vista Hub · 浏览器即开即用 · 数据全程本地处理</footer>
+</div>
+<!-- 密码弹窗 -->
+<div class="modal-mask" id="pwdMask">
+  <div class="modal">
+    <div class="lock">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <h3>我的私密</h3>
+    <p>请输入访问密码</p>
+    <input type="password" id="pwdInput" placeholder="••••••" maxlength="12" autocomplete="off" onkeydown="if(event.key==='Enter')checkPwd()">
+    <div class="err" id="pwdErr"></div>
+    <div class="btns">
+      <button class="cancel" onclick="closePwd()">取消</button>
+      <button class="ok" onclick="checkPwd()">进入</button>
+    </div>
+  </div>
+</div>
+<!-- 私密导航页 -->
+<div class="secret-panel" id="secretPanel">
+  <div class="sp-inner">
+  <div class="sp-head">
+    <div class="sp-brand">
+      <div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#0a0f22" stroke-width="2.2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#0a0f22" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <div><b>我的私密</b><span>PRIVATE SPACE</span></div>
+    </div>
+    <div class="sp-close" onclick="closeSecret()" title="退出">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="sp-body">
+    <div class="sp-sec">
+      <div class="bar"></div>
+      <h2>私密工具</h2>
+      <span id="spCount"></span>
+    </div>
+    <div class="sp-grid" id="spGrid"></div>
+    <div class="sp-sec" style="margin-top:34px;">
+      <div class="bar"></div>
+      <h2>使用说明</h2>
+    </div>
+    <div class="sp-empty">此空间为私有工具导航，仅本人可见。<br>如需添加私密工具，请联系开发者维护本页面。</div>
+  </div>
+  </div>
+</div>
+
+<!-- 首次验证弹窗 -->
+<div class="modal-mask" id="verifyMask">
+  <div class="modal">
+    <div class="lock"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <h3>首次使用验证</h3>
+    <p>我的真实姓名</p>
+    <input id="verifyInput" placeholder="请输入姓名" autocomplete="off" maxlength="10">
+    <div class="err" id="verifyErr"></div>
+    <div class="btns">
+      <button class="ok" onclick="doVerify()">确认</button>
+      <button class="cancel" onclick="cancelVerify()">取消</button>
+    </div>
+  </div>
+</div>
+<!-- 关于弹窗 -->
+<div class="modal-mask" id="aboutMask">
+  <div class="modal">
+    <div class="lock"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.8"/><path d="M12 11v5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff"/></svg></div>
+    <h3>关于</h3>
+    <p style="line-height:2.1;">所有者：Mr · Wu<br>QQ：641296512</p>
+    <div class="btns">
+      <button class="ok" onclick="closeAbout()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 更新日志弹窗 -->
+<div class="modal-mask" id="logMask">
+  <div class="modal">
+    <div class="lock"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#fff" stroke-width="1.8"/><path d="M8 3v4M16 3v4M3 10h18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <h3>更新日志</h3>
+    <p>元枢工具箱 · 持续更新</p>
+    <div class="log-list" id="logList"></div>
+    <div class="btns">
+      <button class="ok" onclick="closeLog()">关闭</button>
+    </div>
+  </div>
+</div>
+<script>
+
+// ===== 私密按钮点击涟漪 =====
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('secretBtn');
+  if (btn) btn.addEventListener('click', function(e){
+    var r = btn.getBoundingClientRect();
+    var px = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+    var py = ((e.clientY - r.top) / r.height * 100).toFixed(1);
+    btn.style.setProperty('--px', px + '%');
+    btn.style.setProperty('--py', py + '%');
+    // E 彩色水波 + G 点击脉冲
+    btn.classList.remove('ripple'); void btn.offsetWidth; btn.classList.add('ripple');
+    btn.classList.remove('pulse'); void btn.offsetWidth; btn.classList.add('pulse');
+  });
+});
+
+// ===== 我的私密 =====
+var SECRET_PWD = '199024';
+var SECRET_KEY = 'vista_secret_unlocked';
+// 私密工具（可在此扩展）
+var SECRET_TOOLS = [
+  {
+    name: '渝选房 v1.4.1',
+    desc: '重庆主城智能选房：多维筛选（区域/总价/面积/地铁线）、十维深度分析、AI 多模型推荐、噪声分析、百度地图定位。',
+    href: 'yxf141.html',
+    g1: '#0ea5e9', g2: '#6366f1', gs: 'rgba(14,165,233,.4)',
+    tag: 'v1.4.1',
+    tagColor: 'rgba(56,189,248,.4)', tagText: '#7dd3fc', tagBg: 'rgba(56,189,248,.1)'
+  },
+  {
+    name: '重庆8000楼盘 v1.7',
+    desc: '重庆 8000+ 楼盘优劣势速查表：区域房价、楼盘对比、优势劣势一览，快速筛选目标楼盘。',
+    href: 'cq8000.html',
+    g1: '#f59e0b', g2: '#ef4444', gs: 'rgba(245,158,11,.4)',
+    tag: 'v1.7',
+    tagColor: 'rgba(251,191,36,.4)', tagText: '#fcd34d', tagBg: 'rgba(251,191,36,.1)'
+  }
+];
+function openSecret(){
+  if (sessionStorage.getItem(SECRET_KEY) === '1'){
+    showSecretPanel();
+  } else {
+    document.getElementById('pwdMask').classList.add('show');
+    setTimeout(function(){ document.getElementById('pwdInput').focus(); }, 60);
+  }
+}
+function closePwd(){
+  document.getElementById('pwdMask').classList.remove('show');
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('pwdErr').textContent = '';
+}
+function checkPwd(){
+  var v = document.getElementById('pwdInput').value;
+  if (v === SECRET_PWD){
+    sessionStorage.setItem(SECRET_KEY, '1');
+    closePwd();
+    showSecretPanel();
+  } else {
+    document.getElementById('pwdErr').textContent = '密码错误，请重试';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+}
+function showSecretPanel(){
+  document.getElementById('secretBtn').classList.add('unlocked');
+  renderSecretTools();
+  document.getElementById('secretPanel').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeSecret(){
+  document.getElementById('secretPanel').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function renderSecretTools(){
+  var grid = document.getElementById('spGrid');
+  document.getElementById('spCount').textContent = '共 ' + SECRET_TOOLS.length + ' 项';
+  grid.innerHTML = '';
+  SECRET_TOOLS.forEach(function(t){
+    var a = document.createElement('a');
+    a.className = 'sp-card';
+    a.href = t.href;
+    a.style.setProperty('--g1', t.g1);
+    a.style.setProperty('--g2', t.g2);
+    a.style.setProperty('--gs', t.gs);
+    a.style.setProperty('--cb', 'rgba(255,255,255,.14)');
+    a.style.setProperty('--cc', '#9aa7c7');
+    a.style.setProperty('--cbg', 'rgba(255,255,255,.05)');
+    a.innerHTML = '<div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></div>'
+      + '<h4>' + t.name + '</h4><p>' + t.desc + '</p>'
+      + '<span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>';
+    grid.appendChild(a);
+  });
+}
+document.getElementById('pwdMask').addEventListener('click', function(e){
+  if (e.target === this) closePwd();
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){ closePwd(); closeSecret(); }
+});
+
+// ===== 主题切换 =====
+var THEMES = ['space','business','ink','neo'];
+var THEME_VER = 'v3';  // 默认主题版本，变更默认主题时递增以作废旧记忆
+function setTheme(t, save){
+  document.body.setAttribute('data-theme', t);
+  document.querySelectorAll('.theme-picker .tp').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-t') === t);
+  });
+  if (save !== false){
+    try {
+      localStorage.setItem('vista_theme', t);
+      localStorage.setItem('vista_theme_ver', THEME_VER);
+    } catch(e){}
+  }
+  // 星座连线动画：仅深空科技主题运行
+  if (t === 'space') startConstellation();
+  else stopConstellation();
+}
+
+// ===== 星座连线（Canvas 粒子） =====
+var _constRunning = false;
+var _constFrame = null;
+function startConstellation(){
+  var cv = document.getElementById('spaceCanvas');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var W = cv.width = window.innerWidth;
+  var H = cv.height = window.innerHeight;
+  var pts = [];
+  var COUNT = 60;
+  for (var i = 0; i < COUNT; i++){
+    pts.push({x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3});
+  }
+  _constRunning = true;
+  function frame(){
+    if (!_constRunning) return;
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < COUNT; i++){
+      var p = pts[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(125,211,252,.8)';
+      ctx.fill();
+      for (var j = i + 1; j < COUNT; j++){
+        var q = pts[j];
+        var dx = p.x - q.x, dy = p.y - q.y;
+        var d2 = dx * dx + dy * dy;
+        if (d2 < 130 * 130){
+          var a = (1 - Math.sqrt(d2) / 130) * .4;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = 'rgba(139,124,246,' + a + ')';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    }
+    _constFrame = requestAnimationFrame(frame);
+  }
+  frame();
+  window.addEventListener('resize', function(){
+    if (_constRunning){
+      cv.width = window.innerWidth;
+      cv.height = window.innerHeight;
+      W = cv.width; H = cv.height;
+    }
+  });
+}
+function stopConstellation(){
+  _constRunning = false;
+  if (_constFrame) cancelAnimationFrame(_constFrame);
+  _constFrame = null;
+  var cv = document.getElementById('spaceCanvas');
+  if (cv && cv.getContext){
+    var ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+  }
+}
+(function(){
+  var saved = null;
+  try {
+    var ver = localStorage.getItem('vista_theme_ver');
+    if (ver === THEME_VER) saved = localStorage.getItem('vista_theme');
+  } catch(e){}
+  if (saved && THEMES.indexOf(saved) >= 0) setTheme(saved, false);
+  else setTheme('business', false);
+})();
+
+// ===== 波形尾迹动态鼠标（全局，视口坐标直映·方案A） =====
+(function(){
+  var cv = document.getElementById('cursorFx');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var W = 0, H = 0, DPR = 1, pts = [];
+  var mx = 0, my = 0, hasMoved = false, inView = true, staticFrames = 0;
+  var MAXP = 24;
+  function rs(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * DPR; cv.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    pts = [];
+  }
+  function onMove(x, y){ mx = x; my = y; hasMoved = true; inView = true; }
+  document.addEventListener('mouseenter', function(e){ onMove(e.clientX, e.clientY); });
+  document.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
+  document.addEventListener('mouseleave', function(){ inView = false; pts = []; });
+  document.addEventListener('touchstart', function(e){
+    if (e.touches.length) onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  document.addEventListener('touchmove', function(e){
+    if (e.touches.length) onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  window.addEventListener('resize', rs);
+  rs();
+  function loop(now){
+    ctx.clearRect(0, 0, W, H);
+    // 鼠标未移动过：不绘制任何内容（避免光晕初始错位在页面中心）
+    if (!inView || !hasMoved){ requestAnimationFrame(loop); return; }
+    // 路径记录：波形头部精确咬合指针
+    var tailP = pts.length ? pts[pts.length - 1] : null;
+    if (!tailP || Math.hypot(tailP.x - mx, tailP.y - my) >= 0.5){
+      pts.push({x:mx, y:my, t:now});
+      if (pts.length > MAXP) pts.shift();
+    }
+    // 智能消散：静止每2帧去1点 ≈0.8s 消散完
+    if (pts.length){
+      var tail = pts[pts.length - 1];
+      var moving = Math.hypot(tail.x - mx, tail.y - my) >= 0.5;
+      if (moving){ staticFrames = 0; }
+      else {
+        staticFrames++;
+        if (staticFrames >= 2){ pts.shift(); staticFrames = 0; }
+      }
+    }
+    // 三波带：全部从指针尖端发出、尾部渐隐
+    var n = pts.length;
+    if (n){
+      for (var b = 0; b < 3; b++){
+        ctx.beginPath();
+        for (var i = 0; i < n; i++){
+          var p = pts[i];
+          var k = (n > 1) ? i / (n - 1) : 1;
+          var fade = Math.pow(k, 0.85);
+          var amp = (14 + b * 8) * (1 - k);
+          var wave = Math.sin(p.t * 0.02 + b * 2.1) * amp;
+          var px = p.x, py = p.y + wave + (b - 1) * 10 * (1 - k);
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = 'rgba(56,189,248,' + ((0.8 - b * 0.22) * fade).toFixed(3) + ')';
+        ctx.lineWidth = 3.2 - b * 0.8;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+    }
+    // 中心光点 = 指针本体（柔和发光，中心即鼠标位置）
+    var g = ctx.createRadialGradient(mx, my, 0, mx, my, 16);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(.35, 'rgba(125,211,252,.8)');
+    g.addColorStop(1, 'rgba(56,189,248,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(mx, my, 16, 0, Math.PI * 2); ctx.fill();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// ===== 关于弹窗 =====
+function openAbout(){ document.getElementById('aboutMask').classList.add('show'); }
+function closeAbout(){ document.getElementById('aboutMask').classList.remove('show'); }
+
+// ===== 首次点击卡片验证（我的真实姓名：吴小虎） =====
+var UNLOCK_KEY = 'vista_card_unlock';
+var pendingCardHref = null;
+function cardUnlocked(){
+  try { return sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch(e){ return false; }
+}
+function unlockCards(){ try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch(e){} }
+function openVerify(){
+  document.getElementById('verifyMask').classList.add('show');
+  document.getElementById('verifyInput').value = '';
+  document.getElementById('verifyErr').textContent = '';
+  setTimeout(function(){ document.getElementById('verifyInput').focus(); }, 120);
+}
+function closeVerify(){ document.getElementById('verifyMask').classList.remove('show'); }
+function cancelVerify(){ pendingCardHref = null; closeVerify(); }
+function doVerify(){
+  var v = document.getElementById('verifyInput').value.trim();
+  if (v === '吴小虎'){
+    unlockCards();
+    closeVerify();
+    if (pendingCardHref){
+      var h = pendingCardHref; pendingCardHref = null;
+      window.open(h, '_blank', 'noopener');
+    }
+  } else {
+    document.getElementById('verifyErr').textContent = '姓名不正确，请重试';
+  }
+}
+// 捕获阶段拦截卡片点击：未解锁则先验证
+document.addEventListener('click', function(e){
+  var a = e.target.closest ? e.target.closest('a.card') : null;
+  if (!a) return;
+  if (cardUnlocked()) return;
+  e.preventDefault();
+  e.stopPropagation();
+  pendingCardHref = a.getAttribute('href');
+  openVerify();
+}, true);
+// 验证框 Enter 确认（脚本在 body 末尾执行，DOM 已就绪）
+(function(){
+  var vi = document.getElementById('verifyInput');
+  if (vi) vi.addEventListener('keydown', function(e){ if (e.key === 'Enter') doVerify(); });
+})();
+
+// ===== ① 卡片入场动画（交错浮现） =====
+(function(){
+  var cards = document.querySelectorAll('.card');
+  cards.forEach(function(card, i){
+    card.style.animationDelay = (i * 60) + 'ms';
+    card.addEventListener('animationend', function(){
+      card.style.animation = 'none';
+      card.classList.add('in');
+    }, {once:true});
+  });
+})();
+
+// ===== ② 卡片 3D 倾斜 + 光晕跟随 =====
+(function(){
+  var cards = document.querySelectorAll('.card');
+  cards.forEach(function(card){
+    card.addEventListener('mousemove', function(e){
+      if (card.classList.contains('dragging')) return;
+      var r = card.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width;
+      var py = (e.clientY - r.top) / r.height;
+      var rx = (0.5 - py) * 10;
+      var ry = (px - 0.5) * 12;
+      card.style.setProperty('--mx', (px * 100) + '%');
+      card.style.setProperty('--my', (py * 100) + '%');
+      card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px)';
+    });
+    card.addEventListener('mouseleave', function(){
+      card.style.transform = '';
+    });
+  });
+})();
+
+// ===== ⑤ 工具搜索过滤 =====
+function filterTools(q){
+  q = (q || '').trim().toLowerCase();
+  var cards = document.querySelectorAll('.card');
+  var shown = 0;
+  cards.forEach(function(card){
+    var txt = card.textContent.toLowerCase();
+    var hit = !q || txt.indexOf(q) >= 0;
+    card.style.display = hit ? '' : 'none';
+    if (hit) shown++;
+  });
+  var empty = document.getElementById('searchEmpty');
+  if (empty) empty.style.display = shown ? 'none' : 'block';
+}
+
+// ===== ⑥ 拖动卡片调整位置（localStorage 持久化） =====
+(function(){
+  var grid = document.querySelector('.grid');
+  if (!grid) return;
+  var orderKey = 'vista_card_order';
+  var dragEl = null;
+  function saveOrder(){
+    try {
+      var arr = Array.prototype.slice.call(grid.querySelectorAll('.card')).map(function(a){ return a.getAttribute('href'); });
+      localStorage.setItem(orderKey, JSON.stringify(arr));
+    } catch(e){}
+  }
+  function loadOrder(){
+    try {
+      var arr = JSON.parse(localStorage.getItem(orderKey));
+      if (arr && arr.length){
+        arr.forEach(function(h){
+          var a = grid.querySelector('.card[href="' + h + '"]');
+          if (a) grid.appendChild(a);
+        });
+      }
+    } catch(e){}
+  }
+  grid.querySelectorAll('.card').forEach(function(a){ a.draggable = true; });
+  document.addEventListener('dragstart', function(e){
+    var card = e.target.closest ? e.target.closest('.card') : null;
+    if (card){
+      dragEl = card; card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', card.getAttribute('href') || ''); } catch(err){}
+    }
+  });
+  document.addEventListener('dragover', function(e){
+    if (!dragEl) return;
+    e.preventDefault();
+    var card = e.target.closest ? e.target.closest('.card') : null;
+    if (card && card !== dragEl){
+      var r = card.getBoundingClientRect();
+      var after = (e.clientX - r.left) > r.width / 2;
+      if (after) card.parentNode.insertBefore(dragEl, card.nextSibling);
+      else card.parentNode.insertBefore(dragEl, card);
+    }
+  });
+  document.addEventListener('drop', function(e){
+    if (!dragEl) return;
+    e.preventDefault();
+    dragEl.classList.remove('dragging');
+    saveOrder();
+    dragEl = null;
+  });
+  document.addEventListener('dragend', function(){
+    if (dragEl){ dragEl.classList.remove('dragging'); dragEl = null; }
+  });
+  loadOrder();
+})();
+
+// ===== ⑦ 公告栏 + 更新日志 =====
+var NEWS_LOG = [
+  {d:'2026-08-15', t:'新增：卡片入场动画、3D倾斜光晕、工具搜索、拖动排序、收藏置顶、元信息'},
+  {d:'2026-08-15', t:'新增：关于按钮（所有者 Mr · Wu）、首次使用姓名验证、SVG 图标'},
+  {d:'2026-08-15', t:'新增：四主题切换、动态背景、波形尾迹鼠标、我的私密导航页'},
+  {d:'2026-08-10', t:'元枢工具箱正式上线：首批 7 款工程工具'}
+];
+function renderLog(){
+  var el = document.getElementById('logList');
+  if (!el) return;
+  el.innerHTML = NEWS_LOG.map(function(n){
+    return '<div class="log-item"><span class="ld">' + n.d + '</span><span class="lt">' + n.t + '</span></div>';
+  }).join('');
+}
+function openLog(){ renderLog(); document.getElementById('logMask').classList.add('show'); }
+function closeLog(){ document.getElementById('logMask').classList.remove('show'); }
+function closeNotice(){
+  document.getElementById('noticeBar').style.display = 'none';
+  try { sessionStorage.setItem('vista_notice_closed', '1'); } catch(e){}
+}
+(function(){
+  try {
+    if (sessionStorage.getItem('vista_notice_closed') === '1'){
+      var nb = document.getElementById('noticeBar');
+      if (nb) nb.style.display = 'none';
+    }
+  } catch(e){}
+})();
+
+// ===== ⑧ 常用收藏（星标置顶 + localStorage） =====
+var favKey = 'vista_favs';
+function getFavs(){ try { return JSON.parse(localStorage.getItem(favKey)) || []; } catch(e){ return []; } }
+function saveFavs(arr){ try { localStorage.setItem(favKey, JSON.stringify(arr)); } catch(e){} }
+function toggleFav(ev, btn){
+  ev.preventDefault(); ev.stopPropagation();
+  var href = btn.getAttribute('data-href');
+  var favs = getFavs();
+  var i = favs.indexOf(href);
+  if (i >= 0) favs.splice(i, 1); else favs.push(href);
+  saveFavs(favs);
+  renderFavButtons();
+  applyFavTop();
+}
+function renderFavButtons(){
+  var favs = getFavs();
+  document.querySelectorAll('.card').forEach(function(card){
+    var btn = card.querySelector('.fav-btn');
+    if (btn){
+      var on = favs.indexOf(card.getAttribute('href')) >= 0;
+      btn.classList.toggle('on', on);
+      btn.innerHTML = on
+        ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6L12 17l-5.4 2.6 1-6L3.3 9.4l6-.9L12 3z"/></svg>'
+        : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6L12 17l-5.4 2.6 1-6L3.3 9.4l6-.9L12 3z"/></svg>';
+    }
+  });
+}
+function applyFavTop(){
+  var grid = document.querySelector('.grid');
+  if (!grid) return;
+  var favs = getFavs();
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
+  cards.sort(function(a, b){
+    var fa = favs.indexOf(a.getAttribute('href')) >= 0;
+    var fb = favs.indexOf(b.getAttribute('href')) >= 0;
+    if (fa !== fb) return fa ? -1 : 1;
+    return 0;
+  });
+  cards.forEach(function(card){ grid.appendChild(card); });
+}
+
+// ===== ⑨ 卡片元信息 + 收藏按钮注入 =====
+var CARD_META = {
+  'sgjht.html': '08-15', 'murus.html': '08-09', 'cqcost428.html': '08-15',
+  'cqcost19.html': '08-15', 'cq24q.html': '08-15', 'stampgen.html': '08-15',
+  'evalwrite.html': '08-15'
+};
+(function(){
+  document.querySelectorAll('.card').forEach(function(card){
+    var href = card.getAttribute('href') || '';
+    // 新标签页打开
+    card.setAttribute('target', '_blank');
+    card.setAttribute('rel', 'noopener');
+    // 收藏按钮
+    if (!card.querySelector('.fav-btn')){
+      var btn = document.createElement('span');
+      btn.className = 'fav-btn';
+      btn.setAttribute('data-href', href);
+      btn.setAttribute('title', '收藏置顶');
+      btn.onclick = function(ev){ toggleFav(ev, btn); };
+      card.appendChild(btn);
+    }
+    // 元信息
+    if (!card.querySelector('.meta') && CARD_META[href]){
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg> 更新于 ' + CARD_META[href];
+      card.appendChild(meta);
+    }
+  });
+  renderFavButtons();
+})();
+</script>
+</body>
+</html>
