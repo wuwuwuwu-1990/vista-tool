@@ -364,8 +364,6 @@
        backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:12.5px;color:var(--txt);}
   .notice .n-ico{flex-shrink:0;color:var(--blue);display:flex;}
   .notice .n-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .notice .n-more{flex-shrink:0;color:var(--blue);cursor:pointer;font-weight:600;font-size:12px;}
-  .notice .n-more:hover{text-decoration:underline;}
   .notice .n-close{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
        justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s;font-size:12px;}
   .notice .n-close:hover{background:rgba(248,113,113,.15);color:#f87171;}
@@ -426,7 +424,6 @@
   <div class="notice" id="noticeBar">
     <span class="n-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M4 12a8 8 0 0 1 16 0v5h-2v-3h2M4 14v3h2v-3M4 12h2M18 12h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
     <span class="n-txt" id="noticeTxt">元枢工具箱更新：新增卡片入场动画 · 3D倾斜光晕 · 工具搜索 · 拖拽排序 · 收藏置顶</span>
-    <span class="n-more" onclick="openLog()">更新日志</span>
     <span class="n-close" onclick="closeNotice()" title="关闭">✕</span>
   </div>
 <div class="tool-search">
@@ -1071,7 +1068,6 @@ function renderLog(){
     return '<div class="log-item"><span class="ld">' + n.d + '</span><span class="lt">' + n.t + '</span></div>';
   }).join('');
 }
-function openLog(){ openAbout(); }  // 公告栏「更新日志」→ 打开关于弹窗
 function closeNotice(){
   document.getElementById('noticeBar').style.display = 'none';
   try { sessionStorage.setItem('vista_notice_closed', '1'); } catch(e){}
