@@ -696,6 +696,8 @@ function renderSecretTools(){
     var a = document.createElement('a');
     a.className = 'sp-card';
     a.href = t.href;
+    a.target = '_blank';
+    a.rel = 'noopener';
     a.style.setProperty('--g1', t.g1);
     a.style.setProperty('--g2', t.g2);
     a.style.setProperty('--gs', t.gs);
