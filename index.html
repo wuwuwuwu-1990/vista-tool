@@ -654,7 +654,7 @@ function setTheme(t, save){
 
 function openAbout(){
   renderLog();
-  try { localStorage.setItem(LOG_SEEN_KEY, getLastLogDate()); } catch(e){}
+  try { localStorage.setItem(LOG_SEEN_KEY, getLastLogKey()); } catch(e){}
   updateLogBadge();
   document.getElementById('aboutMask').classList.add('show');
 }
@@ -818,14 +818,14 @@ var NEWS_LOG = [
 ];
 // ===== 更新日志滚动条（导航栏下方，垂直自动滚动） =====
 // ===== 更新日志（在关于弹窗内）+ 绿色角标 =====
-var LOG_SEEN_KEY = 'vista_log_seen';
-function getLastLogDate(){ return NEWS_LOG.length ? NEWS_LOG[0].d : ''; }
+var LOG_SEEN_KEY = 'vista_log_seen_v2';  // v2：已读标记从"日期"升级为"日期+内容"，同一天新增日志也能触发角标
+function getLastLogKey(){ return NEWS_LOG.length ? (NEWS_LOG[0].d + '|' + NEWS_LOG[0].t) : ''; }
 function updateLogBadge(){
   var badge = document.getElementById('logBadge');
   if (!badge) return;
   var seen = '';
   try { seen = localStorage.getItem(LOG_SEEN_KEY) || ''; } catch(e){}
-  var latest = getLastLogDate();
+  var latest = getLastLogKey();
   badge.style.display = (latest && latest !== seen) ? 'block' : 'none';
 }
 function renderLog(){
