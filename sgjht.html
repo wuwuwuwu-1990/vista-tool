@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>施工计划图软件 · 横道图 / 双代号时标网络图</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f5f7fa; --panel:#ffffff; --line:#e3e8ef; --text:#1f2d3d;
+    --muted:#7a869a; --primary:#2f6fed; --crit:#e23c39; --normal:#3a8ee6;
+    --grid:#eef1f6; --head:#33415c; --shadow:0 2px 10px rgba(31,45,61,.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"SimSun","宋体",serif;
+       background:var(--bg);color:var(--text);font-size:13px;}
+  header{background:linear-gradient(90deg,#2f6fed,#4f8ef7);color:#fff;
+         padding:8px 20px 10px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);flex-wrap:wrap;}
+  header .brand{display:flex;align-items:center;gap:8px;}
+  header .brand .logo{font-size:24px;line-height:1;}
+  header .brand h1{font-size:14px;margin:0;font-weight:600;letter-spacing:.5px;}
+  header .brand .tag{font-size:11px;opacity:.9;background:rgba(255,255,255,.18);
+              padding:1px 8px;border-radius:20px;display:inline-block;margin-top:2px;}
+  header .center{flex:1;text-align:center;min-width:280px;}
+  header .names-row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+  header .pfix{color:rgba(255,255,255,.75);font-size:14px;letter-spacing:1px;white-space:nowrap;}
+  header .pfix.sep{opacity:.5;}
+  header .nm-input{font-size:14px;letter-spacing:1px;text-align:center;
+                   background:transparent;border:none;border-bottom:1px dashed rgba(255,255,255,.55);
+                   color:#fff;outline:none;width:min(320px,30vw);padding:2px 4px;}
+  header .nm-input:focus{border-bottom-color:#fff;}
+  header .proj{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);
+               padding:6px 12px;border-radius:8px;font-size:12px;}
+  header .proj input{font-size:12px;padding:4px 8px;border:none;border-radius:5px;color:var(--text);}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:9px 20px;background:var(--panel);
+           border-bottom:1px solid var(--line);align-items:center;}
+  button,.btn{cursor:pointer;border:none;border-radius:6px;padding:6px 12px;font-size:13px;
+              background:var(--primary);color:#fff;transition:.15s;}
+  button:hover{filter:brightness(1.08);}
+  button.ghost{background:#eef2fb;color:var(--primary);}
+  button.danger{background:#fdecec;color:var(--crit);}
+  button.warn{background:#fff4e0;color:#c2740a;}
+  .toolbar label.chk{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:4px;}
+  .toolbar select{font-size:12px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;color:var(--head);background:#fff;}
+  .toolbar .lbl{font-size:12px;color:var(--muted);}
+  .meta{margin-left:auto;font-size:12px;color:var(--muted);}
+  .meta b{color:var(--crit);}
+  .layout{display:flex;min-height:calc(100vh - 168px);}
+  .left{width:620px;flex:0 0 620px;background:var(--panel);border-right:1px solid var(--line);
+        padding:12px;overflow:auto;min-width:300px;}
+  .divider{width:6px;flex:0 0 6px;cursor:col-resize;background:var(--line);transition:background .15s;}
+  .divider:hover{background:#b8c6dd;}
+  .right{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .tabs{display:flex;gap:4px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);}
+  .tab{padding:10px 18px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;
+       font-weight:600;}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+  .tabs .fs-btn{margin-left:auto;align-self:center;padding:4px 10px;font-size:12px;}
+  .right:fullscreen{background:#fff;padding:10px;}
+  .right:fullscreen .view{overflow:auto;}
+  .right:fullscreen .tabs{flex:0 0 auto;}
+  .view{flex:1;overflow:auto;padding:14px;background:var(--bg);}
+  h3.sec{margin:0 0 10px;font-size:14px;color:var(--head);
+         display:flex;align-items:center;gap:8px;}
+  h3.sec small{font-weight:400;color:var(--muted);font-size:11px;}
+  .tablewrap{overflow-x:auto;}
+  table.grid{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.grid th,table.grid td{border:1px solid var(--line);padding:5px 6px;text-align:center;white-space:nowrap;}
+  table.grid th{background:#f0f3f9;color:var(--head);}
+  table.grid td input[type=text],table.grid td input[type=number]{
+    width:100%;border:none;background:transparent;text-align:center;
+    font-size:12.5px;color:var(--text);outline:none;padding:3px;}
+  table.grid td input:focus{background:#fff7e6;}
+  table.grid td input[type=color]{width:30px;height:24px;border:none;background:none;cursor:pointer;padding:0;}
+  table.grid tr.crit td{background:#fff5f5;}
+  table.grid td.computed{color:var(--primary);background:#f7faff;}
+  table.grid select.kvsel{width:100%;font-size:11px;padding:1px 2px;border:1px solid var(--line);border-radius:4px;color:var(--text);background:#fff;}
+  .mvbtn{cursor:pointer;border:1px solid var(--line);border-radius:4px;background:#fff;padding:0 6px;
+         font-size:12px;color:var(--muted);}
+  .mvbtn:hover{background:#eef2fb;color:var(--primary);}
+  .addrow{margin-top:10px;width:100%;}
+  .cpm-tip{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;}
+  svg{background:var(--panel);border:1px solid var(--line);border-radius:8px;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);
+          padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;line-height:1;}
+  .legend i{display:inline-block;width:22px;height:0;border-top:3px solid;}
+  .legend .bar{display:inline-block;width:22px;height:9px;border-radius:2px;}
+  .scrollwrap{overflow:auto;}
+  #tip{position:fixed;z-index:999;background:#fff;border:1px solid var(--line);border-radius:8px;
+       box-shadow:0 8px 24px rgba(31,45,61,.18);padding:8px 12px;font-size:12px;pointer-events:none;
+       display:none;max-width:340px;line-height:1.8;color:var(--text);}
+  #tip .tk{color:var(--muted);}
+  #tip .crit{color:var(--crit);}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#33415c;color:#fff;
+         padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:99;}
+  .toast.show{opacity:1;}
+  #annotOverlay{position:fixed;inset:0;pointer-events:none;z-index:96;overflow:hidden;}
+  .st-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;}
+  .st-item{border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;background:#fff;transition:.12s;}
+  .st-item:hover{border-color:#b8c6dd;}
+  .st-item.sel{border-color:var(--primary);box-shadow:0 0 0 2px #eef2fb;background:#f7faff;}
+  .st-item .prev{margin:0 auto 4px;display:block;}
+  .st-item .prev.bar{width:38px;height:12px;border-radius:2px;}
+  .st-item .prev.line{width:40px;height:2px;}
+  .st-item .nm{font-size:10px;color:var(--muted);}
+  #aboutOverlay{position:fixed;inset:0;background:rgba(31,45,61,.45);z-index:97;display:none;align-items:center;justify-content:center;}
+  #aboutPanel{background:#fff;border-radius:12px;width:min(680px,92vw);max-height:84vh;display:flex;flex-direction:column;
+              box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;}
+  #aboutPanel .ab-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#33415c;
+                       color:#fff;font-weight:700;font-size:15px;}
+  #aboutPanel .ab-close{cursor:pointer;font-size:15px;color:#fff;opacity:.8;}
+  #aboutPanel .ab-close:hover{opacity:1;}
+  #aboutPanel .ab-body{padding:14px 20px;overflow:auto;font-size:12.5px;line-height:1.8;color:var(--text);}
+  #aboutPanel .ab-ver{color:var(--primary);font-weight:700;margin-bottom:8px;}
+  #aboutPanel h4{margin:12px 0 4px;color:var(--head);font-size:13px;}
+  #aboutPanel ul,#aboutPanel ol{margin:4px 0 4px 18px;padding:0;}
+  #aboutPanel li{margin:2px 0;}
+  .panel{position:fixed;top:90px;right:24px;width:300px;background:#fff;border:1px solid var(--line);
+         border-radius:10px;box-shadow:0 10px 30px rgba(31,45,61,.2);padding:14px;z-index:98;display:none;}
+  .panel .p-head{font-size:14px;font-weight:700;color:var(--head);display:flex;justify-content:space-between;align-items:center;}
+  .panel .p-close{cursor:pointer;color:var(--muted);font-size:14px;padding:0 4px;}
+  .panel .p-close:hover{color:var(--crit);}
+  .panel .p-sub{font-size:11.5px;color:var(--muted);margin:8px 0 6px;}
+  .panel .p-sw{display:flex;flex-wrap:wrap;gap:6px;}
+  .panel .p-sw .sw{width:26px;height:26px;border-radius:6px;cursor:pointer;border:2px solid transparent;}
+  .panel .p-sw .sw.sel{border-color:#1f2d3d;box-shadow:0 0 0 2px #fff inset;}
+  .panel .p-row{display:flex;align-items:center;gap:8px;margin:10px 0 6px;}
+  .panel .p-row input[type=color]{width:34px;height:26px;border:none;background:none;cursor:pointer;padding:0;}
+  .panel .p-cur{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);}
+  .panel .p-hex{font-size:12px;color:var(--muted);font-family:Consolas,monospace;}
+  .panel .p-chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin:8px 0 12px;}
+  .panel .p-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .panel .font-chip{cursor:pointer;border:1px solid var(--line);border-radius:6px;background:#fff;padding:6px 12px;
+                    font-size:13px;color:var(--head);}
+  .panel .font-chip.sel{background:#eef2fb;border-color:var(--primary);color:var(--primary);}
+  .panel .font-prev{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:6px;
+                    font-size:16px;text-align:center;color:var(--head);}
+  .panel .p-inrow{display:flex;gap:6px;margin-top:8px;align-items:center;}
+  .panel .p-inrow .p-val{min-width:44px;text-align:center;color:var(--muted);font-size:12px;}
+  .panel .p-inrow input{flex:1;font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;color:var(--text);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">📊</span>
+    <div>
+      <h1>施工计划图软件</h1>
+      <span class="tag">横道图 · 双代号时标网络图 · CPM</span>
+    </div>
+  </div>
+  <div class="center">
+    <div class="names-row">
+      <span class="pfix">工程名称：</span><input type="text" id="projName" class="nm-input" value="示例住宅楼工程" oninput="onProjChange()" placeholder="请输入工程名称">
+      <span class="pfix sep">｜</span>
+      <span class="pfix">图名：</span><input type="text" id="chartTitle" class="nm-input" value="施工计划横道图" onchange="onChartTitleChange()" placeholder="图表名称（可编辑）">
+    </div>
+  </div>
+  </div>
+  <div class="proj">
+    <label>开工日期：<input type="date" id="startDate" onchange="recompute()"></label>
+    <button id="annotBtn" onclick="toggleAnnotate()" title="用引线标注工具栏功能按钮与图表区的对应关系" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.45);padding:5px 12px">🔗 注解</button>
+    <button onclick="openAbout()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.45);padding:5px 12px">关于</button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button class="ghost" onclick="loadSample()">载入样例</button>
+  <button class="ghost" onclick="loadStress()">载入50行测试</button>
+  <button class="ghost" onclick="addTask()">+ 新增工序</button>
+  <button onclick="recompute()">重新计算 / 绘图</button>
+  <button class="danger" onclick="clearAll()">清空</button>
+  <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+  <button class="ghost" id="ghToggle" onclick="toggleGridHandle()">☩ 米字格</button>
+  <button class="ghost" onclick="setBarH(barH/1.2)">条高−</button>
+  <button class="ghost" onclick="setBarH(barH*1.2)">条高＋</button>
+  <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+  <button class="ghost" onclick="setInfoFS(infoFS/1.2)">信息字号−</button>
+  <button class="ghost" onclick="setInfoFS(infoFS*1.2)">信息字号＋</button>
+  <label class="chk"><input type="checkbox" id="wkDayChk" checked onchange="recompute()"> 显示星期</label>
+  <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+  <span class="lbl">图幅</span><select id="paperSel">
+    <option value="210,297">A4 竖向</option>
+    <option value="297,210" selected>A4 横向</option>
+    <option value="297,420">A3 竖向</option>
+    <option value="420,297">A3 横向</option>
+  </select>
+  <span class="lbl">清晰度</span><select id="dpiSel">
+    <option value="300" selected>300 DPI</option>
+    <option value="600">600 DPI</option>
+    <option value="900">900 DPI</option>
+  </select>
+  <span class="lbl">时间</span><select id="granSel" onchange="recompute()">
+    <option value="day">按天</option>
+    <option value="week" selected>按周</option>
+    <option value="month">按月</option>
+  </select>
+  <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+  <button class="ghost" onclick="downloadTemplate()">Excel 模板</button>
+  <button class="ghost" onclick="document.getElementById('fileInput').click()">导入 Excel</button>
+  <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
+  <button class="ghost" onclick="exportExcel()">导出 Excel[含PNG]</button>
+  <button class="ghost" onclick="exportWord()">导出 Word</button>
+  <button class="ghost" onclick="exportSVG()">导出 SVG</button>
+  <button class="warn" onclick="randomColors()">随机配色</button>
+  <button class="warn" onclick="openPanel('color')">统一配色</button>
+  <button class="warn" onclick="openPanel('font')">统一字体</button>
+  <button class="warn" onclick="openPanel('style')">条/线样式</button>
+  <span class="meta" id="metaInfo">工期：— ｜ 关键线路：—</span>
+</div>
+
+<div class="layout">
+  <!-- 左侧：任务编辑 + CPM 结果 -->
+  <div class="left" id="leftPanel">
+    <h3 class="sec">工序清单 <small>▲▼调整顺序（后一行紧前于前一行）</small></h3>
+    <div class="tablewrap">
+    <table class="grid" id="taskTable">
+      <thead>
+        <tr><th style="width:50px">顺序</th><th style="width:36px">序号</th><th>工序名称</th><th style="width:56px">工期</th>
+            <th style="width:36px">颜色</th><th style="width:86px">开始时间</th><th style="width:86px">结束时间</th><th style="width:34px" title="起点事件是否位于关键线路上">关键事件</th><th style="width:28px">删</th></tr>
+      </thead>
+      <tbody id="taskBody"></tbody>
+    </table>
+    </div>
+    <button class="btn ghost addrow" onclick="addTask()">+ 新增工序</button>
+
+    <h3 class="sec" style="margin-top:18px">CPM 计算结果</h3>
+    <div class="tablewrap">
+    <table class="grid" id="cpmTable">
+      <thead><tr><th>序号</th><th>工作</th><th>ES</th><th>EF</th><th>LS</th><th>LF</th>
+                  <th>TF</th><th>FF</th><th>关键</th></tr></thead>
+      <tbody id="cpmBody"></tbody>
+    </table>
+    </div>
+    <div class="cpm-tip">
+      说明：工序按<b>行顺序自动衔接</b>（后一行在前一行完成后开始）。ES/EF=最早开始/完成，
+      LS/LF=最迟开始/完成，TF=总时差、FF=自由时差，TF=0 为关键（红色）。<br>
+      横道图中<b>拖动工序条</b>：左右=调整开始日期（可到任意位置，含与上一工序重叠，下游自动同步）、
+      右缘=改工期、上下=调整顺序。
+    </div>
+  </div>
+  <div class="divider" id="divider"></div>
+
+  <!-- 右侧：双视图 -->
+  <div class="right">
+    <div class="tabs">
+      <div class="tab active" data-v="gantt" onclick="switchTab('gantt')">施工横道图</div>
+      <div class="tab" data-v="network" onclick="switchTab('network')">双代号时标网络图</div>
+      <button class="ghost fs-btn" id="fsBtn" onclick="toggleFullscreen()" title="全屏显示图表区（Esc 退出）">⛶ 全屏</button>
+    </div>
+    <div class="legend" id="legendGantt">
+      <span><i style="border-color:var(--crit)"></i>关键工序</span>
+      <span><span class="bar" style="background:linear-gradient(90deg,#3a8ee6,#8b5cf6,#ec4899,#f59e0b)"></span>非关键工序[由配色控制]</span>
+      <span>⇔ 拖动条调整日期/工期/顺序</span>
+      <span>⬤ 红色节点为关键事件</span>
+    </div>
+    <div class="legend" id="legendNet" style="display:none">
+      <span><i style="border-color:var(--crit)"></i>关键箭线（实线）</span>
+      <span><i style="border-color:#94a3b8;border-top-style:dashed"></i>非关键箭线</span>
+      <span>-- 虚线 = 工序间隔（等待）</span>
+    </div>
+    <div class="view scrollwrap" id="viewGantt"></div>
+    <div class="view scrollwrap" id="viewNetwork" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="tip"></div>
+<div id="annotOverlay"></div>
+
+<!-- 关于弹窗：版本信息 + 使用说明 -->
+<div id="aboutOverlay">
+  <div id="aboutPanel">
+    <div class="ab-head">关于 施工计划图软件<span class="ab-close" onclick="closeAbout()">✕</span></div>
+    <div class="ab-body">
+      <div class="ab-ver">版本：v1.5.21（2026-08-15）｜ 单文件 HTML，双击即用，无需安装</div>
+      <h4>功能简介</h4>
+      <ul>
+        <li>施工横道图（甘特图）＋ 双代号时标网络图，自动计算 CPM 关键线路（TF=0 红色）</li>
+        <li>年月日日历时间轴：按天 / 按周 / 按月三种粒度，周末高亮、今天线、显示星期开关</li>
+        <li>拖动排程：左右拖条=调整开始日期（可到任意位置，含与上一工序重叠）、右缘=改工期、上下=调整顺序，下游自动同步</li>
+        <li>10 款进度条样式 ＋ 10 款时间区分割线样式，一键切换并记忆</li>
+        <li>统一配色（含关键工序进度跟随）、统一字体（宋体默认/黑体/楷体/仿宋/电脑字体）</li>
+        <li>导出：Excel（四工作表：工程信息/工序计划/施工横道图/双代号时标网络图，横道图与网络图各占一页）、Word（含图表截图）、SVG、模板下载与导入</li>
+      </ul>
+      <h4>使用说明</h4>
+      <ol>
+        <li>顶部输入<b>工程名称</b>、选择<b>开工日期</b></li>
+        <li>左侧录入工序：名称、工期（0=瞬时）、颜色；▲▼ 调整顺序（顺序即依赖，后一行在前一行完成后开始）</li>
+        <li>默认按周显示；工具栏：米字格(显/隐)（默认隐藏，横道图与网络图均可显示/隐藏，蓝色手柄可左右/上下/斜向拖调列宽行高、右上角圆点拖移动位置、悬停显示使用方法）、条高/信息字号、时间粒度（按天/周/月）、条/线样式、统一配色/字体；点击"等待N天"输入文字显示为 等待N天[文字]；尾部补刻度与最右框线对齐无留白（按天+3日格/按周+1周/按月+3天，表头文字框线同步补齐）；视图切换行有⛶全屏按钮，顶栏🔗注解按钮以真实界面为底图叠加引线标注各功能对应位置</li>
+        <li>信息列（序号/名称/开始/结束/工期）列宽可拖动分隔条调整（记忆选择），序号单独成列；文字超出时列宽/行高自动撑大；按周列宽为按天2倍、按月为3倍；年月表头仅跨度外框、无中间竖线；尾月不足绘制足月；全网格样式=全图黑色框线；共享文件夹每版仅保留最近5个版本</li>
+        <li>横道图中直接拖动工序条调整日期/工期/顺序</li>
+        <li>导出 Excel 自动生成横道图与网络图 PNG，各占一个工作表（图幅/清晰度用工具栏当前设置）</li>
+      </ol>
+      <h4>说明</h4>
+      <ul>
+        <li>ES/EF/LS/LF=最早/最迟开始完成，TF/FF=总/自由时差；间隔>0 显示“等待N天”，间隔<0 为与上一工序重叠</li>
+        <li>导出的图不显示“今天”线与周末底色（界面内正常显示）</li>
+      </ul>
+      <h4>已知边界</h4>
+      <ul>
+        <li>双代号图按“时标网络图”简化画法；链式连接，间隔以虚线表示</li>
+        <li>Excel 导入/导出依赖 SheetJS（CDN 自动加载），首次使用需联网；绘图与 CPM 完全离线可用</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 统一配色面板 -->
+<div class="panel" id="colorPanel">
+  <div class="p-head">统一修改颜色<span class="p-close" onclick="openPanel(null)">✕</span></div>
+  <div class="p-sub">选择颜色（点击色块或自定义取色）</div>
+  <div class="p-sw" id="cpSwatches"></div>
+  <div class="p-row">
+    <input type="color" id="cpCustom" value="#3a8ee6" oninput="pickColor(this.value)">
+    <span class="p-cur" id="cpPreview"></span>
+    <span class="p-hex" id="cpHex">#3A8EE6</span>
+  </div>
+  <div class="p-chk">关键工序（TF=0）恒为红色；进度填充自动跟随工序色加深。</div>
+  <div class="p-actions">
+    <button onclick="applyUniformColor()">应用到全部工序</button>
+    <button class="ghost" onclick="openPanel(null)">取消</button>
+  </div>
+</div>
+
+<!-- 统一字体内板 -->
+<div class="panel" id="fontPanel">
+  <div class="p-head">统一修改字体<span class="p-close" onclick="openPanel(null)">✕</span></div>
+  <div class="p-sub">内置字体（点击应用，全软件生效）</div>
+  <div class="p-sw" id="fontChips"></div>
+  <div class="p-sub">调用电脑字体（输入已安装字体名称）</div>
+  <div class="p-inrow">
+    <input type="text" id="fontCustom" placeholder="如：微软雅黑 / Arial / 隶书">
+    <button class="ghost" onclick="applyCustomFont()">应用</button>
+  </div>
+  <div class="font-prev" id="fontPrev">施工计划横道图 Aa 123 天天向上</div>
+  <div class="p-actions" style="margin-top:10px">
+    <button class="ghost" onclick="applyFont('')">恢复默认</button>
+  </div>
+</div>
+
+<!-- 条样式 / 分割线样式面板 -->
+<div class="panel" id="stylePanel">
+  <div class="p-head">条样式 / 分割线样式<span class="p-close" onclick="openPanel(null)">✕</span></div>
+  <div class="p-sub">进度条样式（10 款，点击应用）</div>
+  <div class="st-grid" id="stBars"></div>
+  <div class="p-sub">时间区分割线样式（10 款，点击应用）</div>
+  <div class="st-grid" id="stLines"></div>
+  <div class="p-actions"><button class="ghost" onclick="openPanel(null)">完成</button></div>
+</div>
+
+<script>
+/* ===================== 常量 / 配色 ===================== */
+const PALETTE=['#3a8ee6','#22a06b','#f59e0b','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1','#eab308','#0ea5e9'];
+const WEEKDAYS=['日','一','二','三','四','五','六'];
+const CSSMAP={'var(--crit)':'#e23c39','var(--normal)':'#3a8ee6','var(--muted)':'#7a869a','var(--text)':'#1f2d3d','var(--grid)':'#eef1f6','var(--primary)':'#2f6fed','var(--head)':'#33415c'};
+const DEFAULT_FONT='"SimSun","宋体",serif';
+const OLD_BLACK_FONT='"SimHei","黑体","Microsoft YaHei",sans-serif';
+let fontFamily=DEFAULT_FONT; // 统一字体：仅作用于图表内文字（SVG）
+const FONT_PRESETS=[
+  ['默认(宋体)',DEFAULT_FONT],
+  ['黑体','"SimHei","黑体","Microsoft YaHei",sans-serif'],
+  ['楷体','"KaiTi","楷体",serif'],
+  ['仿宋','"FangSong","仿宋",serif']
+];
+const BAR_STYLES=['纯色','渐变','圆角阴影','描边空心','斜条纹','玻璃高光','双色内嵌','柔和','圆点纹理','立体'];
+const LINE_STYLES=['浅灰细线','均匀灰线','虚线','点线','全网格','粗线','双线','红色标记','极浅隐线','无网格'];
+
+/* ===================== 数据模型（链式：无紧前/无层级） ===================== */
+let tasks=[];        // {id, name, dur, color, progress, gap}
+let seq=0;
+let currentTab='gantt';
+let zoom=1;
+let rowHS=1; // 行高缩放（0.6~2）
+let lastC=null;
+let barStyle=0, lineStyle=0; // 进度条样式 / 时间区分割线样式（0~9）
+let barH=0.7; // 进度条高度比例（相对行高，0.45~0.95）
+let showGH=false; // 米字格手柄显隐（默认隐藏）
+let ghPos={x:0.5,b:18}; // 米字格手柄位置（x=相对信息区宽比例，b=距底部像素）
+let infoW={idx:42,name:150,start:78,end:78,dur:44}; // 信息列宽（序号/工序名称/开始/结束/工期）
+let infoFS=1; // 信息列字号（0.6~2）
+try{
+  barStyle=Math.max(0,Math.min(9,parseInt(localStorage.getItem('sgl_barstyle')||2)));
+  lineStyle=Math.max(0,Math.min(9,parseInt(localStorage.getItem('sgl_linestyle')||3)));
+  try{ barH=Math.max(0.45,Math.min(0.95,parseFloat(localStorage.getItem('sgl_barh')||'0.7')||0.7)); }catch(e){}
+  try{ showGH=localStorage.getItem('sgl_ghshow')==='1'; }catch(e){}
+  try{ const p=JSON.parse(localStorage.getItem('sgl_ghpos')||'null'); if(p&&p.x!=null) ghPos=p; }catch(e){}
+  try{ const iw=JSON.parse(localStorage.getItem('sgl_infow')||'null');
+    if(iw&&iw.name) infoW=Object.assign(infoW,iw); }catch(e){}
+  try{ infoFS=Math.max(0.6,Math.min(2,parseFloat(localStorage.getItem('sgl_infofs')||'1')||1)); }catch(e){}
+}catch(e){}
+
+function newTask(name,dur,color){
+  seq++;
+  return {id:seq,name:name,dur:Math.max(0,Number(dur)||0),color:color||PALETTE[(seq-1)%PALETTE.length],
+          progress:0, gap:0, startOff:0};
+}
+
+/* ===================== 日期辅助 ===================== */
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function startDateVal(){return document.getElementById('startDate').value||todayISO();}
+function projName(){return (document.getElementById('projName').value||'施工计划图软件').trim();}
+function addDays(start,n){
+  const [y,m,dd]=start.split('-').map(Number);
+  const d=new Date(y,m-1,dd+n);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function daysFrom(sd,dateStr){
+  const a=sd.split('-').map(Number), b=dateStr.split('-').map(Number);
+  return Math.round((new Date(b[0],b[1]-1,b[2])-new Date(a[0],a[1]-1,a[2]))/86400000);
+}
+function showWkDay(){ return document.getElementById('wkDayChk').checked; }
+function gridYOf(top0){ return top0+36+22+(showWkDay()?14:0); }
+function shade(hex,p){
+  const n=parseInt(hex.replace('#',''),16);
+  const r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  const f=Math.max(0,1-p);
+  return 'rgb('+Math.round(r*f)+','+Math.round(g*f)+','+Math.round(b*f)+')';
+}
+
+/* ===================== CPM（链式 + 间隔） ===================== */
+function computeCPM(list){
+  // 工期口径：结束日期 = 开始日期 + 持续天数 - 1（含首尾）；总工期 = 末工序结束日 - 开工日 + 1
+  const es={},ef={};
+  list.forEach((t,i)=>{
+    es[t.id]= i===0? Math.max(0,Number(t.startOff)||0) : (ef[list[i-1].id]+1+(Number(t.gap)||0));
+    ef[t.id]=es[t.id]+Math.max(0,t.dur-1);
+  });
+  const projectDur=list.length? ef[list[list.length-1].id]+1 : 0;
+  const lf={},ls={},tf={},ff={};
+  list.forEach((t,i)=>{
+    const next=list[i+1];
+    lf[t.id]= next? es[next.id]-1 : ef[t.id];
+    ls[t.id]=lf[t.id]-Math.max(0,t.dur)+1;
+    tf[t.id]=ls[t.id]-es[t.id];
+    ff[t.id]=(next? es[next.id]-1 : ef[t.id])-ef[t.id];
+  });
+  return {es,ef,ls,lf,tf,ff,projectDur,order:list.map(t=>t.id),byId:{},cycle:false,children:{},isSum:()=>false};
+}
+
+/* ===================== 日历表头（年/月/日＋星期分行） ===================== */
+// 表头文字随列宽×行高缩放(th)，行高动态撑大容纳文字
+function headTh(){ return Math.max(0.5,Math.min(2.5,zoom*rowHS)); }
+function gridYFor(mode,top0){
+  const th=headTh();
+  if(mode==='day') return top0+Math.ceil(16*th)+Math.ceil(20*th)+Math.ceil(22*th)+(showWkDay()?Math.ceil(14*th):0);
+  if(mode==='week') return top0+Math.ceil(16*th)+Math.ceil(20*th)+Math.ceil(38*th);
+  return top0+Math.ceil(16*th)+Math.ceil(20*th)+Math.ceil(20*th);
+}
+function timelineHeader(mode,dur,colW,left,top0,H,sd,rightX){
+  const th=headTh();
+  const yY=top0, mY=top0+Math.ceil(16*th), dY=mY+Math.ceil(20*th), wdY=dY+Math.ceil(22*th);
+  const gridY=gridYFor(mode,top0);
+  let s='';
+  const base=sd.split('-').map(Number);
+  const info=[];
+  for(let d=0;d<=dur+3;d++){ // 多建3天：按天补刻度区域也需日期信息
+    const dt=new Date(base[0],base[1]-1,base[2]+d);
+    info.push({y:dt.getFullYear(),m:dt.getMonth()+1,day:dt.getDate(),wd:dt.getDay(),
+               dm:new Date(dt.getFullYear(),dt.getMonth()+1,0).getDate()});
+  }
+  let xOf;
+  if(mode==='week') xOf=d=>left+(d/7)*colW;
+  else if(mode==='month') xOf=d=>{const i=info[d];const months=(i.y-base[0])*12+(i.m-base[1]);return left+months*colW+(i.day-1)/i.dm*colW;};
+  else xOf=d=>left+d*colW;
+  const ink=lineStyle===4?'#111827':''; // 全网格：所有框线黑色
+  const rightXv=rightX!=null?rightX:null;
+  // 周末底色（按天）
+  if(mode==='day'){
+    for(let d=0;d<=dur;d++){ if(info[d].wd===0||info[d].wd===6){ const x=xOf(d); s+=`<rect class="wkend" x="${x.toFixed(1)}" y="${gridY}" width="${colW.toFixed(1)}" height="${H-gridY}" fill="#faf1ef"/>`; } }
+  }
+  // 网格竖线（按分割线样式 lineStyle 生成）
+  function gridLine(x,major){
+    if(lineStyle===9) return ''; // 无网格
+    const g=(c,w,dash)=>`<line x1="${x}" y1="${gridY}" x2="${x}" y2="${H}" stroke="${c}" stroke-width="${w}"${dash?` stroke-dasharray="${dash}"`:''}/>`;
+    switch(lineStyle){
+      case 0: return major? g('#dbe2ec',1.2) : g('#eef1f6',1);          // 浅灰细线
+      case 1: return g('#d8dee8',1);                                     // 均匀灰线
+      case 2: return g('#cbd5e1',1,'4 3');                               // 虚线
+      case 3: return g('#cbd5e1',1,'2 3');                               // 点线
+      case 4: return major? g(ink||'#111827',1.2) : g(ink||'#111827',0.8); // 全网格：全部黑色实线
+      case 5: return g('#c9d4e2',1.8);                                   // 粗线
+      case 6: return g('#e3e8ef',1)+g(x+2,true);                         // 双线
+      case 7: return g('#e8a8a4',1.2);                                   // 红色标记
+      default:return g('rgba(31,45,61,.06)',1);                          // 极浅隐线
+    }
+  }
+  if(mode==='day'){
+    for(let d=0;d<=dur+3;d++){ const x=xOf(d); const major=d%5===0; s+=gridLine(x,major); } // 工期末后补3个日格的分割线
+    if(rightXv!=null && rightXv>xOf(dur+3)) s+=gridLine(rightXv,true);
+  } else if(mode==='week'){
+    const nW=Math.ceil((dur+1)/7);
+    for(let w=0;w<=nW;w++){ s+=gridLine(left+w*colW,true); }
+    if(rightXv!=null && rightXv>left+nW*colW) s+=gridLine(rightXv,true);
+  } else {
+    for(let d=1;d<=dur;d++){ if(info[d].day===1){ s+=gridLine(xOf(d),true); } }
+    s+=gridLine(left,true);
+    s+=gridLine(rightXv!=null?rightXv:xOf(dur), true); // 尾格右边界刻度
+  }
+  // 日+星期（按天）
+  if(mode==='day'){
+    for(let d=0;d<=dur+3;d++){ const x=xOf(d); const wk=info[d].wd===0||info[d].wd===6; // 补3天刻度也显示日数字
+      if(colW>=14){ s+=`<text x="${(x+colW/2).toFixed(1)}" y="${dY+Math.ceil(15*th)}" font-size="H11.5" fill="${wk?'#e23c39':'#33415c'}" text-anchor="middle" font-weight="600">${info[d].day}</text>`; }
+      else if(colW>=9){ s+=`<text x="${(x+colW/2).toFixed(1)}" y="${dY+Math.ceil(15*th)}" font-size="H9" fill="${wk?'#e23c39':'#33415c'}" text-anchor="middle">${info[d].day}</text>`; }
+    }
+    if(showWkDay()){ // 日/星期分隔线仅在显示星期时画（避免无星期时与表头底横线形成双线）
+      s+=`<line x1="${left}" y1="${dY+Math.ceil(22*th)}" x2="${rightXv!=null?rightXv:xOf(dur+3)}" y2="${dY+Math.ceil(22*th)}" stroke="${ink||'#e3e8ef'}"/>`;
+      for(let d=0;d<=dur+3;d++){ const x=xOf(d); const wk=info[d].wd===0||info[d].wd===6; s+=`<text x="${(x+colW/2).toFixed(1)}" y="${wdY+Math.ceil(10*th)}" font-size="H9.5" fill="${wk?'#e23c39':'#7a869a'}" text-anchor="middle">${WEEKDAYS[info[d].wd]}</text>`; }
+    }
+  }
+  // 周行（按周）
+  if(mode==='week'){
+    const nW=Math.ceil((dur+1)/7);
+    for(let w=0;w<nW;w++){ const x=left+w*colW; const d0=w*7;
+      const ds=addDays(sd,d0);
+      s+=`<text x="${(x+colW/2).toFixed(1)}" y="${dY+Math.ceil(15*th)}" font-size="H10.5" fill="#33415c" text-anchor="middle">第${w+1}周</text>`;
+      s+=`<text x="${(x+colW/2).toFixed(1)}" y="${dY+Math.ceil(29*th)}" font-size="H9" fill="#7a869a" text-anchor="middle">${ds.slice(5).replace('-','/')}</text>`;
+    }
+  }
+  // 年/月跨度边界：按月模式首格从最左(left)开始、各月格按 月索引×colW 连续排布（避免开工日偏移导致错位重叠）；天/周按实际日期坐标
+  function spanLeft(sDay){
+    if(mode==='month'){ const i=info[sDay]; return left+((i.y-info[0].y)*12+(i.m-info[0].m))*colW; }
+    return xOf(sDay);
+  }
+  function spanRight(sDay,eDay){
+    if(eDay>=dur) return rightXv!=null?rightXv:(mode==='day'?xOf(dur):xOf(eDay+1)); // 尾月/尾年跨度格收到补刻度右边界（与最右框线对齐）
+    if(mode==='month') return spanLeft(sDay)+colW*((info[eDay].y-info[sDay].y)*12+(info[eDay].m-info[sDay].m)+1);
+    return xOf(eDay+1);
+  }
+  if(lineStyle!==9){
+    // 年行跨度外框（top0 ~ top0+16）
+    let ys2=0;
+    while(ys2<=dur){
+      let ye2=ys2; while(ye2+1<=dur && info[ye2+1].y===info[ys2].y) ye2++;
+      const x0=spanLeft(ys2), x1=spanRight(ys2,ye2);
+      s+=`<rect x="${x0.toFixed(1)}" y="${top0}" width="${(x1-x0).toFixed(1)}" height="${Math.ceil(16*th)}" fill="none" stroke="${ink||'#d8dee8'}" stroke-width="1"/>`;
+      ys2=ye2+1;
+    }
+    // 月行跨度外框（mY ~ dY）
+    let ms2=0;
+    while(ms2<=dur){
+      let me2=ms2; while(me2+1<=dur && info[me2+1].y===info[ms2].y && info[me2+1].m===info[ms2].m) me2++;
+      const x0=spanLeft(ms2), x1=spanRight(ms2,me2);
+      s+=`<rect x="${x0.toFixed(1)}" y="${mY}" width="${(x1-x0).toFixed(1)}" height="${Math.ceil(20*th)}" fill="none" stroke="${ink||'#d8dee8'}" stroke-width="1"/>`;
+      ms2=me2+1;
+    }
+    // 日/周行单元格竖线（dY ~ gridY；按月无此行列竖线）
+    const xs=new Set();
+    if(mode==='day'){ for(let d=0;d<=dur+3;d++) xs.add(Math.round(xOf(d)*10)/10); } // 补3天刻度表头竖线
+    else if(mode==='week'){ const nW=Math.ceil((dur+1)/7); for(let w=0;w<=nW;w++) xs.add(Math.round((left+w*colW)*10)/10); }
+    xs.forEach(x=>{ s+=`<line x1="${x}" y1="${dY}" x2="${x}" y2="${gridY}" stroke="${ink||'#e3e8ef'}" stroke-width="1"/>`; });
+    // 表头与图表区底部横线（强制延伸到最右边）
+    s+=`<line x1="${left}" y1="${gridY}" x2="${rightXv!=null?rightXv:xOf(dur)}" y2="${gridY}" stroke="${ink||'#d8dee8'}" stroke-width="1"/>`;
+  }
+  // 月（合并）
+  let ms=0;
+  while(ms<=dur){
+    let me=ms; while(me+1<=dur && info[me+1].y===info[ms].y && info[me+1].m===info[ms].m) me++;
+    const x0=spanLeft(ms), x1=spanRight(ms,me);
+    if(x1-x0>=20) s+=`<text x="${((x0+x1)/2).toFixed(1)}" y="${mY+Math.ceil(14*th)}" font-size="H11" fill="#1f2d3d" text-anchor="middle" font-weight="600">${info[ms].m}月</text>`;
+    ms=me+1;
+  }
+  // 年（合并）
+  let ys=0;
+  while(ys<=dur){
+    let ye=ys; while(ye+1<=dur && info[ye+1].y===info[ys].y) ye++;
+    const x0=spanLeft(ys), x1=spanRight(ys,ye);
+    s+=`<text x="${((x0+x1)/2).toFixed(1)}" y="${yY+Math.ceil(12*th)}" font-size="H11" fill="#475569" text-anchor="middle" font-weight="600">${info[ys].y}年</text>`;
+    ys=ye+1;
+  }
+  // 今天线
+  const td=daysFrom(sd,todayISO());
+  if(td>=0 && td<=dur){
+    const x=xOf(td);
+    s+=`<line class="tm" x1="${x}" y1="${yY}" x2="${x}" y2="${H}" stroke="#e23c39" stroke-width="1.6" stroke-dasharray="5 3"/>`;
+    s+=`<rect class="tm" x="${x-16}" y="${yY-14}" width="32" height="13" rx="3" fill="#e23c39"/>`;
+    s+=`<text class="tm" x="${x}" y="${yY-4}" font-size="9.5" fill="#fff" text-anchor="middle">今天</text>`;
+  }
+  return {svg:s, gridY, xOf};
+}
+
+/* ===================== 渲染：任务表 ===================== */
+function renderTaskTable(c){
+  const sd=startDateVal();
+  const tb=document.getElementById('taskBody'); tb.innerHTML='';
+  if(!c||c.cycle){
+    tb.innerHTML='<tr><td colspan="9" style="color:var(--crit);padding:10px">⚠ 计算异常</td></tr>';
+    return;
+  }
+  tasks.forEach((t,i)=>{
+    const tr=document.createElement('tr');
+    if(isCrit(t)) tr.className='crit';
+    tr.innerHTML=`
+      <td>
+        <button class="mvbtn" title="上移（顺序即依赖）" onclick="moveUp(${t.id})">▲</button>
+        <button class="mvbtn" title="下移" onclick="moveDown(${t.id})">▼</button>
+      </td>
+      <td>${t.id}</td>
+      <td><input type="text" value="${esc(t.name)}" onchange="upd(${t.id},'name',this.value)"></td>
+      <td><input type="number" min="0" value="${t.dur}" onchange="upd(${t.id},'dur',this.value)"></td>
+      <td><input type="color" value="${t.color||'#3a8ee6'}" onchange="setColor(${t.id},this.value)"></td>
+      <td class="computed">${addDays(sd,c.es[t.id])}</td>
+      <td class="computed">${addDays(sd,c.ef[t.id])}</td>
+      <td class="computed"><select class="kvsel" onchange="upd(${t.id},'forceKey',this.value)" title="关键事件判定：自动=按CPM计算，也可手动指定该工序是否关键">
+        <option value="auto" ${!t.forceKey||t.forceKey==='auto'?'selected':''}>自动</option>
+        <option value="key" ${t.forceKey==='key'?'selected':''}>关键</option>
+        <option value="normal" ${t.forceKey==='normal'?'selected':''}>非关键</option>
+      </select></td>
+      <td><button class="btn danger" style="padding:2px 6px" onclick="del(${t.id})">×</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function upd(id,field,val){
+  const t=tasks.find(x=>x.id===id); if(!t) return;
+  if(field==='dur') t.dur=Math.max(0,Number(val)||0);
+  else t[field]=val;
+  recompute();
+}
+function setColor(id,val){const t=tasks.find(x=>x.id===id); if(t){t.color=val; renderGantt(lastC); renderNetwork(lastC);}}
+function addTask(){ tasks.push(newTask('新工序',1)); recompute(); }
+function del(id){ tasks=tasks.filter(t=>t.id!==id); renumberIds(); recompute(); }
+function clearAll(){ tasks=[]; seq=0; recompute(); }
+function renumberIds(){ tasks.forEach((t,i)=>t.id=i+1); seq=tasks.length; }
+// 关键判定：手动指定(forceKey: key/normal)优先，否则按 CPM 计算（TF=0）
+function isCrit(t){
+  if(t.forceKey==='key') return true;
+  if(t.forceKey==='normal') return false;
+  return !!(lastC && lastC.tf[t.id]===0);
+}
+function moveUp(id){ const i=tasks.findIndex(t=>t.id===id); if(i>0){ const a=tasks[i-1]; tasks[i-1]=tasks[i]; tasks[i]=a; renumberIds(); recompute(); } }
+function moveDown(id){ const i=tasks.findIndex(t=>t.id===id); if(i>-1&&i<tasks.length-1){ const a=tasks[i+1]; tasks[i+1]=tasks[i]; tasks[i]=a; renumberIds(); recompute(); } }
+function randomColors(){ tasks.forEach((t,i)=>t.color=PALETTE[i%PALETTE.length]); renderTaskTable(lastC); renderGantt(lastC); renderNetwork(lastC); toast('已随机配色'); }
+
+/* ===================== 渲染：CPM 表 ===================== */
+function renderCPM(c){
+  const tb=document.getElementById('cpmBody'); tb.innerHTML='';
+  if(c.cycle) return;
+  tasks.forEach(t=>{
+    const crit=isCrit(t);
+    const tr=document.createElement('tr');
+    if(crit) tr.className='crit';
+    tr.innerHTML=`<td>${t.id}</td><td style="text-align:left">${esc(t.name)}</td>
+      <td>${c.es[t.id]}</td><td>${c.ef[t.id]}</td><td>${c.ls[t.id]}</td><td>${c.lf[t.id]}</td>
+      <td>${c.tf[t.id]}</td><td>${c.ff[t.id]}</td>
+      <td style="color:${crit?'var(--crit)':'var(--muted)'}">${crit?'★':'—'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ===================== 渲染：横道图（SVG） ===================== */
+/* 米字格手柄 SVG（横道图/网络图共用） */
+function gridHandleSVG(left,H){
+  if(!showGH) return '';
+  const gx=Math.max(18,Math.min(left-18, ghPos.x*left));
+  const gy=Math.max(30,Math.min(H-30, H-ghPos.b));
+  return `<g class="grid-handle" style="cursor:move">
+    <circle cx="${gx}" cy="${gy}" r="13" fill="rgba(37,99,235,.10)" stroke="#2563eb" stroke-width="2"/>
+    <line x1="${gx-6.5}" y1="${gy}" x2="${gx+6.5}" y2="${gy}" stroke="#1d4ed8" stroke-width="2"/>
+    <line x1="${gx}" y1="${gy-6.5}" x2="${gx}" y2="${gy+6.5}" stroke="#1d4ed8" stroke-width="2"/>
+    <line x1="${gx-4.8}" y1="${gy-4.8}" x2="${gx+4.8}" y2="${gy+4.8}" stroke="#60a5fa" stroke-width="1.4"/>
+    <line x1="${gx-4.8}" y1="${gy+4.8}" x2="${gx+4.8}" y2="${gy-4.8}" stroke="#60a5fa" stroke-width="1.4"/>
+    <g class="gh-move" style="cursor:move">
+      <circle cx="${gx+13}" cy="${gy-13}" r="7" fill="#f97316" stroke="#fff" stroke-width="1.5"/>
+      <path d="M${gx+11} ${gy-13} l4 0 l0 4 M${gx+15} ${gy-13} l-4 0 l0 4" stroke="#fff" stroke-width="1.2" fill="none"/>
+    </g>
+  </g>`;
+}
+/* 米字格手柄事件绑定（横道图/网络图共用） */
+function attachGridHandle(svg){
+  if(!svg) return;
+  svg.querySelectorAll('.grid-handle').forEach(h=>{
+    h.addEventListener('mouseenter',e=>showTip(e,'<div style="font-weight:400;font-size:13px;color:#1d4ed8">☩ 米字格使用方法</div><div>左右拖＝调整<u>列宽</u>；上下拖＝调整<u>行高</u>；斜向拖＝两者同时调整</div><div>右上角<span style="color:#f97316">橙色圆点</span>＝移动手柄位置；工具栏「米字格」可显/隐</div>'));
+    h.addEventListener('mousemove',moveTip);
+    h.addEventListener('mouseleave',hideTip);
+    h.addEventListener('mousedown',e=>{
+      if(e.button!==0) return;
+      hideTip();
+      drag={mode:'grid',startX:e.clientX,startY:e.clientY,startZoom:zoom,startRowHS:rowHS};
+      e.preventDefault();
+    });
+  });
+  svg.querySelectorAll('.gh-move').forEach(h=>{
+    h.addEventListener('mousedown',e=>{
+      if(e.button!==0) return;
+      e.stopPropagation();
+      drag={mode:'ghmove',startX:e.clientX,startY:e.clientY,startPx:ghPos.x,startPb:ghPos.b};
+      e.preventDefault();
+    });
+  });
+}
+function renderGantt(c){
+  const sd=startDateVal();
+  const mode=document.getElementById('granSel').value;
+  const top0=14;
+  const iF=Math.max(0.5,Math.min(2.5, infoFS));
+  const cIdxW=Math.max(infoW.idx, Math.ceil(3*12*iF*0.7+10)); // 序号列（可拖动调宽）
+  const cNameW=infoW.name; // 名称列宽不因文字撑大（过长自动缩字号+换行）
+  const cStartW=Math.max(infoW.start, Math.ceil(10*11*iF*0.64)+12);
+  const cEndW=Math.max(infoW.end, Math.ceil(10*11*iF*0.64)+12);
+  const cDurW=Math.max(infoW.dur, Math.ceil(4*11*iF*0.6)+8);
+  // 名称列换行估算：最多3行；行高随行数自动加高
+  const nameBox=cNameW-16, nameFS=11; // 略微缩小字号（原12）
+  const perLineN=Math.max(2,Math.floor(nameBox/(nameFS*iF*1.05)));
+  const maxLines=Math.min(3, tasks.length?Math.max(1,...tasks.map(t=>Math.ceil(t.name.length/perLineN))):1);
+  const rowH=Math.max(Math.round(30*rowHS), Math.round(maxLines*nameFS*iF+10));
+  const left=cIdxW+cNameW+cStartW+cEndW+cDurW;
+  const dur=c.projectDur;
+  const th=headTh(); // 表头文字缩放比例
+  let colW = mode==='month'? Math.round(180*zoom) : (mode==='week'? Math.round(80*zoom) : Math.round(26*zoom));
+  // 时间轴表头文字超出时，列宽自动撑大
+  if(mode==='day') colW=Math.max(colW, Math.ceil(2*11.5*th*0.66+10));
+  else if(mode==='week') colW=Math.max(colW, Math.ceil(6*10.5*th*0.6+10));
+  else colW=Math.max(colW, Math.ceil(3*11*th*0.66+10));
+  const gridY=gridYFor(mode,top0);
+  const xOf=timelineHeader(mode,dur,colW,left,top0,0,sd).xOf;
+  // 尾部补齐刻度且不留空白：按天+3个日格、按周+1周、按月+3天；rightX=补刻度末端（与最右框线对齐，无右侧边距）
+  const rightX = mode==='week' ? xOf(dur)+colW : (mode==='day' ? xOf(dur)+3*colW : xOf(dur)+Math.round(colW*0.1));
+  const W=left+Math.max(0,rightX-left), H=gridY+tasks.length*rowH+4;
+  lastXOf=xOf;
+  const ink=lineStyle===4?'#111827':''; // 全网格：信息区/时间轴框线黑色
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#ffffff;font-family:${currentFont().replace(/"/g,"'")}"
+    data-left="${left}" data-gridy="${gridY}" data-rowh="${rowH}">
+  <defs>
+    <pattern id="pStripes" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="6" fill="#fff" opacity=".55"/></pattern>
+    <pattern id="pDots" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#fff" opacity=".5"/></pattern>
+  </defs>
+  <style>.grow:hover{opacity:.85}.bar-cursor{cursor:pointer}.bar-resize{cursor:ew-resize}.col-res{cursor:col-resize}</style>`;
+  tasks.forEach((t,i)=>{
+    if(i%2===1) svg+=`<rect x="${left}" y="${gridY+i*rowH}" width="${W-left}" height="${rowH}" fill="rgba(31,45,61,.025)"/>`;
+  });
+  svg+=timelineHeader(mode,dur,colW,left,top0,H,sd,rightX).svg;
+  // 信息列表头（无填充，仅框线）
+  svg+=`<line x1="0" y1="${top0}" x2="${left}" y2="${top0}" stroke="${ink||'#dbe2ec'}" stroke-width="1.2"/>`;
+  svg+=`<line x1="${left}" y1="${top0}" x2="${left}" y2="${H}" stroke="${ink||'#dbe2ec'}" stroke-width="1.2"/>`;
+  const colXs=[cIdxW,cIdxW+cNameW,cIdxW+cNameW+cStartW,cIdxW+cNameW+cStartW+cEndW];
+  const sepXs=[cIdxW,cIdxW+cNameW,cIdxW+cNameW+cStartW,cIdxW+cNameW+cStartW+cEndW,left];
+  sepXs.forEach(cx=>{ svg+=`<line x1="${cx}" y1="${top0}" x2="${cx}" y2="${H}" stroke="${ink||'#dbe2ec'}" stroke-width="1"/>`; });
+  ['序号','工序名称','开始时间','结束时间','工期'].forEach((txt,i)=>{
+    const cx0=i===0?0:colXs[i-1], cx1=i===4?left:colXs[i];
+    svg+=`<text x="${(cx0+cx1)/2}" y="${(top0+gridY)/2+4}" font-size="F12" fill="#33415c" font-weight="600" text-anchor="middle">${txt}</text>`;
+  });
+  // 表头与第一行工序之间的横线（信息区）
+  svg+=`<line x1="0" y1="${gridY}" x2="${left}" y2="${gridY}" stroke="${ink||'#dbe2ec'}" stroke-width="1"/>`;
+  // 行
+  tasks.forEach((t,i)=>{
+    const y=gridY+i*rowH;
+    const crit=isCrit(t);
+    const es=c.es[t.id]||0, ef=c.ef[t.id]||0;
+    const x0=xOf(es), x1=t.dur>0?xOf(ef+1):x0; // 条覆盖开始日~结束日（含首尾）；0天为细条
+    const ym=y+rowH/2;
+    if(i<tasks.length-1) svg+=`<line x1="0" y1="${y+rowH}" x2="${W}" y2="${y+rowH}" stroke="${ink||'#e3e8ef'}" stroke-width="1"/>`;
+    // 序号单独成列（居中显示）
+    svg+=`<text x="${cIdxW/2}" y="${ym+4}" font-size="F12" fill="#1f2d3d" text-anchor="middle" font-weight="400">${t.id}</text>`;
+    // 工序名称：过长时缩字号+换行（不撑大列宽），最多3行
+    const nameStr=t.name;
+    const nl=[];
+    let nc='';
+    for(const ch of nameStr){ if((nc+ch).length>perLineN){ nl.push(nc); nc=ch; } else nc+=ch; }
+    if(nc) nl.push(nc);
+    let nls=nl;
+    if(nl.length>3) nls=[nl[0],nl[1],nl.slice(2).join('')+'…']; // 超3行：第3行合并加省略号
+    nls.forEach((ln,li)=>{
+      const ly=ym+4+(li-(nls.length-1)/2)*nameFS*iF;
+      svg+=`<text x="${cIdxW+8}" y="${ly.toFixed(1)}" font-size="F${nameFS}" fill="#1f2d3d">${esc(ln)}</text>`;
+    });
+    svg+=`<text x="${cIdxW+cNameW+cStartW/2}" y="${ym+4}" font-size="F11" fill="#475569" text-anchor="middle">${addDays(sd,es)}</text>`;
+    svg+=`<text x="${cIdxW+cNameW+cStartW+cEndW/2}" y="${ym+4}" font-size="F11" fill="#475569" text-anchor="middle">${addDays(sd,ef)}</text>`;
+    svg+=`<text x="${left-cDurW/2}" y="${ym+4}" font-size="F11" fill="#475569" text-anchor="middle" font-weight="600">${t.dur}</text>`;
+    const col=crit?'#e23c39':(t.color||'#3a8ee6');
+    const bw=Math.max(3,x1-x0);
+    const bh=Math.max(4,Math.round((rowH-12)*barH)), by=y+(rowH-bh)/2, bTop=`<rect x="${x0}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="${col}" opacity="${crit?1:.9}"/>`;
+    const bText=bw>=30?`<text x="${(x0+x1)/2}" y="${ym+4}" font-size="10.5" fill="#fff" text-anchor="middle">${t.dur}天</text>`
+                    :`<text x="${(x1+5).toFixed(1)}" y="${ym+4}" font-size="10.5" fill="#64748b">${t.dur}天</text>`;
+    let bar=bTop;
+    if(barStyle===1) bar=bTop+`<rect x="${x0}" y="${by}" width="${bw}" height="${bh/2}" fill="rgba(255,255,255,.28)"/><rect x="${x0}" y="${by+bh/2}" width="${bw}" height="${bh-bh/2}" fill="rgba(0,0,0,.18)"/>`;
+    else if(barStyle===2) bar=`<rect class="grow" x="${x0}" y="${by}" width="${bw}" height="${bh}" rx="6" fill="${col}" opacity="${crit?1:.9}"/><rect x="${x0}" y="${by+bh-3}" width="${bw}" height="3" rx="1.5" fill="rgba(0,0,0,.18)"/>`;
+    else if(barStyle===3) bar=`<rect class="grow" x="${x0}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="${shade(col,.82)}" stroke="${col}" stroke-width="1.5"/>`;
+    else if(barStyle===4) bar=bTop+`<rect x="${x0}" y="${by}" width="${bw}" height="${bh}" fill="url(#pStripes)"/>`;
+    else if(barStyle===5) bar=bTop+`<rect x="${x0}" y="${by}" width="${bw}" height="${bh*0.45}" fill="rgba(255,255,255,.32)"/>`;
+    else if(barStyle===6) bar=bTop+`<rect x="${x0+2}" y="${by+2}" width="${Math.max(1,bw-4)}" height="${bh-4}" rx="2" fill="${shade(col,.35)}"/>`;
+    else if(barStyle===7) bar=`<rect class="grow" x="${x0}" y="${by}" width="${bw}" height="${bh}" rx="4" fill="${col}" opacity=".55" stroke="${col}" stroke-width="1"/>`;
+    else if(barStyle===8) bar=bTop+`<rect x="${x0}" y="${by}" width="${bw}" height="${bh}" fill="url(#pDots)"/>`;
+    else if(barStyle===9) bar=bTop+`<rect x="${x0}" y="${by+bh*0.55}" width="${bw}" height="${bh*0.45}" fill="rgba(0,0,0,.22)"/>`;
+    svg+=`<g data-id="${t.id}" class="bar-cursor">
+      ${bar}
+      ${bText}
+      <rect class="bar-resize" x="${(x1-5).toFixed(1)}" y="${by}" width="5" height="${bh}" fill="transparent"/>
+      </g>`;
+    // 间隔（等待）虚线：与下一行之间（g0=本工序结束日+1 即下一工序最早可开始日）
+    if(i<tasks.length-1){
+      const next=tasks[i+1];
+      const g0=ef+1, g1=c.es[next.id];
+      if(g1>g0){
+        const gx1=xOf(g0), gx2=xOf(g1);
+        svg+=`<path d="M${gx1} ${ym} L${gx2} ${ym}" stroke="#c2ccda" stroke-width="1" stroke-dasharray="4 3"/>`;
+        const note=next.waitNote||'';
+        const waitTxt=`等待${g1-g0}天${note?'['+esc(note)+']':''}`;
+        const wCol=note?'#5b6b82':'#94a3b8'; // 有注释时加深颜色，确保可见
+        if(gx2-gx1>26) svg+=`<text class="waitNote" data-n="${i+1}" x="${(gx1+gx2)/2}" y="${ym-5}" font-size="9.5" fill="${wCol}" text-anchor="middle" style="cursor:pointer">${waitTxt}</text>`;
+        else svg+=`<text class="waitNote" data-n="${i+1}" x="${Math.min(gx2+4,W-120)}" y="${ym-5}" font-size="9.5" fill="${wCol}" style="cursor:pointer">${waitTxt}</text>`;
+      }
+    }
+  });
+  // 信息列拖动把手（覆盖在分隔线上）
+  sepXs.forEach((cx,idx)=>{
+    svg+=`<rect class="col-res" data-idx="${idx}" x="${(cx-3.5).toFixed(1)}" y="${top0}" width="7" height="${H-top0}" fill="transparent"/>`;
+  });
+  // 米字格手柄：左右拖=列宽、上下拖=行高、斜向拖=两者同时；右上角小圆点拖=移动手柄位置
+  svg+=gridHandleSVG(left,H);
+  // 四周外边框（顶=年份上方框线、左=工序名称左侧框线、右/下=外边线）
+  svg+=`<rect x="0.5" y="${top0}" width="${(W-1).toFixed(1)}" height="${(H-top0-1).toFixed(1)}" fill="none" stroke="${ink||'#dbe2ec'}" stroke-width="1.2"/>`;
+  svg+=`</svg>`;
+  // 先缩放图表文字（数字字号），后处理信息文字（F 占位符）→ 信息区不随列宽/行高缩放
+  const ts=Math.max(0.5,Math.min((1+(zoom-1)*0.42)*(1+(rowHS-1)*0.42),(rowH-8)/12, (mode==='day'||mode==='week'?colW/9:99)));
+  if(ts!==1) svg=svg.replace(/font-size="([\d.]+)"/g,(m,v)=>'font-size="'+(parseFloat(v)*ts).toFixed(1)+'"');
+  const iScale=Math.max(0.5,Math.min(2.5, infoFS)); // 信息四列字号仅受"信息字号"按钮控制
+  svg=svg.replace(/font-size="F([\d.]+)"/g,(m,v)=>'font-size="'+(parseFloat(v)*iScale).toFixed(1)+'"');
+  // 时间轴表头（年/月/周/天/星期）文字随列宽×行高完整比例缩放（H* 占位符）
+  const tsHead=Math.max(0.5,Math.min(2.5, zoom*rowHS));
+  svg=svg.replace(/font-size="H([\d.]+)"/g,(m,v)=>'font-size="'+(parseFloat(v)*tsHead).toFixed(1)+'"');
+  // 全部字体不加粗
+  svg=svg.replace(/\sfont-weight="[^"]*"/g,'');
+  document.getElementById('viewGantt').innerHTML=svg;
+  attachGanttInteractions(c,sd);
+}
+
+/* ===================== 悬停提示 + 拖动（左右=日期/右缘=工期/上下=顺序） ===================== */
+function tipHTML(t,c,sd){
+  const crit=isCrit(t);
+  const es=c.es[t.id]||0, ef=c.ef[t.id]||0;
+  let h=`<div style="font-size:13px">${esc(t.name)} ${crit?'<span class=crit>★关键</span>':''}</div>`;
+  h+=`<div><span class="tk">开始：</span>${addDays(sd,es)} <span class="tk">结束：</span>${addDays(sd,ef)}</div>`;
+  h+=`<div><span class="tk">工期：</span>${t.dur} 天</div>`;
+  if(t.gap>0) h+=`<div><span class="tk">前间隔：</span>${t.gap} 天</div>`;
+  else if(t.gap<0) h+=`<div><span class="tk">与上一工序重叠：</span>${-t.gap} 天</div>`;
+  h+=`<div><span class="tk">ES/EF：</span>${es}/${ef} <span class="tk">TF/FF：</span>${c.tf[t.id]}/${c.ff[t.id]}</div>`;
+  return h;
+}
+function showTip(e,html){
+  const tip=document.getElementById('tip');
+  tip.innerHTML=html; tip.style.display='block';
+  moveTip(e);
+}
+function moveTip(e){
+  const tip=document.getElementById('tip');
+  const pad=14;
+  let x=e.clientX+pad, y=e.clientY+pad;
+  const r=tip.getBoundingClientRect();
+  if(x+r.width>window.innerWidth-8) x=Math.max(8,e.clientX-r.width-pad);
+  if(y+r.height>window.innerHeight-8) y=Math.max(8,e.clientY-r.height-pad);
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+}
+function hideTip(){ document.getElementById('tip').style.display='none'; }
+
+let drag=null; // 全局拖动状态（避免 recompute 重建时重复注册）
+let colDrag=null; // 信息列宽拖动状态 {idx,startX,startW}
+let lastXOf=d=>d; // 当前时间粒度的天→像素映射（由 renderGantt/renderNetwork 更新）
+function dayAtX(xOf,dur,sx){
+  let lo=0,hi=Math.max(0,dur);
+  while(lo<hi){ const mid=Math.ceil((lo+hi)/2); if(xOf(mid)<=sx) lo=mid; else hi=mid-1; }
+  return lo;
+}
+function attachGanttInteractions(c,sd){
+  const svg=document.getElementById('viewGantt').querySelector('svg');
+  if(!svg) return;
+  // 悬停提示
+  svg.querySelectorAll('g[data-id]').forEach(g=>{
+    const id=parseInt(g.getAttribute('data-id'));
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    const html=tipHTML(t,c,sd);
+    g.addEventListener('mouseenter',e=>showTip(e,html));
+    g.addEventListener('mousemove',moveTip);
+    g.addEventListener('mouseleave',hideTip);
+  });
+  // 等待天数点击：弹出输入框设置虚线下方自定义文字
+  svg.querySelectorAll('.waitNote').forEach(el=>{
+    el.addEventListener('click',e=>{
+      const n=parseInt(el.getAttribute('data-n')); // 数组位置（1-based）
+      const t=tasks[n-1]; if(!t) return;
+      const v=prompt('在等待N天后面输入自定义文字（留空清除）：', t.waitNote||'');
+      if(v===null) return;
+      t.waitNote=v.trim();
+      recompute();
+    });
+  });
+  // 落点标记（每次渲染重建）
+  if(!svg.querySelector('#dropMark')){
+    const dropMark=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    dropMark.setAttribute('id','dropMark');
+    dropMark.setAttribute('x',String(svg.getAttribute('data-left')));
+    dropMark.setAttribute('width',String(Number(svg.getAttribute('width'))-Number(svg.getAttribute('data-left'))));
+    dropMark.setAttribute('height',String(Number(svg.getAttribute('data-rowh'))-4));
+    dropMark.setAttribute('fill','rgba(47,111,237,.14)');
+    dropMark.setAttribute('stroke','#2f6fed');
+    dropMark.setAttribute('stroke-dasharray','4 3');
+    dropMark.setAttribute('rx','3');
+    dropMark.style.display='none';
+    svg.appendChild(dropMark);
+  }
+  // 按下：记录拖动起点
+  svg.querySelectorAll('g[data-id]').forEach(g=>{
+    const id=parseInt(g.getAttribute('data-id'));
+    g.addEventListener('mousedown',e=>{
+      if(e.button!==0) return;
+      const t=tasks.find(x=>x.id===id); if(!t) return;
+      const idx=tasks.indexOf(t);
+      const barRect=g.querySelector('rect').getBoundingClientRect();
+      drag={id, idx, t, mode:null, target:null, startX:e.clientX, startY:e.clientY,
+            nearEdge:Math.abs(e.clientX-barRect.right)<10};
+      e.preventDefault();
+    });
+  });
+  // 信息列宽拖动把手
+  svg.querySelectorAll('.col-res').forEach(h=>{
+    h.addEventListener('mousedown',e=>{
+      if(e.button!==0) return;
+      const idx=parseInt(h.getAttribute('data-idx'));
+      const key=idx===0?'idx':idx===1?'name':idx===2?'start':idx===3?'end':'dur';
+      colDrag={idx,startX:e.clientX,startW:infoW[key]};
+      e.preventDefault();
+    });
+  });
+  // 米字格手柄（左右=列宽、上下=行高、斜向=同时；橙点=移动位置）
+  attachGridHandle(svg);
+}
+/* 全局拖动处理（仅注册一次） */
+(function(){
+  function svgMetrics(){
+    const sel=currentTab==='gantt'?'viewGantt':'viewNetwork';
+    const svg=document.getElementById(sel).querySelector('svg');
+    if(!svg) return null;
+    return {svg,
+      left:Number(svg.getAttribute('data-left')||350),
+      gridY:Number(svg.getAttribute('data-gridy')||72),
+      rowH:Number(svg.getAttribute('data-rowh')||30),
+      svgW:parseFloat(svg.getAttribute('width')),
+      svgH:parseFloat(svg.getAttribute('height'))};
+  }
+  function svgXOf(m,x){
+    const rect=m.svg.getBoundingClientRect();
+    return (x-rect.left)*m.svgW/rect.width;
+  }
+  function svgYOf(m,y){
+    const rect=m.svg.getBoundingClientRect();
+    return (y-rect.top)*m.svgH/rect.height;
+  }
+  document.addEventListener('mousemove',e=>{
+    if(colDrag){
+      const m=svgMetrics(); if(!m) return;
+      const dx=svgXOf(m,e.clientX)-svgXOf(m,colDrag.startX);
+      const key=colDrag.idx===0?'idx':colDrag.idx===1?'name':colDrag.idx===2?'start':colDrag.idx===3?'end':'dur';
+      const lim=[[30,80],[80,420],[60,220],[60,220],[40,180]][colDrag.idx];
+      infoW[key]=Math.max(lim[0],Math.min(lim[1],Math.round(colDrag.startW+dx)));
+      recompute();
+      return;
+    }
+    if(!drag) return;
+    const m=svgMetrics(); if(!m) return;
+    if(drag.mode==='ghmove'){
+      const dx=svgXOf(m,e.clientX)-svgXOf(m,drag.startX);
+      const dy=svgYOf(m,e.clientY)-svgYOf(m,drag.startY);
+      ghPos.x=Math.max(0,Math.min(1, drag.startPx+dx/(m.left||1)));
+      ghPos.b=Math.max(14,Math.min(m.svgH-30, drag.startPb-dy));
+      recompute();
+      return;
+    }
+    if(drag.mode==='grid'){
+      const dx=svgXOf(m,e.clientX)-svgXOf(m,drag.startX);
+      const dy=svgYOf(m,e.clientY)-svgYOf(m,drag.startY);
+      zoom=Math.max(0.5,Math.min(2.5,drag.startZoom+dx/260));
+      rowHS=Math.max(0.5,Math.min(3,drag.startRowHS+dy/130)); // 最大行高加大到3倍
+      recompute();
+      return;
+    }
+    if(!drag.mode){
+      const dx=e.clientX-drag.startX, dy=e.clientY-drag.startY;
+      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>6){ drag.mode='row'; }
+      else if(drag.nearEdge && Math.abs(dx)>3){ drag.mode='resize'; }
+      else if(Math.abs(dx)>3){ drag.mode='move'; }
+      if(!drag.mode) return;
+    }
+    if(drag.mode==='row'){
+      const rowIdx=Math.max(0,Math.min(tasks.length-1,Math.round((svgYOf(m,e.clientY)-m.gridY)/m.rowH)));
+      drag.target=rowIdx;
+      const mk=m.svg.querySelector('#dropMark');
+      if(mk){ mk.setAttribute('y',String(m.gridY+rowIdx*m.rowH)); mk.style.display=''; }
+      return;
+    }
+    const sx=svgXOf(m,e.clientX);
+    const day=dayAtX(lastXOf,lastC.projectDur,sx);
+    if(drag.mode==='move'){
+      const idx=drag.idx, t=drag.t;
+      const prevB= idx===0?0:(lastC.ef[tasks[idx-1].id]+1); // 前一工序结束日+1
+      if(idx===0){ t.startOff=Math.max(0, day); }
+      else { t.gap=Math.max(-prevB, day - prevB); } // 可拖到任意位置，含与上一工序重叠（起点不低于第0天）
+      recompute();
+    } else if(drag.mode==='resize'){
+      const t=drag.t;
+      t.dur=Math.max(1, day - lastC.es[t.id] + 1); // 工期=结束日-开始日+1
+      recompute();
+    }
+  });
+  document.addEventListener('mouseup',()=>{
+    if(colDrag){
+      colDrag=null;
+      try{ localStorage.setItem('sgl_infow',JSON.stringify(infoW)); }catch(e){}
+      return;
+    }
+    if(!drag) return;
+    if(drag.mode==='grid'||drag.mode==='ghmove'){ try{ localStorage.setItem('sgl_ghpos',JSON.stringify(ghPos)); }catch(e){} }
+    if(drag.mode==='row' && drag.target!=null && drag.target!==drag.idx){
+      const item=tasks.splice(drag.idx,1)[0];
+      tasks.splice(drag.target,0,item);
+      renumberIds();
+      recompute();
+      toast('已调整顺序到第 '+(drag.target+1)+' 行');
+    }
+    const m=svgMetrics();
+    if(m){ const mk=m.svg.querySelector('#dropMark'); if(mk) mk.style.display='none'; }
+    drag=null;
+  });
+})();
+
+/* ===================== 渲染：双代号时标网络图（链式） ===================== */
+function renderNetwork(c){
+  const sd=startDateVal();
+  const mode=document.getElementById('granSel').value;
+  const rowH=Math.round(58*rowHS), left=70, top0=14;
+  const dur=c.projectDur;
+  const th=headTh();
+  let colW = mode==='month'? Math.round(180*zoom) : (mode==='week'? Math.round(80*zoom) : Math.round(24*zoom));
+  if(mode==='day') colW=Math.max(colW, Math.ceil(2*11.5*th*0.66+10));
+  else if(mode==='week') colW=Math.max(colW, Math.ceil(6*10.5*th*0.6+10));
+  else colW=Math.max(colW, Math.ceil(3*11*th*0.66+10));
+  const gridY=gridYFor(mode,top0);
+  const n=tasks.length;
+  const xOf=timelineHeader(mode,dur,colW,left,top0,0,sd).xOf;
+  // 尾部补齐刻度且不留空白：按天+3个日格、按周+1周、按月+3天
+  const rightX = mode==='week' ? xOf(dur)+colW : (mode==='day' ? xOf(dur)+3*colW : xOf(dur)+Math.round(colW*0.1));
+  const H=gridY+n*rowH+4;
+  const W=left+Math.max(0,rightX-left)+10; // 仅留10px防节点裁剪
+  const ink=lineStyle===4?'#111827':''; // 全网格：黑色框线
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#ffffff;font-family:${currentFont().replace(/"/g,"'")}"
+    data-left="${left}" data-gridy="${gridY}" data-rowh="${rowH}">
+  <style>.grow:hover{opacity:.85}</style>`;
+  svg+=timelineHeader(mode,dur,colW,left,top0,H,sd,rightX).svg;
+  // 链式连接线（工序间隔为虚线；x1=本工序结束日+1，x2=下工序开始日）
+  for(let i=0;i<n-1;i++){
+    const a=tasks[i], b=tasks[i+1];
+    const y1=gridY+i*rowH+rowH/2, y2=gridY+(i+1)*rowH+rowH/2;
+    const x1=xOf(c.ef[a.id]+1), x2=xOf(c.es[b.id]);
+    const gap=c.es[b.id]-(c.ef[a.id]+1);
+    const mid=(y1+y2)/2;
+    if(gap>0){
+      svg+=`<path d="M${x1} ${y1} C${x1} ${mid} ${x2} ${mid} ${x2} ${y2}" fill="none" stroke="#c2ccda" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+      const waitTxt2=`等待${gap}天${b.waitNote?'['+esc(b.waitNote)+']':''}`;
+      const wCol2=b.waitNote?'#5b6b82':'#94a3b8';
+      if(x2-x1>30) svg+=`<text class="waitNote" data-n="${i+1}" x="${(x1+x2)/2}" y="${mid-4}" font-size="10" fill="${wCol2}" text-anchor="middle" style="cursor:pointer">${waitTxt2}</text>`;
+      else svg+=`<text class="waitNote" data-n="${i+1}" x="${Math.min(x2+4,W-140)}" y="${mid-4}" font-size="10" fill="${wCol2}" style="cursor:pointer">${waitTxt2}</text>`;
+    } else {
+      svg+=`<path d="M${x1} ${y1} C${x1} ${mid} ${x2} ${mid} ${x2} ${y2}" fill="none" stroke="#b6c2d4" stroke-width="1.2"/>`;
+    }
+  }
+  // 工序箭线
+  tasks.forEach((t,i)=>{
+    const y=gridY+i*rowH+rowH/2;
+    const x0=xOf(c.es[t.id]), x1=xOf(c.ef[t.id]+1);
+    const crit=isCrit(t);
+    const color=crit?'#e23c39':(t.color||'#7a869a');
+    const width=crit?2.4:1.8;
+    if(t.dur<=0){
+      svg+=`<g data-id="${t.id}" style="cursor:pointer"><line x1="${x0}" y1="${y}" x2="${x0+14}" y2="${y}" stroke="${color}" stroke-width="${width}"/>
+        <path d="M${x0+14} ${y} l-8 -4 l0 8 z" fill="${color}"/>
+        <text x="${x0+20}" y="${y+4}" font-size="11" fill="#1f2d3d">${i+1}. ${esc(t.name)}</text></g>`;
+      return;
+    }
+    svg+=`<g data-id="${t.id}" style="cursor:pointer"><line x1="${x0}" y1="${y}" x2="${x1-6}" y2="${y}" stroke="${color}" stroke-width="${width}"/>
+      <path d="M${x1} ${y} l-9 -4 l0 8 z" fill="${color}"/>
+      <text x="${(x0+x1)/2}" y="${y-7}" font-size="11" fill="#1f2d3d" text-anchor="middle">${i+1}. ${esc(t.name)}</text>
+      <text x="${(x0+x1)/2}" y="${y+15}" font-size="10.5" fill="#7a869a" text-anchor="middle">${t.dur}天</text></g>`;
+  });
+  // 事件节点：每个工序起点 + 终点（终点=结束日+1）
+  tasks.forEach((t,i)=>{
+    const x=xOf(c.es[t.id]), y=gridY+i*rowH+rowH/2;
+    const crit=isCrit(t);
+    const fill=crit?'#e23c39':'#fff';
+    const stroke=crit?'#e23c39':'#5b6b82';
+    svg+=`<circle cx="${x}" cy="${y}" r="13" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`;
+    svg+=`<text x="${x}" y="${y+4}" font-size="11" fill="${crit?'#fff':'#1f2d3d'}" text-anchor="middle" font-weight="${crit?700:400}">${i+1}</text>`;
+    svg+=`<text x="${x}" y="${y-18}" font-size="10" fill="#7a869a" text-anchor="middle">${c.es[t.id]}</text>`;
+  });
+  if(n){
+    const last=tasks[n-1];
+    const x=xOf(c.ef[last.id]+1), y=gridY+(n-1)*rowH+rowH/2;
+    svg+=`<circle cx="${x}" cy="${y}" r="13" fill="#e23c39" stroke="#e23c39" stroke-width="1.6"/>`;
+    svg+=`<text x="${x}" y="${y+4}" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">${n+1}</text>`;
+    svg+=`<text x="${x}" y="${y-18}" font-size="10" fill="#7a869a" text-anchor="middle">${c.ef[last.id]}</text>`;
+  }
+  // 四周外边框
+  svg+=`<rect x="0.5" y="${top0}" width="${(W-1).toFixed(1)}" height="${(H-top0-1).toFixed(1)}" fill="none" stroke="${ink||'#dbe2ec'}" stroke-width="1.2"/>`;
+  // 米字格手柄（与横道图共用，左右=列宽、上下=行高、斜向=同时；橙点=移动位置）
+  svg+=gridHandleSVG(left,H);
+  svg+=`</svg>`;
+  // 图表文字随列宽/行高同比例缩放，且不超出行高
+  const ts2=Math.max(0.5,Math.min((1+(zoom-1)*0.42)*(1+(rowHS-1)*0.42),(rowH-10)/12));
+  if(ts2!==1) svg=svg.replace(/font-size="([\d.]+)"/g,(m,v)=>'font-size="'+(parseFloat(v)*ts2).toFixed(1)+'"');
+  // 时间轴表头文字随列宽×行高完整比例缩放
+  const tsHead2=Math.max(0.5,Math.min(2.5, zoom*rowHS));
+  svg=svg.replace(/font-size="H([\d.]+)"/g,(m,v)=>'font-size="'+(parseFloat(v)*tsHead2).toFixed(1)+'"');
+  // 全部字体不加粗
+  svg=svg.replace(/\sfont-weight="[^"]*"/g,'');
+  document.getElementById('viewNetwork').innerHTML=svg;
+  // 网络悬停提示
+  const ns=document.getElementById('viewNetwork').querySelector('svg');
+  if(ns) ns.querySelectorAll('g[data-id]').forEach(g=>{
+    const id=parseInt(g.getAttribute('data-id'));
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    const html=tipHTML(t,c,sd);
+    g.addEventListener('mouseenter',e=>showTip(e,html));
+    g.addEventListener('mousemove',moveTip);
+    g.addEventListener('mouseleave',hideTip);
+  });
+  // 等待天数点击：设置虚线下方自定义文字
+  if(ns) ns.querySelectorAll('.waitNote').forEach(el=>{
+    el.addEventListener('click',e=>{
+      const n=parseInt(el.getAttribute('data-n')); // 数组位置（1-based）
+      const t=tasks[n-1]; if(!t) return;
+      const v=prompt('在等待N天后面输入自定义文字（留空清除）：', t.waitNote||'');
+      if(v===null) return;
+      t.waitNote=v.trim();
+      recompute();
+    });
+  });
+  // 米字格手柄事件（网络图同样可拖调列宽/行高/移位置）
+  attachGridHandle(ns);
+}
+
+/* ===================== 主流程 ===================== */
+function recompute(){
+  try{
+    const c=computeCPM(tasks);
+    lastC=c;
+    renderTaskTable(c);
+    renderCPM(c);
+    renderGantt(c);
+    renderNetwork(c);
+    const crits=tasks.filter(t=>c.tf[t.id]===0);
+    document.getElementById('metaInfo').innerHTML=
+      `工期：${c.projectDur} 天 ｜ 关键线路：${crits.map(t=>t.id+' '+t.name).join(' → ')} ｜ 列宽：${Math.round(zoom*100)}%`;
+  }catch(err){
+    console.error('recompute 异常:', err);
+    toast('绘图异常：'+err.message);
+  }
+}
+function setZoom(z){
+  zoom=Math.max(0.5,Math.min(2.5,z));
+  if(lastC){ renderGantt(lastC); renderNetwork(lastC); }
+  toast('列宽 '+Math.round(zoom*100)+'%');
+}
+function setRowH(f){
+  rowHS=Math.max(0.5,Math.min(3,f));
+  if(lastC){ renderGantt(lastC); renderNetwork(lastC); }
+  toast('行高 '+Math.round(rowHS*100)+'%');
+}
+function setInfoFS(f){
+  infoFS=Math.max(0.6,Math.min(2,f));
+  try{ localStorage.setItem('sgl_infofs',infoFS); }catch(e){}
+  if(lastC){ renderGantt(lastC); renderNetwork(lastC); }
+  toast('信息字号 '+Math.round(infoFS*100)+'%');
+}
+function setBarH(f){
+  barH=Math.max(0.45,Math.min(0.95,f));
+  try{ localStorage.setItem('sgl_barh',barH); }catch(e){}
+  if(lastC){ renderGantt(lastC); }
+  toast('进度条高度 '+Math.round(barH*100)+'%');
+}
+function toggleGridHandle(){
+  showGH=!showGH;
+  try{ localStorage.setItem('sgl_ghshow',showGH?'1':'0'); }catch(e){}
+  const b=document.getElementById('ghToggle');
+  if(b) b.textContent=showGH?'米字格(显)':'米字格(隐)';
+  // 横道图与网络图都要重绘，否则切换视图后手柄残留
+  if(lastC){ renderGantt(lastC); renderNetwork(lastC); }
+  toast(showGH?'米字格手柄已显示（悬停可看使用方法）':'米字格手柄已隐藏');
+}
+function onProjChange(){
+  document.title=projName()+' · 施工计划图软件';
+  if(lastC){ renderGantt(lastC); renderNetwork(lastC); }
+}
+let chartTitleCustom=null; // 用户自定义图表名（null=随Tab自动）
+function chartTitleVal(){ return (chartTitleCustom||document.getElementById('chartTitle').value||'').trim(); }
+function onChartTitleChange(){
+  chartTitleCustom=document.getElementById('chartTitle').value.trim();
+  document.title=(projName()||'施工计划图软件')+' · '+(chartTitleVal()||(currentTab==='gantt'?'施工计划横道图':'双代号时标网络图'));
+}
+function switchTab(v){
+  currentTab=v;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  document.getElementById('viewGantt').style.display = v==='gantt'?'block':'none';
+  document.getElementById('viewNetwork').style.display = v==='network'?'block':'none';
+  document.getElementById('legendGantt').style.display = v==='gantt'?'flex':'none';
+  document.getElementById('legendNet').style.display = v==='network'?'flex':'none';
+  if(!chartTitleCustom) document.getElementById('chartTitle').value = v==='gantt'?'施工计划横道图':'双代号时标网络图';
+  document.title=(projName()||'施工计划图软件')+' · '+(chartTitleVal()||(v==='gantt'?'施工计划横道图':'双代号时标网络图'));
+  if(annotateMode) buildAnnotations();
+}
+/* 全屏显示图表区（Esc 或再次点击退出） */
+function toggleFullscreen(){
+  const r=document.querySelector('.right');
+  if(document.fullscreenElement || document.webkitFullscreenElement){
+    (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+  } else if(r.requestFullscreen){
+    r.requestFullscreen().catch(()=>toast('浏览器拒绝了全屏请求'));
+  } else if(r.webkitRequestFullscreen){
+    r.webkitRequestFullscreen();
+  } else { toast('当前浏览器不支持全屏'); }
+}
+document.addEventListener('fullscreenchange',()=>{
+  const b=document.getElementById('fsBtn');
+  if(b) b.textContent=document.fullscreenElement?'✕ 退出全屏':'⛶ 全屏';
+});
+/* ===================== 注解模式：工具栏按钮 ⇄ 图表区引线标注 ===================== */
+let annotateMode=false;
+const ANNOTS=[
+  // 顶栏（导出标题/时间轴起点）
+  {sel:'#projName',label:'工程名称（导出图主标题）',zone:'view',vp:[0.5,0.04]},
+  {sel:'#chartTitle',label:'图名（导出图副标题）',zone:'view',vp:[0.5,0.10]},
+  {sel:'#startDate',label:'开工日期＝时间轴起点',zone:'view',vp:[0.05,0.16]},
+  // 左侧工序清单
+  {sel:'button[onclick*="loadSample"]',label:'载入样例数据',zone:'task',vp:[0.98,0.13]},
+  {sel:'button[onclick*="loadStress"]',label:'50行压力测试',zone:'task',vp:[0.98,0.3]},
+  {sel:'button[onclick*="addTask"]',label:'清单新增工序',zone:'task',vp:[0.98,0.5]},
+  {sel:'button[onclick*="clearAll"]',label:'清空全部工序',zone:'task',vp:[0.98,0.7]},
+  // 工具栏样式类
+  {sel:'#ghToggle',label:'米字格手柄（列宽/行高）',zone:'view',vp:[0.62,0.36]},
+  {sel:'button[onclick*="setBarH"]',label:'进度条高度',zone:'view',vp:[0.62,0.48]},
+  {sel:'button[onclick*="setInfoFS"]',label:'信息四列字号',zone:'view',vp:[0.62,0.60]},
+  {sel:'#wkDayChk',label:'星期行开关',zone:'view',vp:[0.3,0.14]},
+  {sel:'#granSel',label:'时间粒度 天/周/月',zone:'view',vp:[0.52,0.14]},
+  // 工具栏导出类
+  {sel:'#paperSel',label:'导出图幅 A3/A4 横竖',zone:'view',vp:[0.78,0.3]},
+  {sel:'#dpiSel',label:'导出清晰度 300/600/900',zone:'view',vp:[0.78,0.42]},
+  {sel:'button[onclick*="downloadTemplate"],button[onclick*="importExcel"],button[onclick*="exportExcel"],button[onclick*="exportWord"],button[onclick*="exportSVG"]',label:'Excel/Word/SVG 导入导出',zone:'view',vp:[0.8,0.56]},
+  // 配色/字体/样式
+  {sel:'button[onclick*="randomColors"],button[onclick*="openPanel(\'color\')"]',label:'工序颜色（随机/统一）',zone:'view',vp:[0.42,0.34]},
+  {sel:'button[onclick*="openPanel(\'font\')"]',label:'图表内字体',zone:'view',vp:[0.42,0.46]},
+  {sel:'button[onclick*="openPanel(\'style\')"]',label:'条/线样式',zone:'view',vp:[0.42,0.58]},
+  // 图例
+  {sel:'.legend',label:'图例（关键/非关键等）',zone:'legend',vp:[0.5,0.5]}
+];
+function toggleAnnotate(){
+  annotateMode=!annotateMode;
+  const b=document.getElementById('annotBtn');
+  if(b){ b.style.background=annotateMode?'#f97316':'rgba(255,255,255,.2)'; b.style.borderColor=annotateMode?'#f97316':'rgba(255,255,255,.45)'; }
+  if(annotateMode) buildAnnotations();
+  else { const o=document.getElementById('annotOverlay'); if(o) o.innerHTML=''; toast('注解已关闭'); }
+}
+function annotRect(sel){
+  const els=document.querySelectorAll(sel);
+  if(!els.length) return null;
+  let l=Infinity,t=Infinity,r=-Infinity,b=-Infinity;
+  els.forEach(el=>{
+    const rc=el.getBoundingClientRect();
+    if(rc.width===0&&rc.height===0) return;
+    l=Math.min(l,rc.left); t=Math.min(t,rc.top); r=Math.max(r,rc.right); b=Math.max(b,rc.bottom);
+  });
+  if(!isFinite(l)) return null;
+  return {x:l,y:t,w:r-l,h:b-t};
+}
+/* 注解引线采用抛物线（贝塞尔曲线），见 buildAnnotations */
+/* 注解底图：克隆当前真实界面作为静态底图（foreignObject 内嵌） */
+function interfaceSnapshotHTML(){
+  const clone=document.body.cloneNode(true);
+  ['annotOverlay','tip','toast','aboutOverlay','colorPanel','fontPanel','stylePanel'].forEach(id=>{
+    const el=clone.querySelector('#'+id); if(el) el.remove();
+  });
+  clone.querySelectorAll('script').forEach(s=>s.remove());
+  const vg=document.getElementById('viewGantt'), vn=document.getElementById('viewNetwork');
+  const st={g:{t:vg?vg.scrollTop:0,l:vg?vg.scrollLeft:0},n:{t:vn?vn.scrollTop:0,l:vn?vn.scrollLeft:0}};
+  const gEl=clone.querySelector('#viewGantt'), nEl=clone.querySelector('#viewNetwork');
+  if(gEl){ gEl.setAttribute('data-st',st.g.t+'|'+st.g.l); }
+  if(nEl){ nEl.setAttribute('data-st',st.n.t+'|'+st.n.l); }
+  const bg=getComputedStyle(document.body).backgroundColor||'#f5f7fb';
+  return {html:`<div xmlns="http://www.w3.org/1999/xhtml" style="width:${innerWidth}px;height:${innerHeight}px;overflow:hidden;background:${bg}">${clone.innerHTML}</div>`,st};
+}
+function buildAnnotations(){
+  const o=document.getElementById('annotOverlay'); if(!o) return;
+  if(!annotateMode){ o.innerHTML=''; return; }
+  const snap=interfaceSnapshotHTML();
+  const view=document.querySelector(currentTab==='gantt'?'#viewGantt':'#viewNetwork');
+  if(!view) return;
+  const vc=view.getBoundingClientRect();
+  const taskEl=document.getElementById('taskTable');
+  const tc=taskEl&&taskEl.getBoundingClientRect().width?taskEl.getBoundingClientRect():null;
+  const zoneRect=z=>{
+    if(z==='view') return vc;
+    if(z==='task') return tc||vc;
+    if(z==='legend'){
+      const lg=document.getElementById(currentTab==='gantt'?'legendGantt':'legendNet');
+      if(!lg) return vc;
+      const rc=lg.getBoundingClientRect();
+      return rc.width?rc:vc;
+    }
+    return vc;
+  };
+  const items=ANNOTS.map(a=>{ const rc=annotRect(a.sel); return rc?Object.assign({},a,rc):null; }).filter(Boolean);
+  if(!items.length){ o.innerHTML=''; return; }
+  let svg=`<svg width="100%" height="100%" style="position:absolute;left:0;top:0">
+    <foreignObject x="0" y="0" width="${innerWidth}" height="${innerHeight}">${snap.html}</foreignObject>`;
+  items.forEach((it,idx)=>{
+    const x1=Math.round(it.x+it.w), y1=Math.round(it.y+it.h/2);
+    const zr=zoneRect(it.zone);
+    const x2=Math.round(zr.left+zr.width*(it.vp[0]||0.5));
+    const y2=Math.round(zr.top+zr.height*(it.vp[1]||0.5));
+    // 抛物线引线：三次贝塞尔曲线（水平出线→弧线→水平入线），自然平滑
+    const bend=Math.max(50,Math.round(Math.abs(x2-x1)*0.45));
+    const mx1=x1+bend, mx2=x2-bend;
+    svg+=`<path d="M${x1} ${y1} C${mx1} ${y1}, ${mx2} ${y2}, ${x2} ${y2}" fill="none" stroke="#f97316" stroke-width="1.6" opacity=".9"/>`;
+    svg+=`<circle cx="${x1}" cy="${y1}" r="4" fill="#f97316" stroke="#fff" stroke-width="1"/>`;
+    svg+=`<rect x="${x2-4}" y="${y2-4}" width="8" height="8" fill="#2563eb" transform="rotate(45 ${x2} ${y2})"/>`;
+    // 文字注解：终点右侧（超视口自动移回）
+    const tw=Math.round(it.label.length*10.5+20);
+    let lx=x2+10, ly=y2-8;
+    if(lx+tw>innerWidth-4) lx=Math.max(4,x2-tw-10);
+    if(ly<4) ly=4; if(ly>innerHeight-24) ly=innerHeight-24;
+    svg+=`<g><rect x="${lx}" y="${ly}" width="${tw}" height="17" rx="4" fill="rgba(255,255,255,.95)" stroke="#f97316" stroke-width="1"/>`;
+    svg+=`<text x="${lx+tw/2}" y="${ly+12.5}" font-size="10.5" fill="#b45309" text-anchor="middle">${it.label}</text></g>`;
+  });
+  svg+=`</svg>`;
+  o.innerHTML=svg;
+  // 同步底图内部滚动位置（与真实界面一致）
+  requestAnimationFrame(()=>{
+    const g=o.querySelector('#viewGantt'); if(g){ g.scrollTop=snap.st.g.t; g.scrollLeft=snap.st.g.l; }
+    const n=o.querySelector('#viewNetwork'); if(n){ n.scrollTop=snap.st.n.t; n.scrollLeft=snap.st.n.l; }
+  });
+}
+let annotTimer=null;
+function annotRefresh(){ clearTimeout(annotTimer); annotTimer=setTimeout(()=>{ if(annotateMode) buildAnnotations(); },250); }
+window.addEventListener('resize',annotRefresh);
+window.addEventListener('scroll',annotRefresh,true);
+function initDivider(){
+  const div=document.getElementById('divider');
+  const left=document.getElementById('leftPanel');
+  try{ const saved=localStorage.getItem('sgl_leftw'); if(saved) applyW(parseInt(saved)); }catch(e){}
+  div.addEventListener('mousedown',e=>{
+    e.preventDefault();
+    const onMove=ev=>{ applyW(ev.clientX-9); };
+    const onUp=()=>{ document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp);
+      try{ localStorage.setItem('sgl_leftw', left.getBoundingClientRect().width); }catch(e){} };
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+  function applyW(w){
+    w=Math.max(320,Math.min(1400,w));
+    left.style.width=w+'px'; left.style.flexBasis=w+'px';
+  }
+}
+
+/* ===================== 统一配色 / 统一字体 面板 ===================== */
+let cpColor='#3a8ee6';
+function openPanel(which){
+  ['colorPanel','fontPanel','stylePanel'].forEach(id=>{ document.getElementById(id).style.display='none'; });
+  if(which==='color'){ buildSwatches(); document.getElementById('cpCustom').value=cpColor; updateCpPreview(); document.getElementById('colorPanel').style.display='block'; }
+  else if(which==='font'){ buildFontChips(); document.getElementById('fontPanel').style.display='block'; }
+  else if(which==='style'){ buildStyleSwatches(); document.getElementById('stylePanel').style.display='block'; }
+}
+/* 条/线样式：10+10 款 */
+const BAR_PREV=[
+ 'background:#3a8ee6',
+ 'background:linear-gradient(#6fb3f0,#2f6fed)',
+ 'background:#3a8ee6;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.25)',
+ 'background:#eaf2fd;border:1.5px solid #3a8ee6',
+ 'background:repeating-linear-gradient(45deg,#3a8ee6 0 4px,#7db9ef 4px 8px)',
+ 'background:linear-gradient(#fff 0 35%,#3a8ee6 35%)',
+ 'background:#3a8ee6;box-shadow:inset 0 0 0 3px #1f5bb8',
+ 'background:rgba(58,142,230,.55);border:1px solid #3a8ee6',
+ 'background:#3a8ee6;background-image:radial-gradient(#fff 1.2px,transparent 1.2px);background-size:5px 5px',
+ 'background:linear-gradient(#3a8ee6 55%,#1f5bb8 55%)'
+];
+const LINE_PREV=[
+ 'background:#dbe2ec;height:2px',
+ 'background:#d8dee8;height:2px',
+ 'background:#9db9e8;height:2px',
+ 'background:repeating-linear-gradient(90deg,#cbd5e1 0 3px,transparent 3px 6px);height:2px',
+ 'background:radial-gradient(#cbd5e1 1px,transparent 1px);background-size:4px 2px;height:2px',
+ 'background:#c9d4e2;height:3px',
+ 'background:#e3e8ef;height:2px;box-shadow:0 4px 0 #e3e8ef',
+ 'background:#e8a8a4;height:2px',
+ 'background:rgba(31,45,61,.08);height:2px',
+ 'background:transparent;height:2px;border-top:1px dashed #ddd'
+];
+function buildStyleSwatches(){
+  const barBox=document.getElementById('stBars'); barBox.innerHTML='';
+  BAR_STYLES.forEach((nm,i)=>{
+    const it=document.createElement('div');
+    it.className='st-item'+(barStyle===i?' sel':'');
+    const p=document.createElement('span'); p.className='prev bar'; p.style.cssText=BAR_PREV[i];
+    const t=document.createElement('div'); t.className='nm'; t.textContent=nm;
+    it.appendChild(p); it.appendChild(t);
+    it.onclick=()=>{ barStyle=i; try{localStorage.setItem('sgl_barstyle',i);}catch(e){} renderGantt(lastC); buildStyleSwatches(); toast('进度条样式：'+nm); };
+    barBox.appendChild(it);
+  });
+  const lineBox=document.getElementById('stLines'); lineBox.innerHTML='';
+  LINE_STYLES.forEach((nm,i)=>{
+    const it=document.createElement('div');
+    it.className='st-item'+(lineStyle===i?' sel':'');
+    const p=document.createElement('span'); p.className='prev line'; p.style.cssText=LINE_PREV[i];
+    const t=document.createElement('div'); t.className='nm'; t.textContent=nm;
+    it.appendChild(p); it.appendChild(t);
+    it.onclick=()=>{ lineStyle=i; try{localStorage.setItem('sgl_linestyle',i);}catch(e){} renderGantt(lastC); renderNetwork(lastC); buildStyleSwatches(); toast('分割线样式：'+nm); };
+    lineBox.appendChild(it);
+  });
+}
+function buildSwatches(){
+  const box=document.getElementById('cpSwatches'); box.innerHTML='';
+  PALETTE.concat(['#e23c39','#f8fafc']).forEach(col=>{
+    const sw=document.createElement('div');
+    sw.className='sw'+(col===cpColor?' sel':'');
+    sw.style.background=col; sw.dataset.col=col;
+    if(col==='#f8fafc'){ sw.style.border='1px solid #cbd5e1'; }
+    sw.title=col;
+    sw.onclick=()=>pickColor(col);
+    box.appendChild(sw);
+  });
+}
+function pickColor(col){
+  cpColor=col.toLowerCase();
+  document.getElementById('cpCustom').value=cpColor;
+  document.querySelectorAll('#cpSwatches .sw').forEach(el=>el.classList.toggle('sel',el.dataset.col===cpColor));
+  updateCpPreview();
+}
+function updateCpPreview(){
+  document.getElementById('cpPreview').style.background=cpColor;
+  document.getElementById('cpHex').textContent=cpColor.toUpperCase();
+}
+function applyUniformColor(){
+  if(!tasks.length){ toast('暂无工序'); return; }
+  tasks.forEach(t=>t.color=cpColor);
+  renderTaskTable(lastC); renderGantt(lastC); renderNetwork(lastC);
+  openPanel(null);
+  toast('已统一为 '+cpColor.toUpperCase()+'（进度填充自动跟随）');
+}
+function currentFont(){
+  return fontFamily||DEFAULT_FONT;
+}
+function buildFontChips(){
+  const box=document.getElementById('fontChips'); box.innerHTML='';
+  const cur=fontFamily||DEFAULT_FONT;
+  FONT_PRESETS.forEach(([label,fam])=>{
+    const chip=document.createElement('div');
+    chip.className='font-chip'+(cur===fam?' sel':'');
+    chip.textContent=label;
+    chip.style.fontFamily=fam;
+    chip.onclick=()=>applyFont(fam);
+    box.appendChild(chip);
+  });
+  document.getElementById('fontPrev').style.fontFamily=cur;
+}
+function applyFont(fam){
+  fam=fam||DEFAULT_FONT;
+  fontFamily=fam;
+  try{ localStorage.setItem('sgl_font',fam); }catch(e){}
+  buildFontChips();
+  if(lastC){ renderGantt(lastC); renderNetwork(lastC); }
+  toast(fam===DEFAULT_FONT?'已恢复默认字体(宋体)':'字体已应用(仅图表内)');
+}
+function applyCustomFont(){
+  const v=document.getElementById('fontCustom').value.trim();
+  if(!v){ toast('请输入字体名称'); return; }
+  applyFont('"'+v.replace(/["']/g,'')+'",sans-serif');
+}
+
+/* ===================== Excel：模板 / 导入 / 导出 ===================== */
+function xlsxReady(){ if(typeof XLSX==='undefined'){ toast('Excel 功能需联网加载组件，请检查网络'); return false; } return true; }
+function downloadTemplate(){
+  if(!xlsxReady()) return;
+  const aoa=[['序号','工序名称','开始时间','结束时间','持续天数'],
+             [1,'施工准备','2026-08-14','2026-08-15',2],
+             [2,'基础工程','2026-08-16','2026-08-25',10],
+             [3,'主体结构','2026-08-26','2026-09-14',20]];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'工序表');
+  XLSX.writeFile(wb, '施工计划图软件_导入模板.xlsx');
+  toast('模板已下载');
+}
+function parseDateStr(s){
+  if(s==null) return null;
+  s=String(s).trim();
+  const m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if(!m) return null;
+  const dt=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+  if(isNaN(dt.getTime())) return null;
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+function importExcel(input){
+  if(!xlsxReady()){ input.value=''; return; }
+  const f=input.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const sd=startDateVal();
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      let start=0;
+      const headStr=(rows[0]||[]).join('|');
+      if(/工序名称|名称|工作/.test(headStr)) start=1;
+      const newTasks=[]; let maxId=0; let i=0;
+      let prevEndB=null; // 上一工序结束日+1（边界）
+      for(let r=start;r<rows.length;r++){
+        const row=rows[r];
+        if(!row||row.length===0) continue;
+        const id=parseInt(row[0]); const name=String(row[1]||'').trim();
+        const sDate=parseDateStr(row[2]); const eDate=parseDateStr(row[3]);
+        const durCell=parseFloat(row[4]);
+        let startDay=null, endDay=null, dur=0;
+        if(sDate&&eDate){
+          startDay=daysFrom(sd,sDate); endDay=daysFrom(sd,eDate);
+          dur=endDay-startDay+1; // 工期=结束-开始+1
+        } else if(eDate){
+          endDay=daysFrom(sd,eDate);
+        }
+        if(durCell>0) dur=durCell;
+        if(sDate&&!eDate) startDay=daysFrom(sd,sDate);
+        if(!name && dur<=0){ if(sDate==null) continue; }
+        const tid=isNaN(id)?(newTasks.length?Math.max(...newTasks.map(t=>t.id))+1:1):id;
+        const t={id:tid,name:name||('工序'+tid),dur,color:PALETTE[(i++)%PALETTE.length],progress:0,gap:0,startOff:0};
+        if(newTasks.length===0){
+          t.startOff= startDay!=null? Math.max(0,startDay) : 0;
+        } else if(startDay!=null){
+          t.gap= startDay - prevEndB; // 可为负=重叠
+        }
+        newTasks.push(t);
+        if(endDay!=null) prevEndB=endDay+1;
+        else if(dur>0){ prevEndB= (startDay!=null?startDay:0)+dur; }
+        maxId=Math.max(maxId,tid);
+      }
+      if(!newTasks.length){ toast('未读取到有效数据'); input.value=''; return; }
+      tasks=newTasks; seq=maxId; renumberIds(); recompute();
+      toast('已导入 '+tasks.length+' 道工序');
+    }catch(err){ toast('导入失败：'+err.message); }
+    input.value='';
+  };
+  reader.readAsArrayBuffer(f);
+}
+// ExcelJS 懒加载（用于导出含 PNG 图表页的 xlsx）
+function loadExcelJS(){
+  return new Promise((res,rej)=>{
+    if(window.ExcelJS){ res(window.ExcelJS); return; }
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+    s.onload=()=>res(window.ExcelJS);
+    s.onerror=()=>rej(new Error('Excel 组件加载失败，请检查网络后重试'));
+    document.head.appendChild(s);
+  });
+}
+async function exportExcel(){
+  try{
+    const sd=startDateVal();
+    const gEl=document.querySelector('#viewGantt svg');
+    const nEl=document.querySelector('#viewNetwork svg');
+    if(!gEl||!nEl){ toast('请先绘制图表'); return; }
+    // 1) 按当前图幅/DPI 分别渲染横道图与网络图
+    const [mmW,mmH]=document.getElementById('paperSel').value.split(',').map(Number);
+    const dpi=parseInt(document.getElementById('dpiSel').value);
+    const gCv=await drawExportCanvas(gEl,{mmW,mmH,dpi,chartName:chartTitleVal()||'施工计划横道图'});
+    const nCv=await drawExportCanvas(nEl,{mmW,mmH,dpi,chartName:'双代号时标网络图'});
+    // 2) ExcelJS 生成 xlsx（工程信息 + 工序计划 + 横道图 + 网络图 四个工作表）
+    const ExcelJS=await loadExcelJS();
+    const wb=new ExcelJS.Workbook();
+    const wsInfo=wb.addWorksheet('工程信息');
+    [['工程名称',projName()],['开工日期',sd],['总工期(天)',lastC.projectDur],
+     ['关键线路',tasks.filter(t=>lastC.tf[t.id]===0).map(t=>t.name).join(' → ')],
+     ['图幅',document.getElementById('paperSel').selectedOptions[0].text],
+     ['清晰度',dpi+' DPI']].forEach(r=>wsInfo.addRow(r));
+    wsInfo.getColumn(1).width=16; wsInfo.getColumn(2).width=70;
+    const ws=wb.addWorksheet('工序计划');
+    ws.addRow(['序号','工序名称','开始时间','结束时间','持续天数','间隔(天)','ES','EF','LS','LF','TF','FF','关键']);
+    tasks.forEach(t=>ws.addRow([t.id,t.name,addDays(sd,lastC.es[t.id]),addDays(sd,lastC.ef[t.id]),t.dur,t.gap||0,
+      lastC.es[t.id],lastC.ef[t.id],lastC.ls[t.id],lastC.lf[t.id],lastC.tf[t.id],lastC.ff[t.id],lastC.tf[t.id]===0?'★':'']));
+    ws.getColumn(2).width=24; ws.getColumn(3).width=14; ws.getColumn(4).width=14;
+    const fitImg=(w,n,cv)=>{ const sc=Math.min(1,1500/cv.width,1500/cv.height);
+      w.addImage(n,{tl:{col:0,row:0}, ext:{width:Math.round(cv.width*sc), height:Math.round(cv.height*sc)}});
+      w.getColumn(1).width=Math.round(cv.width*sc/7.5)+2; w.getRow(1).height=Math.round(cv.height*sc*0.75)+2; };
+    const wsG=wb.addWorksheet('施工横道图');
+    fitImg(wsG, wb.addImage({base64:gCv.toDataURL('image/png').split(',')[1],extension:'png'}), gCv);
+    const wsN=wb.addWorksheet('双代号时标网络图');
+    fitImg(wsN, wb.addImage({base64:nCv.toDataURL('image/png').split(',')[1],extension:'png'}), nCv);
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=projName()+'_(含横道图与网络图)_施工进度计划.xlsx';
+    a.click(); URL.revokeObjectURL(a.href);
+    toast('Excel 已导出（横道图+网络图各一工作表）');
+  }catch(e){ toast('导出失败：'+e.message); }
+}
+
+/* ===================== Word / PNG / SVG 导出 ===================== */
+async function exportWord(){
+  const c=lastC; const sd=startDateVal(); const pn=projName();
+  let html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>';
+  html+='<h1 style="color:#2f6fed;text-align:center">'+esc(pn)+'</h1>';
+  html+='<h2 style="text-align:center">'+esc(chartTitleVal()||(currentTab==='gantt'?'施工计划横道图':'双代号时标网络图'))+'</h2>';
+  html+='<p>总工期：'+c.projectDur+' 天 ｜ 开工日期：'+sd+'</p>';
+  html+='<h3>一、工序清单与关键线路</h3><table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;font-size:12px">';
+  html+='<tr style="background:#f0f3f9"><th>序号</th><th>工序名称</th><th>持续天数</th><th>间隔(天)</th><th>开始</th><th>结束</th><th>TF</th><th>关键</th></tr>';
+  tasks.forEach(t=>{ html+='<tr><td>'+t.id+'</td><td>'+esc(t.name)+'</td><td>'+t.dur+'</td><td>'+(t.gap||0)+'</td><td>'+addDays(sd,c.es[t.id])+'</td><td>'+addDays(sd,c.ef[t.id])+'</td><td>'+c.tf[t.id]+'</td><td>'+(c.tf[t.id]===0?'★红':'')+'</td></tr>'; });
+  html+='</table>';
+  try{
+    const gEl=document.querySelector('#viewGantt svg');
+    if(gEl){ const png=await svgToDataURL(gEl); html+='<h3>二、施工横道图</h3><img src="'+png+'" style="max-width:100%">'; }
+  }catch(e){}
+  const nEl=document.querySelector('#viewNetwork svg');
+  if(nEl){ try{ const png2=await svgToDataURL(nEl); html+='<h3>三、双代号时标网络图</h3><img src="'+png2+'" style="max-width:100%">'; }catch(e){} }
+  html+='</body></html>';
+  const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=pn+'_'+(currentTab==='gantt'?'施工横道图':'双代号时标网络图')+'.doc'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Word 已导出');
+}
+/* 导出净化：剔除“今天”标记与拖动落点标记，把 CSS 变量换成实色，可选按字号缩放 */
+function cleanSvgForExport(svgEl,fontScale){
+  const clone=svgEl.cloneNode(true);
+  clone.querySelectorAll('.tm,#dropMark,.wkend,.grid-handle,.gh-move,.annot-ghost').forEach(el=>el.remove());
+  let svg=new XMLSerializer().serializeToString(clone);
+  svg=svg.replace(/var\(--[a-z]+\)/g, m=>CSSMAP[m]||'#000');
+  if(fontScale && fontScale!==1) svg=svg.replace(/font-size="([\d.]+)"/g,(m,v)=>'font-size="'+(parseFloat(v)*fontScale).toFixed(1)+'"');
+  if(!svg.includes('xmlns=')) svg=svg.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
+  return svg;
+}
+function svgToDataURL(svgEl,opts){
+  opts=opts||{};
+  return new Promise((resolve,reject)=>{
+    const svg=cleanSvgForExport(svgEl,opts.fontScale||1);
+    const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    img.onload=()=>{
+      const w=parseFloat(svgEl.getAttribute('width'))||800;
+      const h=parseFloat(svgEl.getAttribute('height'))||600;
+      const cv=document.createElement('canvas'); cv.width=w*2; cv.height=h*2;
+      const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height);
+      cx.scale(2,2); cx.drawImage(img,0,0,w,h);
+      try{ resolve(cv.toDataURL('image/png')); }catch(e){ reject(e); }
+      URL.revokeObjectURL(url);
+    };
+    img.onerror=()=>{ reject(new Error('img')); URL.revokeObjectURL(url); };
+    img.src=url;
+  });
+}
+/* ===================== 导出图绘制（Excel 内嵌 PNG 用） ===================== */
+async function drawExportCanvas(svgEl,opts){
+  const {mmW,mmH,dpi,fontScale=1,projScale=1,chartScale=1,chartName}=opts;
+  const dataUrl=await svgToDataURL(svgEl,{fontScale});
+  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('img'));i.src=dataUrl;});
+  const cw=Math.round(mmW/25.4*dpi), ch=Math.round(mmH/25.4*dpi);
+  const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
+  const cx=cv.getContext('2d');
+  cx.fillStyle='#fff'; cx.fillRect(0,0,cw,ch);
+  const fam=currentFont().replace(/"/g,"'"); // canvas font 用单引号，避免引号嵌套
+  const titleH=Math.round(ch*0.10), m=Math.round(ch*0.012);
+  cx.textAlign='center';
+  cx.fillStyle='#1f2d3d';
+  cx.font=Math.round(titleH*0.32*projScale)+'px '+fam;
+  cx.fillText(projName()||'施工计划图软件', cw/2, titleH*0.42, cw-m*2);
+  cx.fillStyle='#475569';
+  cx.font=Math.round(titleH*0.18*chartScale)+'px '+fam;
+  cx.fillText(chartName||(currentTab==='gantt'?'施工计划横道图':'双代号时标网络图'), cw/2, titleH*0.86, cw-m*2);
+  const svgW=parseFloat(svgEl.getAttribute('width'))||800;
+  const svgH=parseFloat(svgEl.getAttribute('height'))||600;
+  const chartTop=Math.round(titleH)+m;          // 图表名下方即接图表
+  const boxW=cw-m*2, boxH=ch-chartTop-m;
+  const ratio=Math.min(boxW/svgW, boxH/svgH);
+  const dw=svgW*ratio, dh=svgH*ratio;
+  const dx=m+(boxW-dw)/2, dy=chartTop;          // 顶部对齐（不垂直居中，不留大空隙）
+  cx.drawImage(img, dx, dy, dw, dh);
+  return cv;
+}
+function openAbout(){ document.getElementById('aboutOverlay').style.display='flex'; }
+function closeAbout(){ document.getElementById('aboutOverlay').style.display='none'; }
+function exportSVG(){
+  const sel=currentTab==='gantt'?'viewGantt':'viewNetwork';
+  const svgEl=document.querySelector('#'+sel+' svg');
+  if(!svgEl){ toast('请先绘制图表'); return; }
+  const blob=new Blob([cleanSvgForExport(svgEl)],{type:'image/svg+xml;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=projName()+'_'+(currentTab==='gantt'?'施工横道图':'双代号时标网络图')+'.svg';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('SVG 已导出');
+}
+
+/* ===================== 提示 ===================== */
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+/* ===================== 样例 / 压力 ===================== */
+function loadSample(){
+  tasks=[]; seq=0;
+  tasks.push(newTask('施工准备',2,'#3a8ee6')); tasks[0].progress=100;
+  tasks.push(newTask('基础工程',6,'#22a06b')); tasks[1].progress=100;
+  tasks.push(newTask('主体结构',6,'#f59e0b')); tasks[2].progress=60;
+  tasks.push(newTask('砌体工程',6,'#8b5cf6')); tasks[3].progress=20;
+  tasks.push(newTask('屋面工程',6,'#06b6d4'));
+  tasks.push(newTask('设备安装',6,'#ec4899')); tasks[5].progress=40;
+  tasks.push(newTask('装饰装修',6,'#84cc16'));
+  tasks.push(newTask('验收准备',6,'#14b8a6'));
+  tasks.push(newTask('竣工验收',2,'#f97316'));
+  tasks[6].gap=2; // 装饰装修前留 2 天间隔（演示等待）
+  recompute();
+}
+function loadStress(){
+  tasks=[]; seq=0;
+  for(let i=1;i<=50;i++){
+    const t=newTask('工序'+i,1+(i%5));
+    t.progress=(i*7)%100;
+    tasks.push(t);
+  }
+  recompute();
+  toast('已载入 50 道工序压力测试数据');
+}
+
+/* 启动 */
+document.getElementById('startDate').value=todayISO();
+document.title=projName()+' · 施工计划横道图';
+initDivider();
+try{ let saved=localStorage.getItem('sgl_font'); if(saved===OLD_BLACK_FONT){ localStorage.removeItem('sgl_font'); saved=null; } if(saved) fontFamily=saved; }catch(e){}
+{ const b=document.getElementById('ghToggle'); if(b) b.textContent=showGH?'米字格(显)':'米字格(隐)'; }
+loadSample();
+</script>
+</body>
+</html>
