@@ -356,14 +356,6 @@
   @keyframes cardIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0) scale(1)}}
   .card{animation:cardIn .55s cubic-bezier(.22,.9,.3,1) both;}
 
-  /* ===== 收藏按钮 ===== */
-  .fav-btn{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;
-       display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;
-       color:rgba(154,167,199,.7);background:rgba(255,255,255,.08);border:1px solid var(--card-b);
-       transition:all .2s;}
-  .card:hover .fav-btn{opacity:1;}
-  .fav-btn:hover{transform:scale(1.12);}
-  .fav-btn.on{opacity:1;color:#fbbf24;background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.45);}
   /* ===== 卡片元信息 ===== */
   .card .meta{font-size:10.5px;color:var(--muted);opacity:.75;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
   /* ===== 公告栏 ===== */
@@ -932,48 +924,7 @@ function closeNotice(){
   } catch(e){}
 })();
 
-// ===== ⑧ 常用收藏（星标置顶 + localStorage） =====
-var favKey = 'vista_favs';
-function getFavs(){ try { return JSON.parse(localStorage.getItem(favKey)) || []; } catch(e){ return []; } }
-function saveFavs(arr){ try { localStorage.setItem(favKey, JSON.stringify(arr)); } catch(e){} }
-function toggleFav(ev, btn){
-  ev.preventDefault(); ev.stopPropagation();
-  var href = btn.getAttribute('data-href');
-  var favs = getFavs();
-  var i = favs.indexOf(href);
-  if (i >= 0) favs.splice(i, 1); else favs.push(href);
-  saveFavs(favs);
-  renderFavButtons();
-  applyFavTop();
-}
-function renderFavButtons(){
-  var favs = getFavs();
-  document.querySelectorAll('.card').forEach(function(card){
-    var btn = card.querySelector('.fav-btn');
-    if (btn){
-      var on = favs.indexOf(card.getAttribute('href')) >= 0;
-      btn.classList.toggle('on', on);
-      btn.innerHTML = on
-        ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6L12 17l-5.4 2.6 1-6L3.3 9.4l6-.9L12 3z"/></svg>'
-        : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6L12 17l-5.4 2.6 1-6L3.3 9.4l6-.9L12 3z"/></svg>';
-    }
-  });
-}
-function applyFavTop(){
-  var grid = document.querySelector('.grid');
-  if (!grid) return;
-  var favs = getFavs();
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
-  cards.sort(function(a, b){
-    var fa = favs.indexOf(a.getAttribute('href')) >= 0;
-    var fb = favs.indexOf(b.getAttribute('href')) >= 0;
-    if (fa !== fb) return fa ? -1 : 1;
-    return 0;
-  });
-  cards.forEach(function(card){ grid.appendChild(card); });
-}
-
-// ===== ⑨ 卡片元信息 + 收藏按钮注入 =====
+// ===== ⑨ 卡片元信息 + 新标签页 =====
 var CARD_META = {
   'sgjht.html': '08-15', 'murus.html': '08-09', 'cqcost428.html': '08-15',
   'cqcost19.html': '08-15', 'cq24q.html': '08-15', 'stampgen.html': '08-15',
@@ -985,15 +936,6 @@ var CARD_META = {
     // 新标签页打开
     card.setAttribute('target', '_blank');
     card.setAttribute('rel', 'noopener');
-    // 收藏按钮
-    if (!card.querySelector('.fav-btn')){
-      var btn = document.createElement('span');
-      btn.className = 'fav-btn';
-      btn.setAttribute('data-href', href);
-      btn.setAttribute('title', '收藏置顶');
-      btn.onclick = function(ev){ toggleFav(ev, btn); };
-      card.appendChild(btn);
-    }
     // 元信息
     if (!card.querySelector('.meta') && CARD_META[href]){
       var meta = document.createElement('div');
@@ -1002,7 +944,6 @@ var CARD_META = {
       card.appendChild(meta);
     }
   });
-  renderFavButtons();
 })();
 // 页面加载：检测更新日志角标（有未读更新则「关于」显示绿点）
 updateLogBadge();
