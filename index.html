@@ -370,13 +370,21 @@
   .log-item:last-child{border-bottom:none;}
   .log-item .ld{flex-shrink:0;font-size:11.5px;color:var(--blue);font-weight:600;padding-top:1px;}
   .log-item .lt{font-size:12.5px;color:var(--txt);}
-  /* 关于弹窗内更新日志 */
-  .about-log{margin-top:16px;border-top:1px solid rgba(255,255,255,.12);padding-top:12px;text-align:left;}
-  .about-log-title{font-size:12.5px;color:#eef2fb;font-weight:600;letter-spacing:2px;margin-bottom:2px;}
-  .about-log .log-list{max-height:200px;margin-top:2px;}
-  .about-log .log-item{border-color:rgba(255,255,255,.1);}
-  .about-log .log-item .ld{color:#7dd3fc;}
-  .about-log .log-item .lt{color:rgba(238,242,251,.85);}
+  /* ===== 更新日志滚动条（导航栏下方） ===== */
+  .log-ticker{position:relative;max-width:760px;margin:-4px auto 14px;height:96px;overflow:hidden;
+       background:var(--card);border:1px solid var(--card-b);border-radius:16px;
+       backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:12px 20px;
+       box-shadow:0 4px 18px rgba(10,15,34,.12);}
+  .log-ticker-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .log-ticker-head .t-ico{color:var(--blue);display:flex;}
+  .log-ticker-head b{font-size:12px;font-weight:600;color:var(--txt);letter-spacing:2px;}
+  .log-ticker-head .t-count{font-size:10.5px;color:var(--muted);margin-left:auto;letter-spacing:.5px;}
+  .log-ticker-inner{display:flex;flex-direction:column;gap:5px;
+       -webkit-mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent);
+       mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent);}
+  .log-ticker-inner .li{display:flex;gap:10px;align-items:baseline;font-size:12.5px;line-height:1.6;}
+  .log-ticker-inner .li .ld{flex-shrink:0;font-size:11px;color:var(--blue);font-weight:600;min-width:62px;}
+  .log-ticker-inner .li .lt{color:var(--txt);}
 </style>
 </head>
 <body>
@@ -414,6 +422,15 @@
       </div>
     </div>
   </nav>
+  <!-- 更新日志滚动条（导航栏下方） -->
+  <div class="log-ticker" id="logTicker">
+    <div class="log-ticker-head">
+      <span class="t-ico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 3v4M16 3v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <b>更新日志</b>
+      <span class="t-count" id="logTickerCount"></span>
+    </div>
+    <div class="log-ticker-inner" id="logTickerInner"></div>
+  </div>
   <header>
     <div class="kicker">VISTA HUB · 工程数字工具集</div>
     <h1>元枢工具箱<small>一站式工程在线工具</small></h1>
@@ -603,10 +620,6 @@
     <div class="lock"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.8"/><path d="M12 11v5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff"/></svg></div>
     <h3>关于</h3>
     <p style="line-height:2.1;">所有者：Mr · Wu<br>QQ：641296512</p>
-    <div class="about-log">
-      <div class="about-log-title">更新日志</div>
-      <div class="log-list" id="aboutLogList"></div>
-    </div>
     <div class="btns">
       <button class="ok" onclick="closeAbout()">关闭</button>
     </div>
@@ -887,7 +900,7 @@ function stopConstellation(){
 })();
 
 // ===== 关于弹窗 =====
-function openAbout(){ renderLog(); document.getElementById('aboutMask').classList.add('show'); }
+function openAbout(){ document.getElementById('aboutMask').classList.add('show'); }
 function closeAbout(){ document.getElementById('aboutMask').classList.remove('show'); }
 
 // ===== 首次点击卡片验证（我的真实姓名：吴小虎） =====
@@ -1045,14 +1058,44 @@ var NEWS_LOG = [
   {d:'2026-08-15', t:'新增：四主题切换、动态背景、波形尾迹鼠标、我的私密导航页'},
   {d:'2026-08-10', t:'元枢工具箱正式上线：首批 7 款工程工具'}
 ];
+// ===== 更新日志滚动条（导航栏下方，垂直自动滚动） =====
 function renderLog(){
-  var el = document.getElementById('aboutLogList');
-  if (!el) return;
-  el.innerHTML = NEWS_LOG.map(function(n){
-    return '<div class="log-item"><span class="ld">' + n.d + '</span><span class="lt">' + n.t + '</span></div>';
+  var inner = document.getElementById('logTickerInner');
+  var count = document.getElementById('logTickerCount');
+  if (!inner) return;
+  var html = NEWS_LOG.map(function(n){
+    return '<div class="li"><span class="ld">' + n.d + '</span><span class="lt">' + n.t + '</span></div>';
   }).join('');
+  // 两份内容实现无缝循环
+  inner.innerHTML = html + html;
+  if (count) count.textContent = '共 ' + NEWS_LOG.length + ' 条 · 悬停暂停';
+  startLogTicker();
 }
-function openLog(){ openAbout(); }
+var _tickerRunning = false, _tickerFrame = null, _tickerY = 0;
+function startLogTicker(){
+  var inner = document.getElementById('logTickerInner');
+  var box = document.getElementById('logTicker');
+  if (!inner || !box) return;
+  var half = inner.scrollHeight / 2;  // 一份内容高度
+  if (half <= box.clientHeight) return; // 内容不够不滚动
+  if (_tickerRunning) return;
+  _tickerRunning = true;
+  function frame(){
+    if (!_tickerRunning) return;
+    _tickerY -= 0.45;                       // 垂直向上滚动速度
+    if (_tickerY <= -half) _tickerY = 0;    // 无缝回绕
+    inner.style.transform = 'translateY(' + _tickerY + 'px)';
+    _tickerFrame = requestAnimationFrame(frame);
+  }
+  frame();
+  // 悬停暂停
+  box.addEventListener('mouseenter', function(){ _tickerRunning = false; if (_tickerFrame) cancelAnimationFrame(_tickerFrame); });
+  box.addEventListener('mouseleave', function(){ if (!_tickerRunning){ _tickerRunning = true; frame(); } });
+}
+function openLog(){  // 公告栏「更新日志」→ 滚动到页面日志条
+  var tk = document.getElementById('logTicker');
+  if (tk) tk.scrollIntoView({behavior:'smooth', block:'center'});
+}
 function closeNotice(){
   document.getElementById('noticeBar').style.display = 'none';
   try { sessionStorage.setItem('vista_notice_closed', '1'); } catch(e){}
@@ -1138,6 +1181,8 @@ var CARD_META = {
   });
   renderFavButtons();
 })();
+// 页面加载即渲染更新日志滚动条
+renderLog();
 </script>
 </body>
 </html>
