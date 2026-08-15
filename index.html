@@ -370,18 +370,21 @@
   .log-item:last-child{border-bottom:none;}
   .log-item .ld{flex-shrink:0;font-size:11.5px;color:var(--blue);font-weight:600;padding-top:1px;}
   .log-item .lt{font-size:12.5px;color:var(--txt);}
-  /* ===== 更新日志滚动条（导航栏下方） ===== */
-  .log-ticker{position:relative;max-width:760px;margin:-4px auto 14px;height:96px;overflow:hidden;
+  /* ===== 更新日志滚动条（导航栏下方，手动滚动，右对齐导航栏） ===== */
+  .log-ticker{position:relative;width:760px;max-width:100%;margin:0 0 14px auto;height:110px;
+       display:flex;flex-direction:column;
        background:var(--card);border:1px solid var(--card-b);border-radius:16px;
        backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:12px 20px;
        box-shadow:0 4px 18px rgba(10,15,34,.12);}
-  .log-ticker-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .log-ticker-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-shrink:0;}
   .log-ticker-head .t-ico{color:var(--blue);display:flex;}
   .log-ticker-head b{font-size:12px;font-weight:600;color:var(--txt);letter-spacing:2px;}
   .log-ticker-head .t-count{font-size:10.5px;color:var(--muted);margin-left:auto;letter-spacing:.5px;}
-  .log-ticker-inner{display:flex;flex-direction:column;gap:5px;
-       -webkit-mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent);
-       mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent);}
+  .log-ticker-inner{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:6px;
+       -webkit-mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);
+       mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);}
+  .log-ticker-inner::-webkit-scrollbar{width:5px;}
+  .log-ticker-inner::-webkit-scrollbar-thumb{background:var(--card-b);border-radius:3px;}
   .log-ticker-inner .li{display:flex;gap:10px;align-items:baseline;font-size:12.5px;line-height:1.6;}
   .log-ticker-inner .li .ld{flex-shrink:0;font-size:11px;color:var(--blue);font-weight:600;min-width:62px;}
   .log-ticker-inner .li .lt{color:var(--txt);}
@@ -412,6 +415,8 @@
       <button class="tp" data-t="neo" onclick="setTheme('neo')">新拟态</button>
     </div>
 
+      <div class="ver">工程数字工具集 · 浏览器即开即用 · 无需安装 · 数据本地处理</div>
+
       <div class="secret-btn" id="secretBtn" onclick="openSecret()" title="我的私密空间">
         <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path class="lock-arc" d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <span class="sb-txt">我的私密</span>
@@ -431,11 +436,6 @@
     </div>
     <div class="log-ticker-inner" id="logTickerInner"></div>
   </div>
-  <header>
-    <div class="kicker">VISTA HUB · 工程数字工具集</div>
-    <h1>元枢工具箱<small>一站式工程在线工具</small></h1>
-    <p>浏览器即开即用 · 无需安装 · 数据本地处理</p>
-  </header>
   
   <!-- 公告栏 -->
   <div class="notice" id="noticeBar">
@@ -1066,31 +1066,10 @@ function renderLog(){
   var html = NEWS_LOG.map(function(n){
     return '<div class="li"><span class="ld">' + n.d + '</span><span class="lt">' + n.t + '</span></div>';
   }).join('');
-  // 两份内容实现无缝循环
-  inner.innerHTML = html + html;
-  if (count) count.textContent = '共 ' + NEWS_LOG.length + ' 条 · 悬停暂停';
-  startLogTicker();
-}
-var _tickerRunning = false, _tickerFrame = null, _tickerY = 0;
-function startLogTicker(){
-  var inner = document.getElementById('logTickerInner');
-  var box = document.getElementById('logTicker');
-  if (!inner || !box) return;
-  var half = inner.scrollHeight / 2;  // 一份内容高度
-  if (half <= box.clientHeight) return; // 内容不够不滚动
-  if (_tickerRunning) return;
-  _tickerRunning = true;
-  function frame(){
-    if (!_tickerRunning) return;
-    _tickerY -= 0.45;                       // 垂直向上滚动速度
-    if (_tickerY <= -half) _tickerY = 0;    // 无缝回绕
-    inner.style.transform = 'translateY(' + _tickerY + 'px)';
-    _tickerFrame = requestAnimationFrame(frame);
-  }
-  frame();
-  // 悬停暂停
-  box.addEventListener('mouseenter', function(){ _tickerRunning = false; if (_tickerFrame) cancelAnimationFrame(_tickerFrame); });
-  box.addEventListener('mouseleave', function(){ if (!_tickerRunning){ _tickerRunning = true; frame(); } });
+  // 最新在顶部，默认即显示最新（手动滚动查看历史）
+  inner.innerHTML = html;
+  if (count) count.textContent = '共 ' + NEWS_LOG.length + ' 条 · 最新更新';
+  inner.scrollTop = 0;
 }
 function openLog(){  // 公告栏「更新日志」→ 滚动到页面日志条
   var tk = document.getElementById('logTicker');
