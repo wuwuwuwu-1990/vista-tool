@@ -55,6 +55,29 @@
          radial-gradient(800px 480px at -10% 30%,var(--bg-extra2),transparent 60%),
          radial-gradient(700px 500px at 60% 115%,var(--bg-extra3),transparent 60%),
          linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);}
+  /* ===== 深空科技专属：流星雨动态背景（5 颗彗星，GPU 合成层动画） ===== */
+  .bg-shoot{display:none;position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  body[data-theme="space"] .bg-shoot{display:block;}
+  .shoot{position:absolute;top:0;left:0;width:2px;border-radius:2px;
+       background:linear-gradient(180deg,#ffffff 0%,rgba(173,205,255,.85) 30%,rgba(120,160,255,.35) 65%,transparent 100%);
+       transform:rotate(45deg);opacity:0;
+       animation:shootFly var(--d,7s) linear var(--dl,-1s) infinite;will-change:transform,opacity;}
+  .shoot::before{content:"";position:absolute;top:-1px;left:50%;width:5px;height:5px;transform:translate(-50%,-50%);
+       border-radius:50%;background:#fff;
+       box-shadow:0 0 8px 3px rgba(160,200,255,.9),0 0 18px 6px rgba(120,170,255,.45);}
+  .shoot:nth-child(1){left:68%;top:-6%;height:80px;--d:7.2s;--dl:-1.2s;}
+  .shoot:nth-child(2){left:82%;top:-3%;height:120px;--d:8.6s;--dl:-3.4s;}
+  .shoot:nth-child(3){left:55%;top:-10%;height:64px;--d:6.4s;--dl:-5.6s;}
+  .shoot:nth-child(4){left:90%;top:-2%;height:140px;--d:9.4s;--dl:-7.8s;}
+  .shoot:nth-child(5){left:42%;top:-12%;height:96px;--d:7.8s;--dl:-10.2s;}
+  @keyframes shootFly{
+    0%{opacity:0;transform:rotate(45deg) translate3d(-9vw,0,0);}
+    2.5%{opacity:1;}
+    12%{opacity:1;}
+    15%{opacity:0;transform:rotate(45deg) translate3d(80vw,0,0);}
+    100%{opacity:0;transform:rotate(45deg) translate3d(80vw,0,0);}
+  }
+
   /* ===== 商务深蓝专属：光晕呼吸动态背景 ===== */
   .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
   .bg-halo.h1{width:58vmin;height:58vmin;left:50%;top:42%;transform:translate(-50%,-50%);
