@@ -105,9 +105,7 @@
   .bg-sun.s2{width:38vmin;height:38vmin;left:26%;top:68%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(138,75,45,.35),transparent 62%);
        animation:sunBreathe 7.5s ease-in-out 1.5s infinite;}
-  .bg-sun.s3{width:32vmin;height:32vmin;left:78%;top:26%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(185,138,94,.3),transparent 62%);
-       animation:sunBreathe 8.5s ease-in-out 2.5s infinite;}
+
   body[data-theme="ink"] .bg-sun{display:block;}
   @keyframes sunBreathe{
     0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.92);}
@@ -118,8 +116,6 @@
   .bg-const{display:none;position:fixed;inset:0;pointer-events:none;z-index:0;}
   body[data-theme="space"] .bg-const{display:block;}
 
-  /* ===== 波形尾迹动态鼠标（全局） ===== */
-  #cursorFx{position:fixed;inset:0;z-index:60;pointer-events:none;}
   .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
   .bg-halo.h1{width:58vmin;height:58vmin;left:50%;top:42%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(245,166,35,.4),rgba(245,166,35,.13) 45%,transparent 70%);
@@ -127,9 +123,7 @@
   .bg-halo.h2{width:42vmin;height:42vmin;left:28%;top:66%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(30,111,217,.48),rgba(30,111,217,.15) 45%,transparent 68%);
        animation:haloBreathe 7.5s ease-in-out 1.4s infinite;}
-  .bg-halo.h3{width:36vmin;height:36vmin;left:76%;top:24%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(77,163,255,.4),transparent 66%);
-       animation:haloBreathe 8.5s ease-in-out 2.6s infinite;}
+
   body[data-theme="business"] .bg-halo{display:block;}
   @keyframes haloBreathe{
     0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(.9);}
@@ -226,10 +220,11 @@
   .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:16px;}
   .card{position:relative;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;overflow:hidden;
-       background:var(--card);border:1px solid var(--card-b);backdrop-filter:blur(8px);
+       background:var(--card);border:1px solid var(--card-b);
        transform-style:preserve-3d;will-change:transform;opacity:0;
-       transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease;}
+       transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease,backdrop-filter .25s;}
   .card.in{opacity:1;}
+  .card:hover{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
   .card::after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;pointer-events:none;z-index:2;
        background:radial-gradient(circle,rgba(255,255,255,.18),transparent 62%);
        left:var(--mx,50%);top:var(--my,50%);transform:translate(-50%,-50%) translateZ(26px);
@@ -385,12 +380,9 @@
 <body>
 <div class="bg-sun s1"></div>
 <div class="bg-sun s2"></div>
-<div class="bg-sun s3"></div>
 <div class="bg-const"><canvas id="spaceCanvas"></canvas></div>
-<canvas id="cursorFx"></canvas>
 <div class="bg-halo h1"></div>
 <div class="bg-halo h2"></div>
-<div class="bg-halo h3"></div>
 <div class="wrap">
   <nav>
     <div class="brand">
@@ -743,7 +735,7 @@ function startConstellation(){
   var W = cv.width = window.innerWidth;
   var H = cv.height = window.innerHeight;
   var pts = [];
-  var COUNT = 40;  // GPU 优化：60→40 粒子
+  var COUNT = 25;  // GPU 优化：60→40→25 粒子
   for (var i = 0; i < COUNT; i++){
     pts.push({x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3});
   }
@@ -764,8 +756,8 @@ function startConstellation(){
         var q = pts[j];
         var dx = p.x - q.x, dy = p.y - q.y;
         var d2 = dx * dx + dy * dy;
-        if (d2 < 130 * 130){
-          var a = (1 - Math.sqrt(d2) / 130) * .4;
+        if (d2 < 90 * 90){
+          var a = (1 - Math.sqrt(d2) / 90) * .4;
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(q.x, q.y);
@@ -806,100 +798,7 @@ function stopConstellation(){
   else setTheme('business', false);
 })();
 
-// ===== 波形尾迹动态鼠标（全局，视口坐标直映·方案A） =====
-(function(){
-  var cv = document.getElementById('cursorFx');
-  if (!cv) return;
-  var ctx = cv.getContext('2d');
-  var W = 0, H = 0, DPR = 1, pts = [];
-  var mx = 0, my = 0, hasMoved = false, inView = true, staticFrames = 0;
-  var MAXP = 24;
-  function rs(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
-    cv.width = W * DPR; cv.height = H * DPR;
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    pts = [];
-  }
-  function onMove(x, y){ mx = x; my = y; hasMoved = true; inView = true; resumeFx(); }
-  document.addEventListener('mouseenter', function(e){ onMove(e.clientX, e.clientY); });
-  document.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
-  document.addEventListener('mouseleave', function(){ inView = false; pts = []; });
-  document.addEventListener('touchstart', function(e){
-    if (e.touches.length) onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive:true});
-  document.addEventListener('touchmove', function(e){
-    if (e.touches.length) onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive:true});
-  window.addEventListener('resize', rs);
-  // ===== GPU 优化：静止时暂停 rAF（鼠标不动零绘制） =====
-  var idleFrames = 0, stopped = false, rafId = null;
-  function resumeFx(){
-    if (stopped && hasMoved && inView){
-      stopped = false;
-      rafId = requestAnimationFrame(loop);
-    }
-  }
-  rs();
-  function loop(now){
-    ctx.clearRect(0, 0, W, H);
-    // 鼠标未移动过/离开页面：不绘制任何内容（避免光晕初始错位）
-    if (!inView || !hasMoved){ rafId = requestAnimationFrame(loop); return; }
-    // 路径记录：波形头部精确咬合指针
-    var tailP = pts.length ? pts[pts.length - 1] : null;
-    if (!tailP || Math.hypot(tailP.x - mx, tailP.y - my) >= 0.5){
-      pts.push({x:mx, y:my, t:now});
-      if (pts.length > MAXP) pts.shift();
-    }
-    // 智能消散：静止每2帧去1点 ≈0.8s 消散完
-    var moving = false;
-    if (pts.length){
-      var tail = pts[pts.length - 1];
-      moving = Math.hypot(tail.x - mx, tail.y - my) >= 0.5;
-      if (moving){ staticFrames = 0; }
-      else {
-        staticFrames++;
-        if (staticFrames >= 2){ pts.shift(); staticFrames = 0; }
-      }
-    }
-    // 静止累计超过 90 帧（≈1.5s，尾迹已消散）→ 暂停循环省 GPU
-    if (!moving && !pts.length){
-      idleFrames++;
-      if (idleFrames > 90){ stopped = true; return; }
-    } else {
-      idleFrames = 0;
-    }
-    // 三波带：全部从指针尖端发出、尾部渐隐
-    var n = pts.length;
-    if (n){
-      for (var b = 0; b < 3; b++){
-        ctx.beginPath();
-        for (var i = 0; i < n; i++){
-          var p = pts[i];
-          var k = (n > 1) ? i / (n - 1) : 1;
-          var fade = Math.pow(k, 0.85);
-          var amp = (14 + b * 8) * (1 - k);
-          var wave = Math.sin(p.t * 0.02 + b * 2.1) * amp;
-          var px = p.x, py = p.y + wave + (b - 1) * 10 * (1 - k);
-          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        }
-        ctx.strokeStyle = 'rgba(56,189,248,' + ((0.8 - b * 0.22) * fade).toFixed(3) + ')';
-        ctx.lineWidth = 3.2 - b * 0.8;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-      }
-    }
-    // 中心光点 = 指针本体（柔和发光，中心即鼠标位置）
-    var g = ctx.createRadialGradient(mx, my, 0, mx, my, 16);
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(.35, 'rgba(125,211,252,.8)');
-    g.addColorStop(1, 'rgba(56,189,248,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(mx, my, 16, 0, Math.PI * 2); ctx.fill();
-    rafId = requestAnimationFrame(loop);
-  }
-  rafId = requestAnimationFrame(loop);
-})();
+
 
 // ===== 关于弹窗 =====
 function openAbout(){
