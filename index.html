@@ -47,46 +47,6 @@
     --sp-bar:linear-gradient(180deg,#ffc861,#f5a623);
     --foot-c:#7e9cc0;
   }
-  /* ===== 主题 3：雅致水墨 ===== */
-  body[data-theme="ink"]{
-    --bg1:#f2efe8; --bg2:#e6e2d8;
-    --bg-extra1:rgba(138,75,45,.05); --bg-extra2:transparent; --bg-extra3:transparent;
-    --card:rgba(255,255,255,.6); --card-b:rgba(47,58,66,.1);
-    --txt:#2f2a22; --muted:#8a8375;
-    --blue:#5c6b73; --cyan:#8a6b4d; --violet:#3a4a52; --teal:#8a4b2d;
-    --title-grad:linear-gradient(120deg,#2f2a22 40%,#8a4b2d 100%);
-    --kicker-c:#8a4b2d; --kicker-b:rgba(138,75,45,.06); --kicker-bd:rgba(138,75,45,.3);
-    --card-hover:0 12px 30px rgba(47,58,66,.12);
-    --card-hover-bd:rgba(138,75,45,.3);
-    --sec-bar:linear-gradient(180deg,#8a4b2d,#b98a5e);
-    --chip-def-bd:rgba(138,75,45,.18); --chip-def-c:#8a6b4d; --chip-def-bg:rgba(138,75,45,.05);
-    --mark-grad:linear-gradient(135deg,#5c6b73,#2f3a42);
-    --mark-shadow:0 4px 14px rgba(47,58,66,.25);
-    --btn-ok:linear-gradient(135deg,#5c6b73,#8a4b2d);
-    --sp-mark:linear-gradient(135deg,#8a4b2d,#b98a5e);
-    --sp-bar:linear-gradient(180deg,#8a4b2d,#b98a5e);
-    --foot-c:#a09a8c;
-  }
-  /* ===== 主题 3：新拟态 ===== */
-  body[data-theme="neo"]{
-    --bg1:#e8ecf4; --bg2:#dde3ee;
-    --bg-extra1:transparent; --bg-extra2:transparent; --bg-extra3:transparent;
-    --card:#e8ecf4; --card-b:transparent;
-    --txt:#2a3350; --muted:#7b86a5;
-    --blue:#4f6ef7; --cyan:#38b6e8; --violet:#7c5cf0; --teal:#2fa88a;
-    --title-grad:linear-gradient(120deg,#2a3350 30%,#4f6ef7 100%);
-    --kicker-c:#4f6ef7; --kicker-b:#e8ecf4; --kicker-bd:transparent;
-    --card-hover:8px 8px 18px #b9c2d6,-8px -8px 18px #fff;
-    --card-hover-bd:#c8d2e4;
-    --sec-bar:linear-gradient(180deg,#4f6ef7,#38b6e8);
-    --chip-def-bd:#d4dbe8; --chip-def-c:#5b6480; --chip-def-bg:#eef2f9;
-    --mark-grad:linear-gradient(145deg,#d5dce9,#c2cbdd);
-    --mark-shadow:5px 5px 12px #c3cbdc,-5px -5px 12px #fff;
-    --btn-ok:linear-gradient(135deg,#4f6ef7,#38b6e8);
-    --sp-mark:linear-gradient(135deg,#4f6ef7,#38b6e8);
-    --sp-bar:linear-gradient(180deg,#4f6ef7,#38b6e8);
-    --foot-c:#7b86a5;
-  }
   html{scroll-behavior:smooth;}
   body{min-height:100vh;font-family:"Microsoft YaHei","PingFang SC",-apple-system,sans-serif;
        color:var(--txt);overflow-x:hidden;transition:background .3s;
@@ -95,40 +55,7 @@
          radial-gradient(800px 480px at -10% 30%,var(--bg-extra2),transparent 60%),
          radial-gradient(700px 500px at 60% 115%,var(--bg-extra3),transparent 60%),
          linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);}
-  /* ===== 雅致水墨专属：暖阳呼吸动态背景 ===== */
-  .bg-sun{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
-  .bg-sun.s1{width:56vmin;height:56vmin;left:50%;top:38%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(199,139,77,.5),rgba(199,139,77,.16) 45%,transparent 68%);
-       animation:sunBreathe 6s ease-in-out infinite;}
-  .bg-sun.s1::after{content:"";position:absolute;inset:14%;border-radius:50%;
-       background:radial-gradient(circle,rgba(235,190,120,.5),transparent 62%);animation:sunBreathe 6s ease-in-out 3s infinite;}
-  .bg-sun.s2{width:38vmin;height:38vmin;left:26%;top:68%;transform:translate(-50%,-50%);
-       background:radial-gradient(circle,rgba(138,75,45,.35),transparent 62%);
-       animation:sunBreathe 7.5s ease-in-out 1.5s infinite;}
-
-  body[data-theme="ink"] .bg-sun{display:block;}
-  @keyframes sunBreathe{
-    0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.92);}
-    50%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}
-  }
-
-  /* ===== 深空科技专属：星座连线动态背景 ===== */
-  /* ===== 深空科技专属：流星雨动态背景（低占用 3%） ===== */
-  .bg-shoot{display:none;position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-  body[data-theme="space"] .bg-shoot{display:block;}
-  .bg-shoot .shoot{position:absolute;width:140px;height:2px;border-radius:2px;
-       background:linear-gradient(90deg,#fff,transparent);opacity:0;
-       transform:rotate(135deg);animation:shoot 3.5s linear infinite;}
-  .bg-shoot .shoot::after{content:"";position:absolute;right:-3px;top:-2px;width:6px;height:6px;
-       border-radius:50%;background:#fff;box-shadow:0 0 10px #fff;}
-  .bg-shoot .shoot:nth-child(1){top:15%;left:65%;animation-delay:0s;}
-  .bg-shoot .shoot:nth-child(2){top:38%;left:80%;animation-delay:-1.2s;}
-  .bg-shoot .shoot:nth-child(3){top:5%;left:35%;animation-delay:-2.3s;}
-  .bg-shoot .shoot:nth-child(4){top:55%;left:92%;animation-delay:-.7s;}
-  .bg-shoot .shoot:nth-child(5){top:25%;left:15%;animation-delay:-2.9s;}
-  @keyframes shoot{0%{transform:rotate(135deg) translateX(0);opacity:0;}8%{opacity:1;}
-       35%{transform:rotate(135deg) translateX(-500px);opacity:0;}100%{opacity:0;}}
-
+  /* ===== 商务深蓝专属：光晕呼吸动态背景 ===== */
   .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
   .bg-halo.h1{width:58vmin;height:58vmin;left:50%;top:42%;transform:translate(-50%,-50%);
        background:radial-gradient(circle,rgba(245,166,35,.4),rgba(245,166,35,.13) 45%,transparent 70%);
@@ -383,8 +310,6 @@
 </style>
 </head>
 <body>
-<div class="bg-sun s1"></div>
-<div class="bg-sun s2"></div>
 <div class="bg-shoot"><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div></div>
 <div class="bg-halo h1"></div>
 <div class="bg-halo h2"></div>
@@ -400,8 +325,6 @@
     <div class="theme-picker" id="themePicker" title="切换界面主题">
       <button class="tp" data-t="space" onclick="setTheme('space')">深空科技</button>
       <button class="tp on" data-t="business" onclick="setTheme('business')">商务深蓝</button>
-      <button class="tp" data-t="ink" onclick="setTheme('ink')">雅致水墨</button>
-      <button class="tp" data-t="neo" onclick="setTheme('neo')">新拟态</button>
     </div>
 
 
@@ -712,8 +635,8 @@ document.addEventListener('keydown', function(e){
 });
 
 // ===== 主题切换 =====
-var THEMES = ['space','business','ink','neo'];
-var THEME_VER = 'v3';  // 默认主题版本，变更默认主题时递增以作废旧记忆
+var THEMES = ['space','business'];
+var THEME_VER = 'v4';  // 主题精简为2个(space/business)，递增作废旧记忆  // 默认主题版本，变更默认主题时递增以作废旧记忆
 function setTheme(t, save){
   document.body.setAttribute('data-theme', t);
   document.querySelectorAll('.theme-picker .tp').forEach(function(b){
@@ -887,6 +810,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-08-15', t:'精简：去除雅致水墨/新拟态主题（保留深空科技+商务深蓝）'},
   {d:'2026-08-15', t:'新增：卡片入场动画、3D倾斜光晕、工具搜索、拖动排序、收藏置顶、元信息'},
   {d:'2026-08-15', t:'新增：关于按钮（所有者 Mr · Wu）、首次使用姓名验证、SVG 图标'},
   {d:'2026-08-15', t:'新增：四主题切换、动态背景、波形尾迹鼠标、我的私密导航页'},
