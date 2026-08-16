@@ -301,15 +301,6 @@
 
   /* ===== 卡片元信息 ===== */
   .card .meta{font-size:10.5px;color:var(--muted);opacity:.75;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
-  /* ===== 公告栏 ===== */
-  .notice{max-width:820px;margin:0 auto 22px;display:flex;align-items:center;gap:10px;
-       padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);
-       backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:12.5px;color:var(--txt);}
-  .notice .n-ico{flex-shrink:0;color:var(--blue);display:flex;}
-  .notice .n-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .notice .n-close{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
-       justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s;font-size:12px;}
-  .notice .n-close:hover{background:rgba(248,113,113,.15);color:#f87171;}
   /* 日志弹窗列表 */
   .log-list{max-height:340px;overflow-y:auto;text-align:left;margin-top:4px;}
   .log-item{display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid var(--card-b);line-height:1.55;}
@@ -356,12 +347,6 @@
     </div>
   </nav>
   
-  <!-- 公告栏 -->
-  <div class="notice" id="noticeBar">
-    <span class="n-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M4 12a8 8 0 0 1 16 0v5h-2v-3h2M4 14v3h2v-3M4 12h2M18 12h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-    <span class="n-txt" id="noticeTxt">元枢工具箱更新：新增卡片入场动画 · 3D倾斜光晕 · 工具搜索 · 拖拽排序 · 收藏置顶</span>
-    <span class="n-close" onclick="closeNotice()" title="关闭">✕</span>
-  </div>
 <div class="tool-search">
     <input id="toolSearch" type="text" placeholder="搜索工具（名称 / 功能关键词）…" oninput="filterTools(this.value)">
     <span class="ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
@@ -826,6 +811,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-08-16', t:'精简：移除首页更新公告栏'},
   {d:'2026-08-15', t:'精简：去除雅致水墨/新拟态主题（保留深空科技+商务深蓝）'},
   {d:'2026-08-15', t:'新增：卡片入场动画、3D倾斜光晕、工具搜索、拖动排序、收藏置顶、元信息'},
   {d:'2026-08-15', t:'新增：关于按钮（所有者 Mr · Wu）、首次使用姓名验证、SVG 图标'},
@@ -851,18 +837,6 @@ function renderLog(){
     return '<div class="log-item"><span class="ld">' + n.d + '</span><span class="lt">' + n.t + '</span></div>';
   }).join('');
 }
-function closeNotice(){
-  document.getElementById('noticeBar').style.display = 'none';
-  try { sessionStorage.setItem('vista_notice_closed', '1'); } catch(e){}
-}
-(function(){
-  try {
-    if (sessionStorage.getItem('vista_notice_closed') === '1'){
-      var nb = document.getElementById('noticeBar');
-      if (nb) nb.style.display = 'none';
-    }
-  } catch(e){}
-})();
 
 // ===== ⑨ 卡片元信息 + 新标签页 =====
 var CARD_META = {
