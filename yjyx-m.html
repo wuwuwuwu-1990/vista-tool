@@ -93,7 +93,7 @@ body{
 /* 底部 Tab 导航 */
 .tabbar{position:fixed;bottom:0;left:0;right:0;height:56px;z-index:50;display:flex;background:rgba(13,20,38,.95);
   border-top:1px solid var(--border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding-bottom:env(safe-area-inset-bottom)}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;cursor:pointer;border:none;background:none}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--muted);font-size:9px;cursor:pointer;border:none;background:none}
 .tab .ic{font-size:20px;line-height:1}
 .tab.on{color:var(--primary)}
 .tab.on .ic{text-shadow:0 0 12px rgba(34,211,238,.7)}
@@ -110,6 +110,13 @@ body{
 .lg-ver{display:inline-block;min-width:50px;color:var(--primary2);font-weight:700}
 .dialog .close{float:right;font-size:18px;color:var(--muted);cursor:pointer}
 
+.hl-item{display:flex;align-items:center;gap:10px;padding:12px 6px;border-bottom:1px dashed rgba(148,163,184,.15);cursor:pointer}
+.hl-item:last-child{border-bottom:none}
+.hl-item:active{background:rgba(34,211,238,.08)}
+.hl-name{font-size:15px;font-weight:700;color:var(--text)}
+.hl-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.hl-score{flex:0 0 44px;height:44px;border-radius:12px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--primary)}
 .empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
 </style>
 </head>
@@ -127,9 +134,11 @@ body{
 
 <div class="tabbar">
   <button class="tab on" id="tab0" onclick="showTab(0)"><span class="ic">🏠</span>总览</button>
-  <button class="tab" id="tab1" onclick="showTab(1)"><span class="ic">🖼️</span>实景位置</button>
-  <button class="tab" id="tab2" onclick="showTab(2)"><span class="ic">📋</span>十大板块</button>
-  <button class="tab" id="tab3" onclick="showTab(3)"><span class="ic">💬</span>综合点评</button>
+  <button class="tab" id="tab1" onclick="showTab(1)"><span class="ic">🏘️</span>房源</button>
+  <button class="tab" id="tab2" onclick="showTab(2)"><span class="ic">🖼️</span>航拍</button>
+  <button class="tab" id="tab3" onclick="showTab(3)"><span class="ic">🗺️</span>街景</button>
+  <button class="tab" id="tab4" onclick="showTab(4)"><span class="ic">📋</span>板块</button>
+  <button class="tab" id="tab5" onclick="showTab(5)"><span class="ic">💬</span>点评</button>
 </div>
 
 <div class="mask" id="aboutMask" onclick="if(event.target===this)hideAbout()">
@@ -186,7 +195,7 @@ var HOUSES=[
 
 
 var cur = 0, tab = 0;
-var TAB_NAMES = ['总览','实景位置','十大板块','综合点评'];
+var TAB_NAMES = ['总览','房源','航拍','街景','十大板块','综合点评'];
 
 function BCOLOR(s){return s>=85?"#34d399":s>=75?"#22d3ee":"#fbbf24";}
 function GRADE(s){return s>=85?"优":s>=75?"良好":"中等";}
@@ -227,8 +236,8 @@ function renderScores(h){
     }).join('')+'</div></div>';
 }
 
-function renderScene(h){
-  var s = '<div class="card"><h3><span class="bar"></span>实景 · 位置</h3>';
+function renderHang(h){
+  var s = '<div class="card"><h3><span class="bar"></span>航拍实景</h3>';
   if(h.hangUrl){
     s += '<div class="hang-wrap" id="hangWrap"><div class="empty" style="padding:70px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div>'+
       '<div class="hang-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动）</div>';
@@ -237,15 +246,32 @@ function renderScene(h){
   } else {
     s += '<div class="empty">该房源暂无航拍实景</div>';
   }
+  s += '</div>';
+  return s;
+}
+
+function renderMap(h){
+  var s = '<div class="card"><h3><span class="bar"></span>高德街景</h3>';
   if(h.mapUrl){
     s += '<div class="map-wrap"><iframe class="map-frame" src="'+h.mapUrl+'&platform=pc" loading="lazy" allowfullscreen></iframe></div>'+
       '<div class="map-tag">高德街道图 · 可拖动缩放</div>';
   } else if(h.mapImg){
-    s += '<div style="margin-top:10px"><img src="'+h.mapImg+'" style="width:100%;border-radius:10px" alt=""></div>';
+    s += '<img src="'+h.mapImg+'" style="width:100%;border-radius:10px" alt=""></div>';
   } else {
     s += '<div class="empty">该房源暂无地图底图</div>';
   }
   s += '</div>';
+  return s;
+}
+
+function renderHouseList(){
+  var s = '<div class="card"><h3><span class="bar"></span>已选房源（'+HOUSES.length+' 套）</h3>'+
+    HOUSES.map(function(h,i){
+      return '<div class="hl-item" onclick="selectHouse('+i+')">'+
+        '<div style="flex:1"><div class="hl-name">'+h.name+'</div>'+
+        '<div class="hl-sub">'+h.area+' · '+h.plate+' · '+h.price+'</div></div>'+
+        '<div class="hl-score">'+h.score+'</div></div>';
+    }).join('')+'</div>';
   return s;
 }
 
@@ -311,15 +337,19 @@ function render(){
   if(tab===0){
     body += renderHero(h) + renderKpis(h) + renderScores(h);
   } else if(tab===1){
-    body += renderScene(h);
+    body += renderHouseList();
   } else if(tab===2){
+    body += renderHang(h);
+  } else if(tab===3){
+    body += renderMap(h);
+  } else if(tab===4){
     body += renderBoards(h);
   } else {
     body += renderHero(h) + renderComment(h);
   }
   page.innerHTML = body;
-  // 实景位置 Tab: DOM 就绪后自动登录金福云并加载航拍
-  if(tab===1 && HOUSES[cur].hangUrl) setTimeout(function(){ jfyAutoLogin(HOUSES[cur].hangUrl); }, 200);
+  // 航拍 Tab: DOM 就绪后自动登录金福云并加载航拍
+  if(tab===2 && HOUSES[cur].hangUrl) setTimeout(function(){ jfyAutoLogin(HOUSES[cur].hangUrl); }, 200);
   // 滚动后强制回到顶部（iframe 加载防滚动锚定）
   setTimeout(function(){ page.scrollTop = 0; }, 300);
 }
