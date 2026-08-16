@@ -66,10 +66,16 @@ body{
 
 /* 实景位置 */
 .scene-box{position:relative;background:#0b1020;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.hang-wrap{height:56vh;min-height:300px}
-.hang-frame{width:100%;height:56vh;min-height:300px;border:none;display:block}
-.map-wrap{height:56vh;min-height:300px}
-.map-frame{width:100%;height:56vh;min-height:300px;border:none;background:#e8ecf1;display:block}
+.hang-wrap{height:62vh;min-height:320px}
+.hang-frame{width:100%;height:62vh;min-height:320px;border:none;display:block}
+.map-wrap{height:62vh;min-height:320px}
+.map-frame{width:100%;height:62vh;min-height:320px;border:none;background:#e8ecf1;display:block}
+/* 全屏模式: 覆盖整个可视区 */
+.fullscene{position:fixed;inset:0;z-index:80;background:#0b1020}
+.fullscene .hang-wrap,.fullscene .map-wrap{height:100vh;min-height:0;border:none;border-radius:0}
+.fullscene .hang-frame,.fullscene .map-frame{height:100vh;min-height:0}
+.fullscene .scene-close{position:fixed;top:14px;right:14px;z-index:85;background:rgba(13,20,38,.85);border:1px solid var(--primary);
+  color:var(--primary);font-size:13px;border-radius:20px;padding:7px 16px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .scene-cap{font-size:11px;color:var(--muted);margin-top:6px;text-align:center}
 .scene-tag{display:inline-block;font-size:11px;color:var(--primary2);background:rgba(34,211,238,.1);border:1px solid var(--border);border-radius:5px;padding:2px 8px;margin-top:8px}
 .scene-open{position:absolute;top:10px;right:10px;z-index:20;background:rgba(13,20,38,.85);border:1px solid var(--primary);
@@ -192,7 +198,7 @@ var HOUSES=[
       },
     {t:"商业与医疗",s:68,items:[["商业","重庆大悦城 · 南/北区"],["社区商业","底商 + 生活超市"],["医疗","翠云街道社区卫生服务中心 / 新兴医院"],["公园","威漫公园423m · 悦来滨江公园"]]},
     {t:"不利因素",s:70,items:[["噪音","临金山大道 · 靠路房配双重真空隔音玻璃"],["商业","大型商业依赖大悦城"],["人气","入住率不高 · 氛围待成熟"],["出行","暂不便 · 待甘悦大道通车改善"],["提示","购房前实地测试昼/夜噪音"]]},
-    {t:"综合评价",s:82,items:[["定位","融创品质纯洋房社区"],["亮点","楼间距宽 · 绿化好 · 环境安静"],["适合人群","改善型家庭 · 北区通勤"],["展望","悦来配套兑现 + 中央公园片区辐射"]]}
+    {t:"综合评价",s:79,items:[["定位","融创品质纯洋房社区"],["亮点","楼间距宽 · 绿化好 · 环境安静"],["适合人群","改善型家庭 · 北区通勤"],["展望","悦来配套兑现 + 中央公园片区辐射"]]}
   ]
 }
 ];
@@ -244,7 +250,7 @@ function renderHang(h){
   var s = '<div class="card"><h3><span class="bar"></span>航拍实景</h3>';
   if(h.hangUrl){
     s += '<div class="scene-box">'+
-      '<button class="scene-open" onclick="window.open(\''+h.hangUrl+'\')">⛶ 全屏打开</button>'+
+      '<button class="scene-open" onclick="openScene(\'hang\',\''+h.hangUrl+'\')">⛶ 全屏</button>'+
       '<div class="hang-wrap" id="hangWrap"><div class="empty" style="padding:70px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div></div>'+
       '<div class="scene-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动）</div>';
   } else if(h.hangImg){
@@ -260,7 +266,7 @@ function renderMap(h){
   var s = '<div class="card"><h3><span class="bar"></span>高德街景</h3>';
   if(h.mapUrl){
     s += '<div class="scene-box">'+
-      '<button class="scene-open" onclick="window.open(\''+h.mapUrl+'\')">⛶ 全屏打开</button>'+
+      '<button class="scene-open" onclick="openScene(\'map\',\''+h.mapUrl+'\')">⛶ 全屏</button>'+
       '<div class="map-wrap"><iframe class="map-frame" src="'+h.mapUrl+'&platform=pc" loading="lazy" allowfullscreen></iframe></div></div>'+
       '<div class="scene-tag">高德街道图 · 可拖动缩放</div>';
   } else if(h.mapImg){
@@ -286,17 +292,24 @@ function renderHouseList(){
 /* 金福云自动登录: 隐藏 iframe POST 账号密码, 拿 cookie 后加载航拍 */
 var JFY_ACCOUNT='18523591621', JFY_PASSWORD='wxf19900064wxf';
 var jfyLoginBusy = false;
-function jfyAutoLogin(url){
+var jfyLoginDone = false;
+function jfyAutoLogin(url, wrapId){
   if(jfyLoginBusy) return;
   jfyLoginBusy = true;
-  var wrap = document.getElementById('hangWrap');
-  // 先建隐藏登录 iframe
+  var wrap = document.getElementById(wrapId || 'hangWrap');
+  // 已登录过则直接加载
+  if(jfyLoginDone){
+    if(wrap) wrap.innerHTML = '<iframe class="hang-frame" src="'+url+'" loading="lazy" allowfullscreen></iframe>';
+    jfyLoginBusy = false;
+    return;
+  }
+  // 建"可见但极小"的登录 iframe（避免被当弹窗拦截；display:none 的 iframe 提交 cookie 可能被浏览器丢弃）
   var f = document.createElement('iframe');
-  f.style.display = 'none';
   f.name = 'jfyLoginFrame';
   f.src = 'about:blank';
+  f.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:2px;height:2px;border:none';
   document.body.appendChild(f);
-  // 用表单 POST 到金福云登录接口（iframe 内提交, SameSite=None cookie 可写入）
+  // 用表单 POST 到金福云登录接口
   var form = document.createElement('form');
   form.method = 'POST';
   form.target = 'jfyLoginFrame';
@@ -305,12 +318,18 @@ function jfyAutoLogin(url){
   var inp2 = document.createElement('input'); inp2.name='password'; inp2.value=JFY_PASSWORD;
   form.appendChild(inp1); form.appendChild(inp2);
   document.body.appendChild(form);
-  // 等待登录完成(约2秒)后加载航拍 iframe
-  setTimeout(function(){
+  // 等登录 iframe 加载完成(登录响应回来)后, 再延迟加载航拍
+  var timer = null;
+  var done = function(){
+    if(timer) clearTimeout(timer);
     form.remove(); f.remove();
     if(wrap) wrap.innerHTML = '<iframe class="hang-frame" src="'+url+'" loading="lazy" allowfullscreen></iframe>';
+    jfyLoginDone = true;
     jfyLoginBusy = false;
-  }, 2200);
+  };
+  f.onload = function(){ setTimeout(done, 1500); };  // 等 cookie 落地
+  timer = setTimeout(done, 6000);  // 兜底
+  form.submit();
 }
 
 function renderBoards(h){
@@ -375,6 +394,26 @@ function showTab(t){
   render();
 }
 
+/* 全屏模式: 覆盖整个可视区显示航拍/街景 */
+function openScene(type, url){
+  var page = document.getElementById('page');
+  var layer = document.createElement('div');
+  layer.className = 'fullscene';
+  layer.id = 'fullScene';
+  if(type==='hang'){
+    layer.innerHTML = '<button class="scene-close" onclick="closeScene()">✕ 退出全屏</button>'+
+      '<div class="hang-wrap" id="hangWrapFull"><div class="empty" style="padding:120px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div>';
+  } else {
+    layer.innerHTML = '<button class="scene-close" onclick="closeScene()">✕ 退出全屏</button>'+
+      '<div class="map-wrap"><iframe class="map-frame" src="'+url+'&platform=pc" loading="lazy" allowfullscreen></iframe></div>';
+  }
+  document.body.appendChild(layer);
+  if(type==='hang') jfyAutoLogin(url, 'hangWrapFull');
+}
+function closeScene(){
+  var l = document.getElementById('fullScene');
+  if(l) l.remove();
+}
 function showAbout(){document.getElementById('aboutMask').classList.add('show');}
 function hideAbout(){document.getElementById('aboutMask').classList.remove('show');}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')hideAbout();});
