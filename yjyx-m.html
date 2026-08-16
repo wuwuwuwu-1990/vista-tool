@@ -230,7 +230,7 @@ function renderScores(h){
 function renderScene(h){
   var s = '<div class="card"><h3><span class="bar"></span>实景 · 位置</h3>';
   if(h.hangUrl){
-    s += '<div class="hang-wrap"><iframe class="hang-frame" src="'+h.hangUrl+'" loading="lazy" allowfullscreen></iframe></div>'+
+    s += '<div class="hang-wrap" id="hangWrap"><div class="empty" style="padding:70px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div>'+
       '<div class="hang-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动）</div>';
   } else if(h.hangImg){
     s += '<img src="'+h.hangImg+'" style="width:100%;border-radius:10px" alt="'+h.name+'">';
@@ -238,7 +238,7 @@ function renderScene(h){
     s += '<div class="empty">该房源暂无航拍实景</div>';
   }
   if(h.mapUrl){
-    s += '<div class="map-wrap"><iframe class="map-frame" src="'+h.mapUrl+'" loading="lazy" allowfullscreen></iframe></div>'+
+    s += '<div class="map-wrap"><iframe class="map-frame" src="'+h.mapUrl+'&platform=pc" loading="lazy" allowfullscreen></iframe></div>'+
       '<div class="map-tag">高德街道图 · 可拖动缩放</div>';
   } else if(h.mapImg){
     s += '<div style="margin-top:10px"><img src="'+h.mapImg+'" style="width:100%;border-radius:10px" alt=""></div>';
@@ -247,6 +247,36 @@ function renderScene(h){
   }
   s += '</div>';
   return s;
+}
+
+/* 金福云自动登录: 隐藏 iframe POST 账号密码, 拿 cookie 后加载航拍 */
+var JFY_ACCOUNT='18523591621', JFY_PASSWORD='wxf19900064wxf';
+var jfyLoginBusy = false;
+function jfyAutoLogin(url){
+  if(jfyLoginBusy) return;
+  jfyLoginBusy = true;
+  var wrap = document.getElementById('hangWrap');
+  // 先建隐藏登录 iframe
+  var f = document.createElement('iframe');
+  f.style.display = 'none';
+  f.name = 'jfyLoginFrame';
+  f.src = 'about:blank';
+  document.body.appendChild(f);
+  // 用表单 POST 到金福云登录接口（iframe 内提交, SameSite=None cookie 可写入）
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.target = 'jfyLoginFrame';
+  form.action = 'https://vr.jinfuyun.cn/passport/login?act=do_login';
+  var inp1 = document.createElement('input'); inp1.name='phone'; inp1.value=JFY_ACCOUNT;
+  var inp2 = document.createElement('input'); inp2.name='password'; inp2.value=JFY_PASSWORD;
+  form.appendChild(inp1); form.appendChild(inp2);
+  document.body.appendChild(form);
+  // 等待登录完成(约2秒)后加载航拍 iframe
+  setTimeout(function(){
+    form.remove(); f.remove();
+    if(wrap) wrap.innerHTML = '<iframe class="hang-frame" src="'+url+'" loading="lazy" allowfullscreen></iframe>';
+    jfyLoginBusy = false;
+  }, 2200);
 }
 
 function renderBoards(h){
@@ -288,6 +318,8 @@ function render(){
     body += renderHero(h) + renderComment(h);
   }
   page.innerHTML = body;
+  // 实景位置 Tab: DOM 就绪后自动登录金福云并加载航拍
+  if(tab===1 && HOUSES[cur].hangUrl) setTimeout(function(){ jfyAutoLogin(HOUSES[cur].hangUrl); }, 200);
   // 滚动后强制回到顶部（iframe 加载防滚动锚定）
   setTimeout(function(){ page.scrollTop = 0; }, 300);
 }
