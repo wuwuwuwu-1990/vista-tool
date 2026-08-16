@@ -112,7 +112,6 @@ main{flex:1;min-width:0;height:100%;overflow-y:auto;padding:14px 18px 30px 6px;b
 .map-tip{font-size:12px;color:var(--muted);margin-top:8px}
 .map-tag{display:inline-block;font-size:12px;color:var(--primary2);background:rgba(34,211,238,.1);border:1px solid var(--border);border-radius:5px;padding:2px 8px;margin-top:8px}
 
-
 @media print{
   html,body{height:auto;overflow:visible}
   .topbar{position:static}
@@ -199,6 +198,58 @@ footer{margin-top:30px;padding:14px 0 6px;border-top:1px solid var(--border);col
   *{color:#111 !important;text-shadow:none !important}
   canvas{filter:invert(1) hue-rotate(180deg)}
 }
+@media(max-width:900px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden}
+  .layout{display:block;height:auto;padding:0;min-height:100vh;max-width:100%;overflow-x:hidden}
+  main{display:block;height:auto;overflow:visible;padding:14px 10px 40px;width:100%}
+  .sidebar{width:100%;max-width:100%;flex:none;position:relative;height:auto;max-height:none;overflow:hidden;
+    border-right:none;border-bottom:1px solid var(--border);padding:8px 10px;box-sizing:border-box}
+  .divider{display:none}
+  .side-list{display:flex;flex-direction:row;overflow-x:auto;padding-bottom:4px;gap:8px;width:100%;-webkit-overflow-scrolling:touch}
+  .side-item{min-width:120px;max-width:160px;flex:0 0 auto;padding:8px 12px;border:1px solid var(--border);border-radius:10px;box-sizing:border-box}
+  .side-item .si-score{display:none}
+  .side-foot{display:none}
+  .topbar{gap:8px;padding:8px 10px;flex-wrap:nowrap}
+  .logo{font-size:16px}
+  .logo-sub{display:none}
+  .topbar .nav{gap:2px}
+  .topbar .nav a{font-size:12px;padding:4px 6px}
+  .topbar .actions{gap:4px}
+  .topbar .btn{padding:4px 8px;font-size:11px}
+  .ver-badge{display:none}
+  .hero{padding:10px 12px;border-radius:12px}
+  .hero-top{flex-direction:column;align-items:flex-start;gap:8px}
+  .hero-id{min-width:0;width:100%}
+  .h-name{font-size:18px;gap:8px}
+  .h-grade{font-size:12px;padding:3px 8px}
+  .h-chips{gap:4px}
+  .chip{font-size:11px;padding:3px 7px}
+  .kpis{grid-template-columns:repeat(2,1fr)!important;width:100%}
+  .kpi{padding:5px 8px}
+  .kpi .k-val{font-size:12px}
+  .hero-right{width:100%}
+  .score-chips{grid-template-columns:1fr}
+  .hang-wrap{height:220px}
+  .hang-frame{height:220px}
+  .map-wrap{height:260px}
+  .map-frame{height:260px}
+  .board{padding:10px 12px}
+  .b-title{font-size:14px}
+  .b-items li{font-size:12px}
+  .row2{grid-template-columns:1fr}
+  .about-box{width:94vw;max-height:86vh;padding:14px}
+  .map-legend{grid-template-columns:1fr}
+  .table-wrap{overflow-x:auto}
+}
+@media(max-width:480px){
+  .h-name{font-size:16px}
+  .h-grade{font-size:11px;padding:2px 6px}
+  .chip{font-size:10px;padding:2px 6px}
+  .kpi .k-label{font-size:9px}
+  .kpi .k-val{font-size:11px}
+  .topbar .nav a{font-size:11px;padding:3px 4px}
+  .section-title{font-size:15px;margin:18px 0 10px}
+}
 </style>
 </head>
 <body>
@@ -209,68 +260,7 @@ footer{margin-top:30px;padding:14px 0 6px;border-top:1px solid var(--border);col
     <a href="#mapsec">地图</a>
     <a href="#boards">十大板块</a>
     <div class="nav-dd">
-      <a class="dd-trigge@media(max-width:900px){
-  /* 核心修复: 纵向布局下 main 必须自然滚动，不能 height:100%+overflow 卡死 */
-  html,body{height:auto;min-height:100%}
-  .layout{display:block;height:auto;padding:0;min-height:100vh;max-width:100%;overflow-x:hidden}
-  main{display:block;height:auto;overflow:visible;padding:14px 10px 40px;width:100%}
-  html,body{overflow-x:hidden}
-  .sidebar{width:100%;max-width:100%;flex:none;position:relative;height:auto;max-height:none;overflow:hidden;
-    border-right:none;border-bottom:1px solid var(--border);padding:8px 10px;box-sizing:border-box}
-  .divider{display:none}
-  .side-list{display:flex;flex-direction:row;overflow-x:auto;padding-bottom:4px;gap:8px;width:100%;-webkit-overflow-scrolling:touch}
-  .side-item{min-width:120px;max-width:160px;flex:0 0 auto;padding:8px 12px;border:1px solid var(--border);border-radius:10px;box-sizing:border-box}
-  .side-item .si-score{display:none}
-  .side-foot{display:none}
-  /* topbar 手机紧凑 */
-  .topbar{gap:8px;padding:8px 10px;flex-wrap:nowrap}
-  .logo{font-size:16px}
-  .logo-sub{display:none}
-  .topbar .nav{gap:2px}
-  .topbar .nav a{font-size:12px;padding:4px 6px}
-  .topbar .actions{gap:4px}
-  .topbar .btn{padding:4px 8px;font-size:11px}
-  .ver-badge{display:none}
-  /* hero 手机适配 */
-  .hero{padding:10px 12px;border-radius:12px}
-  .hero-top{flex-direction:column;align-items:flex-start;gap:8px}
-  .hero-id{min-width:0;width:100%}
-  .h-name{font-size:18px;gap:8px}
-  .h-grade{font-size:12px;padding:3px 8px}
-  .h-chips{gap:4px}
-  .chip{font-size:11px;padding:3px 7px}
-  .kpis{grid-template-columns:repeat(2,1fr);width:100%}
-  .kpi{padding:5px 8px}
-  .kpi .k-val{font-size:12px}
-  .hero-right{width:100%}
-  .score-chips{grid-template-columns:1fr}
-  /* 航拍/地图手机高度 */
-  .hang-wrap{height:220px}
-  .hang-frame{height:220px}
-  .map-wrap{height:260px}
-  .map-frame{height:260px}
-  /* 板块卡片手机适配 */
-  .board{padding:10px 12px}
-  .b-title{font-size:14px}
-  .b-items li{font-size:12px}
-  .row2{grid-template-columns:1fr}
-  /* about 弹窗 */
-  .about-box{width:94vw;max-height:86vh;padding:14px}
-  .map-legend{grid-template-columns:1fr}
-  /* 表格滚动 */
-  .table-wrap{overflow-x:auto}
-  /* 隐藏动画简化 */
-  .divider{display:none !important}
-}
-@media(max-width:480px){
-  .h-name{font-size:16px}
-  .h-grade{font-size:11px;padding:2px 6px}
-  .chip{font-size:10px;padding:2px 6px}
-  .kpi .k-label{font-size:9px}
-  .kpi .k-val{font-size:11px}
-  .topbar .nav a{font-size:11px;padding:3px 4px}
-  .section-title{font-size:15px;margin:18px 0 10px}
-}r">已选房源 <span class="dd-arrow">▾</span></a>
+      <a class="dd-trigger">已选房源 <span class="dd-arrow">▾</span></a>
       <div class="dd-menu" id="ddMenu"></div>
     </div>
   </nav>
