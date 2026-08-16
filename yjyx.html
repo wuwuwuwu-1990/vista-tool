@@ -428,7 +428,8 @@ function renderMap(h){
   var c=document.getElementById('mapCard');
   var cap='<div class="map-cap">'+h.name+' · '+h.addr+'</div><div class="map-tag">高德街道图 · 可拖动缩放</div>';
   if(h.mapUrl){
-    c.innerHTML='<div class="map-wrap"><iframe class="map-frame" id="mapFrame" src="'+h.mapUrl+'" loading="lazy" allowfullscreen></iframe></div>'+
+    var murl = h.mapUrl + (h.mapUrl.indexOf('?')>-1?'&':'?') + 'platform=pc';
+    c.innerHTML='<div class="map-wrap"><iframe class="map-frame" id="mapFrame" src="'+murl+'" loading="lazy" allowfullscreen></iframe></div>'+
       '<div class="map-static"><img src="'+h.mapImg+'" alt="'+h.name+' 静态底图"></div>'+
       '<div class="map-tip">↑ 交互地图：可拖动、滚轮缩放（加载需联网，搜索框保留显示，手动缩放一次可自动收起）；静态底图为打印备份</div>'+cap;
     // 高德搜索框展示框保留显示（手动缩放可自动收起）
