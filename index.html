@@ -68,6 +68,8 @@
   .bg-shoot .shoot:nth-child(4){top:55%;left:92%;animation-delay:-.7s;}
   .bg-shoot .shoot:nth-child(5){top:25%;left:15%;animation-delay:-2.9s;}
   @keyframes shoot{0%{transform:rotate(135deg) translateX(0);opacity:0;}8%{opacity:1;}35%{transform:rotate(135deg) translateX(-500px);opacity:0;}100%{opacity:0;}}
+  /* GPU优化：标签页不可见时暂停循环动效 */
+  body.anim-paused .bg-halo,body.anim-paused .bg-shoot .shoot{animation-play-state:paused;}
 
   /* ===== 商务深蓝专属：光晕呼吸动态背景 ===== */
   .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
@@ -175,13 +177,13 @@
   .card{position:relative;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;overflow:hidden;
        background:var(--card);border:1px solid var(--card-b);
-       transform-style:preserve-3d;will-change:transform;opacity:0;
-       transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease,backdrop-filter .25s;}
+       transform-style:preserve-3d;opacity:0;
+       transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease;}
   .card.in{opacity:1;}
-  .card:hover{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+  .card:hover{background:rgba(255,255,255,.09);}
   .card::after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;pointer-events:none;z-index:2;
        background:radial-gradient(circle,rgba(255,255,255,.18),transparent 62%);
-       left:var(--mx,50%);top:var(--my,50%);transform:translate(-50%,-50%) translateZ(26px);
+       left:50%;top:50%;transform:translate(calc(var(--gx,0px) - 50%),calc(var(--gy,0px) - 50%)) translateZ(26px);
        opacity:0;transition:opacity .3s;}
   .card:hover::after{opacity:1;}
   .card.dragging{opacity:.55;transform:scale(.96);cursor:grabbing;}
@@ -728,12 +730,16 @@ document.addEventListener('click', function(e){
       var py = (e.clientY - r.top) / r.height;
       var rx = (0.5 - py) * 10;
       var ry = (px - 0.5) * 12;
-      card.style.setProperty('--mx', (px * 100) + '%');
-      card.style.setProperty('--my', (py * 100) + '%');
+      // GPU优化：光晕偏移用合成属性 transform 驱动（只更新合成层，不触发重绘）
+      card.style.setProperty('--gx', ((px - 0.5) * r.width) + 'px');
+      card.style.setProperty('--gy', ((py - 0.5) * r.height) + 'px');
+      // GPU优化：仅鼠标交互期间临时提升合成层，平时不占显存
+      card.style.willChange = 'transform';
       card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px)';
     });
     card.addEventListener('mouseleave', function(){
       card.style.transform = '';
+      card.style.willChange = '';
     });
   });
 })();
@@ -811,6 +817,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-08-16', t:'优化：GPU占用降低（卡片悬停毛玻璃改静态、后台自动暂停动效）'},
   {d:'2026-08-16', t:'精简：移除首页更新公告栏'},
   {d:'2026-08-15', t:'精简：去除雅致水墨/新拟态主题（保留深空科技+商务深蓝）'},
   {d:'2026-08-15', t:'新增：卡片入场动画、3D倾斜光晕、工具搜索、拖动排序、收藏置顶、元信息'},
@@ -871,6 +878,10 @@ updateLogBadge();
   } catch(e){}
   setTheme(t, false);  // 不重复写 localStorage
 })();
+// ===== GPU优化：标签页不可见时暂停循环动效（流星雨/光晕），切回恢复 =====
+document.addEventListener('visibilitychange', function(){
+  document.body.classList.toggle('anim-paused', document.hidden);
+});
 </script>
 </body>
 </html>
