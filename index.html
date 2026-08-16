@@ -70,6 +70,8 @@
   @keyframes shoot{0%{transform:rotate(135deg) translateX(0);opacity:0;}8%{opacity:1;}35%{transform:rotate(135deg) translateX(-500px);opacity:0;}100%{opacity:0;}}
   /* GPU优化：标签页不可见时暂停循环动效 */
   body.anim-paused .bg-halo,body.anim-paused .bg-shoot .shoot{animation-play-state:paused;}
+  /* ===== 背景动效总开关：body data-bgfx="off" 时流星雨/光晕全部关闭（代码保留，启用时去掉该属性即可） ===== */
+  body[data-bgfx="off"] .bg-shoot,body[data-bgfx="off"] .bg-halo{display:none !important;}
 
   /* ===== 商务深蓝专属：光晕呼吸动态背景 ===== */
   .bg-halo{display:none;position:fixed;pointer-events:none;z-index:0;border-radius:50%;will-change:transform,opacity;}
@@ -318,7 +320,7 @@
   .about-log .log-item .lt{color:rgba(238,242,251,.85);}
 </style>
 </head>
-<body data-theme="business">
+<body data-theme="business" data-bgfx="off">
 <div class="bg-shoot"><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div><div class="shoot"></div></div>
 <div class="bg-halo h1"></div>
 <div class="bg-halo h2"></div>
@@ -556,22 +558,6 @@ var SECRET_PWD = '199024';
 var SECRET_KEY = 'vista_secret_unlocked';
 // 私密工具（可在此扩展）
 var SECRET_TOOLS = [
-  {
-    name: '渝居优选 v1.3.7',
-    desc: '重庆主城智能选房（渝选房升级版）：十大板块深度分析 + 十维综合评分 + 金福云航拍实景 + 高德街道图定位 + 已选房源侧边导航。',
-    href: 'yjyx.html',
-    g1: '#22d3ee', g2: '#a78bfa', gs: 'rgba(34,211,238,.4)',
-    tag: 'v1.3.7',
-    tagColor: 'rgba(34,211,238,.4)', tagText: '#7dd3fc', tagBg: 'rgba(34,211,238,.1)'
-  },
-  {
-    name: '渝居优选 手机版',
-    desc: '移动端专属界面：底部 Tab 导航（总览/实景位置/十大板块/综合点评）、房源滑动切换、大触控按钮，手机浏览体验最佳。',
-    href: 'yjyx-m.html',
-    g1: '#22d3ee', g2: '#f472b6', gs: 'rgba(244,114,182,.35)',
-    tag: '手机版',
-    tagColor: 'rgba(244,114,182,.45)', tagText: '#f9a8d4', tagBg: 'rgba(244,114,182,.12)'
-  },
   {
     name: '渝选房 v1.4.1',
     desc: '重庆主城智能选房：多维筛选（区域/总价/面积/地铁线）、十维深度分析、AI 多模型推荐、噪声分析、百度地图定位。',
@@ -833,6 +819,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-08-17', t:'精简：关闭主题背景动效（流星雨/光晕，代码保留可随时启用）'},
   {d:'2026-08-16', t:'优化：GPU占用降低（卡片悬停毛玻璃改静态、后台自动暂停动效）'},
   {d:'2026-08-16', t:'精简：移除首页更新公告栏'},
   {d:'2026-08-15', t:'精简：去除雅致水墨/新拟态主题（保留深空科技+商务深蓝）'},
