@@ -279,6 +279,7 @@
   .secret-panel .sp-card p{font-size:12px;color:rgba(238,242,251,.6);line-height:1.7;flex:1;}
   .secret-panel .sp-card .tag{margin-top:12px;font-size:10.5px;padding:3px 10px;border-radius:20px;align-self:flex-start;
        border:1px solid var(--cb);color:var(--cc);background:var(--cbg);}
+  .secret-panel .sp-card .sp-meta{margin-top:10px;font-size:10.5px;color:rgba(238,242,251,.45);display:flex;align-items:center;gap:4px;letter-spacing:.5px;}
   .secret-panel .sp-empty{border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:40px;text-align:center;color:rgba(238,242,251,.55);font-size:13px;line-height:2;background:rgba(255,255,255,.04);}
   @media (max-width:1700px){.grid{grid-template-columns:repeat(6,1fr);}}
   @media (max-width:1300px){.grid{grid-template-columns:repeat(4,1fr);}}
@@ -563,7 +564,7 @@ var SECRET_TOOLS = [
     desc: '重庆主城智能选房：多维筛选（区域/总价/面积/地铁线）、十维深度分析、AI 多模型推荐、噪声分析、百度地图定位。',
     href: 'yxf141.html',
     g1: '#0ea5e9', g2: '#6366f1', gs: 'rgba(14,165,233,.4)',
-    tag: 'v1.4.1',
+    tag: 'v1.4.1', date: '08-15',
     tagColor: 'rgba(56,189,248,.4)', tagText: '#7dd3fc', tagBg: 'rgba(56,189,248,.1)'
   },
   {
@@ -571,7 +572,7 @@ var SECRET_TOOLS = [
     desc: '重庆 8000+ 楼盘优劣势速查表：区域房价、楼盘对比、优势劣势一览，快速筛选目标楼盘。',
     href: 'cq8000.html',
     g1: '#f59e0b', g2: '#ef4444', gs: 'rgba(245,158,11,.4)',
-    tag: 'v1.7',
+    tag: 'v1.7', date: '08-17',
     tagColor: 'rgba(251,191,36,.4)', tagText: '#fcd34d', tagBg: 'rgba(251,191,36,.1)'
   },
   {
@@ -579,7 +580,7 @@ var SECRET_TOOLS = [
     desc: '重庆主城智能选房（十大板块版）：十大板块深度分析 + 十维综合评分 + 金福云航拍实景 + 高德街道图定位 + 已选房源导航。',
     href: 'yjyx.html',
     g1: '#22c55e', g2: '#14b8a6', gs: 'rgba(34,197,94,.4)',
-    tag: 'v1.3.12',
+    tag: 'v1.3.12', date: '08-17',
     tagColor: 'rgba(52,211,153,.4)', tagText: '#6ee7b7', tagBg: 'rgba(52,211,153,.1)'
   },
   {
@@ -587,7 +588,7 @@ var SECRET_TOOLS = [
     desc: '渝居优选手机适配版：手机上浏览、筛选楼盘更顺手，界面为移动端优化。',
     href: 'yjyx-m.html',
     g1: '#14b8a6', g2: '#0ea5e9', gs: 'rgba(20,184,166,.4)',
-    tag: '手机版',
+    tag: '手机版', date: '08-17',
     tagColor: 'rgba(45,212,191,.4)', tagText: '#5eead4', tagBg: 'rgba(45,212,191,.1)'
   }
 ];
@@ -644,7 +645,8 @@ function renderSecretTools(){
     a.style.setProperty('--cbg', 'rgba(255,255,255,.05)');
     a.innerHTML = '<div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></div>'
       + '<h4>' + t.name + '</h4><p>' + t.desc + '</p>'
-      + '<span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>';
+      + '<span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>'
+      + (t.date ? '<span class="sp-meta">更新于 ' + t.date + '</span>' : '');
     grid.appendChild(a);
   });
 }
