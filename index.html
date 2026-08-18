@@ -359,7 +359,7 @@
 
   <div class="sec-title">
     <div class="bar"></div>
-    <h2>全部工具<span class="sec-count">共 7 款</span></h2>
+    <h2>全部工具<span class="sec-count">共 8 款</span></h2>
   </div>
   <div class="grid">
     <a class="card" href="sgjht.html" style="--g1:#3a8ee6;--g2:#5f5ef0;--gs:rgba(74,124,235,.5);--a1:#4f8ef7;--a2:#8b7cf6;">
@@ -891,6 +891,8 @@ var CARD_META = {
   'evalwrite.html': '08-15'
 };
 (function(){
+  var _tc = document.querySelector('.sec-count');
+  if (_tc) _tc.textContent = '共 ' + document.querySelectorAll('.card').length + ' 款';
   document.querySelectorAll('.card').forEach(function(card){
     var href = card.getAttribute('href') || '';
     // 新标签页打开
