@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>剖筑挡墙断面成图系统 Murus v0.1.0</title>
+<title>剖筑多形式挡土墙断面成图系统 Murus+ v0.2.42</title>
 <style>
 /* ============ 设计令牌 ============ */
 :root{
@@ -208,7 +208,7 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
 .dropzone b{display:block;color:var(--ink-2);font-size:12px;margin-bottom:3px}
 
 /* 弹层 */
-.mask{position:fixed;inset:0;background:rgba(14,26,44,.42);display:none;align-items:center;justify-content:center;z-index:60;backdrop-filter:blur(3px)}
+.mask{position:fixed;inset:0;background:rgba(14,26,44,.42);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px)}
 .mask.show{display:flex}
 .mask.light{background:rgba(14,26,44,.10);backdrop-filter:none}
 .mask.movable.show{display:block}
@@ -254,23 +254,92 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
 .toast.warn{background:rgba(150,94,8,.96)}
 .toast.err{background:rgba(163,45,45,.96)}
 @keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ============ 入口页（三形式选择） ============ */
+#entry{position:fixed;inset:0;z-index:999;background:linear-gradient(140deg,#7ea6e0,#a78fd8 50%,#e8a0c0);display:flex;align-items:center;justify-content:center}
+#entry.hide{display:none}
+.entry-in{width:min(980px,94vw);text-align:center;padding:44px 20px}
+.entry-in h2{font-size:27px;font-weight:800;color:#111;letter-spacing:.5px;margin-top:18px;text-shadow:0 1px 2px rgba(255,255,255,.55)}
+.entry-in h2 em{font-style:normal;color:#111}
+.entry-sub{color:#1a1a1a;font-size:15px;margin:10px 0 34px}
+.entry-cards{display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
+.entry-card{width:288px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.5);border-radius:20px;padding:30px 20px 26px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:13px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 26px rgba(40,50,120,.25);transition:transform .15s,box-shadow .15s,background .15s}
+.entry-card:hover{transform:translateY(-5px);background:rgba(255,255,255,.32);box-shadow:0 14px 36px rgba(40,50,120,.38)}
+.entry-card .ec-svg{width:186px;height:172px}
+.entry-card .ec-name{font-size:18px;font-weight:700;color:#111}
+.entry-foot{margin-top:24px;color:#222;font-size:13px;letter-spacing:.3px}
+.entry-about{color:#111;cursor:pointer;font-weight:600;text-decoration:none;margin-left:4px}
+.entry-about:hover{text-decoration:underline}
+.form-tag{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;color:var(--brand);font-weight:600;font-size:13px}
+.home-btn{background:var(--brand-2);color:#fff;border:1px solid var(--brand-2);display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;font-weight:600;transition:background .15s,box-shadow .15s,transform .1s}
+.home-btn:hover{background:var(--brand);border-color:var(--brand);box-shadow:0 4px 14px rgba(28,111,208,.38)}
+.home-btn:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
+
+
+<div id="entry">
+  <div class="entry-in">
+    <div class="entry-logo">
+      <svg viewBox="0 0 64 64" width="68" height="68"><rect width="64" height="64" rx="14" fill="#0d3f6e"/><path d="M20 14h14l18 32H26Z" fill="none" stroke="#8fc0ea" stroke-width="2.4" stroke-linejoin="round"/><path d="M20 14v32" stroke="#8fc0ea" stroke-width="2.4"/></svg>
+    </div>
+    <h2>剖筑多形式挡土墙断面成图系统 <em>Murus+</em></h2>
+    <p class="entry-sub">请选择挡墙断面形式，开始绘制</p>
+    <div class="entry-cards">
+            <button class="entry-card" data-form="vertical">
+      <svg viewBox="-0.4 -0.45 1.95 3.8" class="ec-svg">
+        <defs>
+          <pattern id="stone_v" width="0.5" height="0.32" patternUnits="userSpaceOnUse"><rect width="0.5" height="0.32" fill="#f2e4c8"/><path d="M0.02 0.04 L0.14 0.005 L0.26 0.04 L0.26 0.125 L0.14 0.16 L0.02 0.125 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/><path d="M0.3 0.04 L0.42 0.005 L0.5 0.04 L0.5 0.125 L0.42 0.16 L0.3 0.125 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/><path d="M0.16 0.2 L0.28 0.165 L0.4 0.2 L0.4 0.285 L0.28 0.32 L0.16 0.285 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/></pattern>
+        </defs>
+        <path d="M0 2.222 L0.3333 0 L1.1153 0 L1.1153 2.222 Z" fill="url(#stone_v)" stroke="none"/>
+        <path d="M-0.2 2.722 L0 2.764 L1.1153 3 L1.1153 2.222 L0 2.222 L-0.2 2.222 Z" fill="url(#stone_v)" stroke="none"/>
+        <path d="M-0.2 2.722 L0 2.764 L1.1153 3 L1.1153 2.222 L1.1153 0 L0.3333 0 L0 2.222 L-0.2 2.222 Z" fill="none" stroke="#5a4020" stroke-width="0.024" stroke-linejoin="round"/>
+      </svg>
+        <span class="ec-name">直立式挡土墙</span>
+      </button>
+            <button class="entry-card" data-form="yang">
+      <svg viewBox="-0.4 -0.45 2.25 3.8" class="ec-svg">
+        <defs>
+          <pattern id="stone_y" width="0.5" height="0.32" patternUnits="userSpaceOnUse"><rect width="0.5" height="0.32" fill="#f2e4c8"/><path d="M0.02 0.04 L0.14 0.005 L0.26 0.04 L0.26 0.125 L0.14 0.16 L0.02 0.125 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/><path d="M0.3 0.04 L0.42 0.005 L0.5 0.04 L0.5 0.125 L0.42 0.16 L0.3 0.125 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/><path d="M0.16 0.2 L0.28 0.165 L0.4 0.2 L0.4 0.285 L0.28 0.32 L0.16 0.285 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/></pattern>
+        </defs>
+        <path d="M0 2.304 L0.576 0 L1.405 0 L0.829 2.304 Z" fill="url(#stone_y)" stroke="none"/>
+        <path d="M-0.2 2.804 L0 2.8498 L0.655 3 L0.829 2.304 L0 2.304 L-0.2 2.304 Z" fill="url(#stone_y)" stroke="none"/>
+        <path d="M-0.2 2.804 L0 2.8498 L0.655 3 L1.405 0 L0.576 0 L0 2.304 L-0.2 2.304 Z" fill="none" stroke="#5a4020" stroke-width="0.024" stroke-linejoin="round"/>
+      </svg>
+        <span class="ec-name">仰斜式挡土墙</span>
+      </button>
+            <button class="entry-card" data-form="fu">
+      <svg viewBox="-0.5 -0.45 2.6 3.8" class="ec-svg">
+        <defs>
+          <pattern id="stone_f" width="0.5" height="0.32" patternUnits="userSpaceOnUse"><rect width="0.5" height="0.32" fill="#f2e4c8"/><path d="M0.02 0.04 L0.14 0.005 L0.26 0.04 L0.26 0.125 L0.14 0.16 L0.02 0.125 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/><path d="M0.3 0.04 L0.42 0.005 L0.5 0.04 L0.5 0.125 L0.42 0.16 L0.3 0.125 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/><path d="M0.16 0.2 L0.28 0.165 L0.4 0.2 L0.4 0.285 L0.28 0.32 L0.16 0.285 Z" fill="none" stroke="#8a6a3a" stroke-width="0.014"/></pattern>
+        </defs>
+        <path d="M0 2.18 L0.109 0 L0.585 0 L1.348 2.18 Z" fill="url(#stone_f)" stroke="none"/>
+        <path d="M-0.295 2.68 L0 2.7289 L1.635 3 L1.348 2.18 L0 2.18 L-0.295 2.18 Z" fill="url(#stone_f)" stroke="none"/>
+        <path d="M0 2.18 L0.109 0 L0.585 0 L1.635 3 L-0.295 2.68 L-0.295 2.18 Z" fill="none" stroke="#5a4020" stroke-width="0.024" stroke-linejoin="round"/>
+      </svg>
+        <span class="ec-name">俯斜式挡土墙</span>
+      </button>
+    </div>
+    <div class="entry-foot"><span id="entryVer">v0.2.48</span> · 离线单文件 · 记录自动保存在本机浏览器 · <a class="entry-about" id="entryAbout">关于</a></div>
+  </div>
+</div>
 
 <header class="topbar">
   <div class="brand">
     <img class="logo" id="logoImg" alt="Murus">
     <div>
-      <h1>剖筑挡墙断面成图系统 <em>Murus</em><span class="vbadge" id="hdVer">v0.1.0</span></h1>
+      <h1>剖筑多形式挡土墙断面成图系统 <em>Murus+</em><span class="vbadge" id="hdVer">v0.1.0</span></h1>
     </div>
   </div>
   <div class="top-actions">
+    <button class="btn home-btn" id="tbHome" title="返回形式选择页"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 3l9 7.6"/><path d="M5.2 9.6V21h13.6V9.6"/><path d="M9.6 21v-6.4h4.8V21"/></svg>形式</button>
     <button class="btn ghost" id="btnTpl">标准表格模板</button>
     <button class="btn ghost" id="btnImport">导入 Excel</button>
     <button class="btn ghost" id="btnXlsxOut">导出 Excel</button>
     <span class="divider"></span>
     <button class="btn" id="btnPng">导出 PNG</button>
+    <button class="btn icon" id="btnAnno" title="标注调整（尺寸界线偏移）">📏</button>
     <button class="btn icon" id="btnAbout" title="关于 Murus">?</button>
   </div>
 </header>
@@ -280,38 +349,41 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
   <!-- ========== 左：参数 ========== -->
   <aside class="panel left" id="panelL">
     <div class="sec">
-      <div class="sec-h"><span class="bar"></span><h2>断面参数</h2><span class="tag">单位 m</span></div>
+      <div class="sec-h"><span class="bar"></span><h2>断面形式与参数</h2><span class="tag">单位 m</span></div>
+      <div class="field"><label>挡墙形式</label>
+        <div class="ctl form-tag" id="f_formTxt">直立式挡土墙</div></div>
+      <div class="hint" id="formDesc"></div>
       <div class="schema" id="schema"></div>
       <div class="field"><label>挡墙编号</label>
         <div class="ctl"><input id="f_id" type="text" placeholder="如 DQ-1"></div></div>
-      <div class="field"><label>墙高 <b>H1</b></label>
-        <div class="ctl"><input id="f_H1" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
-      <div class="field"><label>基础埋深 <b>H2</b></label>
-        <div class="ctl"><input id="f_H2" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
-      <div class="field"><label>墙体顶宽 <b>B1</b></label>
-        <div class="ctl"><input id="f_B1" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
-      <div class="field"><label>墙体底宽 <b>B2</b></label>
-        <div class="ctl"><input id="f_B2" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
-      <div class="field"><label>外坡比 <b>W</b></label>
-        <div class="ctl"><span class="pre">1 :</span><input id="f_W" type="number" step="0.01" value="0.05"></div></div>
-      <div class="field"><label>内坡比 <b>N</b></label>
-        <div class="ctl"><span class="pre">1 :</span><input id="f_N" type="number" step="0.01" value="0.25"></div></div>
+      <div class="field"><label>墙高 <b>H</b></label>
+        <div class="ctl"><input id="f_H" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>顶宽 <b>b</b></label>
+        <div class="ctl"><input id="f_b" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>外坡比 <b>m1</b></label>
+        <div class="ctl"><span class="pre">1 :</span><input id="f_m1" type="number" step="0.01" value="0.05"></div></div>
+      <div class="field"><label>内坡比 <b>m2</b></label>
+        <div class="ctl"><span class="pre">1 :</span><input id="f_m2" type="number" step="0.01" value="0.05"></div></div>
+      <div class="field"><label>底坡比 <b>n</b></label>
+        <div class="ctl"><span class="pre">1 :</span><input id="f_n" type="number" step="0.01" value="20"></div></div>
+      <div class="field"><label>墙趾宽度 <b>bj</b></label>
+        <div class="ctl"><input id="f_bj" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>墙趾高度 <b>hj</b></label>
+        <div class="ctl"><input id="f_hj" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>墙踵高度 <b>hn</b></label>
+        <div class="ctl"><input id="f_hn" type="number" step="0.05" min="0"><span class="unit">m</span></div></div>
       <div class="field"><label>地面设计标高</label>
         <div class="ctl"><input id="f_elev" type="number" step="0.1" value="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>底宽 Bd</label><div class="ctl readonly"><span id="bdinfo">—</span></div></div>
+      <div class="field"><label>基底坡度（hj/hn）</label><div class="ctl readonly"><span id="neffinfo">—</span></div></div>
     </div>
 
     <div class="sec">
       <div class="sec-h"><span class="bar o"></span><h2>几何校核与计算</h2></div>
-      <div class="field"><label>校核模式</label>
-        <select class="ctl" id="f_mode">
-          <option value="slope">坡比优先（由 B1、W、N 反算 B2）</option>
-          <option value="width">底宽优先（由 顶宽B1、底宽B2 反算坡比）</option>
-        </select>
-      </div>
       <div id="verdict" class="verdict ok"><span class="dot"></span><span class="txt"></span></div>
       <div class="kpis">
-        <div class="kpi"><div class="k">断面总高 H = H1+H2</div><div class="v" id="k_H">–<small>m</small></div></div>
-        <div class="kpi"><div class="k">采用底宽 B2</div><div class="v" id="k_B2">–<small>m</small></div></div>
+        <div class="kpi"><div class="k">断面总高 H（输入）</div><div class="v" id="k_H">–<small>m</small></div></div>
+        <div class="kpi"><div class="k">采用底宽 Bd</div><div class="v" id="k_B2">–<small>m</small></div></div>
         <div class="kpi"><div class="k">断面面积 A</div><div class="v" id="k_A">–<small>m²</small></div></div>
         <div class="kpi"><div class="k">每延米圬工量</div><div class="v" id="k_V">–<small>m³/m</small></div></div>
       </div>
@@ -356,8 +428,9 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
         <label class="sw"><input type="checkbox" id="o_customnote" checked><i></i>自定义引注</label>
       </div>
       <button class="btn block" id="btnNotesMgr" style="margin-top:8px">自定义引注管理…</button>
-      <div class="hint">尺寸标注单位可在「尺寸单位」中切换（mm / cm / m），图形下方标注本图标示单位；尺寸数值按厘米级取整。标高以 <code>m</code> 计并保留三位小数。</div>
+      <div class="hint">尺寸标注单位可在「尺寸单位」中切换（mm / cm / m）。底宽 Bd 为计算值：直立式 Bd=bj+b+Hw·m1；仰斜式 Bd=b+bj·(1−m1)+Hw·(m1+m2)；俯斜式 Bd=bj+b+m1·Hw+m2·H。Hw=H−hj−hn 为墙身高，m1/m2 为图面"1:m"标注文字。</div>
     </div>
+
   </aside>
   <div class="rsz" id="rszL"><span class="grip"></span></div>
   <!-- ========== 中：画布 ========== -->
@@ -405,7 +478,7 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
         <table class="rec">
           <thead><tr>
             <th><input type="checkbox" id="chkAll"></th>
-            <th>编号</th><th>H1</th><th>H2</th><th>B1</th><th>B2</th><th>W</th><th>N</th>
+            <th>编号</th><th>形式</th><th>H</th><th>b</th><th>Bd</th><th>面积</th>
           </tr></thead>
           <tbody id="recBody"></tbody>
         </table>
@@ -560,6 +633,21 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
   </div>
 </div>
 
+<!-- 标注调整 -->
+<div class="mask movable light" id="mAnno" style="background:transparent">
+  <div class="modal" style="width:560px">
+    <div class="modal-h" title="按住标题栏可拖动窗口"><h3>标注调整 · 尺寸界线偏移（当前记录实时生效）</h3><span class="x" data-close-anno>×</span></div>
+    <div class="modal-b">
+      <div class="hint">每项标注可切「固定ext / 连接式」并调 ext（界线长度）、off（尺寸线离对象距离，图面 mm）。改动实时生效并自动保存，下次打开保持；「恢复默认」还原 v0.2.22 出厂值。</div>
+      <div id="annoPanel"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" id="annoReset">恢复默认</button>
+        <button class="btn primary" data-close-anno style="flex:1">完成</button>
+      </div>
+      <div id="annoMeas" class="hint" style="margin-top:8px;font-size:11px;white-space:pre-line"></div>
+    </div>
+  </div>
+</div>
 <!-- 批量进度 -->
 <div class="mask" id="mProg">
   <div class="modal" style="width:380px">
@@ -626,109 +714,89 @@ const CADFONT = '"仿宋","FangSong","STFangsong","SimSun","Songti SC",serif';
    版本与迭代更新
    单一事实来源：改这里即可升级版本；关于对话框与导出文件名自动同步。
    ===================================================================== */
-const APP_VERSION = '0.3.47';
+const APP_VERSION = '0.2.53';
 const APP_VERSION_LABEL = 'v' + APP_VERSION;
 const APP_CHANGELOG = [
-  { v:'0.3.47', date:'2026-08-09',
-    note:'修复合并长图导出偶发「长图生成失败」：①画布面积上限探测留 8% 余量（原恰在边界）②上限检查改用取整后的实际画布尺寸（原用浮点乘积可能漏判）③轻微超限时自动等比缩放保证导出成功（≥85% 无感适配），严重超限与编码失败给出明确参数提示。' },
-  { v:'0.3.44', date:'2026-08-09',
-    note:'C20/C25 片(块)石混凝土的填充样式改为与「毛石混凝土」一致：混凝土细点基底 + 不规则六边形大块毛石（不再只是素混凝土点）。' },
-  { v:'0.3.43', date:'2026-08-09',
-    note:'填充样式调整：移除「浆砌块石」「素混凝土」两个选项（其余保留，共 10 项）；修正**毛石混凝土**图案——混凝土细点基底上叠加清晰的不规则大块毛石（六边形轮廓、颜色加深）；修正**砂卵石**图案——改为密集的椭圆卵石（网格错位分布、大小随机），更贴近实际填充。' },
-  { v:'0.3.42', date:'2026-08-09',
-    note:'墙身填充样式扩充（全选）：新增**浆砌块石、干砌片石、钢筋混凝土、毛石混凝土、回填土、砂卵石** 6 种图案，并开放**砖砌体**（代码已含）；「墙身材料」下拉现共 12 项（片石/块石/干砌片石/素混凝土/C20·C25片石混凝土/钢筋混凝土/毛石混凝土/砖砌体/回填土/砂卵石/不填充），材料做法引注文字同步扩展。' },
-  { v:'0.3.41', date:'2026-08-09',
-    note:'参数表与引注文字间距统一为 **1.5mm**（撤销 v0.3.39 的「仅墙材引注 0.75mm」特殊规则，间距过小视觉拥挤）；仍按所有引注（含水平偏移）的文字实际右端自适应定位。' },
-  { v:'0.3.40', date:'2026-08-09',
-    note:'修复参数表与墙材引注实际距离过大的问题：内置墙材引注带水平偏移 hx=-35mm（文字左移 35mm），但参数表原只按 leadX+文字宽定位、未跟随该偏移，导致仅墙材引注时二者实际水平距离约 **35.75mm**。现参数表水平位置改为跟随**所有引注（含内置与自定义的水平偏移）的文字实际右端最大值**：仅墙材引注时紧贴文字右端 **0.75mm**、其余 1.5mm，完全自适应。' },
-  { v:'0.3.39', date:'2026-08-09',
-    note:'当图上**仅有墙材引注**（通用引注关闭、自定义引注为空、墙材引注开启）时，参数表与墙材引注的间距再缩小一半（1.5mm → 0.75mm），版面更紧凑；水平位置仍自适应引注文字。其余情况保持 1.5mm。' },
-  { v:'0.3.38', date:'2026-08-09',
-    note:'参数表与引注文字间距再缩小一半：3mm → **1.5mm**，紧贴引注文字；水平位置继续自适应（随引注文字总宽与自定义引注水平偏移自动跟随）。' },
-  { v:'0.3.37', date:'2026-08-09',
-    note:'参数表定位优化：与所有引注文字（含自定义引注）的间距由 6mm 收窄至 **3mm**，更贴近引注文字；水平位置继续**自适应**——随引注文字总宽与自定义引注的水平偏移（H mm）自动跟随，引注右移时参数表同步右移，版面始终紧凑。' },
-  { v:'0.3.36', date:'2026-08-09',
-    note:'导出分辨率档位精简：合并导出 A3 图幅最高 **300 DPI**（去掉 600/900 DPI）；合并导出长图最高 **高清 4800px**（去掉 9600/14400px）。两处均保留「标准/高清」两档，避免超高分辨率触发画布上限、同时满足常规出图清晰度。' },
-  { v:'0.3.35', date:'2026-08-09',
-    note:'合并长图「列数」按用户明确语义重做：选择框为**列数（1~5 列）**，全部勾选断面**平均分配**到各列——1 列=全部单列连续（默认，原行为）；2 列=全部均分两列并排（如 16 张 → 每列 8 张）；3/4/5 列同理（16 张 5 列 → 4/3/3/3/3）。导出始终是纵向长图（每列竖排、列间留缝+竖向分隔线）。' },
-  { v:'0.3.34', date:'2026-08-09',
-    note:'修复合并长图导出报错「Canvas is already in error state」：原保护只检查画布边长（≤16384/32767），未检查**面积上限**（Chrome/Edge≈2.68 亿像素）——当长图宽、高都未超边但乘积超面积时 canvas 创建失败导致 drawImage 报错。现新增运行时面积上限探测（正方形二分）并纳入导出保护，超限时明确提示增大每列图幅数或降低分辨率。' },
-  { v:'0.3.33', date:'2026-08-09',
-    note:'合并长图「每列图幅数」按用户明确例子实现：长图始终一张，选「2 幅/列」即**每列排 N 幅、超出自动换列横向并排**（16 张图选 2 幅/列 → 8 列×2 幅的一张长图）；「1 幅/列（单列纵向长图）」为默认，与原行为一致；列内竖排、水平居中，列间留缝画竖向分隔线（随「分幅分隔线」开关）；总宽/总高超画布上限时提示增大每列幅数或降分辨率。' },
-  { v:'0.3.32', date:'2026-08-09',
-    note:'合并长图导出新增「每列图幅数」选择框（按用户确认）：长图**始终是一张纵向长图**；选「全部」=连续无分组（原行为），选 2/3/4/5 幅=每隔 N 幅插入一条**加粗分组分隔线**（深色粗线，独立于「分幅分隔线」开关），便于在一张长图内分块查看；提示语标注分组信息。' },
-  { v:'0.3.31', date:'2026-08-09',
-    note:'合并长图导出恢复为**一张纵向长图**（按用户确认）：所有勾选断面按统一比例自上而下竖排成一张长图，有多长算多长；移除 v0.3.29/0.3.30 的「每页/每列幅数」选择框与多列横排逻辑（非用户所需）；仅在总长超过浏览器单张画布高度上限时自动分段并提示。' },
-  { v:'0.3.30', date:'2026-08-09',
-    note:'合并长图导出的「每页幅数」改为「每列图幅数」（按用户澄清）：仍输出**一张连续长图**，但断面图按「每列 N 幅」纵向排布、超出自动换列横向并排（1 幅/列=原单列长图），适合整图多列查看；列内各幅水平居中、列间留缝，列/幅间分隔线可选；总宽/总高受浏览器画布硬上限保护，超限时提示改每列幅数或降分辨率。' },
-  { v:'0.3.29', date:'2026-08-09',
-    note:'合并长图导出新增「每页幅数」选择框：可选「全部（单张连续，默认）/ 2 / 4 / 6 / 9 幅每页」。选「全部」保持原有单张连续长图行为；选 N 幅/页则按每页 N 幅分页导出多张竖长图（多张自动打包 ZIP，文件名带「_第X-Y段」标记），方便分批打印/分页查看；浏览器单张画布高度硬上限仍作为兜底约束（极致分辨率+特高墙时页内再自动拆分）。' },
-  { v:'0.3.28', date:'2026-08-09',
-    note:'「关于 Murus」面板新增「界面区域图解」：嵌入一张基于真实界面截图的超清（2800×1840）注解图，标注各区域专业叫法（顶栏 Header、侧边栏 Sidebar、画布区 Canvas、分隔条 Splitter、状态栏 Status Bar、模态框 Modal 等）；点击图片可放大查看细节。' },
-  { v:'0.3.27', date:'2026-08-09',
-    note:'界面精简：移除顶栏「批量成图导出」按钮（与右侧「图形导出」的批量导出为同一功能入口，保留右侧一个即可）；右侧「图形导出」面板的「批量导出 ZIP」按钮更名为「批量成图导出」，名称与功能统一。' },
-  { v:'0.3.26', date:'2026-08-09',
-    note:'修复右侧侧边栏拖动方向反了的问题：右侧拖动手柄位于右栏左缘，原逻辑向右拖动=右栏变宽会使手柄被顶向左侧、方向相反；现改为右侧手柄拖动方向取反（向右拖=右栏变窄、向左拖=变宽），手柄始终跟随鼠标移动，左右两侧拖动手感一致。' },
-  { v:'0.3.25', date:'2026-08-09',
-    note:'修复并优化侧边栏拖拽调宽：① 拖动逻辑重写——宽度基准改为直接读取面板实际宽度（getBoundingClientRect），不再解析 grid 计算列宽，任何环境均可稳定拖动调整左/右侧栏宽度；② 拖动手柄加宽并改为「三条竖线」图形把手（替代原文字悬浮提示），hover/拖动高亮，视觉自解释；③ 鼠标移出窗口自动结束拖动，宽度继续记忆。' },
-  { v:'0.3.24', date:'2026-08-09',
-    note:'左侧/右侧侧边栏新增「左右拖动调宽」功能：左右栏与画布之间各有一个竖向拖动手柄，按住左右拖动即可调整侧栏宽度（左栏 200~460px、右栏 220~500px），画布自适应重绘；宽度自动记忆（localStorage），下次打开保持上次布局。' },
-  { v:'0.3.23', date:'2026-08-09',
-    note:'图名标注及「本图标示单位为：xxx」行整体上移：与底部尺寸标注线的间距缩短一半（图名基线距尺寸线 22mm→11mm，单位行随图名同步上移），底部版面更紧凑。' },
-  { v:'0.3.22', date:'2026-08-09',
-    note:'内置「墙材引注」（原开关控制那条）位置同步优化：锚点 X 偏移 +0.26（米）、尾端文字水平偏移 -35（图纸毫米），与「自定义引注管理」中「＋墙材引注」添加的默认位置完全一致，两条路径的墙材引注排位统一。' },
-  { v:'0.3.21', date:'2026-08-09',
-    note:'细节调整：①图名标注——图名文字缩小 40%（7→4.2 字高），下方横线上移、与文字距离收窄，版式更紧凑；②自定义引注管理面板——锚点 X/Y 偏移输入框后标注单位「M」，尾端文字水平偏移输入框后标注「X」（水平方向），量纲一目了然；③「＋墙材引注」默认参数优化——锚点 X 偏移默认 0.26（米）、尾端文字水平偏移默认 -35（图纸毫米），添加后即处于合理排位。' },
-  { v:'0.3.20', date:'2026-08-09',
-    note:'「标高符号」默认不显示（新图默认不画标高，需要时勾选「标高符号」开关开启），与「通用引注」默认关闭保持一致，让默认图纸更简洁。' },
-  { v:'0.3.19', date:'2026-08-09',
-    note:'墙材引注纳入「自定义引注管理」：管理弹窗新增「＋墙材引注」按钮，一键把当前材料做法引注（如 M7.5浆砌片(块)石砌筑）加入自定义清单，锚点自动取「墙身中部」（与内置一致），之后文字/锚点/X·Y偏移/H水平偏移全部可自由编辑、可删除；点击添加时自动关闭原「墙材引注」开关，避免图上出现两条重复墙材引注。材料文字映射与内置引注单一来源（matNoteText）。' },
-  { v:'0.3.18', date:'2026-08-09',
-    note:'交互与默认值调整：①「通用引注」默认不显示（新图默认只画尺寸/标高/坡度/墙材引注/自定义引注，需要时勾选开启）；②「自定义引注」默认清单为空（不再预置示例，由用户自行添加）；③「自定义引注管理」弹窗改为**浅色半透明遮罩（无背景虚化）**，打开时能实时看清背后图纸的引注调整效果；④ 该弹窗**可拖动**（按住标题栏移动），默认停靠在**右上角**区域，不遮挡画布主区。' },
-  { v:'0.3.17', date:'2026-08-09',
-    note:'自定义引注管理新增「尾端文字标注的水平调整」：每条引注可单独设置文字水平偏移 H（图纸毫米，正值文字整体右移、负值左移），引线末端与文字同步平移，避免文字重叠或留白不均；水平偏移自动纳入版面宽度计算，右移不会超出画布被裁。入口：左侧「自定义引注管理…」弹窗，每条引注「H(mm)」输入框。' },
-  { v:'0.3.16', date:'2026-08-09',
-    note:'新增「自定义引注」功能（用户可添加、可调整）：① 全局一份引注清单，应用于所有勾选挡墙（单张/合并 A3/合并长图导出均包含）；② 每条引注支持多行文字 + 「锚点部件」下拉（墙顶面/墙背(内坡)/墙趾面(外坡)/墙身中部/墙趾/墙踵/基底面/泄水孔/墙背填料，坐标按每面墙几何自动计算）+ X/Y 偏移微调（米）；③ 与内置引注（泄水管/填料/基底做法等）叠加显示，引线风格统一（圆点+斜线+水平引出，3mm 字高）；④ 左侧成图设置新增「自定义引注」开关与「管理」按钮，弹窗增/删/改实时联动成图；⑤ 长引注文字自动纳入版面宽度计算，避免被画布裁切。' },
-  { v:'0.3.15', date:'2026-08-09',
-    note:'按用户本意重做「合并长图导出」：改为默认输出**一张连续长图**（所有勾选断面按统一比例 1:eff 自上而下拼成一条，有多长算多长、不分片）。仅在总高真超过浏览器单张画布高度硬上限时才被迫分段，并用 toast 明确提示“是浏览器物理限制”。新增 getMaxCanvasDim() 运行时探测各浏览器画布上限（Chrome≈16384 / Firefox≈32767，留 400px 余量），取代原来写死的 16000px 强制分片。单图文件名不再带分段标记。' },
-  { v:'0.3.14', date:'2026-08-09',
-    note:'新增「导出分辨率」选项，解决输出不够清晰的问题。合并 A3 与合并长图导出均新增分辨率下拉：A3 可选「标准150/高清300/超清600/极致900 DPI」（DPI 倍率直接放大画布与格子像素、2× 超采样保持标注清晰）；长图可选「标准2400/高清4800/超清9600/极致14400 px」最宽幅像素宽，并新增单幅高度安全上限 12000px（个别特高墙自动降采样避免超过画布极限）。文件名与提示均标注所选分辨率。默认「高清」。' },
-  { v:'0.3.13', date:'2026-08-09',
-    note:'将合并 A3 的标注去拥挤方案移植到「合并长图导出」：长图不再调用有分辨率崩塌缺陷的 renderSectionCanvas，改为逐幅用 renderCellCanvas 按统一像素分辨率（以最宽幅为基准、目标 2400px、2× 超采样）高清矢量重绘，标注与墙身同比例且清晰，彻底消除长图“挤在一起”。保留原超长分片与 try/catch 保护。' },
-  { v:'0.3.12', date:'2026-08-09',
-    note:'彻底重做合并 A3 导出，根治标注“挤在一起”问题。根因：旧实现用 view.s=1000*ppmm/eff 渲染单幅，标注像素与 eff 相消只取决于 dpi，而墙身尺寸∝1/eff，eff 被算大时墙身被压扁、标注却不变→比例失调，再经 drawImage 缩小后标注糊成一团。新方案：① 新增 renderCellCanvas，按格子目标像素×超采样（×2）高分辨率矢量重绘单幅（几何填满格子、标注按 g.S=eff/1000 的 1:eff 比例同比例清晰）；② 合并导出新增「每页幅数」选项（1/2/4/6/9，默认 4 幅 2×2），每幅占据 A3 固定格子、绝不挤压，超出自动分页为多张 A3（ZIP 打包）；③ eff 仅作标注 1:eff 比例声明，不再决定单幅分辨率。整段包 try/catch 暴露异常。' },
-  { v:'0.3.11', date:'2026-08-09',
-    note:'修复「合并长图导出」点击无反应问题：① 函数入口增加即时提示与整体 try/catch，任何异常都会以 toast 形式暴露，不再静默失败；② 增加超长保护——单张画布高度超过引擎上限（保守取 16000px）时自动分片导出为多张 PNG，避免 toBlob 在超大画布下被浏览器静默丢弃；③ 增加 toDataURL 兜底下载路径；④ 修正面板文案（长图由横向改为纵向堆叠）。' },
-  { v:'0.3.10', date:'2026-08-09',
-    note:'移除右侧（最右侧列）「标准 Excel 表格」面板区块（含拖入导入 dropzone、下载标准模板 tpl2、导出当前清单 xls2），因其与顶部操作栏的「标准表格模板 / 导入 Excel / 导出 Excel」功能完全重复。同步清理 JS 中对 tpl2、xls2、drop 元素的事件绑定，避免元素移除后 null 引用报错；顶部三个按钮与全局窗口拖放导入能力保留，Excel 导入/导出功能不丢失。' },
-  { v:'0.3.9', date:'2026-08-09',
-    note:'合并长图导出由横向拼接改为**纵向排列**：各幅断面图改为自上而下堆叠为一张竖向长图（宽度取各幅最大值居中，高度累加），分幅分隔线改为横贯分隔线；同时修正长图导出 toBlob 回调中误用未定义变量 figs 的缺陷（改为 secs.length）。' },
-  { v:'0.3.8', date:'2026-08-09',
-    note:'重做合并导出（A3 与长图）的绘制管线：摒弃「直接把 drawScene 画进小格子 + 标注等比缩放(annoScale)」方案（该方案在多列/多行时单格变小、墙身缩小而标注不缩，仍会拥挤重叠）。改为先按 1:eff 自然比例把每幅断面**独立渲染并紧裁**成单张图（墙身与尺寸/引注尺度完全一致，即单张导出效果），再以整体等比缩放方式拼入 A3 格子或长图。标注随图幅整体缩小、不再错位。新增 renderSectionCanvas() 辅助函数。' },
-  { v:'0.3.7', date:'2026-08-09',
-    note:'① 优化合并导出 A3 图幅：新增标注随图幅等比缩放机制——当 A3 被拆成多行（单格变小）时，尺寸标注、引线、图名等标注元素按格高自动缩小（annoScale，下限 0.45），彻底解决多图挤在一张 A3 时标注/引注重叠的问题。② 新增「合并长图导出」：将勾选的多幅断面图按统一比例自左向右拼接为一张横向长图，每幅含独立图名，支持长图外框与分幅分隔线开关，便于整体查阅或贴入 CAD / Word。' },
-  { v:'0.3.6', date:'2026-08-09',
-    note:'修正合并导出 A3 图幅的分页逻辑：原逻辑将所有选中断面图强行缩比挤入一张 A3；现改为先按单页能舒适排下的数量确定每页容量（每页列数由图幅比例自适应、行数由统一比例推导），单页排满后自动续排至下一张 A3。多页时导出为 ZIP（第01张.png…），单页仍导出单张 PNG；标题栏同步显示「第 X/Y 张」。' },
-  { v:'0.3.5', date:'2026-08-09',
-    note:'将左侧成图设置中「做法引注」开关的显示名称改为「墙材引注」（id 仍为 o_matnote，控制材料引注文字显隐的逻辑不变）。' },
-  { v:'0.3.4', date:'2026-08-09',
-    note:'图形导出（合并导出 A3 图幅）新增「导出图框」显示/隐藏开关：默认勾选，取消后合并 A3 图纸不绘制外框、绘图区框及标题栏，仅保留各断面图分格与内容。' },
-  { v:'0.3.3', date:'2026-08-09',
-    note:'取消「墙身材料」图案显示/隐藏开关（墙身材料图案按「墙身材料」下拉选择始终生效，含"不填充图案"）。将原「墙身材料引线」开关独立保留并改名为「做法引注」，专门控制材料引注文字（如"M7.5浆砌片(块)石砌筑"）的显隐，与泄水孔/填土/基底等引注（原「做法引注」改名为「通用引注」）相互独立。右侧合并导出 A3 的「墙身材料（合并图）」开关一并取消。' },
-  { v:'0.3.2', date:'2026-08-09',
-    note:'将「墙身材料」开关拆分为两个独立开关（左侧成图设置）：「墙身材料」仅控制墙身材料图案填充；新增「墙身材料引线」独立控制材料做法引注的引线文字（如「M7.5浆砌片(块)石砌筑」）显示/隐藏，二者互不影响。' },
-  { v:'0.3.1', date:'2026-08-09',
-    note:'新增「墙身材料 显示/不显示」开关（成图设置区），可单独控制墙身材料图案与材料做法引注的显示；合并导出 A3 对话框新增独立的「墙身材料（合并图）」开关，使合并图材料显示可与主视图分开控制。同时移除页头副标题文字。' },
-  { v:'0.3.0', date:'2026-08-09',
-    note:'新增「合并导出 A3 图幅」：一键将清单勾选的多个挡墙断面图合并为一张 A3 图纸（未勾选则全部）。支持 A3 横向/纵向、出图比例自动统一或指定（1:50/1:100/1:150/1:200，放不下时自动适配），含图框与标题栏。' },
-  { v:'0.2.2', date:'2026-08-09',
-    note:'修正 v0.2.0 误改：①墙背回填恢复为贴顶的矩形回填带（恢复上一版样式）；②泄水孔反滤包改为沿墙背坡度 N 倾斜、紧贴挡墙内边（非矩形）；③左侧墙高竖向尺寸文字左移，与标注线留出间距；④图名标注改为国标单线（去掉粗细双线）。版本更迭保留历史版本，不再删除。' },
-  { v:'0.2.1', date:'2026-08-09',
-    note:'挡墙记录清单默认显示两条记录（DQ-1、DQ-2）；Excel 标准模板示例行同步精简为 2 条。' },
-  { v:'0.2.0', date:'2026-08-09',
-    note:'用户反馈迭代：①尺寸标注文字置于标注线上方并整体更贴近挡墙；②图名改为「XXX 挡墙断面图」并移除比例文字；③坡度标注去除小正三角形，仅留「1:W/1:N」标签；④尺寸数值按厘米级取整（mm/cm/m 三档切换），断面面积与每延米圬工量改为两位小数；⑤新增尺寸单位 mm/cm/m 切换及图下「本图标示单位为：XX」；⑥坡比默认值改为外 0.05、内 0.25；⑦墙背回填改为紧贴挡墙内边的楔形；⑧墙身材料调整为 M7.5 浆砌片(块)石、C20/C25 片(块)石混凝土（移除 C20 素混凝土、MU10 砖砌体）。' },
-  { v:'0.1.0', date:'2026-08-09',
-    note:'初始演示版：参数输入、天正风格自动成图与标注、滚轮缩放/拖拽平移、透明PNG导出（含批量ZIP）、Excel标准模板导入与批量成图、离线自包含（内联SheetJS）。顶宽B1 / 底宽B2。' }
+  { v:'0.2.53', date:'2026-08-19',
+    note:'①入口页（卡片页面）所有文字改为醒目黑色：主标题、副标题、三张卡片名称、页脚、“关于”链接均由白色/半透明白改为黑色（#111~#222），移除白色文字阴影，在玻璃拟态背景上更清晰。②修正错别字：羊皮纸卡片名称“侯斜式”→“侯斜式”（v0.2.51 重建卡片时误写，本次恢复）。'
+  },
+  { v:'0.2.52', date:'2026-08-19',
+    note:'①移除卡片图外部装饰（用户反馈图外有线条/不干净）：删除墙趾地面线（#b09a72 斜线）与红色「检」印章，卡片只保留羊皮纸块石填充 + 深棕轮廓，图面干净。'
+  },
+  { v:'0.2.51', date:'2026-08-19',
+    note:'①入口页三张卡片断面图采用「复古羊皮纸」方案（用户从 10 款中选定）：米黄羊皮纸底 + 棕色六边形块石+ 深棕描边 + 墙趾地面线 + 红色印章「检」点缀；②修复合并 A3/合并长图导出标注比例错误：根因是合并导出 auto 比例固定 100、长图从 200 起步自适应，而单张导出按墙高 1:25/50/100，导致合并图标注相对墙身大 4~8 倍；现改为与单张一致（按墙高 H≤8→25、≤12→50、否则 100，或用户显式选择），标注与墙身比例完全同单张导出。'
+  },
+  { v:'0.2.50', date:'2026-08-19',
+    note:'①版本历史（关于弹窗）改为倒序排列：最新版在最上、逐版向下递减（数组保持新→旧存储，渲染移除 reverse）；②修复批量/合并/长图导出包含其他挡墙形式：exportBatch/mergeExport/longExport 只取当前形式的选中记录（无选中则当前形式全部）；③修复导出标注与绘图区不一致：导出函数按记录自身形式取 opt/anno（俯斜 Hw off=21.7 等标注参数不再错配）；④修正错别字「俯斜式」→「俯斜式」（默认记录备注、Excel 模板形式列/备注）；⑤changelog 0.2.37 条目 Bd 公式笔误 (1−1)→(1−m1)。'
+  },
+  { v:'0.2.49', date:'2026-08-19',
+    note:'入口页采用「玻璃拟态」方案（10 款方案中用户选定）：蓝紫粉渐变背景，三张形式卡片改为毛玻璃质感（半透明白底+白描边+backdrop-filter blur），白色标题/文字带微阴影，hover 提亮上浮；进入主界面后入口层 display:none 不参与渲染，blur 仅入口页一次性绘制，GPU 开销极小。'
+  },
+  { v:'0.2.48', date:'2026-08-19',
+    note:'修复入口页脚位置：v0.2.46 切片替换残留一个多余的 </div>，导致 entry-in 被提前闭合、entry-foot 脱离容器成为 #entry（flex）的独立子项而布局错位；删除多余闭合标签，恢复 entry-cards → entry-foot → entry-in → entry 正确嵌套，页脚回到三张卡片正下方。'
+  },
+  { v:'0.2.47', date:'2026-08-19',
+    note:'修复入口界面「关于」点击无弹窗：.mask（弹窗遮罩）z-index 由 60 提升至 1000，高于入口层(999)，关于弹窗 mAbout 在入口页可正常显示与关闭；入口页脚信息行（版本·离线单文件·记录保存·关于）保持于三张卡片正下方并收紧间距（margin-top 34→24），与卡片更贴近。'
+  },
+  { v:'0.2.46', date:'2026-08-19',
+    note:'①入口卡片示意图修正上下颠倒（真实坐标 y 翻转，墙顶在上），墙身与基础统一按主界面「干砌块石」样式（六边形块石错缝、#b7a58d）填充；②入口界面整体放大更显眼（标题27px/卡片286px/示意图184×170/logo 68）；③入口页脚版本号改为动态显示（span#entryVer 随 APP_VERSION 自动同步，所有版本号位置统一）；④入口页新增「关于」按钮，打开与主界面一致的关于弹窗（mAbout）。'
+  },
+  { v:'0.2.45', date:'2026-08-19',
+    note:'①各挡墙形式设置完全独立（出图比例/材料/单位/12开关/标注参数按形式分开保存，切换互不影响）；②俯斜式 Hw 尺寸线偏移默认改为 21.7（其余形式 18）；③入口卡片示意图比例优化：改用真实断面坐标+各形式独立 viewBox（不再变形），墙身按「干砌块石」图案填充；④修复挡墙编号手动输入不同步：recNo 优先显示记录存储编号，图形区标题/记录清单即时同步，新增/入口新建编号取最大+1 去重。'
+  },
+  { v:'0.2.44', date:'2026-08-19',
+    note:'①顶栏「形式」按钮重做：SVG 房屋图标 + 品牌蓝底白字，悬停提亮更醒目；②记录清单按当前挡墙形式过滤（只显示本形式条目，其余形式不出现），默认每种形式保留 2 条记录（共 6 条），全选/已选统计/上一条下一条/条数均限当前形式；③入口卡片示意图按主界面真实断面几何重画（直立=墙背竖直+墙面斜、仰斜=平行四边形等宽、俯斜=墙背C→E直线），与成图断面一致。'
+  },
+  { v:'0.2.43', date:'2026-08-19',
+    note:'入口页卡片优化：①三张形式卡片 SVG 按各形式真实断面重画（直立=墙面斜+墙背竖直、仰斜=平行四边形等宽、俯斜=墙背C→E直线），删除卡片文字描述并放大图片；②主界面移除「挡墙形式」下拉框，改为只读形式标签，各形式主界面独立，形式切换仅通过入口页（顶栏「⌂ 形式」）；formDesc 保留显示当前形式参数说明。'
+  },
+  { v:'0.2.42', date:'2026-08-19',
+    note:'新增入口页：打开软件先显示三种挡墙形式（直立/仰斜/俯斜）选择卡片，点选后进入主界面并自动切换到对应形式记录（已有则选中、无则新建）；顶栏新增「⌂ 形式」按钮可随时返回入口重新选择。'
+  },
+  { v:'0.2.41', date:'2026-08-19',
+    note:'仰斜式挡土墙 Bd 公式修正“（用户手算 200+2300·0.25+830−3000·0.25=855 确认）”；①墙趾台阶凸出 tj 统一=bj（仰斜不再乘(1−m1)，v0.2.8 旧规则作废）；②Bd 公式改为 bj+b+m1·Hw−m2·H（m2=m1，默认 0.855 > 顶宽 0.829，解决“顶宽>底宽”问题）；wallBase=b−m1·H2 不变（顶宽仍=b），墙背 C→E 直线与 m2=m1 不变。'
+  },
+  { v:'0.2.40', date:'2026-08-19',
+    note:'仰斜式挡土墙：①内坡比 m2 自动等于外坡比 m1“（用户要求）”，layout 强制 m2=m1，m2 输入框在仰斜时禁用并同步显示 m1，改 m1 时 m2 跟随；②墙背 C→E 贯穿全高直线（无折点 B，删墙踵竖边④），xTR=wallBase+m1·H，墙身仍平行四边形等宽（顶宽=b）；③Bd 公式改为 b+bj·(1−m1)−m1·H2（默认 0.805，墙踵底左移至 b−m1·H2 以保持墙背平行直线且顶宽=b）；④Bd<b 检查对仰斜豁免（墙背悬挑），墙身底宽 wallBase<0.01 新增保护。'
+  },
+  { v:'0.2.39', date:'2026-08-19',
+    note:'仰斜式挡土墙顶宽回归输入 b“（用户要求）”：墙背改为墙身段（H2 以上）与墙面 DG 平行同向（均 1:m1），墙身平行四边形等宽（顶宽=底宽=b），H2 以下恢复墙踵竖边④；xTR=wallBase+m1·Hw；Bd 公式改为 b+bj·(1−m1)（默认 0.979，与实配设计值 0.980 偏差 -0.1%），调整 b 时 Bd 同步联动；顶宽标注/参数表恢复显示输入 b；rX/bbox 右界扩展保留。'
+  },
+  { v:'0.2.38', date:'2026-08-19',
+    note:'仰斜式挡土墙墙背与外边同向平行“（用户确认）”：墙背 C→E 与墙面 DG 平行且同向右上倾斜（均 1:m1），墙身呈平行四边形，xTR=wallBase+m1·H（默认 3.280，墙顶内缘超出墙踵 0.875m），顶宽随几何（默认 2.579，B1/参数表/b 标注改为计算顶宽）；放开 xTR>wallBase 钳制（仅仰斜），rX 与 bbox 右界扩展覆盖墙背顶部，墙背坡度标注仍按 m2 显示。'
+  },
+  { v:'0.2.37', date:'2026-08-19',
+    note:'仰斜式挡土墙几何修正“（用户指导）”：墙背由“墙身段 1:m2 + 墙踵竖边④折角”改为 C→E 贯穿全高 H 的直线且与墙面 DG 平行（坡度 1:m1），删除墙踵竖边④与 H2 折角 B；Bd 公式改为 b+bj·(1−m1)+m1·(H+Hw) 保持顶宽恒=b（默认 Bd 2.381→2.555）；台阶顶边 A′（−tj,H2）→G(0,H2) 由闭合虚线改为实线描边；墙背坡度标注仍按参数表 m2 显示。'
+  },
+  { v:'0.2.36', date:'2026-08-19',
+    note:'修复挡墙记录清单：表头含「形式」列但行渲染漏输出该单元格，导致数据错位、形式不显示。renderRecs 在编号后补 formName(r.form) 形式单元格，空状态行 colspan 6→7，使列与表头（勾选/编号/形式/H/b/Bd/面积）对齐。'
+  },
+  { v:'0.2.35', date:'2026-08-19',
+    note:'挡墙记录清单自动序号前缀由 DG 改回 DQ：recNo 返回 DQ-1/DQ-2/...，新增/复制/导入默认编号前缀同步为 DQ（上一版 0.2.34 误将前缀改成 DG，本次纠正）。'
+  },
+  { v:'0.2.34', date:'2026-08-19',
+    note:'挡墙记录清单序号改为自动排列：新增 recNo(rec) 全局函数，按列表行号返回 DG-1/DG-2/...，清单序号列、注记表挡墙编号、出图标题、单张与批量 PNG 文件名、导出 Excel 编号列、成图进度文本统一使用 recNo（增删/导入/复制后序号始终连续从上到下排列）；新增/复制/导入默认编号前缀由 DQ 改为 DG。'
+  },
+  { v:'0.2.33', date:'2026-08-18',
+    note:'俯斜式 Bd 公式修正：墙背（内坡）为 C→E 一条贯穿全高 H 的直线，内坡比水平投影应为 m2\u00b7H（此前误用 m2\u00b7Hw）。Bd 改为 bj+b+m1\u00b7Hw+m2\u00b7H；xTR 改为 wallBase−m2\u00b7H，墙背线成为真正的 1:m2（标注与几何一致），顶宽仍恒等于 b。仰斜/直立不受影响。'
+  },
+  { v:'0.2.32', date:'2026-08-18',
+    note:'俯斜式：恢复 v0.2.30 的墙背几何（边①=从墙顶内缘 C 直斜到墙踵底 E 的一条直线，去掉 H2 折角 B、删除墙踵竖边④，B 与 E 合为一点）；保留 v0.2.31 的 m1/m2 各自独立输入。墙背（内坡比）标注显示参数表 m2（如 1:0.35）并随 m2 同步，标注文字贴在 C→E 线上（顶宽仍恒等于 b）。说明：v0.2.31 误将几何一并回退，本次仅恢复几何、标注不变。'
+  },
+  { v:'0.2.31', date:'2026-08-18',
+    note:'俯斜式：①取消外坡比 m1 与内坡比 m2 的强制联动，两者改为各自独立、可任意手动输入；②墙背（边①）由「C→E 整条直线（约 1:3.7）」回退为「墙身段按 1:m2 画（C→B）+ H2 处折到墙踵竖边④」，标注坡度恢复为 1:m2、与参数表一致；顶宽仍恒等于 b。仅俯斜生效，仰斜/直立不变。'
+  },
+  { v:'0.2.30', date:'2026-08-18',
+    note:'俯斜式墙背（边①）改为从墙顶内缘 C 直斜到墙踵底 E 的一条直线，去掉 H2 处的折角 B、删除墙踵端竖边④，B 与 E 合为一点（顶宽仍恒等于 b）。墙背标注坡度按实际全高坡度显示（约 1:3.7，缓于输入 1:m2）。仅俯斜生效，仰斜/直立不变。'
+  },
+  { v:'0.2.29', date:'2026-08-18',
+    note:'仰斜式挡土墙：墙身改为按坡比绘制（与俯斜一致，左缘 x=m1·Hw、右缘/墙背 x=wallBase−m2·Hw），m1/m2 真正驱动几何倾斜；Bd 公式同步改为 b+bj·(1−m1)+Hw·(m1+m2) 使底宽与坡比自洽（默认仰斜 Bd 由 0.979 调整为 2.131）。'
+  },
+  { v:'0.2.28', date:'2026-08-18',
+    note:'俯斜式挡土墙：①外坡比 m1 与内坡比 m2 联动（调整任一波比，另一自动跟随为相同值）；②墙身改为按坡比绘制（左缘 x=m1·Hw、右缘/墙背 x=wallBase−m2·Hw），右缘向右下俯斜、图形向右倾斜（不再强制顶宽居中）；顶宽仍恒等于 b。'
+  },
+  { v:'0.2.27', date:'2026-08-18', note:'默认参数 Hw off=18、bj off=4.0。' },
+  { v:'0.2.26', date:'2026-08-18', note:'标注调整窗口不模糊。' }
 ];
 /* 新增迭代时，在此数组顶部插入一条即可，例如：
    { v:'0.2.0', date:'2026-08-xx', note:'新增扩大基础（趾板/踵板）…' },
@@ -762,37 +830,43 @@ const ICON_URL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(ICON_S
 $('logoImg').src = ICON_URL; $('logoBig').src = ICON_URL;
 /* 注入版本号与版本历史（单一事实来源 APP_VERSION / APP_CHANGELOG） */
 $('hdVer').textContent = APP_VERSION_LABEL;
+  const _ev = $('entryVer'); if (_ev) _ev.textContent = APP_VERSION_LABEL;
+  const _ea = $('entryAbout'); if (_ea) _ea.onclick = ()=>$('mAbout').classList.add('show');   // 入口关于与主界面一致
 $('aboutVer').textContent = APP_VERSION_LABEL;
-(function(){ const cl=$('changelog'); if(!cl) return; APP_CHANGELOG.slice().reverse().forEach(e=>{ const li=document.createElement('li'); li.innerHTML='<b>'+e.v+'</b>'+e.date+'　'+e.note; cl.appendChild(li); }); })();
-document.title = '剖筑挡墙断面成图系统 Murus ' + APP_VERSION_LABEL;
+(function(){ const cl=$('changelog'); if(!cl) return; APP_CHANGELOG.forEach(e=>{ const li=document.createElement('li'); li.innerHTML='<b>'+e.v+'</b>'+e.date+'　'+e.note; cl.appendChild(li); }); })();
+document.title = '剖筑多形式挡土墙断面成图系统 Murus+ ' + APP_VERSION_LABEL;
 (function(){ const l=document.createElement('link'); l.rel='icon'; l.href=ICON_URL; document.head.appendChild(l); })();
 
 /* ---------- 左侧参数示意图 ---------- */
-$('schema').innerHTML = `<svg viewBox="0 0 280 172">
+$('schema').innerHTML = `<svg viewBox="0 0 280 186">
 <defs><marker id="ar" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
   <path d="M0 1.4L4.6 3.5L0 5.6z" fill="#8695ab"/></marker></defs>
-<path d="M40 108H108" stroke="#9aa8bd" stroke-width="1.8"/>
-<g stroke="#c3cddc" stroke-width="1"><path d="M43 114l4-5M53 114l4-5M63 114l4-5M73 114l4-5M83 114l4-5M93 114l4-5"/></g>
-<path d="M100 133H185L162 32H126Z" fill="#fdf3e2" stroke="#d9922b" stroke-width="1.6" stroke-linejoin="round"/>
-<g stroke="#e7c893" stroke-width=".8"><path d="M108 108h72M114 82h60M120 57h48"/></g>
-<path d="M160 32H200" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
-<path d="M183 133H205" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
-<path d="M106 108H72" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
+<path d="M40 118H104" stroke="#9aa8bd" stroke-width="1.8"/>
+<g stroke="#c3cddc" stroke-width="1"><path d="M43 124l4-5M53 124l4-5M63 124l4-5M73 124l4-5M83 124l4-5M93 124l4-5"/></g>
+<path d="M40 118h186l-4 4H44Z" fill="#e9e9e6" stroke="#888" stroke-width=".8"/>
+<path d="M98 140h122l-22-42h-22Z" fill="none" stroke="#9aa8bd" stroke-width=".8" stroke-dasharray="3 2"/>
+<path d="M94 122h4" stroke="#9aa8bd" stroke-width=".8"/>
+<path d="M120 150h6" stroke="#9aa8bd" stroke-width=".8"/>
+<path d="M124 118H196L174 30H140Z" fill="#fdf3e2" stroke="#d9922b" stroke-width="1.6" stroke-linejoin="round"/>
+<g stroke="#e7c893" stroke-width=".8"><path d="M106 116h80M114 88h66M122 60h54"/></g>
+<path d="M174 30H212" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
+<path d="M196 140H216" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
+<path d="M104 118H74" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
 <g stroke="#8695ab" stroke-width=".9" marker-start="url(#ar)" marker-end="url(#ar)">
-  <path d="M76 34v72"/><path d="M76 110v21"/><path d="M126 24h36"/><path d="M100 143h85"/></g>
-<path d="M126 32H70" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
-<path d="M100 133H70" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
+  <path d="M78 32v84"/><path d="M78 118v16"/><path d="M140 22h32"/><path d="M98 152h94"/><path d="M122 22v12"/></g>
+<path d="M140 30H74" stroke="#c3cddc" stroke-width=".8" stroke-dasharray="3 2"/>
 <g font-family="Times New Roman,serif" font-size="12" font-style="italic" fill="#1c6fd0">
-  <text x="66" y="74" text-anchor="end">H1</text>
-  <text x="66" y="126" text-anchor="end">H2</text>
-  <text x="144" y="19" text-anchor="middle">B1</text>
-  <text x="142" y="157" text-anchor="middle">B2</text>
-  <text x="93" y="62" text-anchor="end" fill="#d9922b">W</text>
-  <text x="192" y="70" fill="#d9922b">N</text></g>
+  <text x="68" y="76" text-anchor="end">H</text>
+  <text x="68" y="130" text-anchor="end">hj</text>
+  <text x="156" y="17" text-anchor="middle">b</text>
+  <text x="144" y="166" text-anchor="middle">Bd</text>
+  <text x="96" y="36" text-anchor="end" fill="#d9922b">m1</text>
+  <text x="200" y="48" fill="#d9922b">m2</text>
+  <text x="120" y="150" fill="#d9922b">bj</text>
+  <text x="212" y="128" fill="#d9922b">hn</text>
+  <text x="132" y="126" fill="#b3730c">n</text></g>
 <g font-family="PingFang SC,Microsoft YaHei" font-size="9" fill="#8695ab">
-  <text x="42" y="100">外侧地面</text><text x="207" y="36">墙顶／填土面</text><text x="208" y="137">基底</text></g>
-<path d="M118 66l0 22 5 0" fill="none" stroke="#d9922b" stroke-width="1"/>
-<path d="M170 66l0 22-5 0" fill="none" stroke="#d9922b" stroke-width="1"/>
+  <text x="44" y="110">外侧地面</text><text x="212" y="24">墙顶／填土面</text><text x="206" y="146">基底</text></g>
 </svg>`;
 
 /* ---------- 工具 ---------- */
@@ -816,103 +890,217 @@ function dl(blob,name){ const a=document.createElement('a'); a.href=URL.createOb
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},600); }
 
 /* ---------- 状态 ---------- */
+const OPT_DEFAULT = { scaleSel:'auto', mat:'rubble', baseElev:0, dimUnit:'mm',
+         dim:true, elev:false, slope:true, note:false, weep:true, backfill:true,
+         cushion:false, table:false, title:true, bgfill:true, matNote:true, grid:true, customNote:true };
+const ANNO_DEFAULT = { hn:{mode:'fixed',ext:10.5,off:10}, hj:{mode:'fixed',ext:10.5,off:10},
+  Hw:{mode:'conn',ext:0,off:18}, H:{mode:'conn',ext:0,off:19},
+  b:{mode:'fixed',ext:7.5,off:7}, bj:{mode:'fixed',ext:4.4,off:4.0},
+  Bd:{mode:'conn',ext:0,off:6} };
+const ANNO_DEFAULT_FU = JSON.parse(JSON.stringify(ANNO_DEFAULT)); ANNO_DEFAULT_FU.Hw.off = 21.7;   // 俯斜 Hw 尺寸线偏移默认 21.7（v0.2.45 用户要求）
 const state = {
   recs: [
-    {id:'DQ-1', H1:4.0, H2:1.0, B1:0.60, B2:2.10, W:0.05, N:0.25, sel:true,  note:'路肩重力式挡墙'},
-    {id:'DQ-2', H1:3.0, H2:0.8, B1:0.50, B2:1.26, W:0.20, N:0.00, sel:true,  note:'直立式墙背'}
+    {id:'DQ-1', form:'yang',     H:3.0, b:0.829, Bd:0, m1:0.25, m2:0.25, n:0.2,  bj:0.200, hj:0.500, hn:0.196, sel:true,  note:'仰斜式（H=3m）'},
+    {id:'DQ-2', form:'yang',     H:3.5, b:0.829, Bd:0, m1:0.25, m2:0.25, n:0.2,  bj:0.200, hj:0.500, hn:0.196, sel:true,  note:'仰斜式（H=3.5m）'},
+    {id:'DQ-3', form:'vertical', H:3.0, b:0.782, Bd:0, m1:0.15, m2:0,    n:0.2,  bj:0.200, hj:0.500, hn:0.278, sel:true,  note:'直立式（H=3m）'},
+    {id:'DQ-4', form:'vertical', H:3.5, b:0.782, Bd:0, m1:0.15, m2:0,    n:0.2,  bj:0.200, hj:0.500, hn:0.278, sel:true,  note:'直立式（H=3.5m）'},
+    {id:'DQ-5', form:'fu',       H:3.0, b:0.476, Bd:0, m1:0.05, m2:0.35, n:0.15, bj:0.295, hj:0.500, hn:0.320, sel:false, note:'俯斜式（H=3m）'},
+    {id:'DQ-6', form:'fu',       H:3.5, b:0.476, Bd:0, m1:0.05, m2:0.35, n:0.15, bj:0.295, hj:0.500, hn:0.320, sel:false, note:'俯斜式（H=3.5m）'}
   ],
   cur: 0,
-  opt: { mode:'slope', scaleSel:'auto', mat:'rubble', baseElev:0, dimUnit:'mm',
-         dim:true, elev:false, slope:true, note:false, weep:true, backfill:true,
-         cushion:false, table:false, title:true, bgfill:true, matNote:true, grid:true, customNote:true },
+  opts: { vertical:JSON.parse(JSON.stringify(OPT_DEFAULT)), yang:JSON.parse(JSON.stringify(OPT_DEFAULT)), fu:JSON.parse(JSON.stringify(OPT_DEFAULT)) },
+  opt: null,
   customNotes: [],
-  view: { s:60, tx:0, ty:0 }
+  view: { s:60, tx:0, ty:0 },
+  annos: { vertical:JSON.parse(JSON.stringify(ANNO_DEFAULT)), yang:JSON.parse(JSON.stringify(ANNO_DEFAULT)), fu:JSON.parse(JSON.stringify(ANNO_DEFAULT_FU)) },
+  anno: null
 };
+state.opt = state.opts['yang'];
+state.anno = state.annos['yang'];
+
+(function(){
+  try{ const s = localStorage.getItem('murusplus_annos');
+    if (s){ const j = JSON.parse(s);
+      if (j && j.v === APP_VERSION && j.dims){
+        for (const f of ['vertical','yang','fu']) if (j.dims[f]){
+          for (const k in ANNO_DEFAULT) if (j.dims[f][k]) state.annos[f][k] = Object.assign({}, ANNO_DEFAULT[k], j.dims[f][k]);
+        }
+        state.anno = state.annos[state.recs[state.cur].form || 'yang'];
+      }
+    }
+  }catch(e){}
+})();
+function saveAnno(){ try{ const out = {v:APP_VERSION, dims:{}}; for (const f of ['vertical','yang','fu']) out.dims[f] = state.annos[f]; localStorage.setItem('murusplus_annos', JSON.stringify(out)); }catch(e){} }
 
 /* =====================================================================
    几何与版面计算
    ===================================================================== */
+/* ---------- 挡墙形式（17J008 图集第15页） ---------- */
+const FORMS = {
+  vertical:{ name:'直立式挡土墙', desc:'17J008 直立式断面样式。Bd=bj+b+Hw·m1（Hw=H−hj−hn 墙身高）；内坡比 m2 固定为 0（内边竖直）；m1 为图面标注。' },
+  yang:    { name:'仰斜式挡土墙', desc:'17J008 仰斜式断面样式。Bd=bj+b+m1·Hw−m2·H（m2=m1，默认 0.855>顶宽 b）；内坡比 m2 自动=外坡比 m1；墙背 C→E 贯穿全高直线（无折点 B、无墙踵竖边④），与墙面 DG 平行同向（均 1:m1，墙身平行四边形等宽，顶宽=b，台阶凸出 tj=bj）；台阶顶边 A′→G 实线。' },
+  fu:      { name:'俯斜式挡土墙', desc:'17J008 俯斜式断面样式。Bd=bj+b+m1·Hw+m2·H；墙身按坡比绘制（向右倾斜：左缘 x=m1·Hw、右缘/墙背 x=wallBase−m2·H，墙背为贯穿全高 H 的 1:m2 直线）；m1 与 m2 各自独立输入，互不影响。' }
+};
+const formName = f => (FORMS[f] && FORMS[f].name) || f;
 function layout(rec, opt){
-  const H1 = num(rec.H1), H2 = num(rec.H2), H = H1 + H2;
-  let B1 = num(rec.B1), B2 = num(rec.B2), W = num(rec.W), N = num(rec.N);
-  const B2theory = B1 + (W + N) * H;
-  let note = null, level = 'ok';
+  const form = rec.form || 'vertical';
+  const H = num(rec.H), b = num(rec.b), refBd = num(rec.Bd);
+  let m1 = num(rec.m1), m2 = num(rec.m2);
+  const n = num(rec.n), bj = num(rec.bj), hj = num(rec.hj), hn = num(rec.hn);
 
-  if (H <= 0)  return {bad:'墙高 H1 与基础埋深 H2 之和须大于 0'};
-  if (B1 <= 0) return {bad:'墙体顶宽 B1 须大于 0'};
+  if (H <= 0) return { bad:'总高 H 须大于 0' };
+  if (b <= 0)  return { bad:'顶宽 b 须大于 0' };
+  if (hj < 0)  return { bad:'hj 不能为负' };
+  if (hn < 0)  return { bad:'hn 不能为负' };
+  if (bj < 0)  return { bad:'bj 不能为负' };
+  if (m1 < 0 || m2 < 0) return { bad:'坡比 m1/m2 不能为负' };
 
-  if (opt.mode === 'slope'){
-    if (Math.abs(B2theory - B2) > 0.005){
-      note = '输入底宽 ' + fmtN(B2) + ' m 与坡比不符，已按坡比取用 B2 = ' + fmtN(B2theory) + ' m';
-      level = 'warn';
-    } else note = '几何自洽：B2 = B1 + (W+N)·H = ' + fmtN(B2theory) + ' m';
-    B2 = B2theory;
+  // 高度分解：hn(基底高差) + hj(墙趾端基础厚) + Hw(墙身高) = H
+  const Hw = H - hj - hn;
+  if (Hw <= 0) return { bad:'墙身高 Hw = H\u2212hj\u2212hn 须大于 0' };
+  const H2 = hj + hn;
+
+  // 直立式内坡比固定为 0（用户固化要求）；仰斜内坡比自动=外坡比（v0.2.40 用户要求）
+  if (form === 'vertical') m2 = 0;
+  if (form === 'yang') m2 = m1;
+
+  // ===== Bd 计算 ======
+  let bdF, Bd;
+  if (form === 'vertical'){ bdF = 'bj+b+Hw\u00b7m1';              Bd = bj + b + Hw * m1; }
+  else if (form === 'yang'){ bdF = 'bj+b+m1\u00b7Hw\u2212m2\u00b7H'; Bd = bj + b + m1 * Hw - m2 * H; }
+  else {                    bdF = 'bj+b+m1\u00b7Hw+m2\u00b7H';        Bd = bj + b + m1 * Hw + m2 * H; }
+  if (!isFinite(Bd) || Bd <= 0) return { bad:'Bd 计算异常，请复核 m1/m2/bj' };
+  if (form !== 'yang' && Bd < b) return { bad:'计算底宽 Bd='+fmtN(Bd)+' m 小于顶宽 b，请复核 m1/m2/bj' };   // 仰斜墙背悬挑，Bd 允许小于 b
+
+  // 墙趾台阶凸出宽 tj 与墙身底宽 wallBase
+  const tj = bj;   // 墙趾台阶凸出统一=bj（v0.2.41 用户手算确认，仰斜不再乘(1-m1)）
+  const wallBase = Bd - tj;
+  if (wallBase < 0.01) return { bad:'墙身底宽异常，请复核 m1/b' };
+
+  // 墙身形状：仰斜 xTR=wallBase+m1·Hw（墙身段墙背与墙面平行同向，平行四边形等宽）；俯斜 xTR=wallBase−m2·H（墙背贯穿全高）；直立 m2=0 内竖、m1=0 外竖
+  let xTL, xTR;
+  if (form === 'yang') { xTL = m1 * Hw; xTR = wallBase + m1 * H; }   // 仰斜：墙背 C→E 贯穿全高直线（无折点 B），与墙面 DG 平行同向（坡度 1:m1=m2，xTR=wallBase+m1·H，墙身平行四边形等宽，顶宽=b）
+  else if (form === 'fu') { xTL = m1 * Hw; xTR = wallBase - m2 * H; }  // 俯斜：墙背贯穿全高 H，xTR=wallBase-m2*H（真正 1:m2）
+  else if (m2 === 0)      { xTR = wallBase; xTL = xTR - b; }
+  else if (m1 === 0) { xTL = 0;        xTR = xTL + b; }
+  else               { xTL = (wallBase - b) / 2; xTR = xTL + b; }
+  if (xTL < -1e-6 || xTR < xTL || (form !== 'yang' && xTR > wallBase + 1e-6)){
+    xTL = Math.max(0, Math.min(xTL, wallBase)); xTR = Math.max(xTL, Math.min(xTR, wallBase));
+  }
+  if (xTR - xTL <= 0.005) return { bad:'计算底宽与顶宽冲突，请复核' };
+
+  const xBL = -tj, xBR = wallBase;
+  // 方案 B：基底一条连续斜线（台阶前缘 hn → 墙踵底 0），斜线与 x=0 交点 y0
+  const y0 = hn * wallBase / Bd;
+  // 俯斜：墙背为从墙顶内缘 C(xTR,H) 直斜到墙踵底 E(wallBase,0) 的一条直线，
+  // 去掉 H2 折角 B、删除墙踵端竖边④，B 与 E 合为一点；墙背标注按参数表内坡比 m2 显示（与参数表同步）。
+  // 其余形式：墙背在墙身段按 1:m2 画（C→B），H2 处折到墙踵竖边④。顶宽恒等于 b，m1/m2 各自独立输入。
+  let wall, fnd, toe, outline;
+  if (form === 'fu'){
+    const xBackH2 = xTR + (wallBase - xTR) * Hw / H;       // 墙背直线与 y=H2 交点（不单独描边）
+    wall    = [[0,H2],[xTL,H],[xTR,H],[xBackH2,H2]];
+    const mass = [[0,H2],[xTL,H],[xTR,H],[wallBase,0],[xBL,hn],[xBL,H2]];
+    fnd = mass; toe = mass; outline = mass;
+  } else if (form === 'yang'){
+    const xBackH2 = xTR + (wallBase - xTR) * Hw / H;       // 墙背 C→E 直线与 y=H2 交点（不单独描边，无折点 B）
+    wall    = [[0,H2],[xTL,H],[xTR,H],[xBackH2,H2]];
+    fnd     = [[0,y0],[wallBase,0],[xBackH2,H2],[0,H2]];
+    toe     = [[xBL,hn],[0,y0],[0,H2],[xBL,H2]];
+    outline = [[xBL,hn],[0,y0],[wallBase,0],[xTR,H],[xTL,H],[0,H2],[xBL,H2]];
   } else {
-    if (B2 <= B1) return {bad:'底宽优先模式下，B2 必须大于 B1'};
-    const d = B2 - B1, sum = W + N;
-    if (Math.abs(sum) > 1e-9){ W = d*W/sum/H; N = d*N/sum/H; } else { W = d/2/H; N = d/2/H; }
-    if (Math.abs(B2theory - B2) > 0.005){
-      note = '已按底宽反算坡比：外 1:' + fmtN(W) + '　内 1:' + fmtN(N); level = 'warn';
-    } else note = '几何自洽：外 1:' + fmtN(W) + '　内 1:' + fmtN(N);
+    wall    = [[0,H2],[wallBase,H2],[xTR,H],[xTL,H]];
+    fnd     = [[0,y0],[wallBase,0],[wallBase,H2],[0,H2]];
+    toe     = [[xBL,hn],[0,y0],[0,H2],[xBL,H2]];
+    outline = [[xBL,hn],[0,y0],[wallBase,0],[wallBase,H2],[xTR,H],[xTL,H],[0,H2],[xBL,H2]];
   }
 
-  const xBL = 0, xBR = B2, xTL = W*H, xTR = B2 - N*H;
-  if (xTR - xTL <= 0.01) return {bad:'坡比过大导致墙顶宽度归零，请复核 W / N'};
+  const xf = y => y <= H2 ? 0 : xTL * (y - H2) / Hw;
+  // 墙背（内坡）：俯斜按全高 C→E 直线（wallBase - (wallBase-xTR)*y/H）；其余 H2 以下垂直、H2 以上按 1:m2
+  const xb = (form === 'fu' || form === 'yang')
+    ? (y => wallBase - (wallBase - xTR) * y / H)
+    : (y => y <= H2 ? wallBase : wallBase - (wallBase - xTR) * (y - H2) / Hw);
 
-  const denom = opt.scaleSel === 'auto' ? (H<=3 ? 25 : H<=6 ? 50 : H<=12 ? 100 : 200) : parseInt(opt.scaleSel,10);
-  const S = denom/1000;                 // 图纸 1mm = S 实际米
+  // 基底坡比 nEff（水平:竖直）= 总宽/hn
+  let nEff = 0;
+  if (hn > 1e-6) nEff = Bd / hn;
+  const k1 = xTL / Hw;
+  const k2 = (form === 'yang') ? m1 : (wallBase - xTR) / Hw;
+  const mBack = m2;   // 墙背标注坡度 = 内坡比 m2（与参数表一致）
+
+  // verdict：Bd 计算值 + 与设计 Bd(refBd) 对照
+  const bdDev = refBd > 0 ? Math.abs(refBd - Bd) / Bd : 0;
+  let note, level = 'ok';
+  let head = 'Bd=' + fmtN(Bd) + ' m（' + bdF + '）';
+  if (bdDev > 0.02) head += '，设计 Bd=' + fmtN(refBd) + ' m 偏差 ' + (bdDev*100).toFixed(1) + '%';
+  if (n > 0 && hn > 1e-6){
+    const nIn = 1 / n;
+    if (Math.abs(nEff - nIn) / Math.max(nEff, nIn) > 0.05){
+      note = '底坡比 n(1:'+fmtN(n)+') 与 hn 推算基底(1:'+fmtN(nEff)+')不符，已按 hn 成图；Hw='+fmtN(Hw)+' m；' + head;
+      level = 'warn';
+    } else if (bdDev > 0.02){
+      note = head + '，已按公式成图；基底坡 1:'+fmtN(nEff)+'；Hw='+fmtN(Hw)+' m';
+      level = 'warn';
+    } else {
+      note = '几何自洽：' + head + '；基底坡 1:'+fmtN(nEff)+'；Hw='+fmtN(Hw)+' m';
+    }
+  } else {
+    note = '基底按 hn 成图；' + head + '；Hw='+fmtN(Hw)+' m';
+    if (bdDev > 0.02) level = 'warn';
+  }
+
+  const denom = opt.scaleSel === 'auto' ? (H<=8?25:H<=12?50:100) : parseInt(opt.scaleSel,10);   // H<=8 一律 1:25（用户要求）
+  const S = denom/1000;
   const mm = v => v*S;
 
-  const xf = y => xBL + W*y;            // 外坡面
-  const xb = y => xBR - N*y;            // 内坡面
-  const wall = [[xBL,0],[xTL,H],[xTR,H],[xBR,0]];
-
   const gL = xBL - mm(18);
-  const rX = xBR + mm(26);
-  const dimX1 = gL - mm(5), dimX2 = dimX1 - mm(9);
+  const rX = Math.max(xBR + mm(26), xTR + mm(14));   // 填土区右界须覆盖墙背顶部 xTR（仰斜平行四边形时 xTR>wallBase）
+  const dimX1 = xBL - mm(10), dimX2 = dimX1 - mm(9);   // hn/hj/Hw 同列贴近台阶，H 最外列
   const dimYb = -mm(9), dimYt = H + mm(7);
   const titleY = -mm(20);
   const leadX = rX + mm(9);
 
-  // 引注文字
   const matTxt = matNoteText(opt.mat);
   const notes = [];
-  if (opt.matNote) notes.push({ y: H2 + (H-H2)*0.62, x: (xf(H2+(H-H2)*0.62)+xb(H2+(H-H2)*0.62))/2 + 0.26, t:[matTxt], hx:-35 });
+  if (opt.matNote) notes.push({ y: H2 + Hw*0.62, x: (xf(H2+Hw*0.62)+xb(H2+Hw*0.62))/2 + 0.26, t:[matTxt], hx:-35 });
   if (opt.note){
-    if (opt.weep && H1 >= 1.0) notes.push({ y: H2 + 0.30, x: xBR - N*(H2+0.3) - 0.05, t:['Φ100 PVC泄水管 i=4%','间距2.0m 梅花形布置'] });
+    if (opt.weep && Hw >= 1.0) notes.push({ y: H2 + 0.30, x: xb(H2+0.3) - 0.05, t:['Φ100 PVC泄水管 i=4%','间距2.0m 梅花形布置'] });
     if (opt.backfill) notes.push({ y: H - 0.35, x: xTR + mm(9), t:['墙背填料分层夯实'] });
     notes.push({ y: -mm(2.4), x: xBR + mm(2), t:[ opt.cushion ? 'C15混凝土垫层 厚100' : '基底素土夯实 压实度≥0.93' ] });
   }
-  // 所有引注文字「实际右端」最大值（含内置引注 hx 与自定义引注 hx 水平偏移），参数表/版面以此自适应
-  // 注意：初始值不能用 leadX——内置墙材引注 hx=-35mm 时文字右端可能比 leadX 更靠左，必须取引注实际右端
   let textRightMax = -Infinity;
-  notes.forEach(n => { if (!n || !n.t) return; n.t.forEach(s => { s = String(s).trim(); if (s) textRightMax = Math.max(textRightMax, leadX + mm(num(n.hx)||0) + mm(textW(s,3.0))); }); });
+  notes.forEach(nn => { if (!nn || !nn.t) return; nn.t.forEach(s => { s = String(s).trim(); if (s) textRightMax = Math.max(textRightMax, leadX + mm(num(nn.hx)||0) + mm(textW(s,3.0))); }); });
   if (opt.customNote !== false) (state.customNotes||[]).forEach(cn => { if (!cn || !cn.t) return; String(cn.t).split('\n').forEach(s => { s = s.trim(); if (s) textRightMax = Math.max(textRightMax, leadX + mm(num(cn.hx)||0) + mm(textW(s,3.0))); }); });
-  if (textRightMax === -Infinity) textRightMax = leadX;   // 无任何引注时兜底
+  if (textRightMax === -Infinity) textRightMax = leadX;
 
-  // 参数表
-  const tabRows = [['挡墙编号',rec.id||'—'],['墙高 H1',fmtN(H1)+' m'],['基础埋深 H2',fmtN(H2)+' m'],
-                   ['墙体顶宽 B1',fmtN(B1)+' m'],['墙体底宽 B2',fmtN(B2)+' m'],
-                   ['外坡比 W','1 : '+fmtN(W)],['内坡比 N','1 : '+fmtN(N)],
-                   ['断面面积',((B2+B1)/2*H).toFixed(2)+' m²']];
-  const tabW = mm(46), tabH = mm(6)*tabRows.length;
-  // 参数表水平位置自适应：紧贴「所有引注文字」实际右端（含内置/自定义水平偏移），间距统一 1.5mm
+  let area = 0;
+  for(let i=0;i<outline.length;i++){ const a=outline[i], bb=outline[(i+1)%outline.length]; area += a[0]*bb[1] - bb[0]*a[1]; }
+  area = Math.abs(area) / 2;
+
+  const tabRows = [
+    ['挡墙编号', recNo(rec)], ['断面形式', formName(form)],
+    ['总高 H', fmtN(H)+' m'], ['墙身高 Hw', fmtN(Hw)+' m'],
+    ['基底高差 hn', fmtN(hn)+' m'], ['墙趾端厚 hj', fmtN(hj)+' m'],
+    ['顶宽 b', fmtN(b)+' m'], ['底宽 Bd(计算)', fmtN(Bd)+' m'],
+    ['外坡比 m1', m1===0?'直立':'1:'+fmtN(m1)], ['内坡比 m2', m2===0?'直立':'1:'+fmtN(m2)],
+    ['底坡比 n', n<=0?'水平':'1:'+fmtN(n)],
+    ['墙趾宽 bj', fmtN(bj)+' m'], ['断面面积', area.toFixed(2)+' m²']
+  ];
+  const tabW = mm(52), tabH = mm(6)*tabRows.length;
   const tabGap = 1.5;
   const tabX = textRightMax + mm(tabGap), tabY = H;
 
-  const titleTxt = (rec.id||'挡墙') + ' 挡墙断面图';
+  const titleTxt = recNo(rec) + ' 挡土墙断面图';
   const titleW = textW(titleTxt,4.2) + textW('  1:'+denom,5);
-
-  let minX = Math.min(dimX2 - mm(9), (xBL+xBR)/2 - mm(titleW/2) - mm(2));
-  let maxX = Math.max(textRightMax + mm(3), (xBL+xBR)/2 + mm(titleW/2) + mm(2));
+  let minX = Math.min(dimX2 - mm(9), (xBL+xBR)/2 - mm(titleW/2) - mm(3));
+  let maxX = Math.max(textRightMax + mm(3), (xBL+xBR)/2 + mm(titleW/2) + mm(3), xTR + mm(2));   // 覆盖仰斜墙背顶部 xTR
   if (opt.table) maxX = Math.max(maxX, tabX + tabW + mm(3));
-  const minY = titleY - mm(13), maxY = dimYt + mm(8);
+  const minY = Math.min(titleY, 0) - mm(13), maxY = dimYt + mm(8);
 
-  return { H1,H2,H,B2,B1,W,N, denom,S,mm, xBL,xBR,xTL,xTR, xf,xb, wall,
-           gL,rX,dimX1,dimX2,dimYb,dimYt,titleY,leadX, notes, matTxt, titleTxt,
-           tabRows,tabW,tabH,tabX,tabY,
-           bbox:{x0:minX,y0:minY,x1:maxX,y1:maxY}, note, level,
-           area:(B2+B1)/2*H };
+  return { form, H1:Hw, H2:H2, H, B1:b, B2:Bd, W:m1, N:m2, mBack, Hw, b, Bd, refBd, bdF, tj, wallBase, m1, m2, n, bj, hj, hn, yHeel:0, nEff, y0, k1, k2,
+           denom, S, mm, xBL, xBR, xTL, xTR, xf, xb, wall, fnd, toe, outline,
+           gL, rX, dimX1, dimX2, dimYb, dimYt, titleY, leadX, notes, matTxt, titleTxt,
+           tabRows, tabW, tabH, tabX, tabY,
+           bbox:{x0:minX, y0:minY, x1:maxX, y1:maxY}, note, level, area };
 }
 
 /* =====================================================================
@@ -962,8 +1150,8 @@ function hatch45(P, clipPts, x0, x1, yTop, step, len, color, w){
 }
 
 /* --- 墙身材料图案 --- */
-function material(P, g, mat, seed){
-  const ctx = P.ctx; ctx.save(); P.poly(g.wall,true); ctx.clip();
+function material(P, g, mat, seed, clip){
+  const ctx = P.ctx; ctx.save(); P.poly(clip||g.wall,true); ctx.clip();
   const r = rng(seed);
   const x0 = Math.min(g.xBL,g.xTL), x1 = Math.max(g.xBR,g.xTR);
 
@@ -1033,46 +1221,64 @@ function material(P, g, mat, seed){
 
 /* --- 素土夯实 / 垫层 --- */
 function foundationSym(P, g, opt){
-  const baseY = opt.cushion ? -0.10 : 0;
-  const exL = opt.cushion ? -0.10 : 0, exR = opt.cushion ? g.xBR+0.10 : g.xBR;
-  if (opt.cushion){
-    P.fill([[exL,0],[exR,0],[exR,baseY],[exL,baseY]], '#e9e9e6');
-    P.stroke([[exL,0],[exL,baseY],[exR,baseY],[exR,0]], 0.25, '#555', false);
-    const ctx=P.ctx; ctx.save(); P.poly([[exL,0],[exR,0],[exR,baseY],[exL,baseY]],true); ctx.clip();
-    ctx.strokeStyle='#9a9a95'; ctx.lineWidth=P.lw(0.14); ctx.beginPath();
-    for(let x=exL-0.3;x<exR+0.3;x+=P.mm(2)){ ctx.moveTo(P.X(x),P.Y(0)); ctx.lineTo(P.X(x+0.1),P.Y(baseY)); }
-    ctx.stroke(); ctx.restore();
+  // 基底斜线（墙趾端 xBL,hn → 墙踵端 xBR,0）画夯实符号
+  const xL = g.xBL, xR = g.xBR;
+  const yL = g.hn, yR = 0;
+  const grp = P.mm(4.0), gap = P.mm(1.5), len = P.mm(1.9);
+  for (let x = xL + P.mm(1); x < xR - P.mm(1); x += grp){
+    for (let k = 0; k < 3; k++){
+      const xx = x + k * gap; if (xx > xR - P.mm(1)) break;
+      const t = (xx - xL) / (xR - xL);
+      const y = yL + t * (yR - yL);
+      P.line(xx, y, xx - len, y - len, 0.2, '#6d6d6d');
+    }
   }
-  // 夯实符号：三短斜线一组
-  const y = baseY, s = P.mm(1.9), gap = P.mm(1.5), grp = P.mm(3.2);
-  let x = exL;
-  while (x < exR){
-    for (let k=0;k<3;k++){ const xx = x + k*gap; if (xx > exR) break;
-      P.line(xx, y, xx - s, y - s, 0.2, '#6d6d6d'); }
-    x += grp + gap*2;
-  }
-  P.line(exL - P.mm(2), y, exR + P.mm(2), y, 0.3, '#4a4a4a');
 }
 
 /* --- 尺寸标注 --- */
-function dimH(P, x1, x2, yLine, yObj, txt, up){
-  const c = '#0f5aa8', g = P.mm(1.6), o = P.mm(2.2), t = P.mm(1.35);
+function dimH(P, x1, x2, yLine, yObj, txt, up, ext){
+  const c = '#0f5aa8', g = P.mm(1.6), t = P.mm(1.35), ov = P.mm(2);
   const dir = up ? 1 : -1;
-  P.line(x1, yObj + dir*g, x1, yLine + dir*o, 0.18, c);
-  P.line(x2, yObj + dir*g, x2, yLine + dir*o, 0.18, c);
+  if (ext){
+    P.line(x1, yObj + dir*g, x1, yObj + dir*(g + ext), 0.18, c);
+    P.line(x2, yObj + dir*g, x2, yObj + dir*(g + ext), 0.18, c);
+  } else {
+    P.line(x1, yObj + dir*g, x1, yLine + dir*ov, 0.18, c);
+    P.line(x2, yObj + dir*g, x2, yLine + dir*ov, 0.18, c);
+  }
   P.line(x1 - P.mm(1.5), yLine, x2 + P.mm(1.5), yLine, 0.22, c);
   P.line(x1 - t, yLine - t, x1 + t, yLine + t, 0.36, c);
   P.line(x2 - t, yLine - t, x2 + t, yLine + t, 0.36, c);
   P.text(txt, (x1+x2)/2, yLine + P.mm(1.3), {size:3.5, color:c, align:'center', base:'bottom'});
 }
-function dimV(P, y1, y2, xLine, xo1, xo2, txt){
-  const c = '#0f5aa8', g = P.mm(1.6), o = P.mm(2.2), t = P.mm(1.35);
-  P.line(xo1 - g, y1, xLine - o, y1, 0.18, c);
-  P.line(xo2 - g, y2, xLine - o, y2, 0.18, c);
+function dimV(P, y1, y2, xLine, xo1, xo2, txt, ext){
+  const c = '#0f5aa8', g = P.mm(1.6), t = P.mm(1.35), ov = P.mm(2);
+  if (ext){
+    P.line(xo1 - g - ext, y1, xo1 - g, y1, 0.18, c);
+    P.line(xo2 - g - ext, y2, xo2 - g, y2, 0.18, c);
+  } else {
+    P.line(xo1 - g, y1, xLine - ov, y1, 0.18, c);
+    P.line(xo2 - g, y2, xLine - ov, y2, 0.18, c);
+  }
   P.line(xLine, y1 - P.mm(1.5), xLine, y2 + P.mm(1.5), 0.22, c);
   P.line(xLine - t, y1 - t, xLine + t, y1 + t, 0.36, c);
   P.line(xLine - t, y2 - t, xLine + t, y2 + t, 0.36, c);
   P.text(txt, xLine - P.mm(2.4), (y1+y2)/2, {size:3.5, color:c, align:'center', base:'bottom', rot:-Math.PI/2});
+}
+/* --- 斜基底水平标注（两端各自引线）--- */
+function dimH2(P, x1, y1, x2, y2, yLine, txt, ext){
+  const c = '#0f5aa8', g = P.mm(1.6), t = P.mm(1.35), ov = P.mm(2);
+  if (ext){
+    P.line(x1, y1 - g - ext, x1, y1 - g, 0.18, c);
+    P.line(x2, y2 - g - ext, x2, y2 - g, 0.18, c);
+  } else {
+    P.line(x1, y1 - g, x1, yLine - ov, 0.18, c);
+    P.line(x2, y2 - g, x2, yLine - ov, 0.18, c);
+  }
+  P.line(x1 - P.mm(1.5), yLine, x2 + P.mm(1.5), yLine, 0.22, c);
+  P.line(x1 - t, yLine - t, x1 + t, yLine + t, 0.36, c);
+  P.line(x2 - t, yLine - t, x2 + t, yLine + t, 0.36, c);
+  P.text(txt, (x1+x2)/2, yLine + P.mm(1.3), {size:3.5, color:c, align:'center', base:'bottom'});
 }
 /* --- 标高符号 --- */
 function elevMark(P, x, y, val, dir){
@@ -1167,24 +1373,35 @@ function drawScene(ctx, rec, g, view, opt){
     hatch45(P, clip, g.xTR, g.rX + d, g.H, mm(3.2), mm(2.6), '#a2937c', 0.16);
     P.line(g.xTR, g.H, g.rX, g.H, 0.5, '#6b6153');
   }
-  /* 2. 外侧地面 */
+  /* 2. 外侧地面（基础顶高度） */
   {
     const d = mm(7), yb = g.H2 - d, ybc = Math.max(yb, 0);
     const clip = [[g.gL,g.H2],[g.xf(g.H2),g.H2],[g.xf(ybc),ybc],[g.xBL,yb],[g.gL,yb]];
     P.fill(clip, 'rgba(206,192,168,.30)');
     hatch45(P, clip, g.gL + mm(1), g.xf(g.H2), g.H2, mm(3.2), mm(2.6), '#a2937c', 0.16);
     P.line(g.gL, g.H2, g.xf(g.H2), g.H2, 0.7, '#3d3a33');
-    // 折断符号
     P.line(g.gL, g.H2, g.gL - mm(2.4), g.H2 + mm(1.6), 0.25, '#3d3a33');
   }
-  /* 3. 基础垫层与夯实 */
+  /* 3. 基础夯实符号（沿基底斜线） */
   foundationSym(P, g, opt);
-
-  /* 4. 墙身 */
-  if (opt.bgfill) P.fill(g.wall, (opt.mat==='concrete'||opt.mat==='c20rubble'||opt.mat==='c25rubble') ? '#f1f1ee' : '#faf6ee');
-  material(P, g, opt.mat, seed);
-  P.stroke(g.wall, 0.5, '#141414', true);
-
+  /* 4. 墙身+基础（三段：墙身、基础本体、墙趾台阶） */
+  if (opt.bgfill){
+    const bgC = (opt.mat==='c20rubble'||opt.mat==='c25rubble'||opt.mat==='rc'||opt.mat==='rcconcrete') ? '#f1f1ee' : '#faf6ee';
+    P.fill(g.wall, bgC);
+    P.fill(g.fnd,  bgC);
+    P.fill(g.toe,  bgC);
+  }
+  material(P, g, opt.mat, seed+1, g.outline);
+  material(P, g, opt.mat, seed+2, g.toe);
+  // 墙身内边（墙背）：俯斜/仰斜为 C→E 一条直线（无 H2 折角、无墙踵竖边④）；其余为 B→C（墙身段）+ H2 折角
+  if (g.form === 'fu' || g.form === 'yang') P.line(g.xTR, g.H, g.xBR, 0, 0.5, '#141414');
+  else                                       P.line(g.wallBase, g.H2, g.xTR, g.H, 0.5, '#141414');
+  P.line(g.xTR, g.H, g.xTL, g.H, 0.5, '#141414');            // 墙顶边
+  P.line(g.xTL, g.H, 0, g.H2, 0.5, '#141414');               // 墙身外边
+  if (g.form !== 'fu' && g.form !== 'yang') P.line(g.xBR, 0, g.xBR, g.H2, 0.5, '#141414'); // 墙踵端竖边④（俯斜/仰斜并入墙背 C→E 不画）
+  P.line(g.xBL, g.hn, g.xBL, g.H2, 0.5, '#141414');         // 台阶左外缘竖边
+  if (g.form === 'yang') P.line(0, g.H2, g.xBL, g.H2, 0.5, '#141414'); // 台阶顶边 A′→G（仰斜 v0.2.37 用户要求）
+  P.line(g.xBL, g.hn, g.xBR, 0, 0.5, '#141414');            // 基底斜线（整条连续）
   /* 5. 泄水孔与反滤层 */
   if (opt.weep && g.H1 >= 1.0){
     const ys = []; let y = g.H2 + 0.30;
@@ -1195,7 +1412,6 @@ function drawScene(ctx, rec, g, view, opt){
       const r = 0.05;
       P.line(x1, yy + r, x2, y2 + r, 0.22, '#2c3e50');
       P.line(x1, yy - r, x2, y2 - r, 0.22, '#2c3e50');
-      // 反滤包（紧贴挡墙内边，沿墙背坡度 N 倾斜）
       const yb0 = yy - 0.15, yb1 = yy + 0.15;
       const wx0 = g.xb(yb0), wx1 = g.xb(yb1), depth = 0.30;
       const box = [[wx0,yb0],[wx1,yb1],[wx1+depth,yb1],[wx0+depth,yb0]];
@@ -1207,31 +1423,39 @@ function drawScene(ctx, rec, g, view, opt){
       ctx2.restore();
     });
   }
-
-  /* 6. 尺寸标注（mm） */
+  /* 6. 尺寸标注（按 17J008 图集第15页位置） */
   if (opt.dim){
-    dimH(P, g.xTL, g.xTR, g.dimYt, g.H, fmtDim(g.B1, opt.dimUnit), true);
-    dimH(P, g.xBL, g.xBR, g.dimYb, 0, fmtDim(g.B2, opt.dimUnit), false);
-    dimV(P, 0, g.H2, g.dimX1, g.xBL, g.xf(g.H2), fmtDim(g.H2, opt.dimUnit));
-    dimV(P, g.H2, g.H, g.dimX1, g.xf(g.H2), g.xTL, fmtDim(g.H1, opt.dimUnit));
-    dimV(P, 0, g.H, g.dimX2, g.dimX1 - mm(1.2), g.dimX1 - mm(1.2), fmtDim(g.H, opt.dimUnit));
+    const u = opt.dimUnit, A = state.anno;
+    const ex = k => A[k].mode === 'fixed' ? g.mm(A[k].ext) : null;
+    dimH(P, g.xTL, g.xTR, g.H + g.mm(A.b.off), g.H, 'b='+fmtDim(g.B1,u), true, ex('b'));
+    dimH2(P, g.xBL, g.hn, g.xBR, 0, -g.mm(A.Bd.off), 'Bd='+fmtDim(g.B2,u), ex('Bd'));
+    dimH(P, g.xBL, 0, g.H2 + g.mm(A.bj.off), g.H2, 'bj='+fmtDim(g.bj,u), true, ex('bj'));
+    dimV(P, 0, g.H, g.xBL - g.mm(A.H.off), g.xBL, g.xBL, 'H='+fmtDim(g.H,u), ex('H'));
+    dimV(P, 0, g.hn, g.xBL - g.mm(A.hn.off), g.xBL, g.xBL, 'hn='+fmtDim(g.hn,u), ex('hn'));
+    dimV(P, g.hn, g.H2, g.xBL - g.mm(A.hj.off), g.xBL, g.xBL, 'hj='+fmtDim(g.hj,u), ex('hj'));
+    dimV(P, g.H2, g.H, -g.mm(A.Hw.off), 0, g.xTL, 'Hw='+fmtDim(g.H1,u), ex('Hw'));
   }
   /* 7. 标高 */
   if (opt.elev){
     const E = num(opt.baseElev);
-    elevMark(P, g.xTR - mm(1), g.H, E + g.H1, 1);
+    elevMark(P, g.xTR - mm(1), g.H, E + g.H, 1);
     elevMark(P, g.xf(g.H2) + mm(1), g.H2, E, -1);
     elevMark(P, g.xBR - mm(1), 0, E - g.H2, 1);
   }
   /* 8. 坡度 */
   if (opt.slope){
     const len = Math.min(g.H*0.30, mm(14));
-    slopeMark(P, g.xf, g.H2 + (g.H-g.H2)*0.30, len, g.W, -1, '1:'+fmtN(g.W));
-    slopeMark(P, g.xb, g.H*0.42, len, g.N, 1, '1:'+fmtN(g.N));
+    if (g.W > 0) slopeMark(P, g.xf, g.H2 + (g.H-g.H2)*0.30, len, g.W, -1, '1:'+fmtN(g.W));
+    if (g.mBack > 0) slopeMark(P, g.xb, g.H*0.42, len, g.mBack, 1, '1:'+fmtN(g.mBack));
+    if (g.nEff > 0){
+      P.text('基底 1:'+fmtN(g.nEff), (g.xBL+g.xBR)/2, g.hn/2 + mm(2), {size:3.0, color:'#b3730c', align:'center', base:'bottom'});
+    } else {
+      P.text('基底水平', (g.xBL+g.xBR)/2, -mm(2), {size:3.0, color:'#b3730c', align:'center', base:'bottom'});
+    }
   }
   /* 9. 引出标注 */
   g.notes.forEach(n => leader(P, n.x, n.y, g.leadX + g.mm(n.hx||0), n.t));
-  /* 9.5 自定义引注（全局清单，叠加于内置引注） */
+  /* 9.5 自定义引注 */
   if (opt.customNote !== false){
     (state.customNotes||[]).forEach(cn => {
       if (!cn || !cn.t) return;
@@ -1319,8 +1543,9 @@ function render(){
   }
   $('stZoom').textContent = Math.round(state.view.s / (state.fitS || state.view.s) * 100) + '%';
   $('stScale').textContent = g.bad ? '—' : '1:' + g.denom;
-  $('bgName').textContent = rec.id || '未命名';
+  $('bgName').textContent = recNo(rec) || '未命名';
   $('bgSub').textContent = g.bad ? '参数异常' :
+    'b=' + fmtN(g.B1) + 'm　Bd=' + fmtN(g.B2) + 'm　H=' + fmtN(g.H1) + 'm　1:' + g.denom;
     'H=' + fmtN(g.H) + 'm　B2=' + fmtN(g.B2) + 'm　B1=' + fmtN(g.B1) + 'm　1:' + g.denom;
 }
 
@@ -1352,10 +1577,13 @@ window.addEventListener('keydown', e=>{ if(e.key==='f'||e.key==='F'){ if(documen
 /* =====================================================================
    UI 绑定
    ===================================================================== */
-const FIELDS = ['id','H1','H2','B1','B2','W','N'];
+const FIELDS = ['id','H','b','m1','m2','n','bj','hj','hn'];
 function loadForm(){
   const r = curRec(); if(!r) return;
-  FIELDS.forEach(k => $('f_'+k).value = (k==='id') ? (r.id||'') : r[k]);
+  const ft = $('f_formTxt'); if (ft){ const f0 = FORMS[r.form] ? r.form : 'vertical'; ft.textContent = FORMS[f0].name; }
+  const fd = $('formDesc'); if (fd && FORMS[r.form]) fd.textContent = FORMS[r.form].desc;
+  FIELDS.forEach(k => $('f_'+k).value = (k==='id') ? recNo(r) : r[k]);
+  const fm2 = $('f_m2'); if (fm2){ fm2.disabled = (r.form === 'vertical' || r.form === 'yang'); if (r.form === 'yang') fm2.value = num(r.m1); }   // 仰斜内坡比自动=外坡比
   $('f_elev').value = state.opt.baseElev;
   $('f_unit').value = state.opt.dimUnit;
   updateCalc();
@@ -1366,6 +1594,7 @@ function updateCalc(){
   const v = $('verdict'), t = v.querySelector('.txt');
   if (g.bad){ v.className='verdict err'; t.textContent = g.bad;
     ['k_H','k_B2','k_A','k_V'].forEach(i=>$(i).textContent='–');
+    const bd=$('bdinfo'), ne=$('neffinfo'); if(bd) bd.textContent='—'; if(ne) ne.textContent='—';
     return;
   }
   v.className = 'verdict ' + (g.level==='warn'?'warn':'ok'); t.textContent = g.note;
@@ -1373,19 +1602,18 @@ function updateCalc(){
   $('k_B2').innerHTML = fmtN(g.B2) + '<small>m</small>';
   $('k_A').innerHTML  = g.area.toFixed(2) + '<small>m²</small>';
   $('k_V').innerHTML  = g.area.toFixed(2) + '<small>m³/m</small>';
+  const bd=$('bdinfo'); if(bd) bd.textContent = fmtN(g.Bd) + ' m（' + (g.bdF||'') + '）';
+  const ne=$('neffinfo'); if(ne) ne.textContent = (g.nEff>0 ? ('1:'+fmtN(g.nEff)) : '水平');
 }
 FIELDS.forEach(k=>{
   $('f_'+k).addEventListener('input', ()=>{
     const r = curRec(); if(!r) return;
     r[k] = (k==='id') ? $('f_'+k).value : num($('f_'+k).value);
-    if (state.opt.mode==='slope' && ['H1','H2','B1','W','N'].includes(k)){
-      const g = layout(r, state.opt); if(!g.bad){ r.B2 = +g.B2.toFixed(4); $('f_B2').value = r.B2; }
-    }
+    if (k==='m1' && r.form==='yang'){ r.m2 = r.m1; const fm2=$('f_m2'); if (fm2) fm2.value = num(r.m1); }   // 仰斜 m2 跟随 m1
     renderRecs(); updateCalc(); render();
   });
 });
 $('f_elev').addEventListener('input', ()=>{ state.opt.baseElev = num($('f_elev').value); render(); });
-$('f_mode').addEventListener('change', ()=>{ state.opt.mode = $('f_mode').value; loadForm(); render(); });
 $('f_scale').addEventListener('change', ()=>{ state.opt.scaleSel = $('f_scale').value; fitView(); });
 $('f_mat').addEventListener('change', ()=>{ state.opt.mat = $('f_mat').value; render(); });
 $('f_unit').addEventListener('change', ()=>{ state.opt.dimUnit = $('f_unit').value; render(); });
@@ -1397,8 +1625,8 @@ $('tbFit').onclick = fitView;
 $('tbIn').onclick  = ()=>{ state.view.s*=1.25; render(); };
 $('tbOut').onclick = ()=>{ state.view.s/=1.25; render(); };
 $('tbGrid').onclick= function(){ state.opt.grid=!state.opt.grid; this.classList.toggle('on',state.opt.grid); render(); };
-$('tbPrev').onclick= ()=>{ if(state.cur>0){ state.cur--; loadForm(); renderRecs(); fitView(); } };
-$('tbNext').onclick= ()=>{ if(state.cur<state.recs.length-1){ state.cur++; loadForm(); renderRecs(); fitView(); } };
+$('tbPrev').onclick= ()=>{ const f=(state.recs[state.cur]||{}).form; const ids=state.recs.map((r,i)=>r.form===f?i:-1).filter(i=>i>=0); const p=ids.indexOf(state.cur); if(p>0){ state.cur=ids[p-1]; loadForm(); renderRecs(); fitView(); } };
+$('tbNext').onclick= ()=>{ const f=(state.recs[state.cur]||{}).form; const ids=state.recs.map((r,i)=>r.form===f?i:-1).filter(i=>i>=0); const p=ids.indexOf(state.cur); if(p<ids.length-1){ state.cur=ids[p+1]; loadForm(); renderRecs(); fitView(); } };
 
 /* ---------- 侧边栏拖拽调宽 ---------- */
 function attachResizer(handle, panel, prop, min, max, dir){
@@ -1423,7 +1651,7 @@ function attachResizer(handle, panel, prop, min, max, dir){
     handle.classList.remove('active');
     document.body.classList.remove('resizing');
     try {
-      localStorage.setItem('murus_sidebars', JSON.stringify({
+      localStorage.setItem('murusplus_sidebars', JSON.stringify({
         wL: document.documentElement.style.getPropertyValue('--wL') || '',
         wR: document.documentElement.style.getPropertyValue('--wR') || ''
       }));
@@ -1434,7 +1662,7 @@ function attachResizer(handle, panel, prop, min, max, dir){
 }
 (function(){
   let saved = null;
-  try { saved = JSON.parse(localStorage.getItem('murus_sidebars') || 'null'); } catch(e){}
+  try { saved = JSON.parse(localStorage.getItem('murusplus_sidebars') || 'null'); } catch(e){}
   if (saved){
     if (saved.wL) document.documentElement.style.setProperty('--wL', saved.wL);
     if (saved.wR) document.documentElement.style.setProperty('--wR', saved.wR);
@@ -1443,18 +1671,29 @@ function attachResizer(handle, panel, prop, min, max, dir){
   attachResizer($('rszR'), $('panelR'), '--wR', 220, 500, -1);
 })();
 
+// 挡墙记录序号：按列表位置自动排列 DQ-1, DQ-2, ...（不依赖存储的 id）
+function curForm(){ return (state.recs[state.cur]||{}).form || 'vertical'; }
+function recNo(rec){
+  if (rec && rec.id && String(rec.id).trim()) return String(rec.id).trim();   // 手动编号优先（图形区/清单即时同步）
+  const i = state.recs.indexOf(rec);
+  return 'DQ-' + (i>=0 ? i+1 : (state.recs.length+1));
+}
 /* ---------- 记录清单 ---------- */
 function renderRecs(){
   const tb = $('recBody');
-  if (!state.recs.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty">暂无记录，点击「＋ 新增」或导入 Excel</div></td></tr>'; }
+  const form = (state.recs[state.cur]||{}).form || 'vertical';
+  const list = state.recs.map((r,idx)=>({r,idx})).filter(o=>o.r.form===form);   // 只显示当前挡墙形式
+  if (!list.length){ tb.innerHTML = '<tr><td colspan="7"><div class="empty">暂无记录，点击「＋ 新增」或导入 Excel</div></td></tr>'; }
   else {
-    tb.innerHTML = state.recs.map((r,i)=>{
+    tb.innerHTML = list.map(o=>{
+      const r=o.r, i=o.idx;
       const g = layout(r, state.opt);
       return '<tr class="'+(i===state.cur?'on':'')+(g.bad?' bad':'')+'" data-i="'+i+'">'
         + '<td><input type="checkbox" data-c="'+i+'"'+(r.sel?' checked':'')+'></td>'
-        + '<td>'+(r.id||'—')+'</td><td>'+fmtN(r.H1)+'</td><td>'+fmtN(r.H2)+'</td>'
-        + '<td>'+fmtN(r.B1)+'</td><td>'+fmtN(g.bad?r.B2:g.B2)+'</td>'
-        + '<td>'+fmtN(r.W)+'</td><td>'+fmtN(r.N)+'</td></tr>';
+        + '<td>'+recNo(r)+'</td>'
+        + '<td>'+formName(r.form)+'</td>'
+        + '<td>'+fmtN(r.H)+'</td><td>'+fmtN(r.b)+'</td>'
+        + '<td>'+fmtN(g.bad?0:g.B2)+'</td><td>'+(g.bad?'-':g.area.toFixed(2))+'</td></tr>';
     }).join('');
   }
   tb.querySelectorAll('tr[data-i]').forEach(tr=>{
@@ -1464,23 +1703,27 @@ function renderRecs(){
     cb.onchange = ()=>{ state.recs[+cb.dataset.c].sel = cb.checked; updSel(); };
   });
   updSel();
-  $('stCount').textContent = '共 ' + state.recs.length + ' 条';
+  $('stCount').textContent = '共 ' + list.length + ' 条';
 }
 function updSel(){
-  const n = state.recs.filter(r=>r.sel).length;
+  const form = (state.recs[state.cur]||{}).form;
+  const tot = state.recs.filter(r=>r.form===form).length;
+  const n = state.recs.filter(r=>r.form===form && r.sel).length;
   $('selTag').textContent = '已选 ' + n;
-  $('chkAll').checked = n>0 && n===state.recs.length;
+  $('chkAll').checked = n>0 && n===tot;
 }
-$('chkAll').onchange = function(){ state.recs.forEach(r=>r.sel=this.checked); renderRecs(); };
-$('rAll').onclick = ()=>{ const all = state.recs.every(r=>r.sel); state.recs.forEach(r=>r.sel=!all); renderRecs(); };
+$('chkAll').onchange = function(){ const form=(state.recs[state.cur]||{}).form; state.recs.forEach(r=>{ if(r.form===form) r.sel=this.checked; }); renderRecs(); };
+$('rAll').onclick = ()=>{ const form=(state.recs[state.cur]||{}).form; const ls=state.recs.filter(r=>r.form===form); const all=ls.every(r=>r.sel); ls.forEach(r=>r.sel=!all); renderRecs(); };
 $('rAdd').onclick = ()=>{
-  const n = state.recs.length+1;
-  state.recs.push({id:'DQ-'+n, H1:3.0, H2:0.8, B1:0.5, B2:1.64, W:0.05, N:0.25, sel:true, note:''});
+  const nums = state.recs.map(r=>parseInt(String(r.id||'').replace(/\D/g,''),10)||0);
+  const n = nums.length ? Math.max.apply(null,nums)+1 : 1;
+  const cur = curRec(); const form = (cur && cur.form) || 'vertical';
+  state.recs.push({id:'DQ-'+n, form, H:3.5, b:0.60, Bd:0, m1:0.10, m2:0.10, n:0.2, bj:0.25, hj:0.50, hn:0.35, sel:true, note:''});
   state.cur = state.recs.length-1; loadForm(); renderRecs(); fitView(); toast('已新增记录','ok');
 };
 $('rCopy').onclick = ()=>{
   const r = curRec(); if(!r) return;
-  const c = Object.assign({}, r); c.id = (r.id||'DQ') + '-副本';
+  const c = Object.assign({}, r); c.id = recNo(r) + '-副本';
   state.recs.splice(state.cur+1, 0, c); state.cur++; loadForm(); renderRecs(); toast('已复制记录','ok');
 };
 $('rDel').onclick = ()=>{
@@ -1493,50 +1736,58 @@ $('rClear').onclick = ()=>{ if(!confirm('确认清空全部记录？')) return; 
 /* =====================================================================
    Excel 模板 / 导入 / 导出
    ===================================================================== */
-const HEAD = ['挡墙编号','墙高H1(m)','基础埋深H2(m)','墙体顶宽B1(m)','墙体底宽B2(m)','外坡比W','内坡比N','备注'];
+const HEAD = ['挡墙编号','形式','总高H(m)','顶宽b(m)','底宽Bd(m)','外坡比m1','内坡比m2','底坡比n','墙趾宽bj(m)','墙趾高hj(m)','墙踵高hn(m)','备注'];
 const DEMO = [
-  ['DQ-1',4.0,1.0,0.60,2.10,0.05,0.25,'路肩重力式挡墙'],
-  ['DQ-2',3.0,0.8,0.50,1.26,0.20,0.00,'直立式墙背']
+  ['DQ-1','仰斜式',3.0,0.829,0.855,0.25,0.25,0.2,0.20,0.500,0.196,'仰斜式（H=3m）'],
+  ['DQ-2','仰斜式',3.5,0.829,0.855,0.25,0.25,0.2,0.20,0.500,0.196,'仰斜式（H=3.5m）'],
+  ['DQ-3','直立式',3.0,0.782,1.315,0.15,0,0.2,0.20,0.500,0.278,'直立式（H=3m）'],
+  ['DQ-4','直立式',3.5,0.782,1.615,0.15,0,0.2,0.20,0.500,0.278,'直立式（H=3.5m）'],
+  ['DQ-5','俯斜式',3.0,0.476,1.930,0.05,0.35,0.15,0.295,0.500,0.32,'俯斜式（H=3m）'],
+  ['DQ-6','俯斜式',3.5,0.476,2.155,0.05,0.35,0.15,0.295,0.500,0.32,'俯斜式（H=3.5m）']
 ];
 function downloadTemplate(){
   const rows = [HEAD].concat(DEMO);
   if (typeof XLSX === 'undefined'){
     const csv = '\uFEFF' + rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'Murus_挡墙参数标准表.csv');
+    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'Murus+_挡墙参数标准表.csv');
     toast('离线环境，已导出 CSV 模板','warn'); return;
   }
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:12},{wch:13},{wch:15},{wch:15},{wch:15},{wch:11},{wch:11},{wch:20}];
+  ws['!cols'] = [{wch:12},{wch:10},{wch:10},{wch:9},{wch:10},{wch:10},{wch:10},{wch:9},{wch:11},{wch:11},{wch:11},{wch:20}];
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '挡墙参数表');
-  XLSX.writeFile(wb, 'Murus_挡墙参数标准表.xlsx');
+  XLSX.writeFile(wb, 'Murus+_挡墙参数标准表.xlsx');
   toast('标准模板已下载','ok');
 }
 function exportXlsx(){
   if (!state.recs.length){ toast('清单为空','warn'); return; }
   const rows = [HEAD].concat(state.recs.map(r=>{
     const g = layout(r, state.opt);
-    return [r.id, num(r.H1), num(r.H2), num(r.B1), g.bad?num(r.B2):+g.B2.toFixed(4), num(r.W), num(r.N), r.note||''];
+    return [recNo(r), formName(r.form||'vertical'), num(r.H), num(r.b), g.bad?0:+g.B2.toFixed(4), num(r.m1), num(r.m2), num(r.n), num(r.bj), num(r.hj), num(r.hn), r.note||''];
   }));
   if (typeof XLSX === 'undefined'){
     const csv = '\uFEFF' + rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'Murus_挡墙清单.csv'); toast('已导出 CSV','warn'); return;
+    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'Murus+_挡墙清单.csv'); toast('已导出 CSV','warn'); return;
   }
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{wch:12},{wch:13},{wch:15},{wch:15},{wch:15},{wch:11},{wch:11},{wch:20}];
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '挡墙参数表');
-  XLSX.writeFile(wb, 'Murus_挡墙清单.xlsx'); toast('清单已导出','ok');
+  XLSX.writeFile(wb, 'Murus+_挡墙清单.xlsx'); toast('清单已导出','ok');
 }
 function pickCol(head){
   const idx = {};
   head.forEach((h,i)=>{
     const s = String(h||'').replace(/\s/g,'').toUpperCase();
     if (/编号|名称|ID/.test(s) && idx.id===undefined) idx.id = i;
-    else if (/H1|墙高/.test(s) && idx.H1===undefined) idx.H1 = i;
-    else if (/H2|埋深|基础/.test(s) && idx.H2===undefined) idx.H2 = i;
-    else if (/B1|顶宽/.test(s) && idx.B1===undefined) idx.B1 = i;
-    else if (/B2|底宽/.test(s) && idx.B2===undefined) idx.B2 = i;
-    else if (/^W|外坡/.test(s) && idx.W===undefined) idx.W = i;
-    else if (/^N|内坡/.test(s) && idx.N===undefined) idx.N = i;
+    else if (/形式|类型|FORM/.test(s) && idx.form===undefined) idx.form = i;
+    else if (/^H|墙高/.test(s) && idx.H===undefined) idx.H = i;
+    else if (/底宽|^BD\b|^BD\(/.test(s) && idx.Bd===undefined) idx.Bd = i;
+    else if (/顶宽|^B\b|^B\(/.test(s) && idx.b===undefined) idx.b = i;
+    else if (/M1|外坡/.test(s) && idx.m1===undefined) idx.m1 = i;
+    else if (/M2|内坡/.test(s) && idx.m2===undefined) idx.m2 = i;
+    else if (/^N|底坡/.test(s) && idx.n===undefined) idx.n = i;
+    else if (/BJ|墙趾宽/.test(s) && idx.bj===undefined) idx.bj = i;
+    else if (/HJ|墙趾高/.test(s) && idx.hj===undefined) idx.hj = i;
+    else if (/HN|墙踵/.test(s) && idx.hn===undefined) idx.hn = i;
     else if (/备注|说明/.test(s) && idx.note===undefined) idx.note = i;
   });
   return idx;
@@ -1545,20 +1796,26 @@ function ingest(aoa){
   let hi = -1;
   for (let i=0;i<Math.min(aoa.length,10);i++){
     const s = (aoa[i]||[]).join('').toUpperCase();
-    if (/H1|墙高/.test(s) && /(B2|底宽|B1|顶宽)/.test(s)){ hi = i; break; }
+    if (/H|墙高/.test(s) && /(BD|底宽|B|顶宽)/.test(s)){ hi = i; break; }
   }
   if (hi < 0){ toast('未识别到表头行，请使用标准模板','err'); return; }
   const idx = pickCol(aoa[hi]);
-  if (idx.H1===undefined || idx.B1===undefined){ toast('表头缺少必要字段（H1 / B1）','err'); return; }
+  if (idx.H===undefined || idx.b===undefined){ toast('表头缺少必要字段（H / b）','err'); return; }
+  if (idx.Bd===undefined){ toast('表头缺少 Bd（底宽）列','err'); return; }
+  const FORM_KEYS = { '直立式': 'vertical', '直立': 'vertical', '仰斜式': 'yang', '仰斜': 'yang', '俯斜式': 'fu', '俯斜': 'fu' };
   let n = 0;
   for (let i=hi+1;i<aoa.length;i++){
     const row = aoa[i]||[];
     if (row.every(c=>c===''||c===undefined||c===null)) continue;
     const r = { id: String(row[idx.id] ?? ('DQ-'+(state.recs.length+1))).trim() || ('DQ-'+(state.recs.length+1)),
-      H1:num(row[idx.H1]), H2:num(row[idx.H2]), B1:num(row[idx.B1]), B2:num(row[idx.B2]),
-      W:num(row[idx.W]), N:num(row[idx.N]), note: idx.note!==undefined ? String(row[idx.note]??'') : '', sel:true };
-    if (r.H1 <= 0 && r.H2 <= 0) continue;
-    if (!r.B2) { const g = layout(r,{...state.opt, mode:'slope'}); if(!g.bad) r.B2 = +g.B2.toFixed(4); }
+      form: FORM_KEYS[String(row[idx.form]||'').trim()] || 'vertical',
+      H:num(row[idx.H]), b:num(row[idx.b]), Bd:num(row[idx.Bd]), m1:num(row[idx.m1]), m2:num(row[idx.m2]),
+      n:num(row[idx.n]), bj:num(row[idx.bj]), hj:num(row[idx.hj]), hn:num(row[idx.hn]),
+      note: idx.note!==undefined ? String(row[idx.note]??'') : '', sel:true };
+    const fx = (FORMS[r.form] && FORMS[r.form].fixed) || {};
+    if (fx.m1 !== undefined) r.m1 = fx.m1;
+    if (fx.m2 !== undefined) r.m2 = fx.m2;
+    if (r.H <= 0) continue;
     state.recs.push(r); n++;
   }
   if (!n){ toast('未读取到有效数据行','warn'); return; }
@@ -1601,7 +1858,8 @@ window.addEventListener('drop', e=>{ e.preventDefault(); if(e.dataTransfer.files
    PNG 导出
    ===================================================================== */
 function renderOffscreen(rec, mult, bgWhite){
-  const g = layout(rec, state.opt);
+  const o = (state.opts && state.opts[rec.form]) || state.opt;
+  const g = layout(rec, o);
   if (g.bad) return null;
   const bw = g.bbox.x1 - g.bbox.x0, bh = g.bbox.y1 - g.bbox.y0;
   const targetW = 1600 * mult;
@@ -1612,7 +1870,9 @@ function renderOffscreen(rec, mult, bgWhite){
   const cx = c.getContext('2d');
   if (bgWhite){ cx.fillStyle = '#fff'; cx.fillRect(0,0,W,H); }
   const view = { s, tx: pad - g.bbox.x0*s, ty: pad + g.bbox.y1*s };
-  drawScene(cx, rec, g, view, state.opt);
+  const _a = state.anno; state.anno = (state.annos && state.annos[rec.form]) || state.anno;
+  drawScene(cx, rec, g, view, o);
+  state.anno = _a;
   return c;
 }
 // 按 1:eff 自然比例将单幅断面独立渲染到 canvas（内容紧裁，标注与墙身同比例），用于合并导出
@@ -1630,7 +1890,9 @@ function renderSectionCanvas(rec, o2, dpi){
   const cx = c.getContext('2d');
   const cxw = (g.bbox.x0 + g.bbox.x1)/2, cyw = (g.bbox.y0 + g.bbox.y1)/2;
   const view = { s: pxM, tx: W/2 - cxw*pxM, ty: H/2 + cyw*pxM };
+  const _a = state.anno; state.anno = (state.annos && state.annos[rec.form]) || state.anno;
   drawScene(cx, rec, g, view, Object.assign({}, o2, { annoScale: 1 }));
+  state.anno = _a;
   return c;
 }
 // 按格子目标像素高分辨率矢量重绘单幅（用于合并 A3 每格）
@@ -1650,18 +1912,21 @@ function renderCellCanvas(rec, o2, cellWpx, cellHpx, ov){
   const cx = c.getContext('2d');
   const cxw = (g.bbox.x0 + g.bbox.x1) / 2, cyw = (g.bbox.y0 + g.bbox.y1) / 2;
   const view = { s, tx: W / 2 - cxw * s, ty: H / 2 + cyw * s };
+  const _a = state.anno; state.anno = (state.annos && state.annos[rec.form]) || state.anno;
   drawScene(cx, rec, g, view, Object.assign({}, o2, { annoScale: 1 }));
+  state.anno = _a;
   return c;
 }
 function exportOne(){
   const rec = curRec(); if(!rec){ toast('无记录','warn'); return; }
   const c = renderOffscreen(rec, parseInt($('e_res').value,10), $('e_bg').value==='white');
   if (!c){ toast('当前参数无法成图','err'); return; }
-  c.toBlob(b=>{ dl(b, 'Murus_' + (rec.id||'挡墙') + '_v' + APP_VERSION + '_断面图.png'); toast('PNG 已导出（'+c.width+'×'+c.height+'）','ok'); }, 'image/png');
+  c.toBlob(b=>{ dl(b, 'Murus+_' + recNo(rec) + '_v' + APP_VERSION + '_断面图.png'); toast('PNG 已导出（'+c.width+'×'+c.height+'）','ok'); }, 'image/png');
 }
 async function exportBatch(){
-  let list = state.recs.filter(r=>r.sel);
-  if (!list.length) list = state.recs.slice();
+  const _f = curForm();
+  let list = state.recs.filter(r => r.form === _f && r.sel);
+  if (!list.length) list = state.recs.filter(r => r.form === _f);
   if (!list.length){ toast('清单为空','warn'); return; }
   const mult = parseInt($('e_res').value,10), white = $('e_bg').value==='white';
   $('mProg').classList.add('show');
@@ -1669,21 +1934,21 @@ async function exportBatch(){
   let okN = 0, failN = 0;
   for (let i=0;i<list.length;i++){
     const r = list[i];
-    $('pgTxt').textContent = '(' + (i+1) + '/' + list.length + ') 正在成图：' + (r.id||'未命名');
+    $('pgTxt').textContent = '(' + (i+1) + '/' + list.length + ') 正在成图：' + recNo(r);
     $('pgBar').style.width = Math.round((i)/list.length*100) + '%';
     await new Promise(rs=>setTimeout(rs,16));
     const c = renderOffscreen(r, mult, white);
     if (!c){ failN++; continue; }
     const blob = await new Promise(rs=>c.toBlob(rs,'image/png'));
-    if (zip) zip.file('Murus_' + (r.id||('WALL'+i)) + '_v' + APP_VERSION + '_断面图.png', blob);
-    else { dl(blob, 'Murus_' + (r.id||('WALL'+i)) + '_v' + APP_VERSION + '_断面图.png'); await new Promise(rs=>setTimeout(rs,320)); }
+    if (zip) zip.file('Murus+_' + recNo(r) + '_v' + APP_VERSION + '_断面图.png', blob);
+    else { dl(blob, 'Murus+_' + recNo(r) + '_v' + APP_VERSION + '_断面图.png'); await new Promise(rs=>setTimeout(rs,320)); }
     okN++;
   }
   $('pgBar').style.width = '100%';
   if (zip){
     $('pgTxt').textContent = '正在打包 ZIP…';
     const b = await zip.generateAsync({type:'blob'});
-    dl(b, 'Murus_挡墙断面图_v' + APP_VERSION + '_' + okN + '张.zip');
+    dl(b, 'Murus+_挡墙断面图_v' + APP_VERSION + '_' + okN + '张.zip');
   }
   $('mProg').classList.remove('show'); $('pgBar').style.width='0%';
   toast('批量导出完成：成功 ' + okN + ' 张' + (failN?('，跳过 '+failN+' 条异常'):''), failN?'warn':'ok');
@@ -1716,8 +1981,9 @@ function drawTitleBlock(cx, x, y, w, h, d){
   cx.restore();
 }
 function mergeExport(){
-  let list = state.recs.filter(r => r.sel);
-  if (!list.length) list = state.recs.slice();
+  const _f = curForm();
+  let list = state.recs.filter(r => r.form === _f && r.sel);
+  if (!list.length) list = state.recs.filter(r => r.form === _f);
   if (!list.length){ toast('清单为空','warn'); return; }
   try{
     const orient = $('m_orient').value;
@@ -1735,7 +2001,8 @@ function mergeExport(){
     const innerW = innerR - innerL, innerH = innerB - innerT;
 
     const n = list.length;
-    const eff = (scaleSel === 'auto') ? 100 : parseInt(scaleSel, 10);    // 仅声明标注的 1:eff 出图比例
+    const eff = (scaleSel === 'auto') ? 0 : parseInt(scaleSel, 10);    // 0 = 按墙高 auto（与单张一致）
+    const effOf = r2 => eff ? eff : (r2.H<=8 ? 25 : r2.H<=12 ? 50 : 100);
     const unit = ({mm:'mm', cm:'cm', m:'m'})[state.opt.dimUnit] || 'mm';
     const orientTxt = (orient === 'land') ? '横向' : '纵向';
     const pages = Math.ceil(n / ppp);
@@ -1757,7 +2024,7 @@ function mergeExport(){
         cx.lineWidth = Math.max(1.5, ppmm*0.6); cx.strokeRect(3*ppmm, 3*ppmm, W - 6*ppmm, H - 6*ppmm);
         cx.lineWidth = Math.max(0.8, ppmm*0.35); cx.strokeRect(innerL, innerT, innerW, innerH);
         drawTitleBlock(cx, innerL, innerB, innerW, tbH*ppmm,
-          { n, eff, orient, ver: APP_VERSION_LABEL, unit, adapted:false, page: p+1, pages });
+          { n, eff: eff || effOf(list[0]), orient, ver: APP_VERSION_LABEL, unit, adapted:false, page: p+1, pages });
       }
       slice.forEach((rec, j) => {
         const col = j % cols, row = Math.floor(j/cols);
@@ -1765,7 +2032,7 @@ function mergeExport(){
         cx.strokeStyle = '#8896a6'; cx.lineWidth = 0.7;
         cx.strokeRect(cellX + ppmm*2, cellY + ppmm*2, cellW - ppmm*4, cellH - ppmm*4);
         // 按格子目标像素高分辨率矢量重绘单幅：几何填满格子、标注按 1:eff 同比例高清，不再被 eff 压扁糊化
-        const o2 = Object.assign({}, state.opt, { scaleSel: String(eff) });
+        const o2 = Object.assign({}, (state.opts && state.opts[rec.form]) || state.opt, { scaleSel: String(effOf(rec)) });
         const sc = renderCellCanvas(rec, o2, cellW - 2*inset, cellH - 2*inset, 2);
         if (!sc) return;
         const scale = Math.min((cellW - 2*inset)/sc.width, (cellH - 2*inset)/sc.height);
@@ -1777,14 +2044,14 @@ function mergeExport(){
 
     Promise.all(pageBlobs).then(blobs => {
       if (pages === 1){
-        dl(blobs[0], 'Murus_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '.png');
-        toast('已合并导出 A3（每页 ' + ppp + ' 幅，' + resTxt + ' ' + DPI + 'DPI，1:' + eff + '，' + n + ' 幅）', 'ok');
+        dl(blobs[0], 'Murus+_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '.png');
+        toast('已合并导出 A3（每页 ' + ppp + ' 幅，' + resTxt + ' ' + DPI + 'DPI，1:' + (eff || 'auto') + '，' + n + ' 幅）', 'ok');
       } else {
         const zip = new JSZip();
         blobs.forEach((b, i) => zip.file('第' + String(i+1).padStart(2,'0') + '张.png', b));
         zip.generateAsync({ type:'blob' }).then(zb => {
-          dl(zb, 'Murus_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '_共' + pages + '张.zip');
-          toast('已合并导出 A3（每页 ' + ppp + ' 幅，' + resTxt + ' ' + DPI + 'DPI，1:' + eff + '，' + n + ' 幅，共 ' + pages + ' 张）', 'ok');
+          dl(zb, 'Murus+_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '_共' + pages + '张.zip');
+          toast('已合并导出 A3（每页 ' + ppp + ' 幅，' + resTxt + ' ' + DPI + 'DPI，1:' + (eff || 'auto') + '，' + n + ' 幅，共 ' + pages + ' 张）', 'ok');
         });
       }
     });
@@ -1829,8 +2096,9 @@ function getMaxCanvasArea(){
 $('l_merge').onclick = longExport;
 async function longExport(){
   toast('正在生成长图…');
-  try{    let list = state.recs.filter(r => r.sel);
-    if (!list.length) list = state.recs.slice();
+  try{    const _f = curForm();
+    let list = state.recs.filter(r => r.form === _f && r.sel);
+    if (!list.length) list = state.recs.filter(r => r.form === _f);
     if (!list.length){ toast('清单为空','warn'); return; }
 
     const scaleSel = $('l_scale').value;
@@ -1843,24 +2111,9 @@ async function longExport(){
     const nice = [25,50,75,100,125,150,200,250,300,400,500,600,750,1000,1500,2000];
     const niceUp = x => { for (const v of nice) if (v >= x - 1e-6) return v; return nice[nice.length-1]; };
 
-    // 统一比例 eff：使每幅在目标像素（900px）内可放下的较大值
-    let eff = (scaleSel === 'auto') ? 200 : parseInt(scaleSel, 10), adapted = false;
-    for (let it = 0; it < 6; it++){
-      const o2 = Object.assign({}, state.opt, { scaleSel: String(eff) });
-      let need = 0;
-      for (const rec of list){
-        const g = layout(rec, o2); if (g.bad) continue;
-        const bw = g.bbox.x1 - g.bbox.x0, bh = g.bbox.y1 - g.bbox.y0;
-        need = Math.max(need, bw*ppm_full/900, bh*ppm_full/900);
-      }
-      let useEff = niceUp(need);
-      if (scaleSel !== 'auto'){
-        const t = parseInt(scaleSel, 10);
-        if (t >= need - 1e-6) useEff = t; else { useEff = niceUp(need); adapted = true; }
-      }
-      if (useEff === eff) break;
-      eff = useEff;
-    }
+    // 出图比例 eff：与单张导出一致（auto = 按墙高 1:25/50/100）
+    const eff = (scaleSel === 'auto') ? 0 : parseInt(scaleSel, 10);
+    const effOf = r2 => eff ? eff : (r2.H<=8 ? 25 : r2.H<=12 ? 50 : 100);
 
     // 每幅按「固定高分辨率矢量重绘」（与合并 A3 同思路）：几何按统一像素分辨率渲染、标注与墙身同比例且高清，
     // 彻底规避旧 renderSectionCanvas 中 view.s=1000*ppmm/eff 让 eff 在标注像素中抵消、墙身却随 1/eff 缩小，
@@ -1872,7 +2125,7 @@ async function longExport(){
     const prepared = [];
     let maxBw = 0;
     for (const rec of list){
-      const o2 = Object.assign({}, state.opt, { scaleSel: String(eff) });
+      const o2 = Object.assign({}, (state.opts && state.opts[rec.form]) || state.opt, { scaleSel: String(effOf(rec)) });
       const g = layout(rec, o2); if (g.bad) continue;
       const bw = g.bbox.x1 - g.bbox.x0, bh = g.bbox.y1 - g.bbox.y0;
       maxBw = Math.max(maxBw, bw);
@@ -1951,14 +2204,14 @@ async function longExport(){
         cx.beginPath(); cx.moveTo(lx, outer); cx.lineTo(lx, outer + maxColH); cx.stroke();
       }
     }
-    const fname = 'Murus_挡墙断面图合并长图_v' + APP_VERSION + '_' + secs.length + '幅_' + resTxt + '_1:' + eff + (cols > 1 ? '_' + cols + '列' : '') + (scaled ? '_适配' : '') + '.png';
+    const fname = 'Murus+_挡墙断面图合并长图_v' + APP_VERSION + '_' + secs.length + '幅_' + resTxt + '_1:' + (eff || 'auto') + (cols > 1 ? '_' + cols + '列' : '') + (scaled ? '_适配' : '') + '.png';
     const blob = c.toBlob ? await new Promise(rs => c.toBlob(rs, 'image/png')) : null;
     if (!blob){
       toast('长图生成失败：画布创建/编码失败（' + cw + '×' + chh + 'px，浏览器上限 边长 ' + MAXD + 'px / 面积 ' + Math.round(MAXA/1e6) + ' 百万像素）。请降低导出分辨率或增大列数后重试', 'warn');
       return;
     }
     dl(blob, fname);
-    toast('已合并导出长图（' + resTxt + '，1:' + eff + (adapted ? '，已适配' : '') + '，' + secs.length + ' 幅' + (cols > 1 ? '，' + cols + ' 列均分' : '，单列连续') + (scaled ? '，已自动缩放至 ' + Math.round(fit*100) + '% 适配画布上限' : '') + '）', 'ok');
+    toast('已合并导出长图（' + resTxt + '，1:' + (eff || 'auto') + '，' + secs.length + ' 幅' + (cols > 1 ? '，' + cols + ' 列均分' : '，单列连续') + (scaled ? '，已自动缩放至 ' + Math.round(fit*100) + '% 适配画布上限' : '') + '）', 'ok');
   }catch(err){
     console.error('longExport error:', err);
     toast('长图导出出错：' + (err && err.message ? err.message : String(err)), 'err');
@@ -1977,6 +2230,63 @@ function showUiGuide(){
   m.onclick = ()=>m.remove();
   document.body.appendChild(m);
 }
+/* ---------- 标注调整工具（尺寸界线偏移，面板调整） ---------- */
+const ANNO_DEFS = {
+  hn:{label:'hn（0~hn）', ori:'V', ref:'xBL'}, hj:{label:'hj（hn~H2）', ori:'V', ref:'xBL'},
+  Hw:{label:'Hw（H2~H）', ori:'V', ref:'x0'},  H :{label:'H（总高）',  ori:'V', ref:'xBL'},
+  b :{label:'b（顶宽）',  ori:'H', ref:'H'},   bj:{label:'bj（墙趾宽）',ori:'H', ref:'H2'},
+  Bd:{label:'Bd（底宽）', ori:'H', ref:'base'}
+};
+function annoG(){ const r = curRec(); if (!r) return null; const g = layout(r, state.opt); return g && g.bad ? null : g; }
+function annoMeas(k){
+  const A = state.anno[k], g = annoG(); if (!g) return '';
+  const mm = v => v / g.S, gg = 1.6, ov = 2;
+  if (k === 'Bd'){
+    if (A.mode === 'fixed') return '界线 '+A.ext.toFixed(1)+'mm · 低端越线 '+(A.off-(gg+A.ext)).toFixed(1)+'mm';
+    const L = (mm(g.hn)-gg)-(-A.off-ov), R = (0-gg)-(-A.off-ov);
+    return '连接式 · 左 '+L.toFixed(1)+' / 右 '+R.toFixed(1)+'mm';
+  }
+  if (ANNO_DEFS[k].ori === 'V'){
+    if (A.mode === 'fixed'){ const rel = A.off-(gg+A.ext); return '界线 '+A.ext.toFixed(1)+'mm · '+(rel<0?'越过':'间隙')+Math.abs(rel).toFixed(1)+'mm'; }
+    const xLine = ANNO_DEFS[k].ref==='xBL' ? mm(g.xBL)-A.off : -A.off;
+    const xo1 = k==='Hw' ? 0 : mm(g.xBL), xo2 = k==='Hw' ? mm(g.xTL) : mm(g.xBL);
+    const L = xLine-ov-(xo1-gg), R = xLine-ov-(xo2-gg);
+    return '连接式 · 左 '+L.toFixed(1)+' / 右 '+R.toFixed(1)+'mm';
+  }
+  if (A.mode === 'fixed'){ const rel = A.off-(gg+A.ext); return '界线 '+A.ext.toFixed(1)+'mm · '+(rel<0?'越过':'间隙')+Math.abs(rel).toFixed(1)+'mm'; }
+  return '连接式';
+}
+function updAnnoMeas(){
+  const el = $('annoMeas'); if (!el) return;
+  const rows = ['【当前各界线实测 · 图面 mm】'];
+  for (const k in ANNO_DEFS) rows.push('· '+ANNO_DEFS[k].label+'：'+annoMeas(k));
+  el.textContent = rows.join('\n');
+}
+function buildAnnoPanel(){
+  const p = $('annoPanel'); p.innerHTML = '';
+  for (const k in ANNO_DEFS){
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:5px 8px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px';
+    const nm = document.createElement('span'); nm.textContent = ANNO_DEFS[k].label; nm.style.width = '86px'; nm.style.fontSize = '12px';
+    const se = document.createElement('select'); se.style.width = '84px';
+    [['fixed','固定ext'],['conn','连接式']].forEach(([v,l])=>{ const op=document.createElement('option'); op.value=v; op.textContent=l; if(v===state.anno[k].mode) op.selected=true; se.appendChild(op); });
+    const ex = document.createElement('input'); ex.type='number'; ex.step='0.1'; ex.min='0'; ex.value=state.anno[k].ext; ex.style.width='52px'; ex.disabled = state.anno[k].mode!=='fixed';
+    const of = document.createElement('input'); of.type='number'; of.step='0.1'; of.min='0'; of.value=state.anno[k].off; of.style.width='52px';
+    const rg = document.createElement('input'); rg.type='range'; rg.min='2'; rg.max='40'; rg.step='0.1'; rg.value=state.anno[k].off; rg.style.flex='1';
+    const mv = document.createElement('span'); mv.style.fontSize='11px'; mv.style.color='var(--mut,#66707d)'; mv.style.width='118px';
+    const upd = ()=>{ mv.textContent = 'off '+state.anno[k].off.toFixed(1)+' · ext '+(state.anno[k].mode==='fixed'?state.anno[k].ext.toFixed(1):'—'); };
+    const commit = ()=>{ saveAnno(); updAnnoMeas(); render(); };
+    se.onchange = ()=>{ state.anno[k].mode = se.value; ex.disabled = se.value!=='fixed'; upd(); commit(); };
+    ex.oninput = ()=>{ state.anno[k].ext = Math.max(0, parseFloat(ex.value)||0); upd(); commit(); };
+    of.oninput = ()=>{ state.anno[k].off = Math.max(0, parseFloat(of.value)||0); rg.value = state.anno[k].off; upd(); commit(); };
+    rg.oninput = ()=>{ state.anno[k].off = parseFloat(rg.value); of.value = state.anno[k].off; upd(); commit(); };
+    row.append(nm, se, ex, of, rg, mv); upd(); p.appendChild(row);
+  }
+}
+$('btnAnno').onclick = ()=>{ buildAnnoPanel(); updAnnoMeas(); $('mAnno').classList.add('show'); };
+document.querySelectorAll('[data-close-anno]').forEach(el=>el.onclick = ()=>$('mAnno').classList.remove('show'));
+$('annoReset').onclick = ()=>{ const f0=curForm(); state.anno = JSON.parse(JSON.stringify(f0==='fu'?ANNO_DEFAULT_FU:ANNO_DEFAULT)); state.annos[f0]=state.anno; saveAnno(); buildAnnoPanel(); updAnnoMeas(); render(); };
+
 $('btnAbout').onclick = ()=>$('mAbout').classList.add('show');
 /* 自定义引注管理 */
 function renderNoteList(){
@@ -2047,11 +2357,30 @@ $('icoPng').onclick = ()=>{
   const img = new Image();
   img.onload = ()=>{ const c=document.createElement('canvas'); c.width=c.height=512;
     c.getContext('2d').drawImage(img,0,0,512,512);
-    c.toBlob(b=>{ dl(b,'Murus_icon_512.png'); toast('图标已导出','ok'); },'image/png'); };
+    c.toBlob(b=>{ dl(b,'Murus+_icon_512.png'); toast('图标已导出','ok'); },'image/png'); };
   img.src = ICON_URL;
 };
 
 /* ---------- 启动 ---------- */
+
+/* ---------- 入口页：三形式选择 ---------- */
+function enterForm(form){
+  const en = $('entry'); if (en) en.classList.add('hide');
+  const idx = state.recs.findIndex(r => r.form === form);
+  if (idx >= 0){ state.cur = idx; }
+  else {
+    const nums = state.recs.map(r=>parseInt(String(r.id||'').replace(/\D/g,''),10)||0);
+    const n = nums.length ? Math.max.apply(null,nums)+1 : 1;
+    state.recs.push({ id:'DQ-'+n, form:form, H:3.0, b:0.60, Bd:0, m1:0.10, m2:(form==='vertical'?0:0.10), n:0.2, bj:0.25, hj:0.50, hn:0.30, sel:true, note:'' });
+    state.cur = state.recs.length - 1;
+  }
+  state.opt = state.opts[form] || state.opts['yang'];     // 各形式设置独立
+  state.anno = state.annos[form] || state.annos['yang'];   // 标注独立（俯斜 Hw off=21.7）
+  loadForm(); renderRecs(); render(); fitView();
+}
+document.querySelectorAll('.entry-card').forEach(c => { c.onclick = () => enterForm(c.dataset.form); });
+$('tbHome').onclick = () => { const en = $('entry'); if (en) en.classList.remove('hide'); };
+
 renderRecs(); loadForm(); resize(); setTimeout(fitView, 60);
 </script>
 </body>
