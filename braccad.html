@@ -2210,7 +2210,7 @@ renderRecs(); loadForm(); resize(); setTimeout(fitView, 60);
   function buildCad(g, o) {
     const denom = o.denom || g.denom;
     const cmds = [];
-    // 图纸 mm → 世界米（与 Murus 的 g.mm 相同）
+    // 图纸 mm → 世界米（与主视图 g.mm 换算一致）
     const tmm = function (v) { return v * denom / 1000; };
     const tmm2 = function (v) { return v * denom / 1000; };
 
