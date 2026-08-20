@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>剖筑挡墙断面成图系统 Murus v0.1.0</title>
+<title>固维挡墙断面CAD自动成图系统 BraceCad v0.1.0</title>
 <style>
 /* ============ 设计令牌 ============ */
 :root{
@@ -260,7 +260,7 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
 
 <header class="topbar">
   <div class="brand">
-    <img class="logo" id="logoImg" alt="Murus">
+    <img class="logo" id="logoImg" alt="BraceCad">
     <div>
       <h1>固维挡墙断面CAD自动成图系统 <em>BraceCad</em><span class="vbadge" id="hdVer">v0.1.0</span></h1>
     </div>
@@ -272,7 +272,7 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
     <span class="divider"></span>
     <button class="btn" id="btnPng">导出 PNG</button>
     <button class="btn primary" id="btnCad" title="导出当前断面为天正标准 DXF">导出 CAD</button>
-    <button class="btn icon" id="btnAbout" title="关于 Murus">?</button>
+    <button class="btn icon" id="btnAbout" title="关于 BraceCad">?</button>
   </div>
 </header>
 
@@ -559,13 +559,13 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
 </div>
 <div class="mask" id="mAbout">
   <div class="modal">
-    <div class="modal-h"><h3>关于 Murus</h3><span class="x" data-close>×</span></div>
+    <div class="modal-h"><h3>关于 BraceCad</h3><span class="x" data-close>×</span></div>
     <div class="modal-b">
       <div class="about-hero">
         <img class="big" id="logoBig" alt="">
         <div>
-          <h4>剖筑挡墙断面成图系统</h4>
-          <p>Murus · Retaining Wall Section Generator</p>
+          <h4>固维挡墙断面CAD自动成图系统</h4>
+          <p>BraceCad · CAD Auto-Drafting for Retaining Wall Sections</p>
           <span class="ver" id="aboutVer">v0.1.0</span>
         </div>
       </div>
@@ -1444,13 +1444,13 @@ function downloadTemplate(){
   const rows = [HEAD].concat(DEMO);
   if (typeof XLSX === 'undefined'){
     const csv = '\uFEFF' + rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'Murus_挡墙参数标准表.csv');
+    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'BraceCad_挡墙参数标准表.csv');
     toast('离线环境，已导出 CSV 模板','warn'); return;
   }
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{wch:12},{wch:13},{wch:15},{wch:15},{wch:15},{wch:11},{wch:11},{wch:20}];
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '挡墙参数表');
-  XLSX.writeFile(wb, 'Murus_挡墙参数标准表.xlsx');
+  XLSX.writeFile(wb, 'BraceCad_挡墙参数标准表.xlsx');
   toast('标准模板已下载','ok');
 }
 function exportXlsx(){
@@ -1461,12 +1461,12 @@ function exportXlsx(){
   }));
   if (typeof XLSX === 'undefined'){
     const csv = '\uFEFF' + rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'Murus_挡墙清单.csv'); toast('已导出 CSV','warn'); return;
+    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), 'BraceCad_挡墙清单.csv'); toast('已导出 CSV','warn'); return;
   }
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{wch:12},{wch:13},{wch:15},{wch:15},{wch:15},{wch:11},{wch:11},{wch:20}];
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '挡墙参数表');
-  XLSX.writeFile(wb, 'Murus_挡墙清单.xlsx'); toast('清单已导出','ok');
+  XLSX.writeFile(wb, 'BraceCad_挡墙清单.xlsx'); toast('清单已导出','ok');
 }
 function pickCol(head){
   const idx = {};
@@ -1599,7 +1599,7 @@ function exportOne(){
   const rec = curRec(); if(!rec){ toast('无记录','warn'); return; }
   const c = renderOffscreen(rec, parseInt($('e_res').value,10), $('e_bg').value==='white');
   if (!c){ toast('当前参数无法成图','err'); return; }
-  c.toBlob(b=>{ dl(b, 'Murus_' + (rec.id||'挡墙') + '_v' + APP_VERSION + '_断面图.png'); toast('PNG 已导出（'+c.width+'×'+c.height+'）','ok'); }, 'image/png');
+  c.toBlob(b=>{ dl(b, 'BraceCad_' + (rec.id||'挡墙') + '_v' + APP_VERSION + '_断面图.png'); toast('PNG 已导出（'+c.width+'×'+c.height+'）','ok'); }, 'image/png');
 }
 async function exportBatch(){
   let list = state.recs.filter(r=>r.sel);
@@ -1617,15 +1617,15 @@ async function exportBatch(){
     const c = renderOffscreen(r, mult, white);
     if (!c){ failN++; continue; }
     const blob = await new Promise(rs=>c.toBlob(rs,'image/png'));
-    if (zip) zip.file('Murus_' + (r.id||('WALL'+i)) + '_v' + APP_VERSION + '_断面图.png', blob);
-    else { dl(blob, 'Murus_' + (r.id||('WALL'+i)) + '_v' + APP_VERSION + '_断面图.png'); await new Promise(rs=>setTimeout(rs,320)); }
+    if (zip) zip.file('BraceCad_' + (r.id||('WALL'+i)) + '_v' + APP_VERSION + '_断面图.png', blob);
+    else { dl(blob, 'BraceCad_' + (r.id||('WALL'+i)) + '_v' + APP_VERSION + '_断面图.png'); await new Promise(rs=>setTimeout(rs,320)); }
     okN++;
   }
   $('pgBar').style.width = '100%';
   if (zip){
     $('pgTxt').textContent = '正在打包 ZIP…';
     const b = await zip.generateAsync({type:'blob'});
-    dl(b, 'Murus_挡墙断面图_v' + APP_VERSION + '_' + okN + '张.zip');
+    dl(b, 'BraceCad_挡墙断面图_v' + APP_VERSION + '_' + okN + '张.zip');
   }
   $('mProg').classList.remove('show'); $('pgBar').style.width='0%';
   toast('批量导出完成：成功 ' + okN + ' 张' + (failN?('，跳过 '+failN+' 条异常'):''), failN?'warn':'ok');
@@ -1654,7 +1654,7 @@ function drawTitleBlock(cx, x, y, w, h, d){
   const dt = new Date();
   const ds = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
   cx.fillText('日期 ' + ds, cuts[2] + 10, y + h*0.5);
-  cx.fillText('制图 Murus', cuts[3] + 10, y + h*0.5);
+  cx.fillText('制图 BraceCad', cuts[3] + 10, y + h*0.5);
   cx.restore();
 }
 function mergeExport(){
@@ -1719,13 +1719,13 @@ function mergeExport(){
 
     Promise.all(pageBlobs).then(blobs => {
       if (pages === 1){
-        dl(blobs[0], 'Murus_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '.png');
+        dl(blobs[0], 'BraceCad_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '.png');
         toast('已合并导出 A3（每页 ' + ppp + ' 幅，' + resTxt + ' ' + DPI + 'DPI，1:' + eff + '，' + n + ' 幅）', 'ok');
       } else {
         const zip = new JSZip();
         blobs.forEach((b, i) => zip.file('第' + String(i+1).padStart(2,'0') + '张.png', b));
         zip.generateAsync({ type:'blob' }).then(zb => {
-          dl(zb, 'Murus_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '_共' + pages + '张.zip');
+          dl(zb, 'BraceCad_挡墙断面图合并A3_' + orientTxt + '_v' + APP_VERSION + '_' + n + '幅_' + resTxt + '_共' + pages + '张.zip');
           toast('已合并导出 A3（每页 ' + ppp + ' 幅，' + resTxt + ' ' + DPI + 'DPI，1:' + eff + '，' + n + ' 幅，共 ' + pages + ' 张）', 'ok');
         });
       }
@@ -1893,7 +1893,7 @@ async function longExport(){
         cx.beginPath(); cx.moveTo(lx, outer); cx.lineTo(lx, outer + maxColH); cx.stroke();
       }
     }
-    const fname = 'Murus_挡墙断面图合并长图_v' + APP_VERSION + '_' + secs.length + '幅_' + resTxt + '_1:' + eff + (cols > 1 ? '_' + cols + '列' : '') + (scaled ? '_适配' : '') + '.png';
+    const fname = 'BraceCad_挡墙断面图合并长图_v' + APP_VERSION + '_' + secs.length + '幅_' + resTxt + '_1:' + eff + (cols > 1 ? '_' + cols + '列' : '') + (scaled ? '_适配' : '') + '.png';
     const blob = c.toBlob ? await new Promise(rs => c.toBlob(rs, 'image/png')) : null;
     if (!blob){
       toast('长图生成失败：画布创建/编码失败（' + cw + '×' + chh + 'px，浏览器上限 边长 ' + MAXD + 'px / 面积 ' + Math.round(MAXA/1e6) + ' 百万像素）。请降低导出分辨率或增大列数后重试', 'warn');
@@ -1989,7 +1989,7 @@ $('icoPng').onclick = ()=>{
   const img = new Image();
   img.onload = ()=>{ const c=document.createElement('canvas'); c.width=c.height=512;
     c.getContext('2d').drawImage(img,0,0,512,512);
-    c.toBlob(b=>{ dl(b,'Murus_icon_512.png'); toast('图标已导出','ok'); },'image/png'); };
+    c.toBlob(b=>{ dl(b,'BraceCad_icon_512.png'); toast('图标已导出','ok'); },'image/png'); };
   img.src = ICON_URL;
 };
 
@@ -1997,8 +1997,9 @@ $('icoPng').onclick = ()=>{
 renderRecs(); loadForm(); resize(); setTimeout(fitView, 60);
 
 // ===== BraceCad CAD 导出（嵌入 dxf_gen.js） =====
+(function(){
 
-  'use strict';
+  
 
   /* ---------- 图纸毫米 → DXF 绘图单位 ---------- */
   // 世界米 ×1000 = 实际 mm；图纸 mm × denom = 实际 mm（denom = 出图比例分母）
@@ -2424,7 +2425,7 @@ renderRecs(); loadForm(); resize(); setTimeout(fitView, 60);
     return cmds;
   }
 
-  /* 文字宽度估计（与 Murus textW 相同） */
+  /* 文字宽度估计（与主视图 textW 一致） */
   function textW(str, mm) {
     let w = 0;
     for (const c of String(str)) w += /[\x00-\xff]/.test(c) ? 0.56 : 1.0;
@@ -2453,13 +2454,10 @@ renderRecs(); loadForm(); resize(); setTimeout(fitView, 60);
     w.w(0, 'EOF');
     return w.lines.join('\n') + '\n';
   }
-
-  global.braceCadDxf = braceCadDxf;
-  global.buildCad = buildCad;
-  global.textW = textW;
 window.braceCadDxf = braceCadDxf;
 window.buildCad = buildCad;
-window._braceCadDxf = braceCadDxf;
+window.textW = textW;
+})();
 
 
 /* ---------- CAD 导出 ---------- */
