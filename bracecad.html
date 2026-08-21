@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>固维挡墙断面CAD自动成图系统 BraceCad v0.1.36</title>
+<title>固维挡墙断面CAD自动成图系统 BraceCad v0.1.51</title>
 <style>
 /* ============ 设计令牌 ============ */
 :root{
@@ -262,7 +262,7 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
   <div class="brand">
     <img class="logo" id="logoImg" alt="BraceCad">
     <div>
-      <h1>固维挡墙断面CAD自动成图系统 <em>BraceCad</em><span class="vbadge" id="hdVer">v0.1.36</span></h1>
+      <h1>固维挡墙断面CAD自动成图系统 <em>BraceCad</em><span class="vbadge" id="hdVer">v0.1.51</span></h1>
     </div>
   </div>
   <div class="top-actions">
@@ -655,7 +655,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 </script>
 <script>
 /* =====================================================================
-   固维挡墙断面CAD自动成图系统 BraceCad v0.1.36
+   固维挡墙断面CAD自动成图系统 BraceCad v0.1.51
    基于 Murus v0.3.47 构建，新增「CAD 出图」功能：导出符合天正建筑标准
    的 R2010 DXF，CAD 打开后可直接在天正中继续编辑/打印。
    参数：编号 / 墙高H1 / 基础埋深H2 / 顶宽B1 / 底宽B2 / 外坡比W / 内坡比N
@@ -667,9 +667,39 @@ const CADFONT = '"仿宋","FangSong","STFangsong","SimSun","Songti SC",serif';
    版本与迭代更新
    单一事实来源：改这里即可升级版本；关于对话框与导出文件名自动同步。
    ===================================================================== */
-const APP_VERSION = '0.1.36';
+const APP_VERSION = '0.1.51';
 const APP_VERSION_LABEL = 'v' + APP_VERSION;
 const APP_CHANGELOG = [
+{ v:'0.1.51', date:'2026-08-22',
+    note:'顶部黄色提示文字高度【固定 200 图形单位】（用户要求，不再随墙高缩放——v0.1.50 为 4.0mm×denom，合并首墙 1-1# 仅 80）。修改：提示 TEXT 在预烘焙之后写入并直接带 hm:200；单张导出绘图范围 ey1 同步按 15mm 图纸间隙+0.2m 字高计算。验证：Playwright 合并导出，ezdxf 确认顶部黄色 TEXT 字高恒为 200（62=2、y 全图最大），audit errors=0。' },
+{ v:'0.1.50', date:'2026-08-22',
+    note:'导出 CAD 顶部加黄色提示（用户要求，针对「填充图案需改一次比例再改回才显示」——根因是 AutoCAD/天正对非关联+内嵌用户定义图案（76=1）的 HATCH 首次不主动计算填充，编辑触发 regeneration 才显示）。在每次导出（单张/批量每张/合并第一张）最上方断面顶宽之上 15mm 图纸处，加黄色（62=2）TEXT「提示：CAD 未自动计算填充，若填充未显示请修改比例再改回」，字高 200 图形单位 @denom50（h=4.0mm 图纸×denom，随墙高缩放），图层文字标注、居中。单张导出 extents 同步含提示。验证：Playwright 合并导出，ezdxf 确认顶部存在该黄色 TEXT（62=2、字高=4.0×denom、y 为全图最大），audit errors=0。' },
+{ v:'0.1.49', date:'2026-08-22',
+    note:'彻底修复「按图面显示的尺寸手算断面面积，与参数表最后一位小数不一致」（v0.1.48 后用户复测，2#/6#/7-1# 仍差 0.01）。实证根因：slope 模式几何顶宽由 B2 与坡比推得（顶宽=B2-(W+N)·H），可能 ≠ 输入 B1——如 2# 输入顶宽 0.98、坡比推得 0.984，表/标注用 0.98 算面积 2.13，CAD 实测轮廓 0.984 算 2.14。修复：slope 模式改为【以输入 B1/B2 反算 W/N（保持 W:N 比例）】，几何顶宽精确 = 输入 B1（2# W 0.05→0.0504 显示仍 1:0.05），CAD 实测 = 表 = 手算，三者完全一致；超容差才警告并按底宽反算坡比。验证：Playwright m 合并导出，16 墙「轮廓 shoelace=参数表面积=按显示值手算」全部相等，audit errors=0。' },
+{ v:'0.1.48', date:'2026-08-22',
+    note:'修复「部分通过图面数据计算的断面面积与断面参数表显示的数据不符」（用户按图面尺寸标注自行验算面积发现）。实证：导出 DXF 墙轮廓精确面积（shoelace）与参数表面积 16 墙全部一致（差≤0.004），表本身无误；根因是 slope 模式下 B2 被【无条件】按坡比理论值重算（B2=B2theory 在 if/else 外执行）——如 5-1# 输入底宽 1.8、理论 1.795（差 0.005 在容差内），几何变 1.795 而标注/参数表显示 1.80，用户按图面标注 (0.88+1.80)/2×3.05=4.09 与表 4.08（按 1.795 算）差 0.01。修复：容差（0.005+1e-6）范围内不再重算 B2（保持用户输入值，标注与几何一致）；断面面积行改用 f2 统一舍入。验证：Playwright m 合并导出，16 墙轮廓 shoelace=参数表面积（差≤0.004）且标注值=几何（5-1# 底宽几何 1.80），audit errors=0。' },
+{ v:'0.1.47', date:'2026-08-22',
+    note:'修复「导入挡墙参数标准表.xlsx 后，部分尺寸标注数据与断面参数表不相符」（用户逐墙检查发现，5-1# 挡墙底宽：尺寸标注 1.80 vs 参数表 1.79）。根因①舍入路径不一致：尺寸标注 fmtDim 用 Math.round(v*100+1e-9)/100（浮点补偿，1.795→1.80），v0.1.46 参数表直接 toFixed(2)（浮点 1.79499…→1.79）；②坡比容差判断 Math.abs(B2theory-B2)>0.005 受浮点误差（0.005000000000000004）误报「与坡比不符」。修复：参数表四行长度改用与尺寸标注同路径 f2 = (Math.round(v*100+1e-9)/100).toFixed(2)；容差改 0.005+1e-6。验证：Playwright m 合并导出，逐墙对比尺寸文字 vs 参数表（B1/B2/H1/H2/H）全部一致（不符=0），audit errors=0。' },
+{ v:'0.1.46', date:'2026-08-22',
+    note:'断面参数表 m 单位长度统一保留两位小数（用户要求「CAD 导出后，断面参数表以 m 为单位的长度均保留两位小数」）。根因：参数表长度值用 fmtN（toFixed(3) 去尾零）→ 顶宽 1.2、埋深 0.5 显示一位。修复：墙高 H1 / 基础埋深 H2 / 墙体顶宽 B1 / 墙体底宽 B2 四行改为 toFixed(2)+" m"（1.20、0.50、4.58）；坡比仍用 fmtN（非长度）；断面面积本已两位。预览画布与导出同步（共用 g.tabRows）。验证：Playwright 合并导出，ezdxf 读 BraceCadTable 块内 TEXT，m 单位长度全部 X.XX（如 "4.58 m"/"1.20 m"），audit errors=0。' },
+{ v:'0.1.45', date:'2026-08-22',
+    note:'修复 m 单位小数位（用户实测：v0.1.44 用 DIMDEC 覆盖后 CAD 里仍显示 X.X 非两位小数）——DIMLFAC/DIMDEC 的 XDATA DSTYLE 覆盖机制在用户 CAD 不可靠。改为【尺寸文字写死格式化数值】：entityDim 组码 1 直接写 c.override（buildCad 的 fmtDim 结果）——mm→"4580"、cm→"458"、m→"4.58"（toFixed(2) 两位小数），对任意 CAD 100% 精确显示，不再依赖标注变量覆盖。保留 DIMSCALE=70×k 覆盖（标注全局比例缩放）。代价：拉伸标注文字不再自动更新（导出图纸静态交付）。验证：Playwright m/mm 合并导出，ezdxf 读 DIMENSION 组码 1 确认 m="4.58"/mm="4580"，audit errors=0。' },
+{ v:'0.1.44', date:'2026-08-22',
+    note:'修复 v0.1.43 的单位精度问题（用户实测：导出为 m 时尺寸标注未保留两位小数）。根因：DIMDEC(271) 是【整数型】dimvar，XDATA DSTYLE 覆盖必须用 1070/1070（整数对）写入，v0.1.43 误写成 1070/1040（实数对）被 AutoCAD 忽略 → 小数位不生效。修复：271 改为 1070/1070 写入（2）；DIMSCALE(40)/DIMLFAC(144) 为实数型仍用 1070/1040。m→DIMLFAC=0.001+DIMDEC=2（显示 4.58），mm→DIMLFAC=1+DIMDEC=0（显示 4580）。验证：Playwright m 合并导出，ezdxf 读 XDATA 确认 (1070,271)/(1070,2)，audit errors=0。' },
+{ v:'0.1.43', date:'2026-08-22',
+    note:'修复「CAD 出图尺寸单位 mm/cm/m 切换后，导出的 DXF 尺寸标注数值不变」（用户实测反馈）。根因：DIMENSION 文字为「<>」动态测量值，按模型单位（mm）由 CAD 自动计算显示，mm/cm/m 选项此前只影响了被忽略的 override 字段，从未生效。修复：在 XDATA DSTYLE 覆盖中补写 DIMLFAC(144) 与 DIMDEC(271)——mm→×1（整数）、cm→×0.1（整数）、m→×0.001（两位小数），DIMENSION 文字保持「<>」动态（拉伸仍跟随）。与 v0.1.42 的 DIMSCALE=70×k 覆盖同机制共存。验证：Playwright 分别以 mm/m 导出合并 DXF，ezdxf 读取 XDATA 144/271 值正确（mm:1/0、m:0.001/2）、audit errors=0。' },
+{ v:'0.1.42', date:'2026-08-21',
+    note:'用户否决 v0.1.41 手绘尺寸方案并回退（四项修复）：① 尺寸标注恢复上一版【标准转角标注 DIMENSION 实体】（70=32、样式 _TCH_ARCH，参数与 v0.1.38-40 完全一致：顶宽/底宽水平、埋深/墙高/总高垂直，锚点 dimX1 右 10.15mm 图纸竖直线、文字居尺寸线左侧 3.85mm）；比例协调只改【标注全局比例】——每面墙 DIMSCALE = 70×(H/5)（墙高5000基准=70），以 XDATA DSTYLE 覆盖组码 40 写入 DIMENSION 实体（AutoCAD 属性面板改「标注全局比例」的标准机制，APPID ACAD 已注册），矮墙标注同比例缩小；② 图名「右侧长出」根因修复——宽度按全宽 textW（CJK=1.0）估算、导出文字宽度因子却是 0.7，导致文字左偏、下划线右侧多出约 0.3×文字宽（实测最高墙右超 ~500 单位且随墙高放大）；改为 textWdxf（CJK 0.7×h、ASCII 0.56×h），图名真正居中于底宽标注正中、下划线两端仅超出 0.6mm 图纸；③ 竖直尺寸文字左移量改为随本墙 denom 预计算（c.off=tmm(3.85)），修复合并导出共用写盘 denom 导致矮墙文字偏移过大；④ 软件界面【预览】比例改为线性 denom=10×H（替代分档 25/50/100/200），预览与导出一致、矮墙参数表不再偏大。验证：node --check；Playwright 真实导入 16 行 xlsx 合并导出；ezdxf 0 errors；DIMENSION 80 个含 DSTYLE 覆盖、图名左右超仅 0.6mm 图纸、参数表行距/字高=6H/3H 线性。' },
+{ v:'0.1.41', date:'2026-08-21',
+    note:'比例协调第一版（用户针对「导入挡墙参数标准表.xlsx 后合并导出 CAD 比例不协调」提出，v0.1.42 已部分回退）：① 以默认墙高 5000 为基准，新增墙高比例系数 k=H/5.0，标注 denom=base×k 线性缩放（替代原 auto 分档 denom 非线性跳变）；② 尺寸标注曾改为手绘 LINE+TEXT（v0.1.42 被用户否决，已恢复标准转角标注 DIMENSION，只缩放标注全局比例）；③ 合并导出每断面独立烘焙文字高度 hm；④ 图名下划线两端仅超出文字 0.6mm、图名与「本图标示单位为」正中=底宽标注正中（v0.1.42 修正宽度折算后完全对齐）。' },
+{ v:'0.1.40', date:'2026-08-21',
+    note:'M7.5 墙体材质文字两项调整（用户要求）：① 文字高度改为 200 图形单位（h=4.0mm 图纸 @denom50，与坡比文字一致，原 3.0mm=150 单位）；② 与内坡比（1:N）间距改为两倍文字行距（2×4.0=8.0mm 图纸，原 4.5mm），仍左对齐。验证：Playwright 导出 + ezdxf 0 errors。' },
+{ v:'0.1.39', date:'2026-08-21',
+    note:'M7.5 墙体材质文字位置调整（用户要求）：从原引注位置（leadX+mm(hx) 墙右缘）改为放在内坡比（1:N）标注文字上方、与之左对齐——x = xb(H*0.42)+2.2mm（与 1:N 同 x 左对齐），y = H*0.42 + 4.5mm 图纸（1:N 字高 4.0 之上留 0.5 间隙）。其他引注不变。验证：Playwright 导出 + ezdxf 0 errors + $HANDSEED。' },
+{ v:'0.1.38', date:'2026-08-21',
+    note:'三项（用户要求，以共享 BraceCad_合并断面.dxf 为样式基准）：① 垂直尺寸 5000/4000/1000 样式改为与合并断面一致——锚点统一为 dimX1 右侧 10.15mm 图纸竖直线（三尺寸竖直同线，尺寸界线不再沿墙内坡斜线；界线长度 1000/4000=507.5mm、5000=957.5mm @1:50，与文件一致）；② 垂直尺寸文字移到尺寸线左侧 3.85mm 图纸（entityDim 对 angle=90 处理，11 x = lx - 3.85×denom/1000，与文件 192.5mm@50 一致）；③ 顶宽处回填土线右侧减少 1 根斜线（x1 = rX+tmm(2)-step）。全部导出（单张/批量/合并）共用 buildCad，改动同时生效。验证：Playwright 导出 + ezdxf 0 errors + $HANDSEED。' },
+{ v:'0.1.37', date:'2026-08-21',
+    note:'四项（用户要求）：① 去掉 M7.5 墙体材质引注的引线，仅保留文字（原 3 顶点 LWPOLYLINE 引线删除，其他引注如泄水孔引线保留）；② 断面参数表图层改为「断面参数表」（块内 LINE/TEXT 与 INSERT 均从「文字标注」改为「断面参数表」，CAD 打开自动建层）；③ 顶宽处（墙背）回填土线左侧减少 2 根斜线（起点右移 2×3.2mm 步距）；④ 删除外侧地面线左端的截断示意小斜线（(gL,H2)→(gL-2.4mm,H2+1.6mm)）。验证：Playwright 真实导出 + ezdxf 0 errors + $HANDSEED 检查。' },
 { v:'0.1.36', date:'2026-08-21',
     note:'删除导出 DXF 中的图框（用户要求：CAD 里有个很小很小的、图层为图框的东西）。根因：图框按图形 bbox 缩放 A3 框（scale=min(420*0.92/bw,297*0.90/bh)），图形高 5m 时 scale≈0.053、图框缩成 22×16mm 小方框。修复：buildCad 删除整个图框段（o.frame）；CAD 面板移除「含 A3 图框 + 标题栏」复选框；getCadOpt frame 固定 false。' },
 { v:'0.1.35', date:'2026-08-21',
@@ -856,11 +886,13 @@ function layout(rec, opt){
   if (B1 <= 0) return {bad:'墙体顶宽 B1 须大于 0'};
 
   if (opt.mode === 'slope'){
-    if (Math.abs(B2theory - B2) > 0.005){
-      note = '输入底宽 ' + fmtN(B2) + ' m 与坡比不符，已按坡比取用 B2 = ' + fmtN(B2theory) + ' m';
+    // v0.1.49：以输入 B1/B2 为准反算 W/N（保持 W:N 比例），几何顶宽精确 = 输入 B1
+    const sum0 = W + N, d0 = B2 - B1;
+    if (Math.abs(sum0) > 1e-9){ W = d0*W/sum0/H; N = d0*N/sum0/H; } else { W = d0/2/H; N = d0/2/H; }
+    if (Math.abs(B2theory - B2) > 0.005 + 1e-6){
+      note = '输入底宽 ' + fmtN(B2) + ' m 与坡比不符，已按底宽反算坡比：外 1:' + fmtN(W) + '　内 1:' + fmtN(N);
       level = 'warn';
     } else note = '几何自洽：B2 = B1 + (W+N)·H = ' + fmtN(B2theory) + ' m';
-    B2 = B2theory;
   } else {
     if (B2 <= B1) return {bad:'底宽优先模式下，B2 必须大于 B1'};
     const d = B2 - B1, sum = W + N;
@@ -873,7 +905,7 @@ function layout(rec, opt){
   const xBL = 0, xBR = B2, xTL = W*H, xTR = B2 - N*H;
   if (xTR - xTL <= 0.01) return {bad:'坡比过大导致墙顶宽度归零，请复核 W / N'};
 
-  const denom = opt.scaleSel === 'auto' ? (H<=3 ? 25 : H<=6 ? 50 : H<=12 ? 100 : 200) : parseInt(opt.scaleSel,10);
+  const denom = opt.scaleSel === 'auto' ? Math.round(10 * H) : parseInt(opt.scaleSel, 10);   // v0.1.42 线性比例：10×H（墙高5000=1:50基准）
   const S = denom/1000;                 // 图纸 1mm = S 实际米
   const mm = v => v*S;
 
@@ -905,10 +937,11 @@ function layout(rec, opt){
   if (textRightMax === -Infinity) textRightMax = leadX;   // 无任何引注时兜底
 
   // 参数表
-  const tabRows = [['挡墙编号',rec.id||'—'],['墙高 H1',fmtN(H1)+' m'],['基础埋深 H2',fmtN(H2)+' m'],
-                   ['墙体顶宽 B1',fmtN(B1)+' m'],['墙体底宽 B2',fmtN(B2)+' m'],
+  const f2 = v => (Math.round(v*100 + 1e-9)/100).toFixed(2);
+  const tabRows = [['挡墙编号',rec.id||'—'],['墙高 H1',f2(H1)+' m'],['基础埋深 H2',f2(H2)+' m'],
+                   ['墙体顶宽 B1',f2(B1)+' m'],['墙体底宽 B2',f2(B2)+' m'],
                    ['外坡比 W','1 : '+fmtN(W)],['内坡比 N','1 : '+fmtN(N)],
-                   ['断面面积',((B2+B1)/2*H).toFixed(2)+' m²']];
+                   ['断面面积',f2((B2+B1)/2*H)+' m²']];
   const tabW = mm(46), tabH = mm(6)*tabRows.length;
   // 参数表水平位置自适应：紧贴「所有引注文字」实际右端（含内置/自定义水平偏移），间距统一 1.5mm
   const tabGap = 1.5;
@@ -2395,7 +2428,7 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
     if (c.color !== undefined) w.w(62, String(c.color));
     w.w(100, 'AcDbText');
     w.w(10, w.num(c.x * M)); w.w(20, w.num(c.y * M)); w.w(30, '0.0');
-    w.w(40, w.num(mmW(c.h, denom)));       // 字高（图纸mm × denom）
+    w.w(40, w.num(c.hm !== undefined ? c.hm : mmW(c.h, denom)));       // 字高（优先用烘焙好的 hm：已含比例系数 k；兜底 mmW）
     w.w(1, toUPlus(c.str));
     w.w(50, w.num(c.rot || 0));
     w.w(41, '0.7'); w.w(51, '0.0');   // 宽度因子 0.7（与 Standard 样式一致，属性面板显示 0.7——实体 41 会覆盖样式值，必须显式写）
@@ -2418,20 +2451,39 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
     w.w(100, 'AcDbDimension');
     w.w(3, '_TCH_ARCH');                       // 标注样式（天正规范，含标准 340/342 引用）
     w.w(10, w.num(c.lx * M)); w.w(20, w.num(c.ly * M)); w.w(30, '0.0');   // 定义点 = 尺寸线位置
-    const tx = (c.p1[0] + c.p2[0]) / 2, ty = (c.p1[1] + c.p2[1]) / 2;
-    w.w(11, w.num(tx * M)); w.w(21, w.num(ty * M)); w.w(31, '0.0');       // 文字中点（dimtad=1 置顶）
+    // v0.1.38 垂直尺寸（angle=90）文字移到尺寸线左侧 3.85mm 图纸（对齐用户提供的合并断面.dxf，
+    // 该文件文字 11 x = 尺寸线 lx - 192.5mm @denom50）；水平尺寸保持定义点中点。
+    // v0.1.42：垂直尺寸左移量随本墙 denom 预计算（c.off = tmm(3.85)，buildCad 各墙独立算，
+    // 合并导出不再共用一个写盘 denom → 矮墙文字偏移修复）。c.lx 已随中心化平移，vtx 自动跟随。
+    const vtx = (c.off !== undefined) ? c.lx - c.off
+              : ((Math.abs(c.angle || 0) === 90) ? c.lx - 3.85 * denom / 1000 : (c.p1[0] + c.p2[0]) / 2);
+    const vty = (c.p1[1] + c.p2[1]) / 2;
+    w.w(11, w.num(vtx * M)); w.w(21, w.num(vty * M)); w.w(31, '0.0');       // 文字中点（dimtad=1 置顶）
     w.w(70, '32');                             // 用户要求：保持 v0.1.23 的「转角标注」属性（70 bit5=块引用位）
     // 说明：70=0 属性显示「线性标注」、70=32 属性显示「转角标注」（AutoCAD 标准类型）。
     // 用户实测后确认要「转角标注」属性（2026-08-21，v0.1.25）。「连续标注」属性为天正私有实体
     // TCH_DIMENSION2 才有，标准 DXF 无法生成（AutoCAD 标准类型无「连续」）。
     w.w(71, '5');                              // 附着点 middle center
-    w.w(1, '<>');   // 动态测量值：拉伸标注夹点/定义点时文字自动跟随（用户要求）。
-    // 注意：不能用 override 写死数值（600/2100...），否则拉伸尺寸不更新。
+    // v0.1.45：尺寸文字【写死格式化数值】（c.override，如 "4.58" / "4580"）。
+    // 背景：v0.1.43/0.1.44 用 DIMLFAC/DIMDEC 的 XDATA DSTYLE 覆盖做单位换算，用户实测
+    // 在 CAD 里不生效（m 单位小数位错误）→ 覆盖机制不可靠。写死文字对任意 CAD 100% 精确显示
+    // （mm→"4580"、cm→"458"、m→"4.58"），不再依赖标注变量覆盖。代价：拉伸标注时文字不自动更新
+    // （导出图纸为静态交付，可接受；如后续需动态可改回 '<>'，但 m 单位将无法保证两位小数）。
+    w.w(1, c.override !== undefined ? String(c.override) : '<>');
     w.w(100, 'AcDbAlignedDimension');
     w.w(13, w.num(c.p1[0] * M)); w.w(23, w.num(c.p1[1] * M)); w.w(33, '0.0');  // 第一延伸线原点
     w.w(14, w.num(c.p2[0] * M)); w.w(24, w.num(c.p2[1] * M)); w.w(34, '0.0');  // 第二延伸线原点
     w.w(50, w.num(c.angle || 0));              // 旋转角（0=水平 90=竖直）
     w.w(100, 'AcDbRotatedDimension');          // 空子类（标准线性尺寸双类结构）
+    // v0.1.42：标注全局比例随墙高同比例缩放（DIMSCALE = 70 × k）。
+    // 机制 = XDATA DSTYLE 覆盖（AutoCAD 属性面板改单个尺寸「标注全局比例」时的标准存储方式，
+    // APPID 'ACAD' 已在模板 APPID 表注册；组码 40 = DIMSCALE，实数型用 1070/1040）。
+    w.w(1001, 'ACAD');
+    w.w(1000, 'DSTYLE');
+    w.w(1002, '{');
+    w.w(1070, '40');
+    w.w(1040, w.num(c.dimscale !== undefined ? c.dimscale : 70));
+    w.w(1002, '}');
   }
 
   function entityHatch(w, c, denom) {
@@ -2496,28 +2548,38 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
      （全部为世界坐标·米；字高/偏移为图纸 mm，writer 里 ×denom）
      ===================================================================== */
   function buildCad(g, o) {
-    const denom = o.denom || g.denom;
+    // v0.1.41 比例协调：以默认墙高 5.0m（=5000）为基准，墙高变化时所有标注
+    // （尺寸/文字/参数表/回填斜线/图名等）同比例缩放。base = UI 指定出图比例（auto→50）；
+    // k = g.H/5.0；标注用 denom = base*k（即 10*H 时）。几何以米为单位不受影响，
+    // 从而任一墙高下标注与墙体比例恒定，与 5000 参考墙一致（替代原 auto 分档 denom 的非线性跳变）。
+    const base = (typeof o.denom === 'number' && o.denom > 0) ? o.denom : 50;
+    const k = (g.H || 5.0) / 5.0;
+    const denom = base * k;
     const cmds = [];
     const tmm = function (v) { return v * denom / 1000; };
+    // v0.1.42：尺寸标注恢复【标准转角标注 DIMENSION 实体】（上一版样式，70=32，样式 _TCH_ARCH）。
+    // 比例协调只改「标注全局比例」：DIMSCALE = 70 × k（k=H/5，墙高5000为基准），
+    // 由 entityDim 以 XDATA DSTYLE 覆盖组码 40 写入，每面墙独立 → 矮墙标注同比例缩小。
 
     /* 1. 墙背回填（斜线带 + 边界线） */
     if (o.backfill !== false) {
       const d = tmm(7), yb = g.H - d;
       const clip = [[g.xTR, g.H], [g.rX, g.H], [g.rX, yb], [g.xb(yb), yb]];
       const step = tmm(3.2), len = tmm(2.6);
-      let x0 = Math.min(g.xTR, g.xb(yb)) - tmm(2);
-      const x1 = g.rX + tmm(2);
+      // v0.1.37 顶宽处回填土线：左侧减少 2 根斜线（起点右移 2 个步距）
+      let x0 = Math.min(g.xTR, g.xb(yb)) - tmm(2) + 2 * step;
+      // v0.1.38 顶宽处回填土线：右侧减少 1 根斜线（终点左移 1 个步距）
+      const x1 = g.rX + tmm(2) - step;
       for (let x = x0; x <= x1; x += step) {
         cmds.push({ t: 'line', x1: x, y1: g.H, x2: x - len, y2: yb, layer: '回填土', lw: 13 });
       }
       cmds.push({ t: 'line', x1: g.xTR, y1: g.H, x2: g.rX, y2: g.H, layer: '回填土', lw: 18 });
     }
 
-    /* 2. 外侧地面线 + 折断 + 地面线下回填土符号（v0.1.33，与主视图画布 hatch45 一致：45° 斜线、水平间距 3.2mm、线长 2.6mm） */
+    /* 2. 外侧地面线 + 地面线下回填土符号（v0.1.33 45° 斜线；v0.1.37 删除左端截断小斜线） */
     {
       const ybc = Math.max(g.H2 - tmm(7), 0);
       cmds.push({ t: 'line', x1: g.gL, y1: g.H2, x2: g.xf(g.H2), y2: g.H2, layer: '虚线_隐蔽线', ltype: 'DASHED', lw: 18 });
-      cmds.push({ t: 'line', x1: g.gL, y1: g.H2, x2: g.gL - tmm(2.4), y2: g.H2 + tmm(1.6), layer: '墙体', lw: 13 });
       const st2 = tmm(3.2), ln2 = tmm(2.6);
       for (let x = g.gL + tmm(1); x <= g.xf(g.H2) + 1e-9; x += st2) {
         cmds.push({ t: 'line', x1: x, y1: g.H2, x2: x - ln2, y2: g.H2 - ln2, layer: '回填土', lw: 13 });
@@ -2583,7 +2645,7 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
       });
     }
 
-    /* 6. 尺寸标注（TCAD-DIM 旋转线性标注） */
+    /* 6. 尺寸标注（标准转角标注 DIMENSION，样式 _TCH_ARCH；v0.1.42 恢复，v0.1.41 手绘版作废） */
     if (o.dim !== false) {
       const fmtDim = function (v, unit) {
         const cm = Math.round(v * 100 + 1e-9);
@@ -2592,13 +2654,23 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
         return String(cm * 10);
       };
       const u = o.dimUnit || 'mm';
-      cmds.push({ t: 'dim', p1: [g.xTL, g.H], p2: [g.xTR, g.H], lx: (g.xTL + g.xTR) / 2, ly: g.dimYt, angle: 0, override: fmtDim(g.B1, u) });
-      cmds.push({ t: 'dim', p1: [g.xBL, 0], p2: [g.xBR, 0], lx: g.xBR / 2, ly: g.dimYb, angle: 0, override: fmtDim(g.B2, u) });
-      cmds.push({ t: 'dim', p1: [0, 0], p2: [g.xf(g.H2), g.H2], lx: g.dimX1, ly: g.H2 / 2, angle: 90, override: fmtDim(g.H2, u) });
-      cmds.push({ t: 'dim', p1: [g.xf(g.H2), g.H2], p2: [g.xTL, g.H], lx: g.dimX1, ly: (g.H2 + g.H) / 2, angle: 90, override: fmtDim(g.H1, u) });
-      // 总高 5000：与画布版（main.js dimV）一致——尺寸界线从 dimX1 左侧 mm(1.2) 竖直锚点（y=0 与 y=H）水平伸到尺寸线 dimX2，
-      // 与左侧 4000（墙高）界线同侧同向、范围一致（v0.1.27 曾从墙右缘 xBR 伸出，用户要求与 4000 一致改回左侧布局）
-      cmds.push({ t: 'dim', p1: [g.dimX1 - g.mm(1.2), 0], p2: [g.dimX1 - g.mm(1.2), g.H], lx: g.dimX2, ly: g.H / 2, angle: 90, override: fmtDim(g.H, u) });
+      // v0.1.45：尺寸文字写死格式化数值（override 字段 = fmtDim 结果）——
+      // mm→"4580"、cm→"458"、m→"4.58"（两位小数，toFixed(2)），entityDim 直接写入组码 1。
+      // 修复 v0.1.43/44 用 DIMLFAC/DIMDEC 覆盖在 CAD 不生效、m 单位小数位错误的问题。
+      // 标注全局比例：基线 70（= _TCH_ARCH 的 DIMSCALE，对应墙高 5000 基准），按 k=H/5 同比例缩放
+      const dimscale = 70 * k;
+      cmds.push({ t: 'dim', p1: [g.xTL, g.H], p2: [g.xTR, g.H], lx: (g.xTL + g.xTR) / 2, ly: g.dimYt, angle: 0, override: fmtDim(g.B1, u), dimscale: dimscale });
+      cmds.push({ t: 'dim', p1: [g.xBL, 0], p2: [g.xBR, 0], lx: g.xBR / 2, ly: g.dimYb, angle: 0, override: fmtDim(g.B2, u), dimscale: dimscale });
+      // v0.1.38 垂直尺寸（1000 埋深 / 4000 墙高 / 5000 总高）样式对齐用户提供的合并断面.dxf：
+      // 锚点统一为 dimX1 右侧 10.15mm 图纸的竖直线（三尺寸竖直同线，尺寸界线不再沿墙内坡斜线；
+      // 界线长度：1000/4000 = 10.15mm 图纸 = 507.5mm@1:50，5000 = 10.15+9 = 19.15mm = 957.5mm，与文件一致），
+      // 文字移到尺寸线左侧（entityDim 处理垂直尺寸文字偏移）。全部导出（单张/批量/合并）共用本段。
+      const vz = g.dimX1 + tmm(10.15);
+      // 竖直尺寸文字左移量（3.85mm 图纸 × 本墙 denom，随墙高同比例；v0.1.42）
+      const dimOff = tmm(3.85);
+      cmds.push({ t: 'dim', p1: [vz, 0], p2: [vz, g.H2], lx: g.dimX1, ly: g.H2 / 2, angle: 90, override: fmtDim(g.H2, u), dimscale: dimscale, off: dimOff });
+      cmds.push({ t: 'dim', p1: [vz, g.H2], p2: [vz, g.H], lx: g.dimX1, ly: (g.H2 + g.H) / 2, angle: 90, override: fmtDim(g.H1, u), dimscale: dimscale, off: dimOff });
+      cmds.push({ t: 'dim', p1: [vz, 0], p2: [vz, g.H], lx: g.dimX2, ly: g.H / 2, angle: 90, override: fmtDim(g.H, u), dimscale: dimscale, off: dimOff });
     }
 
     /* 7. 标高符号 —— 用户要求取消（2026-08-21，v0.1.24），整块禁用；代码保留便于恢复 */
@@ -2636,17 +2708,23 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
         const lyr = isMat ? '墙体材质' : '文字标注';
         const lines = (n.t || []).join('\n').split('\n');
         if (!isMat) cmds.push({ t: 'circle', cx: n.x, cy: n.y, r: 0.08, layer: lyr });
-        const xEnd = g.leadX + (o.noteHx ? g.mm(n.hx || 0) : 0);
-        const mx = n.x + (xEnd - n.x) * 0.30, my = n.y + tmm(4.6);
         if (isMat) {
-          cmds.push({ t: 'lwpolyline', pts: [[n.x, n.y], [mx, my], [xEnd, my]], layer: lyr, close: false, lw: 13 });
+          // v0.1.40：M7.5 墙体材质文字——字高 200 图形单位（=4.0mm 图纸 @denom50，与坡比文字一致），
+          // 与内坡比（1:N）间距为两倍文字行距（2×4.0 = 8.0mm 图纸），仍左对齐
+          const ym2 = g.H * 0.42, xm2 = g.xb(ym2);
+          const xSlope = xm2 + tmm(2.2);
+          lines.forEach(function (s, i) {
+            cmds.push({ t: 'text', str: s, x: xSlope, y: ym2 + tmm(8.0) + (i === 0 ? 0 : -tmm(4.0) * i), h: 4.0, layer: lyr, align: 'left' });
+          });
         } else {
+          const xEnd = g.leadX + (o.noteHx ? g.mm(n.hx || 0) : 0);
+          const mx = n.x + (xEnd - n.x) * 0.30, my = n.y + tmm(4.6);
           cmds.push({ t: 'line', x1: n.x, y1: n.y, x2: mx, y2: my, layer: lyr, lw: 13 });
           cmds.push({ t: 'line', x1: mx, y1: my, x2: xEnd, y2: my, layer: lyr, lw: 13 });
+          lines.forEach(function (s, i) {
+            cmds.push({ t: 'text', str: s, x: xEnd, y: my + (i === 0 ? tmm(1.0) : -tmm(2.7) * i - tmm(1.5)), h: 3.0, layer: lyr, align: 'left' });
+          });
         }
-        lines.forEach(function (s, i) {
-          cmds.push({ t: 'text', str: s, x: xEnd, y: my + (i === 0 ? tmm(1.0) : -tmm(2.7) * i - tmm(1.5)), h: 3.0, layer: lyr, align: 'left' });
-        });
       });
     }
 
@@ -2678,38 +2756,60 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
       });
       g._tabX = tabX;   // 块参照 INSERT 插入点 x（braceCadDxf 用 g._tabX || g.tabX）
       const tbl = [];
+      const TL = '断面参数表';   // v0.1.37 参数表单独图层（原「文字标注」）
       for (let i = 0; i <= n; i++) {
-        tbl.push({ t: 'line', x1: 0, y1: -i * rh, x2: w, y2: -i * rh, layer: '文字标注', lw: i === 0 || i === 1 || i === n ? 18 : 13 });
+        tbl.push({ t: 'line', x1: 0, y1: -i * rh, x2: w, y2: -i * rh, layer: TL, lw: i === 0 || i === 1 || i === n ? 18 : 13 });
       }
-      tbl.push({ t: 'line', x1: 0, y1: 0, x2: 0, y2: -n * rh, layer: '文字标注', lw: 18 });
-      tbl.push({ t: 'line', x1: w, y1: 0, x2: w, y2: -n * rh, layer: '文字标注', lw: 18 });
-      tbl.push({ t: 'line', x1: w * 0.52, y1: -rh, x2: w * 0.52, y2: -n * rh, layer: '文字标注', lw: 13 });
-      tbl.push({ t: 'text', str: '断面参数表', x: w / 2, y: -rh + tmm(1.6), h: 3.4, layer: '文字标注', align: 'middle' });
+      tbl.push({ t: 'line', x1: 0, y1: 0, x2: 0, y2: -n * rh, layer: TL, lw: 18 });
+      tbl.push({ t: 'line', x1: w, y1: 0, x2: w, y2: -n * rh, layer: TL, lw: 18 });
+      tbl.push({ t: 'line', x1: w * 0.52, y1: -rh, x2: w * 0.52, y2: -n * rh, layer: TL, lw: 13 });
+      tbl.push({ t: 'text', str: '断面参数表', x: w / 2, y: -rh + tmm(1.6), h: 3.4, layer: TL, align: 'middle' });
       rows.forEach(function (r, i) {
         if (i === 0) return;
         const yy = -(i + 1) * rh + tmm(1.6);
-        tbl.push({ t: 'text', str: r[0], x: tmm(2), y: yy, h: 3.0, layer: '文字标注', align: 'left' });
-        tbl.push({ t: 'text', str: r[1], x: w * 0.52 + tmm(2), y: yy, h: 3.0, layer: '文字标注', align: 'left' });
+        tbl.push({ t: 'text', str: r[0], x: tmm(2), y: yy, h: 3.0, layer: TL, align: 'left' });
+        tbl.push({ t: 'text', str: r[1], x: w * 0.52 + tmm(2), y: yy, h: 3.0, layer: TL, align: 'left' });
       });
       g._tblCmds = tbl;
     }
 
-    /* 11. 图名（v0.1.27 视觉方案：TEXT + 粗下划线；v0.1.28 带属性块实测 AutoCAD 打不开已回退） */
+    /* 11. 图名（v0.1.27 视觉方案：TEXT + 粗下划线；v0.1.28 带属性块实测 AutoCAD 打不开已回退）
+       v0.1.42：① 图名下划线两端仅超出图名文字一小段（对称、0.6mm 图纸，随比例缩放）——
+       宽度按导出文字宽度因子 0.7 折算（textWdxf：CJK 0.7×h、ASCII 0.56×h），
+       修复 v0.1.41 用全宽 textW 导致文字左偏、下划线右侧长出很多的问题；
+       ② 图名与「本图标示单位为：XX」二者正中 = 底宽尺寸标注正中（均为 (xBL+xBR)/2）。 */
     if (o.title !== false) {
       const TS = 4.9, UL = 1.8;   // 7mm(国标)×35(比例)/50(全局) = 4.9
-      const cx = (g.xBL + g.xBR) / 2;
-      const w1 = textW(g.titleTxt, TS);
-      const x0 = cx - tmm(w1 / 2);
+      const cxTitle = (g.xBL + g.xBR) / 2;   // = 底宽尺寸标注正中
+      const w1 = textWdxf(g.titleTxt, TS);   // 与 DXF 实际渲染宽度一致（宽度因子 0.7）
+      const x0 = cxTitle - tmm(w1 / 2);
       cmds.push({ t: 'text', str: g.titleTxt, x: x0, y: g.titleY, h: TS, layer: '文字标注', align: 'left', color: 7 });
-      // v0.1.33 图名下划线改为 LWPOLYLINE 多段线：全局宽度 10（43=10.0，与墙体一致）+ 绿色（62=3）
-      cmds.push({ t: 'lwpolyline', pts: [[x0 - tmm(1), g.titleY - tmm(UL)], [x0 + tmm(w1 + 1), g.titleY - tmm(UL)]], layer: '文字标注', color: 3 });
+      // 下划线：左右各超出图名文字 over（对称、很小），避免「多出一截」
+      const over = tmm(0.6);
+      cmds.push({ t: 'lwpolyline', pts: [[x0 - over, g.titleY - tmm(UL)], [x0 + tmm(w1) + over, g.titleY - tmm(UL)]], layer: '文字标注', color: 3 });
       const unitTxt = ({ mm: 'mm', cm: 'cm', m: 'm' })[o.dimUnit || 'mm'] || 'mm';
-      cmds.push({ t: 'text', str: '本图标示单位为：' + unitTxt, x: cx, y: g.titleY - tmm(6), h: 3.2, layer: '文字标注', align: 'middle' });
+      cmds.push({ t: 'text', str: '本图标示单位为：' + unitTxt, x: cxTitle, y: g.titleY - tmm(6), h: 3.2, layer: '文字标注', align: 'middle' });
     }
 
-    /* 12. 图框 —— v0.1.36 已删除（用户要求：导出 CAD 里有个很小很小的图框，删掉）。
-       原实现按图形 bbox 缩放 A3 框（scale = min(420*0.92/bw, 297*0.90/bh)），
-       图形高 5m 时 scale≈0.053，图框缩成 22×16mm 的小方框，无实际意义。 */
+    // v0.1.41 预烘焙文字高度（mm，已含比例系数 k）——合并导出时各断面独立比例，
+    // 避免所有断面共用一个写盘 denom 导致文字高度被错误缩放。
+    cmds.forEach(function (c) { if (c.t === 'text') c.hm = mmW(c.h, denom); });
+    if (g._tblCmds) g._tblCmds.forEach(function (c) { if (c.t === 'text') c.hm = mmW(c.h, denom); });
+
+    // v0.1.50/51：CAD 未自动计算填充提示（黄色，字高【固定 200 图形单位】v0.1.51）——
+    // 置于该断面内容最高处（顶宽之上 15mm 图纸）。仅当 o.topNote（单张导出 / 批量每张 /
+    // 合并导出第一张）时写入一次。放在预烘焙之后、直接写 hm=200，不受 denom 缩放。
+    if (o.topNote) {
+      let mY = -Infinity;
+      cmds.forEach(function (c) {
+        if (c.t === 'line') { if (c.y1 > mY) mY = c.y1; if (c.y2 > mY) mY = c.y2; }
+        else if (c.t === 'circle') { if (c.cy + c.r > mY) mY = c.cy + c.r; }
+        else if (c.t === 'text') { if (c.y > mY) mY = c.y; }
+        else if (c.t === 'lwpolyline' || c.t === 'hatch') { c.pts.forEach(function (p) { if (p[1] > mY) mY = p[1]; }); }
+        else if (c.t === 'dim') { if (c.p1[1] > mY) mY = c.p1[1]; if (c.p2[1] > mY) mY = c.p2[1]; if (c.ly > mY) mY = c.ly; }
+      });
+      cmds.push({ t: 'text', str: '提示：CAD 未自动计算填充，若填充未显示请修改比例再改回', x: 0, y: mY + tmm(15), h: 4.0, hm: 200, layer: '文字标注', color: 2, align: 'middle' });
+    }
 
     return cmds;
   }
@@ -2718,6 +2818,14 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
   function textW(str, mm) {
     let w = 0;
     for (const c of String(str)) w += /[\x00-\xff]/.test(c) ? 0.56 : 1.0;
+    return w * mm;
+  }
+
+  /* 文字宽度估计（DXF 版：实体宽度因子 0.7，CJK 折算 0.7×h，ASCII 0.56×h——
+     与 entityText 写入的 41=0.7 一致；画布 textW 的 CJK 1.0 仅用于屏幕预览） */
+  function textWdxf(str, mm) {
+    let w = 0;
+    for (const c of String(str)) w += /[\x00-\xff]/.test(c) ? 0.56 : 0.7;
     return w * mm;
   }
 
@@ -2778,9 +2886,10 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
         c.lx += dx; c.ly += dy;
       }
     });
-    // 居中后的图形范围（mm，含边距）
+    // 居中后的图形范围（mm，含边距）；v0.1.51：含顶部提示文字（顶宽之上 15mm 图纸 + 固定字高 200 单位=0.2m）
     const ex0 = wNum((g.bbox.x0 + dx - 0.5) * M), ey0 = wNum((g.bbox.y0 + dy - 0.5) * M);
-    const ex1 = wNum((g.bbox.x1 + dx + 0.5) * M), ey1 = wNum((g.bbox.y1 + dy + 0.5) * M);
+    const _noteTop = g.bbox.y1 + (o.topNote ? 15 * denom / 1000 + 0.2 : 0);
+    const ex1 = wNum((g.bbox.x1 + dx + 0.5) * M), ey1 = wNum(Math.max(g.bbox.y1 + dy + 0.5, _noteTop + dy) * M);
 
     // 动态 ENTITIES：句柄从模板最大句柄 0x159 之后开始，实体 330 指向 *Model_Space BLOCK_RECORD（模板句柄 17）
     const w = new DxfWriter('AC1015');
@@ -2817,7 +2926,7 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
             '100\nAcDbLine\n10\n' + w.num(e.x1 * M) + '\n20\n' + w.num(e.y1 * M) + '\n30\n0.0\n11\n' + w.num(e.x2 * M) + '\n21\n' + w.num(e.y2 * M) + '\n31\n0.0\n';
         } else if (e.t === 'text') {
           inner += '0\nTEXT\n5\n' + w.handle() + '\n330\n' + blkH + '\n100\nAcDbEntity\n8\n' + toUPlus(e.layer || '0') + '\n' +
-            '100\nAcDbText\n10\n' + w.num(e.x * M) + '\n20\n' + w.num(e.y * M) + '\n30\n0.0\n40\n' + w.num(mmW(e.h, denom)) + '\n1\n' + toUPlus(e.str) + '\n50\n0\n41\n0.7\n51\n0.0\n7\nStandard\n71\n0\n72\n' + (e.align === 'middle' ? '1' : '0') + '\n11\n' + w.num(e.x * M) + '\n21\n' + w.num(e.y * M) + '\n31\n0.0\n100\nAcDbText\n';
+            '100\nAcDbText\n10\n' + w.num(e.x * M) + '\n20\n' + w.num(e.y * M) + '\n30\n0.0\n40\n' + w.num(e.hm !== undefined ? e.hm : mmW(e.h, denom)) + '\n1\n' + toUPlus(e.str) + '\n50\n0\n41\n0.7\n51\n0.0\n7\nStandard\n71\n0\n72\n' + (e.align === 'middle' ? '1' : '0') + '\n11\n' + w.num(e.x * M) + '\n21\n' + w.num(e.y * M) + '\n31\n0.0\n100\nAcDbText\n';
         }
       });
       blkText =
@@ -2829,7 +2938,7 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
       const ix = w.num(((g._tabX || g.tabX) + dx) * M), iy = w.num((g.tabY + dy) * M);   // 插入点 x 用贴近 M7.5 引注的 _tabX（v0.1.32）
       // INSERT 必须位于 ENTITIES SECTION 头之后（entText 自带 SECTION 头，插到其 ENDSEC 前）
       const insText =
-        '0\nINSERT\n5\n' + insH + '\n330\n17\n100\nAcDbEntity\n8\n' + toUPlus('文字标注') + '\n100\nAcDbBlockReference\n2\nBraceCadTable\n10\n' + ix + '\n20\n' + iy + '\n30\n0.0\n41\n1.0\n42\n1.0\n43\n1.0\n50\n0.0\n70\n0';   // 70=0：无属性跟随（用户要求不要属性块）
+        '0\nINSERT\n5\n' + insH + '\n330\n17\n100\nAcDbEntity\n8\n' + toUPlus('断面参数表') + '\n100\nAcDbBlockReference\n2\nBraceCadTable\n10\n' + ix + '\n20\n' + iy + '\n30\n0.0\n41\n1.0\n42\n1.0\n43\n1.0\n50\n0.0\n70\n0';   // 70=0：无属性跟随（用户要求不要属性块）
       entPart = entText.replace('\n0\nENDSEC', '\n' + insText + '\n0\nENDSEC');
     }
     out = out
@@ -2859,6 +2968,8 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
   function braceCadMergeDxf(items, o) {
     o = o || {};
     const denom = o.denom || (items[0] && items[0].g.denom) || 50;
+    // v0.1.50：合并导出只对最上面（第一张）断面加「CAD 未自动计算填充」黄色提示
+    if (items && items.length && items[0].oo) items[0].oo.topNote = true;
     const GAP = 40 * denom / 1000;                 // 断面间垂直间距 40mm 图纸（米）
 
     // 1. 每断面 buildCad + 中心化
@@ -2950,7 +3061,7 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
               '100\nAcDbLine\n10\n' + w.num(e.x1 * M) + '\n20\n' + w.num(e.y1 * M) + '\n30\n0.0\n11\n' + w.num(e.x2 * M) + '\n21\n' + w.num(e.y2 * M) + '\n31\n0.0\n';
           } else if (e.t === 'text') {
             inner += '0\nTEXT\n5\n' + w.handle() + '\n330\n' + blkH + '\n100\nAcDbEntity\n8\n' + toUPlus(e.layer || '0') + '\n' +
-              '100\nAcDbText\n10\n' + w.num(e.x * M) + '\n20\n' + w.num(e.y * M) + '\n30\n0.0\n40\n' + w.num(mmW(e.h, denom)) + '\n1\n' + toUPlus(e.str) + '\n50\n0\n41\n0.7\n51\n0.0\n7\nStandard\n71\n0\n72\n' + (e.align === 'middle' ? '1' : '0') + '\n11\n' + w.num(e.x * M) + '\n21\n' + w.num(e.y * M) + '\n31\n0.0\n100\nAcDbText\n';
+              '100\nAcDbText\n10\n' + w.num(e.x * M) + '\n20\n' + w.num(e.y * M) + '\n30\n0.0\n40\n' + w.num(e.hm !== undefined ? e.hm : mmW(e.h, denom)) + '\n1\n' + toUPlus(e.str) + '\n50\n0\n41\n0.7\n51\n0.0\n7\nStandard\n71\n0\n72\n' + (e.align === 'middle' ? '1' : '0') + '\n11\n' + w.num(e.x * M) + '\n21\n' + w.num(e.y * M) + '\n31\n0.0\n100\nAcDbText\n';
           }
         });
         blkText += '0\nBLOCK\n5\n' + blkH + '\n330\n' + brH + '\n100\nAcDbEntity\n8\n0\n100\nAcDbBlockBegin\n2\n' + ins.name + '\n70\n0\n10\n0.0\n20\n0.0\n30\n0.0\n3\n' + ins.name + '\n1\n\n' +
@@ -2958,7 +3069,7 @@ window.__GBK = {"墙": [199, 189], "体": [204, 229], "尺": [179, 223], "寸": 
           '0\nENDBLK\n5\n' + endH + '\n330\n' + blkH + '\n100\nAcDbEntity\n8\n0\n100\nAcDbBlockEnd';
         const insH = w.handle();
         const ix = w.num(ins.ix * M), iy = w.num(ins.iy * M);
-        entPart = entPart.replace('\n0\nENDSEC', '\n0\nINSERT\n5\n' + insH + '\n330\n17\n100\nAcDbEntity\n8\n' + toUPlus('文字标注') + '\n100\nAcDbBlockReference\n2\n' + ins.name + '\n10\n' + ix + '\n20\n' + iy + '\n30\n0.0\n41\n1.0\n42\n1.0\n43\n1.0\n50\n0.0\n70\n0\n0\nENDSEC');
+        entPart = entPart.replace('\n0\nENDSEC', '\n0\nINSERT\n5\n' + insH + '\n330\n17\n100\nAcDbEntity\n8\n' + toUPlus('断面参数表') + '\n100\nAcDbBlockReference\n2\n' + ins.name + '\n10\n' + ix + '\n20\n' + iy + '\n30\n0.0\n41\n1.0\n42\n1.0\n43\n1.0\n50\n0.0\n70\n0\n0\nENDSEC');
       });
     }
     const ex0 = wNum((minX + dx2 - 0.5) * M), ey0 = wNum((minY + dy2 - 0.5) * M);
@@ -3026,7 +3137,8 @@ function exportCurrentDxf(){
   const g = layout(rec, state.opt);
   if (g.bad){ toast('参数异常：' + g.bad, 'err'); return; }
   const o = getCadOpt();
-  if (o.denom == null) o.denom = g.denom;
+  if (o.denom == null) o.denom = 50;   // v0.1.41 比例协调：auto 以 5000 参考墙为基准(base=50)，不再用分档 g.denom（会非线性跳变）
+  o.topNote = true;                     // v0.1.50：顶部黄色提示（CAD 未自动计算填充）
   const dxf = braceCadDxf(g, o);
   const name = (rec.id || '挡墙') + '_挡墙断面.dxf';
   dl(new Blob([dxfToGbk(dxf)], {type:'application/dxf'}), name);
@@ -3044,7 +3156,8 @@ function exportBatchDxf(){
     const g = layout(rec, state.opt);
     if (g.bad){ bad++; return; }
     const oo = Object.assign({}, o);
-    if (oo.denom == null) oo.denom = g.denom;
+    if (oo.denom == null) oo.denom = 50;   // v0.1.41 比例协调：合并/批量均按 5000 参考墙基准，逐断面再乘 k=H/5
+    oo.topNote = true;                     // v0.1.50：每张顶部黄色提示（CAD 未自动计算填充）
     const dxf = braceCadDxf(g, oo);
     const name = (rec.id || ('DQ-' + (n+1))) + '_挡墙断面.dxf';
     zip.file(name, dxfToGbk(dxf));
@@ -3068,7 +3181,7 @@ function exportMergeDxf(){
     const g = layout(rec, state.opt);
     if (g.bad) return;
     const oo = Object.assign({}, o);
-    if (oo.denom == null) oo.denom = g.denom;
+    if (oo.denom == null) oo.denom = 50;   // v0.1.41 比例协调：合并/批量均按 5000 参考墙基准，逐断面再乘 k=H/5
     items.push({ g: g, oo: oo });
   });
   if (!items.length){ toast('无可用记录','warn'); return; }
