@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>房览速记 · 房源随手记</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%230ea5e9'/%3E%3Cpath d='M32 16 14 32h5v16h10V36h6v12h10V32h5z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f3f6fb; --card:#ffffff; --line:#e5eaf3; --txt:#1f2937; --sub:#6b7280; --mut:#9ca3af;
+  --pri:#0ea5e9; --pri2:#0284c7; --pri-bg:#e0f2fe; --teal:#0d9488; --amber:#f59e0b; --red:#ef4444;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;padding-bottom:40px}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;color:var(--txt)}
+a{color:var(--pri2);text-decoration:none}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+
+/* ===== 顶栏 ===== */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hd{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#0284c7);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px -4px rgba(14,165,233,.5)}
+.logo svg{width:24px;height:24px}
+.tt{flex:1;min-width:150px}
+.tt h1{font-size:18px;font-weight:700;letter-spacing:.5px}
+.tt p{font-size:12px;color:var(--sub)}
+.hd-btns{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;transition:.15s;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn-pri{background:linear-gradient(135deg,#38bdf8,#0284c7);color:#fff;box-shadow:0 4px 12px -4px rgba(14,165,233,.5)}
+.btn-pri:hover{filter:brightness(1.05)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--txt)}
+.btn-ghost:hover{border-color:#c7d4e6;background:#f8fafc}
+.btn-ok{background:var(--teal);color:#fff}
+.btn-ok:hover{filter:brightness(1.05)}
+.btn-danger{background:#fff;color:var(--red);border:1px solid #fecaca}
+.btn-danger:hover{background:#fef2f2}
+
+/* 同步状态 */
+.sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:#f1f5f9;color:var(--sub);border:1px solid var(--line)}
+.sync-pill .dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1}
+.sync-pill.ok .dot{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+.sync-pill.err .dot{background:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+.sync-pill.busy .dot{background:var(--amber);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* ===== 主体 ===== */
+main{max-width:1080px;margin:0 auto;padding:14px 16px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stat{flex:1;min-width:140px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow)}
+.stat .v{font-size:20px;font-weight:800;color:var(--txt)}
+.stat .v small{font-size:12px;font-weight:600;color:var(--mut)}
+.stat .k{font-size:12px;color:var(--sub);margin-top:2px}
+.stat.hl .v{color:var(--pri2)}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.search{flex:1;min-width:200px;position:relative}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--mut);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;outline:none;transition:.15s}
+.search input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.sort-wrap{position:relative}
+.sort-wrap select{appearance:none;padding:9px 32px 9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:var(--txt);outline:none;cursor:pointer}
+.sort-wrap::after{content:"";position:absolute;right:12px;top:50%;transform:translateY(-70%) rotate(45deg);width:7px;height:7px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);pointer-events:none}
+
+.tag-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tag{font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--sub);transition:.15s;cursor:pointer}
+.tag:hover{border-color:#c7d4e6}
+.tag.on{background:var(--pri-bg);border-color:var(--pri);color:var(--pri2)}
+
+/* 房源卡片 */
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.hcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;position:relative;transition:.18s}
+.hcard:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px rgba(15,23,42,.2);border-color:#cfe3f5}
+.hcard .row1{display:flex;align-items:flex-start;gap:10px;justify-content:space-between}
+.hname{font-size:16px;font-weight:700;line-height:1.35;flex:1}
+.hname .src{display:inline-block;font-size:11px;font-weight:600;color:var(--pri2);background:var(--pri-bg);padding:1px 8px;border-radius:6px;margin-right:6px;vertical-align:1px}
+.hops{display:flex;gap:4px;flex:none}
+.icobtn{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--sub);transition:.15s}
+.icobtn:hover{background:#f1f5f9;color:var(--txt)}
+.icobtn.del:hover{background:#fef2f2;color:var(--red)}
+.icobtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.price{font-size:22px;font-weight:800;color:#e11d48;line-height:1.2}
+.price small{font-size:12px;font-weight:600;color:var(--mut)}
+.price .unit{font-size:13px;color:var(--sub)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;font-weight:600;padding:3px 9px;border-radius:7px;background:#f1f5f9;color:#475569}
+.chip.b{background:var(--pri-bg);color:var(--pri2)}
+.chip.a{background:#fef3c7;color:#b45309}
+.chip.g{background:#ecfdf5;color:#047857}
+.stars{color:var(--amber);font-size:14px;letter-spacing:1px}
+.stars .off{color:#e2e8f0}
+.pc{font-size:12.5px;color:var(--sub);background:#f8fafc;border-radius:9px;padding:8px 10px;border:1px dashed #e2e8f0}
+.pc b{color:var(--teal);font-weight:700;margin-right:4px}
+.pc.good b{color:var(--teal)}
+.pc.bad b{color:var(--red)}
+.pc p{white-space:pre-wrap;word-break:break-word}
+.ftime{font-size:11px;color:var(--mut);margin-top:auto}
+.empty{text-align:center;padding:70px 20px;color:var(--mut)}
+.empty svg{width:64px;height:64px;stroke:#cbd5e1;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
+.empty h3{font-size:16px;color:var(--sub);margin-bottom:6px;font-weight:600}
+
+/* ===== 弹窗 ===== */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto}
+.mask.show{display:flex}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:560px;box-shadow:0 24px 60px -20px rgba(15,23,42,.35);margin:auto;animation:pop .18s ease}
+@keyframes pop{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.modal.wide{max-width:720px}
+.m-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.m-head h2{font-size:16px;font-weight:700}
+.m-close{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.m-close:hover{background:#f1f5f9;color:var(--txt)}
+.m-body{padding:18px 20px;max-height:70vh;overflow-y:auto}
+.m-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+
+/* 表单 */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fitem{display:flex;flex-direction:column;gap:5px}
+.fitem.full{grid-column:1/-1}
+.fitem label{font-size:12.5px;font-weight:700;color:#374151}
+.fitem label .req{color:var(--red)}
+.fitem input[type=text],.fitem input[type=number],.fitem input[type=date],.fitem input[type=url],.fitem select,.fitem textarea{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;outline:none;transition:.15s;width:100%}
+.fitem input:focus,.fitem select:focus,.fitem textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,165,233,.13)}
+.fitem textarea{resize:vertical;min-height:56px}
+.cbx{display:flex;flex-wrap:wrap;gap:7px}
+.cbx label{font-size:12.5px;font-weight:600;color:#475569;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;transition:.12s;user-select:none}
+.cbx input{display:none}
+.cbx label.on{background:var(--pri-bg);border-color:var(--pri);color:var(--pri2)}
+.rate{display:flex;gap:2px}
+.rate button{font-size:24px;color:#e2e8f0;transition:.12s;line-height:1}
+.rate button.on{color:var(--amber)}
+.rate button:hover{transform:scale(1.15)}
+
+/* 详情 */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ditem{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.ditem .k{font-size:11.5px;color:var(--mut);margin-bottom:2px}
+.ditem .v{font-size:14px;font-weight:600;word-break:break-word}
+.ditem .v.warn{color:var(--red)}
+.ditem.full{grid-column:1/-1}
+.dlink{display:inline-flex;align-items:center;gap:5px;color:var(--pri2);font-weight:600;font-size:13px;word-break:break-all}
+
+/* 设置 */
+.set-group{margin-bottom:18px}
+.set-group h3{font-size:13px;font-weight:800;color:#374151;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.set-group h3 .tag2{font-size:10px;background:var(--pri-bg);color:var(--pri2);padding:1px 7px;border-radius:999px;font-weight:700}
+.set-row{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.set-row label{font-size:12.5px;font-weight:700;color:#374151}
+.set-row input,.set-row select{padding:8px 11px;border:1px solid var(--line);border-radius:9px;outline:none;width:100%}
+.set-row input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,165,233,.13)}
+.hint{font-size:12px;color:var(--sub);background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;line-height:1.7}
+.hint code{background:#eef2f7;padding:1px 6px;border-radius:5px;font-size:11.5px;color:#0f766e}
+.switch{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;user-select:none}
+.switch input{display:none}
+.switch .trk{width:38px;height:22px;border-radius:999px;background:#cbd5e1;position:relative;transition:.18s;flex:none}
+.switch .trk::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch input:checked+.trk{background:var(--teal)}
+.switch input:checked+.trk::after{left:19px}
+.danger-zone{border:1px solid #fecaca;background:#fffbfb;border-radius:12px;padding:12px 14px}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:200;box-shadow:0 10px 30px -8px rgba(0,0,0,.4);max-width:88vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:#dc2626}
+
+footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font-size:12px;color:var(--mut)}
+
+@media (max-width:640px){
+  .fgrid{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .list{grid-template-columns:1fr}
+  .stat{min-width:100px}
+  .hd{padding:10px 12px}
+  .tt h1{font-size:16px}
+  .btn{padding:7px 11px;font-size:12.5px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M3 11.5 12 4l9 7.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v10h13V10" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20v-5h4v5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="tt">
+      <h1>房览速记</h1>
+      <p>抖音看房随手记 · 手机/电脑双端同步</p>
+    </div>
+    <div class="hd-btns">
+      <span class="sync-pill" id="syncPill" title="GitHub 同步状态"><span class="dot"></span><span id="syncTxt">未连接同步</span></span>
+      <button class="btn btn-ghost" onclick="doSync('pull')" id="syncBtn">⟳ 同步</button>
+      <button class="btn btn-pri" onclick="openForm()">＋ 添加房源</button>
+      <button class="btn btn-ghost" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="stats">
+    <div class="stat hl"><div class="v" id="stCount">0 <small>套</small></div><div class="k">已收录房源</div></div>
+    <div class="stat"><div class="v" id="stPrice">-- <small>万</small></div><div class="k">平均总价</div></div>
+    <div class="stat"><div class="v" id="stUnit">-- <small>元/㎡</small></div><div class="k">均价（有面积数据）</div></div>
+    <div class="stat"><div class="v" id="stScore">-- <small>/5</small></div><div class="k">平均评分</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="kw" placeholder="搜索小区 / 备注 / 标签…" oninput="render()">
+    </div>
+    <div class="sort-wrap">
+      <select id="sort" onchange="render()">
+        <option value="new">最新收录</option>
+        <option value="price_asc">总价 ↑</option>
+        <option value="price_desc">总价 ↓</option>
+        <option value="unit_desc">单价 ↓</option>
+        <option value="score_desc">评分 ↓</option>
+      </select>
+    </div>
+  </div>
+  <div class="tag-bar" id="tagBar"></div>
+
+  <div class="list" id="list"></div>
+  <div class="empty" id="empty" style="display:none">
+    <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg>
+    <h3>还没有收录房源</h3>
+    <p style="font-size:13px">点击右上角「＋ 添加房源」，把抖音刷到的房源、价格、优缺点随手记下来。<br>配置 GitHub 同步后，手机和电脑数据自动互通。</p>
+  </div>
+</main>
+
+<footer>房览速记 v1.0.0 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+
+<!-- ===== 添加/编辑弹窗 ===== -->
+<div class="mask" id="formMask">
+  <div class="modal wide">
+    <div class="m-head"><h2 id="formTitle">添加房源</h2><button class="m-close" onclick="closeForm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <div class="m-body">
+      <div class="fgrid">
+        <div class="fitem full">
+          <label>房源名称 / 小区 <span class="req">*</span></label>
+          <input type="text" id="f_name" placeholder="例：万科城市之光 3栋 / 抖音-某博主推荐" maxlength="60">
+        </div>
+        <div class="fitem">
+          <label>总价（万元）</label>
+          <input type="number" id="f_price" min="0" step="0.1" placeholder="例：168">
+        </div>
+        <div class="fitem">
+          <label>面积（㎡）</label>
+          <input type="number" id="f_area" min="0" step="0.1" placeholder="例：89">
+        </div>
+        <div class="fitem">
+          <label>户型</label>
+          <select id="f_layout">
+            <option value="">请选择</option>
+            <option>一室</option><option>两室</option><option>三室</option><option>四室</option>
+            <option>五室+</option><option>别墅/洋房</option><option>公寓/LOFT</option><option>其他</option>
+          </select>
+        </div>
+        <div class="fitem">
+          <label>楼层</label>
+          <input type="text" id="f_floor" placeholder="例：12/33层 或 中楼层" maxlength="20">
+        </div>
+        <div class="fitem">
+          <label>朝向</label>
+          <select id="f_face">
+            <option value="">请选择</option>
+            <option>南</option><option>东南</option><option>东</option><option>西南</option>
+            <option>南北通透</option><option>西</option><option>北</option><option>东北</option><option>西北</option><option>其他</option>
+          </select>
+        </div>
+        <div class="fitem">
+          <label>装修</label>
+          <select id="f_deco">
+            <option value="">请选择</option>
+            <option>毛坯</option><option>简装</option><option>精装</option><option>豪装</option><option>拎包入住</option>
+          </select>
+        </div>
+        <div class="fitem">
+          <label>来源平台</label>
+          <select id="f_src">
+            <option value="抖音">抖音</option><option value="贝壳">贝壳</option><option value="安居客">安居客</option>
+            <option value="链家">链家</option><option value="中介推荐">中介推荐</option><option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="fitem">
+          <label>原始链接（抖音/房源页）</label>
+          <input type="url" id="f_link" placeholder="https://…" maxlength="300">
+        </div>
+        <div class="fitem">
+          <label>记录日期</label>
+          <input type="date" id="f_date">
+        </div>
+        <div class="fitem full">
+          <label>标签（可多选，也可自填）</label>
+          <div class="cbx" id="f_tags">
+            <label data-t="近地铁"><input type="checkbox" value="近地铁">近地铁</label>
+            <label data-t="学区房"><input type="checkbox" value="学区房">学区房</label>
+            <label data-t="临江"><input type="checkbox" value="临江">临江</label>
+            <label data-t="公园旁"><input type="checkbox" value="公园旁">公园旁</label>
+            <label data-t="次新房"><input type="checkbox" value="次新房">次新房</label>
+            <label data-t="低总价"><input type="checkbox" value="低总价">低总价</label>
+            <label data-t="高性价比"><input type="checkbox" value="高性价比">高性价比</label>
+            <label data-t="自住"><input type="checkbox" value="自住">自住</label>
+            <label data-t="投资"><input type="checkbox" value="投资">投资</label>
+            <label data-t="装修好"><input type="checkbox" value="装修好">装修好</label>
+            <label data-t="视野好"><input type="checkbox" value="视野好">视野好</label>
+            <label data-t="安静"><input type="checkbox" value="安静">安静</label>
+          </div>
+          <input type="text" id="f_tag_custom" placeholder="自定义标签，多个用逗号分隔" maxlength="60" style="margin-top:7px">
+        </div>
+        <div class="fitem full">
+          <label>评分</label>
+          <div class="rate" id="f_rate">
+            <button type="button" data-v="1">★</button><button type="button" data-v="2">★</button><button type="button" data-v="3">★</button>
+            <button type="button" data-v="4">★</button><button type="button" data-v="5">★</button>
+          </div>
+        </div>
+        <div class="fitem full">
+          <label>优点</label>
+          <textarea id="f_good" placeholder="例：户型方正、得房率高、近地铁站步行5分钟…" maxlength="500"></textarea>
+        </div>
+        <div class="fitem full">
+          <label>缺点</label>
+          <textarea id="f_bad" placeholder="例：临主干道有噪音、周边商业配套一般…" maxlength="500"></textarea>
+        </div>
+        <div class="fitem full">
+          <label>备注</label>
+          <textarea id="f_note" placeholder="看房感受、议价空间、房东情况等…" maxlength="500"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-ghost" onclick="closeForm()">取消</button>
+      <button class="btn btn-pri" onclick="saveForm()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 详情弹窗 ===== -->
+<div class="mask" id="detailMask">
+  <div class="modal">
+    <div class="m-head"><h2>房源详情</h2><button class="m-close" onclick="closeDetail()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <div class="m-body" id="detailBody"></div>
+    <div class="m-foot">
+      <button class="btn btn-danger" id="detailDel" onclick="delFromDetail()">删除</button>
+      <button class="btn btn-ghost" onclick="editFromDetail()">编辑</button>
+      <button class="btn btn-pri" onclick="closeDetail()">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 设置弹窗 ===== -->
+<div class="mask" id="setMask">
+  <div class="modal">
+    <div class="m-head"><h2>设置</h2><button class="m-close" onclick="closeSettings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <div class="m-body">
+      <div class="set-group">
+        <h3>☁️ GitHub 双端同步 <span class="tag2">手机+电脑 数据互通</span></h3>
+        <div class="set-row"><label>GitHub 仓库（owner/repo）</label><input id="s_repo" placeholder="wuwuwuwu-1990/vista-tool"></div>
+        <div class="set-row"><label>分支</label><input id="s_branch" placeholder="main"></div>
+        <div class="set-row"><label>数据文件名</label><input id="s_path" placeholder="fanglian-data.json"></div>
+        <div class="set-row"><label>访问令牌（Personal Access Token，仅存本机）</label><input id="s_token" type="password" placeholder="github_pat_…" autocomplete="off"></div>
+        <label class="switch" style="margin-bottom:10px"><input type="checkbox" id="s_auto"><span class="trk"></span>修改后自动同步到 GitHub</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ok" onclick="testSync()">测试连接</button>
+          <button class="btn btn-pri" onclick="saveSettings(true)">保存并立即同步</button>
+          <button class="btn btn-ghost" onclick="saveSettings(false)">仅保存</button>
+        </div>
+        <div class="hint" style="margin-top:10px">
+          <b>配置方法（一次性）：</b>① 登录 github.com → Settings → Developer settings → Fine-grained tokens → 生成令牌，勾选目标仓库的 <code>Contents: Read and write</code> 权限；② 把令牌粘贴到上方；③ 手机、电脑各自打开本页面并粘贴同一次生成的令牌，数据即互通。<br>
+          <b>默认仓库</b>：<code>wuwuwuwu-1990/vista-tool</code>（当前站点仓库，已内置数据文件 <code>fanglian-data.json</code>）。令牌只保存在本机浏览器 localStorage，不会上传到任何服务器。保存/修改/删除房源时自动同步，冲突按「谁后改谁生效」合并，删掉的房源不会复活。
+        </div>
+      </div>
+      <div class="set-group">
+        <h3>💾 数据备份</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="exportData()">导出 JSON 备份</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('impFile').click()">导入 JSON</button>
+          <input type="file" id="impFile" accept=".json,application/json" style="display:none" onchange="importData(this)">
+        </div>
+        <div class="hint" style="margin-top:10px">本地数据存于浏览器 localStorage。换设备/清缓存前建议先导出备份；导入时与现有数据智能合并（按记录更新时间），不会覆盖丢失。</div>
+      </div>
+      <div class="set-group danger-zone">
+        <h3>⚠️ 危险操作</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-danger" onclick="clearAll()">清空全部数据</button>
+        </div>
+      </div>
+    </div>
+    <div class="m-foot"><button class="btn btn-pri" onclick="closeSettings()">关闭</button></div>
+  </div>
+</div>
+
+<!-- ===== 确认弹窗 ===== -->
+<div class="mask" id="confirmMask">
+  <div class="modal" style="max-width:400px">
+    <div class="m-body" style="text-align:center;padding:26px 20px">
+      <div style="font-size:34px;margin-bottom:10px" id="cfIcon">🗑️</div>
+      <h2 id="cfTitle" style="font-size:16px;font-weight:700;margin-bottom:8px">确认删除？</h2>
+      <p id="cfMsg" style="font-size:13px;color:var(--sub)">删除后可通过同步在其它设备找回，本机无法恢复。</p>
+    </div>
+    <div class="m-foot" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-danger" id="cfOk">确认</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= 房览速记 v1.0.0 =================
+   功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
+         JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）
+==================================================== */
+var APP = { name:'房览速记', version:'1.0.0' };
+var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
+var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
+
+var state = { records:[], deleted:[], updatedAt:0 };
+var settings = Object.assign({}, DEFAULT_SET);
+var curEditId = null, curDetailId = null, curRate = 0, confirmCb = null;
+
+/* ---------- 数据存取 ---------- */
+function loadAll(){
+  try{ var raw = localStorage.getItem(LS_DATA); if(raw){ var d = JSON.parse(raw); state.records = d.records||[]; state.deleted = d.deleted||[]; state.updatedAt = d.updatedAt||0; } }catch(e){}
+  try{ var s = localStorage.getItem(LS_SET); if(s) settings = Object.assign({}, DEFAULT_SET, JSON.parse(s)); }catch(e){}
+  try{ var t = localStorage.getItem(LS_TOKEN); if(t) settings.token = t; }catch(e){}
+  fillSetForm(); updateSyncPill(); render();
+}
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_DATA, JSON.stringify({records:state.records, deleted:state.deleted, updatedAt:state.updatedAt}));
+    var tok = settings.token||'';
+    delete settings.token;
+    localStorage.setItem(LS_SET, JSON.stringify(settings));
+    localStorage.setItem(LS_TOKEN, tok);
+    settings.token = tok;
+  }catch(e){ toast('本地保存失败：' + e.message, true); }
+}
+function touch(){ state.updatedAt = Date.now(); }
+
+/* ---------- CRUD ---------- */
+function readForm(){
+  var tags = [];
+  document.querySelectorAll('#f_tags input:checked').forEach(function(i){ tags.push(i.value); });
+  var custom = document.getElementById('f_tag_custom').value.trim();
+  if(custom) custom.split(/[,，]/).map(function(s){s=s.trim(); if(s) tags.push(s);});
+  tags = tags.filter(function(v,i,a){return a.indexOf(v)===i;});
+  return {
+    name: document.getElementById('f_name').value.trim(),
+    price: parseFloat(document.getElementById('f_price').value) || null,
+    area: parseFloat(document.getElementById('f_area').value) || null,
+    layout: document.getElementById('f_layout').value,
+    floor: document.getElementById('f_floor').value.trim(),
+    face: document.getElementById('f_face').value,
+    deco: document.getElementById('f_deco').value,
+    src: document.getElementById('f_src').value,
+    link: document.getElementById('f_link').value.trim(),
+    date: document.getElementById('f_date').value || todayStr(),
+    tags: tags,
+    rate: curRate,
+    good: document.getElementById('f_good').value.trim(),
+    bad: document.getElementById('f_bad').value.trim(),
+    note: document.getElementById('f_note').value.trim()
+  };
+}
+function saveForm(){
+  var d = readForm();
+  if(!d.name){ toast('请填写房源名称/小区', true); document.getElementById('f_name').focus(); return; }
+  if(curEditId){
+    var r = state.records.find(function(x){return x.id===curEditId;});
+    if(r){ Object.keys(d).forEach(function(k){ r[k]=d[k]; }); r.updatedAt = Date.now(); touch(); }
+    toast('已更新');
+  }else{
+    state.records.push(Object.assign({id: uid(), createdAt: Date.now(), updatedAt: Date.now()}, d));
+    touch();
+    toast('已添加');
+  }
+  saveLocal(); closeForm(); render(); autoPush();
+}
+function openForm(id){
+  curEditId = id||null; curRate = 0;
+  document.getElementById('formTitle').textContent = id ? '编辑房源' : '添加房源';
+  ['f_name','f_price','f_area','f_floor','f_link','f_tag_custom','f_good','f_bad','f_note'].forEach(function(i){ document.getElementById(i).value=''; });
+  ['f_layout','f_face','f_deco'].forEach(function(i){ document.getElementById(i).value=''; });
+  document.getElementById('f_src').value = '抖音';
+  document.getElementById('f_date').value = todayStr();
+  document.querySelectorAll('#f_tags input').forEach(function(i){ i.checked=false; });
+  document.querySelectorAll('#f_tags label').forEach(function(l){ l.classList.remove('on'); });
+  document.querySelectorAll('#f_rate button').forEach(function(b){ b.classList.remove('on'); });
+  if(id){
+    var r = state.records.find(function(x){return x.id===id;});
+    if(!r) return;
+    document.getElementById('f_name').value = r.name||'';
+    if(r.price!=null) document.getElementById('f_price').value = r.price;
+    if(r.area!=null) document.getElementById('f_area').value = r.area;
+    document.getElementById('f_layout').value = r.layout||'';
+    document.getElementById('f_floor').value = r.floor||'';
+    document.getElementById('f_face').value = r.face||'';
+    document.getElementById('f_deco').value = r.deco||'';
+    document.getElementById('f_src').value = r.src||'抖音';
+    document.getElementById('f_link').value = r.link||'';
+    document.getElementById('f_date').value = r.date||todayStr();
+    (r.tags||[]).forEach(function(t){
+      var inp = document.querySelector('#f_tags input[value="'+CSS.escape(t)+'"]');
+      if(inp){ inp.checked = true; inp.closest('label').classList.add('on'); }
+    });
+    var known = Array.prototype.map.call(document.querySelectorAll('#f_tags input'), function(i){return i.value;});
+    var customTags = (r.tags||[]).filter(function(t){ return known.indexOf(t)<0; });
+    document.getElementById('f_tag_custom').value = customTags.join('，');
+    curRate = r.rate||0;
+    renderRate();
+    document.getElementById('f_good').value = r.good||'';
+    document.getElementById('f_bad').value = r.bad||'';
+    document.getElementById('f_note').value = r.note||'';
+  }
+  show('formMask');
+}
+function closeForm(){ hide('formMask'); curEditId=null; }
+function delRecord(id, silent){
+  var r = state.records.find(function(x){return x.id===id;});
+  if(!r) return;
+  state.records = state.records.filter(function(x){return x.id!==id;});
+  state.deleted.push({id:id, ts:Date.now()});
+  touch(); saveLocal(); if(!silent) toast('已删除');
+  render(); autoPush();
+}
+function confirmDel(id, name){
+  showConfirm('🗑️','删除这条房源？','「'+(name||'该房源')+'」将被删除，其它设备同步后同样会移除。', function(){ delRecord(id); });
+}
+function delFromDetail(){
+  var id = curDetailId; closeDetail();
+  confirmDel(id, (state.records.find(function(x){return x.id===id;})||{}).name);
+}
+function editFromDetail(){ var id=curDetailId; closeDetail(); openForm(id); }
+
+/* ---------- 渲染 ---------- */
+function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function uid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function stars(n){
+  var s=''; for(var i=1;i<=5;i++) s += '<span class="'+(i<=n?'':'off')+'">★</span>'; return '<span class="stars">'+s+'</span>';
+}
+function unitPrice(r){ return (r.price!=null && r.area) ? Math.round(r.price*10000/r.area) : null; }
+function fmtDate(ts){ if(!ts) return ''; var d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function collectTags(){
+  var map = {};
+  state.records.forEach(function(r){ (r.tags||[]).forEach(function(t){ map[t]=(map[t]||0)+1; }); });
+  return Object.keys(map).sort(function(a,b){ return map[b]-map[a]; });
+}
+var curTag = '';
+function renderTagBar(){
+  var bar = document.getElementById('tagBar');
+  var tags = collectTags();
+  var html = '<span class="tag'+(curTag===''?' on':'')+'" onclick="toggleTag(\'\')">全部</span>';
+  tags.forEach(function(t){ html += '<span class="tag'+(curTag===t?' on':'')+'" onclick="toggleTag(\''+esc(t).replace(/'/g,"\\'")+'\')">'+esc(t)+'</span>'; });
+  bar.innerHTML = html;
+}
+function toggleTag(t){ curTag = (curTag===t)?'':t; render(); }
+function filtered(){
+  var kw = (document.getElementById('kw').value||'').trim().toLowerCase();
+  var sort = document.getElementById('sort').value;
+  var arr = state.records.filter(function(r){
+    if(curTag && (r.tags||[]).indexOf(curTag)<0) return false;
+    if(!kw) return true;
+    var hay = [r.name,r.src,(r.tags||[]).join(' '),r.good,r.bad,r.note,r.floor].join(' ').toLowerCase();
+    return hay.indexOf(kw)>=0;
+  });
+  var cmp = {
+    new: function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); },
+    price_asc: function(a,b){ return (a.price??1e9)-(b.price??1e9); },
+    price_desc: function(a,b){ return (b.price??0)-(a.price??0); },
+    unit_desc: function(a,b){ return (unitPrice(b)??0)-(unitPrice(a)??0); },
+    score_desc: function(a,b){ return (b.rate||0)-(a.rate||0); }
+  }[sort] || cmp.new;
+  return arr.sort(cmp);
+}
+function render(){
+  renderTagBar();
+  var arr = filtered();
+  var list = document.getElementById('list');
+  document.getElementById('empty').style.display = arr.length ? 'none' : 'block';
+  list.innerHTML = arr.map(cardHtml).join('');
+  renderStats();
+}
+function cardHtml(r){
+  var up = unitPrice(r);
+  var chips = '';
+  if(r.area) chips += '<span class="chip">'+esc(r.area)+'㎡</span>';
+  if(r.layout) chips += '<span class="chip b">'+esc(r.layout)+'</span>';
+  if(r.floor) chips += '<span class="chip">'+esc(r.floor)+'</span>';
+  if(r.face) chips += '<span class="chip">'+esc(r.face)+'</span>';
+  if(r.deco) chips += '<span class="chip a">'+esc(r.deco)+'</span>';
+  var tags = (r.tags||[]).map(function(t){ return '<span class="chip g">'+esc(t)+'</span>'; }).join('');
+  var pc = '';
+  if(r.good) pc += '<div class="pc good"><b>优</b><p>'+esc(r.good)+'</p></div>';
+  if(r.bad)  pc += '<div class="pc bad"><b>缺</b><p>'+esc(r.bad)+'</p></div>';
+  var link = r.link ? '<a class="icobtn" title="打开链接" target="_blank" rel="noopener" onclick="event.stopPropagation()" href="'+esc(r.link)+'"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></a>' : '';
+  return '<div class="hcard" onclick="openDetail(\''+r.id+'\')">'
+    + '<div class="row1"><div class="hname">' + (r.src?'<span class="src">'+esc(r.src)+'</span>':'') + esc(r.name) + '</div>'
+    + '<div class="hops">' + link
+    + '<button class="icobtn" title="编辑" onclick="event.stopPropagation();openForm(\''+r.id+'\')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'
+    + '<button class="icobtn del" title="删除" onclick="event.stopPropagation();confirmDel(\''+r.id+'\',\''+esc(r.name).replace(/'/g,"\\'")+'\')"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>'
+    + '</div></div>'
+    + '<div class="price">' + (r.price!=null ? esc(String(r.price))+' <small>万</small>' : '<span style="font-size:14px;font-weight:600;color:var(--mut)">未填总价</span>') + (up?' <span class="unit">· '+up.toLocaleString()+'元/㎡</span>':'') + '</div>'
+    + (chips?'<div class="chips">'+chips+'</div>':'')
+    + (tags?'<div class="chips">'+tags+'</div>':'')
+    + (r.rate?stars(r.rate):'')
+    + pc
+    + '<div class="ftime">'+(r.date?('记录于 '+esc(r.date)):'')+(r.updatedAt?' · 更新 '+fmtDate(r.updatedAt):'')+'</div>'
+    + '</div>';
+}
+function renderStats(){
+  var n = state.records.length;
+  document.getElementById('stCount').innerHTML = n + ' <small>套</small>';
+  var ps = state.records.filter(function(r){return r.price!=null;});
+  var avgP = ps.length ? ps.reduce(function(s,r){return s+r.price;},0)/ps.length : null;
+  document.getElementById('stPrice').innerHTML = avgP!=null ? Math.round(avgP*10)/10+' <small>万</small>' : '-- <small>万</small>';
+  var us = state.records.filter(function(r){return unitPrice(r)!=null;});
+  var avgU = us.length ? us.reduce(function(s,r){return s+unitPrice(r);},0)/us.length : null;
+  document.getElementById('stUnit').innerHTML = avgU!=null ? Math.round(avgU).toLocaleString()+' <small>元/㎡</small>' : '-- <small>元/㎡</small>';
+  var rs = state.records.filter(function(r){return r.rate;});
+  var avgR = rs.length ? rs.reduce(function(s,r){return s+r.rate;},0)/rs.length : null;
+  document.getElementById('stScore').innerHTML = avgR!=null ? Math.round(avgR*10)/10+' <small>/5</small>' : '-- <small>/5</small>';
+}
+
+/* ---------- 详情 ---------- */
+function openDetail(id){
+  var r = state.records.find(function(x){return x.id===id;});
+  if(!r) return; curDetailId = id;
+  var up = unitPrice(r);
+  function row(k,v,cls){ return '<div class="ditem'+(cls?' '+cls:'')+'"><div class="k">'+k+'</div><div class="v'+(cls?' '+cls:'')+'">'+v+'</div></div>'; }
+  var tags = (r.tags||[]).map(function(t){ return '<span class="chip g" style="margin-right:5px">'+esc(t)+'</span>'; }).join('') || '—';
+  var html = '<div class="detail-grid">'
+    + row('房源名称', esc(r.name), 'full')
+    + row('总价', r.price!=null ? '<span class="warn">'+esc(String(r.price))+' 万元</span>' : '未填')
+    + row('单价', up ? up.toLocaleString()+' 元/㎡' : '—')
+    + row('面积', r.area?esc(String(r.area))+' ㎡':'—')
+    + row('户型', r.layout||'—')
+    + row('楼层', r.floor||'—')
+    + row('朝向', r.face||'—')
+    + row('装修', r.deco||'—')
+    + row('来源', r.src||'—')
+    + row('记录日期', r.date||'—')
+    + row('评分', r.rate?stars(r.rate):'—')
+    + row('标签', tags, 'full')
+    + row('原始链接', r.link?'<a class="dlink" href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.link)+' ↗</a>':'—','full')
+    + row('优点', r.good?esc(r.good).replace(/\n/g,'<br>'):'—','full')
+    + row('缺点', r.bad?esc(r.bad).replace(/\n/g,'<br>'):'—','full')
+    + row('备注', r.note?esc(r.note).replace(/\n/g,'<br>'):'—','full')
+    + '</div>';
+  document.getElementById('detailBody').innerHTML = html;
+  show('detailMask');
+}
+function closeDetail(){ hide('detailMask'); curDetailId=null; }
+
+/* ---------- 评分控件 ---------- */
+document.getElementById('f_rate').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  curRate = parseInt(b.getAttribute('data-v'),10);
+  renderRate();
+});
+function renderRate(){
+  document.querySelectorAll('#f_rate button').forEach(function(b){
+    b.classList.toggle('on', parseInt(b.getAttribute('data-v'),10)<=curRate);
+  });
+}
+document.querySelectorAll('#f_tags label').forEach(function(l){
+  l.addEventListener('click', function(){ l.classList.toggle('on'); });
+});
+
+/* ---------- 导出 / 导入 ---------- */
+function exportData(){
+  var data = { app:APP.name, version:APP.version, exportedAt:new Date().toISOString(),
+    records:state.records, deleted:state.deleted };
+  var blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '房览速记_备份_' + todayStr() + '.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast('已导出备份文件');
+}
+function importData(input){
+  var f = input.files[0]; if(!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    try{
+      var d = JSON.parse(rd.result);
+      if(!d.records || !d.records.length){ toast('文件中没有房源数据', true); input.value=''; return; }
+      var merged = mergeRemote({records:d.records, deleted:d.deleted||[], updatedAt:Date.now()});
+      var added = merged.records.length - state.records.filter(function(r){ return merged.records.some(function(m){return m.id===r.id;}); }).length;
+      state.records = merged.records; state.deleted = merged.deleted;
+      state.updatedAt = Date.now(); saveLocal(); render();
+      toast('导入完成，当前共 '+state.records.length+' 条');
+    }catch(e){ toast('导入失败：文件格式不正确', true); }
+    input.value='';
+  };
+  rd.readAsText(f);
+}
+
+/* ---------- GitHub 同步 ---------- */
+function syncCfg(){ return { owner:settings.owner, repo:settings.repo, branch:settings.branch, path:settings.path, token:settings.token }; }
+function ghUrl(cfg, path){
+  return 'https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+path.split('/').map(encodeURIComponent).join('/')+'?ref='+encodeURIComponent(cfg.branch);
+}
+function ghHeaders(cfg){
+  var h = { 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' };
+  if(cfg.token) h['Authorization'] = 'Bearer ' + cfg.token;
+  return h;
+}
+function b64Decode(s){
+  var bin = atob(s.replace(/\s/g,''));
+  var bytes = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  try{ return new TextDecoder('utf-8').decode(bytes); }catch(e){ return decodeURIComponent(escape(bin)); }
+}
+function mergeRemote(ds){
+  var map = {}, allDel = {};
+  (ds.records||[]).concat(state.records).forEach(function(r){
+    var ex = map[r.id];
+    if(!ex || (r.updatedAt||0) > (ex.updatedAt||0)) map[r.id] = r;
+  });
+  (ds.deleted||[]).concat(state.deleted).forEach(function(t){
+    var ex = allDel[t.id];
+    if(!ex || (t.ts||0) > (ex.ts||0)) allDel[t.id] = t;
+  });
+  var records = Object.keys(map).map(function(k){return map[k];}).filter(function(r){
+    var t = allDel[r.id];
+    return !(t && (t.ts||0) >= (r.updatedAt||0));
+  });
+  return { records:records, deleted:Object.keys(allDel).map(function(k){return allDel[k];}), updatedAt:Math.max(ds.updatedAt||0, state.updatedAt||0) };
+}
+function setBusy(txt){
+  var pill = document.getElementById('syncPill'), tx = document.getElementById('syncTxt');
+  pill.className = 'sync-pill busy'; tx.textContent = txt||'同步中…';
+}
+function setSyncOk(txt){
+  var pill = document.getElementById('syncPill'), tx = document.getElementById('syncTxt');
+  pill.className = 'sync-pill ok'; tx.textContent = txt||'已同步';
+}
+function setSyncErr(txt){
+  var pill = document.getElementById('syncPill'), tx = document.getElementById('syncTxt');
+  pill.className = 'sync-pill err'; tx.textContent = txt||'同步失败';
+}
+function updateSyncPill(){
+  var cfg = syncCfg();
+  if(!cfg.token){ setSyncErr('未配置令牌'); document.getElementById('syncBtn').disabled = false; return; }
+  if(settings.lastSync){ setSyncOk('上次 '+fmtDate(settings.lastSync)); }
+  else { setSyncOk('已配置，待同步'); }
+}
+function syncPayload(){
+  return { app:APP.name, version:APP.version, updatedAt:Date.now(), records:state.records, deleted:state.deleted };
+}
+function doSync(mode){
+  var cfg = syncCfg();
+  if(!cfg.token){ toast('请先在设置里配置 GitHub 令牌', true); openSettings(); return; }
+  if(!cfg.owner || !cfg.repo || !cfg.path){ toast('仓库信息不完整', true); openSettings(); return; }
+  setBusy('同步中…');
+  var p = mode==='push' ? pushRemote(cfg) : pullRemote(cfg);
+  p.then(function(res){
+    settings.lastSync = Date.now(); saveLocal();
+    setSyncOk('已同步 '+fmtDate(settings.lastSync));
+    render();
+    toast(res.msg);
+  }).catch(function(err){
+    setSyncErr('同步失败');
+    toast(err.message||'同步失败，请检查令牌与网络', true);
+  });
+}
+function pullRemote(cfg){
+  return fetch(ghUrl(cfg, cfg.path), { headers:ghHeaders(cfg) }).then(function(resp){
+    if(resp.status===404) return { empty:true };
+    if(!resp.ok) return resp.json().then(function(j){ throw new Error('拉取失败 HTTP '+resp.status+(j.message?'：'+j.message:'')); });
+    return resp.json();
+  }).then(function(meta){
+    if(meta.empty){
+      if(!state.records.length) return { msg:'远端无数据，已保持本地' };
+      return pushRemote(cfg).then(function(){ return { msg:'本地数据已上传' }; });
+    }
+    var remote = JSON.parse(b64Decode(meta.content));
+    var merged = mergeRemote(remote);
+    var changed = merged.records.length !== state.records.length || merged.updatedAt > state.updatedAt;
+    state.records = merged.records; state.deleted = merged.deleted;
+    state.updatedAt = merged.updatedAt; saveLocal();
+    if(changed) return pushRemote(cfg).then(function(){ return { msg:'已合并远端数据并同步，共 '+state.records.length+' 条' }; });
+    return { msg:'已是最新，共 '+state.records.length+' 条' };
+  });
+}
+function pushRemote(cfg){
+  var data = syncPayload();
+  var body = JSON.stringify(data);
+  var url = 'https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+cfg.path.split('/').map(encodeURIComponent).join('/');
+  var fetchRemote = function(){
+    return fetch(url, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); });
+  };
+  return fetchRemote().then(function(meta){
+    var payload = { message:'房览速记 同步 '+new Date().toLocaleString('zh-CN'), branch:cfg.branch,
+      content: btoa(unescape(encodeURIComponent(body))) };
+    if(meta && meta.sha) payload.sha = meta.sha;
+    return fetch(url, { method:'PUT', headers:ghHeaders(cfg), body:JSON.stringify(payload) }).then(function(r){
+      if(!r.ok) return r.json().then(function(j){ throw new Error('推送失败 HTTP '+r.status+(j.message?'：'+j.message:'')); });
+      return r.json();
+    });
+  }).then(function(){ return { msg:'已推送，数据全端同步' }; });
+}
+var pushTimer = null;
+function autoPush(){
+  if(!settings.auto || !settings.token) return;
+  clearTimeout(pushTimer);
+  setBusy('待同步…');
+  pushTimer = setTimeout(function(){
+    doSync('push');
+  }, 900);
+}
+function testSync(){
+  var cfg = syncCfg();
+  if(!cfg.token){ toast('请先填写令牌', true); return; }
+  setBusy('测试中…');
+  fetch('https://api.github.com/user', { headers:ghHeaders(cfg) }).then(function(r){
+    if(!r.ok) throw new Error('令牌无效（HTTP '+r.status+'）');
+    return r.json();
+  }).then(function(u){
+    setSyncOk('连接成功');
+    toast('连接成功：'+u.login);
+  }).catch(function(e){ setSyncErr('测试失败'); toast(e.message||'连接失败', true); });
+}
+
+/* ---------- 设置 ---------- */
+function fillSetForm(){
+  document.getElementById('s_repo').value = settings.owner+'/'+settings.repo;
+  document.getElementById('s_branch').value = settings.branch;
+  document.getElementById('s_path').value = settings.path;
+  document.getElementById('s_token').value = settings.token||'';
+  document.getElementById('s_auto').checked = !!settings.auto;
+}
+function saveSettings(doSyncNow){
+  var rp = document.getElementById('s_repo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
+  var parts = rp.split('/');
+  if(parts.length!==2 || !parts[0] || !parts[1]){ toast('仓库格式应为 owner/repo', true); return; }
+  settings.owner = parts[0]; settings.repo = parts[1];
+  settings.branch = document.getElementById('s_branch').value.trim() || 'main';
+  settings.path = document.getElementById('s_path').value.trim() || 'fanglian-data.json';
+  settings.token = document.getElementById('s_token').value.trim();
+  settings.auto = document.getElementById('s_auto').checked;
+  saveLocal(); updateSyncPill();
+  closeSettings();
+  if(doSyncNow){ if(!settings.token){ toast('已保存，未配置令牌', true); openSettings(); return; } doSync('pull'); }
+  else toast('设置已保存');
+}
+function openSettings(){ fillSetForm(); show('setMask'); }
+function closeSettings(){ hide('setMask'); }
+
+/* ---------- 危险操作 ---------- */
+function clearAll(){
+  showConfirm('⚠️','清空全部数据？','本机全部房源记录将被清空（GitHub 上的数据不受影响）。此操作不可恢复，建议先导出备份。', function(){
+    state.records=[]; state.deleted=[]; state.updatedAt=Date.now(); saveLocal(); render();
+    toast('已清空本地数据'); autoPush();
+  });
+}
+
+/* ---------- 通用 ---------- */
+function show(id){ document.getElementById(id).classList.add('show'); }
+function hide(id){ document.getElementById(id).classList.remove('show'); }
+var toastTimer=null;
+function toast(msg, isErr){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className = 'show'+(isErr?' err':'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ t.className=''; }, 2600);
+}
+function showConfirm(icon,title,msg,cb){
+  document.getElementById('cfIcon').textContent = icon||'⚠️';
+  document.getElementById('cfTitle').textContent = title||'确认操作？';
+  document.getElementById('cfMsg').textContent = msg||'';
+  confirmCb = cb;
+  show('confirmMask');
+}
+document.getElementById('cfOk').addEventListener('click', function(){ var cb=confirmCb; closeConfirm(); if(cb) cb(); });
+function closeConfirm(){ hide('confirmMask'); confirmCb=null; }
+document.querySelectorAll('.mask').forEach(function(m){
+  m.addEventListener('click', function(e){
+    if(e.target===m && m.id!=='confirmMask') m.classList.remove('show');
+  });
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape') document.querySelectorAll('.mask.show').forEach(function(m){ m.classList.remove('show'); });
+});
+
+loadAll();
+</script>
+</body>
+</html>
