@@ -14,10 +14,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;padding-bottom:40px}
+body{background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;padding-bottom:40px}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font:inherit;color:var(--txt)}
 a{color:var(--pri2);text-decoration:none}
+::placeholder{font-family:inherit}
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
 
@@ -216,7 +217,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
     <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M3 11.5 12 4l9 7.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v10h13V10" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20v-5h4v5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <div class="tt">
       <h1>房览速记</h1>
-      <p>抖音看房随手记 · 手机/电脑双端同步</p>
+      <p>抖音 / 安居客等看房随手记 · 手机/电脑双端同步</p>
     </div>
     <div class="hd-btns">
       <span class="sync-pill" id="syncPill" title="GitHub 同步状态"><span class="dot"></span><span id="syncTxt">未连接同步</span></span>
@@ -257,11 +258,11 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   <div class="empty" id="empty" style="display:none">
     <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg>
     <h3>还没有收录房源</h3>
-    <p style="font-size:13px">点击右上角「＋ 添加房源」，把抖音刷到的房源、价格、优缺点随手记下来。<br>配置 GitHub 同步后，手机和电脑数据自动互通。</p>
+    <p style="font-size:13px">点击右上角「＋ 添加房源」，把抖音、安居客等来源平台刷到的房源、价格、优缺点随手记下来。<br>配置 GitHub 同步后，手机和电脑数据自动互通。</p>
   </div>
 </main>
 
-<footer>房览速记 v1.0.5 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.6 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -453,13 +454,13 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.5 =================
+/* ================= 房览速记 v1.0.6 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
-         点赞/踩功能（点赞多的排前面）
+         点赞/踩功能（点赞多的排前面）、全站苹果字体
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.5' };
+var APP = { name:'房览速记', version:'1.0.6' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
