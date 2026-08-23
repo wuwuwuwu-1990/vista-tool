@@ -231,7 +231,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.0 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.1 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -375,6 +375,15 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
         </div>
       </div>
       <div class="set-group">
+        <h3>📱 配置导入导出 <span class="tag2">换设备免手输令牌</span></h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <button class="btn btn-ghost" onclick="exportCfg()">复制当前配置</button>
+          <button class="btn btn-ghost" onclick="importCfg()">导入配置</button>
+        </div>
+        <textarea id="cfgBox" placeholder="粘贴配置文本到此处，然后点「导入配置」" style="width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:9px;min-height:64px;resize:vertical;font-size:12.5px"></textarea>
+        <div class="hint" style="margin-top:10px">在已配置好的设备上点「复制当前配置」，把复制的内容通过微信/QQ 发到另一台设备，粘贴到上方并「导入配置」即可完成同步设置（含令牌，请勿发给他人）。导入后自动保存并立即同步。</div>
+      </div>
+      <div class="set-group">
         <h3>💾 数据备份</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="exportData()">导出 JSON 备份</button>
@@ -417,9 +426,10 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.0' };
+var APP = { name:'房览速记', version:'1.0.1' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
+var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
 
 var state = { records:[], deleted:[], updatedAt:0 };
 var settings = Object.assign({}, DEFAULT_SET);
@@ -856,6 +866,46 @@ function saveSettings(doSyncNow){
 }
 function openSettings(){ fillSetForm(); show('setMask'); }
 function closeSettings(){ hide('setMask'); }
+
+/* ---------- 配置导入导出（换设备免手输令牌） ---------- */
+function exportCfg(){
+  var cfg = { v:1, owner:settings.owner, repo:settings.repo, branch:settings.branch, path:settings.path, auto:!!settings.auto, token:settings.token||'' };
+  var text = CFG_PREFIX + JSON.stringify(cfg);
+  var done = function(){ toast('配置已复制，可粘贴到另一台设备导入'); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){
+      promptBoxFallback(text); done();
+    });
+  } else {
+    promptBoxFallback(text); done();
+  }
+}
+function promptBoxFallback(text){
+  var box = document.getElementById('cfgBox');
+  box.value = text;
+  box.focus(); box.select();
+}
+function importCfg(){
+  var raw = (document.getElementById('cfgBox').value||'').trim();
+  if(!raw){ toast('请先粘贴配置文本', true); return; }
+  var json = raw;
+  if(json.indexOf(CFG_PREFIX) === 0) json = json.slice(CFG_PREFIX.length);
+  var cfg;
+  try{ cfg = JSON.parse(json); }catch(e){ toast('配置格式不正确', true); return; }
+  if(!cfg || cfg.v !== 1 || !cfg.owner || !cfg.repo){ toast('配置内容无效', true); return; }
+  settings.owner = String(cfg.owner); settings.repo = String(cfg.repo);
+  settings.branch = String(cfg.branch || 'main');
+  settings.path = String(cfg.path || 'fanglian-data.json');
+  settings.auto = !!cfg.auto;
+  settings.token = String(cfg.token || '');
+  saveLocal(); fillSetForm(); updateSyncPill();
+  document.getElementById('cfgBox').value = '';
+  if(settings.token){
+    closeSettings(); doSync('pull');
+  } else {
+    toast('配置已导入（未含令牌，请手动填写令牌）');
+  }
+}
 
 /* ---------- 危险操作 ---------- */
 function clearAll(){
