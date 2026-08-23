@@ -231,7 +231,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.2 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.3 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -422,12 +422,12 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.2 =================
+/* ================= 房览速记 v1.0.3 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
-         配置复制/粘贴导入（换设备免手输令牌）、读写权限检测提示
+         配置复制/粘贴导入（换设备免手输令牌）、连接测试（只读检测，不再产生提交）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.2' };
+var APP = { name:'房览速记', version:'1.0.3' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -839,30 +839,24 @@ function testSync(){
   var cfg = syncCfg();
   if(!cfg.token){ toast('请先填写令牌', true); return; }
   setBusy('测试中…');
-  var putUrl = 'https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+cfg.path.split('/').map(encodeURIComponent).join('/');
+  // 只读检测（不写入仓库、不产生提交）：身份 + 数据文件读取
+  var readUrl = ghUrl(cfg, cfg.path);
   fetch('https://api.github.com/user', { headers:ghHeaders(cfg) })
   .then(function(r){
     if(!r.ok) throw new Error('令牌无效（HTTP '+r.status+'）');
     return r.json();
   })
   .then(function(u){
-    // 读权限检测：读取数据文件（不存在视为正常，稍后创建）
-    return fetch(putUrl, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); }).then(function(meta){
-      // 写权限检测：文件存在则原样写回（不改数据），不存在则创建空数据集
-      var data = (meta && meta.sha)
-        ? { message:'房览速记 连接测试（内容未变）', branch:cfg.branch, sha:meta.sha, content:meta.content }
-        : { message:'房览速记 初始化数据文件', branch:cfg.branch,
-            content: btoa(unescape(encodeURIComponent(JSON.stringify({app:APP.name, version:APP.version, updatedAt:0, records:[], deleted:[]})))) };
-      return fetch(putUrl, { method:'PUT', headers:ghHeaders(cfg), body:JSON.stringify(data) }).then(function(r){
-        if(r.status===403) throw new Error('令牌只有读权限！请到 GitHub 令牌设置把 Contents 权限改为 Read and write');
-        if(!r.ok) throw new Error('写入测试失败（HTTP '+r.status+'）');
-        return u.login;
-      });
+    return fetch(readUrl, { headers:ghHeaders(cfg) }).then(function(r){
+      if(r.status===403) throw new Error('没有读取权限：请检查令牌的 Repository access 是否选择了目标仓库');
+      if(r.status===404) return u.login;                       // 数据文件还不存在 = 正常
+      if(!r.ok) throw new Error('读取测试失败（HTTP '+r.status+'）');
+      return u.login;
     });
   })
   .then(function(login){
-    setSyncOk('读写正常');
-    toast('连接成功，读写权限均正常：'+login);
+    setSyncOk('连接正常');
+    toast('连接成功，读取正常：'+login+'。写入权限在首次同步时自动验证');
   })
   .catch(function(e){ setSyncErr('测试失败'); toast(e.message||'连接失败', true); });
 }
