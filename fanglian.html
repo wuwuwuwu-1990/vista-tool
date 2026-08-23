@@ -100,6 +100,14 @@ main{max-width:1080px;margin:0 auto;padding:14px 16px}
 .pc.bad b{color:var(--red)}
 .pc p{white-space:pre-wrap;word-break:break-word}
 .ftime{font-size:11px;color:var(--mut);margin-top:auto}
+.hfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:4px}
+.hfoot .vbox{display:flex;gap:6px}
+.vbtn{display:flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:.15s}
+.vbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vbtn.up:hover{color:#16a34a;border-color:#86efac}
+.vbtn.up.on{color:#fff;background:#16a34a;border-color:#16a34a}
+.vbtn.down:hover{color:#dc2626;border-color:#fca5a5}
+.vbtn.down.on{color:#fff;background:#dc2626;border-color:#dc2626}
 .empty{text-align:center;padding:70px 20px;color:var(--mut)}
 .empty svg{width:64px;height:64px;stroke:#cbd5e1;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
 .empty h3{font-size:16px;color:var(--sub);margin-bottom:6px;font-weight:600}
@@ -177,6 +185,27 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   .hd{padding:10px 12px}
   .tt h1{font-size:16px}
   .btn{padding:7px 11px;font-size:12.5px}
+  /* 手机端：标题与操作按钮分行 */
+  .hd .tt{order:1;min-width:0}
+  .hd .logo{order:0}
+  .hd .hd-btns{order:2;width:100%;justify-content:stretch;flex-wrap:nowrap}
+  .hd .hd-btns .btn{flex:1;justify-content:center}
+  .hd .hd-btns .btn-pri{flex:1.6}
+  .sync-pill{display:none}
+  /* 搜索与排序：搜索占满一行 */
+  .toolbar{flex-wrap:wrap}
+  .search{min-width:100%}
+  .sort-wrap{width:100%}
+  .sort-wrap select{width:100%}
+  /* 卡片点赞按钮加大点击区 */
+  .vbtn{padding:5px 13px;font-size:13px}
+  .vbtn svg{width:16px;height:16px}
+  /* 弹窗贴近屏幕边缘 */
+  .mask{padding:0}
+  .modal{border-radius:0;max-width:100%;min-height:100vh}
+  .m-body{max-height:none}
+  .m-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+  .stats .stat{min-width:calc(50% - 5px)}
 }
 </style>
 </head>
@@ -213,6 +242,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
     </div>
     <div class="sort-wrap">
       <select id="sort" onchange="render()">
+        <option value="hot" selected>点赞优先</option>
         <option value="new">最新收录</option>
         <option value="price_asc">总价 ↑</option>
         <option value="price_desc">总价 ↓</option>
@@ -231,7 +261,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.4 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.5 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -260,15 +290,19 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
           </select>
         </div>
         <div class="fitem">
-          <label>楼层</label>
-          <input type="text" id="f_floor" placeholder="例：12/33层 或 中楼层" maxlength="20">
+          <label>区域板块</label>
+          <input type="text" id="f_area_block" placeholder="例：渝北区·照母山" maxlength="50">
         </div>
         <div class="fitem">
-          <label>朝向</label>
-          <select id="f_face">
+          <label>建成年代</label>
+          <input type="number" id="f_build_year" min="1990" max="2030" placeholder="例：2018">
+        </div>
+        <div class="fitem">
+          <label>建筑类型</label>
+          <select id="f_build_type">
             <option value="">请选择</option>
-            <option>南</option><option>东南</option><option>东</option><option>西南</option>
-            <option>南北通透</option><option>西</option><option>北</option><option>东北</option><option>西北</option><option>其他</option>
+            <option>洋房</option><option>小高层</option><option>高层</option><option>超高层</option>
+            <option>别墅</option><option>公寓</option><option>其他</option>
           </select>
         </div>
         <div class="fitem">
@@ -284,10 +318,6 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
             <option value="抖音">抖音</option><option value="贝壳">贝壳</option><option value="安居客">安居客</option>
             <option value="链家">链家</option><option value="中介推荐">中介推荐</option><option value="其他">其他</option>
           </select>
-        </div>
-        <div class="fitem">
-          <label>原始链接（抖音/房源页）</label>
-          <input type="url" id="f_link" placeholder="https://…" maxlength="300">
         </div>
         <div class="fitem">
           <label>记录日期</label>
@@ -423,12 +453,13 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.4 =================
+/* ================= 房览速记 v1.0.5 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
-         配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）
+         配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
+         点赞/踩功能（点赞多的排前面）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.4' };
+var APP = { name:'房览速记', version:'1.0.5' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -468,11 +499,11 @@ function readForm(){
     price: parseFloat(document.getElementById('f_price').value) || null,
     area: parseFloat(document.getElementById('f_area').value) || null,
     layout: document.getElementById('f_layout').value,
-    floor: document.getElementById('f_floor').value.trim(),
-    face: document.getElementById('f_face').value,
+    area_block: document.getElementById('f_area_block').value.trim(),
+    build_year: parseInt(document.getElementById('f_build_year').value) || null,
+    build_type: document.getElementById('f_build_type').value,
     deco: document.getElementById('f_deco').value,
     src: document.getElementById('f_src').value,
-    link: document.getElementById('f_link').value.trim(),
     date: document.getElementById('f_date').value || todayStr(),
     tags: tags,
     rate: curRate,
@@ -498,8 +529,8 @@ function saveForm(){
 function openForm(id){
   curEditId = id||null; curRate = 0;
   document.getElementById('formTitle').textContent = id ? '编辑房源' : '添加房源';
-  ['f_name','f_price','f_area','f_floor','f_link','f_tag_custom','f_good','f_bad','f_note'].forEach(function(i){ document.getElementById(i).value=''; });
-  ['f_layout','f_face','f_deco'].forEach(function(i){ document.getElementById(i).value=''; });
+  ['f_name','f_price','f_area','f_area_block','f_build_year','f_tag_custom','f_good','f_bad','f_note'].forEach(function(i){ document.getElementById(i).value=''; });
+  ['f_layout','f_build_type','f_deco'].forEach(function(i){ document.getElementById(i).value=''; });
   document.getElementById('f_src').value = '抖音';
   document.getElementById('f_date').value = todayStr();
   document.querySelectorAll('#f_tags input').forEach(function(i){ i.checked=false; });
@@ -512,11 +543,11 @@ function openForm(id){
     if(r.price!=null) document.getElementById('f_price').value = r.price;
     if(r.area!=null) document.getElementById('f_area').value = r.area;
     document.getElementById('f_layout').value = r.layout||'';
-    document.getElementById('f_floor').value = r.floor||'';
-    document.getElementById('f_face').value = r.face||'';
+    document.getElementById('f_area_block').value = r.area_block||'';
+    if(r.build_year!=null) document.getElementById('f_build_year').value = r.build_year;
+    document.getElementById('f_build_type').value = r.build_type||'';
     document.getElementById('f_deco').value = r.deco||'';
     document.getElementById('f_src').value = r.src||'抖音';
-    document.getElementById('f_link').value = r.link||'';
     document.getElementById('f_date').value = r.date||todayStr();
     (r.tags||[]).forEach(function(t){
       var inp = document.querySelector('#f_tags input[value="'+CSS.escape(t)+'"]');
@@ -551,6 +582,21 @@ function delFromDetail(){
 }
 function editFromDetail(){ var id=curDetailId; closeDetail(); openForm(id); }
 
+/* ---------- 点赞/踩 ---------- */
+function vote(id, dir){
+  var r = state.records.find(function(x){return x.id===id;});
+  if(!r) return;
+  r.up = r.up||0; r.down = r.down||0;
+  if(dir===1){ // 赞
+    if(r.myUp){ r.up = Math.max(0, r.up-1); r.myUp = 0; }
+    else{ if(r.myDown){ r.down = Math.max(0, r.down-1); } r.up += 1; r.myUp = 1; r.myDown = 0; }
+  }else{ // 踩
+    if(r.myDown){ r.down = Math.max(0, r.down-1); r.myDown = 0; }
+    else{ if(r.myUp){ r.up = Math.max(0, r.up-1); } r.down += 1; r.myDown = 1; r.myUp = 0; }
+  }
+  r.updatedAt = Date.now(); touch(); saveLocal(); render(); autoPush();
+}
+
 /* ---------- 渲染 ---------- */
 function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function uid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
@@ -581,10 +627,11 @@ function filtered(){
   var arr = state.records.filter(function(r){
     if(curTag && (r.tags||[]).indexOf(curTag)<0) return false;
     if(!kw) return true;
-    var hay = [r.name,r.src,(r.tags||[]).join(' '),r.good,r.bad,r.note,r.floor].join(' ').toLowerCase();
+    var hay = [r.name,r.src,(r.tags||[]).join(' '),r.good,r.bad,r.note,r.area_block,r.build_type,r.build_year].join(' ').toLowerCase();
     return hay.indexOf(kw)>=0;
   });
   var cmp = {
+    hot: function(a,b){ var d=(b.up||0)-(a.up||0); return d!==0?d:((b.updatedAt||0)-(a.updatedAt||0)); },
     new: function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); },
     price_asc: function(a,b){ return (a.price??1e9)-(b.price??1e9); },
     price_desc: function(a,b){ return (b.price??0)-(a.price??0); },
@@ -606,17 +653,18 @@ function cardHtml(r){
   var chips = '';
   if(r.area) chips += '<span class="chip">'+esc(r.area)+'㎡</span>';
   if(r.layout) chips += '<span class="chip b">'+esc(r.layout)+'</span>';
-  if(r.floor) chips += '<span class="chip">'+esc(r.floor)+'</span>';
-  if(r.face) chips += '<span class="chip">'+esc(r.face)+'</span>';
+  if(r.area_block) chips += '<span class="chip">'+esc(r.area_block)+'</span>';
+  if(r.build_year) chips += '<span class="chip">'+esc(r.build_year)+'年</span>';
+  if(r.build_type) chips += '<span class="chip a">'+esc(r.build_type)+'</span>';
   if(r.deco) chips += '<span class="chip a">'+esc(r.deco)+'</span>';
   var tags = (r.tags||[]).map(function(t){ return '<span class="chip g">'+esc(t)+'</span>'; }).join('');
   var pc = '';
   if(r.good) pc += '<div class="pc good"><b>优</b><p>'+esc(r.good)+'</p></div>';
   if(r.bad)  pc += '<div class="pc bad"><b>缺</b><p>'+esc(r.bad)+'</p></div>';
-  var link = r.link ? '<a class="icobtn" title="打开链接" target="_blank" rel="noopener" onclick="event.stopPropagation()" href="'+esc(r.link)+'"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></a>' : '';
+  var upN = r.up||0, dnN = r.down||0;
   return '<div class="hcard" onclick="openDetail(\''+r.id+'\')">'
     + '<div class="row1"><div class="hname">' + (r.src?'<span class="src">'+esc(r.src)+'</span>':'') + esc(r.name) + '</div>'
-    + '<div class="hops">' + link
+    + '<div class="hops">'
     + '<button class="icobtn" title="编辑" onclick="event.stopPropagation();openForm(\''+r.id+'\')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'
     + '<button class="icobtn del" title="删除" onclick="event.stopPropagation();confirmDel(\''+r.id+'\',\''+esc(r.name).replace(/'/g,"\\'")+'\')"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>'
     + '</div></div>'
@@ -625,7 +673,13 @@ function cardHtml(r){
     + (tags?'<div class="chips">'+tags+'</div>':'')
     + (r.rate?stars(r.rate):'')
     + pc
+    + '<div class="hfoot">'
+    + '<div class="vbox">'
+    + '<button class="vbtn up'+(r.myUp?' on':'')+'" title="点赞" onclick="event.stopPropagation();vote(\''+r.id+'\',1)"><svg viewBox="0 0 24 24"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3z"/><path d="M7 10l4.5-7a2 2 0 0 1 2 2.2L12.5 9H20a2 2 0 0 1 2 2.4l-1.8 8A2 2 0 0 1 18.3 21H7"/></svg><span>'+(upN||'')+'</span></button>'
+    + '<button class="vbtn down'+(r.myDown?' on':'')+'" title="踩" onclick="event.stopPropagation();vote(\''+r.id+'\',-1)"><svg viewBox="0 0 24 24"><path d="M17 14V3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3z"/><path d="M17 14l-4.5 7a2 2 0 0 1-2-2.2L11.5 15H4a2 2 0 0 1-2-2.4l1.8-8A2 2 0 0 1 5.7 3H17"/></svg><span>'+(dnN||'')+'</span></button>'
+    + '</div>'
     + '<div class="ftime">'+(r.date?('记录于 '+esc(r.date)):'')+(r.updatedAt?' · 更新 '+fmtDate(r.updatedAt):'')+'</div>'
+    + '</div>'
     + '</div>';
 }
 function renderStats(){
@@ -655,14 +709,14 @@ function openDetail(id){
     + row('单价', up ? up.toLocaleString()+' 元/㎡' : '—')
     + row('面积', r.area?esc(String(r.area))+' ㎡':'—')
     + row('户型', r.layout||'—')
-    + row('楼层', r.floor||'—')
-    + row('朝向', r.face||'—')
+    + row('区域板块', r.area_block||'—')
+    + row('建成年代', r.build_year||'—')
+    + row('建筑类型', r.build_type||'—')
     + row('装修', r.deco||'—')
     + row('来源', r.src||'—')
     + row('记录日期', r.date||'—')
     + row('评分', r.rate?stars(r.rate):'—')
     + row('标签', tags, 'full')
-    + row('原始链接', r.link?'<a class="dlink" href="'+esc(r.link)+'" target="_blank" rel="noopener">'+esc(r.link)+' ↗</a>':'—','full')
     + row('优点', r.good?esc(r.good).replace(/\n/g,'<br>'):'—','full')
     + row('缺点', r.bad?esc(r.bad).replace(/\n/g,'<br>'):'—','full')
     + row('备注', r.note?esc(r.note).replace(/\n/g,'<br>'):'—','full')
