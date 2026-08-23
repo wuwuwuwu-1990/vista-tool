@@ -217,7 +217,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
     <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M3 11.5 12 4l9 7.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v10h13V10" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20v-5h4v5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <div class="tt">
       <h1>房览速记</h1>
-      <p>抖音 / 安居客等看房随手记 · 手机/电脑双端同步</p>
+      <p>抖音 / 安居客等平台房源随手记 · 手机/电脑双端同步</p>
     </div>
     <div class="hd-btns">
       <span class="sync-pill" id="syncPill" title="GitHub 同步状态"><span class="dot"></span><span id="syncTxt">未连接同步</span></span>
@@ -262,7 +262,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.6 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.7 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -454,13 +454,13 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.6 =================
+/* ================= 房览速记 v1.0.7 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
-         点赞/踩功能（点赞多的排前面）、全站苹果字体
+         点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.6' };
+var APP = { name:'房览速记', version:'1.0.7' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -669,7 +669,7 @@ function cardHtml(r){
     + '<button class="icobtn" title="编辑" onclick="event.stopPropagation();openForm(\''+r.id+'\')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'
     + '<button class="icobtn del" title="删除" onclick="event.stopPropagation();confirmDel(\''+r.id+'\',\''+esc(r.name).replace(/'/g,"\\'")+'\')"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>'
     + '</div></div>'
-    + '<div class="price">' + (r.price!=null ? esc(String(r.price))+' <small>万</small>' : '<span style="font-size:14px;font-weight:600;color:var(--mut)">未填总价</span>') + (up?' <span class="unit">· '+up.toLocaleString()+'元/㎡</span>':'') + '</div>'
+    + '<div class="price">' + (r.price!=null ? esc(String(r.price))+' <small>万</small>' : '<span style="font-size:14px;font-weight:600;color:var(--mut)">未填总价</span>') + (up?' <span class="unit">· '+up+'元/㎡</span>':'') + '</div>'
     + (chips?'<div class="chips">'+chips+'</div>':'')
     + (tags?'<div class="chips">'+tags+'</div>':'')
     + (r.rate?stars(r.rate):'')
@@ -691,7 +691,7 @@ function renderStats(){
   document.getElementById('stPrice').innerHTML = avgP!=null ? Math.round(avgP*10)/10+' <small>万</small>' : '-- <small>万</small>';
   var us = state.records.filter(function(r){return unitPrice(r)!=null;});
   var avgU = us.length ? us.reduce(function(s,r){return s+unitPrice(r);},0)/us.length : null;
-  document.getElementById('stUnit').innerHTML = avgU!=null ? Math.round(avgU).toLocaleString()+' <small>元/㎡</small>' : '-- <small>元/㎡</small>';
+  document.getElementById('stUnit').innerHTML = avgU!=null ? Math.round(avgU)+' <small>元/㎡</small>' : '-- <small>元/㎡</small>';
   var rs = state.records.filter(function(r){return r.rate;});
   var avgR = rs.length ? rs.reduce(function(s,r){return s+r.rate;},0)/rs.length : null;
   document.getElementById('stScore').innerHTML = avgR!=null ? Math.round(avgR*10)/10+' <small>/5</small>' : '-- <small>/5</small>';
@@ -707,7 +707,7 @@ function openDetail(id){
   var html = '<div class="detail-grid">'
     + row('房源名称', esc(r.name), 'full')
     + row('总价', r.price!=null ? '<span class="warn">'+esc(String(r.price))+' 万元</span>' : '未填')
-    + row('单价', up ? up.toLocaleString()+' 元/㎡' : '—')
+    + row('单价', up ? up+' 元/㎡' : '—')
     + row('面积', r.area?esc(String(r.area))+' ㎡':'—')
     + row('户型', r.layout||'—')
     + row('区域板块', r.area_block||'—')
