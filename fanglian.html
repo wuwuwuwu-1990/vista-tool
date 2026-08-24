@@ -263,7 +263,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.11 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.12 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -448,15 +448,15 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.11 =================
+/* ================= 房览速记 v1.0.12 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
          点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符、
-         推送 409 自动重试合并（多设备同时写入不再报错）、两行精简卡、删除评分机制、
-         详情弹窗表格行式（高度压缩45%）
+         推送 409 自动重试合并、两行精简卡、删除评分机制、详情弹窗表格行式、
+         拉取改为纯读不反推（减少409冲突）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.11' };
+var APP = { name:'房览速记', version:'1.0.12' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -813,7 +813,12 @@ function doSync(mode){
     toast(res.msg);
   }).catch(function(err){
     setSyncErr('同步失败');
-    toast(err.message||'同步失败，请检查令牌与网络', true);
+    var msg = err && err.message ? err.message : '';
+    if(/Failed to fetch|NetworkError|HTTP 0|networkerror/i.test(msg)){
+      toast('网络连接失败：请检查手机/电脑能否访问 api.github.com（国内网络偶尔不稳定，稍后重试）', true);
+    }else{
+      toast(msg||'同步失败，请检查令牌与网络', true);
+    }
   });
 }
 function pullRemote(cfg){
@@ -828,10 +833,12 @@ function pullRemote(cfg){
     }
     var remote = JSON.parse(b64Decode(meta.content));
     var merged = mergeRemote(remote);
-    var changed = merged.records.length !== state.records.length || merged.updatedAt > state.updatedAt;
+    var before = state.records.length;
+    var changed = merged.records.length !== before || merged.updatedAt > state.updatedAt;
     state.records = merged.records; state.deleted = merged.deleted;
     state.updatedAt = merged.updatedAt; saveLocal();
-    if(changed) return pushRemote(cfg).then(function(){ return { msg:'已合并远端数据并同步，共 '+state.records.length+' 条' }; });
+    // v1.0.12：拉取只做合并，不再反推（避免与其它设备自动推送竞争产生 409）
+    if(changed) return { msg:'已合并其他设备的最新数据，共 '+state.records.length+' 条' };
     return { msg:'已是最新，共 '+state.records.length+' 条' };
   });
 }
