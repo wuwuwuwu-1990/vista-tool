@@ -140,13 +140,21 @@ main{max-width:1080px;margin:0 auto;padding:14px 16px}
 .cbx input{display:none}
 .cbx label.on{background:var(--pri-bg);border-color:var(--pri);color:var(--pri2)}
 
-/* 详情 */
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ditem{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.ditem .k{font-size:11.5px;color:var(--mut);margin-bottom:2px}
-.ditem .v{font-size:14px;font-weight:600;word-break:break-word}
-.ditem .v.warn{color:var(--red)}
-.ditem.full{grid-column:1/-1}
+/* 详情（表格行式） */
+.dtb{border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.dtb .drow{display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #eef2f7;font-size:13px}
+.dtb .drow:last-child{border-bottom:none}
+.dtb .drow:nth-child(even){background:#fafbfd}
+.dtb .drow .k{width:78px;flex:none;color:var(--mut);font-size:12px}
+.dtb .drow .v{font-weight:600;word-break:break-word}
+.dtb .drow .v.warn{color:var(--red)}
+.dtb .dchip{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:6px;background:var(--pri-bg);color:var(--pri2);margin-right:4px}
+.dtb .dup{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #eef2f7}
+.dtb .dup .col{padding:7px 12px;font-size:13px}
+.dtb .dup .col.l{border-right:1px solid #eef2f7}
+.dtb .dup .col b{color:var(--teal);font-size:11px;margin-right:4px}
+.dtb .dup .col.bd b{color:var(--red)}
+.dtb .dup .col p{color:var(--sub);line-height:1.55;font-size:12.5px;word-break:break-word}
 .dlink{display:inline-flex;align-items:center;gap:5px;color:var(--pri2);font-weight:600;font-size:13px;word-break:break-all}
 
 /* 设置 */
@@ -176,7 +184,6 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 @media (max-width:640px){
   .fgrid{grid-template-columns:1fr}
-  .detail-grid{grid-template-columns:1fr}
   .list{grid-template-columns:1fr}
   .stat{min-width:100px}
   .hd{padding:10px 12px}
@@ -256,7 +263,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.10 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.11 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -441,14 +448,15 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.10 =================
+/* ================= 房览速记 v1.0.11 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
          点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符、
-         推送 409 自动重试合并（多设备同时写入不再报错）、两行精简卡（密度+60%）、删除评分机制
+         推送 409 自动重试合并（多设备同时写入不再报错）、两行精简卡、删除评分机制、
+         详情弹窗表格行式（高度压缩45%）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.10' };
+var APP = { name:'房览速记', version:'1.0.11' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -675,29 +683,30 @@ function renderStats(){
   document.getElementById('stUnit').innerHTML = avgU!=null ? Math.round(avgU)+' <small>元/㎡</small>' : '-- <small>元/㎡</small>';
 }
 
-/* ---------- 详情 ---------- */
+/* ---------- 详情（表格行式） ---------- */
 function openDetail(id){
   var r = state.records.find(function(x){return x.id===id;});
   if(!r) return; curDetailId = id;
   var up = unitPrice(r);
-  function row(k,v,cls){ return '<div class="ditem'+(cls?' '+cls:'')+'"><div class="k">'+k+'</div><div class="v'+(cls?' '+cls:'')+'">'+v+'</div></div>'; }
-  var tags = (r.tags||[]).map(function(t){ return '<span class="chip g" style="margin-right:5px">'+esc(t)+'</span>'; }).join('') || '—';
-  var html = '<div class="detail-grid">'
-    + row('房源名称', esc(r.name), 'full')
+  function row(k,v){ return '<div class="drow"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+  function col(cls,b,txt){ return '<div class="col'+(cls?' '+cls:'')+'"><b>'+b+'</b><p>'+txt+'</p></div>'; }
+  var tags = (r.tags||[]).map(function(t){ return '<span class="dchip">'+esc(t)+'</span>'; }).join('') || '—';
+  var html = '<div class="dtb">'
+    + row('房源名称', esc(r.name))
     + row('总价', r.price!=null ? '<span class="warn">'+esc(String(r.price))+' 万元</span>' : '未填')
     + row('单价', up ? up+' 元/㎡' : '—')
     + row('面积', r.area?esc(String(r.area))+' ㎡':'—')
     + row('户型', r.layout||'—')
     + row('区域板块', r.area_block||'—')
-    + row('建成年代', r.build_year||'—')
-    + row('建筑类型', r.build_type||'—')
+    + row('年代/类型', [r.build_year, r.build_type].filter(Boolean).join(' · ')||'—')
     + row('装修', r.deco||'—')
-    + row('来源', r.src||'—')
-    + row('记录日期', r.date||'—')
-    + row('标签', tags, 'full')
-    + row('优点', r.good?esc(r.good).replace(/\n/g,'<br>'):'—','full')
-    + row('缺点', r.bad?esc(r.bad).replace(/\n/g,'<br>'):'—','full')
-    + row('备注', r.note?esc(r.note).replace(/\n/g,'<br>'):'—','full')
+    + row('来源/日期', [r.src, r.date].filter(Boolean).join(' · ')||'—')
+    + row('标签', tags)
+    + '<div class="dup">'
+    + col('', '优点', r.good?esc(r.good).replace(/\n/g,'<br>'):'—')
+    + col('bd', '缺点', r.bad?esc(r.bad).replace(/\n/g,'<br>'):'—')
+    + '</div>'
+    + row('备注', r.note?esc(r.note).replace(/\n/g,'<br>'):'—')
     + '</div>';
   document.getElementById('detailBody').innerHTML = html;
   show('detailMask');
