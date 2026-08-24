@@ -37,7 +37,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     --grid:#eef1f6; --head:#33415c; --shadow:0 2px 10px rgba(31,45,61,.06);
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:"SimSun","宋体",serif;
+  body{margin:0;font-family:"PingFang SC","Microsoft YaHei","Segoe UI",-apple-system,sans-serif;
        background:var(--bg);color:var(--text);font-size:13px;}
   header{background:linear-gradient(90deg,#2f6fed,#4f8ef7);color:#fff;
          padding:8px 20px 10px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);flex-wrap:wrap;}
@@ -380,8 +380,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 const PALETTE=['#3a8ee6','#22a06b','#f59e0b','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1','#eab308','#0ea5e9'];
 const WEEKDAYS=['日','一','二','三','四','五','六'];
 const CSSMAP={'var(--crit)':'#e23c39','var(--normal)':'#3a8ee6','var(--muted)':'#7a869a','var(--text)':'#1f2d3d','var(--grid)':'#eef1f6','var(--primary)':'#2f6fed','var(--head)':'#33415c'};
-const DEFAULT_FONT='"SimSun","宋体",serif';
-const OLD_BLACK_FONT='"SimHei","黑体","Microsoft YaHei",sans-serif';
+const DEFAULT_FONT='"PingFang SC","Microsoft YaHei","Segoe UI",-apple-system,sans-serif';
+const OLD_BLACK_FONT='"PingFang SC","Microsoft YaHei","Segoe UI",-apple-system,sans-serif';
 let fontFamily=DEFAULT_FONT; // 统一字体：仅作用于图表内文字（SVG）
 const FONT_PRESETS=[
   ['默认(宋体)',DEFAULT_FONT],
