@@ -91,11 +91,6 @@ main{max-width:1080px;margin:0 auto;padding:14px 16px}
 .hcard .chip.b{background:var(--pri-bg);color:var(--pri2)}
 .hcard .chip.a{background:#fef3c7;color:#b45309}
 .hcard .chip.g{background:#ecfdf5;color:#047857}
-.hcard .marks{display:flex;gap:3px;flex:none}
-.hcard .mk{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid var(--line);color:var(--sub);background:var(--bg)}
-.hcard .mk.gd{color:var(--teal);border-color:#a7f3d0;background:#ecfdf5}
-.hcard .mk.bd{color:var(--red);border-color:#fecaca;background:#fef2f2}
-.hcard .mk.no{color:#cbd5e1}
 .hcard .r3{display:flex;align-items:center;justify-content:space-between;gap:6px;border-top:1px dashed var(--line);padding-top:5px}
 .hcard .vbox{display:flex;gap:5px}
 .hcard .vbtn{display:flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:.15s}
@@ -264,7 +259,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.13 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.14 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -449,15 +444,16 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.13 =================
+/* ================= 房览速记 v1.0.14 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
          点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符、
          推送 409 自动重试合并、两行精简卡、删除评分机制、详情弹窗表格行式、
-         拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转
+         拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
+         卡片去掉优✓缺✗标记（更紧凑）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.13' };
+var APP = { name:'房览速记', version:'1.0.14' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -651,15 +647,12 @@ function cardHtml(r){
   var extra = (r.tags||[]).slice(0,2).map(function(t){ return '<span class="chip g">'+esc(t)+'</span>'; });
   chips = chips.concat(extra);
   if(chips.length>6) chips = chips.slice(0,6);
-  var mkG = r.good ? '<span class="mk gd">优✓</span>' : '<span class="mk no">优—</span>';
-  var mkB = r.bad  ? '<span class="mk bd">缺✗</span>' : '<span class="mk no">缺—</span>';
   var upN = r.up||0, dnN = r.down||0;
   return '<div class="hcard" onclick="openDetail(\''+r.id+'\')">'
     + '<div class="r1"><div class="hname">' + (r.src?'<span class="src">'+esc(r.src)+'</span>':'') + esc(r.name) + '</div>'
     + '<div class="pr">' + (r.price!=null ? esc(String(r.price))+'<small>万</small>' : '<span class="nopr">未填总价</span>') + (up?'<span class="unit">·'+up+'元/㎡</span>':'') + '</div></div>'
     + '<div class="r2">'
     + '<div class="chips">' + chips.join('') + '</div>'
-    + '<div class="marks">' + mkG + mkB + '</div>'
     + '</div>'
     + '<div class="r3">'
     + '<div class="vbox">'
