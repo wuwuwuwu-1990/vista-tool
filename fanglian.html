@@ -262,7 +262,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.8 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.9 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -454,13 +454,14 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.8 =================
+/* ================= 房览速记 v1.0.9 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
-         点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符
+         点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符、
+         推送 409 自动重试合并（多设备同时写入不再报错）
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.8' };
+var APP = { name:'房览速记', version:'1.0.9' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -830,7 +831,7 @@ function doSync(mode){
   if(!cfg.token){ toast('请先在设置里配置 GitHub 令牌', true); openSettings(); return; }
   if(!cfg.owner || !cfg.repo || !cfg.path){ toast('仓库信息不完整', true); openSettings(); return; }
   setBusy('同步中…');
-  var p = mode==='push' ? pushRemote(cfg) : pullRemote(cfg);
+  var p = mode==='push' ? preMergeThenPush(cfg) : pullRemote(cfg);
   p.then(function(res){
     settings.lastSync = Date.now(); saveLocal();
     setSyncOk('已同步 '+fmtDate(settings.lastSync));
@@ -860,25 +861,62 @@ function pullRemote(cfg){
     return { msg:'已是最新，共 '+state.records.length+' 条' };
   });
 }
-function pushRemote(cfg){
-  var data = syncPayload();
-  var body = JSON.stringify(data);
+function pushRemote(cfg, _retry){
+  var retry = _retry||0;
+  var body = JSON.stringify(syncPayload());
   var url = 'https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+cfg.path.split('/').map(encodeURIComponent).join('/');
-  var fetchRemote = function(){
-    return fetch(url, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); });
-  };
-  return fetchRemote().then(function(meta){
+  var doPut = function(sha){
     var payload = { message:'房览速记 同步 '+new Date().toLocaleString('zh-CN'), branch:cfg.branch,
       content: btoa(unescape(encodeURIComponent(body))) };
-    if(meta && meta.sha) payload.sha = meta.sha;
+    if(sha) payload.sha = sha;
     return fetch(url, { method:'PUT', headers:ghHeaders(cfg), body:JSON.stringify(payload) }).then(function(r){
-      if(!r.ok) return r.json().then(function(j){
-        if(r.status===403) throw new Error('写入被拒绝(403)：令牌没有写权限！请到 GitHub 令牌设置把 Contents 权限改为 Read and write');
-        throw new Error('推送失败 HTTP '+r.status+(j.message?'：'+j.message:''));
-      });
-      return r.json();
+      return r.json().then(function(j){ return { status:r.status, json:j }; });
     });
+  };
+  return fetch(url, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); }).then(function(meta){
+    return doPut(meta && meta.sha);
+  }).then(function(res){
+    // 409 = 远端已被其他设备/操作修改（sha 过期）：自动拉取最新 → 智能合并 → 重推，最多 3 次
+    if(res.status===409 && retry<3){
+      return fetch(url, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); }).then(function(meta2){
+        if(meta2 && meta2.sha && meta2.content){
+          try{
+            var remote = JSON.parse(b64Decode(meta2.content));
+            var merged = mergeRemote(remote);
+            state.records = merged.records; state.deleted = merged.deleted;
+            state.updatedAt = merged.updatedAt; saveLocal();
+            toast('检测到其他设备更新，已自动合并', false);
+          }catch(e){}
+        }
+        return pushRemote(cfg, retry+1);
+      });
+    }
+    if(res.status===403) throw new Error('写入被拒绝(403)：令牌没有写权限！请到 GitHub 令牌设置把 Contents 权限改为 Read and write');
+    if(res.status!==200 && res.status!==201) throw new Error('推送失败 HTTP '+res.status+((res.json&&res.json.message)?'：'+res.json.message:''));
+    return res.json;
   }).then(function(){ return { msg:'已推送，数据全端同步' }; });
+}
+/* 方案B：推送前先拉取远端并智能合并到本地，再推送（从源头减少 409 冲突） */
+function preMergeThenPush(cfg){
+  var url = ghUrl(cfg, cfg.path);
+  return fetch(url, { headers:ghHeaders(cfg) }).then(function(resp){
+    if(resp.status===404) return null;  // 远端还没有数据文件，直接首次推送
+    if(!resp.ok) return resp.json().then(function(j){ throw new Error('推送前合并失败 HTTP '+resp.status+(j.message?'：'+j.message:'')); });
+    return resp.json();
+  }).then(function(meta){
+    if(meta && meta.content){
+      try{
+        var remote = JSON.parse(b64Decode(meta.content));
+        var merged = mergeRemote(remote);
+        if(merged.records.length!==state.records.length || merged.updatedAt>state.updatedAt){
+          state.records = merged.records; state.deleted = merged.deleted;
+          state.updatedAt = merged.updatedAt; saveLocal();
+          toast('已合并其他设备的最新数据', false);
+        }
+      }catch(e){}
+    }
+    return pushRemote(cfg);
+  });
 }
 var pushTimer = null;
 function autoPush(){
