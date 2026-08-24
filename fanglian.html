@@ -262,7 +262,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.7 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.8 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -454,13 +454,13 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.7 =================
+/* ================= 房览速记 v1.0.8 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
          点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.7' };
+var APP = { name:'房览速记', version:'1.0.8' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
@@ -660,8 +660,8 @@ function cardHtml(r){
   if(r.deco) chips += '<span class="chip a">'+esc(r.deco)+'</span>';
   var tags = (r.tags||[]).map(function(t){ return '<span class="chip g">'+esc(t)+'</span>'; }).join('');
   var pc = '';
-  if(r.good) pc += '<div class="pc good"><b>优</b><p>'+esc(r.good)+'</p></div>';
-  if(r.bad)  pc += '<div class="pc bad"><b>缺</b><p>'+esc(r.bad)+'</p></div>';
+  if(r.good) pc += '<div class="pc good"><b>优点</b><p>'+esc(r.good)+'</p></div>';
+  if(r.bad)  pc += '<div class="pc bad"><b>缺点</b><p>'+esc(r.bad)+'</p></div>';
   var upN = r.up||0, dnN = r.down||0;
   return '<div class="hcard" onclick="openDetail(\''+r.id+'\')">'
     + '<div class="row1"><div class="hname">' + (r.src?'<span class="src">'+esc(r.src)+'</span>':'') + esc(r.name) + '</div>'
