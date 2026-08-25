@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑笺札记 · 个人工程资料库</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2316a34a'/><text x='50' y='70' font-size='54' text-anchor='middle' fill='white' font-family='Arial'>筑</text></svg>">
+<style>
+:root{
+  --bg:#eef5ee; --card:#ffffff; --line:#d9e8db;
+  --text:#1f2b1f; --muted:#647864;
+  --primary:#16a34a; --primary-2:#15803d; --accent:#4ade80;
+  --green-bg:#f0faf3; --amber:#b45309; --amber-bg:#fffbeb; --amber-line:#fde68a;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Display","SF Pro Text","PingFang SC","PingFang HK","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,#f4faf4 0%,#e9f3ea 40%,#dfeee2 100%);pointer-events:none;z-index:-1}
+
+/* ===== 顶栏（立体玻璃） ===== */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #e2eee4;box-shadow:0 10px 26px -14px rgba(20,60,30,.35)}
+.topbar-inner{width:100%;max-width:none;margin:0;padding:0 16px;height:60px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.topbar-left{display:flex;align-items:center;gap:10px;justify-self:start}
+.app-name{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--text);letter-spacing:.2px}
+.app-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#16a34a,#4ade80);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;box-shadow:0 4px 12px rgba(22,163,74,.35)}
+.topbar-right{display:flex;align-items:center;justify-self:end}
+.search-box{position:relative;width:320px;justify-self:center}
+.search-box input{width:100%;height:38px;padding:9px 38px 9px 38px;border-radius:12px;border:1.5px solid #bcd8c1;background:var(--green-bg);font-family:var(--font);font-size:13px;color:var(--text);outline:none;transition:all .2s;box-shadow:inset 0 2px 4px rgba(20,60,30,.10),inset 0 -1px 1px rgba(255,255,255,.7),0 1px 2px rgba(255,255,255,.9)}
+.search-box input:focus{border-color:var(--primary);background:#fff;box-shadow:inset 0 2px 4px rgba(20,60,30,.08),0 0 0 3px rgba(22,163,74,.12)}
+.search-box .s-ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex;color:var(--muted)}
+.search-box .s-ic svg{width:15px;height:15px}
+.s-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:none;background:#d9e8db;color:#5b7a5b;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .15s;padding:0}
+.s-clear svg{width:10px;height:10px}
+.s-clear:hover{background:#16a34a;color:#fff}
+.s-clear.show{display:flex}
+.btn-about{display:flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 16px;border-radius:12px;border:1.5px solid #cfe0d2;background:linear-gradient(180deg,#ffffff,#eef5ee);font-family:var(--font);font-size:13px;color:var(--text);cursor:pointer;transition:all .15s;box-shadow:0 2px 4px rgba(20,60,30,.14),inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(20,60,30,.06)}
+.btn-about svg{width:15px;height:15px}
+.btn-about:active{background:linear-gradient(180deg,#e3efe5,#f5faf6);box-shadow:inset 0 2px 4px rgba(20,60,30,.14),0 1px 1px rgba(255,255,255,.9)}
+.btn-about:hover{border-color:var(--primary);color:var(--primary-2);box-shadow:0 3px 8px rgba(22,163,74,.22),inset 0 1px 1px rgba(255,255,255,.95)}
+
+/* 今日历史搜索面板 */
+.hist-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px -8px rgba(20,60,30,.22);padding:10px;display:none;z-index:80}
+.hist-panel.show{display:block;animation:pop .18s ease}
+.hist-title{font-size:11px;color:var(--muted);font-weight:600;padding:2px 8px 8px;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between}
+.hist-clear{font-size:11px;color:var(--amber);cursor:pointer;font-weight:500}
+.hist-clear:hover{text-decoration:underline}
+.hist-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;font-size:13px;color:var(--text);cursor:pointer;transition:all .12s}
+.hist-item:hover{background:var(--green-bg)}
+.hist-item .h-ic{display:flex;color:var(--muted);flex-shrink:0}
+.hist-item .h-ic svg{width:13px;height:13px}
+.hist-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-empty{padding:14px 8px;text-align:center;font-size:12px;color:var(--muted)}
+
+/* ===== 主布局（视口内固定，页面不滚动） ===== */
+html,body{height:100%;overflow:hidden}
+.main{width:100%;max-width:none;height:calc(100vh - 60px);margin:0;padding:16px;display:flex;gap:14px;align-items:stretch}
+
+/* 左侧栏 */
+.sidebar{width:196px;flex-shrink:0;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:#d9e8db;border-radius:6px}
+.side-card{background:var(--card);border:1.5px solid #c9ddcd;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(20,60,30,.05),0 8px 20px -6px rgba(20,60,30,.22),0 18px 40px -12px rgba(20,60,30,.18)}
+.side-card h6{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:8px 4px 8px;font-weight:600}
+.side-card h6:first-child{margin-top:0}
+.side-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;font-size:13.5px;color:var(--text);cursor:pointer;transition:all .12s;margin-bottom:2px;font-weight:500}
+.side-item:hover{background:var(--green-bg)}
+.side-item.on{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.25)}
+.side-item .s-ico{display:flex;flex-shrink:0}
+.side-item .s-ico svg{width:16px;height:16px}
+.side-item .cnt{margin-left:auto;font-size:11.5px;background:rgba(22,163,74,.1);color:var(--primary-2);padding:1px 8px;border-radius:10px;font-weight:600}
+.side-item.on .cnt{background:rgba(255,255,255,.22);color:#fff}
+.side-stats{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+.stat-row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 6px;color:var(--muted)}
+.stat-row b{color:var(--text);font-variant-numeric:tabular-nums}
+
+/* 右侧内容：中间面板高度撑满，仅数据行滚动 */
+.content{flex:1;min-width:0;display:flex;flex-direction:column}
+.panel{background:var(--card);border:1.5px solid #c9ddcd;border-radius:16px;box-shadow:0 1px 2px rgba(20,60,30,.05),0 10px 26px -6px rgba(20,60,30,.24),0 22px 48px -14px rgba(20,60,30,.2);flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+/* 中间栏头部：年份栏+表头固定在面板顶部不滚动 */
+.panel-sticky{background:var(--card);border-radius:16px 16px 0 0;flex-shrink:0}
+.panel-head{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card);flex-wrap:wrap}
+.panel-head h2{font-size:17px;font-weight:700}
+.panel-head .sub{font-size:12.5px;color:var(--muted)}
+/* 独立表头行（替代 thead） */
+.thead-row{display:flex;align-items:center;background:#f2f8f3;padding:0 18px;border-bottom:1px solid var(--line)}
+.thead-row span{font-size:12.5px;color:var(--muted);font-weight:600;padding:12px 0;white-space:nowrap}
+.tcol-date{width:105px;min-width:105px}
+.tcol-type{width:120px;min-width:120px}
+.tcol-name{flex:1}
+.tcol-note{width:150px;min-width:150px}
+
+/* 右侧类型看板 */
+.rboard{width:210px;flex-shrink:0;overflow-y:auto}
+.rboard::-webkit-scrollbar{width:6px}
+.rboard::-webkit-scrollbar-thumb{background:#d9e8db;border-radius:6px}
+.rb-card{background:var(--card);border:1.5px solid #c9ddcd;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(20,60,30,.05),0 8px 20px -6px rgba(20,60,30,.22),0 18px 40px -12px rgba(20,60,30,.18)}
+.rb-card h6{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:2px 4px 10px;font-weight:600;display:flex;align-items:center;gap:6px}
+.rb-card h6 svg{width:13px;height:13px;flex-shrink:0}
+.rb-list{overflow-y:auto;padding-right:2px}
+.rb-list::-webkit-scrollbar{width:6px}
+.rb-list::-webkit-scrollbar-thumb{background:#d9e8db;border-radius:6px}
+.rb-row{display:flex;align-items:center;gap:8px;padding:6px 6px;font-size:12.5px;border-bottom:1px dashed #eef6ef}
+.rb-row:last-child{border-bottom:none}
+.rb-row .rb-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.rb-row .rb-bar{width:44px;height:6px;border-radius:4px;background:var(--green-bg);overflow:hidden;flex-shrink:0}
+.rb-row .rb-bar i{display:block;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:4px}
+.rb-row .rb-n{min-width:26px;text-align:right;font-weight:700;color:var(--primary-2);font-variant-numeric:tabular-nums}
+.years-tab{display:flex;gap:6px;flex-wrap:wrap}
+.yr{padding:6px 14px;border-radius:20px;font-size:12.5px;background:var(--green-bg);color:var(--muted);cursor:pointer;transition:all .15s;border:1px solid transparent;font-weight:500}
+.yr:hover{border-color:var(--primary);color:var(--primary-2)}
+.yr.on{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 3px 10px rgba(22,163,74,.25)}
+.panel-head .spacer{flex:1}
+
+/* 表格：数据行在固定高度内滚动 */
+.tbl-wrap{flex:1;min-height:0;overflow-y:auto;overflow-x:auto}
+.tbl-wrap::-webkit-scrollbar{width:8px;height:8px}
+.tbl-wrap::-webkit-scrollbar-thumb{background:#d9e8db;border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}
+tbody td{padding:11px 18px;border-bottom:1px solid #eef6ef;color:var(--text);vertical-align:middle}
+tbody td.tcol-date{width:105px;padding-left:18px}
+tbody td.tcol-type{width:120px}
+tbody td.tcol-name{width:auto}
+tbody td.tcol-note{width:150px}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--green-bg)}
+tbody tr:last-child td{border-bottom:none}
+td .date{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;white-space:nowrap}
+.tag{display:inline-block;font-size:11.5px;padding:3px 10px;border-radius:9px;background:var(--green-bg);color:var(--primary-2);font-weight:600;white-space:nowrap;margin-right:4px;margin-bottom:2px}
+.tag.o{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-line)}
+.tag.d{background:#eef5ee;color:#5b7a5b;border:1px solid #d9e8db}
+td .proj{font-weight:500;line-height:1.5}
+td .proj .note{color:var(--muted);font-weight:400;font-size:12px}
+.ftag{font-size:11px;padding:2px 8px;border-radius:7px;background:#f0faf3;border:1px solid #d9e8db;color:#5b7a5b;white-space:nowrap}
+.note-tag{display:inline-block;font-size:11.5px;padding:3px 10px;border-radius:9px;background:#fff6e8;border:1px solid var(--amber-line);color:var(--amber);font-weight:500;white-space:nowrap}
+.empty{padding:60px 20px;text-align:center;color:var(--muted);font-size:14px}
+
+/* 弹窗公共样式（关于） */
+.modal-mask{position:fixed;inset:0;background:rgba(20,40,25,.45);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-mask.show{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:560px;box-shadow:0 24px 60px rgba(10,30,15,.3);overflow:hidden;animation:pop .25s cubic-bezier(.2,1.2,.4,1)}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-foot{padding:14px 24px;border-top:1px solid var(--line);background:#fbfefb;display:flex;justify-content:flex-end}
+.btn-pri{padding:9px 22px;border-radius:11px;border:none;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-family:var(--font);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s;box-shadow:0 4px 14px rgba(22,163,74,.3)}
+.btn-pri:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(22,163,74,.4)}
+
+/* 弹窗滚动锁 */
+body.lock-scroll{overflow:hidden}
+
+/* 关于弹窗 */
+.about-hero{text-align:center;padding:26px 20px 20px;background:linear-gradient(180deg,#eef5ee,#fbfefb)}
+.about-hero .big-logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#16a34a,#4ade80);color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;box-shadow:0 10px 26px rgba(22,163,74,.35)}
+.about-hero h2{font-size:20px;font-weight:700}
+.about-hero p{font-size:13px;color:var(--muted);margin-top:6px}
+.about-hero .ver{display:inline-block;margin-top:10px;font-size:12px;background:#fff;border:1px solid var(--line);color:var(--primary-2);padding:4px 14px;border-radius:20px;font-weight:600}
+.about-body{padding:16px 24px 24px}
+.about-line{display:flex;gap:12px;padding:9px 0;font-size:13.5px;border-bottom:1px dashed #eef6ef}
+.about-line:last-child{border:none}
+.about-line b{width:84px;color:var(--muted);font-weight:600;flex-shrink:0}
+.about-line span{color:var(--text)}
+
+/* 响应式 */
+@media (max-width:900px){
+  html,body{overflow:auto}
+  .main{height:auto;flex-direction:column}
+  .sidebar{width:100%}
+  .search-box{display:none}
+  .panel-head{flex-wrap:wrap}
+  .panel{min-height:400px}
+}
+</style>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <div class="app-logo">筑</div>
+      <span class="app-name">筑笺札记 · 个人工程资料库</span>
+    </div>
+    <div class="search-box">
+      <span class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><line x1="17" y1="17" x2="21" y2="21"/><circle cx="11" cy="11" r="1.5" fill="#e8871e" stroke="none"/></svg></span>
+      <input id="kw" type="text" placeholder="搜索项目 / 类型 / 日期 / 备注…" oninput="render();onKwInput(event)" oncompositionend="onKwInput()" onblur="onKwBlur()" onfocus="openHist()" onkeydown="if(event.key==='Escape'){this.blur();render()}">
+      <button class="s-clear" id="kwClear" onclick="clearKw()" title="清除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"/><line x1="18.5" y1="5.5" x2="5.5" y2="18.5"/><circle cx="12" cy="12" r="4" fill="#e8871e" stroke="none" opacity=".25"/></svg></button>
+      <div class="hist-panel" id="histPanel">
+        <div class="hist-title">🕘 今日历史搜索 <span class="hist-clear" onclick="clearHist()">清空</span></div>
+        <div id="histList"></div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-about" onclick="openAbout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><line x1="12" y1="10.5" x2="12" y2="15.5"/><circle cx="12" cy="7.3" r="1.3" fill="#e8871e" stroke="none"/></svg>关于</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 左侧栏 -->
+  <div class="sidebar">
+    <div class="side-card">
+      <h6>资料库</h6>
+      <div class="side-item on" data-lib="all" onclick="setLib('all')"><span class="s-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><circle cx="12" cy="13" r="1.3" fill="#e8871e" stroke="none"/></svg></span>全部资料<span class="cnt" id="cntAll">0</span></div>
+      <div class="side-item" data-lib="eng" onclick="setLib('eng')"><span class="s-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="1.3" fill="#e8871e" stroke="none"/></svg></span>工程资料<span class="cnt" id="cntEng">0</span></div>
+      <div class="side-item" data-lib="spj" onclick="setLib('spj')"><span class="s-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><line x1="9" y1="11" x2="15" y2="11"/><circle cx="11" cy="15.5" r="1.3" fill="#e8871e" stroke="none"/></svg></span>评审资料<span class="cnt" id="cntSpj">0</span></div>
+      <div class="side-stats">
+        <div class="stat-row"><span>覆盖年份</span><b id="stYears">-</b></div>
+        <div class="stat-row"><span>资料类型</span><b id="stTypes">-</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧内容 -->
+  <div class="content">
+    <div class="panel">
+      <div class="panel-sticky">
+        <div class="panel-head">
+          <h2 id="panelTitle">工程资料</h2>
+          <span class="sub" id="panelSub">共 0 条记录</span>
+          <div class="spacer"></div>
+          <div class="years-tab" id="yearsTab"></div>
+        </div>
+        <div class="thead-row">
+          <span class="tcol-date">资料日期</span><span class="tcol-type">资料类型</span><span class="tcol-name">项目名称</span><span class="tcol-note">备注</span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧类型看板 -->
+  <div class="rboard">
+    <div class="rb-card">
+      <h6><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><rect x="4" y="11" width="4" height="8" rx="1"/><rect x="10" y="5" width="4" height="14" rx="1"/><rect x="16" y="8" width="4" height="11" rx="1"/><circle cx="6" cy="15" r="1.1" fill="#e8871e" stroke="none"/><circle cx="12" cy="12" r="1.1" fill="#e8871e" stroke="none"/><circle cx="18" cy="13.5" r="1.1" fill="#e8871e" stroke="none"/></svg>资料类型统计</h6>
+      <div class="rb-list" id="rbList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 关于弹窗 -->
+<div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
+  <div class="modal">
+    <div class="about-hero">
+      <div class="big-logo">筑</div>
+      <h2>筑笺札记 · 个人工程资料库</h2>
+      <p>工程资料 / 评审资料 一站式检索管理</p>
+      <span class="ver" id="verTag">v1.0.10</span>
+    </div>
+    <div class="about-body">
+      <div class="about-line"><b>数据来源</b><span>工作室工程资料.xlsx（117 条）＋ 工作室评审资料.xlsx（112 条）</span></div>
+      <div class="about-line"><b>记录结构</b><span>日期【类型】项目名称 · 备注（重庆凯弘/收费/财评等）· 压缩包格式</span></div>
+      <div class="about-line"><b>检索方式</b><span>左侧资料库切换 · 年份筛选（2019-2024）· 关键词搜索覆盖项目/类型/日期/备注</span></div>
+      <div class="about-line"><b>使用提示</b><span>表格条目全部展开，滚动页面查看；搜索框带清除按钮，支持备注内容检索</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn-pri" onclick="closeAbout()">知道了</button></div>
+  </div>
+</div>
+
+<script>
+/* ============ 内嵌数据（由构建脚本注入） ============ */
+const ZQ_DATA = {"eng":[{"date":"2019.10.11","type":"技术资料","name":"酉阳钟多镇梁家堡村麻地坝文化广场项目","ext":"ZIP","note":""},{"date":"2019.10.31","type":"全套资料","name":"酉阳县麻旺镇深度贫困村江北对口帮扶项目(新建七组和何家堡桥)","ext":"ZIP","note":""},{"date":"2019.12.25","type":"全套资料","name":"丁市镇中心小学校操场维修（硬化及新建塑胶运动场）工程","ext":"ZIP","note":""},{"date":"2020.01.08","type":"全套资料","name":"南腰界镇深度贫困村江北对口帮扶项目（一）","ext":"ZIP","note":""},{"date":"2020.01.09","type":"预算编制","name":"重庆黔江小南海国家地质公园科普陈列馆建设项目[幕墙工程]","ext":"ZIP","note":""},{"date":"2020.03.12","type":"全套资料","name":"麻旺镇产业基础设施配套项目（沙堡村青花椒基地机耕道）","ext":"ZIP","note":""},{"date":"2020.05.22","type":"结算资料","name":"酉阳县龚滩镇杨柳村安置区连接道路建设项目-已财政评审完","ext":"ZIP","note":""},{"date":"2020.05.26","type":"全套资料","name":"桃花源街道小坝小学校运动场回填工程","ext":"ZIP","note":""},{"date":"2020.06.18","type":"全套资料","name":"泔溪镇泡木村2017年整村脱贫人畜饮水工程建设项目","ext":"ZIP","note":""},{"date":"2020.08.12","type":"补充资料","name":"酉阳县垃圾填埋场渗沥液处理厂工程(增补资料)","ext":"ZIP","note":""},{"date":"2020.09.24","type":"全套资料","name":"楠木乡红霞村2组组通达公路","ext":"ZIP","note":""},{"date":"2020.11.12","type":"全套资料","name":"龚滩镇罾潭村一组公路桥工程","ext":"ZIP","note":""},{"date":"2020.12.01","type":"补充资料","name":"酉阳县阿蓬江大峡谷景区整体开发项目","ext":"7Z","note":""},{"date":"2020.12.11","type":"全套资料","name":"酉阳县司法局业务用房场平(变压器)工程","ext":"ZIP","note":""},{"date":"2020.12.14","type":"技术资料","name":"酉阳县小河镇等17个乡镇污水处理厂配套管网建设项目（一期）一标段","ext":"7Z","note":""},{"date":"2020.12.17","type":"结算资料","name":"酉阳县两罾乡“四好农村路”---2个项目-石亮","ext":"ZIP","note":""},{"date":"2020.12.20","type":"补充资料","name":"酉阳县浪坪乡黄泥沟不稳定斜坡治理工程","ext":"ZIP","note":""},{"date":"2020.12.31","type":"全套资料","name":"2020年两罾乡乌江库区移民产业路建设项目","ext":"ZIP","note":""},{"date":"2021.02.05","type":"资料刻盘","name":"龙潭镇第二小学校建设项目后期资料","ext":"7Z","note":""},{"date":"2021.03.23","type":"结算资料","name":"兴隆镇土坪村撤并村（油黄坳-大路井）通畅公路[改资料]","ext":"7Z","note":""},{"date":"2021.03.31","type":"结算资料","name":"酉阳县龙潭镇赵庄渤海公租房维修项目[城建公司内审已完结]","ext":"7Z","note":""},{"date":"2021.04.25","type":"全套资料","name":"酉阳自治县铜鼓乡卫生院环境整治项目[已财政评审完]","ext":"7Z","note":""},{"date":"2021.05.31","type":"结算资料","name":"酉阳县后坪乡“四好农村路”——3个项目—冉[改资料，已出报告]","ext":"7Z","note":""},{"date":"2021.07.12","type":"全套资料","name":"酉阳县菖蒲花田农旅融合示范项目-基础设施工程（菖蒲盖草甸排洪建设项目）[已财政评审完]","ext":"7Z","note":""},{"date":"2021.07.19","type":"结算资料","name":"酉阳县司法局业务用房工程场平结算—田罡—1个项目","ext":"7Z","note":""},{"date":"2021.08.26","type":"结算资料","name":"石柱县三星乡等10乡镇污水管网及农村居民点生活污染治理项目","ext":"7Z","note":""},{"date":"2021.09.02","type":"全套资料","name":"龙潭镇江丰至井岗公路K2+040—137.5段水毁修复工程—刘伟—1个项目[已出报告]","ext":"7Z","note":""},{"date":"2021.09.04","type":"结算资料","name":"酉阳县板溪叠石花谷生态园扶贫示范项目-智能灌溉系统","ext":"7Z","note":""},{"date":"2021.09.27","type":"全套资料","name":"酉水河国家湿地公园2016年湿地保护与恢复项目绿化景观工程","ext":"7Z","note":"已财政评审完"},{"date":"2021.09.29","type":"全套资料","name":"酉阳县长江经济带水质自动监测能力建设项目—吴江—2个项目[已出报告]","ext":"7Z","note":""},{"date":"2021.10.20","type":"竣工图纸","name":"桃花源景区配套基础设施建设—自驾营地云端帐篷接待中心二次装修工程","ext":"RAR","note":""},{"date":"2021.11.16","type":"结算资料","name":"酉阳县龙潭镇横A路至快速通道接道及维修工程[帮周坤]","ext":"7Z","note":""},{"date":"2021.11.29","type":"技术资料","name":"水钻开挖隐蔽资料-酉阳县小河镇等17个乡镇污水处理厂配套管网建设项目（一期）一标段","ext":"7Z","note":""},{"date":"2021.12.01","type":"结算资料","name":"酉阳县偏柏乡污水处理厂配套二三级管网建设项目（柏溪村新增部分）","ext":"7Z","note":""},{"date":"2021.12.07","type":"结算资料","name":"酉阳县石正兵生猪养殖场建设项目[已出报告]","ext":"7Z","note":""},{"date":"2021.12.09","type":"结算资料","name":"酉阳县兴隆镇谭永贵生猪养殖场建设项目[已出报告]","ext":"7Z","note":""},{"date":"2021.12.14","type":"全套资料","name":"酉阳县泔溪镇泡木村5组水毁水利修复项目[已出报告]","ext":"7Z","note":""},{"date":"2021.12.14","type":"全套资料","name":"酉阳县泔溪镇泡木村人居环境整治项目[已出报告]","ext":"7Z","note":""},{"date":"2021.12.15","type":"全套资料","name":"酉阳县泔溪镇泡木村水毁公路维修项目[已出报告]","ext":"7Z","note":""},{"date":"2021.12.28","type":"竣工图","name":"酉阳县苍岭镇榨菜腌制池建设项目[已出报告]","ext":"7Z","note":""},{"date":"2021.12.31","type":"技术资料","name":"水钻开挖隐蔽资料1—酉阳县泔溪镇等12个乡镇污水处理厂配套二三级管网建设项目一标段","ext":"7Z","note":""},{"date":"2021.12.31","type":"技术资料","name":"水钻开挖隐蔽资料2—酉阳县泔溪镇等12个乡镇污水处理厂配套二三级管网建设项目二标段","ext":"7Z","note":""},{"date":"2022.03.01","type":"预算编制","name":"酉阳县大中型水库移民后期扶持项目酉水河镇产业及便民道路硬化工程（后溪-长潭）(预算)","ext":"7Z","note":""},{"date":"2022.03.07","type":"全套资料","name":"中国传统村落(后溪村)文物保护利用工程(陈列布展工程)—姚密[已财政评审完]","ext":"7Z","note":""},{"date":"2022.03.07","type":"预算编制","name":"酉阳县龚滩镇上罾潭人行吊桥病害整治工程(预算)","ext":"7Z","note":""},{"date":"2022.04.18","type":"竣工资料","name":"涂市镇桃鱼村育苗大棚建设项目[已出报告]","ext":"7Z","note":""},{"date":"2022.04.24","type":"结算资料","name":"重庆市黔江区正阳工业园区3个场平工程","ext":"7Z","note":""},{"date":"2022.05.23","type":"代理对量","name":"酉阳县华茂混凝土搅拌站工程（一期）环境工程、公厕工程","ext":"7Z","note":""},{"date":"2022.06.06","type":"迎检预算","name":"升华建筑公司调整三个项目预算","ext":"7Z","note":""},{"date":"2022.07.01","type":"施工方案","name":"酉阳县城投·伴山华府房地产开发项目化粪池工程","ext":"RAR","note":""},{"date":"2022.07.08","type":"预算编制","name":"酉阳县退役军人事务局双拥宣传广告建设项目","ext":"7Z","note":""},{"date":"2022.08.10","type":"全套资料","name":"酉阳县龚滩景区配套基础设施建设项目万木码头工程——2个项目—冉君[已全部审计完]","ext":"RAR","note":""},{"date":"2022.08.10","type":"投标预算","name":"酉阳县大中型水库移民后期扶持小河镇雷打洞小二型水库项目","ext":"7Z","note":""},{"date":"2022.08.19","type":"竣工结算","name":"酉阳烈士陵园文化提升项目","ext":"7Z","note":""},{"date":"2022.08.26","type":"投标预算","name":"酉阳县龙潭镇养老服务中心养老服务设施全覆盖项目[三家]","ext":"ZIP","note":""},{"date":"2022.08.26","type":"投标预算","name":"酉阳县龚滩镇养老服务中心养老服务设施全覆盖项目[三家]","ext":"ZIP","note":""},{"date":"2022.08.31","type":"投标预算","name":"重庆粮食集团酉阳县粮食有限责任公司粮食加工厂及储备库建设项目（一期）（第二次）","ext":"ZIP","note":""},{"date":"2022.09.16","type":"投标预算","name":"酉阳县木叶乡干田村边坡治理及产业路建设项目[三家]","ext":"ZIP","note":""},{"date":"2022.09.22","type":"概算编制","name":"黔江区农村生活垃圾治理设施建设项目[其中8个垃圾站]","ext":"7Z","note":""},{"date":"2022.09.23","type":"投标预算","name":"酉阳县腴地乡中心小学校200米环形运动场建设项目[三家]","ext":"7Z","note":""},{"date":"2022.09.25","type":"预算编制","name":"黔江区农村生活垃圾治理设施建设项目[仅完成部分]","ext":"7Z","note":""},{"date":"2022.10.11","type":"预算编制","name":"酉阳县龙潭河五育村断面水质自动监测站供配电工程—吴江","ext":"7Z","note":""},{"date":"2022.10.24","type":"全套资料","name":"酉阳县腴地乡中心小学校校园活动场地改造（油化）项目","ext":"7Z","note":""},{"date":"2022.10.26","type":"投标预算","name":"酉阳县酉水河镇长远村石丫子至多碧水桥头通畅工程","ext":"7Z","note":""},{"date":"2022.11.01","type":"全套资料","name":"酉阳县菖蒲花田农旅融合示范项目—啄啄岩梦幻小屋营地（茨竹坨生态停车场）[已财政评审完]","ext":"7Z","note":""},{"date":"2022.11.04","type":"全套资料","name":"车田乡黄坝村天场坳自来水厂设施设备维修养护项目","ext":"7Z","note":""},{"date":"2022.11.04","type":"全套资料","name":"车田乡黄坝村文家院子农旅融合产业园","ext":"7Z","note":""},{"date":"2022.11.07","type":"全套资料","name":"酉阳烈士陵园文化提升项目","ext":"7Z","note":""},{"date":"2022.11.07","type":"全套资料","name":"酉阳自治县永久性双拥标志和宣传牌广告制作安装购买服务合同","ext":"7Z","note":""},{"date":"2022.12.13","type":"全套资料","name":"全国示范型退役军人服务站政治文化环境建设","ext":"7Z","note":""},{"date":"2023.01.13","type":"全套资料","name":"2018年酉阳县农村饮水安全巩固提升（精准扶贫.精准脱贫）工程十五标段板溪镇","ext":"RAR","note":""},{"date":"2023.01.16","type":"全套资料","name":"酉阳县龙潭河五育村断面水质自动监测站建设项目[已出报告]","ext":"RAR","note":""},{"date":"2023.02.03","type":"预算编制","name":"酉阳县2023年泔溪镇高标准农田（农旅融合）项目[代王海]","ext":"7Z","note":""},{"date":"2023.02.20","type":"全套资料","name":"酉阳县菖蒲花田农旅融合示范项目-游客接待中心（驹驰坝场地平整）[已财政评审完]","ext":"RAR","note":""},{"date":"2023.03.15","type":"全套资料","name":"地灵村“我家菜园地.耕读田”体验农业产业项目[已财政评审完]","ext":"RAR","note":""},{"date":"2023.04.04","type":"补充资料","name":"酉阳县浪坪乡黄泥沟不稳定斜坡治理工程后期审计补充资料","ext":"RAR","note":""},{"date":"2023.05.27","type":"全套资料","name":"酉阳土家族苗族自治县钟多幼儿园盛世华典分园改建项目附属部分","ext":"RAR","note":"已评审定案"},{"date":"2023.06.15","type":"全套资料","name":"酉阳县“创建民族团结示范县”展览馆改造装修工程","ext":"RAR","note":""},{"date":"2023.07.03","type":"全套资料","name":"酉阳县小河镇公共卫生厕所建设项目","ext":"RAR","note":""},{"date":"2023.07.21","type":"投标预算","name":"酉阳县腴地乡东营酉阳稻田养蟹基地项目","ext":"RAR","note":"三家"},{"date":"2023.08.03","type":"全套资料","name":"酉酬镇付家坝人行吊桥维修整治项目","ext":"RAR","note":""},{"date":"2023.08.10","type":"补充资料","name":"酉阳县龚滩景区配套基础设施建设项目万木码头工程（后续）--冉君","ext":"RAR","note":""},{"date":"2023.08.14","type":"预算编制","name":"酉阳县涂市镇大衫村粮食烘干厂建设项目","ext":"RAR","note":""},{"date":"2023.08.23","type":"全套资料","name":"酉阳县花田乡花园小学校教学综合楼建设项目","ext":"RAR","note":""},{"date":"2023.09.08","type":"全套资料","name":"酉阳县桃花源街道2021年城镇老旧小区改造提升项目","ext":"RAR","note":"财评已完"},{"date":"2023.09.12","type":"全套资料","name":"酉阳县铜鼓乡铜西幼儿园文化建设项目","ext":"RAR","note":""},{"date":"2023.09.18","type":"全套资料","name":"酉阳县涂市镇中心幼儿园室内文化建设室内窗帘建设项目","ext":"RAR","note":""},{"date":"2023.09.19","type":"技术资料","name":"板溪组团生活配套建设项目—产业转移承接基地餐饮配套项目--满家怀","ext":"RAR","note":""},{"date":"2023.09.20","type":"预算编制","name":"酉阳县桑竹农贸市场实验室装修改造项目","ext":"RAR","note":""},{"date":"2023.10.08","type":"全套资料","name":"酉阳县楠木乡红庄村少数民族特色村寨保护与发展项目--杨忠诚","ext":"RAR","note":""},{"date":"2023.10.27","type":"全套资料","name":"酉阳自治县2020年岩溶地区石漠化综合治理工程（林草植被保护与恢复）--廖书记","ext":"RAR","note":""},{"date":"2023.10.30","type":"全套资料","name":"酉阳自治县“十三五”易地扶贫搬迁集中安置点配套基础设施建设项目-小河镇连接桥工程","ext":"RAR","note":"审计局审计完"},{"date":"2023.11.20","type":"全套资料","name":"花田景区何家岩环境整治工程3个项目—姚密","ext":"RAR","note":"已审计完"},{"date":"2023.11.20","type":"竣工图纸","name":"酉阳自治县生态茶叶建设项目（初制加工厂建设）","ext":"RAR","note":""},{"date":"2023.12.13","type":"技术资料","name":"酉阳县2023年小河镇人居环境项目","ext":"RAR","note":""},{"date":"2023.12.27","type":"全套资料","name":"酉阳县龙潭古镇历史民居建筑的保护修缮及人居环境改善（第四期）","ext":"RAR","note":""},{"date":"2024.01.02","type":"补充资料","name":"酉阳县板桥乡中心幼儿园建设项目（平场土石方）","ext":"RAR","note":""},{"date":"2024.01.22","type":"预算编制","name":"酉阳县钟灵山农贸市场超市化建设自动人行梯建设项目","ext":"RAR","note":""},{"date":"2024.02.02","type":"全套资料","name":"酉阳县龙潭镇主题氛围营造项目（两个项目）","ext":"RAR","note":""},{"date":"2024.02.19","type":"投标预算","name":"酉阳县酉酬镇沙子坝村烂田沟、田家供水保障工程","ext":"RAR","note":""},{"date":"2024.02.19","type":"投标预算","name":"酉阳县酉酬镇沙子坝村牛栏咀、马鹿坝、和平村供水保障工程","ext":"RAR","note":""},{"date":"2024.04.02","type":"全套资料","name":"酉阳县泔溪镇泡木村项目——泔溪镇 冉伟—4个项目","ext":"RAR","note":"不计费"},{"date":"2024.05.06","type":"全套资料","name":"酉阳县南腰界镇土门村大平盖村民饮水工程","ext":"RAR","note":"收费1K"},{"date":"2024.06.25","type":"全套资料","name":"酉阳县泔溪镇大板村皮都国家级传统村落保护工程项目——泔溪镇 冉伟","ext":"RAR","note":""},{"date":"2024.07.01","type":"全套资料","name":"酉阳县小河坝河上游重点河段综合治理工程（丁市河丁市段）","ext":"RAR","note":"不计费"},{"date":"2024.07.02","type":"全套资料","name":"酉阳县酉水河镇大江村国家级传统村落保护工程","ext":"RAR","note":""},{"date":"2024.07.09","type":"全套资料","name":"酉水河镇大江村群众篮球运动场建设项目","ext":"RAR","note":""},{"date":"2024.07.31","type":"全套资料","name":"酉阳土家族苗族自治县老旧小区弱电改造项目—姚密","ext":"RAR","note":"不计费"},{"date":"2024.08.05","type":"全套资料","name":"酉阳土家族苗族自治县钟多幼儿园盛世华典分园改建项目—冉富光","ext":"RAR","note":"不计费"},{"date":"2024.08.22","type":"投标预算","name":"酉阳县实验中学校灾后重建围墙项目","ext":"RAR","note":""},{"date":"2024.08.27","type":"全套资料","name":"酉阳县李溪镇官坝村8、9组人行吊桥维修整治项目","ext":"RAR","note":""},{"date":"2024.09.02","type":"投标预算","name":"酉阳县黑水镇大涵村大双公路沿线人居环境整治项目","ext":"RAR","note":""},{"date":"2024.10.15","type":"投标预算","name":"酉阳县板溪镇补水及管网延伸工程（黄童坡段）","ext":"RAR","note":""},{"date":"2024.11.15","type":"全套资料","name":"酉阳县泔车路K6+650维修工程","ext":"RAR","note":""},{"date":"2024.12.09","type":"全套资料","name":"酉阳县2023年小河镇高标准农田（农旅融合）项目","ext":"RAR","note":""},{"date":"2024.12.19","type":"全套资料","name":"2024年酉阳县泔溪镇泔溪村公共厕所建设项目—泔溪镇 冉伟","ext":"RAR","note":""},{"date":"2024.12.19","type":"全套资料","name":"酉阳县泔溪镇泡木村委会新建塑胶球场—泔溪镇 冉伟","ext":"RAR","note":""}],"spj":[{"date":"2019.09.18","type":"结算审核","name":"酉阳县李溪镇鹅池村安置点道路改造项目","ext":"ZIP","note":""},{"date":"2019.10.29","type":"结算审核","name":"酉阳县麻旺镇深度贫困村江北对口帮扶项目（一）","ext":"ZIP","note":""},{"date":"2019.11.25","type":"结算审核","name":"涂市镇麻田村“博爱家园”人行便民桥建设项目","ext":"ZIP","note":""},{"date":"2019.11.25","type":"结算审核","name":"麻旺镇亮垭村便民桥建设项目","ext":"ZIP","note":""},{"date":"2019.11.25","type":"结算审核","name":"麻旺镇亮垭村盖板涵桥建设项目","ext":"ZIP","note":""},{"date":"2019.12.16","type":"结算审核","name":"首创蔬菜加工厂建设项目","ext":"ZIP","note":""},{"date":"2019.12.20","type":"结算审核","name":"酉阳县龚滩镇马鞍城村石胡岭至须元村通畅工程","ext":"ZIP","note":""},{"date":"2019.12.27","type":"结算审核","name":"酉阳县铜鼓镇易地扶贫搬迁后续产业铜鼓村基础设施建设项目","ext":"ZIP","note":""},{"date":"2019.12.31","type":"预算审核","name":"南腰界镇深度贫困村江北对口帮扶项目(一)","ext":"ZIP","note":""},{"date":"2020.01.08","type":"结算审核","name":"酉阳县第三中学校新建教学楼外电线路消防水池给水和外电食堂用水工程","ext":"ZIP","note":""},{"date":"2020.03.12","type":"结算审核","name":"酉阳县“四好农村公路”南腰界镇红岩村厚木坝上-杨昌市通畅工程结算报告","ext":"ZIP","note":""},{"date":"2020.06.01","type":"结算审核","name":"桃花源街道小坝小学校运动场回填工程","ext":"ZIP","note":""},{"date":"2020.06.07","type":"概算审核","name":"渝东南综合应急救援指挥中心二期工程(一期)-室内训练馆","ext":"ZIP","note":""},{"date":"2020.06.18","type":"结算审核","name":"泔溪镇泡木村2017年整村脱贫人畜饮水工程建设项目","ext":"ZIP","note":""},{"date":"2020.09.16","type":"结算审核","name":"楠木乡红霞村2组组通达公路","ext":"ZIP","note":""},{"date":"2020.10.14","type":"结算审核","name":"酉阳自治县涂市镇初级中学校配套基础设施建设项目（新铺设塑胶运动场面层）","ext":"ZIP","note":""},{"date":"2020.11.10","type":"结算审核","name":"梁家堡村公路改造工程","ext":"ZIP","note":""},{"date":"2020.11.16","type":"结算审核","name":"龚滩镇罾潭村一组公路桥工程","ext":"ZIP","note":""},{"date":"2020.12.08","type":"结算审核","name":"酉阳县华茂预拌商品混凝土搅拌站工程（一期）实验调度室工程、设备基础工程","ext":"ZIP","note":""},{"date":"2020.12.17","type":"结算审核","name":"酉阳县两罾乡榄溪村撤并村（方家）走马岭村委至天池盖田湾通畅公路工程","ext":"ZIP","note":""},{"date":"2020.12.17","type":"结算审核","name":"酉阳县两罾乡金玉社区撤并村通畅公路工程（金竹井-龙坛子-榄溪垭口-青杆园）","ext":"ZIP","note":""},{"date":"2021.01.07","type":"结算审核","name":"酉阳县2019年花田乡“四好农村路”通组通畅公路建设项目（老龙电站-水洞子、甘家堡-老屋基、岩千底-何家湾）","ext":"ZIP","note":""},{"date":"2021.01.15","type":"结算审核","name":"2020年两罾乡乌江库区移民产业路建设项目","ext":"ZIP","note":""},{"date":"2021.01.20","type":"结算审核","name":"酉阳县兴隆镇公路2017年水毁公路维修工程","ext":"ZIP","note":""},{"date":"2021.01.28","type":"结算审核","name":"酉阳县金银山景观供水工程等7个项目","ext":"ZIP","note":""},{"date":"2021.06.17","type":"结算审核","name":"酉阳县后坪乡前锋村撤并村通畅工程（卫生院-大坪）","ext":"7Z","note":""},{"date":"2021.07.01","type":"结算审核","name":"酉阳县后坪乡“四好农村路”通组通畅工程（高山槽-火气凹-下洞坎）","ext":"7Z","note":""},{"date":"2021.07.01","type":"结算审核","name":"酉阳县后坪乡前锋村撤并村通畅工程（碑跟前-榄树湾）","ext":"7Z","note":""},{"date":"2021.09.07","type":"结算审核","name":"龙潭镇江丰至井岗公路K2+040—137.5段水毁修复工程","ext":"ZIP","note":""},{"date":"2021.09.29","type":"结算审核","name":"酉阳县长江经济带水质自动监测能力建设项目(李溪、小河2个项目)","ext":"7Z","note":""},{"date":"2021.12.14","type":"结算审核","name":"泔溪镇泡木村5组水毁水利修复项目","ext":"7Z","note":""},{"date":"2021.12.14","type":"结算审核","name":"酉阳县泔溪镇泡木村人居环境整治项目","ext":"7Z","note":""},{"date":"2021.12.17","type":"结算审核","name":"酉阳县兴隆镇谭永贵生猪养殖场建设项目","ext":"7Z","note":""},{"date":"2021.12.17","type":"结算审核","name":"酉阳县石正兵生猪养殖场建设项目","ext":"7Z","note":""},{"date":"2021.12.30","type":"结算审核","name":"苍岭镇榨菜腌制池建设项目","ext":"7Z","note":""},{"date":"2021.12.31","type":"结算审核","name":"泔溪镇泡木村水毁公路维修项目","ext":"7Z","note":""},{"date":"2022.01.14","type":"结算审核","name":"酉阳县丁市镇中心幼儿园附属工程及室外水管、厨房水电安装工程","ext":"7Z","note":""},{"date":"2022.01.20","type":"结算审核","name":"酉阳县丁市镇大龙小学校道路硬化、排水沟及食堂改道等附属工程","ext":"7Z","note":""},{"date":"2022.01.24","type":"结算审核","name":"酉阳县泔溪镇卫生院新建医疗废弃物处置间及装修新业务综合楼","ext":"7Z","note":""},{"date":"2022.03.16","type":"结算审核","name":"酉阳县麻旺镇光明村700亩茶叶基地建设项目","ext":"ZIP","note":""},{"date":"2022.03.16","type":"结算审核","name":"酉阳县麻旺镇吉安村1300亩茶叶基地建设项目","ext":"ZIP","note":""},{"date":"2022.03.16","type":"结算审核","name":"酉阳县黑水镇大涵村1300亩茶叶基地建设项目","ext":"ZIP","note":""},{"date":"2022.03.16","type":"结算审核","name":"酉阳县龙潭镇花莲、鹅塘村1300亩茶叶基地建设项目","ext":"ZIP","note":""},{"date":"2022.03.21","type":"预算审核","name":"酉阳县天馆乡产业发展基础设施建设项目","ext":"7Z","note":""},{"date":"2022.04.18","type":"结算审核","name":"涂市镇桃鱼村育苗大棚建设项目","ext":"7Z","note":""},{"date":"2022.10.24","type":"结算审核","name":"酉阳县腴地乡中心小学校校园活动场地改造（油化）项目","ext":"7Z","note":""},{"date":"2022.11.04","type":"结算审核","name":"车田乡黄坝村天场坳自来水厂设施设备维修养护项目","ext":"7Z","note":""},{"date":"2022.11.04","type":"结算审核","name":"车田乡黄坝村文家院子农旅融合产业园","ext":"7Z","note":""},{"date":"2022.12.05","type":"结算审核","name":"酉阳烈士陵园文化提升项目","ext":"7Z","note":""},{"date":"2022.12.05","type":"结算审核","name":"酉阳自治县永久性双拥标志和宣传牌广告制作安装购买服务合同","ext":"7Z","note":""},{"date":"2022.12.09","type":"结算审核","name":"酉阳县鲁渝协作党建引领乡村振兴示范带项目—南腰界基层党校","ext":"7Z","note":""},{"date":"2022.12.23","type":"计量审核","name":"酉阳县泔溪镇大板村少数民族特色村寨保护与发展项目（中期计量审核）","ext":"7Z","note":""},{"date":"2022.12.30","type":"结算审核","name":"酉阳县龙潭河五育村断面水质自动监测站建设项目","ext":"7Z","note":""},{"date":"2023.01.01","type":"结算审核","name":"酉阳县生态茶叶基地花田乡灌溉系统建设项目工程","ext":"7Z","note":""},{"date":"2023.01.04","type":"结算审核","name":"酉阳县酉水河镇老柏村经果林产业路项目","ext":"7Z","note":""},{"date":"2023.01.04","type":"结算审核","name":"酉阳县龚滩镇马鞍城村石胡岭至须元村通畅工程","ext":"7Z","note":""},{"date":"2023.01.10","type":"结算审核","name":"酉阳县2022年酉水河镇公共照明项目","ext":"7Z","note":""},{"date":"2023.06.21","type":"结算审核","name":"酉阳县宜居乡农业产业基础设施建设项目","ext":"RAR","note":""},{"date":"2023.07.05","type":"结算审核","name":"酉阳自治县可大乡新溪小学校教师宿舍楼拆除项目工程","ext":"RAR","note":""},{"date":"2023.08.04","type":"结算审核","name":"酉酬镇付家坝人行吊桥维修整治项目","ext":"RAR","note":""},{"date":"2023.09.05","type":"结算审核","name":"酉阳县第四中学校男生宿舍维修项目工程","ext":"RAR","note":""},{"date":"2023.09.05","type":"结算审核","name":"酉阳县第四中学校老教学楼维修项目工程","ext":"RAR","note":""},{"date":"2023.09.12","type":"结算审核","name":"酉阳县铜鼓乡铜西幼儿园文化建设项目","ext":"RAR","note":""},{"date":"2023.09.18","type":"结算审核","name":"酉阳县涂市镇中心幼儿园室内文化建设室内窗帘建设项目","ext":"RAR","note":""},{"date":"2023.10.08","type":"结算审核","name":"酉阳县楠木乡红庄村少数民族特色村寨保护与发展项目","ext":"RAR","note":""},{"date":"2023.10.09","type":"结算审核","name":"酉阳自治县小坝创业园小学校园维修维护工程","ext":"RAR","note":""},{"date":"2023.10.12","type":"结算审核","name":"板桥乡中心校塑胶运动场维修改造项目","ext":"RAR","note":"重庆凯弘"},{"date":"2023.10.16","type":"结算审核","name":"酉阳县万木镇楠木小学校新建围墙工程","ext":"RAR","note":"重庆凯弘"},{"date":"2023.10.18","type":"结算审核","name":"酉阳县酉水河镇老柏村柑橘基地配套设施建设项目","ext":"RAR","note":"重庆凯弘"},{"date":"2023.10.22","type":"结算审核","name":"酉酬镇田坝小学校教学楼拆除工程结算审核报告","ext":"RAR","note":"重庆凯弘"},{"date":"2023.10.27","type":"结算审核","name":"酉阳自治县2020年岩溶地区石漠化综合治理工程（林草植被保护与恢复）","ext":"ZIP","note":"重庆凯弘"},{"date":"2023.11.15","type":"结算审核","name":"酉阳县15座人行吊桥维修整治工程-后溪村老柏吊桥","ext":"RAR","note":""},{"date":"2023.11.15","type":"结算审核","name":"酉阳县小河镇桃坡村全民健身场地器材补短板工程项目","ext":"RAR","note":""},{"date":"2023.11.30","type":"结算审核","name":"重庆市酉阳第一中学校关于扩高工程拆迁户还建房（一期工程）建设项目","ext":"RAR","note":"重庆凯弘"},{"date":"2024.01.11","type":"结算审核","name":"酉阳县2023年黑水镇大涵村高标准农田(农旅融合)项目","ext":"RAR","note":""},{"date":"2024.02.02","type":"结算审核","name":"酉阳县龙潭镇主题氛围营造项目（两个项目）","ext":"RAR","note":"重庆凯弘"},{"date":"2024.04.08","type":"单价审核","name":"酉阳县人民医院外科二楼、内科楼病房及外科大楼外墙装修改造工程（一期）（核价部分）综合单价审核报告","ext":"RAR","note":""},{"date":"2024.04.08","type":"结算审核","name":"酉阳县2023年酉水河镇大地村2组（雷打湾）抗旱应急供水工程","ext":"RAR","note":""},{"date":"2024.04.08","type":"结算审核","name":"酉阳县腴地乡丰家乐源幼儿园改造项目","ext":"RAR","note":"代席勇 重庆凯弘"},{"date":"2024.04.22","type":"结算审核","name":"酉阳县丁市镇石门村产业路项目","ext":"RAR","note":"财评"},{"date":"2024.04.26","type":"结算审核","name":"酉阳县酉水河镇中心小学校围墙、登山步道等附属工程","ext":"RAR","note":"收费2K，补充资料未知费用"},{"date":"2024.04.26","type":"结算审核","name":"酉阳县酉水河镇初级中学校围墙排危工程","ext":"RAR","note":"收费1K"},{"date":"2024.05.01","type":"预算编制","name":"重庆市酉阳职业教育中心观澜园文化长廊建设项目","ext":"RAR","note":""},{"date":"2024.05.06","type":"结算审核","name":"酉阳县南腰界镇土门村大平盖村民饮水工程","ext":"RAR","note":"收费1K"},{"date":"2024.05.20","type":"预算审核","name":"酉阳县酉州高级中学校燃气安装工程","ext":"RAR","note":""},{"date":"2024.06.06","type":"结算审核","name":"酉阳县酉水河镇中心幼儿园危岩(崩塌)治理项目","ext":"RAR","note":""},{"date":"2024.06.06","type":"预算编制","name":"酉阳县铜鼓镇五人制社会足球场建设项目","ext":"RAR","note":""},{"date":"2024.06.06","type":"预算编制","name":"酉阳县黑水镇室外多功能运动场地建设项目","ext":"RAR","note":""},{"date":"2024.06.25","type":"结算审核","name":"酉阳县后坪乡乌江库区移民项目后坪乡王家村马兰水公路桥","ext":"RAR","note":"收费4.5K"},{"date":"2024.06.25","type":"结算审核","name":"酉阳县泔溪镇大板村皮都国家级传统村落保护工程项目","ext":"RAR","note":"重庆凯弘"},{"date":"2024.06.28","type":"结算审核","name":"酉阳县酉水河镇污水处理设施维修建设项目","ext":"RAR","note":""},{"date":"2024.07.02","type":"结算审核","name":"酉阳县酉水河镇大江村国家级传统村落保护工程","ext":"RAR","note":""},{"date":"2024.07.02","type":"结算审核","name":"酉阳县酉水河镇老柏村国家级传统村落保护工程","ext":"RAR","note":""},{"date":"2024.07.08","type":"结算审核","name":"酉阳县酉水河镇大江村国家级传统村落保护工程","ext":"RAR","note":"修改 兴泰"},{"date":"2024.07.08","type":"结算审核","name":"酉阳县酉水河镇老柏村国家级传统村落保护工程","ext":"RAR","note":"修改 兴泰"},{"date":"2024.07.09","type":"结算审核","name":"酉水河镇大江村群众篮球运动场建设项目","ext":"RAR","note":"重庆凯弘"},{"date":"2024.07.22","type":"结算审核","name":"双泉乡菖蒲村2组梨子树坪农村供水保障工程","ext":"RAR","note":"重庆凯弘"},{"date":"2024.07.22","type":"预算审核","name":"酉阳县中医院住院病区电路改造工程","ext":"RAR","note":"重庆凯弘"},{"date":"2024.07.30","type":"预算审核","name":"重庆市酉州高级中学校旗杆、旗台改造项目","ext":"RAR","note":"重庆凯弘"},{"date":"2024.08.09","type":"结算审核","name":"锦绣华城（原皮革厂片区棚户区改造项目）","ext":"RAR","note":""},{"date":"2024.08.13","type":"结算审核","name":"上罾潭渡口改造升级项目","ext":"RAR","note":"重庆凯弘"},{"date":"2024.08.16","type":"预算审核","name":"酉阳县桃花源新城花园村二组污水改迁工程","ext":"RAR","note":"重庆凯弘"},{"date":"2024.08.20","type":"预算编制","name":"酉阳县钟多街道社区卫生服务中心预防接种门诊（伴山华府）装修改造项目","ext":"RAR","note":"重庆凯弘"},{"date":"2024.09.06","type":"结算审核","name":"酉阳县2023年酉水河镇高标准农田（农旅融合）项目","ext":"RAR","note":""},{"date":"2024.10.15","type":"结算审核","name":"酉阳土家族苗族自治县老旧小区弱电改造项目","ext":"RAR","note":""},{"date":"2024.10.30","type":"结算审核","name":"酉阳县小河镇茶园村篮球场提档升级项目工程","ext":"RAR","note":"收费1.5K"},{"date":"2024.10.31","type":"财评结算","name":"酉阳县板溪叠石花谷生态园扶贫示范项目—C区智能喷灌系统","ext":"RAR","note":"财评"},{"date":"2024.11.15","type":"结算审核","name":"酉阳县泔车路K6+650维修工程","ext":"RAR","note":"重庆凯弘"},{"date":"2024.11.25","type":"预算编制","name":"重庆市酉阳第一中学校（高级中学）体育场地建设项目","ext":"RAR","note":""},{"date":"2024.12.09","type":"结算审核","name":"酉阳县2023年小河镇高标准农田（农旅融合）项目","ext":"RAR","note":""},{"date":"2024.12.11","type":"结算审核","name":"双泉乡白马小学校教学楼、食堂、教师宿舍等校舍屋顶渗漏维修项目","ext":"RAR","note":"重庆凯弘"},{"date":"","type":"结算审核","name":"酉阳县板溪镇叠石花谷C区草坪绿化工程（未完，施工单位起诉，退回资料）","ext":"","note":""}]};
+
+/* ============ 状态 ============ */
+let curLib = 'eng';      // all / eng / spj
+let curYear = 'all';     // 'all' 或具体年份
+
+/* 组装全部记录（带库标记） */
+const ALL = [];
+ZQ_DATA.eng.forEach(r => ALL.push({...r, lib:'eng'}));
+ZQ_DATA.spj.forEach(r => ALL.push({...r, lib:'spj'}));
+
+/* 侧边栏统计 */
+(function initStats(){
+  const years = new Set(), types = new Set();
+  ALL.forEach(r => { if(r.date && r.date.slice(0,4)) years.add(r.date.slice(0,4)); if(r.type) types.add(r.type); });
+  document.getElementById('cntAll').textContent = ALL.length;
+  document.getElementById('cntEng').textContent = ZQ_DATA.eng.length;
+  document.getElementById('cntSpj').textContent = ZQ_DATA.spj.length;
+  document.getElementById('stYears').textContent = years.size;
+  document.getElementById('stTypes').textContent = types.size;
+})();
+
+/* ============ 筛选逻辑 ============ */
+function getFiltered(){
+  let list = ALL;
+  if(curLib !== 'all') list = list.filter(r => r.lib === curLib);
+  if(curYear !== 'all') list = list.filter(r => r.date.slice(0,4) === curYear);
+  const kw = (document.getElementById('kw').value || '').trim().toLowerCase();
+  if(kw){
+    list = list.filter(r =>
+      (r.name||'').toLowerCase().includes(kw) ||
+      (r.type||'').toLowerCase().includes(kw) ||
+      (r.date||'').includes(kw) ||
+      (r.ext||'').toLowerCase().includes(kw) ||
+      (r.note||'').toLowerCase().includes(kw)
+    );
+  }
+  return list;
+}
+
+/* ============ 渲染 ============ */
+function render(){
+  const list = getFiltered();
+  const total = list.length;
+
+  // 标题
+  const libName = curLib==='eng' ? '工程资料' : curLib==='spj' ? '评审资料' : '全部资料';
+  document.getElementById('panelTitle').textContent = libName;
+  document.getElementById('panelSub').textContent = total ? `共 ${total} 条记录` : '暂无匹配记录';
+
+  // 年份Tab（按当前库生成）
+  buildYears();
+
+  // 表格（全部展开，不分页）
+  const tbody = document.getElementById('tbody');
+  if(!total){
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty">🔍 没有找到匹配的记录，试试其他关键词或筛选条件</div></td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(r => `
+      <tr>
+        <td class="tcol-date"><span class="date">${r.date || '-'}</span></td>
+        <td class="tcol-type">${r.type ? `<span class="tag ${typeClass(r.type)}">${esc(r.type)}</span>` : '<span class="ftag">未标注</span>'}</td>
+        <td class="tcol-name"><span class="proj">${esc(r.name)}</span></td>
+        <td class="tcol-note">${r.note ? `<span class="note-tag">${esc(r.note)}</span>` : '<span class="ftag">-</span>'}</td>
+      </tr>`).join('');
+  }
+
+  // 类型统计看板
+  renderBoard();
+}
+
+function renderBoard(){
+  const list = curLib==='all' ? ALL : ALL.filter(r => r.lib === curLib);
+  const cm = {};
+  list.forEach(r => { if(r.type){ cm[r.type] = (cm[r.type]||0)+1; } });
+  const arr = Object.entries(cm).sort((a,b)=>b[1]-a[1]);
+  const max = arr.length ? arr[0][1] : 1;
+  const wrap = document.getElementById('rbList');
+  if(!arr.length){ wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 6px">暂无数据</div>'; return; }
+  wrap.innerHTML = arr.map(([t,n]) => `
+    <div class="rb-row">
+      <span class="rb-name" title="${esc(t)}">${esc(t)}</span>
+      <span class="rb-bar"><i style="width:${Math.round(n/max*100)}%"></i></span>
+      <span class="rb-n">${n}</span>
+    </div>`).join('');
+}
+
+function buildYears(){
+  const list = curLib==='all' ? ALL : ALL.filter(r => r.lib === curLib);
+  const years = [...new Set(list.map(r => r.date && r.date.slice(0,4)).filter(Boolean))].sort();
+  const wrap = document.getElementById('yearsTab');
+  if(!years.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = `<span class="yr ${curYear==='all'?'on':''}" onclick="setYear('all')">全部年份</span>` +
+    years.map(y => `<span class="yr ${curYear===y?'on':''}" onclick="setYear('${y}')">${y}</span>`).join('');
+}
+
+function typeClass(t){
+  if(t.includes('审核')) return 'o';
+  if(t.includes('预算') || t.includes('概算') || t.includes('投标') || t.includes('迎检')) return 'o';
+  if(t.includes('结算') || t.includes('竣工')) return 'd';
+  return '';
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ============ 交互 ============ */
+function setLib(lib){
+  curLib = lib; curYear = 'all';
+  document.querySelectorAll('.side-item').forEach(el => el.classList.toggle('on', el.dataset.lib===lib));
+  render();
+}
+function setYear(y){ curYear = y; render(); }
+function clearKw(){
+  clearTimeout(kwTimer);
+  document.getElementById('kw').value = '';
+  document.getElementById('kwClear').classList.remove('show');
+  hideHist();
+  render();
+}
+/* 搜索框清除按钮显隐 */
+document.addEventListener('input', e => {
+  if(e.target && e.target.id === 'kw'){
+    document.getElementById('kwClear').classList.toggle('show', !!e.target.value.trim());
+  }
+});
+
+/* ============ 今日历史搜索（localStorage） ============ */
+const HIST_KEY = 'zq_hist_v1';
+function getToday(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function getHist(){
+  try{ const raw = JSON.parse(localStorage.getItem(HIST_KEY) || 'null');
+    if(raw && raw.date === getToday()) return raw.items || [];
+  }catch(e){}
+  return [];
+}
+function saveHist(items){
+  try{ localStorage.setItem(HIST_KEY, JSON.stringify({date:getToday(), items:items.slice(0,20)})); }catch(e){}
+}
+/* 输入法组合状态：拼音拼写期间不记录历史（isComposing 为浏览器原生组合标记） */
+let kwTimer = null;
+function onKwInput(e){
+  // 拼音拼写中不记录、也不启动防抖
+  if(e && e.isComposing) return;
+  // 英文/数字/中文：停顿 600ms 后再记录（防抖），避免逐字符入库
+  clearTimeout(kwTimer);
+  kwTimer = setTimeout(recordKw, 600);
+}
+function recordKw(){
+  const kw = (document.getElementById('kw').value || '').trim();
+  if(!kw) return;
+  let items = getHist().filter(x => x !== kw);
+  items.unshift(kw);
+  saveHist(items);
+  if(document.getElementById('histPanel').classList.contains('show')) renderHist();
+}
+/* 失焦时立即记录（点击页面其他位置） */
+function onKwBlur(){
+  clearTimeout(kwTimer);
+  recordKw();
+  hideHist();
+}
+function openHist(){
+  renderHist();
+  document.getElementById('histPanel').classList.add('show');
+  document.addEventListener('click', hideHistOnOutside, true);
+}
+function hideHist(){
+  document.getElementById('histPanel').classList.remove('show');
+  document.removeEventListener('click', hideHistOnOutside, true);
+}
+function hideHistOnOutside(e){
+  if(!e.target.closest('.search-box')) hideHist();
+}
+function renderHist(){
+  const list = getHist();
+  const box = document.getElementById('histList');
+  if(!list.length){
+    box.innerHTML = '<div class="hist-empty">今日暂无搜索记录</div>';
+    return;
+  }
+  box.innerHTML = list.map(k => `
+    <div class="hist-item" onclick="useHist('${esc(k).replace(/'/g,"&#39;")}')">
+      <span class="h-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><line x1="17" y1="17" x2="21" y2="21"/><circle cx="11" cy="11" r="1.5" fill="#e8871e" stroke="none"/></svg></span>
+      <span>${esc(k)}</span>
+    </div>`).join('');
+}
+function useHist(k){
+  document.getElementById('kw').value = k;
+  document.getElementById('kwClear').classList.add('show');
+  hideHist();
+  render();
+}
+function clearHist(){
+  saveHist([]);
+  renderHist();
+}
+
+/* ============ 弹窗（锁滚动） ============ */
+function openAbout(){
+  document.getElementById('aboutMask').classList.add('show');
+  document.body.classList.add('lock-scroll');
+}
+function closeAbout(){
+  document.getElementById('aboutMask').classList.remove('show');
+  document.body.classList.remove('lock-scroll');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeAbout(); hideHist(); } });
+
+/* 初始渲染 */
+render();
+</script>
+</body>
+</html>
