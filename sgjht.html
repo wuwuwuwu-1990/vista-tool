@@ -37,7 +37,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     --grid:#eef1f6; --head:#33415c; --shadow:0 2px 10px rgba(31,45,61,.06);
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  @font-face{font-family:"MSYH Web";src:url('msyh.woff2') format('woff2');font-weight:400;font-display:swap;}
+  body{margin:0;font-family:"MSYH Web","Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
        background:var(--bg);color:var(--text);font-size:13px;}
   header{background:linear-gradient(90deg,#2f6fed,#4f8ef7);color:#fff;
          padding:8px 20px 10px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);flex-wrap:wrap;}
@@ -380,7 +381,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 const PALETTE=['#3a8ee6','#22a06b','#f59e0b','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1','#eab308','#0ea5e9'];
 const WEEKDAYS=['日','一','二','三','四','五','六'];
 const CSSMAP={'var(--crit)':'#e23c39','var(--normal)':'#3a8ee6','var(--muted)':'#7a869a','var(--text)':'#1f2d3d','var(--grid)':'#eef1f6','var(--primary)':'#2f6fed','var(--head)':'#33415c'};
-const DEFAULT_FONT='-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif';
+const DEFAULT_FONT='"MSYH Web","Microsoft YaHei","PingFang SC","Segoe UI",sans-serif';
 const OLD_BLACK_FONT='-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif';
 let fontFamily=DEFAULT_FONT; // 统一字体：仅作用于图表内文字（SVG）
 const FONT_PRESETS=[
@@ -746,7 +747,7 @@ function renderGantt(c){
   const W=left+Math.max(0,rightX-left), H=gridY+tasks.length*rowH+4;
   lastXOf=xOf;
   const ink=lineStyle===4?'#111827':''; // 全网格：信息区/时间轴框线黑色
-  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#ffffff;font-family:${currentFont().replace(/"/g,"'")}"
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#ffffff;font-family:${currentFont().split(',')[0].replace(/"/g,"'")}"
     data-left="${left}" data-gridy="${gridY}" data-rowh="${rowH}">
   <defs>
     <pattern id="pStripes" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="6" fill="#fff" opacity=".55"/></pattern>
@@ -1068,7 +1069,7 @@ function renderNetwork(c){
   const H=gridY+n*rowH+4;
   const W=left+Math.max(0,rightX-left)+10; // 仅留10px防节点裁剪
   const ink=lineStyle===4?'#111827':''; // 全网格：黑色框线
-  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#ffffff;font-family:${currentFont().replace(/"/g,"'")}"
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#ffffff;font-family:${currentFont().split(',')[0].replace(/"/g,"'")}"
     data-left="${left}" data-gridy="${gridY}" data-rowh="${rowH}">
   <style>.grow:hover{opacity:.85}</style>`;
   svg+=timelineHeader(mode,dur,colW,left,top0,H,sd,rightX).svg;
@@ -1652,36 +1653,48 @@ function cleanSvgForExport(svgEl,fontScale){
   if(!svg.includes('xmlns=')) svg=svg.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
   return svg;
 }
-function svgToDataURL(svgEl,opts){
+/* ===================== Web Font 注入（SVG 导出链路，规避 SVG-as-image 禁外链） ===================== */
+let _fontP=null;
+function _b64(buf){let s='',u=new Uint8Array(buf),c=0x8000;for(let i=0;i<u.length;i+=c){s+=String.fromCharCode.apply(null,u.subarray(i,i+c));}return btoa(s);}
+async function injectFontToSVG(svgStr){
+  if(!_fontP){ _fontP=(async()=>{
+    try{ const r=await fetch('msyh.woff2'); if(!r.ok) return null;
+         return 'data:font/woff2;base64,'+_b64(await r.arrayBuffer()); }
+    catch(e){ return null; } })(); }
+  const d=await _fontP; if(!d) return svgStr;
+  const st="<style>@font-face{font-family:'MSYH Web';src:url("+d+") format('woff2');font-weight:400;font-display:swap}</style>";
+  return svgStr.replace(/<svg([^>]*)>/, '<svg$1>'+st);
+}
+async function svgToDataURL(svgEl,opts){
   opts=opts||{};
-  return new Promise((resolve,reject)=>{
-    const svg=cleanSvgForExport(svgEl,opts.fontScale||1);
-    const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const img=new Image();
-    img.onload=()=>{
-      const w=parseFloat(svgEl.getAttribute('width'))||800;
-      const h=parseFloat(svgEl.getAttribute('height'))||600;
-      const cv=document.createElement('canvas'); cv.width=w*2; cv.height=h*2;
-      const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height);
-      cx.scale(2,2); cx.drawImage(img,0,0,w,h);
-      try{ resolve(cv.toDataURL('image/png')); }catch(e){ reject(e); }
-      URL.revokeObjectURL(url);
-    };
-    img.onerror=()=>{ reject(new Error('img')); URL.revokeObjectURL(url); };
-    img.src=url;
-  });
+  let svg=cleanSvgForExport(svgEl,opts.fontScale||1);
+  svg=await injectFontToSVG(svg);
+  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('img'));i.src=url;});
+    try{ if(img.decode) await img.decode(); }catch(e){}
+    const w=parseFloat(svgEl.getAttribute('width'))||800;
+    const h=parseFloat(svgEl.getAttribute('height'))||600;
+    const cv=document.createElement('canvas'); cv.width=w*2; cv.height=h*2;
+    const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height);
+    cx.scale(2,2); cx.drawImage(img,0,0,w,h);
+    const out=cv.toDataURL('image/png');
+    URL.revokeObjectURL(url);
+    return out;
+  }catch(e){ URL.revokeObjectURL(url); throw e; }
 }
 /* ===================== 导出图绘制（Excel 内嵌 PNG 用） ===================== */
 async function drawExportCanvas(svgEl,opts){
+  try{ await document.fonts.load('400 16px "MSYH Web"'); }catch(e){}
   const {mmW,mmH,dpi,fontScale=1,projScale=1,chartScale=1,chartName}=opts;
   const dataUrl=await svgToDataURL(svgEl,{fontScale});
-  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('img'));i.src=dataUrl;});
+  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=async()=>{try{ if(i.decode) await i.decode(); }catch(e){} res(i);};i.onerror=()=>rej(new Error('img'));i.src=dataUrl;});
   const cw=Math.round(mmW/25.4*dpi), ch=Math.round(mmH/25.4*dpi);
   const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
   const cx=cv.getContext('2d');
   cx.fillStyle='#fff'; cx.fillRect(0,0,cw,ch);
-  const fam=currentFont().replace(/"/g,"'"); // canvas font 用单引号，避免引号嵌套
+  const fam=currentFont().split(',')[0].replace(/"/g,"'").trim(); // canvas font 用单引号，避免引号嵌套
   const titleH=Math.round(ch*0.10), m=Math.round(ch*0.012);
   cx.textAlign='center';
   cx.fillStyle='#1f2d3d';
@@ -1702,11 +1715,12 @@ async function drawExportCanvas(svgEl,opts){
 }
 function openAbout(){ document.getElementById('aboutOverlay').style.display='flex'; }
 function closeAbout(){ document.getElementById('aboutOverlay').style.display='none'; }
-function exportSVG(){
+async function exportSVG(){
   const sel=currentTab==='gantt'?'viewGantt':'viewNetwork';
   const svgEl=document.querySelector('#'+sel+' svg');
   if(!svgEl){ toast('请先绘制图表'); return; }
-  const blob=new Blob([cleanSvgForExport(svgEl)],{type:'image/svg+xml;charset=utf-8'});
+  const svg=await injectFontToSVG(cleanSvgForExport(svgEl));
+  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=projName()+'_'+(currentTab==='gantt'?'施工横道图':'双代号时标网络图')+'.svg';
   a.click(); URL.revokeObjectURL(a.href);
