@@ -1,1209 +1,1209 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2310b981%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2310b981dd%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20font-size%3D%2234%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%20font-family%3D%22Microsoft%20YaHei%2Csans-serif%22%20font-weight%3D%22bold%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E">
-    <title>批量压缩图片软件 v1.6.7</title>
-    <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background:#d4c4a8; min-height:100vh; display:flex; flex-direction:column; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
-        .titlebar { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 50%,#808080 100%); color:#333; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:bold; border:1px solid #707070; text-shadow:0 1px 0 rgba(255,255,255,0.5); box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 2px 4px rgba(0,0,0,0.2); background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px); }
-        .titlebar-left { display:flex; align-items:center; gap:8px; }
-        .titlebar-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; }
-        .toolbar { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); border-bottom:1px solid #909090; padding:6px 10px; display:flex; gap:4px; align-items:center; box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
-        .toolbar-btn { padding:6px 12px; background:linear-gradient(180deg,#e0e0e0 0%,#c0c0c0 100%); border:1px solid #808080; font-size:13px; cursor:pointer; color:#222; font-weight:500; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 1px 2px rgba(0,0,0,0.15); transition:all 0.1s ease; border-radius:3px; }
-        .toolbar-btn:hover { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 2px 4px rgba(0,0,0,0.2); }
-        .toolbar-btn:active { background:linear-gradient(180deg,#b0b0b0 0%,#a0a0a0 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); transform:translateY(1px); }
-        .toolbar-separator { width:1px; height:20px; background:#a0a0a0; margin:0 3px; box-shadow:1px 0 0 rgba(255,255,255,0.5); }
-        .main-content { display:flex; flex:1; padding:6px; gap:6px; }
-        .left-panel { width:380px; min-width:280px; max-width:600px; background:#d4c4a8; border:1px solid #5c4033; display:flex; flex-direction:column; flex-shrink:0; box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 4px 8px rgba(0,0,0,0.3); background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
-        .resize-handle { width:6px; cursor:col-resize; background:linear-gradient(180deg,#c0c0c0,#a0a0a0); flex-shrink:0; border:1px solid #909090; }
-        .resize-handle:hover,.resize-handle.active { background:linear-gradient(180deg,#4a6ea9,#3a5a8a); }
-        .panel-header { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); padding:9px 12px; font-size:14px; font-weight:bold; border-bottom:1px solid #808080; color:#222; text-shadow:0 1px 0 rgba(255,255,255,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
-        .panel-content { padding:12px; flex:1; }
-        .file-selection { margin-bottom:16px; }
-        .file-selection label { display:block; font-size:13px; margin-bottom:5px; color:#222; font-weight:600; }
-        .file-input-group { display:flex; gap:3px; }
-        .file-input { flex:1; padding:5px 7px; border:2px inset #c0c0c0; font-size:13px; background:white; }
-        .browse-btn { padding:5px 10px; background:linear-gradient(180deg,#f0f0f0 0%,#d8d8d8 100%); border:2px outset #c0c0c0; font-size:13px; cursor:pointer; color:#333; }
-        .browse-btn:hover { background:linear-gradient(180deg,#e0e0e0 0%,#c8c8c8 100%); }
-        .browse-btn:active { border-style:inset; }
-        .settings-group { margin-bottom:16px; }
-        .settings-group label { display:block; font-size:13px; margin-bottom:5px; color:#222; font-weight:600; }
-        .settings-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
-        .settings-row label { width:80px; font-size:13px; margin-bottom:0; color:#222; font-weight:600; }
-        .settings-row input,.settings-row select { flex:1; padding:5px 7px; border:2px inset #c0c0c0; font-size:13px; background:white; }
-        .checkbox-group { display:flex; align-items:center; gap:5px; margin-bottom:8px; }
-        .checkbox-group input { margin:0; width:15px; height:15px; }
-        .checkbox-group label { font-size:13px; margin-bottom:0; color:#222; font-weight:600; }
-        .right-content { flex:1; display:flex; flex-direction:column; gap:6px; }
-        .file-list-container { flex:1; background:#d4c4a8; border:2px inset #a0a0a0; display:flex; flex-direction:column; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
-        .file-list-header { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); padding:9px 12px; font-size:14px; font-weight:bold; border-bottom:1px solid #808080; display:flex; justify-content:space-between; align-items:center; color:#222; text-shadow:0 1px 0 rgba(255,255,255,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
-        .file-list-count { font-weight:600; color:#222; font-size:13px; }
-        .file-list { flex:1; overflow-y:auto; padding:4px; }
-        .file-item { display:flex; align-items:center; padding:7px 8px; border-bottom:1px solid #e0e0e0; font-size:13px; }
-        .file-item:hover { background:#e8e8e8; }
-        .file-icon { font-size:14px; margin-right:8px; }
-        .file-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#222; font-weight:500; }
-        .file-size { width:70px; text-align:right; color:#555; }
-        .file-status { width:90px; text-align:center; color:#555; }
-        .statusbar { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); border-top:1px solid #808080; padding:7px 12px; font-size:13px; color:#222; font-weight:500; display:flex; justify-content:space-between; border:1px solid #909090; text-shadow:0 1px 0 rgba(255,255,255,0.5); }
-        .status-left,.status-right { display:flex; gap:14px; }
-        .button-area { padding:11px 14px; background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); border:1px solid #808080; display:flex; justify-content:flex-end; gap:8px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
-        .btn { padding:8px 16px; font-size:13px; font-weight:600; border:1px solid #808080; cursor:pointer; min-width:80px; background:linear-gradient(180deg,#e0e0e0 0%,#c0c0c0 100%); color:#222; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 2px 4px rgba(0,0,0,0.15); transition:all 0.1s ease; border-radius:4px; }
-        .btn:hover { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 3px 6px rgba(0,0,0,0.2); }
-        .btn:active { background:linear-gradient(180deg,#b0b0b0 0%,#a0a0a0 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); transform:translateY(1px); }
-        .btn-primary { background:linear-gradient(180deg,#4a6ea9 0%,#3a5a8a 100%); color:white; border-color:#2a4a7a; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
-        .btn-primary:hover { background:linear-gradient(180deg,#3a5a8a 0%,#2a4a7a 100%); }
-        .btn-primary:disabled { background:linear-gradient(180deg,#a0a0a0 0%,#909090 100%); color:#666; border-color:#707070; text-shadow:none; }
-        .btn-secondary { background:linear-gradient(180deg,#f0f0f0 0%,#d8d8d8 100%); color:#333; }
-        .progress-container { padding:0 10px 8px; display:none; }
-        .progress-bar { height:16px; background:white; border:2px inset #c0c0c0; overflow:hidden; }
-        .progress-fill { height:100%; background:linear-gradient(180deg,#5a8aba 0%,#4a6ea9 100%); width:0%; transition:width 0.3s ease; }
-        .progress-text { font-size:11px; color:#666; margin-top:3px; text-align:center; }
-        .drop-zone { border:2px dashed #a0a0a0; margin:6px; padding:40px; text-align:center; background:#e8e8e8; color:#666; font-size:11px; display:none; }
-        .drop-zone.dragover { border-color:#4a6ea9; background:#d0d0d0; }
-        @media (max-width:800px) { .main-content{flex-direction:column;} .left-panel{width:100%!important;max-width:none;} .resize-handle{display:none;} }
-        .file-download-btn { padding:2px 6px!important; font-size:10px!important; min-width:auto!important; }
-        .file-download-btn:disabled { opacity:0.5; cursor:not-allowed; }
-        .file-size[title] { cursor:help; }
-        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1000; justify-content:center; align-items:center; }
-        .modal-overlay.active { display:flex; }
-        .modal { background:#d4c4a8; border:2px solid #5c4033; box-shadow:8px 8px 16px rgba(0,0,0,0.4); width:420px; max-height:80vh; display:flex; flex-direction:column; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); border-radius:8px; overflow:hidden; }
-        .modal-titlebar { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); color:#333; padding:10px 14px; font-size:13px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; text-shadow:0 1px 0 rgba(255,255,255,0.6); border-bottom:1px solid #808080; box-shadow:inset 0 1px 0 rgba(255,255,255,0.5); border-radius:6px 6px 0 0; }
-        .modal-close { background:linear-gradient(180deg,#e0e0e0 0%,#c0c0c0 100%); border:1px solid #808080; color:#333; font-size:12px; cursor:pointer; padding:0 8px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 1px 2px rgba(0,0,0,0.15); transition:all 0.1s ease; border-radius:3px; }
-        .modal-close:hover { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 2px 4px rgba(0,0,0,0.2); }
-        .modal-close:active { background:linear-gradient(180deg,#b0b0b0 0%,#a0a0a0 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); transform:translateY(1px); }
-        .modal-body { padding:12px; overflow-y:auto; flex:1; }
-        .modal-section { margin-bottom:14px; border:2px inset #a0a0a0; background:#d4c4a8; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
-        .modal-section-header { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); padding:6px 10px; font-size:12px; font-weight:bold; border-bottom:1px solid #808080; color:#333; text-shadow:0 1px 0 rgba(255,255,255,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
-        .modal-section-body { padding:8px; }
-        .modal-row { display:flex; align-items:center; margin-bottom:6px; font-size:11px; }
-        .modal-row:last-child { margin-bottom:0; }
-        .modal-row label { width:80px; color:#333; flex-shrink:0; }
-        .modal-row input,.modal-row select { flex:1; padding:3px 5px; border:2px inset #c0c0c0; font-size:11px; background:white; }
-        .modal-row input[type="range"] { margin-right:6px; }
-        .modal-row .value-display { width:35px; text-align:right; font-size:11px; color:#333; }
-        .modal-checkbox { display:flex; align-items:center; gap:4px; margin-bottom:4px; font-size:11px; color:#333; }
-        .modal-checkbox:last-child { margin-bottom:0; }
-        .modal-footer { padding:10px 14px; background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); border-top:1px solid #808080; display:flex; justify-content:flex-end; gap:8px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); border-radius:0 0 6px 6px; }
-        .modal-footer .btn { padding:4px 16px; font-size:11px; }
-        </style>
-</head>
-<body>
-    <!-- 标题栏 -->
-    <div class="titlebar">
-        <div class="titlebar-left">
-            <div class="titlebar-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="cameraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#4a90d9;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#6c5ce7;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <rect x="2" y="5" width="20" height="14" rx="3" fill="url(#cameraGrad)" stroke="#2a4a7a" stroke-width="1"/>
-                    <circle cx="12" cy="12" r="4" fill="white" stroke="#2a4a7a" stroke-width="1"/>
-                    <circle cx="12" cy="12" r="2" fill="#2a4a7a"/>
-                    <rect x="16" y="7" width="3" height="2" rx="1" fill="white" opacity="0.8"/>
-                </svg>
-            </div>
-            <span>批量压缩图片软件 v1.6.7</span>
-        </div>
-    </div>
-    
-    <!-- 工具栏 -->
-    <div class="toolbar">
-        <button class="toolbar-btn" id="addFilesBtn">📷 添加文件</button>
-        <button class="toolbar-btn" id="addFolderBtn">📂 添加文件夹</button>
-        <div class="toolbar-separator"></div>
-        <button class="toolbar-btn" id="removeSelectedBtn">✕ 删除选中</button>
-        <button class="toolbar-btn" id="clearAllBtn">🗑️ 清空列表</button>
-        <div class="toolbar-separator"></div>
-        <button class="toolbar-btn" id="settingsBtn">⚙ 设置</button>
-        <button class="toolbar-btn" id="aboutBtn">ℹ️ 关于</button>
-    </div>
-    
-    <!-- 主内容区 -->
-    <div class="main-content">
-        <!-- 左侧面板 -->
-        <div class="left-panel">
-            <div class="panel-header">压缩设置</div>
-            <div class="panel-content">
-                <!-- 文件选择 -->
-                <div class="file-selection">
-                    <label>输出目录:</label>
-                    <div class="file-input-group">
-                        <input type="text" class="file-input" id="outputDir" placeholder="点击右侧按钮选择输出文件夹" readonly>
-                        <button class="browse-btn" id="browseOutputBtn" style="background:#4a90d9;color:white;border-color:#357abd;">📁 选择文件夹</button>
-                    </div>
-                    <div style="font-size:13px;color:#fff;margin-top:6px;font-weight:bold;background:linear-gradient(135deg,#e74c3c,#c0392b);padding:6px 10px;border-radius:4px;text-shadow:0 1px 1px rgba(0,0,0,0.2);box-shadow:0 2px 4px rgba(231,76,60,0.3);letter-spacing:0.5px;" id="outputDirHint">⚠ 选择后压缩完自动保存到该目录，可覆盖原文件</div>
-                </div>
-                
-                <!-- 压缩设置 -->
-                <div class="settings-group">
-                    <label>压缩质量:</label>
-                    <div class="settings-row">
-                        <label>质量:</label>
-                        <input type="range" id="quality" min="10" max="100" value="80">
-                        <span id="qualityValue" style="font-size:13px;font-weight:600;color:#222;">80%</span>
-                    </div>
-                    
-                    <div class="settings-row">
-                        <label>格式:</label>
-                        <select id="outputFormat">
-                            <option value="original">保持原格式</option>
-                            <option value="jpeg">JPEG</option>
-                            <option value="png">PNG</option>
-                            <option value="webp">WebP</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- 尺寸设置 -->
-                <div class="settings-group">
-                    <label>尺寸调整:</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="resizeEnabled">
-                        <label for="resizeEnabled">启用尺寸调整</label>
-                    </div>
-                    
-                    <div class="settings-row">
-                        <label>最大宽度:</label>
-                        <input type="number" id="maxWidth" placeholder="不限制" min="100">
-                        <span style="font-size:13px;font-weight:600;">px</span>
-                    </div>
-                    
-                    <div class="settings-row">
-                        <label>最大高度:</label>
-                        <input type="number" id="maxHeight" placeholder="不限制" min="100">
-                        <span style="font-size:13px;font-weight:600;">px</span>
-                    </div>
-                    
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="keepRatio" checked>
-                        <label for="keepRatio">保持宽高比</label>
-                    </div>
-                </div>
-                
-                <!-- 高级选项 -->
-                <div class="settings-group">
-                    <label>高级选项:</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="removeExif">
-                        <label for="removeExif">移除EXIF信息</label>
-                    </div>
-                    
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="overwrite">
-                        <label for="overwrite">覆盖原文件</label>
-                    </div>
-                    
-                    <div class="settings-row">
-                        <label>文件命名:</label>
-                        <select id="namingPattern">
-                            <option value="original">原文件名</option>
-                            <option value="suffix">原文件名_压缩</option>
-                            <option value="prefix">压缩_原文件名</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 拖动分隔条 -->
-        <div class="resize-handle" id="resizeHandle"></div>
-        
-        <!-- 右侧内容区 -->
-        <div class="right-content">
-            <!-- 文件列表 -->
-            <div class="file-list-container">
-                <div class="file-list-header">
-                    <span>文件列表</span>
-                    <span class="file-list-count" id="fileCount">0 个文件</span>
-                </div>
-                
-                <!-- 拖放区域 -->
-                <div class="drop-zone" id="dropZone">
-                    拖放图片文件或文件夹到这里
-                </div>
-                
-                <!-- 文件列表 -->
-                <div class="file-list" id="fileList">
-                    <!-- 文件项将在这里动态生成 -->
-                </div>
-            </div>
-            
-            <!-- 进度条 -->
-            <div class="progress-container" id="progressContainer">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">准备中...</div>
-            </div>
-            
-            <!-- 按钮区域 -->
-            <div class="button-area">
-                <button class="btn btn-primary" id="compressBtn">开始压缩</button>
-                <button class="btn btn-primary" id="downloadAllBtn" disabled>全部下载</button>
-                <button class="btn btn-secondary" id="cancelBtn">取消</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 状态栏 -->
-    <div class="statusbar">
-        <div class="status-left">
-            <span>就绪</span>
-            <span>文件数: <span id="statusFileCount">0</span></span>
-            <span>总大小: <span id="statusTotalSize">0 KB</span></span>
-        </div>
-        <div class="status-right">
-            <span>压缩率: <span id="statusCompressionRatio">0%</span></span>
-            <span>已处理: <span id="statusProcessed">0</span></span>
-        </div>
-    </div>
-    
-    <!-- 设置弹窗 -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal">
-            <div class="modal-titlebar">
-                <span>⚙️ 设置</span>
-                <button class="modal-close" id="settingsCloseBtn">×</button>
-            </div>
-            <div class="modal-body">
-                <!-- 默认压缩设置 -->
-                <div class="modal-section">
-                    <div class="modal-section-header">默认压缩设置</div>
-                    <div class="modal-section-body">
-                        <div class="modal-row">
-                            <label>默认质量:</label>
-                            <input type="range" id="settingQuality" min="10" max="100" value="80">
-                            <span class="value-display" id="settingQualityValue">80%</span>
-                        </div>
-                        <div class="modal-row">
-                            <label>默认格式:</label>
-                            <select id="settingFormat">
-                                <option value="original">保持原格式</option>
-                                <option value="jpeg">JPEG</option>
-                                <option value="png">PNG</option>
-                                <option value="webp">WebP</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 默认尺寸设置 -->
-                <div class="modal-section">
-                    <div class="modal-section-header">默认尺寸设置</div>
-                    <div class="modal-section-body">
-                        <div class="modal-checkbox">
-                            <input type="checkbox" id="settingResizeEnabled">
-                            <label for="settingResizeEnabled">默认启用尺寸调整</label>
-                        </div>
-                        <div class="modal-row">
-                            <label>最大宽度:</label>
-                            <input type="number" id="settingMaxWidth" placeholder="不限制" min="100">
-                            <span style="margin-left:4px;">px</span>
-                        </div>
-                        <div class="modal-row">
-                            <label>最大高度:</label>
-                            <input type="number" id="settingMaxHeight" placeholder="不限制" min="100">
-                            <span style="margin-left:4px;">px</span>
-                        </div>
-                        <div class="modal-checkbox">
-                            <input type="checkbox" id="settingKeepRatio" checked>
-                            <label for="settingKeepRatio">默认保持宽高比</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 默认高级选项 -->
-                <div class="modal-section">
-                    <div class="modal-section-header">默认高级选项</div>
-                    <div class="modal-section-body">
-                        <div class="modal-checkbox">
-                            <input type="checkbox" id="settingRemoveExif">
-                            <label for="settingRemoveExif">默认移除EXIF信息</label>
-                        </div>
-                        <div class="modal-checkbox">
-                            <input type="checkbox" id="settingOverwrite">
-                            <label for="settingOverwrite">默认覆盖原文件</label>
-                        </div>
-                        <div class="modal-row">
-                            <label>文件命名:</label>
-                            <select id="settingNaming">
-                                <option value="original">原文件名</option>
-                                <option value="suffix">原文件名_压缩</option>
-                                <option value="prefix">压缩_原文件名</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 其他设置 -->
-                <div class="modal-section">
-                    <div class="modal-section-header">其他</div>
-                    <div class="modal-section-body">
-                        <div class="modal-checkbox">
-                            <input type="checkbox" id="settingAutoLoad">
-                            <label for="settingAutoLoad">启动时自动加载上次设置</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="settingsResetBtn">恢复默认</button>
-                <button class="btn btn-secondary" id="settingsCancelBtn">取消</button>
-                <button class="btn btn-primary" id="settingsSaveBtn">保存</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 关于弹窗 -->
-    <div class="modal-overlay" id="aboutModal">
-        <div class="modal" style="width:480px;">
-            <div class="modal-titlebar">
-                <span>📋 关于</span>
-                <button class="modal-close" id="aboutCloseBtn">×</button>
-            </div>
-            <div class="modal-body" id="aboutContent">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="aboutOkBtn">确定</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        class BatchImageCompressor {
-            constructor() {
-                this.files = [];
-                this.compressedFiles = [];
-                this.isProcessing = false;
-                this.outputDirHandle = null; // File System Access API 目录句柄（Chrome/Edge写入用）
-                this.outputDirName = ''; // 输出目录名称（所有浏览器通用）
-                this.initElements();
-                this.initEvents();
-                this.initDragAndDrop();
-                this.loadSettings(); // 加载保存的设置
-            }
-            
-            initElements() {
-                // 按钮
-                this.addFilesBtn = document.getElementById('addFilesBtn');
-                this.addFolderBtn = document.getElementById('addFolderBtn');
-                this.removeSelectedBtn = document.getElementById('removeSelectedBtn');
-                this.clearAllBtn = document.getElementById('clearAllBtn');
-                this.settingsBtn = document.getElementById('settingsBtn');
-                this.aboutBtn = document.getElementById('aboutBtn');
-                this.browseOutputBtn = document.getElementById('browseOutputBtn');
-                this.compressBtn = document.getElementById('compressBtn');
-                this.downloadAllBtn = document.getElementById('downloadAllBtn');
-                this.cancelBtn = document.getElementById('cancelBtn');
-                
-                // 输入元素
-                this.outputDir = document.getElementById('outputDir');
-                this.quality = document.getElementById('quality');
-                this.qualityValue = document.getElementById('qualityValue');
-                this.outputFormat = document.getElementById('outputFormat');
-                this.resizeEnabled = document.getElementById('resizeEnabled');
-                this.maxWidth = document.getElementById('maxWidth');
-                this.maxHeight = document.getElementById('maxHeight');
-                this.keepRatio = document.getElementById('keepRatio');
-                this.removeExif = document.getElementById('removeExif');
-                this.overwrite = document.getElementById('overwrite');
-                this.namingPattern = document.getElementById('namingPattern');
-                
-                // 显示元素
-                this.fileCount = document.getElementById('fileCount');
-                this.fileList = document.getElementById('fileList');
-                this.dropZone = document.getElementById('dropZone');
-                this.progressContainer = document.getElementById('progressContainer');
-                this.progressFill = document.getElementById('progressFill');
-                this.progressText = document.getElementById('progressText');
-                
-                // 状态栏
-                this.statusFileCount = document.getElementById('statusFileCount');
-                this.statusTotalSize = document.getElementById('statusTotalSize');
-                this.statusCompressionRatio = document.getElementById('statusCompressionRatio');
-                this.statusProcessed = document.getElementById('statusProcessed');
-                
-                // 隐藏的文件输入
-                this.fileInput = document.createElement('input');
-                this.fileInput.type = 'file';
-                this.fileInput.multiple = true;
-                this.fileInput.accept = 'image/*';
-                this.fileInput.style.display = 'none';
-                document.body.appendChild(this.fileInput);
-                
-                this.folderInput = document.createElement('input');
-                this.folderInput.type = 'file';
-                this.folderInput.webkitdirectory = true;
-                this.folderInput.style.display = 'none';
-                document.body.appendChild(this.folderInput);
-                
-                // 输出目录选择器（使用 webkitdirectory，兼容所有浏览器）
-                this.outputFolderInput = document.createElement('input');
-                this.outputFolderInput.type = 'file';
-                this.outputFolderInput.webkitdirectory = true;
-                this.outputFolderInput.style.display = 'none';
-                document.body.appendChild(this.outputFolderInput);
-                
-                // 设置弹窗元素
-                this.settingsModal = document.getElementById('settingsModal');
-                this.settingsCloseBtn = document.getElementById('settingsCloseBtn');
-                this.settingsCancelBtn = document.getElementById('settingsCancelBtn');
-                this.settingsSaveBtn = document.getElementById('settingsSaveBtn');
-                this.settingsResetBtn = document.getElementById('settingsResetBtn');
-                this.settingQuality = document.getElementById('settingQuality');
-                this.settingQualityValue = document.getElementById('settingQualityValue');
-                this.settingFormat = document.getElementById('settingFormat');
-                this.settingResizeEnabled = document.getElementById('settingResizeEnabled');
-                this.settingMaxWidth = document.getElementById('settingMaxWidth');
-                this.settingMaxHeight = document.getElementById('settingMaxHeight');
-                this.settingKeepRatio = document.getElementById('settingKeepRatio');
-                this.settingRemoveExif = document.getElementById('settingRemoveExif');
-                this.settingOverwrite = document.getElementById('settingOverwrite');
-                this.settingNaming = document.getElementById('settingNaming');
-                this.settingAutoLoad = document.getElementById('settingAutoLoad');
-                
-                // 拖动分隔条
-                this.resizeHandle = document.getElementById('resizeHandle');
-                this.leftPanel = document.querySelector('.left-panel');
-            }
-            
-            initEvents() {
-                // 按钮事件
-                this.addFilesBtn.addEventListener('click', () => this.fileInput.click());
-                this.addFolderBtn.addEventListener('click', () => this.folderInput.click());
-                this.removeSelectedBtn.addEventListener('click', () => this.removeSelected());
-                this.clearAllBtn.addEventListener('click', () => this.clearAll());
-                this.settingsBtn.addEventListener('click', () => this.showSettings());
-                this.aboutBtn.addEventListener('click', () => this.showAbout());
-                this.browseOutputBtn.addEventListener('click', () => this.outputFolderInput.click());
-                this.compressBtn.addEventListener('click', () => this.startCompression());
-                this.downloadAllBtn.addEventListener('click', () => this.downloadAll());
-                this.cancelBtn.addEventListener('click', () => this.cancelCompression());
-                
-                // 文件下载按钮事件委托
-                this.fileList.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('file-download-btn')) {
-                        const index = parseInt(e.target.dataset.index);
-                        this.downloadSingleFile(index);
-                    }
-                });
-                
-                // 文件输入事件
-                this.fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
-                this.folderInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
-                this.outputFolderInput.addEventListener('change', (e) => this.handleOutputFolder(e.target.files));
-                
-                // 质量滑块事件
-                this.quality.addEventListener('input', (e) => {
-                    this.qualityValue.textContent = e.target.value + '%';
-                });
-                
-                // 尺寸调整复选框事件
-                this.resizeEnabled.addEventListener('change', (e) => {
-                    this.maxWidth.disabled = !e.target.checked;
-                    this.maxHeight.disabled = !e.target.checked;
-                });
-                
-                // 设置弹窗事件
-                this.settingsCloseBtn.addEventListener('click', () => this.closeSettings());
-                this.settingsCancelBtn.addEventListener('click', () => this.closeSettings());
-                this.settingsSaveBtn.addEventListener('click', () => this.saveSettings());
-                this.settingsResetBtn.addEventListener('click', () => this.resetSettings());
-                
-                // 设置弹窗中质量滑块事件
-                this.settingQuality.addEventListener('input', (e) => {
-                    this.settingQualityValue.textContent = e.target.value + '%';
-                });
-                
-                // 点击遮罩关闭弹窗
-                this.settingsModal.addEventListener('click', (e) => {
-                    if (e.target === this.settingsModal) this.closeSettings();
-                });
-                
-                // 关于弹窗事件
-                this.aboutModal = document.getElementById('aboutModal');
-                document.getElementById('aboutCloseBtn').addEventListener('click', () => this.closeAbout());
-                document.getElementById('aboutOkBtn').addEventListener('click', () => this.closeAbout());
-                this.aboutModal.addEventListener('click', (e) => {
-                    if (e.target === this.aboutModal) this.closeAbout();
-                });
-                
-                // 拖动分隔条调整左右面板宽度
-                this.initResizeHandle();
-            }
-            
-            initResizeHandle() {
-                let isResizing = false;
-                let startX = 0;
-                let startWidth = 0;
-                
-                const handle = this.resizeHandle;
-                const panel = this.leftPanel;
-                
-                handle.addEventListener('mousedown', (e) => {
-                    isResizing = true;
-                    startX = e.clientX;
-                    startWidth = panel.offsetWidth;
-                    handle.classList.add('active');
-                    document.body.style.cursor = 'col-resize';
-                    document.body.style.userSelect = 'none';
-                    e.preventDefault();
-                });
-                
-                document.addEventListener('mousemove', (e) => {
-                    if (!isResizing) return;
-                    const diff = e.clientX - startX;
-                    const newWidth = Math.min(Math.max(startWidth + diff, 280), 600);
-                    panel.style.width = newWidth + 'px';
-                });
-                
-                document.addEventListener('mouseup', () => {
-                    if (isResizing) {
-                        isResizing = false;
-                        handle.classList.remove('active');
-                        document.body.style.cursor = '';
-                        document.body.style.userSelect = '';
-                    }
-                });
-            }
-            
-            initDragAndDrop() {
-                // 拖放事件
-                this.dropZone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    this.dropZone.classList.add('dragover');
-                    this.dropZone.style.display = 'block';
-                });
-                
-                this.dropZone.addEventListener('dragleave', () => {
-                    this.dropZone.classList.remove('dragover');
-                    if (this.files.length === 0) {
-                        this.dropZone.style.display = 'none';
-                    }
-                });
-                
-                this.dropZone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    this.dropZone.classList.remove('dragover');
-                    this.handleFiles(e.dataTransfer.files);
-                });
-                
-                // 整个文件列表区域的拖放
-                this.fileList.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    this.dropZone.style.display = 'block';
-                });
-                
-                this.fileList.addEventListener('dragleave', () => {
-                    if (this.files.length === 0) {
-                        this.dropZone.style.display = 'none';
-                    }
-                });
-                
-                this.fileList.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    this.handleFiles(e.dataTransfer.files);
-                });
-            }
-            
-            handleFiles(fileList) {
-                const newFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'));
-                
-                if (newFiles.length === 0) {
-                    alert('请选择图片文件！');
-                    return;
-                }
-                
-                this.files = [...this.files, ...newFiles];
-                this.updateFileList();
-                this.updateStatusBar();
-                this.dropZone.style.display = 'none';
-                
-                // 清空文件输入
-                this.fileInput.value = '';
-                this.folderInput.value = '';
-            }
-            
-            updateFileList() {
-                this.fileList.innerHTML = '';
-                this.fileCount.textContent = `${this.files.length} 个文件`;
-                
-                this.files.forEach((file, index) => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    fileItem.innerHTML = `
-                        <input type="checkbox" class="file-checkbox" data-index="${index}">
-                        <div class="file-icon">📷</div>
-                        <div class="file-name" title="${file.name}">${file.name}</div>
-                        <div class="file-size">${this.formatSize(file.size)}</div>
-                        <div class="file-status">待处理</div>
-                        <button class="btn btn-secondary file-download-btn" data-index="${index}" disabled style="padding:2px 6px;font-size:11px;margin-left:4px;">下载</button>
-                    `;
-                    this.fileList.appendChild(fileItem);
-                });
-            }
-            
-            updateStatusBar() {
-                this.statusFileCount.textContent = this.files.length;
-                
-                const totalSize = this.files.reduce((sum, file) => sum + file.size, 0);
-                this.statusTotalSize.textContent = this.formatSize(totalSize);
-                
-                if (this.compressedFiles.length > 0) {
-                    const originalSize = this.files.reduce((sum, file) => sum + file.size, 0);
-                    const compressedSize = this.compressedFiles.reduce((sum, file) => sum + file.compressedSize, 0);
-                    const ratio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
-                    this.statusCompressionRatio.textContent = ratio + '%';
-                    this.statusProcessed.textContent = this.compressedFiles.length;
-                }
-            }
-            
-            formatSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-            }
-            
-            removeSelected() {
-                const checkboxes = this.fileList.querySelectorAll('.file-checkbox:checked');
-                const indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
-                
-                this.files = this.files.filter((_, index) => !indices.includes(index));
-                this.updateFileList();
-                this.updateStatusBar();
-            }
-            
-            clearAll() {
-                this.files = [];
-                this.compressedFiles = [];
-                this.updateFileList();
-                this.updateStatusBar();
-                this.dropZone.style.display = 'block';
-            }
-            
-            showSettings() {
-                // 将当前左侧面板的值同步到设置弹窗
-                this.settingQuality.value = this.quality.value;
-                this.settingQualityValue.textContent = this.quality.value + '%';
-                this.settingFormat.value = this.outputFormat.value;
-                this.settingResizeEnabled.checked = this.resizeEnabled.checked;
-                this.settingMaxWidth.value = this.maxWidth.value;
-                this.settingMaxHeight.value = this.maxHeight.value;
-                this.settingKeepRatio.checked = this.keepRatio.checked;
-                this.settingRemoveExif.checked = this.removeExif.checked;
-                this.settingOverwrite.checked = this.overwrite.checked;
-                this.settingNaming.value = this.namingPattern.value;
-                
-                // 读取自动加载设置
-                const saved = localStorage.getItem('batchImageCompressor_settings');
-                if (saved) {
-                    try {
-                        const s = JSON.parse(saved);
-                        this.settingAutoLoad.checked = s.autoLoad !== false;
-                    } catch(e) {}
-                }
-                
-                this.settingsModal.classList.add('active');
-            }
-            
-            closeSettings() {
-                this.settingsModal.classList.remove('active');
-            }
-            
-            closeAbout() {
-                this.aboutModal.classList.remove('active');
-            }
-            
-            saveSettings() {
-                const settings = {
-                    quality: parseInt(this.settingQuality.value),
-                    format: this.settingFormat.value,
-                    resizeEnabled: this.settingResizeEnabled.checked,
-                    maxWidth: this.settingMaxWidth.value,
-                    maxHeight: this.settingMaxHeight.value,
-                    keepRatio: this.settingKeepRatio.checked,
-                    removeExif: this.settingRemoveExif.checked,
-                    overwrite: this.settingOverwrite.checked,
-                    naming: this.settingNaming.value,
-                    autoLoad: this.settingAutoLoad.checked
-                };
-                
-                localStorage.setItem('batchImageCompressor_settings', JSON.stringify(settings));
-                
-                // 立即应用到左侧面板
-                this.applySettings(settings);
-                
-                this.closeSettings();
-                alert('✅ 设置已保存！\n\n' + (settings.autoLoad ? '下次打开时将自动加载这些设置。' : '已关闭自动加载，下次打开将使用默认值。'));
-            }
-            
-            loadSettings() {
-                const saved = localStorage.getItem('batchImageCompressor_settings');
-                if (!saved) return;
-                
-                try {
-                    const settings = JSON.parse(saved);
-                    if (settings.autoLoad !== false) {
-                        this.applySettings(settings);
-                    }
-                } catch(e) {
-                    console.error('加载设置失败:', e);
-                }
-            }
-            
-            applySettings(settings) {
-                this.quality.value = settings.quality;
-                this.qualityValue.textContent = settings.quality + '%';
-                this.outputFormat.value = settings.format;
-                this.resizeEnabled.checked = settings.resizeEnabled;
-                this.maxWidth.value = settings.maxWidth;
-                this.maxHeight.value = settings.maxHeight;
-                this.maxWidth.disabled = !settings.resizeEnabled;
-                this.maxHeight.disabled = !settings.resizeEnabled;
-                this.keepRatio.checked = settings.keepRatio;
-                this.removeExif.checked = settings.removeExif;
-                this.overwrite.checked = settings.overwrite;
-                this.namingPattern.value = settings.naming;
-            }
-            
-            resetSettings() {
-                if (confirm('确定要恢复默认设置吗？\n\n将清除所有已保存的设置。')) {
-                    localStorage.removeItem('batchImageCompressor_settings');
-                    
-                    // 重置弹窗中的值
-                    this.settingQuality.value = 80;
-                    this.settingQualityValue.textContent = '80%';
-                    this.settingFormat.value = 'original';
-                    this.settingResizeEnabled.checked = false;
-                    this.settingMaxWidth.value = '';
-                    this.settingMaxHeight.value = '';
-                    this.settingKeepRatio.checked = true;
-                    this.settingRemoveExif.checked = false;
-                    this.settingOverwrite.checked = false;
-                    this.settingNaming.value = 'original';
-                    this.settingAutoLoad.checked = true;
-                    
-                    // 重置左侧面板
-                    this.quality.value = 80;
-                    this.qualityValue.textContent = '80%';
-                    this.outputFormat.value = 'original';
-                    this.resizeEnabled.checked = false;
-                    this.maxWidth.value = '';
-                    this.maxHeight.value = '';
-                    this.maxWidth.disabled = true;
-                    this.maxHeight.disabled = true;
-                    this.keepRatio.checked = true;
-                    this.removeExif.checked = false;
-                    this.overwrite.checked = false;
-                    this.namingPattern.value = 'original';
-                    
-                    this.closeSettings();
-                    alert('✅ 已恢复默认设置！');
-                }
-            }
-            
-            showAbout() {
-                const hasWriteAccess = this.outputDirHandle ? '✅ 已获得写入权限' : '⚠️ 未获得写入权限（将使用下载方式）';
-                const saved = localStorage.getItem('batchImageCompressor_settings');
-                const settingsStatus = saved ? '✅ 已保存自定义设置' : '使用默认设置';
-                
-                const aboutContent = document.getElementById('aboutContent');
-                aboutContent.innerHTML = `
-                    <div style="text-align:center;padding:8px 0 16px;border-bottom:1px solid #e0e0e0;margin-bottom:16px;">
-                        <div style="font-size:24px;margin-bottom:6px;">📷</div>
-                        <div style="font-size:16px;font-weight:bold;color:#333;">批量压缩图片软件</div>
-                        <div style="font-size:12px;color:#666;margin-top:4px;">v1.6.7</div>
-                    </div>
-                    <div style="font-size:12px;line-height:1.8;color:#444;">
-                        <div style="font-weight:bold;margin-bottom:6px;color:#333;">功能特点：</div>
-                        <ul style="margin:0;padding-left:20px;">
-                            <li>支持批量压缩图片</li>
-                            <li>支持多种图片格式（JPG/PNG/WebP/BMP/GIF）</li>
-                            <li>支持尺寸调整</li>
-                            <li>支持质量调节</li>
-                            <li>选择输出文件夹后自动写入（Chrome/Edge）</li>
-                            <li>支持覆盖原文件</li>
-                            <li>支持单个文件下载和批量下载</li>
-                            <li>支持保存/加载自定义设置</li>
-                            <li>左右面板可拖动调整宽度</li>
-                            <li>纯前端处理，保护隐私</li>
-                        </ul>
-                        <div style="font-weight:bold;margin:12px 0 6px;color:#333;">使用方法：</div>
-                        <ol style="margin:0;padding-left:20px;">
-                            <li>添加图片</li>
-                            <li>点击"选择文件夹"选择输出目录</li>
-                            <li>勾选"覆盖原文件"可直接覆盖</li>
-                            <li>点击"开始压缩"自动完成</li>
-                        </ol>
-                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e0e0e0;font-size:11px;color:#888;">
-                            <div>当前输出目录: <strong>${this.outputDirName || '未选择'}</strong></div>
-                            <div>写入权限: ${hasWriteAccess}</div>
-                            <div>设置状态: ${settingsStatus}</div>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('aboutModal').classList.add('active');
-            }
-            
-            handleOutputFolder(fileList) {
-                // 从 webkitdirectory 选择的文件中提取文件夹路径
-                if (fileList.length === 0) return;
-                
-                // 提取文件夹名称（从第一个文件的 relativePath 或 webkitRelativePath）
-                const firstFile = fileList[0];
-                const relativePath = firstFile.webkitRelativePath || firstFile.relativePath || '';
-                
-                // 文件夹名称是路径的第一段
-                const folderName = relativePath.split('/')[0] || '所选文件夹';
-                this.outputDirName = folderName;
-                
-                // 显示文件夹名称
-                this.outputDir.value = '📁 ' + folderName;
-                this.outputDir.style.color = '#51cf66';
-                this.outputDir.style.fontWeight = 'bold';
-                
-                // 尝试获取写入权限（Chrome/Edge 的 File System Access API）
-                if ('showDirectoryPicker' in window) {
-                    // 提示用户在Chrome/Edge中授权写入
-                    const hint = document.getElementById('outputDirHint');
-                    hint.textContent = '✅ 已选择文件夹: ' + folderName + '（Chrome/Edge下将自动获得写入权限）';
-                    hint.style.color = '#51cf66';
-                    
-                    // 尝试获取 showDirectoryPicker 写入权限
-                    this.tryGetWriteAccess();
-                } else {
-                    // Firefox 等浏览器：显示提示
-                    const hint = document.getElementById('outputDirHint');
-                    hint.textContent = '✅ 已选择文件夹: ' + folderName + '（压缩后将通过下载保存文件）';
-                    hint.style.color = '#4a90d9';
-                }
-                
-                // 清空输入
-                this.outputFolderInput.value = '';
-            }
-            
-            async tryGetWriteAccess() {
-                // 尝试通过 File System Access API 获取写入权限
-                try {
-                    this.outputDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                    this.outputDir.value = '📁 ' + this.outputDirHandle.name;
-                    this.outputDir.title = '已获得写入权限: ' + this.outputDirHandle.name;
-                    
-                    const hint = document.getElementById('outputDirHint');
-                    hint.textContent = '✅ 已获得写入权限，压缩后自动保存到: ' + this.outputDirHandle.name;
-                    hint.style.color = '#51cf66';
-                } catch (err) {
-                    if (err.name === 'AbortError') {
-                        // 用户取消了目录选择，使用之前的文件夹名称
-                        console.log('用户取消了写入权限授权');
-                    } else {
-                        console.error('获取写入权限失败:', err);
-                    }
-                }
-            }
-            
-            
-            async startCompression() {
-                if (this.files.length === 0) {
-                    alert('请先添加图片文件！');
-                    return;
-                }
-                
-                if (this.isProcessing) {
-                    alert('正在处理中，请稍候...');
-                    return;
-                }
-                
-                this.isProcessing = true;
-                this.compressBtn.disabled = true;
-                this.cancelBtn.disabled = false;
-                this.progressContainer.style.display = 'block';
-                
-                const quality = parseInt(this.quality.value) / 100;
-                const outputFormat = this.outputFormat.value;
-                const resizeEnabled = this.resizeEnabled.checked;
-                const maxWidth = resizeEnabled && this.maxWidth.value ? parseInt(this.maxWidth.value) : null;
-                const maxHeight = resizeEnabled && this.maxHeight.value ? parseInt(this.maxHeight.value) : null;
-                const keepRatio = this.keepRatio.checked;
-                const namingPattern = this.namingPattern.value;
-                
-                this.compressedFiles = [];
-                
-                for (let i = 0; i < this.files.length; i++) {
-                    if (!this.isProcessing) break;
-                    
-                    this.updateProgress(i, this.files.length);
-                    
-                    try {
-                        const compressed = await this.compressImage(
-                            this.files[i],
-                            quality,
-                            outputFormat,
-                            maxWidth,
-                            maxHeight,
-                            keepRatio,
-                            namingPattern
-                        );
-                        
-                        this.compressedFiles.push(compressed);
-                        this.updateFileStatus(i, '已完成', compressed);
-                        this.enableFileDownload(i);
-                    } catch (error) {
-                        console.error(`压缩失败: ${this.files[i].name}`, error);
-                        this.updateFileStatus(i, '失败', null);
-                    }
-                }
-                
-                this.isProcessing = false;
-                this.compressBtn.disabled = false;
-                this.cancelBtn.disabled = true;
-                this.downloadAllBtn.disabled = this.compressedFiles.length === 0;
-                this.updateProgress(this.files.length, this.files.length);
-                this.updateStatusBar();
-                
-                // 如果已选择输出目录且有写入权限，自动写入文件
-                if (this.outputDirHandle && this.compressedFiles.length > 0) {
-                    this.progressText.textContent = '正在写入文件到 ' + this.outputDirHandle.name + '...';
-                    let writeCount = 0;
-                    let failCount = 0;
-                    
-                    for (let i = 0; i < this.compressedFiles.length; i++) {
-                        const compressed = this.compressedFiles[i];
-                        this.progressText.textContent = `正在写入 ${i+1}/${this.compressedFiles.length}: ${compressed.newName}`;
-                        try {
-                            await this.writeFileToDirectory(compressed);
-                            writeCount++;
-                        } catch (err) {
-                            console.error(`写入失败: ${compressed.newName}`, err);
-                            failCount++;
-                        }
-                    }
-                    
-                    this.progressContainer.style.display = 'none';
-                    let msg = `✅ 压缩完成！\n\n📊 处理文件数: ${this.compressedFiles.length}\n📉 压缩率: ${this.statusCompressionRatio.textContent}\n\n📁 已自动写入到: ${this.outputDirHandle.name}\n✅ 成功: ${writeCount} 个`;
-                    if (failCount > 0) msg += `\n❌ 失败: ${failCount} 个`;
-                    alert(msg);
-                } else if (this.compressedFiles.length > 0) {
-                    // 已选择文件夹但无写入权限（Firefox等），或未选择文件夹
-                    setTimeout(() => {
-                        this.progressContainer.style.display = 'none';
-                        let msg = `✅ 压缩完成！\n\n📊 处理文件数: ${this.compressedFiles.length}\n📉 压缩率: ${this.statusCompressionRatio.textContent}`;
-                        
-                        if (this.outputDirName) {
-                            msg += `\n\n📁 已选择文件夹: ${this.outputDirName}`;
-                            msg += `\n⚠️ 当前浏览器无写入权限，请使用"全部下载"保存文件`;
-                            if ('showDirectoryPicker' in window) {
-                                msg += `\n\n💡 提示：使用Chrome/Edge打开可自动写入文件夹`;
-                            }
-                        } else {
-                            msg += `\n\n⚠️ 未选择输出目录`;
-                            msg += `\n请点击"📁 选择文件夹"后重新压缩，即可自动写入`;
-                        }
-                        
-                        msg += `\n\n或点击"全部下载"按钮保存文件`;
-                        alert(msg);
-                    }, 500);
-                }
-            }
-            
-            compressImage(file, quality, outputFormat, maxWidth, maxHeight, keepRatio, namingPattern) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        // 调整尺寸
-                        if (maxWidth && width > maxWidth) {
-                            if (keepRatio) {
-                                height = (maxWidth / width) * height;
-                            }
-                            width = maxWidth;
-                        }
-                        
-                        if (maxHeight && height > maxHeight) {
-                            if (keepRatio) {
-                                width = (maxHeight / height) * width;
-                            }
-                            height = maxHeight;
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        // 绘制图片
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // 确定输出格式
-                        let mimeType;
-                        if (outputFormat === 'original') {
-                            mimeType = file.type || 'image/jpeg';
-                        } else {
-                            mimeType = `image/${outputFormat}`;
-                        }
-                        
-                        // 压缩质量
-                        const compressedDataUrl = canvas.toDataURL(mimeType, quality);
-                        
-                        // 转换为Blob
-                        const byteString = atob(compressedDataUrl.split(',')[1]);
-                        const ab = new ArrayBuffer(byteString.length);
-                        const ia = new Uint8Array(ab);
-                        for (let i = 0; i < byteString.length; i++) {
-                            ia[i] = byteString.charCodeAt(i);
-                        }
-                        
-                        const blob = new Blob([ab], { type: mimeType });
-                        
-                        // 确定文件扩展名
-                        let extension;
-                        if (outputFormat === 'original') {
-                            extension = file.name.split('.').pop();
-                        } else {
-                            extension = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
-                        }
-                        
-                        // 生成新文件名
-                        let newName;
-                        const baseName = file.name.replace(/\.[^/.]+$/, '');
-                        
-                        switch (namingPattern) {
-                            case 'suffix':
-                                newName = baseName + '_压缩.' + extension;
-                                break;
-                            case 'prefix':
-                                newName = '压缩_' + baseName + '.' + extension;
-                                break;
-                            default:
-                                newName = baseName + '.' + extension;
-                        }
-                        
-                        resolve({
-                            originalFile: file,
-                            compressedBlob: blob,
-                            compressedUrl: URL.createObjectURL(blob),
-                            newName: newName,
-                            originalSize: file.size,
-                            compressedSize: blob.size
-                        });
-                    };
-                    
-                    img.onerror = reject;
-                    img.src = URL.createObjectURL(file);
-                });
-            }
-            
-            updateFileStatus(index, status, compressed) {
-                const fileItems = this.fileList.querySelectorAll('.file-item');
-                if (fileItems[index]) {
-                    const statusElement = fileItems[index].querySelector('.file-status');
-                    const sizeElement = fileItems[index].querySelector('.file-size');
-                    statusElement.textContent = status;
-                    
-                    if (compressed) {
-                        const ratio = ((1 - compressed.compressedSize / compressed.originalSize) * 100).toFixed(1);
-                        statusElement.textContent = `已完成 (${ratio}%)`;
-                        statusElement.style.color = '#51cf66';
-                        // 更新文件大小显示为压缩后大小
-                        if (sizeElement) {
-                            sizeElement.textContent = this.formatSize(compressed.compressedSize);
-                            sizeElement.style.color = '#51cf66';
-                            sizeElement.title = `原始: ${this.formatSize(compressed.originalSize)} → 压缩后: ${this.formatSize(compressed.compressedSize)}`;
-                        }
-                    } else if (status === '失败') {
-                        statusElement.style.color = '#ff6b6b';
-                    }
-                }
-            }
-            
-            updateProgress(current, total) {
-                const percent = (current / total) * 100;
-                this.progressFill.style.width = `${percent}%`;
-                this.progressText.textContent = `处理中... ${current}/${total}`;
-            }
-            
-            cancelCompression() {
-                this.isProcessing = false;
-                this.compressBtn.disabled = false;
-                this.cancelBtn.disabled = true;
-                this.progressContainer.style.display = 'none';
-            }
-            
-            enableFileDownload(index) {
-                const fileItems = this.fileList.querySelectorAll('.file-item');
-                if (fileItems[index]) {
-                    const downloadBtn = fileItems[index].querySelector('.file-download-btn');
-                    if (downloadBtn) {
-                        downloadBtn.disabled = false;
-                    }
-                }
-            }
-            
-            downloadSingleFile(index) {
-                if (index >= 0 && index < this.compressedFiles.length) {
-                    const compressed = this.compressedFiles[index];
-                    this.downloadBlob(compressed.compressedBlob, compressed.newName);
-                }
-            }
-            
-            downloadAll() {
-                if (this.compressedFiles.length === 0) {
-                    alert('没有可下载的压缩文件！');
-                    return;
-                }
-                
-                // 逐个下载，间隔100ms避免浏览器阻止
-                this.compressedFiles.forEach((compressed, index) => {
-                    setTimeout(() => {
-                        this.downloadBlob(compressed.compressedBlob, compressed.newName);
-                    }, index * 100);
-                });
-            }
-            
-            downloadBlob(blob, fileName) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }
-            
-            async writeFileToDirectory(compressed) {
-                if (!this.outputDirHandle) {
-                    throw new Error('未选择输出目录');
-                }
-                
-                // 覆盖模式：使用原文件名；非覆盖模式：使用压缩后文件名
-                const overwrite = this.overwrite.checked;
-                const fileName = overwrite ? compressed.originalFile.name : compressed.newName;
-                
-                const fileHandle = await this.outputDirHandle.getFileHandle(fileName, { create: true });
-                const writable = await fileHandle.createWritable();
-                await writable.write(compressed.compressedBlob);
-                await writable.close();
-            }
-        }
-        
-        // 初始化应用
-        document.addEventListener('DOMContentLoaded', () => {
-            new BatchImageCompressor();
-        });
-    </script>
-</body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2310b981%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2310b981dd%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20font-size%3D%2234%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%20font-family%3D%22Microsoft%20YaHei%2Csans-serif%22%20font-weight%3D%22bold%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <title>批量压缩图片软件 v1.6.7</title>
+    <style>
+* { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif; background:#d4c4a8; min-height:100vh; display:flex; flex-direction:column; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
+        .titlebar { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 50%,#808080 100%); color:#333; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:bold; border:1px solid #707070; text-shadow:0 1px 0 rgba(255,255,255,0.5); box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 2px 4px rgba(0,0,0,0.2); background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px); }
+        .titlebar-left { display:flex; align-items:center; gap:8px; }
+        .titlebar-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; }
+        .toolbar { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); border-bottom:1px solid #909090; padding:6px 10px; display:flex; gap:4px; align-items:center; box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
+        .toolbar-btn { padding:6px 12px; background:linear-gradient(180deg,#e0e0e0 0%,#c0c0c0 100%); border:1px solid #808080; font-size:13px; cursor:pointer; color:#222; font-weight:500; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 1px 2px rgba(0,0,0,0.15); transition:all 0.1s ease; border-radius:3px; }
+        .toolbar-btn:hover { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 2px 4px rgba(0,0,0,0.2); }
+        .toolbar-btn:active { background:linear-gradient(180deg,#b0b0b0 0%,#a0a0a0 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); transform:translateY(1px); }
+        .toolbar-separator { width:1px; height:20px; background:#a0a0a0; margin:0 3px; box-shadow:1px 0 0 rgba(255,255,255,0.5); }
+        .main-content { display:flex; flex:1; padding:6px; gap:6px; }
+        .left-panel { width:380px; min-width:280px; max-width:600px; background:#d4c4a8; border:1px solid #5c4033; display:flex; flex-direction:column; flex-shrink:0; box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 4px 8px rgba(0,0,0,0.3); background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
+        .resize-handle { width:6px; cursor:col-resize; background:linear-gradient(180deg,#c0c0c0,#a0a0a0); flex-shrink:0; border:1px solid #909090; }
+        .resize-handle:hover,.resize-handle.active { background:linear-gradient(180deg,#4a6ea9,#3a5a8a); }
+        .panel-header { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); padding:9px 12px; font-size:14px; font-weight:bold; border-bottom:1px solid #808080; color:#222; text-shadow:0 1px 0 rgba(255,255,255,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
+        .panel-content { padding:12px; flex:1; }
+        .file-selection { margin-bottom:16px; }
+        .file-selection label { display:block; font-size:13px; margin-bottom:5px; color:#222; font-weight:600; }
+        .file-input-group { display:flex; gap:3px; }
+        .file-input { flex:1; padding:5px 7px; border:2px inset #c0c0c0; font-size:13px; background:white; }
+        .browse-btn { padding:5px 10px; background:linear-gradient(180deg,#f0f0f0 0%,#d8d8d8 100%); border:2px outset #c0c0c0; font-size:13px; cursor:pointer; color:#333; }
+        .browse-btn:hover { background:linear-gradient(180deg,#e0e0e0 0%,#c8c8c8 100%); }
+        .browse-btn:active { border-style:inset; }
+        .settings-group { margin-bottom:16px; }
+        .settings-group label { display:block; font-size:13px; margin-bottom:5px; color:#222; font-weight:600; }
+        .settings-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+        .settings-row label { width:80px; font-size:13px; margin-bottom:0; color:#222; font-weight:600; }
+        .settings-row input,.settings-row select { flex:1; padding:5px 7px; border:2px inset #c0c0c0; font-size:13px; background:white; }
+        .checkbox-group { display:flex; align-items:center; gap:5px; margin-bottom:8px; }
+        .checkbox-group input { margin:0; width:15px; height:15px; }
+        .checkbox-group label { font-size:13px; margin-bottom:0; color:#222; font-weight:600; }
+        .right-content { flex:1; display:flex; flex-direction:column; gap:6px; }
+        .file-list-container { flex:1; background:#d4c4a8; border:2px inset #a0a0a0; display:flex; flex-direction:column; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
+        .file-list-header { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); padding:9px 12px; font-size:14px; font-weight:bold; border-bottom:1px solid #808080; display:flex; justify-content:space-between; align-items:center; color:#222; text-shadow:0 1px 0 rgba(255,255,255,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
+        .file-list-count { font-weight:600; color:#222; font-size:13px; }
+        .file-list { flex:1; overflow-y:auto; padding:4px; }
+        .file-item { display:flex; align-items:center; padding:7px 8px; border-bottom:1px solid #e0e0e0; font-size:13px; }
+        .file-item:hover { background:#e8e8e8; }
+        .file-icon { font-size:14px; margin-right:8px; }
+        .file-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#222; font-weight:500; }
+        .file-size { width:70px; text-align:right; color:#555; }
+        .file-status { width:90px; text-align:center; color:#555; }
+        .statusbar { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); border-top:1px solid #808080; padding:7px 12px; font-size:13px; color:#222; font-weight:500; display:flex; justify-content:space-between; border:1px solid #909090; text-shadow:0 1px 0 rgba(255,255,255,0.5); }
+        .status-left,.status-right { display:flex; gap:14px; }
+        .button-area { padding:11px 14px; background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); border:1px solid #808080; display:flex; justify-content:flex-end; gap:8px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
+        .btn { padding:8px 16px; font-size:13px; font-weight:600; border:1px solid #808080; cursor:pointer; min-width:80px; background:linear-gradient(180deg,#e0e0e0 0%,#c0c0c0 100%); color:#222; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 2px 4px rgba(0,0,0,0.15); transition:all 0.1s ease; border-radius:4px; }
+        .btn:hover { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 3px 6px rgba(0,0,0,0.2); }
+        .btn:active { background:linear-gradient(180deg,#b0b0b0 0%,#a0a0a0 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); transform:translateY(1px); }
+        .btn-primary { background:linear-gradient(180deg,#4a6ea9 0%,#3a5a8a 100%); color:white; border-color:#2a4a7a; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
+        .btn-primary:hover { background:linear-gradient(180deg,#3a5a8a 0%,#2a4a7a 100%); }
+        .btn-primary:disabled { background:linear-gradient(180deg,#a0a0a0 0%,#909090 100%); color:#666; border-color:#707070; text-shadow:none; }
+        .btn-secondary { background:linear-gradient(180deg,#f0f0f0 0%,#d8d8d8 100%); color:#333; }
+        .progress-container { padding:0 10px 8px; display:none; }
+        .progress-bar { height:16px; background:white; border:2px inset #c0c0c0; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(180deg,#5a8aba 0%,#4a6ea9 100%); width:0%; transition:width 0.3s ease; }
+        .progress-text { font-size:11px; color:#666; margin-top:3px; text-align:center; }
+        .drop-zone { border:2px dashed #a0a0a0; margin:6px; padding:40px; text-align:center; background:#e8e8e8; color:#666; font-size:11px; display:none; }
+        .drop-zone.dragover { border-color:#4a6ea9; background:#d0d0d0; }
+        @media (max-width:800px) { .main-content{flex-direction:column;} .left-panel{width:100%!important;max-width:none;} .resize-handle{display:none;} }
+        .file-download-btn { padding:2px 6px!important; font-size:10px!important; min-width:auto!important; }
+        .file-download-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .file-size[title] { cursor:help; }
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1000; justify-content:center; align-items:center; }
+        .modal-overlay.active { display:flex; }
+        .modal { background:#d4c4a8; border:2px solid #5c4033; box-shadow:8px 8px 16px rgba(0,0,0,0.4); width:420px; max-height:80vh; display:flex; flex-direction:column; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); border-radius:8px; overflow:hidden; }
+        .modal-titlebar { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); color:#333; padding:10px 14px; font-size:13px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; text-shadow:0 1px 0 rgba(255,255,255,0.6); border-bottom:1px solid #808080; box-shadow:inset 0 1px 0 rgba(255,255,255,0.5); border-radius:6px 6px 0 0; }
+        .modal-close { background:linear-gradient(180deg,#e0e0e0 0%,#c0c0c0 100%); border:1px solid #808080; color:#333; font-size:12px; cursor:pointer; padding:0 8px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 1px 2px rgba(0,0,0,0.15); transition:all 0.1s ease; border-radius:3px; }
+        .modal-close:hover { background:linear-gradient(180deg,#d0d0d0 0%,#b0b0b0 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 2px 4px rgba(0,0,0,0.2); }
+        .modal-close:active { background:linear-gradient(180deg,#b0b0b0 0%,#a0a0a0 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,0.3); transform:translateY(1px); }
+        .modal-body { padding:12px; overflow-y:auto; flex:1; }
+        .modal-section { margin-bottom:14px; border:2px inset #a0a0a0; background:#d4c4a8; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
+        .modal-section-header { background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); padding:6px 10px; font-size:12px; font-weight:bold; border-bottom:1px solid #808080; color:#333; text-shadow:0 1px 0 rgba(255,255,255,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
+        .modal-section-body { padding:8px; }
+        .modal-row { display:flex; align-items:center; margin-bottom:6px; font-size:11px; }
+        .modal-row:last-child { margin-bottom:0; }
+        .modal-row label { width:80px; color:#333; flex-shrink:0; }
+        .modal-row input,.modal-row select { flex:1; padding:3px 5px; border:2px inset #c0c0c0; font-size:11px; background:white; }
+        .modal-row input[type="range"] { margin-right:6px; }
+        .modal-row .value-display { width:35px; text-align:right; font-size:11px; color:#333; }
+        .modal-checkbox { display:flex; align-items:center; gap:4px; margin-bottom:4px; font-size:11px; color:#333; }
+        .modal-checkbox:last-child { margin-bottom:0; }
+        .modal-footer { padding:10px 14px; background:linear-gradient(180deg,#c0c0c0 0%,#a0a0a0 100%); border-top:1px solid #808080; display:flex; justify-content:flex-end; gap:8px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); border-radius:0 0 6px 6px; }
+        .modal-footer .btn { padding:4px 16px; font-size:11px; }
+        </style>
+</head>
+<body>
+    <!-- 标题栏 -->
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <div class="titlebar-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="cameraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4a90d9;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6c5ce7;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="2" y="5" width="20" height="14" rx="3" fill="url(#cameraGrad)" stroke="#2a4a7a" stroke-width="1"/>
+                    <circle cx="12" cy="12" r="4" fill="white" stroke="#2a4a7a" stroke-width="1"/>
+                    <circle cx="12" cy="12" r="2" fill="#2a4a7a"/>
+                    <rect x="16" y="7" width="3" height="2" rx="1" fill="white" opacity="0.8"/>
+                </svg>
+            </div>
+            <span>批量压缩图片软件 v1.6.7</span>
+        </div>
+    </div>
+    
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <button class="toolbar-btn" id="addFilesBtn">📷 添加文件</button>
+        <button class="toolbar-btn" id="addFolderBtn">📂 添加文件夹</button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" id="removeSelectedBtn">✕ 删除选中</button>
+        <button class="toolbar-btn" id="clearAllBtn">🗑️ 清空列表</button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" id="settingsBtn">⚙ 设置</button>
+        <button class="toolbar-btn" id="aboutBtn">ℹ️ 关于</button>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 左侧面板 -->
+        <div class="left-panel">
+            <div class="panel-header">压缩设置</div>
+            <div class="panel-content">
+                <!-- 文件选择 -->
+                <div class="file-selection">
+                    <label>输出目录:</label>
+                    <div class="file-input-group">
+                        <input type="text" class="file-input" id="outputDir" placeholder="点击右侧按钮选择输出文件夹" readonly>
+                        <button class="browse-btn" id="browseOutputBtn" style="background:#4a90d9;color:white;border-color:#357abd;">📁 选择文件夹</button>
+                    </div>
+                    <div style="font-size:13px;color:#fff;margin-top:6px;font-weight:bold;background:linear-gradient(135deg,#e74c3c,#c0392b);padding:6px 10px;border-radius:4px;text-shadow:0 1px 1px rgba(0,0,0,0.2);box-shadow:0 2px 4px rgba(231,76,60,0.3);letter-spacing:0.5px;" id="outputDirHint">⚠ 选择后压缩完自动保存到该目录，可覆盖原文件</div>
+                </div>
+                
+                <!-- 压缩设置 -->
+                <div class="settings-group">
+                    <label>压缩质量:</label>
+                    <div class="settings-row">
+                        <label>质量:</label>
+                        <input type="range" id="quality" min="10" max="100" value="80">
+                        <span id="qualityValue" style="font-size:13px;font-weight:600;color:#222;">80%</span>
+                    </div>
+                    
+                    <div class="settings-row">
+                        <label>格式:</label>
+                        <select id="outputFormat">
+                            <option value="original">保持原格式</option>
+                            <option value="jpeg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WebP</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 尺寸设置 -->
+                <div class="settings-group">
+                    <label>尺寸调整:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="resizeEnabled">
+                        <label for="resizeEnabled">启用尺寸调整</label>
+                    </div>
+                    
+                    <div class="settings-row">
+                        <label>最大宽度:</label>
+                        <input type="number" id="maxWidth" placeholder="不限制" min="100">
+                        <span style="font-size:13px;font-weight:600;">px</span>
+                    </div>
+                    
+                    <div class="settings-row">
+                        <label>最大高度:</label>
+                        <input type="number" id="maxHeight" placeholder="不限制" min="100">
+                        <span style="font-size:13px;font-weight:600;">px</span>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="keepRatio" checked>
+                        <label for="keepRatio">保持宽高比</label>
+                    </div>
+                </div>
+                
+                <!-- 高级选项 -->
+                <div class="settings-group">
+                    <label>高级选项:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="removeExif">
+                        <label for="removeExif">移除EXIF信息</label>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="overwrite">
+                        <label for="overwrite">覆盖原文件</label>
+                    </div>
+                    
+                    <div class="settings-row">
+                        <label>文件命名:</label>
+                        <select id="namingPattern">
+                            <option value="original">原文件名</option>
+                            <option value="suffix">原文件名_压缩</option>
+                            <option value="prefix">压缩_原文件名</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 拖动分隔条 -->
+        <div class="resize-handle" id="resizeHandle"></div>
+        
+        <!-- 右侧内容区 -->
+        <div class="right-content">
+            <!-- 文件列表 -->
+            <div class="file-list-container">
+                <div class="file-list-header">
+                    <span>文件列表</span>
+                    <span class="file-list-count" id="fileCount">0 个文件</span>
+                </div>
+                
+                <!-- 拖放区域 -->
+                <div class="drop-zone" id="dropZone">
+                    拖放图片文件或文件夹到这里
+                </div>
+                
+                <!-- 文件列表 -->
+                <div class="file-list" id="fileList">
+                    <!-- 文件项将在这里动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 进度条 -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">准备中...</div>
+            </div>
+            
+            <!-- 按钮区域 -->
+            <div class="button-area">
+                <button class="btn btn-primary" id="compressBtn">开始压缩</button>
+                <button class="btn btn-primary" id="downloadAllBtn" disabled>全部下载</button>
+                <button class="btn btn-secondary" id="cancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 状态栏 -->
+    <div class="statusbar">
+        <div class="status-left">
+            <span>就绪</span>
+            <span>文件数: <span id="statusFileCount">0</span></span>
+            <span>总大小: <span id="statusTotalSize">0 KB</span></span>
+        </div>
+        <div class="status-right">
+            <span>压缩率: <span id="statusCompressionRatio">0%</span></span>
+            <span>已处理: <span id="statusProcessed">0</span></span>
+        </div>
+    </div>
+    
+    <!-- 设置弹窗 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-titlebar">
+                <span>⚙️ 设置</span>
+                <button class="modal-close" id="settingsCloseBtn">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- 默认压缩设置 -->
+                <div class="modal-section">
+                    <div class="modal-section-header">默认压缩设置</div>
+                    <div class="modal-section-body">
+                        <div class="modal-row">
+                            <label>默认质量:</label>
+                            <input type="range" id="settingQuality" min="10" max="100" value="80">
+                            <span class="value-display" id="settingQualityValue">80%</span>
+                        </div>
+                        <div class="modal-row">
+                            <label>默认格式:</label>
+                            <select id="settingFormat">
+                                <option value="original">保持原格式</option>
+                                <option value="jpeg">JPEG</option>
+                                <option value="png">PNG</option>
+                                <option value="webp">WebP</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 默认尺寸设置 -->
+                <div class="modal-section">
+                    <div class="modal-section-header">默认尺寸设置</div>
+                    <div class="modal-section-body">
+                        <div class="modal-checkbox">
+                            <input type="checkbox" id="settingResizeEnabled">
+                            <label for="settingResizeEnabled">默认启用尺寸调整</label>
+                        </div>
+                        <div class="modal-row">
+                            <label>最大宽度:</label>
+                            <input type="number" id="settingMaxWidth" placeholder="不限制" min="100">
+                            <span style="margin-left:4px;">px</span>
+                        </div>
+                        <div class="modal-row">
+                            <label>最大高度:</label>
+                            <input type="number" id="settingMaxHeight" placeholder="不限制" min="100">
+                            <span style="margin-left:4px;">px</span>
+                        </div>
+                        <div class="modal-checkbox">
+                            <input type="checkbox" id="settingKeepRatio" checked>
+                            <label for="settingKeepRatio">默认保持宽高比</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 默认高级选项 -->
+                <div class="modal-section">
+                    <div class="modal-section-header">默认高级选项</div>
+                    <div class="modal-section-body">
+                        <div class="modal-checkbox">
+                            <input type="checkbox" id="settingRemoveExif">
+                            <label for="settingRemoveExif">默认移除EXIF信息</label>
+                        </div>
+                        <div class="modal-checkbox">
+                            <input type="checkbox" id="settingOverwrite">
+                            <label for="settingOverwrite">默认覆盖原文件</label>
+                        </div>
+                        <div class="modal-row">
+                            <label>文件命名:</label>
+                            <select id="settingNaming">
+                                <option value="original">原文件名</option>
+                                <option value="suffix">原文件名_压缩</option>
+                                <option value="prefix">压缩_原文件名</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 其他设置 -->
+                <div class="modal-section">
+                    <div class="modal-section-header">其他</div>
+                    <div class="modal-section-body">
+                        <div class="modal-checkbox">
+                            <input type="checkbox" id="settingAutoLoad">
+                            <label for="settingAutoLoad">启动时自动加载上次设置</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="settingsResetBtn">恢复默认</button>
+                <button class="btn btn-secondary" id="settingsCancelBtn">取消</button>
+                <button class="btn btn-primary" id="settingsSaveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 关于弹窗 -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal" style="width:480px;">
+            <div class="modal-titlebar">
+                <span>📋 关于</span>
+                <button class="modal-close" id="aboutCloseBtn">×</button>
+            </div>
+            <div class="modal-body" id="aboutContent">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="aboutOkBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BatchImageCompressor {
+            constructor() {
+                this.files = [];
+                this.compressedFiles = [];
+                this.isProcessing = false;
+                this.outputDirHandle = null; // File System Access API 目录句柄（Chrome/Edge写入用）
+                this.outputDirName = ''; // 输出目录名称（所有浏览器通用）
+                this.initElements();
+                this.initEvents();
+                this.initDragAndDrop();
+                this.loadSettings(); // 加载保存的设置
+            }
+            
+            initElements() {
+                // 按钮
+                this.addFilesBtn = document.getElementById('addFilesBtn');
+                this.addFolderBtn = document.getElementById('addFolderBtn');
+                this.removeSelectedBtn = document.getElementById('removeSelectedBtn');
+                this.clearAllBtn = document.getElementById('clearAllBtn');
+                this.settingsBtn = document.getElementById('settingsBtn');
+                this.aboutBtn = document.getElementById('aboutBtn');
+                this.browseOutputBtn = document.getElementById('browseOutputBtn');
+                this.compressBtn = document.getElementById('compressBtn');
+                this.downloadAllBtn = document.getElementById('downloadAllBtn');
+                this.cancelBtn = document.getElementById('cancelBtn');
+                
+                // 输入元素
+                this.outputDir = document.getElementById('outputDir');
+                this.quality = document.getElementById('quality');
+                this.qualityValue = document.getElementById('qualityValue');
+                this.outputFormat = document.getElementById('outputFormat');
+                this.resizeEnabled = document.getElementById('resizeEnabled');
+                this.maxWidth = document.getElementById('maxWidth');
+                this.maxHeight = document.getElementById('maxHeight');
+                this.keepRatio = document.getElementById('keepRatio');
+                this.removeExif = document.getElementById('removeExif');
+                this.overwrite = document.getElementById('overwrite');
+                this.namingPattern = document.getElementById('namingPattern');
+                
+                // 显示元素
+                this.fileCount = document.getElementById('fileCount');
+                this.fileList = document.getElementById('fileList');
+                this.dropZone = document.getElementById('dropZone');
+                this.progressContainer = document.getElementById('progressContainer');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressText = document.getElementById('progressText');
+                
+                // 状态栏
+                this.statusFileCount = document.getElementById('statusFileCount');
+                this.statusTotalSize = document.getElementById('statusTotalSize');
+                this.statusCompressionRatio = document.getElementById('statusCompressionRatio');
+                this.statusProcessed = document.getElementById('statusProcessed');
+                
+                // 隐藏的文件输入
+                this.fileInput = document.createElement('input');
+                this.fileInput.type = 'file';
+                this.fileInput.multiple = true;
+                this.fileInput.accept = 'image/*';
+                this.fileInput.style.display = 'none';
+                document.body.appendChild(this.fileInput);
+                
+                this.folderInput = document.createElement('input');
+                this.folderInput.type = 'file';
+                this.folderInput.webkitdirectory = true;
+                this.folderInput.style.display = 'none';
+                document.body.appendChild(this.folderInput);
+                
+                // 输出目录选择器（使用 webkitdirectory，兼容所有浏览器）
+                this.outputFolderInput = document.createElement('input');
+                this.outputFolderInput.type = 'file';
+                this.outputFolderInput.webkitdirectory = true;
+                this.outputFolderInput.style.display = 'none';
+                document.body.appendChild(this.outputFolderInput);
+                
+                // 设置弹窗元素
+                this.settingsModal = document.getElementById('settingsModal');
+                this.settingsCloseBtn = document.getElementById('settingsCloseBtn');
+                this.settingsCancelBtn = document.getElementById('settingsCancelBtn');
+                this.settingsSaveBtn = document.getElementById('settingsSaveBtn');
+                this.settingsResetBtn = document.getElementById('settingsResetBtn');
+                this.settingQuality = document.getElementById('settingQuality');
+                this.settingQualityValue = document.getElementById('settingQualityValue');
+                this.settingFormat = document.getElementById('settingFormat');
+                this.settingResizeEnabled = document.getElementById('settingResizeEnabled');
+                this.settingMaxWidth = document.getElementById('settingMaxWidth');
+                this.settingMaxHeight = document.getElementById('settingMaxHeight');
+                this.settingKeepRatio = document.getElementById('settingKeepRatio');
+                this.settingRemoveExif = document.getElementById('settingRemoveExif');
+                this.settingOverwrite = document.getElementById('settingOverwrite');
+                this.settingNaming = document.getElementById('settingNaming');
+                this.settingAutoLoad = document.getElementById('settingAutoLoad');
+                
+                // 拖动分隔条
+                this.resizeHandle = document.getElementById('resizeHandle');
+                this.leftPanel = document.querySelector('.left-panel');
+            }
+            
+            initEvents() {
+                // 按钮事件
+                this.addFilesBtn.addEventListener('click', () => this.fileInput.click());
+                this.addFolderBtn.addEventListener('click', () => this.folderInput.click());
+                this.removeSelectedBtn.addEventListener('click', () => this.removeSelected());
+                this.clearAllBtn.addEventListener('click', () => this.clearAll());
+                this.settingsBtn.addEventListener('click', () => this.showSettings());
+                this.aboutBtn.addEventListener('click', () => this.showAbout());
+                this.browseOutputBtn.addEventListener('click', () => this.outputFolderInput.click());
+                this.compressBtn.addEventListener('click', () => this.startCompression());
+                this.downloadAllBtn.addEventListener('click', () => this.downloadAll());
+                this.cancelBtn.addEventListener('click', () => this.cancelCompression());
+                
+                // 文件下载按钮事件委托
+                this.fileList.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('file-download-btn')) {
+                        const index = parseInt(e.target.dataset.index);
+                        this.downloadSingleFile(index);
+                    }
+                });
+                
+                // 文件输入事件
+                this.fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+                this.folderInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+                this.outputFolderInput.addEventListener('change', (e) => this.handleOutputFolder(e.target.files));
+                
+                // 质量滑块事件
+                this.quality.addEventListener('input', (e) => {
+                    this.qualityValue.textContent = e.target.value + '%';
+                });
+                
+                // 尺寸调整复选框事件
+                this.resizeEnabled.addEventListener('change', (e) => {
+                    this.maxWidth.disabled = !e.target.checked;
+                    this.maxHeight.disabled = !e.target.checked;
+                });
+                
+                // 设置弹窗事件
+                this.settingsCloseBtn.addEventListener('click', () => this.closeSettings());
+                this.settingsCancelBtn.addEventListener('click', () => this.closeSettings());
+                this.settingsSaveBtn.addEventListener('click', () => this.saveSettings());
+                this.settingsResetBtn.addEventListener('click', () => this.resetSettings());
+                
+                // 设置弹窗中质量滑块事件
+                this.settingQuality.addEventListener('input', (e) => {
+                    this.settingQualityValue.textContent = e.target.value + '%';
+                });
+                
+                // 点击遮罩关闭弹窗
+                this.settingsModal.addEventListener('click', (e) => {
+                    if (e.target === this.settingsModal) this.closeSettings();
+                });
+                
+                // 关于弹窗事件
+                this.aboutModal = document.getElementById('aboutModal');
+                document.getElementById('aboutCloseBtn').addEventListener('click', () => this.closeAbout());
+                document.getElementById('aboutOkBtn').addEventListener('click', () => this.closeAbout());
+                this.aboutModal.addEventListener('click', (e) => {
+                    if (e.target === this.aboutModal) this.closeAbout();
+                });
+                
+                // 拖动分隔条调整左右面板宽度
+                this.initResizeHandle();
+            }
+            
+            initResizeHandle() {
+                let isResizing = false;
+                let startX = 0;
+                let startWidth = 0;
+                
+                const handle = this.resizeHandle;
+                const panel = this.leftPanel;
+                
+                handle.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    startX = e.clientX;
+                    startWidth = panel.offsetWidth;
+                    handle.classList.add('active');
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+                    const diff = e.clientX - startX;
+                    const newWidth = Math.min(Math.max(startWidth + diff, 280), 600);
+                    panel.style.width = newWidth + 'px';
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    if (isResizing) {
+                        isResizing = false;
+                        handle.classList.remove('active');
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    }
+                });
+            }
+            
+            initDragAndDrop() {
+                // 拖放事件
+                this.dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.dropZone.classList.add('dragover');
+                    this.dropZone.style.display = 'block';
+                });
+                
+                this.dropZone.addEventListener('dragleave', () => {
+                    this.dropZone.classList.remove('dragover');
+                    if (this.files.length === 0) {
+                        this.dropZone.style.display = 'none';
+                    }
+                });
+                
+                this.dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.dropZone.classList.remove('dragover');
+                    this.handleFiles(e.dataTransfer.files);
+                });
+                
+                // 整个文件列表区域的拖放
+                this.fileList.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.dropZone.style.display = 'block';
+                });
+                
+                this.fileList.addEventListener('dragleave', () => {
+                    if (this.files.length === 0) {
+                        this.dropZone.style.display = 'none';
+                    }
+                });
+                
+                this.fileList.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.handleFiles(e.dataTransfer.files);
+                });
+            }
+            
+            handleFiles(fileList) {
+                const newFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'));
+                
+                if (newFiles.length === 0) {
+                    alert('请选择图片文件！');
+                    return;
+                }
+                
+                this.files = [...this.files, ...newFiles];
+                this.updateFileList();
+                this.updateStatusBar();
+                this.dropZone.style.display = 'none';
+                
+                // 清空文件输入
+                this.fileInput.value = '';
+                this.folderInput.value = '';
+            }
+            
+            updateFileList() {
+                this.fileList.innerHTML = '';
+                this.fileCount.textContent = `${this.files.length} 个文件`;
+                
+                this.files.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <input type="checkbox" class="file-checkbox" data-index="${index}">
+                        <div class="file-icon">📷</div>
+                        <div class="file-name" title="${file.name}">${file.name}</div>
+                        <div class="file-size">${this.formatSize(file.size)}</div>
+                        <div class="file-status">待处理</div>
+                        <button class="btn btn-secondary file-download-btn" data-index="${index}" disabled style="padding:2px 6px;font-size:11px;margin-left:4px;">下载</button>
+                    `;
+                    this.fileList.appendChild(fileItem);
+                });
+            }
+            
+            updateStatusBar() {
+                this.statusFileCount.textContent = this.files.length;
+                
+                const totalSize = this.files.reduce((sum, file) => sum + file.size, 0);
+                this.statusTotalSize.textContent = this.formatSize(totalSize);
+                
+                if (this.compressedFiles.length > 0) {
+                    const originalSize = this.files.reduce((sum, file) => sum + file.size, 0);
+                    const compressedSize = this.compressedFiles.reduce((sum, file) => sum + file.compressedSize, 0);
+                    const ratio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
+                    this.statusCompressionRatio.textContent = ratio + '%';
+                    this.statusProcessed.textContent = this.compressedFiles.length;
+                }
+            }
+            
+            formatSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            removeSelected() {
+                const checkboxes = this.fileList.querySelectorAll('.file-checkbox:checked');
+                const indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
+                
+                this.files = this.files.filter((_, index) => !indices.includes(index));
+                this.updateFileList();
+                this.updateStatusBar();
+            }
+            
+            clearAll() {
+                this.files = [];
+                this.compressedFiles = [];
+                this.updateFileList();
+                this.updateStatusBar();
+                this.dropZone.style.display = 'block';
+            }
+            
+            showSettings() {
+                // 将当前左侧面板的值同步到设置弹窗
+                this.settingQuality.value = this.quality.value;
+                this.settingQualityValue.textContent = this.quality.value + '%';
+                this.settingFormat.value = this.outputFormat.value;
+                this.settingResizeEnabled.checked = this.resizeEnabled.checked;
+                this.settingMaxWidth.value = this.maxWidth.value;
+                this.settingMaxHeight.value = this.maxHeight.value;
+                this.settingKeepRatio.checked = this.keepRatio.checked;
+                this.settingRemoveExif.checked = this.removeExif.checked;
+                this.settingOverwrite.checked = this.overwrite.checked;
+                this.settingNaming.value = this.namingPattern.value;
+                
+                // 读取自动加载设置
+                const saved = localStorage.getItem('batchImageCompressor_settings');
+                if (saved) {
+                    try {
+                        const s = JSON.parse(saved);
+                        this.settingAutoLoad.checked = s.autoLoad !== false;
+                    } catch(e) {}
+                }
+                
+                this.settingsModal.classList.add('active');
+            }
+            
+            closeSettings() {
+                this.settingsModal.classList.remove('active');
+            }
+            
+            closeAbout() {
+                this.aboutModal.classList.remove('active');
+            }
+            
+            saveSettings() {
+                const settings = {
+                    quality: parseInt(this.settingQuality.value),
+                    format: this.settingFormat.value,
+                    resizeEnabled: this.settingResizeEnabled.checked,
+                    maxWidth: this.settingMaxWidth.value,
+                    maxHeight: this.settingMaxHeight.value,
+                    keepRatio: this.settingKeepRatio.checked,
+                    removeExif: this.settingRemoveExif.checked,
+                    overwrite: this.settingOverwrite.checked,
+                    naming: this.settingNaming.value,
+                    autoLoad: this.settingAutoLoad.checked
+                };
+                
+                localStorage.setItem('batchImageCompressor_settings', JSON.stringify(settings));
+                
+                // 立即应用到左侧面板
+                this.applySettings(settings);
+                
+                this.closeSettings();
+                alert('✅ 设置已保存！\n\n' + (settings.autoLoad ? '下次打开时将自动加载这些设置。' : '已关闭自动加载，下次打开将使用默认值。'));
+            }
+            
+            loadSettings() {
+                const saved = localStorage.getItem('batchImageCompressor_settings');
+                if (!saved) return;
+                
+                try {
+                    const settings = JSON.parse(saved);
+                    if (settings.autoLoad !== false) {
+                        this.applySettings(settings);
+                    }
+                } catch(e) {
+                    console.error('加载设置失败:', e);
+                }
+            }
+            
+            applySettings(settings) {
+                this.quality.value = settings.quality;
+                this.qualityValue.textContent = settings.quality + '%';
+                this.outputFormat.value = settings.format;
+                this.resizeEnabled.checked = settings.resizeEnabled;
+                this.maxWidth.value = settings.maxWidth;
+                this.maxHeight.value = settings.maxHeight;
+                this.maxWidth.disabled = !settings.resizeEnabled;
+                this.maxHeight.disabled = !settings.resizeEnabled;
+                this.keepRatio.checked = settings.keepRatio;
+                this.removeExif.checked = settings.removeExif;
+                this.overwrite.checked = settings.overwrite;
+                this.namingPattern.value = settings.naming;
+            }
+            
+            resetSettings() {
+                if (confirm('确定要恢复默认设置吗？\n\n将清除所有已保存的设置。')) {
+                    localStorage.removeItem('batchImageCompressor_settings');
+                    
+                    // 重置弹窗中的值
+                    this.settingQuality.value = 80;
+                    this.settingQualityValue.textContent = '80%';
+                    this.settingFormat.value = 'original';
+                    this.settingResizeEnabled.checked = false;
+                    this.settingMaxWidth.value = '';
+                    this.settingMaxHeight.value = '';
+                    this.settingKeepRatio.checked = true;
+                    this.settingRemoveExif.checked = false;
+                    this.settingOverwrite.checked = false;
+                    this.settingNaming.value = 'original';
+                    this.settingAutoLoad.checked = true;
+                    
+                    // 重置左侧面板
+                    this.quality.value = 80;
+                    this.qualityValue.textContent = '80%';
+                    this.outputFormat.value = 'original';
+                    this.resizeEnabled.checked = false;
+                    this.maxWidth.value = '';
+                    this.maxHeight.value = '';
+                    this.maxWidth.disabled = true;
+                    this.maxHeight.disabled = true;
+                    this.keepRatio.checked = true;
+                    this.removeExif.checked = false;
+                    this.overwrite.checked = false;
+                    this.namingPattern.value = 'original';
+                    
+                    this.closeSettings();
+                    alert('✅ 已恢复默认设置！');
+                }
+            }
+            
+            showAbout() {
+                const hasWriteAccess = this.outputDirHandle ? '✅ 已获得写入权限' : '⚠️ 未获得写入权限（将使用下载方式）';
+                const saved = localStorage.getItem('batchImageCompressor_settings');
+                const settingsStatus = saved ? '✅ 已保存自定义设置' : '使用默认设置';
+                
+                const aboutContent = document.getElementById('aboutContent');
+                aboutContent.innerHTML = `
+                    <div style="text-align:center;padding:8px 0 16px;border-bottom:1px solid #e0e0e0;margin-bottom:16px;">
+                        <div style="font-size:24px;margin-bottom:6px;">📷</div>
+                        <div style="font-size:16px;font-weight:bold;color:#333;">批量压缩图片软件</div>
+                        <div style="font-size:12px;color:#666;margin-top:4px;">v1.6.7</div>
+                    </div>
+                    <div style="font-size:12px;line-height:1.8;color:#444;">
+                        <div style="font-weight:bold;margin-bottom:6px;color:#333;">功能特点：</div>
+                        <ul style="margin:0;padding-left:20px;">
+                            <li>支持批量压缩图片</li>
+                            <li>支持多种图片格式（JPG/PNG/WebP/BMP/GIF）</li>
+                            <li>支持尺寸调整</li>
+                            <li>支持质量调节</li>
+                            <li>选择输出文件夹后自动写入（Chrome/Edge）</li>
+                            <li>支持覆盖原文件</li>
+                            <li>支持单个文件下载和批量下载</li>
+                            <li>支持保存/加载自定义设置</li>
+                            <li>左右面板可拖动调整宽度</li>
+                            <li>纯前端处理，保护隐私</li>
+                        </ul>
+                        <div style="font-weight:bold;margin:12px 0 6px;color:#333;">使用方法：</div>
+                        <ol style="margin:0;padding-left:20px;">
+                            <li>添加图片</li>
+                            <li>点击"选择文件夹"选择输出目录</li>
+                            <li>勾选"覆盖原文件"可直接覆盖</li>
+                            <li>点击"开始压缩"自动完成</li>
+                        </ol>
+                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e0e0e0;font-size:11px;color:#888;">
+                            <div>当前输出目录: <strong>${this.outputDirName || '未选择'}</strong></div>
+                            <div>写入权限: ${hasWriteAccess}</div>
+                            <div>设置状态: ${settingsStatus}</div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('aboutModal').classList.add('active');
+            }
+            
+            handleOutputFolder(fileList) {
+                // 从 webkitdirectory 选择的文件中提取文件夹路径
+                if (fileList.length === 0) return;
+                
+                // 提取文件夹名称（从第一个文件的 relativePath 或 webkitRelativePath）
+                const firstFile = fileList[0];
+                const relativePath = firstFile.webkitRelativePath || firstFile.relativePath || '';
+                
+                // 文件夹名称是路径的第一段
+                const folderName = relativePath.split('/')[0] || '所选文件夹';
+                this.outputDirName = folderName;
+                
+                // 显示文件夹名称
+                this.outputDir.value = '📁 ' + folderName;
+                this.outputDir.style.color = '#51cf66';
+                this.outputDir.style.fontWeight = 'bold';
+                
+                // 尝试获取写入权限（Chrome/Edge 的 File System Access API）
+                if ('showDirectoryPicker' in window) {
+                    // 提示用户在Chrome/Edge中授权写入
+                    const hint = document.getElementById('outputDirHint');
+                    hint.textContent = '✅ 已选择文件夹: ' + folderName + '（Chrome/Edge下将自动获得写入权限）';
+                    hint.style.color = '#51cf66';
+                    
+                    // 尝试获取 showDirectoryPicker 写入权限
+                    this.tryGetWriteAccess();
+                } else {
+                    // Firefox 等浏览器：显示提示
+                    const hint = document.getElementById('outputDirHint');
+                    hint.textContent = '✅ 已选择文件夹: ' + folderName + '（压缩后将通过下载保存文件）';
+                    hint.style.color = '#4a90d9';
+                }
+                
+                // 清空输入
+                this.outputFolderInput.value = '';
+            }
+            
+            async tryGetWriteAccess() {
+                // 尝试通过 File System Access API 获取写入权限
+                try {
+                    this.outputDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                    this.outputDir.value = '📁 ' + this.outputDirHandle.name;
+                    this.outputDir.title = '已获得写入权限: ' + this.outputDirHandle.name;
+                    
+                    const hint = document.getElementById('outputDirHint');
+                    hint.textContent = '✅ 已获得写入权限，压缩后自动保存到: ' + this.outputDirHandle.name;
+                    hint.style.color = '#51cf66';
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        // 用户取消了目录选择，使用之前的文件夹名称
+                        console.log('用户取消了写入权限授权');
+                    } else {
+                        console.error('获取写入权限失败:', err);
+                    }
+                }
+            }
+            
+            
+            async startCompression() {
+                if (this.files.length === 0) {
+                    alert('请先添加图片文件！');
+                    return;
+                }
+                
+                if (this.isProcessing) {
+                    alert('正在处理中，请稍候...');
+                    return;
+                }
+                
+                this.isProcessing = true;
+                this.compressBtn.disabled = true;
+                this.cancelBtn.disabled = false;
+                this.progressContainer.style.display = 'block';
+                
+                const quality = parseInt(this.quality.value) / 100;
+                const outputFormat = this.outputFormat.value;
+                const resizeEnabled = this.resizeEnabled.checked;
+                const maxWidth = resizeEnabled && this.maxWidth.value ? parseInt(this.maxWidth.value) : null;
+                const maxHeight = resizeEnabled && this.maxHeight.value ? parseInt(this.maxHeight.value) : null;
+                const keepRatio = this.keepRatio.checked;
+                const namingPattern = this.namingPattern.value;
+                
+                this.compressedFiles = [];
+                
+                for (let i = 0; i < this.files.length; i++) {
+                    if (!this.isProcessing) break;
+                    
+                    this.updateProgress(i, this.files.length);
+                    
+                    try {
+                        const compressed = await this.compressImage(
+                            this.files[i],
+                            quality,
+                            outputFormat,
+                            maxWidth,
+                            maxHeight,
+                            keepRatio,
+                            namingPattern
+                        );
+                        
+                        this.compressedFiles.push(compressed);
+                        this.updateFileStatus(i, '已完成', compressed);
+                        this.enableFileDownload(i);
+                    } catch (error) {
+                        console.error(`压缩失败: ${this.files[i].name}`, error);
+                        this.updateFileStatus(i, '失败', null);
+                    }
+                }
+                
+                this.isProcessing = false;
+                this.compressBtn.disabled = false;
+                this.cancelBtn.disabled = true;
+                this.downloadAllBtn.disabled = this.compressedFiles.length === 0;
+                this.updateProgress(this.files.length, this.files.length);
+                this.updateStatusBar();
+                
+                // 如果已选择输出目录且有写入权限，自动写入文件
+                if (this.outputDirHandle && this.compressedFiles.length > 0) {
+                    this.progressText.textContent = '正在写入文件到 ' + this.outputDirHandle.name + '...';
+                    let writeCount = 0;
+                    let failCount = 0;
+                    
+                    for (let i = 0; i < this.compressedFiles.length; i++) {
+                        const compressed = this.compressedFiles[i];
+                        this.progressText.textContent = `正在写入 ${i+1}/${this.compressedFiles.length}: ${compressed.newName}`;
+                        try {
+                            await this.writeFileToDirectory(compressed);
+                            writeCount++;
+                        } catch (err) {
+                            console.error(`写入失败: ${compressed.newName}`, err);
+                            failCount++;
+                        }
+                    }
+                    
+                    this.progressContainer.style.display = 'none';
+                    let msg = `✅ 压缩完成！\n\n📊 处理文件数: ${this.compressedFiles.length}\n📉 压缩率: ${this.statusCompressionRatio.textContent}\n\n📁 已自动写入到: ${this.outputDirHandle.name}\n✅ 成功: ${writeCount} 个`;
+                    if (failCount > 0) msg += `\n❌ 失败: ${failCount} 个`;
+                    alert(msg);
+                } else if (this.compressedFiles.length > 0) {
+                    // 已选择文件夹但无写入权限（Firefox等），或未选择文件夹
+                    setTimeout(() => {
+                        this.progressContainer.style.display = 'none';
+                        let msg = `✅ 压缩完成！\n\n📊 处理文件数: ${this.compressedFiles.length}\n📉 压缩率: ${this.statusCompressionRatio.textContent}`;
+                        
+                        if (this.outputDirName) {
+                            msg += `\n\n📁 已选择文件夹: ${this.outputDirName}`;
+                            msg += `\n⚠️ 当前浏览器无写入权限，请使用"全部下载"保存文件`;
+                            if ('showDirectoryPicker' in window) {
+                                msg += `\n\n💡 提示：使用Chrome/Edge打开可自动写入文件夹`;
+                            }
+                        } else {
+                            msg += `\n\n⚠️ 未选择输出目录`;
+                            msg += `\n请点击"📁 选择文件夹"后重新压缩，即可自动写入`;
+                        }
+                        
+                        msg += `\n\n或点击"全部下载"按钮保存文件`;
+                        alert(msg);
+                    }, 500);
+                }
+            }
+            
+            compressImage(file, quality, outputFormat, maxWidth, maxHeight, keepRatio, namingPattern) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // 调整尺寸
+                        if (maxWidth && width > maxWidth) {
+                            if (keepRatio) {
+                                height = (maxWidth / width) * height;
+                            }
+                            width = maxWidth;
+                        }
+                        
+                        if (maxHeight && height > maxHeight) {
+                            if (keepRatio) {
+                                width = (maxHeight / height) * width;
+                            }
+                            height = maxHeight;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // 绘制图片
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 确定输出格式
+                        let mimeType;
+                        if (outputFormat === 'original') {
+                            mimeType = file.type || 'image/jpeg';
+                        } else {
+                            mimeType = `image/${outputFormat}`;
+                        }
+                        
+                        // 压缩质量
+                        const compressedDataUrl = canvas.toDataURL(mimeType, quality);
+                        
+                        // 转换为Blob
+                        const byteString = atob(compressedDataUrl.split(',')[1]);
+                        const ab = new ArrayBuffer(byteString.length);
+                        const ia = new Uint8Array(ab);
+                        for (let i = 0; i < byteString.length; i++) {
+                            ia[i] = byteString.charCodeAt(i);
+                        }
+                        
+                        const blob = new Blob([ab], { type: mimeType });
+                        
+                        // 确定文件扩展名
+                        let extension;
+                        if (outputFormat === 'original') {
+                            extension = file.name.split('.').pop();
+                        } else {
+                            extension = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
+                        }
+                        
+                        // 生成新文件名
+                        let newName;
+                        const baseName = file.name.replace(/\.[^/.]+$/, '');
+                        
+                        switch (namingPattern) {
+                            case 'suffix':
+                                newName = baseName + '_压缩.' + extension;
+                                break;
+                            case 'prefix':
+                                newName = '压缩_' + baseName + '.' + extension;
+                                break;
+                            default:
+                                newName = baseName + '.' + extension;
+                        }
+                        
+                        resolve({
+                            originalFile: file,
+                            compressedBlob: blob,
+                            compressedUrl: URL.createObjectURL(blob),
+                            newName: newName,
+                            originalSize: file.size,
+                            compressedSize: blob.size
+                        });
+                    };
+                    
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+            
+            updateFileStatus(index, status, compressed) {
+                const fileItems = this.fileList.querySelectorAll('.file-item');
+                if (fileItems[index]) {
+                    const statusElement = fileItems[index].querySelector('.file-status');
+                    const sizeElement = fileItems[index].querySelector('.file-size');
+                    statusElement.textContent = status;
+                    
+                    if (compressed) {
+                        const ratio = ((1 - compressed.compressedSize / compressed.originalSize) * 100).toFixed(1);
+                        statusElement.textContent = `已完成 (${ratio}%)`;
+                        statusElement.style.color = '#51cf66';
+                        // 更新文件大小显示为压缩后大小
+                        if (sizeElement) {
+                            sizeElement.textContent = this.formatSize(compressed.compressedSize);
+                            sizeElement.style.color = '#51cf66';
+                            sizeElement.title = `原始: ${this.formatSize(compressed.originalSize)} → 压缩后: ${this.formatSize(compressed.compressedSize)}`;
+                        }
+                    } else if (status === '失败') {
+                        statusElement.style.color = '#ff6b6b';
+                    }
+                }
+            }
+            
+            updateProgress(current, total) {
+                const percent = (current / total) * 100;
+                this.progressFill.style.width = `${percent}%`;
+                this.progressText.textContent = `处理中... ${current}/${total}`;
+            }
+            
+            cancelCompression() {
+                this.isProcessing = false;
+                this.compressBtn.disabled = false;
+                this.cancelBtn.disabled = true;
+                this.progressContainer.style.display = 'none';
+            }
+            
+            enableFileDownload(index) {
+                const fileItems = this.fileList.querySelectorAll('.file-item');
+                if (fileItems[index]) {
+                    const downloadBtn = fileItems[index].querySelector('.file-download-btn');
+                    if (downloadBtn) {
+                        downloadBtn.disabled = false;
+                    }
+                }
+            }
+            
+            downloadSingleFile(index) {
+                if (index >= 0 && index < this.compressedFiles.length) {
+                    const compressed = this.compressedFiles[index];
+                    this.downloadBlob(compressed.compressedBlob, compressed.newName);
+                }
+            }
+            
+            downloadAll() {
+                if (this.compressedFiles.length === 0) {
+                    alert('没有可下载的压缩文件！');
+                    return;
+                }
+                
+                // 逐个下载，间隔100ms避免浏览器阻止
+                this.compressedFiles.forEach((compressed, index) => {
+                    setTimeout(() => {
+                        this.downloadBlob(compressed.compressedBlob, compressed.newName);
+                    }, index * 100);
+                });
+            }
+            
+            downloadBlob(blob, fileName) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+            
+            async writeFileToDirectory(compressed) {
+                if (!this.outputDirHandle) {
+                    throw new Error('未选择输出目录');
+                }
+                
+                // 覆盖模式：使用原文件名；非覆盖模式：使用压缩后文件名
+                const overwrite = this.overwrite.checked;
+                const fileName = overwrite ? compressed.originalFile.name : compressed.newName;
+                
+                const fileHandle = await this.outputDirHandle.getFileHandle(fileName, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(compressed.compressedBlob);
+                await writable.close();
+            }
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new BatchImageCompressor();
+        });
+    </script>
+</body>
 </html>
