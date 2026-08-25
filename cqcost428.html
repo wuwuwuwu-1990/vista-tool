@@ -1,463 +1,463 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>重庆造价咨询收费计算器_基于〔2013〕428号文_V2.2.13</title>
-<style>
-:root{
-  --navy:#4C1D95; --navy2:#7C3AED; --blue:#8B5CF6; --blue-hover:#7C3AED;
-  --sky:#F1EAFE; --bg:#F6F3FE; --card:#FFFFFF; --text:#2A1E4A;
-  --muted:#8B80A8; --border:#E3DAF5; --alt:#FAF7FF; --gold:#F5A623;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:"PingFang SC","Microsoft YaHei UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-.mono{font-family:Consolas,monospace;}
-/* 顶栏渐变 */
-header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 28px 16px;position:relative;border-bottom:2px solid #A78BFA;}
-header h1{font-size:22px;font-weight:700;letter-spacing:.5px;}
-header .ver{color:#FFD88A;font-weight:700;font-size:14px;margin-top:4px;}
-header .sub{color:#DDD3F9;font-size:13px;margin-top:3px;}
-header .about{position:absolute;right:28px;top:50%;transform:translateY(-50%);color:#DDD3F9;font-weight:700;font-size:14px;cursor:pointer;user-select:none;}
-header .about:hover{color:#fff;text-decoration:underline;}
-/* 容器 */
-.page{max-width:1120px;margin:0 auto;padding:20px 24px 40px;}
-.card{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(76,29,149,.06);}
-.card h2{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
-.card h2 .hint{font-size:12px;color:var(--muted);font-weight:400;margin-left:auto;}
-/* 表单 */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 20px;}
-.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;}
-.field input,.field select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:#fff;outline:none;transition:border .15s;}
-.field input:focus,.field select:focus{border-color:var(--blue);}
-.field input:disabled{background:#F3F0FA;color:#A99CC4;cursor:not-allowed;}
-.check{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;user-select:none;}
-.check input{width:16px;height:16px;accent-color:var(--blue);}
-/* 按钮 */
-.actions{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
-.btn{border:none;border-radius:10px;padding:11px 26px;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;}
-.btn-primary{background:var(--blue);color:#fff;}
-.btn-primary:hover{background:var(--blue-hover);}
-.btn-ghost{background:#fff;color:var(--text);border:1px solid var(--border);}
-.btn-ghost:hover{background:var(--sky);}
-.btn.right{margin-left:auto;}
-/* 结果条 */
-.result{border-radius:12px;background:var(--sky);border:1px solid var(--blue);padding:14px 18px;margin-bottom:14px;}
-.result .label{font-size:12.5px;color:var(--muted);}
-.result .fee{font-size:30px;font-weight:700;color:var(--blue);margin-top:3px;font-family:Consolas,monospace;}
-.result .headline{font-size:13px;color:var(--text);margin-top:6px;}
-/* 表格 */
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{background:#F1EBFC;padding:9px 8px;font-weight:700;border-bottom:2px solid var(--border);text-align:center;white-space:nowrap;}
-td{padding:8px;border-bottom:1px solid var(--border);text-align:center;}
-td:first-child{text-align:left;min-width:170px;}
-tr:nth-child(even) td{background:var(--alt);}
-tr.section td{background:#EDE5FB;font-weight:700;}
-tr.total td{background:#F1EAFE;font-weight:700;color:var(--navy);}
-.note{font-size:12px;color:var(--muted);margin-top:10px;}
-/* 底部 */
-footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
-/* 关于弹窗 */
-.modal-mask{position:fixed;inset:0;background:rgba(30,10,60,.45);display:none;align-items:center;justify-content:center;z-index:99;}
-.modal-mask.show{display:flex;}
-.modal{width:520px;max-width:94vw;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:0 12px 40px rgba(20,0,50,.35);}
-.modal-head{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 24px;font-size:17px;font-weight:700;}
-.modal-head small{display:block;font-weight:400;font-size:12px;color:#DDD3F9;margin-top:4px;}
-.modal-body{padding:20px 26px;}
-.modal-body .ft{font-size:13.5px;margin-bottom:7px;}
-.modal-body .dev{margin-top:16px;border-top:1px solid var(--border);padding-top:14px;font-weight:700;font-size:14px;}
-.modal-body .dev2{font-size:12.5px;color:var(--muted);margin-top:4px;}
-.modal-close{text-align:right;padding:0 26px 22px;}
-/* 打印用 */
-@media print{header,.actions,footer,.btn,.card h2 .hint{display:none!important;}}
-</style>
-</head>
-<body>
-
-<header>
-  <h1>重庆造价咨询收费计算器</h1>
-  <div class="ver">V2.2.13</div>
-  <div class="sub">按累进分档费率测算 · 渝价〔2013〕428号</div>
-  <div class="about" onclick="showAbout()">关于</div>
-</header>
-
-<div class="page">
-
-  <!-- 工程名称 -->
-  <div class="card">
-    <h2>工程名称</h2>
-    <input id="projectName" type="text" placeholder="请输入工程名称（如：XX道路工程结算审核）" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;" onfocus="if(this.value==='请输入工程名称（如：XX道路工程结算审核）')this.value='';" onblur="if(!this.value.trim())this.value='请输入工程名称（如：XX道路工程结算审核）'">
-  </div>
-
-  <!-- 计算参数 -->
-  <div class="card">
-    <h2>计算参数<span class="hint">填写工程基础信息，系统将自动按区间累进计算</span></h2>
-    <div class="grid">
-<div class="field">
-        <label>计价方式</label>
-        <select id="pricingType" onchange="updateProjectTypes()">
-          <option value="list">清单计价</option>
-          <option value="quota">定额计价</option>
-        </select>
-      </div>
-<div class="field">
-        <label>收费项目</label>
-        <select id="projectType" onchange="updateCategories()"></select>
-      </div>
-<div class="field">
-        <label>工程类别</label>
-        <select id="category"></select>
-      </div>
-<div class="field">
-        <label>计费基数（万元）</label>
-        <input id="amount" type="number" value="3000" min="0" step="any" class="mono">
-      </div>
-<div class="field">
-        <label>基本收费下浮（%）</label>
-        <input id="discount" type="number" value="0" min="0" step="any" class="mono">
-      </div>
-<div class="field">
-        <label>审减额（万元）</label>
-        <input id="reduced" type="number" value="0" min="0" step="any" class="mono" disabled>
-      </div>
-<div class="field">
-        <label>审减效益下浮（%）</label>
-        <input id="reduceDiscount" type="number" value="0" min="0" step="any" class="mono" disabled>
-      </div>
-<div class="field" style="grid-column:span 3;display:flex;align-items:flex-end;padding-bottom:3px;">
-        <label class="check"><input type="checkbox" id="civil"> 公路、铁路、水电等土木工程（按 70% 计收）</label>
-      </div>
-    </div>
-  </div>
-
-  <!-- 按钮 -->
-  <div class="actions">
-    <button class="btn btn-primary" onclick="calculate()">开始计算</button>
-    <button class="btn btn-ghost" onclick="clearAll()">重置</button>
-    <button class="btn btn-ghost right" onclick="exportPng()">导出 PNG</button>
-    <button class="btn btn-ghost" onclick="exportCsv()">导出 CSV</button>
-  </div>
-
-  <!-- 结果 -->
-  <div class="result">
-    <div class="label">收费预估总计</div>
-    <div class="fee">¥ 0.0000 万元</div>
-    <div class="headline" id="headline">填写参数后点击“开始计算”查看分档明细</div>
-  </div>
-
-  <!-- 明细表 -->
-  <div class="card">
-    <h2>分档明细</h2>
-    <div style="overflow:auto;max-height:430px;">
-      <table id="detail">
-        <thead>
-          <tr><th style="text-align:left;min-width:180px;">收费项目 / 分档区间</th><th>500万以内</th><th>501–1000万</th><th>1001–5000万</th><th>5001万–1亿</th><th>1亿元以上</th><th>小计（万元）</th></tr>
-        </thead>
-        <tbody id="detailBody"></tbody>
-      </table>
-    </div>
-    <div class="note">说明：按累进分档计取；单项不足 3000 元时，按 3000 元保底计收。</div>
-  </div>
-
-  <footer>
-    <span>V2.2.13 · 渝价〔2013〕428号 · 按累进分档计费</span>
-    <span>支持 导出 CSV / 导出 PNG 存档</span>
-  </footer>
-</div>
-
-<!-- 关于 -->
-<div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
-  <div class="modal">
-    <div class="modal-head">重庆造价咨询收费计算器<small>版本 V2.2.13 · 渝价〔2013〕428号</small></div>
-    <div class="modal-body">
-      <div style="font-weight:700;font-size:15px;margin-bottom:10px;">软件功能</div>
-      <div class="ft">· 按渝价〔2013〕428号 累进分档费率测算造价咨询收费</div>
-      <div class="ft">· 支持 清单计价 / 定额计价，10 类收费项目</div>
-      <div class="ft">· 公路、铁路、水电等土木工程按 70% 计收</div>
-      <div class="ft">· 支持 基本收费下浮率、审减额、审减效益下浮率</div>
-      <div class="ft">· 单项收费不足 3000 元时，按 3000 元保底计收</div>
-      <div class="ft">· 一键导出 CSV 数据表 · 一键导出 PNG 截图存档</div>
-      <div class="dev">开发者：吴工 ｜ QQ：641296512</div>
-      <div class="dev2">按渝价〔2013〕428号 计费规则制作，如有疑问欢迎联系。</div>
-    </div>
-    <div class="modal-close"><button class="btn btn-primary" onclick="closeAbout()">关闭</button></div>
-  </div>
-</div>
-
-<script>
-// ============ 数据（与 EXE 源码一致） ============
-var BRACKETS = [500, 1000, 5000, 10000];
-var RATES = {
-  quota: {
-    "概算编制（审核）": {"建筑、市政、园林": [0.17,0.15,0.12,0.09,0.08], "安装、装饰、维修": [0.35,0.30,0.25,0.15,0.12]},
-    "预算、最高限价（标底）编制（审核）": {"建筑、市政、园林": [0.35,0.30,0.25,0.15,0.12], "安装、装饰、维修": [0.65,0.55,0.40,0.30,0.20]},
-    "工程结算编制（审核）": {"建筑、市政、园林": [0.40,0.35,0.30,0.20,0.15], "安装、装饰、维修": [0.70,0.60,0.45,0.35,0.25]},
-    "工程结算-审减效益费": {"通用": [4.50,4.00,3.50,3.00,2.50]},
-    "工程造价纠纷鉴定": {"通用": [1.80,1.50,1.20,1.00,0.80]},
-    "施工阶段工程造价全过程控制": {"通用": [1.50,1.30,1.10,1.00,0.80]}
-  },
-  list: {
-    "工程量清单编制（审核）": {"建筑、市政、园林": [0.25,0.20,0.18,0.15,0.12], "安装、装饰、维修": [0.45,0.40,0.35,0.30,0.25]},
-    "工程量清单组价编制（审核）": {"建筑、市政、园林": [0.18,0.15,0.12,0.10,0.08], "安装、装饰、维修": [0.28,0.24,0.20,0.16,0.12]},
-    "工程量清单及组价编制（审核）": {"建筑、市政、园林": [0.40,0.35,0.30,0.25,0.20], "安装、装饰、维修": [0.70,0.60,0.50,0.40,0.35]},
-    "工程量清单结算编制（审核）": {"建筑、市政、园林": [0.35,0.30,0.25,0.20,0.15], "安装、装饰、维修": [0.60,0.50,0.40,0.30,0.25]},
-    "工程结算-审减效益费": {"通用": [3.50,3.00,2.50,2.00,1.50]},
-    "工程造价纠纷鉴定": {"通用": [1.60,1.30,1.10,0.90,0.60]},
-    "施工阶段工程造价全过程控制": {"通用": [1.30,1.10,1.00,0.80,0.60]}
-  }
-};
-var SETTLE_PROJECTS = ["工程结算编制（审核）", "工程量清单结算编制（审核）"];
-
-// ============ 工具 ============
-function fmt(x){ return (Math.round(x * 10000) / 10000).toFixed(4); }
-function progressive(amount, rates){
-  var bases = [], fees = [], total = 0, prev = 0;
-  for (var i = 0; i < BRACKETS.length; i++){
-    var upper = BRACKETS[i];
-    var seg = Math.max(0, Math.min(amount, upper) - prev);
-    var fee = Math.round(seg * rates[i] / 100 * 10000) / 10000;
-    bases.push(seg); fees.push(fee); total += fee; prev = upper;
-  }
-  var seg2 = Math.max(0, amount - BRACKETS[BRACKETS.length - 1]);
-  var fee2 = Math.round(seg2 * rates[rates.length - 1] / 100 * 10000) / 10000;
-  fees.push(fee2); bases.push(seg2);
-  return {total: total + fee2, fees: fees, bases: bases, rates: rates};
-}
-function getRates(){ return RATES[document.getElementById('pricingType').value]; }
-function isSettle(){ var p = document.getElementById('projectType').value; return SETTLE_PROJECTS.indexOf(p) >= 0; }
-
-// ============ 联动 ============
-function updateProjectTypes(){
-  var rates = getRates();
-  var sel = document.getElementById('projectType');
-  var keep = sel.value;
-  sel.innerHTML = '';
-  Object.keys(rates).forEach(function(k){
-    if (k === '工程结算-审减效益费') return;
-    var o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o);
-  });
-  if (keep && rates[keep]) sel.value = keep;
-  updateCategories();
-}
-function updateCategories(){
-  var rates = getRates();
-  var p = document.getElementById('projectType').value;
-  var sel = document.getElementById('category');
-  sel.innerHTML = '';
-  var cats = Object.keys(rates[p] || {});
-  cats.forEach(function(c){
-    var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o);
-  });
-  var settle = isSettle();
-  document.getElementById('reduced').disabled = !settle;
-  document.getElementById('reduceDiscount').disabled = !settle;
-  if (!settle){
-    document.getElementById('reduced').value = '0';
-    document.getElementById('reduceDiscount').value = '0';
-  }
-}
-function getProjectName(){
-  var v = document.getElementById('projectName').value.trim();
-  if (v === '请输入工程名称（如：XX道路工程结算审核）') return '';
-  return v;
-}
-
-// ============ 计算 ============
-var lastResult = null;
-function calculate(){
-  var amount = parseFloat(document.getElementById('amount').value);
-  var discount = parseFloat(document.getElementById('discount').value) || 0;
-  var reduced = parseFloat(document.getElementById('reduced').value) || 0;
-  var reduceDiscount = parseFloat(document.getElementById('reduceDiscount').value) || 0;
-  if (!(amount > 0)){ alert('请输入正确的数值：计费基数必须大于 0'); return; }
-  var pricing = document.getElementById('pricingType').value;
-  var project = document.getElementById('projectType').value;
-  var category = document.getElementById('category').value;
-  var rates = getRates();
-  var civil = document.getElementById('civil').checked ? 0.7 : 1;
-  var std = progressive(amount, rates[project][category]);
-  var basicFactor = 1 - Math.max(discount, 0) / 100;
-  var basic = std.total * civil * basicFactor;
-  var fees = std.fees.map(function(x){ return x * civil * basicFactor; });
-
-  var reduceFee = 0, rStd = null, rFees = null, rBases = null, rRates = null, rFeesFinal = null;
-  if (isSettle() && reduced > 0){
-    rStd = progressive(reduced, rates['工程结算-审减效益费']['通用']);
-    var rFactor = civil * (1 - Math.max(reduceDiscount, 0) / 100);
-    reduceFee = rStd.total * rFactor;
-    rFeesFinal = rStd.fees.map(function(x){ return x * rFactor; });
-  }
-  var total = basic + reduceFee;
-  if (basic < 0.3 && !reduceFee) total = basic = 0.3;
-
-  document.querySelector('.fee').textContent = '¥ ' + fmt(total) + ' 万元';
-  var headline = '基本收费：' + fmt(basic) + ' 万元' + (reduceFee ? '   +   审减效益费：' + fmt(reduceFee) + ' 万元' : '');
-  document.getElementById('headline').textContent = headline;
-
-  var rows = [];
-  rows.push(['【基本收费】计算基数', std.bases.map(fmt), '-']);
-  rows.push(['基准费率（%）', std.rates, '-']);
-  rows.push(['标准收费（万元）', std.fees.map(fmt), fmt(std.total)]);
-  if (document.getElementById('civil').checked){
-    rows.push(['公路、水电计收系数（按 70%）', ['70.00%','70.00%','70.00%','70.00%','70.00%'], '70.00%']);
-    rows.push(['公路、水电调整后收费（万元）', std.fees.map(function(x){ return fmt(x * civil); }), fmt(std.total * civil)]);
-  }
-  rows.push(['基本收费下浮率（%）', [discount.toFixed(2)+'%',discount.toFixed(2)+'%',discount.toFixed(2)+'%',discount.toFixed(2)+'%',discount.toFixed(2)+'%'], discount.toFixed(2)+'%']);
-  rows.push(['基本收费实收金额（万元）', fees.map(fmt), fmt(basic)]);
-
-  if (reduceFee){
-    rows.push(['【审减效益费】计算基数', rStd.bases.map(fmt), '-']);
-    rows.push(['效益费率（%）', rStd.rates, '-']);
-    rows.push(['标准审减效益费（万元）', rStd.fees.map(fmt), fmt(rStd.total)]);
-    if (document.getElementById('civil').checked){
-      rows.push(['公路、水电计收系数（按 70%）', ['70.00%','70.00%','70.00%','70.00%','70.00%'], '70.00%']);
-      rows.push(['公路、水电调整后效益费（万元）', rStd.fees.map(function(x){ return fmt(x * civil); }), fmt(rStd.total * civil)]);
-    }
-    rows.push(['审减效益下浮率（%）', [reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%'], reduceDiscount.toFixed(2)+'%']);
-    rows.push(['审减效益费实收金额（万元）', rFeesFinal.map(fmt), fmt(reduceFee)]);
-  }
-
-  renderTable(rows);
-  lastResult = {name: getProjectName(), pricing: pricing, project: project, category: category, fee: fmt(total), rows: rows};
-}
-
-function renderTable(rows){
-  var tbody = document.getElementById('detailBody');
-  tbody.innerHTML = '';
-  rows.forEach(function(r, i){
-    var tr = document.createElement('tr');
-    if (r[0].indexOf('【') === 0) tr.className = 'section';
-    var td1 = document.createElement('td'); td1.textContent = r[0]; tr.appendChild(td1);
-    for (var j = 1; j <= 5; j++){
-      var td = document.createElement('td'); td.textContent = r[1][j-1]; tr.appendChild(td);
-    }
-    var td6 = document.createElement('td'); td6.textContent = r[2]; tr.appendChild(td6);
-    tbody.appendChild(tr);
-  });
-}
-
-// ============ 导出 CSV ============
-function exportCsv(){
-  if (!lastResult){ alert('请先完成计算后再导出。'); return; }
-  var r = lastResult;
-  var name = r.name || '造价咨询费用计算表';
-  var lines = [];
-  lines.push(name + '-造价咨询费用计算表');
-  lines.push('计价方式,' + r.pricing);
-  lines.push('收费项目,' + r.project);
-  lines.push('工程类别,' + r.category);
-  lines.push('收费总计,' + r.fee + ' 万元');
-  lines.push('');
-  lines.push('收费项目 / 分档区间,500万以内,501-1000万,1001-5000万,5001万-1亿,1亿元以上,小计（万元）');
-  r.rows.forEach(function(row){ lines.push([row[0]].concat(row[1]).concat([row[2]]).join(',')); });
-  var blob = new Blob(['\ufeff' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name + '.csv';
-  a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
-}
-
-// ============ 导出 PNG（Canvas 绘制结果图） ============
-function exportPng(){
-  if (!lastResult){ alert('请先完成计算后再导出。'); return; }
-  var r = lastResult;
-  var W = 1000, pad = 30;
-  var rows = r.rows.length;
-  var rowH = 34, headH = 46, titleH = 118, infoH = 46;
-  var H = pad * 2 + titleH + infoH + headH + rows * rowH + 30;
-  var cv = document.createElement('canvas');
-  cv.width = W * 2; cv.height = H * 2;
-  var ctx = cv.getContext('2d');
-  ctx.scale(2, 2);
-  function fitText(t, maxW){
-    if (ctx.measureText(t).width <= maxW) return t;
-    var s = t, ell = '…';
-    while (s.length > 4 && ctx.measureText(s + ell).width > maxW) s = s.slice(0, -1);
-    return s + ell;
-  }  // 背景
-  var g = ctx.createLinearGradient(0, 0, W, 0);
-  g.addColorStop(0, '#4C1D95'); g.addColorStop(1, '#7C3AED');
-  ctx.fillStyle = '#F6F3FE'; ctx.fillRect(0, 0, W, H);
-  // 头部渐变
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, titleH);
-  ctx.fillStyle = '#A78BFA'; ctx.fillRect(0, titleH - 2, W, 2);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 26px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
-  ctx.fillText('重庆造价咨询收费计算器', pad, 26);
-  ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 16px Consolas,monospace';
-  ctx.fillText('V2.2.13', pad, 64);
-  ctx.fillStyle = '#DDD3F9'; ctx.font = '15px "Microsoft YaHei UI",sans-serif';
-  ctx.fillText('按累进分档费率测算 · 渝价〔2013〕428号', pad + 88, 64);
-  // 参数区
-  ctx.fillStyle = '#2A1E4A'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
-  var name = r.name || '（未填写工程名称）';
-  ctx.fillText(fitText('工程名称：' + name, W - pad * 2), pad, titleH + 12);
-  ctx.fillText(fitText('计价方式：' + (r.pricing === 'quota' ? '定额计价' : '清单计价') + '   ｜   收费项目：' + r.project + '   ｜   工程类别：' + r.category, W - pad * 2), pad, titleH + 34);
-  // 表格头
-  var y = titleH + infoH + 6;
-  var cols = ['收费项目 / 分档区间', '500万以内', '501–1000万', '1001–5000万', '5001万–1亿', '1亿元以上', '小计（万元）'];
-  var cw = [220, 110, 110, 110, 110, 110, 130];
-  ctx.fillStyle = '#F1EBFC'; ctx.fillRect(pad, y, W - pad * 2, headH);
-  ctx.fillStyle = '#2A1E4A'; ctx.font = 'bold 14px "Microsoft YaHei UI",sans-serif';
-  var x = pad;
-  for (var i = 0; i < cols.length; i++){
-    ctx.fillText(cols[i], x + 8, y + 14);
-    x += cw[i];
-  }
-  y += headH;
-  // 行
-  r.rows.forEach(function(row, idx){
-    ctx.fillStyle = (idx % 2 === 1) ? '#FAF7FF' : '#FFFFFF';
-    if (row[0].indexOf('【') === 0) ctx.fillStyle = '#EDE5FB';
-    ctx.fillRect(pad, y, W - pad * 2, rowH);
-    ctx.fillStyle = '#2A1E4A'; ctx.font = (row[0].indexOf('【') === 0 ? 'bold ' : '') + '13px "Microsoft YaHei UI",sans-serif';
-    var x2 = pad;
-    ctx.fillText(row[0], x2 + 8, y + 10); x2 += cw[0];
-    for (var j = 0; j < 5; j++){
-      ctx.fillText(String(row[1][j]), x2 + cw[j + 1] / 2 - ctx.measureText(String(row[1][j])).width / 2, y + 10);
-      x2 += cw[j + 1];
-    }
-    ctx.fillText(String(row[2]), x2 + cw[6] / 2 - ctx.measureText(String(row[2])).width / 2, y + 10);
-    y += rowH;
-  });
-  // 总计
-  ctx.fillStyle = '#F1EAFE'; ctx.fillRect(pad, y, W - pad * 2, 34);
-  ctx.fillStyle = '#4C1D95'; ctx.font = 'bold 15px "Microsoft YaHei UI",sans-serif';
-  ctx.fillText('收费预估总计：¥ ' + r.fee + ' 万元', pad + 8, y + 10);
-  var img = cv.toDataURL('image/png');
-  var bin = atob(img.split(',')[1]);
-  var arr = new Uint8Array(bin.length);
-  for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-  var blob = new Blob([arr], {type: 'image/png'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = (r.name || '造价咨询费用计算表') + '-计算结果.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
-}
-
-// ============ 其他 ============
-function clearAll(){
-  document.getElementById('projectName').value = '请输入工程名称（如：XX道路工程结算审核）';
-  document.getElementById('amount').value = '3000';
-  document.getElementById('discount').value = '0';
-  document.getElementById('reduced').value = '0';
-  document.getElementById('reduceDiscount').value = '0';
-  document.getElementById('civil').checked = false;
-  document.querySelector('.fee').textContent = '¥ 0.0000 万元';
-  document.getElementById('headline').textContent = '填写参数后点击“开始计算”查看分档明细';
-  document.getElementById('detailBody').innerHTML = '';
-  lastResult = null;
-}
-function showAbout(){ document.getElementById('aboutMask').classList.add('show'); }
-function closeAbout(){ document.getElementById('aboutMask').classList.remove('show'); }
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAbout(); });
-
-// 初始化
-updateProjectTypes();
-</script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重庆造价咨询收费计算器_基于〔2013〕428号文_V2.2.13</title>
+<style>
+:root{
+  --navy:#4C1D95; --navy2:#7C3AED; --blue:#8B5CF6; --blue-hover:#7C3AED;
+  --sky:#F1EAFE; --bg:#F6F3FE; --card:#FFFFFF; --text:#2A1E4A;
+  --muted:#8B80A8; --border:#E3DAF5; --alt:#FAF7FF; --gold:#F5A623;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.mono{font-family:Consolas,monospace;}
+/* 顶栏渐变 */
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 28px 16px;position:relative;border-bottom:2px solid #A78BFA;}
+header h1{font-size:22px;font-weight:700;letter-spacing:.5px;}
+header .ver{color:#FFD88A;font-weight:700;font-size:14px;margin-top:4px;}
+header .sub{color:#DDD3F9;font-size:13px;margin-top:3px;}
+header .about{position:absolute;right:28px;top:50%;transform:translateY(-50%);color:#DDD3F9;font-weight:700;font-size:14px;cursor:pointer;user-select:none;}
+header .about:hover{color:#fff;text-decoration:underline;}
+/* 容器 */
+.page{max-width:1120px;margin:0 auto;padding:20px 24px 40px;}
+.card{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(76,29,149,.06);}
+.card h2{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.card h2 .hint{font-size:12px;color:var(--muted);font-weight:400;margin-left:auto;}
+/* 表单 */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 20px;}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;}
+.field input,.field select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:#fff;outline:none;transition:border .15s;}
+.field input:focus,.field select:focus{border-color:var(--blue);}
+.field input:disabled{background:#F3F0FA;color:#A99CC4;cursor:not-allowed;}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;user-select:none;}
+.check input{width:16px;height:16px;accent-color:var(--blue);}
+/* 按钮 */
+.actions{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.btn{border:none;border-radius:10px;padding:11px 26px;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:var(--blue-hover);}
+.btn-ghost{background:#fff;color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--sky);}
+.btn.right{margin-left:auto;}
+/* 结果条 */
+.result{border-radius:12px;background:var(--sky);border:1px solid var(--blue);padding:14px 18px;margin-bottom:14px;}
+.result .label{font-size:12.5px;color:var(--muted);}
+.result .fee{font-size:30px;font-weight:700;color:var(--blue);margin-top:3px;font-family:Consolas,monospace;}
+.result .headline{font-size:13px;color:var(--text);margin-top:6px;}
+/* 表格 */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#F1EBFC;padding:9px 8px;font-weight:700;border-bottom:2px solid var(--border);text-align:center;white-space:nowrap;}
+td{padding:8px;border-bottom:1px solid var(--border);text-align:center;}
+td:first-child{text-align:left;min-width:170px;}
+tr:nth-child(even) td{background:var(--alt);}
+tr.section td{background:#EDE5FB;font-weight:700;}
+tr.total td{background:#F1EAFE;font-weight:700;color:var(--navy);}
+.note{font-size:12px;color:var(--muted);margin-top:10px;}
+/* 底部 */
+footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+/* 关于弹窗 */
+.modal-mask{position:fixed;inset:0;background:rgba(30,10,60,.45);display:none;align-items:center;justify-content:center;z-index:99;}
+.modal-mask.show{display:flex;}
+.modal{width:520px;max-width:94vw;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:0 12px 40px rgba(20,0,50,.35);}
+.modal-head{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 24px;font-size:17px;font-weight:700;}
+.modal-head small{display:block;font-weight:400;font-size:12px;color:#DDD3F9;margin-top:4px;}
+.modal-body{padding:20px 26px;}
+.modal-body .ft{font-size:13.5px;margin-bottom:7px;}
+.modal-body .dev{margin-top:16px;border-top:1px solid var(--border);padding-top:14px;font-weight:700;font-size:14px;}
+.modal-body .dev2{font-size:12.5px;color:var(--muted);margin-top:4px;}
+.modal-close{text-align:right;padding:0 26px 22px;}
+/* 打印用 */
+@media print{header,.actions,footer,.btn,.card h2 .hint{display:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>重庆造价咨询收费计算器</h1>
+  <div class="ver">V2.2.13</div>
+  <div class="sub">按累进分档费率测算 · 渝价〔2013〕428号</div>
+  <div class="about" onclick="showAbout()">关于</div>
+</header>
+
+<div class="page">
+
+  <!-- 工程名称 -->
+  <div class="card">
+    <h2>工程名称</h2>
+    <input id="projectName" type="text" placeholder="请输入工程名称（如：XX道路工程结算审核）" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;" onfocus="if(this.value==='请输入工程名称（如：XX道路工程结算审核）')this.value='';" onblur="if(!this.value.trim())this.value='请输入工程名称（如：XX道路工程结算审核）'">
+  </div>
+
+  <!-- 计算参数 -->
+  <div class="card">
+    <h2>计算参数<span class="hint">填写工程基础信息，系统将自动按区间累进计算</span></h2>
+    <div class="grid">
+<div class="field">
+        <label>计价方式</label>
+        <select id="pricingType" onchange="updateProjectTypes()">
+          <option value="list">清单计价</option>
+          <option value="quota">定额计价</option>
+        </select>
+      </div>
+<div class="field">
+        <label>收费项目</label>
+        <select id="projectType" onchange="updateCategories()"></select>
+      </div>
+<div class="field">
+        <label>工程类别</label>
+        <select id="category"></select>
+      </div>
+<div class="field">
+        <label>计费基数（万元）</label>
+        <input id="amount" type="number" value="3000" min="0" step="any" class="mono">
+      </div>
+<div class="field">
+        <label>基本收费下浮（%）</label>
+        <input id="discount" type="number" value="0" min="0" step="any" class="mono">
+      </div>
+<div class="field">
+        <label>审减额（万元）</label>
+        <input id="reduced" type="number" value="0" min="0" step="any" class="mono" disabled>
+      </div>
+<div class="field">
+        <label>审减效益下浮（%）</label>
+        <input id="reduceDiscount" type="number" value="0" min="0" step="any" class="mono" disabled>
+      </div>
+<div class="field" style="grid-column:span 3;display:flex;align-items:flex-end;padding-bottom:3px;">
+        <label class="check"><input type="checkbox" id="civil"> 公路、铁路、水电等土木工程（按 70% 计收）</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 按钮 -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="calculate()">开始计算</button>
+    <button class="btn btn-ghost" onclick="clearAll()">重置</button>
+    <button class="btn btn-ghost right" onclick="exportPng()">导出 PNG</button>
+    <button class="btn btn-ghost" onclick="exportCsv()">导出 CSV</button>
+  </div>
+
+  <!-- 结果 -->
+  <div class="result">
+    <div class="label">收费预估总计</div>
+    <div class="fee">¥ 0.0000 万元</div>
+    <div class="headline" id="headline">填写参数后点击“开始计算”查看分档明细</div>
+  </div>
+
+  <!-- 明细表 -->
+  <div class="card">
+    <h2>分档明细</h2>
+    <div style="overflow:auto;max-height:430px;">
+      <table id="detail">
+        <thead>
+          <tr><th style="text-align:left;min-width:180px;">收费项目 / 分档区间</th><th>500万以内</th><th>501–1000万</th><th>1001–5000万</th><th>5001万–1亿</th><th>1亿元以上</th><th>小计（万元）</th></tr>
+        </thead>
+        <tbody id="detailBody"></tbody>
+      </table>
+    </div>
+    <div class="note">说明：按累进分档计取；单项不足 3000 元时，按 3000 元保底计收。</div>
+  </div>
+
+  <footer>
+    <span>V2.2.13 · 渝价〔2013〕428号 · 按累进分档计费</span>
+    <span>支持 导出 CSV / 导出 PNG 存档</span>
+  </footer>
+</div>
+
+<!-- 关于 -->
+<div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
+  <div class="modal">
+    <div class="modal-head">重庆造价咨询收费计算器<small>版本 V2.2.13 · 渝价〔2013〕428号</small></div>
+    <div class="modal-body">
+      <div style="font-weight:700;font-size:15px;margin-bottom:10px;">软件功能</div>
+      <div class="ft">· 按渝价〔2013〕428号 累进分档费率测算造价咨询收费</div>
+      <div class="ft">· 支持 清单计价 / 定额计价，10 类收费项目</div>
+      <div class="ft">· 公路、铁路、水电等土木工程按 70% 计收</div>
+      <div class="ft">· 支持 基本收费下浮率、审减额、审减效益下浮率</div>
+      <div class="ft">· 单项收费不足 3000 元时，按 3000 元保底计收</div>
+      <div class="ft">· 一键导出 CSV 数据表 · 一键导出 PNG 截图存档</div>
+      <div class="dev">开发者：吴工 ｜ QQ：641296512</div>
+      <div class="dev2">按渝价〔2013〕428号 计费规则制作，如有疑问欢迎联系。</div>
+    </div>
+    <div class="modal-close"><button class="btn btn-primary" onclick="closeAbout()">关闭</button></div>
+  </div>
+</div>
+
+<script>
+// ============ 数据（与 EXE 源码一致） ============
+var BRACKETS = [500, 1000, 5000, 10000];
+var RATES = {
+  quota: {
+    "概算编制（审核）": {"建筑、市政、园林": [0.17,0.15,0.12,0.09,0.08], "安装、装饰、维修": [0.35,0.30,0.25,0.15,0.12]},
+    "预算、最高限价（标底）编制（审核）": {"建筑、市政、园林": [0.35,0.30,0.25,0.15,0.12], "安装、装饰、维修": [0.65,0.55,0.40,0.30,0.20]},
+    "工程结算编制（审核）": {"建筑、市政、园林": [0.40,0.35,0.30,0.20,0.15], "安装、装饰、维修": [0.70,0.60,0.45,0.35,0.25]},
+    "工程结算-审减效益费": {"通用": [4.50,4.00,3.50,3.00,2.50]},
+    "工程造价纠纷鉴定": {"通用": [1.80,1.50,1.20,1.00,0.80]},
+    "施工阶段工程造价全过程控制": {"通用": [1.50,1.30,1.10,1.00,0.80]}
+  },
+  list: {
+    "工程量清单编制（审核）": {"建筑、市政、园林": [0.25,0.20,0.18,0.15,0.12], "安装、装饰、维修": [0.45,0.40,0.35,0.30,0.25]},
+    "工程量清单组价编制（审核）": {"建筑、市政、园林": [0.18,0.15,0.12,0.10,0.08], "安装、装饰、维修": [0.28,0.24,0.20,0.16,0.12]},
+    "工程量清单及组价编制（审核）": {"建筑、市政、园林": [0.40,0.35,0.30,0.25,0.20], "安装、装饰、维修": [0.70,0.60,0.50,0.40,0.35]},
+    "工程量清单结算编制（审核）": {"建筑、市政、园林": [0.35,0.30,0.25,0.20,0.15], "安装、装饰、维修": [0.60,0.50,0.40,0.30,0.25]},
+    "工程结算-审减效益费": {"通用": [3.50,3.00,2.50,2.00,1.50]},
+    "工程造价纠纷鉴定": {"通用": [1.60,1.30,1.10,0.90,0.60]},
+    "施工阶段工程造价全过程控制": {"通用": [1.30,1.10,1.00,0.80,0.60]}
+  }
+};
+var SETTLE_PROJECTS = ["工程结算编制（审核）", "工程量清单结算编制（审核）"];
+
+// ============ 工具 ============
+function fmt(x){ return (Math.round(x * 10000) / 10000).toFixed(4); }
+function progressive(amount, rates){
+  var bases = [], fees = [], total = 0, prev = 0;
+  for (var i = 0; i < BRACKETS.length; i++){
+    var upper = BRACKETS[i];
+    var seg = Math.max(0, Math.min(amount, upper) - prev);
+    var fee = Math.round(seg * rates[i] / 100 * 10000) / 10000;
+    bases.push(seg); fees.push(fee); total += fee; prev = upper;
+  }
+  var seg2 = Math.max(0, amount - BRACKETS[BRACKETS.length - 1]);
+  var fee2 = Math.round(seg2 * rates[rates.length - 1] / 100 * 10000) / 10000;
+  fees.push(fee2); bases.push(seg2);
+  return {total: total + fee2, fees: fees, bases: bases, rates: rates};
+}
+function getRates(){ return RATES[document.getElementById('pricingType').value]; }
+function isSettle(){ var p = document.getElementById('projectType').value; return SETTLE_PROJECTS.indexOf(p) >= 0; }
+
+// ============ 联动 ============
+function updateProjectTypes(){
+  var rates = getRates();
+  var sel = document.getElementById('projectType');
+  var keep = sel.value;
+  sel.innerHTML = '';
+  Object.keys(rates).forEach(function(k){
+    if (k === '工程结算-审减效益费') return;
+    var o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o);
+  });
+  if (keep && rates[keep]) sel.value = keep;
+  updateCategories();
+}
+function updateCategories(){
+  var rates = getRates();
+  var p = document.getElementById('projectType').value;
+  var sel = document.getElementById('category');
+  sel.innerHTML = '';
+  var cats = Object.keys(rates[p] || {});
+  cats.forEach(function(c){
+    var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o);
+  });
+  var settle = isSettle();
+  document.getElementById('reduced').disabled = !settle;
+  document.getElementById('reduceDiscount').disabled = !settle;
+  if (!settle){
+    document.getElementById('reduced').value = '0';
+    document.getElementById('reduceDiscount').value = '0';
+  }
+}
+function getProjectName(){
+  var v = document.getElementById('projectName').value.trim();
+  if (v === '请输入工程名称（如：XX道路工程结算审核）') return '';
+  return v;
+}
+
+// ============ 计算 ============
+var lastResult = null;
+function calculate(){
+  var amount = parseFloat(document.getElementById('amount').value);
+  var discount = parseFloat(document.getElementById('discount').value) || 0;
+  var reduced = parseFloat(document.getElementById('reduced').value) || 0;
+  var reduceDiscount = parseFloat(document.getElementById('reduceDiscount').value) || 0;
+  if (!(amount > 0)){ alert('请输入正确的数值：计费基数必须大于 0'); return; }
+  var pricing = document.getElementById('pricingType').value;
+  var project = document.getElementById('projectType').value;
+  var category = document.getElementById('category').value;
+  var rates = getRates();
+  var civil = document.getElementById('civil').checked ? 0.7 : 1;
+  var std = progressive(amount, rates[project][category]);
+  var basicFactor = 1 - Math.max(discount, 0) / 100;
+  var basic = std.total * civil * basicFactor;
+  var fees = std.fees.map(function(x){ return x * civil * basicFactor; });
+
+  var reduceFee = 0, rStd = null, rFees = null, rBases = null, rRates = null, rFeesFinal = null;
+  if (isSettle() && reduced > 0){
+    rStd = progressive(reduced, rates['工程结算-审减效益费']['通用']);
+    var rFactor = civil * (1 - Math.max(reduceDiscount, 0) / 100);
+    reduceFee = rStd.total * rFactor;
+    rFeesFinal = rStd.fees.map(function(x){ return x * rFactor; });
+  }
+  var total = basic + reduceFee;
+  if (basic < 0.3 && !reduceFee) total = basic = 0.3;
+
+  document.querySelector('.fee').textContent = '¥ ' + fmt(total) + ' 万元';
+  var headline = '基本收费：' + fmt(basic) + ' 万元' + (reduceFee ? '   +   审减效益费：' + fmt(reduceFee) + ' 万元' : '');
+  document.getElementById('headline').textContent = headline;
+
+  var rows = [];
+  rows.push(['【基本收费】计算基数', std.bases.map(fmt), '-']);
+  rows.push(['基准费率（%）', std.rates, '-']);
+  rows.push(['标准收费（万元）', std.fees.map(fmt), fmt(std.total)]);
+  if (document.getElementById('civil').checked){
+    rows.push(['公路、水电计收系数（按 70%）', ['70.00%','70.00%','70.00%','70.00%','70.00%'], '70.00%']);
+    rows.push(['公路、水电调整后收费（万元）', std.fees.map(function(x){ return fmt(x * civil); }), fmt(std.total * civil)]);
+  }
+  rows.push(['基本收费下浮率（%）', [discount.toFixed(2)+'%',discount.toFixed(2)+'%',discount.toFixed(2)+'%',discount.toFixed(2)+'%',discount.toFixed(2)+'%'], discount.toFixed(2)+'%']);
+  rows.push(['基本收费实收金额（万元）', fees.map(fmt), fmt(basic)]);
+
+  if (reduceFee){
+    rows.push(['【审减效益费】计算基数', rStd.bases.map(fmt), '-']);
+    rows.push(['效益费率（%）', rStd.rates, '-']);
+    rows.push(['标准审减效益费（万元）', rStd.fees.map(fmt), fmt(rStd.total)]);
+    if (document.getElementById('civil').checked){
+      rows.push(['公路、水电计收系数（按 70%）', ['70.00%','70.00%','70.00%','70.00%','70.00%'], '70.00%']);
+      rows.push(['公路、水电调整后效益费（万元）', rStd.fees.map(function(x){ return fmt(x * civil); }), fmt(rStd.total * civil)]);
+    }
+    rows.push(['审减效益下浮率（%）', [reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%',reduceDiscount.toFixed(2)+'%'], reduceDiscount.toFixed(2)+'%']);
+    rows.push(['审减效益费实收金额（万元）', rFeesFinal.map(fmt), fmt(reduceFee)]);
+  }
+
+  renderTable(rows);
+  lastResult = {name: getProjectName(), pricing: pricing, project: project, category: category, fee: fmt(total), rows: rows};
+}
+
+function renderTable(rows){
+  var tbody = document.getElementById('detailBody');
+  tbody.innerHTML = '';
+  rows.forEach(function(r, i){
+    var tr = document.createElement('tr');
+    if (r[0].indexOf('【') === 0) tr.className = 'section';
+    var td1 = document.createElement('td'); td1.textContent = r[0]; tr.appendChild(td1);
+    for (var j = 1; j <= 5; j++){
+      var td = document.createElement('td'); td.textContent = r[1][j-1]; tr.appendChild(td);
+    }
+    var td6 = document.createElement('td'); td6.textContent = r[2]; tr.appendChild(td6);
+    tbody.appendChild(tr);
+  });
+}
+
+// ============ 导出 CSV ============
+function exportCsv(){
+  if (!lastResult){ alert('请先完成计算后再导出。'); return; }
+  var r = lastResult;
+  var name = r.name || '造价咨询费用计算表';
+  var lines = [];
+  lines.push(name + '-造价咨询费用计算表');
+  lines.push('计价方式,' + r.pricing);
+  lines.push('收费项目,' + r.project);
+  lines.push('工程类别,' + r.category);
+  lines.push('收费总计,' + r.fee + ' 万元');
+  lines.push('');
+  lines.push('收费项目 / 分档区间,500万以内,501-1000万,1001-5000万,5001万-1亿,1亿元以上,小计（万元）');
+  r.rows.forEach(function(row){ lines.push([row[0]].concat(row[1]).concat([row[2]]).join(',')); });
+  var blob = new Blob(['\ufeff' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name + '.csv';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
+}
+
+// ============ 导出 PNG（Canvas 绘制结果图） ============
+function exportPng(){
+  if (!lastResult){ alert('请先完成计算后再导出。'); return; }
+  var r = lastResult;
+  var W = 1000, pad = 30;
+  var rows = r.rows.length;
+  var rowH = 34, headH = 46, titleH = 118, infoH = 46;
+  var H = pad * 2 + titleH + infoH + headH + rows * rowH + 30;
+  var cv = document.createElement('canvas');
+  cv.width = W * 2; cv.height = H * 2;
+  var ctx = cv.getContext('2d');
+  ctx.scale(2, 2);
+  function fitText(t, maxW){
+    if (ctx.measureText(t).width <= maxW) return t;
+    var s = t, ell = '…';
+    while (s.length > 4 && ctx.measureText(s + ell).width > maxW) s = s.slice(0, -1);
+    return s + ell;
+  }  // 背景
+  var g = ctx.createLinearGradient(0, 0, W, 0);
+  g.addColorStop(0, '#4C1D95'); g.addColorStop(1, '#7C3AED');
+  ctx.fillStyle = '#F6F3FE'; ctx.fillRect(0, 0, W, H);
+  // 头部渐变
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, titleH);
+  ctx.fillStyle = '#A78BFA'; ctx.fillRect(0, titleH - 2, W, 2);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 26px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
+  ctx.fillText('重庆造价咨询收费计算器', pad, 26);
+  ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 16px Consolas,monospace';
+  ctx.fillText('V2.2.13', pad, 64);
+  ctx.fillStyle = '#DDD3F9'; ctx.font = '15px "Microsoft YaHei UI",sans-serif';
+  ctx.fillText('按累进分档费率测算 · 渝价〔2013〕428号', pad + 88, 64);
+  // 参数区
+  ctx.fillStyle = '#2A1E4A'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
+  var name = r.name || '（未填写工程名称）';
+  ctx.fillText(fitText('工程名称：' + name, W - pad * 2), pad, titleH + 12);
+  ctx.fillText(fitText('计价方式：' + (r.pricing === 'quota' ? '定额计价' : '清单计价') + '   ｜   收费项目：' + r.project + '   ｜   工程类别：' + r.category, W - pad * 2), pad, titleH + 34);
+  // 表格头
+  var y = titleH + infoH + 6;
+  var cols = ['收费项目 / 分档区间', '500万以内', '501–1000万', '1001–5000万', '5001万–1亿', '1亿元以上', '小计（万元）'];
+  var cw = [220, 110, 110, 110, 110, 110, 130];
+  ctx.fillStyle = '#F1EBFC'; ctx.fillRect(pad, y, W - pad * 2, headH);
+  ctx.fillStyle = '#2A1E4A'; ctx.font = 'bold 14px "Microsoft YaHei UI",sans-serif';
+  var x = pad;
+  for (var i = 0; i < cols.length; i++){
+    ctx.fillText(cols[i], x + 8, y + 14);
+    x += cw[i];
+  }
+  y += headH;
+  // 行
+  r.rows.forEach(function(row, idx){
+    ctx.fillStyle = (idx % 2 === 1) ? '#FAF7FF' : '#FFFFFF';
+    if (row[0].indexOf('【') === 0) ctx.fillStyle = '#EDE5FB';
+    ctx.fillRect(pad, y, W - pad * 2, rowH);
+    ctx.fillStyle = '#2A1E4A'; ctx.font = (row[0].indexOf('【') === 0 ? 'bold ' : '') + '13px "Microsoft YaHei UI",sans-serif';
+    var x2 = pad;
+    ctx.fillText(row[0], x2 + 8, y + 10); x2 += cw[0];
+    for (var j = 0; j < 5; j++){
+      ctx.fillText(String(row[1][j]), x2 + cw[j + 1] / 2 - ctx.measureText(String(row[1][j])).width / 2, y + 10);
+      x2 += cw[j + 1];
+    }
+    ctx.fillText(String(row[2]), x2 + cw[6] / 2 - ctx.measureText(String(row[2])).width / 2, y + 10);
+    y += rowH;
+  });
+  // 总计
+  ctx.fillStyle = '#F1EAFE'; ctx.fillRect(pad, y, W - pad * 2, 34);
+  ctx.fillStyle = '#4C1D95'; ctx.font = 'bold 15px "Microsoft YaHei UI",sans-serif';
+  ctx.fillText('收费预估总计：¥ ' + r.fee + ' 万元', pad + 8, y + 10);
+  var img = cv.toDataURL('image/png');
+  var bin = atob(img.split(',')[1]);
+  var arr = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  var blob = new Blob([arr], {type: 'image/png'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (r.name || '造价咨询费用计算表') + '-计算结果.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+}
+
+// ============ 其他 ============
+function clearAll(){
+  document.getElementById('projectName').value = '请输入工程名称（如：XX道路工程结算审核）';
+  document.getElementById('amount').value = '3000';
+  document.getElementById('discount').value = '0';
+  document.getElementById('reduced').value = '0';
+  document.getElementById('reduceDiscount').value = '0';
+  document.getElementById('civil').checked = false;
+  document.querySelector('.fee').textContent = '¥ 0.0000 万元';
+  document.getElementById('headline').textContent = '填写参数后点击“开始计算”查看分档明细';
+  document.getElementById('detailBody').innerHTML = '';
+  lastResult = null;
+}
+function showAbout(){ document.getElementById('aboutMask').classList.add('show'); }
+function closeAbout(){ document.getElementById('aboutMask').classList.remove('show'); }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAbout(); });
+
+// 初始化
+updateProjectTypes();
+</script>
+</body>
+</html>
