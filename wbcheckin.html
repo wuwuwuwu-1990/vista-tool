@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkBuddy每日领取助手</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316a34a'/%3E%3Ccircle cx='32' cy='30' r='14' fill='%23ffd666'/%3E%3Ctext x='32' y='38' font-size='24' text-anchor='middle' fill='%23a05a00' font-family='Arial'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#eef5ee; --card:#ffffff; --line:#d9e8db;
+    --text:#1f2b1f; --muted:#647864;
+    --primary:#16a34a; --primary-2:#15803d; --accent:#4ade80;
+    --green-bg:#f0faf3; --amber:#b45309; --amber-bg:#fffbeb; --amber-line:#fde68a;
+    --err:#dc2626; --err-bg:#fef2f2; --err-line:#fecaca;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Display","SF Pro Text","PingFang SC","PingFang HK","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#101a12; --card:#17241a; --line:#26382b;
+    --text:#e7f0e8; --muted:#8fa894;
+    --primary:#34d97a; --primary-2:#4ade80; --accent:#6ee7a0;
+    --green-bg:#14241a; --amber:#fbbf24; --amber-bg:#241d10; --amber-line:#5c4512;
+    --err:#f87171; --err-bg:#2a1616; --err-line:#5c2525;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:var(--font);background:
+    radial-gradient(1100px 500px at 15% -5%, rgba(74,222,128,.16), transparent 60%),
+    radial-gradient(900px 460px at 90% 0%, rgba(22,163,74,.12), transparent 55%),
+    var(--bg);
+    color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer}
+  input{font-family:inherit}
+
+  /* ===== 顶栏（立体玻璃） ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid #e2eee4;box-shadow:0 10px 26px -14px rgba(20,60,30,.35)}
+  [data-theme="dark"] .topbar{background:rgba(23,36,26,.85);border-bottom-color:#26382b}
+  .topbar-inner{max-width:820px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:12px}
+  .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#16a34a,#4ade80);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;box-shadow:0 5px 12px rgba(22,163,74,.4),inset 0 -3px 6px rgba(0,60,20,.25),inset 0 2px 3px rgba(255,255,255,.5)}
+  .app-name{font-size:18px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+  .app-name .en{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px}
+  .ver-badge{font-size:12px;font-weight:700;color:#15803d;background:#effaf4;border:1px solid #bfe3c8;border-radius:20px;padding:2px 10px;box-shadow:inset 0 1px 2px rgba(255,255,255,.9),0 2px 5px rgba(20,60,30,.08)}
+  [data-theme="dark"] .ver-badge{color:#4ade80;background:#14241a;border-color:#2c4a34}
+  .topbar .spacer{flex:1}
+  .btn-about{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374a37;background:linear-gradient(180deg,#ffffff,#f0f7f1);border:1px solid #d5e8d8;border-radius:10px;padding:7px 14px;box-shadow:0 3px 6px rgba(20,60,30,.12),inset 0 1px 1px rgba(255,255,255,.9);transition:all .15s}
+  [data-theme="dark"] .btn-about{color:#cfe5d2;background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34}
+  .btn-about:hover{border-color:#16a34a;color:#15803d;transform:translateY(-1px);box-shadow:0 5px 10px rgba(20,60,30,.18)}
+  [data-theme="dark"] .btn-about:hover{color:#4ade80}
+
+  /* ===== 主区 ===== */
+  main{max-width:820px;margin:0 auto;padding:22px 20px 60px;perspective:1400px}
+
+  /* ===== 浮动立体卡片 ===== */
+  .card{
+    position:relative;
+    background:linear-gradient(180deg,#ffffff 0%,#fbfefb 55%,#f3faf4 100%);
+    border:1px solid #ddeadd;
+    border-radius:18px;
+    padding:20px 22px;
+    margin-bottom:26px;
+    box-shadow:
+      0 1px 2px rgba(20,60,30,.05),
+      0 10px 20px -8px rgba(20,60,30,.16),
+      0 26px 46px -18px rgba(20,60,30,.16),
+      inset 0 1px 0 rgba(255,255,255,.95);
+    transition:transform .32s cubic-bezier(.25,.8,.3,1.15), box-shadow .32s, border-color .3s;
+    transform-style:preserve-3d;
+  }
+  [data-theme="dark"] .card{background:linear-gradient(180deg,#17241a 0%,#142017 55%,#111d14 100%);border-color:#26382b}
+  .card::before{
+    content:"";position:absolute;inset:0;border-radius:18px;z-index:-1;
+    background:linear-gradient(180deg,#e2f0e5,#d3e7d8);
+    transform:translateY(7px);
+    box-shadow:0 10px 20px rgba(20,60,30,.12);
+  }
+  [data-theme="dark"] .card::before{background:linear-gradient(180deg,#1c2c20,#16241a)}
+  .card::after{
+    content:"";position:absolute;inset:0;border-radius:18px;z-index:-2;
+    background:linear-gradient(180deg,#d8eadc,#c6e0cc);
+    transform:translateY(13px) scaleY(.99);
+    box-shadow:0 4px 10px rgba(20,60,30,.08);
+  }
+  [data-theme="dark"] .card::after{background:linear-gradient(180deg,#16241a,#111d14)}
+  .card:hover{
+    transform:translateY(-6px) rotateX(1.8deg);
+    border-color:#b8dcc0;
+    box-shadow:
+      0 2px 4px rgba(20,60,30,.06),
+      0 18px 32px -10px rgba(20,60,30,.24),
+      0 44px 76px -22px rgba(20,60,30,.24),
+      inset 0 1px 0 rgba(255,255,255,.98);
+  }
+  .card-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;margin-bottom:14px}
+  .card-title .step{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 6px rgba(22,163,74,.35),inset 0 1px 2px rgba(255,255,255,.4)}
+  .hidden{display:none!important}
+
+  /* ===== 输入区 ===== */
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  input[type=password]{width:100%;background:linear-gradient(180deg,#fbfefb,#f0f8f1);border:1px solid #cfe3d2;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);font-family:ui-monospace,Consolas,monospace;box-shadow:inset 0 2px 6px rgba(20,60,30,.06),inset 0 -1px 2px rgba(255,255,255,.8);transition:border-color .2s,box-shadow .2s}
+  [data-theme="dark"] input[type=password]{background:linear-gradient(180deg,#141f16,#111a13);border-color:#2c4a34}
+  input[type=password]:focus{outline:none;border-color:#16a34a;box-shadow:inset 0 2px 6px rgba(20,60,30,.06),0 0 0 3px rgba(22,163,74,.18)}
+
+  /* ===== 3D 按钮 ===== */
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .btn{border:none;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:transform .12s,box-shadow .12s;user-select:none}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+  .btn-primary{color:#fff;background:linear-gradient(180deg,#1bb455,#15803d);box-shadow:0 5px 0 #0f6d33,0 9px 18px rgba(22,163,74,.35),inset 0 1px 1px rgba(255,255,255,.4);text-shadow:0 1px 2px rgba(0,40,10,.3)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 7px 0 #0f6d33,0 12px 22px rgba(22,163,74,.4),inset 0 1px 1px rgba(255,255,255,.4)}
+  .btn-primary:active{transform:translateY(3px);box-shadow:0 2px 0 #0f6d33,0 5px 10px rgba(22,163,74,.3),inset 0 1px 1px rgba(255,255,255,.4)}
+  .btn-ghost{color:#15803d;background:linear-gradient(180deg,#ffffff,#f0f7f1);border:1px solid #d5e8d8;box-shadow:0 4px 0 #c6ddd0,0 6px 12px rgba(20,60,30,.12),inset 0 1px 1px rgba(255,255,255,.9)}
+  [data-theme="dark"] .btn-ghost{color:#4ade80;background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34;box-shadow:0 4px 0 #0d1710,0 6px 12px rgba(0,0,0,.3)}
+  .btn-ghost:hover{transform:translateY(-2px);box-shadow:0 6px 0 #bdd8c9,0 10px 16px rgba(20,60,30,.16),inset 0 1px 1px rgba(255,255,255,.9)}
+  .btn-ghost:active{transform:translateY(2px);box-shadow:0 2px 0 #c6ddd0,0 3px 8px rgba(20,60,30,.1)}
+  .btn-warn{color:#fff;background:linear-gradient(180deg,#f0a63c,#d9851a);box-shadow:0 5px 0 #a8660f,0 9px 18px rgba(180,120,10,.3),inset 0 1px 1px rgba(255,255,255,.4);text-shadow:0 1px 2px rgba(90,50,0,.3)}
+  .btn-warn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #a8660f,0 12px 22px rgba(180,120,10,.36),inset 0 1px 1px rgba(255,255,255,.4)}
+  .btn-warn:active{transform:translateY(3px);box-shadow:0 2px 0 #a8660f,0 5px 10px rgba(180,120,10,.26)}
+  .btn-danger{color:var(--err);background:linear-gradient(180deg,#ffffff,#fdf2f2);border:1px solid var(--err-line);box-shadow:0 4px 0 #f0c9c9,0 6px 12px rgba(120,30,30,.1),inset 0 1px 1px rgba(255,255,255,.9)}
+  [data-theme="dark"] .btn-danger{background:linear-gradient(180deg,#2a1616,#201111);border-color:#5c2525;box-shadow:0 4px 0 #1a0d0d,0 6px 12px rgba(0,0,0,.3)}
+  .btn-danger:hover{transform:translateY(-2px)}
+  .btn-danger:active{transform:translateY(2px);box-shadow:0 2px 0 #f0c9c9,0 3px 8px rgba(120,30,30,.08)}
+  .btn-sm{padding:3px 10px;font-size:12px;border-radius:8px}
+
+  .check-row{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
+  .check-row label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;margin:0}
+  .check-row input{accent-color:var(--primary)}
+
+  /* ===== 状态区 ===== */
+  .status-big{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .status-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;border:1px solid;box-shadow:inset 0 2px 6px rgba(20,60,30,.08),0 4px 10px rgba(20,60,30,.1)}
+  .status-icon.ok{background:linear-gradient(180deg,#f0faf3,#dff3e4);border-color:#bfe3c8}
+  .status-icon.no{background:linear-gradient(180deg,#fffbeb,#fdf3d3);border-color:#f3e3ae}
+  .status-icon.err{background:linear-gradient(180deg,#fef2f2,#fde3e3);border-color:#fecaca}
+  .status-txt h3{font-size:20px;font-weight:700}
+  .status-txt p{color:var(--muted);font-size:13px;margin-top:2px}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .chip{background:linear-gradient(180deg,#f6fcf7,#eaf7ed);border:1px solid #c9e8d0;border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--text);box-shadow:inset 0 1px 1px rgba(255,255,255,.8),0 2px 5px rgba(20,60,30,.06)}
+  [data-theme="dark"] .chip{background:linear-gradient(180deg,#15251a,#112016);border-color:#2c4a34}
+  .chip b{color:var(--primary-2)}
+
+  /* ===== 周期条 ===== */
+  .cycle{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .day{flex:1;min-width:78px;background:linear-gradient(180deg,#fbfefb,#f0f8f1);border:1px solid #d9e8db;border-radius:12px;padding:10px 6px;text-align:center;position:relative;transition:all .2s;box-shadow:inset 0 2px 5px rgba(20,60,30,.05)}
+  [data-theme="dark"] .day{background:linear-gradient(180deg,#182519,#152019);border-color:#26382b}
+  .day b{display:block;font-size:12px;color:var(--muted);font-weight:600}
+  .day span{display:block;font-size:15px;font-weight:700;margin-top:2px}
+  .day.on{background:linear-gradient(180deg,#f0faf3,#ddf2e2);border-color:#16a34a;box-shadow:0 0 0 2px rgba(22,163,74,.12),inset 0 2px 5px rgba(20,60,30,.05)}
+  [data-theme="dark"] .day.on{background:linear-gradient(180deg,#143021,#102a1b)}
+  .day.on span{color:var(--primary-2)}
+  .day.bonus{background:linear-gradient(180deg,#fffdf5,#fdf4dc);border-color:#eecb63}
+  [data-theme="dark"] .day.bonus{background:linear-gradient(180deg,#2a2410,#241d10)}
+  .day.bonus span{color:var(--amber)}
+  .day.today::after{content:"今天";position:absolute;top:-9px;right:8px;font-size:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:6px;padding:1px 7px;box-shadow:0 2px 5px rgba(22,163,74,.35)}
+  .cycle-hint{color:var(--muted);font-size:12px;margin-top:10px}
+
+  /* ===== 日志 ===== */
+  .log{background:linear-gradient(180deg,#f8fcf8,#f0f8f1);border:1px solid #ddeadd;border-radius:12px;padding:12px 14px;max-height:260px;overflow-y:auto;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;box-shadow:inset 0 2px 6px rgba(20,60,30,.05)}
+  [data-theme="dark"] .log{background:linear-gradient(180deg,#121d14,#0f1911);border-color:#26382b}
+  .log .item{display:flex;gap:10px;padding:5px 0;border-bottom:1px dashed #dceadf;word-break:break-all}
+  [data-theme="dark"] .log .item{border-bottom-color:#22301f}
+  .log .item:last-child{border-bottom:none}
+  .log .t{color:var(--muted);flex-shrink:0}
+  .log .ok{color:#16a34a} .log .err{color:var(--err)} .log .info{color:#15803d}
+  [data-theme="dark"] .log .ok{color:#4ade80} [data-theme="dark"] .log .info{color:#6ee7a0}
+  .empty-log{color:var(--muted);text-align:center;padding:16px 0;font-size:13px}
+
+  /* ===== 降级命令 ===== */
+  .fallback{margin-top:14px;border:1px dashed var(--amber-line);background:linear-gradient(180deg,#fffdf6,#fdf6e3);border-radius:12px;padding:14px;display:none}
+  [data-theme="dark"] .fallback{background:linear-gradient(180deg,#241d10,#1e180d)}
+  .fallback.show{display:block}
+  .fallback h4{font-size:14px;color:var(--amber);margin-bottom:8px}
+  .fallback p{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+  .fallback pre{background:#fff;border:1px solid #e3efe4;border-radius:8px;padding:10px;font-size:11.5px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:10px}
+  [data-theme="dark"] .fallback pre{background:#0f1911;border-color:#26382b}
+
+  /* ===== 帮助 ===== */
+  ol{padding-left:20px;font-size:13.5px;color:var(--text)}
+  ol li{margin-bottom:8px}
+  .kbd{background:linear-gradient(180deg,#fff,#f0f7f1);border:1px solid #d5e8d8;border-radius:6px;padding:1px 8px;font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all;box-shadow:inset 0 1px 1px rgba(255,255,255,.9),0 2px 4px rgba(20,60,30,.06)}
+  [data-theme="dark"] .kbd{background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34}
+  .note{font-size:12.5px;color:var(--muted);margin-top:12px;background:linear-gradient(180deg,#f8fcf8,#f0f8f1);border:1px solid #e0ebe0;border-radius:10px;padding:10px 14px;box-shadow:inset 0 2px 6px rgba(20,60,30,.04)}
+  [data-theme="dark"] .note{background:linear-gradient(180deg,#121d14,#0f1911);border-color:#26382b}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .pulse{animation:pulse .6s ease}
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">✦</div>
+      <div class="app-name">WorkBuddy每日领取助手 <span class="en">DAILY CHECK-IN</span></div>
+      <div class="ver-badge">v1.0</div>
+      <div class="spacer"></div>
+      <button class="btn-about" id="themeBtn" title="切换主题">🌙 深色</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="sub" style="color:var(--muted);font-size:13px;text-align:center;margin-bottom:20px">每日签到 · 7 天周期 1600 分 · 纯本地页面，Token 不出本机</div>
+
+    <!-- Token -->
+    <section class="card">
+      <div class="card-title"><span class="step">1</span>登录 Token（accessToken）</div>
+      <label>粘贴 accessToken（获取方法见下方「如何获取」）</label>
+      <input type="password" id="tokenInput" placeholder="粘贴 accessToken ..." autocomplete="off">
+      <div class="row">
+        <button class="btn btn-ghost" id="btnReadFile">📂 从本机文件读取</button>
+        <button class="btn btn-primary" id="btnSaveToken">💾 保存 Token</button>
+        <button class="btn btn-danger" id="btnClearToken">清除</button>
+      </div>
+      <div class="check-row">
+        <label><input type="checkbox" id="ckAuto" checked> 打开页面自动领取</label>
+        <label><input type="checkbox" id="ckWatch"> 每 60 分钟自动巡检</label>
+      </div>
+    </section>
+
+    <!-- 状态 -->
+    <section class="card">
+      <div class="card-title"><span class="step">2</span>今日状态</div>
+      <div class="status-big">
+        <div class="status-icon no" id="statusIcon">⚡</div>
+        <div class="status-txt">
+          <h3 id="statusTitle">尚未查询</h3>
+          <p id="statusDesc">保存 Token 后点击「一键自动领取」</p>
+        </div>
+      </div>
+      <div class="chips" id="chips">
+        <span class="chip">周期奖励：<b>第 1-6 天 100 分/天</b></span>
+        <span class="chip">第 7 天：<b>1000 分</b></span>
+        <span class="chip">单周期合计：<b>1600 分</b></span>
+      </div>
+    </section>
+
+    <!-- 周期 -->
+    <section class="card">
+      <div class="card-title"><span class="step">3</span>7 天签到周期</div>
+      <div class="cycle" id="cycle"></div>
+      <div class="cycle-hint" id="cycleHint">加载状态后显示周期进度；若接口未返回天数，仅作示意。</div>
+    </section>
+
+    <!-- 操作 -->
+    <section class="card">
+      <div class="card-title"><span class="step">4</span>一键领取</div>
+      <div class="row">
+        <button class="btn btn-primary" id="btnAuto">✨ 一键自动领取</button>
+        <button class="btn btn-ghost" id="btnStatus">查询今日状态</button>
+        <button class="btn btn-warn" id="btnGift">🎁 领取今日礼包（一次性）</button>
+        <button class="btn btn-danger" id="btnClearLog">清空日志</button>
+      </div>
+      <div class="fallback" id="fallback">
+        <h4>⚠️ 浏览器跨域拦截了请求</h4>
+        <p>纯网页无法直接跨域调用接口时，可用本机命令领取（Token 已自动代入，可放心复制）：</p>
+        <pre id="cmdNode"></pre>
+        <div class="row">
+          <button class="btn btn-ghost btn-sm" id="btnCopyCmd">📋 复制 Node 命令</button>
+          <button class="btn btn-ghost btn-sm" id="btnCopyCurl">📋 复制 cURL 命令</button>
+        </div>
+        <pre id="cmdCurl" class="hidden"></pre>
+      </div>
+    </section>
+
+    <!-- 日志 -->
+    <section class="card">
+      <div class="card-title"><span class="step">5</span>运行日志</div>
+      <div class="log" id="logBox"><div class="empty-log" id="logEmpty">暂无日志</div></div>
+    </section>
+
+    <!-- 帮助 -->
+    <section class="card">
+      <div class="card-title"><span class="step">6</span>如何获取 Token</div>
+      <ol>
+        <li>按 <span class="kbd">Win + R</span> 打开运行框，粘贴路径回车（或点按钮复制）：<br>
+          <span class="kbd">%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info</span>
+          <button class="btn btn-ghost btn-sm" id="btnCopyPath" style="margin-left:8px">📋 复制路径</button>
+        </li>
+        <li>用记事本打开该文件，找到 <span class="kbd">"accessToken": "xxx"</span>，复制引号内的内容。</li>
+        <li>粘贴到上方输入框 → 保存 → 点「一键自动领取」。</li>
+        <li>之后每天打开本页面即自动签到；也可勾选「每 60 分钟自动巡检」让页面挂着自动领。</li>
+      </ol>
+      <div class="note">
+        🔒 安全说明：Token 仅保存在本浏览器 localStorage 中，页面为纯本地 HTML，不上传任何第三方。
+        每日签到接口幂等，重复调用不会多领、不会扣分（已领取会提示「今天已签到」）。
+        Token 约 60 天有效，平时正常使用 WorkBuddy 会自动刷新；若提示失效，重新复制一次即可。
+      </div>
+    </section>
+
+    <footer>WorkBuddy每日领取助手 · 接口：POST /v2/billing/meter/daily-checkin · 仅用于个人自动化</footer>
+  </main>
+
+<script>
+(function(){
+'use strict';
+const LS_TOKEN='wb_points_tk', LS_SET='wb_points_set';
+const API_BASES=['https://www.codebuddy.cn','https://copilot.tencent.com'];
+const PATHS={status:'/billing/meter/checkin-activity-status',checkin:'/billing/meter/daily-checkin',gift:'/billing/meter/claim-gift'};
+const $=s=>document.querySelector(s);
+let busy=false;
+
+/* ---------- 主题 ---------- */
+function setTheme(t){document.documentElement.dataset.theme=t;
+  $('#themeBtn').textContent=t==='dark'?'☀️ 浅色':'🌙 深色';
+  try{localStorage.setItem('wb_theme',t)}catch(e){}
+}
+setTheme(localStorage.getItem('wb_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+$('#themeBtn').addEventListener('click',()=>{
+  setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+});
+
+/* ---------- Token ---------- */
+function getToken(){return localStorage.getItem(LS_TOKEN)||''}
+function saveToken(){const t=$('#tokenInput').value.trim();if(!t){log('Token 为空，未保存','err');return}
+  try{localStorage.setItem(LS_TOKEN,t);log('Token 已保存（仅存本浏览器）','ok');}catch(e){log('保存失败：'+e.message,'err')}}
+function loadSettings(){
+  let s={auto:true,watch:false};try{s=Object.assign(s,JSON.parse(localStorage.getItem(LS_SET)||'{}'))}catch(e){}
+  $('#ckAuto').checked=!!s.auto;$('#ckWatch').checked=!!s.watch;
+}
+function persistSettings(){localStorage.setItem(LS_SET,JSON.stringify({auto:$('#ckAuto').checked,watch:$('#ckWatch').checked}))}
+$('#btnSaveToken').addEventListener('click',saveToken);
+$('#btnClearToken').addEventListener('click',()=>{localStorage.removeItem(LS_TOKEN);$('#tokenInput').value='';log('Token 已清除','info')});
+$('#ckAuto').addEventListener('change',persistSettings);
+$('#ckWatch').addEventListener('change',persistSettings);
+
+/* 从本机文件读取（需 Chromium 内核浏览器，走文件选择器） */
+$('#btnReadFile').addEventListener('click',async()=>{
+  if(!window.showOpenFilePicker){log('当前浏览器不支持文件读取，请手动打开文件复制','err');return}
+  try{
+    const [h]=await window.showOpenFilePicker({types:[{description:'登录态文件',accept:{'application/json':['.info','.json']}}]});
+    const text=await (await h.getFile()).text();
+    let obj;try{obj=JSON.parse(text)}catch(e){throw new Error('文件不是有效 JSON')}
+    const tk=(obj.auth&&obj.auth.accessToken)||obj.accessToken;
+    if(!tk)throw new Error('文件中未找到 accessToken 字段');
+    $('#tokenInput').value=tk;saveToken();log('已从文件读取并保存 Token','ok');
+  }catch(e){log('读取失败：'+e.message,'err')}
+});
+
+/* ---------- 日志 ---------- */
+function log(msg,type){
+  const box=$('#logBox');const empty=$('#logEmpty');
+  if(empty)empty.remove();
+  const d=new Date(),ts=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  const el=document.createElement('div');el.className='item';
+  el.innerHTML='<span class="t">'+ts+'</span><span class="'+(type||'info')+'">'+escapeHtml(msg)+'</span>';
+  box.prepend(el);
+  while(box.children.length>100)box.lastChild.remove();
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('#btnClearLog').addEventListener('click',()=>{$('#logBox').innerHTML='<div class="empty-log" id="logEmpty">暂无日志</div>'});
+
+/* ---------- API ---------- */
+function candidates(path){
+  const out=[];
+  for(const b of API_BASES){out.push(b+'/v2'+path);out.push(b+path)}
+  return out;
+}
+async function postJSON(path,token){
+  let lastErr=null;
+  for(const url of candidates(path)){
+    try{
+      const res=await fetch(url,{method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:'{}',credentials:'include'});
+      const text=await res.text();
+      let json=null;try{json=JSON.parse(text)}catch(e){}
+      if(res.status===401||res.status===403)return{ok:false,http:res.status,json,text,url};
+      if(res.ok)return{ok:true,http:res.status,json,text,url};
+      lastErr=new Error('HTTP '+res.status+' '+(json&&json.msg||text||'').slice(0,120));
+    }catch(e){lastErr=e}
+  }
+  throw lastErr||new Error('网络请求失败');
+}
+function msgOf(r){return r.json&&(r.json.msg||r.json.message)||''}
+function codeOf(r){return r.json&&r.json.code}
+function pointsOf(r){const j=r.json;if(!j)return null;
+  return j.points??j.gain_points??j.gained_points??j.data?.points??j.data?.gain_points??null}
+function isChecked(r){const j=r.json;if(!j)return false;
+  if(j.data&&j.data.today_checked_in===true)return true;
+  return /已签到|已领取|已领过|重复领取|already/i.test(msgOf(r)||'');}
+
+/* ---------- 状态渲染 ---------- */
+function setStatus(ok,icon,title,desc){
+  const ic=$('#statusIcon');
+  ic.className='status-icon '+(ok?'ok':ok===null?'err':'no');
+  ic.textContent=icon;
+  $('#statusTitle').textContent=title;
+  $('#statusDesc').textContent=desc;
+  ic.classList.remove('pulse');void ic.offsetWidth;ic.classList.add('pulse');
+}
+function renderStatus(r){
+  const j=r&&r.json,data=j&&j.data||{};
+  const checked=isChecked(r);
+  const streak=numOr(data.streak,data.cycle_streak,data.days_in_cycle,data.continuous_days,data.checked_days,data.total_days);
+  if(checked){setStatus(true,'✅','今日已签到','积分已到手，明天再来 +100 分')}
+  else if(codeOf(r)&&!r.ok){setStatus(null,'⚠️','请求未成功',('HTTP '+r.http+' '+(msgOf(r)||'')).slice(0,60))}
+  else{setStatus(false,'⚡','今日未签到','点击「一键自动领取」立即领取')}
+  renderCycle(streak);
+  const chips=$('#chips');
+  const add=[];
+  if(streak!==null)add.push('<span class="chip">当前连续：<b>'+streak+' 天</b></span>');
+  const pts=pointsOf(r);
+  if(pts!==null)add.push('<span class="chip">本次获得：<b>+'+pts+' 分</b></span>');
+  if(j&&j.data&&j.data.points!==undefined)add.push('<span class="chip">积分余额：<b>'+j.data.points+'</b></span>');
+  if(add.length){chips.innerHTML=add.join('')+chips.innerHTML}
+}
+function numOr(){for(const v of arguments){const n=parseInt(v,10);if(!isNaN(n))return n}return null}
+function renderCycle(streak){
+  const box=$('#cycle');box.innerHTML='';
+  for(let i=1;i<=7;i++){
+    const d=document.createElement('div');
+    d.className='day'+(streak!==null&&i<=streak?' on':'')+(i===7?' bonus':'')+(i===streak?' today':'');
+    d.innerHTML='<b>第'+i+'天</b><span>'+(i===7?'🎁 1000':'+100')+'</span>';
+    box.appendChild(d);
+  }
+  if(streak===null){$('#cycleHint').textContent='接口未返回周期天数，上方仅为 7 天周期示意图。'}
+  else{$('#cycleHint').textContent='当前周期第 '+Math.min(streak,7)+' 天'+(streak>=7?'，已满周期！':'，明天再领 +'+(streak===6?'1000（满7天大奖）':'100')+' 分')+'。'}
+}
+
+/* ---------- 领取流程 ---------- */
+function setBusy(b){busy=b;['btnAuto','btnStatus','btnGift','btnSaveToken'].forEach(id=>{$(id).disabled=b})}
+async function runAuto(showAll){
+  const tk=getToken();
+  if(!tk){log('未配置 Token，请先保存','err');setStatus(null,'🔑','缺少 Token','请粘贴 accessToken 并保存');return}
+  setBusy(true);hideFallback();
+  try{
+    log('查询今日签到状态 ...');
+    const st=await postJSON(PATHS.status,tk);
+    if(st.http===401||st.http===403){log('Token 无效或已过期：'+(msgOf(st)||st.http),'err');
+      setStatus(null,'🚫','Token 无效','请重新从本机文件复制 accessToken');return}
+    renderStatus(st);
+    if(isChecked(st)){log('今日已签到，无需重复领取','ok')}
+    else{
+      log('开始签到 ...');
+      const ck=await postJSON(PATHS.checkin,tk);
+      renderStatus(ck);
+      const p=pointsOf(ck);
+      if(ck.http===401||ck.http===403){log('Token 无效：'+(msgOf(ck)||ck.http),'err')}
+      else if(!ck.ok){log('签到未成功：'+msgOf(ck)+'（HTTP '+ck.http+'）','err')}
+      else if(isChecked(ck)){log('✅ 签到成功'+(p!==null?'，+'+p+' 积分！':'！'),'ok')}
+      else{log('签到响应：'+(msgOf(ck)||JSON.stringify(ck.json||ck.text)),'info')}
+    }
+  }catch(e){
+    log('请求失败：'+e.message,'err');
+    if(/Failed to fetch|NetworkError|TypeError/i.test(e.message||''))showFallback();
+    else setStatus(null,'⚠️','请求异常',e.message);
+  }finally{setBusy(false)}
+}
+$('#btnAuto').addEventListener('click',()=>runAuto(false));
+$('#btnStatus').addEventListener('click',async()=>{
+  const tk=getToken();if(!tk){log('未配置 Token','err');return}
+  setBusy(true);
+  try{const r=await postJSON(PATHS.status,tk);renderStatus(r);log('状态：'+((msgOf(r)||'')||(r.json?JSON.stringify(r.json).slice(0,160):r.text)),'info')}
+  catch(e){log('查询失败：'+e.message,'err')}
+  finally{setBusy(false)}
+});
+$('#btnGift').addEventListener('click',async()=>{
+  const tk=getToken();if(!tk){log('未配置 Token','err');return}
+  setBusy(true);
+  try{
+    log('领取今日礼包（每人限一次）...');
+    const r=await postJSON(PATHS.gift,tk);
+    const m=msgOf(r)||'HTTP '+r.http;
+    if(r.ok&&!isChecked(r)){log('🎁 礼包领取成功：'+m,'ok')}
+    else{log('礼包：'+m,'info')}
+  }catch(e){log('礼包请求失败：'+e.message,'err');if(/Failed to fetch|NetworkError|TypeError/i.test(e.message||''))showFallback()}
+  finally{setBusy(false)}
+});
+
+/* ---------- 降级命令 ---------- */
+function buildCmds(){
+  const tk=getToken();
+  const node='node -e "fetch(\'https://www.codebuddy.cn/v2/billing/meter/daily-checkin\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\',\'Authorization\':\'Bearer '+tk+'\'},body:\'{}\'}).then(r=>r.text()).then(console.log)"';
+  const curl='curl -s -X POST "https://www.codebuddy.cn/v2/billing/meter/daily-checkin" -H "Content-Type: application/json" -H "Authorization: Bearer '+tk+'" -d "{}"';
+  $('#cmdNode').textContent=node;
+  $('#cmdCurl').textContent=curl;
+  $('#cmdNode').dataset.full=node; $('#cmdCurl').dataset.full=curl;
+}
+function showFallback(){buildCmds();$('#fallback').classList.add('show');log('已展示本机命令降级方案，可直接复制运行','warn')}
+function hideFallback(){$('#fallback').classList.remove('show')}
+$('#btnCopyCmd').addEventListener('click',()=>copy($('#cmdNode').dataset.full,'Node 命令已复制'));
+$('#btnCopyCurl').addEventListener('click',()=>copy($('#cmdCurl').dataset.full,'cURL 命令已复制'));
+$('#btnCopyPath').addEventListener('click',()=>copy('%LOCALAPPDATA%\\CodeBuddyExtension\\Data\\Public\\auth\\workbuddy-desktop.info','路径已复制'));
+function copy(text,msg){
+  if(!text){log('暂无命令可复制','err');return}
+  const done=()=>log(msg,'ok');
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done))}
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');done()}catch(e){log('复制失败，请手动选择复制','err')}
+  ta.remove();
+}
+
+/* ---------- 自动巡检 ---------- */
+function startWatch(){
+  setInterval(()=>{
+    if($('#ckWatch').checked&&document.visibilityState==='visible'&&!busy&&getToken()){log('⏰ 定时巡检触发','info');runAuto(false)}
+  },60*60*1000);
+}
+
+/* ---------- 初始化 ---------- */
+loadSettings();
+$('#tokenInput').value=getToken();
+buildCmds();
+startWatch();
+if($('#ckAuto').checked&&getToken()){setTimeout(()=>runAuto(false),400)}
+})();
+</script>
+</body>
+</html>
