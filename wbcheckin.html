@@ -308,12 +308,13 @@ function loadStatus(){
   .then(j=>{
     const checked=!!j.today_checked_in;
     const streak=parseInt(j.streak_days,10);
+    const week=parseInt(j.week_checkin_days,10);
     if(checked){setStatus(true,'✅','今日已签到','云端已于今天完成签到')}
     else{setStatus(false,'⚡','今日未签到','09:10 云端将自动签到')}
-    renderCycle(isNaN(streak)?null:streak);
+    renderCycle(isNaN(week)?(isNaN(streak)?null:Math.min(streak,7)):week);
     const add=[];
     if(!isNaN(streak))add.push('<span class="chip">连续签到：<b>'+streak+' 天</b></span>');
-    if(j.week_checkin_days!==undefined&&j.week_checkin_days!==null)add.push('<span class="chip">本周：<b>'+j.week_checkin_days+'/7 天</b></span>');
+    if(!isNaN(week))add.push('<span class="chip">本周：<b>'+week+'/7 天</b></span>');
     if(j.total_credits!==undefined&&j.total_credits!==null)add.push('<span class="chip">周期总积分：<b>'+j.total_credits+'</b></span>');
     if(j.theme_name)add.push('<span class="chip">活动：<b>'+j.theme_name+'</b></span>');
     if(add.length){chips.innerHTML=add.join('')+chips.innerHTML}
