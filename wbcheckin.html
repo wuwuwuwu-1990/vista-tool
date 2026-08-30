@@ -93,15 +93,9 @@
   .card-title .step{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 6px rgba(22,163,74,.35),inset 0 1px 2px rgba(255,255,255,.4)}
   .hidden{display:none!important}
 
-  /* ===== 输入区 ===== */
-  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-  input[type=password]{width:100%;background:linear-gradient(180deg,#fbfefb,#f0f8f1);border:1px solid #cfe3d2;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);font-family:ui-monospace,Consolas,monospace;box-shadow:inset 0 2px 6px rgba(20,60,30,.06),inset 0 -1px 2px rgba(255,255,255,.8);transition:border-color .2s,box-shadow .2s}
-  [data-theme="dark"] input[type=password]{background:linear-gradient(180deg,#141f16,#111a13);border-color:#2c4a34}
-  input[type=password]:focus{outline:none;border-color:#16a34a;box-shadow:inset 0 2px 6px rgba(20,60,30,.06),0 0 0 3px rgba(22,163,74,.18)}
-
   /* ===== 3D 按钮 ===== */
   .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .btn{border:none;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:transform .12s,box-shadow .12s;user-select:none}
+  .btn{border:none;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:transform .12s,box-shadow .12s;user-select:none;text-decoration:none}
   .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
   .btn-primary{color:#fff;background:linear-gradient(180deg,#1bb455,#15803d);box-shadow:0 5px 0 #0f6d33,0 9px 18px rgba(22,163,74,.35),inset 0 1px 1px rgba(255,255,255,.4);text-shadow:0 1px 2px rgba(0,40,10,.3)}
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 7px 0 #0f6d33,0 12px 22px rgba(22,163,74,.4),inset 0 1px 1px rgba(255,255,255,.4)}
@@ -110,18 +104,6 @@
   [data-theme="dark"] .btn-ghost{color:#4ade80;background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34;box-shadow:0 4px 0 #0d1710,0 6px 12px rgba(0,0,0,.3)}
   .btn-ghost:hover{transform:translateY(-2px);box-shadow:0 6px 0 #bdd8c9,0 10px 16px rgba(20,60,30,.16),inset 0 1px 1px rgba(255,255,255,.9)}
   .btn-ghost:active{transform:translateY(2px);box-shadow:0 2px 0 #c6ddd0,0 3px 8px rgba(20,60,30,.1)}
-  .btn-warn{color:#fff;background:linear-gradient(180deg,#f0a63c,#d9851a);box-shadow:0 5px 0 #a8660f,0 9px 18px rgba(180,120,10,.3),inset 0 1px 1px rgba(255,255,255,.4);text-shadow:0 1px 2px rgba(90,50,0,.3)}
-  .btn-warn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #a8660f,0 12px 22px rgba(180,120,10,.36),inset 0 1px 1px rgba(255,255,255,.4)}
-  .btn-warn:active{transform:translateY(3px);box-shadow:0 2px 0 #a8660f,0 5px 10px rgba(180,120,10,.26)}
-  .btn-danger{color:var(--err);background:linear-gradient(180deg,#ffffff,#fdf2f2);border:1px solid var(--err-line);box-shadow:0 4px 0 #f0c9c9,0 6px 12px rgba(120,30,30,.1),inset 0 1px 1px rgba(255,255,255,.9)}
-  [data-theme="dark"] .btn-danger{background:linear-gradient(180deg,#2a1616,#201111);border-color:#5c2525;box-shadow:0 4px 0 #1a0d0d,0 6px 12px rgba(0,0,0,.3)}
-  .btn-danger:hover{transform:translateY(-2px)}
-  .btn-danger:active{transform:translateY(2px);box-shadow:0 2px 0 #f0c9c9,0 3px 8px rgba(120,30,30,.08)}
-  .btn-sm{padding:3px 10px;font-size:12px;border-radius:8px}
-
-  .check-row{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
-  .check-row label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;margin:0}
-  .check-row input{accent-color:var(--primary)}
 
   /* ===== 状态区 ===== */
   .status-big{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
@@ -129,6 +111,7 @@
   .status-icon.ok{background:linear-gradient(180deg,#f0faf3,#dff3e4);border-color:#bfe3c8}
   .status-icon.no{background:linear-gradient(180deg,#fffbeb,#fdf3d3);border-color:#f3e3ae}
   .status-icon.err{background:linear-gradient(180deg,#fef2f2,#fde3e3);border-color:#fecaca}
+  .status-icon.load{background:linear-gradient(180deg,#f0f7f4,#e4f0e7);border-color:#cfe3d2}
   .status-txt h3{font-size:20px;font-weight:700}
   .status-txt p{color:var(--muted);font-size:13px;margin-top:2px}
   .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
@@ -151,31 +134,20 @@
   .day.today::after{content:"今天";position:absolute;top:-9px;right:8px;font-size:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:6px;padding:1px 7px;box-shadow:0 2px 5px rgba(22,163,74,.35)}
   .cycle-hint{color:var(--muted);font-size:12px;margin-top:10px}
 
-  /* ===== 日志 ===== */
-  .log{background:linear-gradient(180deg,#f8fcf8,#f0f8f1);border:1px solid #ddeadd;border-radius:12px;padding:12px 14px;max-height:260px;overflow-y:auto;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;box-shadow:inset 0 2px 6px rgba(20,60,30,.05)}
-  [data-theme="dark"] .log{background:linear-gradient(180deg,#121d14,#0f1911);border-color:#26382b}
-  .log .item{display:flex;gap:10px;padding:5px 0;border-bottom:1px dashed #dceadf;word-break:break-all}
-  [data-theme="dark"] .log .item{border-bottom-color:#22301f}
-  .log .item:last-child{border-bottom:none}
-  .log .t{color:var(--muted);flex-shrink:0}
-  .log .ok{color:#16a34a} .log .err{color:var(--err)} .log .info{color:#15803d}
-  [data-theme="dark"] .log .ok{color:#4ade80} [data-theme="dark"] .log .info{color:#6ee7a0}
-  .empty-log{color:var(--muted);text-align:center;padding:16px 0;font-size:13px}
-
-  /* ===== 降级命令 ===== */
-  .fallback{margin-top:14px;border:1px dashed var(--amber-line);background:linear-gradient(180deg,#fffdf6,#fdf6e3);border-radius:12px;padding:14px;display:none}
-  [data-theme="dark"] .fallback{background:linear-gradient(180deg,#241d10,#1e180d)}
-  .fallback.show{display:block}
-  .fallback h4{font-size:14px;color:var(--amber);margin-bottom:8px}
-  .fallback p{font-size:12.5px;color:var(--muted);margin-bottom:8px}
-  .fallback pre{background:#fff;border:1px solid #e3efe4;border-radius:8px;padding:10px;font-size:11.5px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:10px}
-  [data-theme="dark"] .fallback pre{background:#0f1911;border-color:#26382b}
-
-  /* ===== 帮助 ===== */
-  ol{padding-left:20px;font-size:13.5px;color:var(--text)}
-  ol li{margin-bottom:8px}
-  .kbd{background:linear-gradient(180deg,#fff,#f0f7f1);border:1px solid #d5e8d8;border-radius:6px;padding:1px 8px;font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all;box-shadow:inset 0 1px 1px rgba(255,255,255,.9),0 2px 4px rgba(20,60,30,.06)}
+  /* ===== 引导/说明 ===== */
+  .guide-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed #dceadf;align-items:flex-start}
+  [data-theme="dark"] .guide-item{border-bottom-color:#22301f}
+  .guide-item:last-child{border-bottom:none}
+  .guide-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 6px rgba(22,163,74,.35),inset 0 1px 2px rgba(255,255,255,.4);margin-top:1px}
+  .guide-txt{flex:1;min-width:0}
+  .guide-txt b{font-size:13.5px;display:block;margin-bottom:2px}
+  .guide-txt p{font-size:12.5px;color:var(--muted);line-height:1.7}
+  .guide-txt a{color:var(--primary-2);font-weight:600;text-decoration:none}
+  .guide-txt a:hover{text-decoration:underline}
+  .kbd{background:linear-gradient(180deg,#fff,#f0f7f1);border:1px solid #d5e8d8;border-radius:6px;padding:1px 8px;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;word-break:break-all;box-shadow:inset 0 1px 1px rgba(255,255,255,.9),0 2px 4px rgba(20,60,30,.06)}
   [data-theme="dark"] .kbd{background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34}
+  .cmd-box{margin-top:10px;background:linear-gradient(180deg,#f8fcf8,#f0f8f1);border:1px solid #ddeadd;border-radius:10px;padding:10px 12px;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;word-break:break-all;box-shadow:inset 0 2px 6px rgba(20,60,30,.05);color:var(--text);line-height:1.7}
+  [data-theme="dark"] .cmd-box{background:linear-gradient(180deg,#121d14,#0f1911);border-color:#26382b}
   .note{font-size:12.5px;color:var(--muted);margin-top:12px;background:linear-gradient(180deg,#f8fcf8,#f0f8f1);border:1px solid #e0ebe0;border-radius:10px;padding:10px 14px;box-shadow:inset 0 2px 6px rgba(20,60,30,.04)}
   [data-theme="dark"] .note{background:linear-gradient(180deg,#121d14,#0f1911);border-color:#26382b}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
@@ -190,39 +162,23 @@
     <div class="topbar-inner">
       <div class="logo">✦</div>
       <div class="app-name">WorkBuddy每日领取助手 <span class="en">DAILY CHECK-IN</span></div>
-      <div class="ver-badge">v1.0</div>
+      <div class="ver-badge">v1.1</div>
       <div class="spacer"></div>
       <button class="btn-about" id="themeBtn" title="切换主题">🌙 深色</button>
     </div>
   </header>
 
   <main>
-    <div class="sub" style="color:var(--muted);font-size:13px;text-align:center;margin-bottom:20px">每日签到 · 7 天周期 1600 分 · 纯本地页面，Token 不出本机</div>
+    <div class="sub" style="color:var(--muted);font-size:13px;text-align:center;margin-bottom:20px">云端每天 09:10 自动签到 · 本页只读查看状态 · 7 天周期 1600 分</div>
 
-    <!-- Token -->
+    <!-- 今日状态（只读） -->
     <section class="card">
-      <div class="card-title"><span class="step">1</span>登录 Token（accessToken）</div>
-      <label>粘贴 accessToken（获取方法见下方「如何获取」）</label>
-      <input type="password" id="tokenInput" placeholder="粘贴 accessToken ..." autocomplete="off">
-      <div class="row">
-        <button class="btn btn-ghost" id="btnReadFile">📂 从本机文件读取</button>
-        <button class="btn btn-primary" id="btnSaveToken">💾 保存 Token</button>
-        <button class="btn btn-danger" id="btnClearToken">清除</button>
-      </div>
-      <div class="check-row">
-        <label><input type="checkbox" id="ckAuto" checked> 打开页面自动领取</label>
-        <label><input type="checkbox" id="ckWatch"> 每 60 分钟自动巡检</label>
-      </div>
-    </section>
-
-    <!-- 状态 -->
-    <section class="card">
-      <div class="card-title"><span class="step">2</span>今日状态</div>
+      <div class="card-title"><span class="step">1</span>今日状态（自动刷新）</div>
       <div class="status-big">
-        <div class="status-icon no" id="statusIcon">⚡</div>
+        <div class="status-icon load" id="statusIcon">⏳</div>
         <div class="status-txt">
-          <h3 id="statusTitle">尚未查询</h3>
-          <p id="statusDesc">保存 Token 后点击「一键自动领取」</p>
+          <h3 id="statusTitle">正在读取云端状态 ...</h3>
+          <p id="statusDesc">数据来自云端自动签到的最新记录</p>
         </div>
       </div>
       <div class="chips" id="chips">
@@ -230,72 +186,79 @@
         <span class="chip">第 7 天：<b>1000 分</b></span>
         <span class="chip">单周期合计：<b>1600 分</b></span>
       </div>
+      <div class="row">
+        <button class="btn btn-primary" id="btnRefresh">🔄 刷新状态</button>
+      </div>
+      <div class="note" id="statusNote">数据由 GitHub Actions 每天 09:10 自动签到后回写，首次部署后下一次签到生效；也可手动触发一次更新（见下方操作引导）。</div>
     </section>
 
-    <!-- 周期 -->
+    <!-- 操作引导 -->
+    <section class="card">
+      <div class="card-title"><span class="step">2</span>操作引导</div>
+      <div class="guide-item">
+        <div class="guide-num">A</div>
+        <div class="guide-txt">
+          <b>云端自动签到（推荐，已开启）</b>
+          <p>GitHub Actions 每天 09:10（北京时间）自动执行签到，结果推送到微信。无需任何操作。
+             <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/actions" target="_blank" rel="noopener">查看云端运行记录 →</a></p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">B</div>
+        <div class="guide-txt">
+          <b>手动触发一次云端签到</b>
+          <p>打开 <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/actions" target="_blank" rel="noopener">Actions 页面</a> → 左侧点「WorkBuddy 每日积分签到」→ 右侧 Run workflow → 保持 main → 绿色按钮。约 30 秒完成，本页状态随即更新。</p>
+        </div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">C</div>
+        <div class="guide-txt">
+          <b>本机命令行查询 / 签到</b>
+          <p>在电脑上打开「命令提示符」，粘贴以下命令回车（本机无跨域限制，可实时查询）：</p>
+          <div class="cmd-box">C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe "C:\Users\Administrator\WorkBuddy\2026-08-31-00-19-05\workbuddy_checkin\workbuddy_checkin.py" --dry-run</div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn btn-ghost" id="btnCopyCmd">📋 复制查询命令</button>
+          </div>
+        </div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">D</div>
+        <div class="guide-txt">
+          <b>Token 失效怎么办</b>
+          <p>微信会收到告警通知。打开本机文件 <span class="kbd">%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info</span>，复制 <span class="kbd">accessToken</span> 的值（eyJ 开头），到
+             <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/settings/secrets/actions" target="_blank" rel="noopener">Secrets 设置</a> 更新 <span class="kbd">WB_TOKEN</span> 即可，约 1 分钟。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 周期说明 -->
     <section class="card">
       <div class="card-title"><span class="step">3</span>7 天签到周期</div>
       <div class="cycle" id="cycle"></div>
-      <div class="cycle-hint" id="cycleHint">加载状态后显示周期进度；若接口未返回天数，仅作示意。</div>
+      <div class="cycle-hint" id="cycleHint">云端状态回写后显示真实周期进度；未回写前为规则示意。</div>
     </section>
 
-    <!-- 操作 -->
+    <!-- 为什么网页不能直接领取 -->
     <section class="card">
-      <div class="card-title"><span class="step">4</span>一键领取</div>
-      <div class="row">
-        <button class="btn btn-primary" id="btnAuto">✨ 一键自动领取</button>
-        <button class="btn btn-ghost" id="btnStatus">查询今日状态</button>
-        <button class="btn btn-warn" id="btnGift">🎁 领取今日礼包（一次性）</button>
-        <button class="btn btn-danger" id="btnClearLog">清空日志</button>
-      </div>
-      <div class="fallback" id="fallback">
-        <h4>⚠️ 浏览器跨域拦截了请求</h4>
-        <p>纯网页无法直接跨域调用接口时，可用本机命令领取（Token 已自动代入，可放心复制）：</p>
-        <pre id="cmdNode"></pre>
-        <div class="row">
-          <button class="btn btn-ghost btn-sm" id="btnCopyCmd">📋 复制 Node 命令</button>
-          <button class="btn btn-ghost btn-sm" id="btnCopyCurl">📋 复制 cURL 命令</button>
-        </div>
-        <pre id="cmdCurl" class="hidden"></pre>
-      </div>
-    </section>
-
-    <!-- 日志 -->
-    <section class="card">
-      <div class="card-title"><span class="step">5</span>运行日志</div>
-      <div class="log" id="logBox"><div class="empty-log" id="logEmpty">暂无日志</div></div>
-    </section>
-
-    <!-- 帮助 -->
-    <section class="card">
-      <div class="card-title"><span class="step">6</span>如何获取 Token</div>
-      <ol>
-        <li>按 <span class="kbd">Win + R</span> 打开运行框，粘贴路径回车（或点按钮复制）：<br>
-          <span class="kbd">%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info</span>
-          <button class="btn btn-ghost btn-sm" id="btnCopyPath" style="margin-left:8px">📋 复制路径</button>
-        </li>
-        <li>用记事本打开该文件，找到 <span class="kbd">"accessToken": "xxx"</span>，复制引号内的内容。</li>
-        <li>粘贴到上方输入框 → 保存 → 点「一键自动领取」。</li>
-        <li>之后每天打开本页面即自动签到；也可勾选「每 60 分钟自动巡检」让页面挂着自动领。</li>
-      </ol>
+      <div class="card-title"><span class="step">4</span>为什么网页不能直接领取</div>
       <div class="note">
-        🔒 安全说明：Token 仅保存在本浏览器 localStorage 中，页面为纯本地 HTML，不上传任何第三方。
-        每日签到接口幂等，重复调用不会多领、不会扣分（已领取会提示「今天已签到」）。
-        Token 约 60 天有效，平时正常使用 WorkBuddy 会自动刷新；若提示失效，重新复制一次即可。
+        WorkBuddy 积分接口出于安全限制<b>不允许网页跨域调用</b>（CORS 拦截），因此本网页无法直接点击「签到」按钮——
+        无论本地打开还是部署到任何网站都一样。这是接口服务端限制，无法绕过。
+        解决方案就是本工具的做法：<b>由云端（GitHub Actions）代替浏览器调用接口</b>，网页只做只读状态展示和操作引导。
       </div>
     </section>
 
-    <footer>WorkBuddy每日领取助手 · 接口：POST /v2/billing/meter/daily-checkin · 仅用于个人自动化</footer>
+    <footer>WorkBuddy每日领取助手 v1.1 · 云端自动签到 · 本页只读</footer>
   </main>
 
 <script>
 (function(){
 'use strict';
-const LS_TOKEN='wb_points_tk', LS_SET='wb_points_set';
-const API_BASES=['https://www.codebuddy.cn','https://copilot.tencent.com'];
-const PATHS={status:'/billing/meter/checkin-activity-status',checkin:'/billing/meter/daily-checkin',gift:'/billing/meter/claim-gift'};
 const $=s=>document.querySelector(s);
-let busy=false;
+// 同源读取（网页与状态文件同在 tool.wbc2023.top，无跨域限制）；降级走 raw/jsDelivr
+const STATUS_URL='https://tool.wbc2023.top/wbcheckin-status.json';
+const STATUS_FALLBACKS=['https://raw.githubusercontent.com/wuwuwuwu-1990/vista-tool/main/wbcheckin-status.json',
+                        'https://cdn.jsdelivr.net/gh/wuwuwuwu-1990/vista-tool@main/wbcheckin-status.json'];
 
 /* ---------- 主题 ---------- */
 function setTheme(t){document.documentElement.dataset.theme=t;
@@ -307,76 +270,6 @@ $('#themeBtn').addEventListener('click',()=>{
   setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 });
 
-/* ---------- Token ---------- */
-function getToken(){return localStorage.getItem(LS_TOKEN)||''}
-function saveToken(){const t=$('#tokenInput').value.trim();if(!t){log('Token 为空，未保存','err');return}
-  try{localStorage.setItem(LS_TOKEN,t);log('Token 已保存（仅存本浏览器）','ok');}catch(e){log('保存失败：'+e.message,'err')}}
-function loadSettings(){
-  let s={auto:true,watch:false};try{s=Object.assign(s,JSON.parse(localStorage.getItem(LS_SET)||'{}'))}catch(e){}
-  $('#ckAuto').checked=!!s.auto;$('#ckWatch').checked=!!s.watch;
-}
-function persistSettings(){localStorage.setItem(LS_SET,JSON.stringify({auto:$('#ckAuto').checked,watch:$('#ckWatch').checked}))}
-$('#btnSaveToken').addEventListener('click',saveToken);
-$('#btnClearToken').addEventListener('click',()=>{localStorage.removeItem(LS_TOKEN);$('#tokenInput').value='';log('Token 已清除','info')});
-$('#ckAuto').addEventListener('change',persistSettings);
-$('#ckWatch').addEventListener('change',persistSettings);
-
-/* 从本机文件读取（需 Chromium 内核浏览器，走文件选择器） */
-$('#btnReadFile').addEventListener('click',async()=>{
-  if(!window.showOpenFilePicker){log('当前浏览器不支持文件读取，请手动打开文件复制','err');return}
-  try{
-    const [h]=await window.showOpenFilePicker({types:[{description:'登录态文件',accept:{'application/json':['.info','.json']}}]});
-    const text=await (await h.getFile()).text();
-    let obj;try{obj=JSON.parse(text)}catch(e){throw new Error('文件不是有效 JSON')}
-    const tk=(obj.auth&&obj.auth.accessToken)||obj.accessToken;
-    if(!tk)throw new Error('文件中未找到 accessToken 字段');
-    $('#tokenInput').value=tk;saveToken();log('已从文件读取并保存 Token','ok');
-  }catch(e){log('读取失败：'+e.message,'err')}
-});
-
-/* ---------- 日志 ---------- */
-function log(msg,type){
-  const box=$('#logBox');const empty=$('#logEmpty');
-  if(empty)empty.remove();
-  const d=new Date(),ts=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
-  const el=document.createElement('div');el.className='item';
-  el.innerHTML='<span class="t">'+ts+'</span><span class="'+(type||'info')+'">'+escapeHtml(msg)+'</span>';
-  box.prepend(el);
-  while(box.children.length>100)box.lastChild.remove();
-}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-$('#btnClearLog').addEventListener('click',()=>{$('#logBox').innerHTML='<div class="empty-log" id="logEmpty">暂无日志</div>'});
-
-/* ---------- API ---------- */
-function candidates(path){
-  const out=[];
-  for(const b of API_BASES){out.push(b+'/v2'+path);out.push(b+path)}
-  return out;
-}
-async function postJSON(path,token){
-  let lastErr=null;
-  for(const url of candidates(path)){
-    try{
-      const res=await fetch(url,{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body:'{}',credentials:'include'});
-      const text=await res.text();
-      let json=null;try{json=JSON.parse(text)}catch(e){}
-      if(res.status===401||res.status===403)return{ok:false,http:res.status,json,text,url};
-      if(res.ok)return{ok:true,http:res.status,json,text,url};
-      lastErr=new Error('HTTP '+res.status+' '+(json&&json.msg||text||'').slice(0,120));
-    }catch(e){lastErr=e}
-  }
-  throw lastErr||new Error('网络请求失败');
-}
-function msgOf(r){return r.json&&(r.json.msg||r.json.message)||''}
-function codeOf(r){return r.json&&r.json.code}
-function pointsOf(r){const j=r.json;if(!j)return null;
-  return j.points??j.gain_points??j.gained_points??j.data?.points??j.data?.gain_points??null}
-function isChecked(r){const j=r.json;if(!j)return false;
-  if(j.data&&j.data.today_checked_in===true)return true;
-  return /已签到|已领取|已领过|重复领取|already/i.test(msgOf(r)||'');}
-
 /* ---------- 状态渲染 ---------- */
 function setStatus(ok,icon,title,desc){
   const ic=$('#statusIcon');
@@ -386,23 +279,6 @@ function setStatus(ok,icon,title,desc){
   $('#statusDesc').textContent=desc;
   ic.classList.remove('pulse');void ic.offsetWidth;ic.classList.add('pulse');
 }
-function renderStatus(r){
-  const j=r&&r.json,data=j&&j.data||{};
-  const checked=isChecked(r);
-  const streak=numOr(data.streak,data.cycle_streak,data.days_in_cycle,data.continuous_days,data.checked_days,data.total_days);
-  if(checked){setStatus(true,'✅','今日已签到','积分已到手，明天再来 +100 分')}
-  else if(codeOf(r)&&!r.ok){setStatus(null,'⚠️','请求未成功',('HTTP '+r.http+' '+(msgOf(r)||'')).slice(0,60))}
-  else{setStatus(false,'⚡','今日未签到','点击「一键自动领取」立即领取')}
-  renderCycle(streak);
-  const chips=$('#chips');
-  const add=[];
-  if(streak!==null)add.push('<span class="chip">当前连续：<b>'+streak+' 天</b></span>');
-  const pts=pointsOf(r);
-  if(pts!==null)add.push('<span class="chip">本次获得：<b>+'+pts+' 分</b></span>');
-  if(j&&j.data&&j.data.points!==undefined)add.push('<span class="chip">积分余额：<b>'+j.data.points+'</b></span>');
-  if(add.length){chips.innerHTML=add.join('')+chips.innerHTML}
-}
-function numOr(){for(const v of arguments){const n=parseInt(v,10);if(!isNaN(n))return n}return null}
 function renderCycle(streak){
   const box=$('#cycle');box.innerHTML='';
   for(let i=1;i<=7;i++){
@@ -411,100 +287,67 @@ function renderCycle(streak){
     d.innerHTML='<b>第'+i+'天</b><span>'+(i===7?'🎁 1000':'+100')+'</span>';
     box.appendChild(d);
   }
-  if(streak===null){$('#cycleHint').textContent='接口未返回周期天数，上方仅为 7 天周期示意图。'}
+  if(streak===null){$('#cycleHint').textContent='云端状态回写后显示真实周期进度；未回写前为规则示意（第 1-6 天 100 分，第 7 天 1000 分）。'}
   else{$('#cycleHint').textContent='当前周期第 '+Math.min(streak,7)+' 天'+(streak>=7?'，已满周期！':'，明天再领 +'+(streak===6?'1000（满7天大奖）':'100')+' 分')+'。'}
 }
-
-/* ---------- 领取流程 ---------- */
-function setBusy(b){busy=b;['btnAuto','btnStatus','btnGift','btnSaveToken'].forEach(id=>{$(id).disabled=b})}
-async function runAuto(showAll){
-  const tk=getToken();
-  if(!tk){log('未配置 Token，请先保存','err');setStatus(null,'🔑','缺少 Token','请粘贴 accessToken 并保存');return}
-  setBusy(true);hideFallback();
-  try{
-    log('查询今日签到状态 ...');
-    const st=await postJSON(PATHS.status,tk);
-    if(st.http===401||st.http===403){log('Token 无效或已过期：'+(msgOf(st)||st.http),'err');
-      setStatus(null,'🚫','Token 无效','请重新从本机文件复制 accessToken');return}
-    renderStatus(st);
-    if(isChecked(st)){log('今日已签到，无需重复领取','ok')}
-    else{
-      log('开始签到 ...');
-      const ck=await postJSON(PATHS.checkin,tk);
-      renderStatus(ck);
-      const p=pointsOf(ck);
-      if(ck.http===401||ck.http===403){log('Token 无效：'+(msgOf(ck)||ck.http),'err')}
-      else if(!ck.ok){log('签到未成功：'+msgOf(ck)+'（HTTP '+ck.http+'）','err')}
-      else if(isChecked(ck)){log('✅ 签到成功'+(p!==null?'，+'+p+' 积分！':'！'),'ok')}
-      else{log('签到响应：'+(msgOf(ck)||JSON.stringify(ck.json||ck.text)),'info')}
-    }
-  }catch(e){
-    log('请求失败：'+e.message,'err');
-    if(/Failed to fetch|NetworkError|TypeError/i.test(e.message||''))showFallback();
-    else setStatus(null,'⚠️','请求异常',e.message);
-  }finally{setBusy(false)}
+function loadStatus(){
+  setStatus(null,'⏳','正在读取云端状态 ...','数据来自云端自动签到的最新记录');
+  const ic=$('#statusIcon');
+  ic.className='status-icon load';ic.textContent='⏳';
+  const chips=$('#chips');
+  // 只保留前三项规则说明
+  chips.innerHTML='<span class="chip">周期奖励：<b>第 1-6 天 100 分/天</b></span><span class="chip">第 7 天：<b>1000 分</b></span><span class="chip">单周期合计：<b>1600 分</b></span>';
+  $('#cycle').innerHTML='';
+  $('#cycleHint').textContent='读取中 ...';
+  function fetchStatus(urls){
+    if(!urls.length)return Promise.reject(new Error('所有地址均不可用'));
+    const [u,...rest]=urls;
+    return fetch(u,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).catch(()=>fetchStatus(rest));
+  }
+  fetchStatus([STATUS_URL].concat(STATUS_FALLBACKS))
+  .then(j=>{
+    const checked=!!j.today_checked_in;
+    const streak=parseInt(j.streak_days,10);
+    if(checked){setStatus(true,'✅','今日已签到','云端已于今天完成签到')}
+    else{setStatus(false,'⚡','今日未签到','09:10 云端将自动签到')}
+    renderCycle(isNaN(streak)?null:streak);
+    const add=[];
+    if(!isNaN(streak))add.push('<span class="chip">连续签到：<b>'+streak+' 天</b></span>');
+    if(j.week_checkin_days!==undefined&&j.week_checkin_days!==null)add.push('<span class="chip">本周：<b>'+j.week_checkin_days+'/7 天</b></span>');
+    if(j.total_credits!==undefined&&j.total_credits!==null)add.push('<span class="chip">周期总积分：<b>'+j.total_credits+'</b></span>');
+    if(j.theme_name)add.push('<span class="chip">活动：<b>'+j.theme_name+'</b></span>');
+    if(add.length){chips.innerHTML=add.join('')+chips.innerHTML}
+    const up=j.updated_at?('最近更新：'+j.updated_at+'（北京时间）'):'';
+    const res=j.result==='checkin_ok'?' · 本次签到成功':(j.result==='status_ok'?' · 已签到':'');
+    $('#statusNote').textContent=(up?up+res:'云端状态已读取')+'。数据由 GitHub Actions 每天 09:10 自动签到后回写。';
+  })
+  .catch(e=>{
+    setStatus(null,'⚠️','暂时无法读取状态','云端状态尚未生成（首次部署后需等一次签到回写）');
+    $('#cycleHint').textContent='尚未获取到云端状态数据。可手动触发一次云端签到（见操作引导 B），约 1 分钟后刷新本页即可看到。';
+    $('#statusNote').textContent='读取失败：'+e.message+'。云端状态由 GitHub Actions 每天 09:10 签到后回写，手动触发一次即可看到数据。';
+  });
 }
-$('#btnAuto').addEventListener('click',()=>runAuto(false));
-$('#btnStatus').addEventListener('click',async()=>{
-  const tk=getToken();if(!tk){log('未配置 Token','err');return}
-  setBusy(true);
-  try{const r=await postJSON(PATHS.status,tk);renderStatus(r);log('状态：'+((msgOf(r)||'')||(r.json?JSON.stringify(r.json).slice(0,160):r.text)),'info')}
-  catch(e){log('查询失败：'+e.message,'err')}
-  finally{setBusy(false)}
-});
-$('#btnGift').addEventListener('click',async()=>{
-  const tk=getToken();if(!tk){log('未配置 Token','err');return}
-  setBusy(true);
-  try{
-    log('领取今日礼包（每人限一次）...');
-    const r=await postJSON(PATHS.gift,tk);
-    const m=msgOf(r)||'HTTP '+r.http;
-    if(r.ok&&!isChecked(r)){log('🎁 礼包领取成功：'+m,'ok')}
-    else{log('礼包：'+m,'info')}
-  }catch(e){log('礼包请求失败：'+e.message,'err');if(/Failed to fetch|NetworkError|TypeError/i.test(e.message||''))showFallback()}
-  finally{setBusy(false)}
-});
 
-/* ---------- 降级命令 ---------- */
-function buildCmds(){
-  const tk=getToken();
-  const node='node -e "fetch(\'https://www.codebuddy.cn/v2/billing/meter/daily-checkin\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\',\'Authorization\':\'Bearer '+tk+'\'},body:\'{}\'}).then(r=>r.text()).then(console.log)"';
-  const curl='curl -s -X POST "https://www.codebuddy.cn/v2/billing/meter/daily-checkin" -H "Content-Type: application/json" -H "Authorization: Bearer '+tk+'" -d "{}"';
-  $('#cmdNode').textContent=node;
-  $('#cmdCurl').textContent=curl;
-  $('#cmdNode').dataset.full=node; $('#cmdCurl').dataset.full=curl;
-}
-function showFallback(){buildCmds();$('#fallback').classList.add('show');log('已展示本机命令降级方案，可直接复制运行','warn')}
-function hideFallback(){$('#fallback').classList.remove('show')}
-$('#btnCopyCmd').addEventListener('click',()=>copy($('#cmdNode').dataset.full,'Node 命令已复制'));
-$('#btnCopyCurl').addEventListener('click',()=>copy($('#cmdCurl').dataset.full,'cURL 命令已复制'));
-$('#btnCopyPath').addEventListener('click',()=>copy('%LOCALAPPDATA%\\CodeBuddyExtension\\Data\\Public\\auth\\workbuddy-desktop.info','路径已复制'));
+/* ---------- 复制 ---------- */
 function copy(text,msg){
-  if(!text){log('暂无命令可复制','err');return}
-  const done=()=>log(msg,'ok');
+  if(!text)return;
+  const done=()=>{const b=$('#btnCopyCmd');const old=b.textContent;b.textContent=msg;setTimeout(()=>b.textContent=old,1500)};
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done))}
   else fallbackCopy(text,done);
 }
 function fallbackCopy(text,done){
   const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.select();
-  try{document.execCommand('copy');done()}catch(e){log('复制失败，请手动选择复制','err')}
+  try{document.execCommand('copy');done()}catch(e){}
   ta.remove();
 }
-
-/* ---------- 自动巡检 ---------- */
-function startWatch(){
-  setInterval(()=>{
-    if($('#ckWatch').checked&&document.visibilityState==='visible'&&!busy&&getToken()){log('⏰ 定时巡检触发','info');runAuto(false)}
-  },60*60*1000);
-}
+$('#btnCopyCmd').addEventListener('click',()=>copy('C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe "C:\\Users\\Administrator\\WorkBuddy\\2026-08-31-00-19-05\\workbuddy_checkin\\workbuddy_checkin.py" --dry-run','✅ 已复制，去命令行粘贴运行'));
+$('#btnRefresh').addEventListener('click',loadStatus);
 
 /* ---------- 初始化 ---------- */
-loadSettings();
-$('#tokenInput').value=getToken();
-buildCmds();
-startWatch();
-if($('#ckAuto').checked&&getToken()){setTimeout(()=>runAuto(false),400)}
+renderCycle(null);
+loadStatus();
+setInterval(()=>{if(document.visibilityState==='visible')loadStatus()},5*60*1000);
 })();
 </script>
 </body>
