@@ -513,9 +513,9 @@
         <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
       <h3>智印PDF工坊 PdfDocSprint</h3>
-      <div class="desc">PDF 封面单面+内容双面智能打印：首页封面单面、内容页双面、打印份数可选、400dpi 高清渲染、横版自动旋转，全程本地解析。</div>
+      <div class="desc">PDF 封面单面+内容双面智能打印：首页封面单面、内容页双面、打印份数可选、400dpi 高清渲染、横版自动旋转，偶数页自动补尾页不串页，全程本地解析。</div>
       <div class="foot">
-        <span class="chip" style="--cb:rgba(22,163,74,.4);--cc:#6ee7b7;--cbg:rgba(22,163,74,.12)">v1.0.4</span>
+        <span class="chip" style="--cb:rgba(22,163,74,.4);--cc:#6ee7b7;--cbg:rgba(22,163,74,.12)">v1.0.5</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">PDF打印</span>
       </div>
     </a>
@@ -932,6 +932,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-08-31', t:'更新：智印PDF工坊 PdfDocSprint v1.0.5（修复打印串页：PDF 页数为偶数时每份自动补空白尾页，双面打印张张配对、多份打印不串页）'},
   {d:'2026-08-31', t:'更新：木材检测报告工具 v3.42（蓝章/红章有效期墨色像素取样校准与章一致、有效期2029年9月、P2红章+有效期可编辑同步、P2签发日期label恢复）'},
   
   {d:'2026-08-31', t:'更新：木材检测报告工具 v3.21（默认字号17/倾斜0°统一、检测依据GB/T5849-2016、蓝章有效期限倾斜4°、修复恢复模板被旧草稿覆盖）'},
