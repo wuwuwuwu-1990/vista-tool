@@ -93,10 +93,15 @@
   /* ===== 最近导入 ===== */
   .recent-box{margin-top:12px;background:linear-gradient(180deg,#f8fcf8,#f0f8f1);border:1px solid #ddeadd;border-radius:12px;padding:10px 12px;box-shadow:inset 0 2px 6px rgba(20,60,30,.05)}
   .recent-head{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px}
+  .recent-head .spacer{flex:1}
+  .recent-head .btn-clear{font-size:11px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 8px;border-radius:8px;transition:all .15s}
+  .recent-head .btn-clear:hover{color:#dc2626;background:#fee2e2}
   .recent-item{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;padding:6px 4px;border-bottom:1px dashed #e3efe4}
   .recent-item:last-child{border-bottom:none}
-  .recent-item .ri-n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .recent-item .ri-n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
   .recent-item .ri-m{color:var(--muted);white-space:nowrap;font-size:11px;flex-shrink:0}
+  .recent-item .ri-x{width:20px;height:20px;flex-shrink:0;border:none;background:#f1f5f1;color:#94a894;border-radius:50%;font-size:11px;line-height:1;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .recent-item .ri-x:hover{background:#fee2e2;color:#dc2626}
   .recent-item.muted{color:var(--muted);justify-content:flex-start}
   .recent-tip{font-size:11px;color:var(--muted);line-height:1.7;margin-top:8px}
 
@@ -234,7 +239,7 @@
   <div class="topbar-inner">
     <div class="logo">🖨️</div>
     <div class="app-name">智印PDF工坊<span class="en">PdfDocSprint</span></div>
-    <span class="ver-badge" id="verBadge">v1.0.5</span>
+    <span class="ver-badge" id="verBadge">v1.0.6</span>
     <div class="spacer"></div>
     <button class="btn-about" onclick="openAbout()">ℹ️ 关于</button>
   </div>
@@ -254,7 +259,7 @@
         </div>
         <input type="file" id="fileInput" accept="application/pdf,.pdf" style="display:none">
         <div class="recent-box">
-          <div class="recent-head">🕘 最近导入</div>
+          <div class="recent-head">🕘 最近导入 <span class="spacer"></span><button class="btn-clear" onclick="clearRecent()">清空</button></div>
           <div id="recentBox"><div class="recent-item muted">暂无记录，导入 PDF 后自动保存</div></div>
           <div class="recent-tip">💡 文件选择对话框的起始位置由<b>系统/浏览器</b>记忆管理，网页无法指定；要快速打开上次的文件夹，推荐直接<b>拖拽 PDF</b>到上方区域，或从系统文件夹对话框左侧的「最近访问」进入。</div>
         </div>
@@ -362,7 +367,7 @@
       <div class="lg">🖨️</div>
       <div>
         <div class="nm">智印PDF工坊 <span style="font-size:11px;color:var(--muted)">PdfDocSprint</span></div>
-        <div class="en">版本 <span id="aboutVer">v1.0.5</span></div>
+        <div class="en">版本 <span id="aboutVer">v1.0.6</span></div>
       </div>
     </div>
     <div class="about-body">
@@ -443,8 +448,9 @@
  * 智印PDF工坊 PdfDocSprint
  * 功能：PDF 首页封面单面打印、内容页双面打印、打印份数可选
  * ============================================================ */
-const APP_VER = "1.0.5";
+const APP_VER = "1.0.6";
 const APP_CHANGELOG = [
+  {v:"v1.0.6", d:"2026-08-31", t:"最近导入记录支持单条删除（✕）与一键清空（二次确认），记录管理更灵活"},
   {v:"v1.0.5", d:"2026-08-31", t:"修复打印串页：PDF 页数为偶数时每份末尾自动补一张空白页，保证双面打印份内纸张配对完整、多份打印不串页"},
   {v:"v1.0.4", d:"2026-08-25", t:"界面升级为浮动立体风格（3D 悬浮卡片、纸张堆叠封面、立体按压按钮）；全局字体改为苹果字体；导入新 PDF 后打印份数自动归 1"},
   {v:"v1.0.3", d:"2026-08-25", t:"新增渲染清晰度档位选择（150草稿/200经济/300标准/400高清，默认400dpi）；切换档位后自动按新档位重新渲染，设置自动记忆"},
@@ -504,10 +510,29 @@ function renderRecent(){
     box.innerHTML = '<div class="recent-item muted">暂无记录，导入 PDF 后自动保存</div>';
     return;
   }
-  box.innerHTML = list.map(it =>
-    '<div class="recent-item"><span class="ri-n">' + it.n + '</span>' +
-    '<span class="ri-m">' + (it.p ? it.p + "页 · " : "") + it.t + '</span></div>'
+  box.innerHTML = list.map((it, idx) =>
+    '<div class="recent-item"><span class="ri-n" title="' + it.n + '">' + it.n + '</span>' +
+    '<span class="ri-m">' + (it.p ? it.p + "页 · " : "") + it.t + '</span>' +
+    '<button class="ri-x" onclick="removeRecent(' + idx + ')" title="删除该条">✕</button></div>'
   ).join("");
+}
+/* 删除单条最近导入记录 */
+function removeRecent(idx){
+  try{
+    const list = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    if(idx < 0 || idx >= list.length) return;
+    list.splice(idx, 1);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    renderRecent();
+    showToast("已删除该条最近导入记录");
+  }catch(e){}
+}
+/* 一键清空最近导入记录（二次确认） */
+function clearRecent(){
+  if(!window.confirm("确定清空全部最近导入记录？")) return;
+  try{ localStorage.removeItem(RECENT_KEY); }catch(e){}
+  renderRecent();
+  showToast("已清空最近导入记录");
 }
 
 /* ---------- 导入 ---------- */
