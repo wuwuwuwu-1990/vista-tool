@@ -131,7 +131,7 @@ body{
 <body>
 
 <div class="appbar">
-  <div class="logo">渝居优选<small>手机版 · v1.3.13-m</small></div>
+  <div class="logo">渝居优选<small>手机版 · v1.3.14-m</small></div>
   <div class="right">
     <button class="about-btn" onclick="showAbout()">关于</button>
   </div>
@@ -152,7 +152,8 @@ body{
   <div class="dialog">
     <span class="close" onclick="hideAbout()">×</span>
     <h3>渝居优选 <span style="color:var(--primary)">手机版</span></h3>
-    <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-08-17</div>
+    <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-01</div>
+    <div class="lg-item"><b>v1.3.14-m</b>：金福云航拍自动登录加固：航拍卡片与全屏层新增「↻ 重登」「↗ 新窗口」按钮（iPhone/微信拦截第三方 cookie 时，新窗口登录一次即恢复；cookie 24h 过期后一键重登）</div>
     <div class="lg-item"><b>v1.3.13-m</b>：同步新增第 3 套房源「保利云禧一期」（巴南龙洲湾 · 评分 78）</div>
     <div class="lg-item"><b>v1.3.12-m 优化</b>：移除顶栏「关于」按钮左侧的旧版本号标签，界面更简洁</div>
     <div class="lg-item"><b>v1.3.11-m 优化</b>：关于弹窗移除更新日志左侧版本号标签，界面更简洁</div>
@@ -315,9 +316,11 @@ function renderHang(h){
   var s = '<div class="card"><h3><span class="bar"></span>航拍实景</h3>';
   if(h.hangUrl){
     s += '<div class="scene-box">'+
+      '<button class="scene-open" style="right:182px" onclick="window.open(\''+h.hangUrl+'\',\'_blank\')">↗ 新窗口</button>'+
+      '<button class="scene-open" style="right:96px" onclick="jfyReLogin()">↻ 重登</button>'+
       '<button class="scene-open" onclick="openScene(\'hang\',\''+h.hangUrl+'\')">⛶ 全屏</button>'+
       '<div class="hang-wrap" id="hangWrap"><div class="empty" style="padding:70px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div></div>'+
-      '<div class="scene-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动）</div>';
+      '<div class="scene-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动 · 若弹出登录框：点「↻ 重登」或「↗ 新窗口」登录一次）</div>';
   } else if(h.hangImg){
     s += '<img src="'+h.hangImg+'" style="width:100%;border-radius:10px" alt="'+h.name+'">';
   } else {
@@ -396,6 +399,14 @@ function jfyAutoLogin(url, wrapId){
   timer = setTimeout(done, 6000);  // 兜底
   form.submit();
 }
+/* 手动重试登录（cookie 过期 24h 后或自动登录被浏览器拦截第三方 cookie 时用） */
+function jfyReLogin(wrapId){
+  if(jfyLoginBusy) return;
+  jfyLoginDone = false;
+  var wrap = document.getElementById(wrapId || 'hangWrap');
+  if(wrap) wrap.innerHTML = '<div class="empty" style="padding:70px 10px">⏳ 正在重新登录金福云…</div>';
+  jfyAutoLogin(HOUSES[cur].hangUrl, wrapId);
+}
 
 function renderBoards(h){
   return '<div class="card" style="padding:0"><h3 style="padding:14px 14px 0"><span class="bar"></span>十大板块深度分析</h3><div style="padding:6px 14px 14px">'+
@@ -467,6 +478,8 @@ function openScene(type, url){
   layer.id = 'fullScene';
   if(type==='hang'){
     layer.innerHTML = '<button class="scene-close" onclick="closeScene()">✕ 退出全屏</button>'+
+      '<button class="scene-close" style="right:130px" onclick="window.open(\''+url+'\',\'_blank\')">↗ 新窗口</button>'+
+      '<button class="scene-close" style="right:250px" onclick="jfyReLogin(\'hangWrapFull\')">↻ 重登</button>'+
       '<div class="hang-wrap" id="hangWrapFull"><div class="empty" style="padding:120px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div>';
   } else {
     layer.innerHTML = '<button class="scene-close" onclick="closeScene()">✕ 退出全屏</button>'+
