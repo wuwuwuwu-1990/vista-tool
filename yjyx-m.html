@@ -135,7 +135,7 @@ body{
 <body>
 
 <div class="appbar">
-  <div class="logo">渝居优选<small>手机版 · v1.3.17-m</small></div>
+  <div class="logo">渝居优选<small>手机版 · v1.3.18-m</small></div>
   <div class="right">
     <button class="about-btn" onclick="showAbout()">关于</button>
   </div>
@@ -157,7 +157,7 @@ body{
     <span class="close" onclick="hideAbout()">×</span>
     <h3>渝居优选 <span style="color:var(--primary)">手机版</span></h3>
     <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-01</div>
-    <div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
+    <div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
     <div class="lg-item"><b>v1.3.16-m</b>：内置高德地图默认 Key 与安全密钥，打开页面自动填入、开箱即用；「⚙」弹窗可随时替换或清除</div>
     <div class="lg-item"><b>v1.3.15-m</b>：接入高德地图官方 JS API 2.0 SDK：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏）；新增「⚙」Key 设置弹窗；未配置 Key 或 SDK 失败自动回退网页版</div>
     <div class="lg-item"><b>v1.3.14-m</b>：金福云航拍自动登录加固：航拍卡片与全屏层新增「↻ 重登」「↗ 新窗口」按钮（iPhone/微信拦截第三方 cookie 时，新窗口登录一次即恢复；cookie 24h 过期后一键重登）</div>
@@ -362,7 +362,7 @@ function amapDomainOk(){
 /* 实际生效的 Key：内置 Key 仅在授权域名下生效，用户自填 Key 不受限制 */
 function amapActiveKey(){var k=amapKey();return (k===AMAP_BUILTIN_KEY&&!amapDomainOk())?'':k;}
 function amapActiveSec(){var s=amapSec();return (s===AMAP_BUILTIN_SEC&&!amapDomainOk())?'':s;}
-var amapObj=null,amapState=0,amapSatLayer=null,amapSatOn=false,amapCur=null;
+var amapObj=null,amapState=0,amapSatLayer=null,amapSatOn=false,amapCur=null,amapMarker=null,amapInfoWin=null,amapCurLL=null;
 function amapLoad(cb){
   if(amapState===2)return cb(true);
   if(amapState===3||!amapActiveKey())return cb(false);
@@ -376,7 +376,7 @@ function amapLoad(cb){
   document.head.appendChild(s);
 }
 function initAmap(h){
-  amapCur=h;
+  amapCur=h; amapCurLL=h.lnglat?h.lnglat.slice():[106.55,29.56];
   var ctr=h.lnglat||[106.55,29.56];
   if(amapObj){try{amapObj.destroy();}catch(e){}amapObj=null;}
   amapObj=new AMap.Map('amapBox',{zoom:h.zoom||16,center:ctr,viewMode:'2D',resizeEnable:true});
@@ -388,12 +388,13 @@ function initAmap(h){
     }catch(e){}
   });
   var mk=new AMap.Marker({position:ctr,title:h.name,anchor:'bottom-center'});
-  amapObj.add(mk);
+  amapObj.add(mk); amapMarker=mk;
   var iw=new AMap.InfoWindow({offset:new AMap.Pixel(0,-34),
     content:'<div style="font:13px/1.6 -apple-system,sans-serif;min-width:150px"><b>'+h.name+'</b><br><span style="color:#888">'+h.addr+'</span></div>'});
-  iw.open(amapObj,ctr);
-  mk.on('click',function(){iw.open(amapObj,ctr);});
+  iw.open(amapObj,ctr); amapInfoWin=iw;
+  mk.on('click',function(){if(amapInfoWin)amapInfoWin.open(amapObj,amapMarker.getPosition());});
   if(amapSatOn&&amapSatLayer){try{amapObj.add(amapSatLayer);}catch(e){}}
+  amapGeocodeFix(h);
 }
 function amapToggleSat(){
   if(!amapObj)return;
@@ -403,7 +404,39 @@ function amapToggleSat(){
     else{amapObj.add(amapSatLayer);amapSatOn=true;}
   }catch(e){alert('卫星图层切换失败：'+e.message);}
 }
-function amapRecenter(){if(amapObj&&amapCur){amapObj.setZoomAndCenter(amapCur.zoom||16,amapCur.lnglat);}}
+/* 定位校正：geoobj 矩形中点仅作兜底；以小区名在「重庆」做 POI 关键字搜索，把地图中心与 Marker 校正到小区真实位置，并缓存到本机避免重复联网 */
+function amapGeocodeFix(h){
+  if(!amapObj||!h||!h.name)return;
+  var cacheKey='yjyx_geocode_'+h.name, cached=null;
+  try{cached=localStorage.getItem(cacheKey);}catch(e){}
+  function applyLL(ll,z){
+    try{
+      amapObj.setCenter(ll);
+      if(z)amapObj.setZoom(z);
+      if(amapMarker)amapMarker.setPosition(ll);
+      if(amapInfoWin)amapInfoWin.open(amapObj,ll);
+      amapCurLL=ll;
+    }catch(e){}
+  }
+  if(cached){try{var c=JSON.parse(cached); if(c&&c.ll)applyLL(c.ll,c.z||h.zoom);}catch(e){} return;}
+  AMap.plugin(['AMap.PlaceSearch'],function(){
+    try{
+      var ps=new AMap.PlaceSearch({city:'重庆',citylimit:true,pageSize:1});
+      ps.search(h.name,function(st,res){
+        if(amapCur!==h)return;
+        if(st==='complete'&&res&&res.poiList&&res.poiList.pois&&res.poiList.pois.length){
+          var p=res.poiList.pois[0].location;
+          if(p&&p.lng&&p.lat){
+            var ll=[Number(p.lng),Number(p.lat)], z=h.zoom?Math.min(18,h.zoom+1):17;
+            applyLL(ll,z);
+            try{localStorage.setItem(cacheKey,JSON.stringify({ll:ll,z:z}));}catch(e){}
+          }
+        }
+      });
+    }catch(e){}
+  });
+}
+function amapRecenter(){if(amapObj&&amapCur){amapObj.setZoomAndCenter(amapCur.zoom||16,amapCurLL);}}
 function amapFullscreen(){
   var w=document.getElementById('amapWrap');
   if(!w)return;
