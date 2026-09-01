@@ -270,7 +270,7 @@ footer{margin-top:30px;padding:14px 0 6px;border-top:1px solid var(--border);col
     </div>
   </nav>
   <div class="actions">
-    <span class="ver-badge" title="当前版本">v1.3.15</span>
+    <span class="ver-badge" title="当前版本">v1.3.16</span>
     <button class="btn" onclick="window.print()">打印 / 存 PDF</button>
     <button class="btn" onclick="showAbout()">关于</button>
   </div>
@@ -523,10 +523,15 @@ function jfyReLogin(){
 }
 
 /* ===== 高德地图 JS API 2.0 SDK 接入（v1.3.15）=====
-   未配置 Key 时自动回退网页版 iframe；Key 存于本机 localStorage，不上传。 */
-var AMAP_BUILTIN_KEY='', AMAP_BUILTIN_SEC='';
-function amapKey(){try{var v=localStorage.getItem('yjyx_amap_key');return (v&&v.trim())?v.trim():AMAP_BUILTIN_KEY;}catch(e){return AMAP_BUILTIN_KEY;}}
-function amapSec(){try{var v=localStorage.getItem('yjyx_amap_sec');return (v&&v.trim())?v.trim():AMAP_BUILTIN_SEC;}catch(e){return AMAP_BUILTIN_SEC;}}
+   内置默认 Key，打开即用；Key 存于本机 localStorage，不上传。 */
+var AMAP_BUILTIN_KEY='e7fd7c3c3d1ed484f298768b7a443055', AMAP_BUILTIN_SEC='0a669e4f6483547841ad906c4eb2a2bd';
+/* 首次打开自动把内置 Key 写入本机 localStorage（仅本机，不上传）；用户主动「清除 Key」后留空并回退网页版 */
+try{
+  if(localStorage.getItem('yjyx_amap_key')===null)localStorage.setItem('yjyx_amap_key',AMAP_BUILTIN_KEY);
+  if(localStorage.getItem('yjyx_amap_sec')===null)localStorage.setItem('yjyx_amap_sec',AMAP_BUILTIN_SEC);
+}catch(e){}
+function amapKey(){try{var v=localStorage.getItem('yjyx_amap_key');return (v===null)?AMAP_BUILTIN_KEY:v.trim();}catch(e){return AMAP_BUILTIN_KEY;}}
+function amapSec(){try{var v=localStorage.getItem('yjyx_amap_sec');return (v===null)?AMAP_BUILTIN_SEC:v.trim();}catch(e){return AMAP_BUILTIN_SEC;}}
 var amapObj=null,amapState=0,amapSatLayer=null,amapSatOn=false,amapCur=null;
 function amapLoad(cb){
   if(amapState===2)return cb(true);
@@ -629,8 +634,8 @@ function renderMap(h){
   }else if(h.mapUrl){
     var murl = h.mapUrl + (h.mapUrl.indexOf('?')>-1?'&':'?') + 'platform=pc';
     c.innerHTML='<div class="map-wrap"><iframe class="map-frame" id="mapFrame" src="'+murl+'" loading="lazy" allowfullscreen></iframe></div>'+
-      '<div class="map-ctl"><button class="btn" onclick="showAmapKey()">⚙ 配置高德 Key（切换为 SDK 交互地图）</button></div>'+
-      stat+'<div class="map-tip">↑ 当前为网页版地图，配置 Key 后自动切换为高德官方 SDK 交互地图</div>'+
+      '<div class="map-ctl"><button class="btn" onclick="showAmapKey()">⚙ 配置 / 恢复高德 Key</button></div>'+
+      stat+'<div class="map-tip">↑ 当前为网页版地图（Key 已清除或不可用），填入 Key 后自动切换为高德官方 SDK 交互地图</div>'+
       cap+'<div class="map-tag">高德街道图 · 网页版</div>';
   }else if(h.mapImg){
     c.innerHTML='<div class="map-static show"><img src="'+h.mapImg+'" alt=""></div>'+cap;
@@ -695,7 +700,7 @@ renderAll();
 <div class="about-mask" id="aboutMask" onclick="if(event.target===this)hideAbout()">
   <div class="about-box">
     <span class="ab-close" onclick="hideAbout()">×</span>
-    <h3>渝居优选 <span class="ab-ver">v1.3.15</span></h3>
+    <h3>渝居优选 <span class="ab-ver">v1.3.16</span></h3>
     <div class="ab-sub">重庆主城智能选房 · 十大板块分析 · 2026-08-16</div>
     <div class="ab-map">
       <div class="map-title">📐 界面布局注解图</div>
@@ -736,7 +741,7 @@ renderAll();
         <span class="map-lg">⑦ 高德地图 SDK</span><span class="map-lg">⑧ 十大板块分析卡片</span>
       </div>
     </div>
-    <div class="lg">更新日志</div><div class="lg-item"><span class="lg-ver">v1.3.15</span><b>接入高德地图官方 JS API 2.0 SDK</b>：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏、缩放尺控件）；新增「⚙ Key 设置」弹窗（Key 存本机 localStorage）；未配置 Key 或 SDK 加载失败时自动回退网页版地图，打印仍用静态底图</div><div class="lg-item"><span class="lg-ver">v1.3.14</span><b>金福云航拍自动登录全覆盖</b>：桌面版补齐自动登录（原先只有手机版有）；新增「↗ 重新登录」按钮（cookie 24h 过期后一键重登）；新增「↗ 新窗口打开」按钮（iOS/微信等拦截第三方 cookie 时，新窗口登录一次即恢复）</div><div class="lg-item"><span class="lg-ver">v1.3.13</span><b>新增第 3 套房源「保利云禧一期」</b>：巴南龙洲湾 · 碧桂园保利联合开发（绿化35%、人车分流）· 3号线鱼胡路站约650m · 划片龙洲湾小学 · 综合评分 78；航拍为用户提供金福云作品</div><div class="lg-item"><span class="lg-ver">v1.3.12</span><b>手机版顶栏优化</b>：移除「关于」按钮左侧旧版本号标签；版本号同步 v1.3.12</div><div class="lg-item"><span class="lg-ver">v1.3.11</span><b>手机版关于弹窗优化</b>：移除更新日志左侧版本号标签，界面更简洁</div><div class="lg-item"><span class="lg-ver">v1.3.10</span><b>首地江山赋·凌山樾改名与航拍更新</b>：名称去掉「北区」改为「首地江山赋·凌山樾」；航拍换为用户提供的新作品（金福云「首地江山赋凌山樾」），封面同步更新</div><div class="lg-item"><span class="lg-ver">v1.3.9</span><b>首地江山赋·凌山樾新增航拍实景</b>：金福云 VR 作品（首地江山赋·悦江城），封面图高清内嵌，点击可跳转全景；桌面版/手机版同步</div><div class="lg-item"><span class="lg-ver">v1.3.8</span><b>新增第 2 套房源「首地江山赋·凌山樾」</b>：两江新区悦来 · 国企低密洋房（容积率1.01）· 划片首地人和街小学 · 悦来站约400m · 综合评分 83；价格按二手挂牌修正为约1.12-1.17万/㎡</div>
+    <div class="lg">更新日志</div><div class="lg-item"><span class="lg-ver">v1.3.16</span><b>高德地图 Key 开箱即用</b>：内置默认 Key 与安全密钥（JS API 2.0 Web端），打开页面自动填入并生效，无需手动配置；「⚙」弹窗仍可随时替换为自己的 Key，「清除 Key」后立即回退网页版地图</div><div class="lg-item"><span class="lg-ver">v1.3.15</span><b>接入高德地图官方 JS API 2.0 SDK</b>：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏、缩放尺控件）；新增「⚙ Key 设置」弹窗（Key 存本机 localStorage）；未配置 Key 或 SDK 加载失败时自动回退网页版地图，打印仍用静态底图</div><div class="lg-item"><span class="lg-ver">v1.3.14</span><b>金福云航拍自动登录全覆盖</b>：桌面版补齐自动登录（原先只有手机版有）；新增「↗ 重新登录」按钮（cookie 24h 过期后一键重登）；新增「↗ 新窗口打开」按钮（iOS/微信等拦截第三方 cookie 时，新窗口登录一次即恢复）</div><div class="lg-item"><span class="lg-ver">v1.3.13</span><b>新增第 3 套房源「保利云禧一期」</b>：巴南龙洲湾 · 碧桂园保利联合开发（绿化35%、人车分流）· 3号线鱼胡路站约650m · 划片龙洲湾小学 · 综合评分 78；航拍为用户提供金福云作品</div><div class="lg-item"><span class="lg-ver">v1.3.12</span><b>手机版顶栏优化</b>：移除「关于」按钮左侧旧版本号标签；版本号同步 v1.3.12</div><div class="lg-item"><span class="lg-ver">v1.3.11</span><b>手机版关于弹窗优化</b>：移除更新日志左侧版本号标签，界面更简洁</div><div class="lg-item"><span class="lg-ver">v1.3.10</span><b>首地江山赋·凌山樾改名与航拍更新</b>：名称去掉「北区」改为「首地江山赋·凌山樾」；航拍换为用户提供的新作品（金福云「首地江山赋凌山樾」），封面同步更新</div><div class="lg-item"><span class="lg-ver">v1.3.9</span><b>首地江山赋·凌山樾新增航拍实景</b>：金福云 VR 作品（首地江山赋·悦江城），封面图高清内嵌，点击可跳转全景；桌面版/手机版同步</div><div class="lg-item"><span class="lg-ver">v1.3.8</span><b>新增第 2 套房源「首地江山赋·凌山樾」</b>：两江新区悦来 · 国企低密洋房（容积率1.01）· 划片首地人和街小学 · 悦来站约400m · 综合评分 83；价格按二手挂牌修正为约1.12-1.17万/㎡</div>
     <div class="lg-item"><span class="lg-ver">v1.3.7</span>手机端兼容性全面修复：侧边导航变横向滚动条、main 自然滚动、航拍/地图高度自适应、hero/KPI 紧凑布局、顶栏精简</div>
     <div class="lg-item"><span class="lg-ver">v1.3.6</span>「关于」弹窗新增<b>界面布局注解图</b>：标注顶栏 / 左侧导航 / hero 标题+chips / KPI 同排 / 评分条 / 航拍实景 / 高德街道图 / 十大板块卡片的位置</div>
     <div class="lg-item"><span class="lg-ver">v1.3.1</span><b>界面全面改版为 Vercel 现代渐变风</b>：深蓝渐变背景 + 半透明玻璃卡片 + 青/紫/粉霓虹点缀；顶栏新增版本号与「关于」入口</div>
@@ -754,7 +759,8 @@ renderAll();
   <div class="about-box" style="max-width:520px">
     <span class="ab-close" onclick="hideAmapKey()">×</span>
     <h3>高德地图 Key 设置</h3>
-    <div class="ab-sub">在 lbs.amap.com 控制台创建「Web端(JS API)」类型 Key，<b>域名白名单留空</b>（本地打开与 tool.wbc2023.top 通用）。保存后仅存于本机浏览器。</div>
+    <div class="ab-sub">已内置默认 Key（Web端 JS API），打开页面即自动填入，<b>一般无需改动</b>。如需用自己的 Key：在 lbs.amap.com 控制台创建「Web端(JS API)」类型 Key，<b>域名白名单留空</b>（本地打开与 tool.wbc2023.top 通用）。保存后仅存于本机浏览器。</div>
+    <div style="margin:12px 0;padding:8px 10px;border-radius:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#86efac;font-size:12.5px;line-height:1.6">✅ 当前使用内置默认 Key：<span style="font-family:monospace">e7fd7c3c…443055</span>，已自动填入下方输入框</div>
     <div style="margin-top:14px;text-align:left">
       <div style="font-size:13px;margin-bottom:6px">Key（Web端 JS API，32 位）</div>
       <input id="amapKeyInput" placeholder="粘贴 32 位 Key" style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,.6);color:var(--text);font-size:13px">
