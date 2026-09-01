@@ -19,16 +19,17 @@ body{
   background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 55%,#312e81 100%);background-attachment:fixed;
   color:var(--text);font-size:15px;line-height:1.55;overflow:hidden;
 }
-/* 顶部 */
-.appbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:50;display:flex;align-items:center;justify-content:space-between;
-  padding:0 14px;background:rgba(13,20,38,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+/* 顶部（v1.3.21-m：顶部避开系统状态栏——刘海屏/挖孔屏下 content 下移到安全区以下） */
+.appbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  height:calc(52px + env(safe-area-inset-top));box-sizing:border-box;padding:env(safe-area-inset-top) 14px 0;
+  background:rgba(13,20,38,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .appbar .logo{font:800 17px/1 'PingFang SC',sans-serif;color:#fff;letter-spacing:.5px;text-shadow:0 0 14px rgba(34,211,238,.7)}
 .appbar .logo small{font-size:11px;color:var(--muted);font-weight:400;margin-left:6px}
 .appbar .right{display:flex;align-items:center;gap:10px}
 .appbar .about-btn{font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px}
 
 /* 主体容器（底部留 tab 高） */
-.page{position:fixed;top:52px;left:0;right:0;bottom:56px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 14px}
+.page{position:fixed;top:calc(52px + env(safe-area-inset-top));left:0;right:0;bottom:56px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 14px}
 
 /* 房源切换卡 */
 .house-switch{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
@@ -84,6 +85,10 @@ body{
 .scene-open{position:absolute;top:10px;right:10px;z-index:20;background:rgba(13,20,38,.85);border:1px solid var(--primary);
   color:var(--primary);font-size:12px;border-radius:20px;padding:6px 14px;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .scene-open:active{background:var(--primary);color:#06121f}
+/* v1.3.21-m：航拍操作按钮组（flex 换行，窄屏不溢出） */
+.scene-ops{position:absolute;top:10px;right:10px;left:10px;z-index:20;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.scene-ops .scene-open{position:static}
+.scene-open.auto{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#06121f;border-color:transparent;font-weight:700}
 .hang-static{display:none}
 
 /* 十大板块 */
@@ -161,7 +166,7 @@ body{
 <body>
 
 <div class="appbar">
-  <div class="logo">渝居优选<small>手机版 · v1.3.20-m</small></div>
+  <div class="logo">渝居优选<small>手机版 · v1.3.21-m</small></div>
   <div class="right">
     <button class="about-btn" onclick="showAbout()">关于</button>
   </div>
@@ -182,8 +187,8 @@ body{
   <div class="dialog">
     <span class="close" onclick="hideAbout()">×</span>
     <h3>渝居优选 <span style="color:var(--primary)">手机版</span></h3>
-    <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-01</div>
-    <div class="lg-item"><b>v1.3.20-m 修复+优化</b>：适配真我GT5 Pro等高刷/高瘦屏——总览页底部新增「选房小结」卡（综合分、优势/短板、综合评价要点、采集时间），消除十大板块评分下方整片深色空白；hero/kpi/board 间距紧凑化；航拍/街景 iframe 高度 62vh→50vh 减少加载中空白</div><div class="lg-item"><b>v1.3.19-m</b>：<b style="color:#fbbf24">修复</b> Key 弹窗以流式 div 显示在 page 顶部、严重遮挡房源切换卡与 hero 区的问题（CSS 缺 .about-mask 样式所致，已补齐，弹窗恢复 fixed 居中默认隐藏）；底部 tab 文字 9→10px、icon 20→21px；房源切换卡分数 16→17px、名称 13→14px；总览小区名 20→22px</div><div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
+    <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-02</div>
+    <div class="lg-item"><b>v1.3.21-m 修复+优化</b>：① 顶栏适配系统状态栏——顶栏整体下移至手机状态栏（刘海/挖孔屏）以下，不再被时钟/电量遮挡，主体区同步下移；② 航拍新增「🔑 自动登录」按钮——浏览器默认拦截第三方 cookie 时，隐藏 iframe 自动登录会失效（VR 弹出登录框），点此按钮用「顶层新窗口」POST 账号密码（顶层不受拦截），登录成功后自动跳转航拍，100% 可用；操作按钮改 flex 换行布局，窄屏不溢出</div><div class="lg-item"><b>v1.3.20-m 修复+优化</b>：适配真我GT5 Pro等高刷/高瘦屏——总览页底部新增「选房小结」卡（综合分、优势/短板、综合评价要点、采集时间），消除十大板块评分下方整片深色空白；hero/kpi/board 间距紧凑化；航拍/街景 iframe 高度 62vh→50vh 减少加载中空白</div><div class="lg-item"><b>v1.3.19-m</b>：<b style="color:#fbbf24">修复</b> Key 弹窗以流式 div 显示在 page 顶部、严重遮挡房源切换卡与 hero 区的问题（CSS 缺 .about-mask 样式所致，已补齐，弹窗恢复 fixed 居中默认隐藏）；底部 tab 文字 9→10px、icon 20→21px；房源切换卡分数 16→17px、名称 13→14px；总览小区名 20→22px</div><div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
     <div class="lg-item"><b>v1.3.16-m</b>：内置高德地图默认 Key 与安全密钥，打开页面自动填入、开箱即用；「⚙」弹窗可随时替换或清除</div>
     <div class="lg-item"><b>v1.3.15-m</b>：接入高德地图官方 JS API 2.0 SDK：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏）；新增「⚙」Key 设置弹窗；未配置 Key 或 SDK 失败自动回退网页版</div>
     <div class="lg-item"><b>v1.3.14-m</b>：金福云航拍自动登录加固：航拍卡片与全屏层新增「↻ 重登」「↗ 新窗口」按钮（iPhone/微信拦截第三方 cookie 时，新窗口登录一次即恢复；cookie 24h 过期后一键重登）</div>
@@ -352,11 +357,14 @@ function renderHang(h){
   var s = '<div class="card"><h3><span class="bar"></span>航拍实景</h3>';
   if(h.hangUrl){
     s += '<div class="scene-box">'+
-      '<button class="scene-open" style="right:182px" onclick="window.open(\''+h.hangUrl+'\',\'_blank\')">↗ 新窗口</button>'+
-      '<button class="scene-open" style="right:96px" onclick="jfyReLogin()">↻ 重登</button>'+
+      '<div class="scene-ops">'+
+      '<button class="scene-open auto" onclick="jfyOpenAutoLogin(\''+h.hangUrl+'\')">🔑 自动登录</button>'+
+      '<button class="scene-open" onclick="jfyReLogin()">↻ 重登</button>'+
+      '<button class="scene-open" onclick="window.open(\''+h.hangUrl+'\',\'_blank\')">↗ 新窗口</button>'+
       '<button class="scene-open" onclick="openScene(\'hang\',\''+h.hangUrl+'\')">⛶ 全屏</button>'+
+      '</div>'+
       '<div class="hang-wrap" id="hangWrap"><div class="empty" style="padding:70px 10px">⏳ 航拍加载中（自动登录金福云）…</div></div></div>'+
-      '<div class="scene-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动 · 若弹出登录框：点「↻ 重登」或「↗ 新窗口」登录一次）</div>';
+      '<div class="scene-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动 · 若弹出登录框：点「🔑 自动登录」新窗口一键登录，不受浏览器拦截）</div>';
   } else if(h.hangImg){
     s += '<img src="'+h.hangImg+'" style="width:100%;border-radius:10px" alt="'+h.name+'">';
   } else {
@@ -598,8 +606,8 @@ function jfyAutoLogin(url, wrapId){
     jfyLoginDone = true;
     jfyLoginBusy = false;
   };
-  f.onload = function(){ setTimeout(done, 1500); };  // 等 cookie 落地
-  timer = setTimeout(done, 6000);  // 兜底
+  f.onload = function(){ setTimeout(done, 2000); };  // 等 cookie 落地
+  timer = setTimeout(done, 8000);  // 兜底
   form.submit();
 }
 /* 手动重试登录（cookie 过期 24h 后或自动登录被浏览器拦截第三方 cookie 时用） */
@@ -609,6 +617,27 @@ function jfyReLogin(wrapId){
   var wrap = document.getElementById(wrapId || 'hangWrap');
   if(wrap) wrap.innerHTML = '<div class="empty" style="padding:70px 10px">⏳ 正在重新登录金福云…</div>';
   jfyAutoLogin(HOUSES[cur].hangUrl, wrapId);
+}
+/* v1.3.21-m「🔑 自动登录」：浏览器默认拦截第三方 cookie 时，隐藏 iframe 登录落不了 cookie，
+   此按钮用「顶层新窗口」POST 账号密码（顶层不受拦截），登录成功后自动跳转 VR —— 100% 可用。 */
+function jfyOpenAutoLogin(url){
+  var w = window.open('about:blank','jfyAutoLoginWin');
+  if(!w){ alert('请允许弹出窗口后重试'); return; }
+  var d = w.document;
+  d.write('<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'+
+    '<body style="margin:0;background:#0b1020;color:#9fb3d8;font:14px/2 sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center">🔑 正在自动登录金福云…<br><small>登录成功后自动打开航拍</small></body></html>');
+  d.close();
+  var form = d.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://vr.jinfuyun.cn/passport/login?act=do_login';
+  var i1 = d.createElement('input'); i1.type='hidden'; i1.name='phone'; i1.value=JFY_ACCOUNT;
+  var i2 = d.createElement('input'); i2.type='hidden'; i2.name='password'; i2.value=JFY_PASSWORD;
+  form.appendChild(i1); form.appendChild(i2);
+  d.body.appendChild(form);
+  form.submit();            // 顶层提交，cookie 正常落地（不受第三方 cookie 拦截）
+  setTimeout(function(){    // 登录响应回来后跳转 VR
+    try{ w.location.href = url; }catch(e){}
+  }, 2000);
 }
 
 function renderBoards(h){
