@@ -177,12 +177,25 @@ body{
 .scene-ops .scene-open{background:linear-gradient(180deg,#ffffff,#f0f7f1);border:1px solid #d5e8d8;color:#374a37;font-weight:600;box-shadow:0 3px 6px rgba(20,60,30,.12),inset 0 1px 1px rgba(255,255,255,.9)}
 .scene-open.auto{background:linear-gradient(180deg,#23b95e,#128a3e 60%,#0e7a37);border-color:#0e7a37;color:#fff;font-weight:700;box-shadow:0 4px 0 #0b5e2b,0 6px 14px rgba(22,163,74,.35)}
 .scene-cap{color:#647864}
+/* ===== v1.3.23-m：修复关于/Key 弹窗「底色不协调 + 文字看不清」 =====
+   上一版智印块把 .about-box/.dialog 弹窗改成白→浅绿渐变底，但正文 .lg-item
+   仍用深色主题的浅色文字（var(--text)，覆盖块漏改颜色）→ 浅底浅字完全看不清；
+   且白绿弹窗与深色科技主界面突兀。本次把弹窗恢复为深色玻璃风格（与主界面协调），
+   智印绿保留在航拍全屏层与按钮组（.fullscene/.scene-ops 等）。 */
+.about-mask,.dialog-mask{background:rgba(2,6,23,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.about-box,.dialog{background:linear-gradient(180deg,rgba(17,27,48,.97),rgba(13,20,38,.95));border:1px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:0 0 30px rgba(34,211,238,.15)}
+.about-box h3,.dialog h3{color:var(--text)}
+.about-box h3 span,.dialog .sub,.about-box .ab-sub{color:var(--muted)}
+.about-box .ab-close,.dialog .close{color:var(--muted)}
+.about-box .lg,.dialog .lg{color:var(--primary);font-weight:700}
+.about-box .lg-item,.dialog .lg-item{border-bottom:1px dashed rgba(255,255,255,.12);color:var(--text)}
+.about-box .lg-item b,.dialog .lg-item b{color:var(--primary)}
 </style>
 </head>
 <body>
 
 <div class="appbar">
-  <div class="logo">渝居优选<small>手机版 · v1.3.22-m</small></div>
+  <div class="logo">渝居优选<small>手机版 · v1.3.23-m</small></div>
   <div class="right">
     <button class="about-btn" onclick="showAbout()">关于</button>
   </div>
@@ -204,7 +217,7 @@ body{
     <span class="close" onclick="hideAbout()">×</span>
     <h3>渝居优选 <span style="color:var(--primary)">手机版</span></h3>
     <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-02</div>
-    <div class="lg-item"><b>v1.3.22-m 子页面风格统一</b>：弹窗（高德 Key 设置 / 关于）、航拍全屏层与操作按钮组全面模仿「智印PDF工坊」绿色风格——浅绿遮罩、白→浅绿渐变圆角卡、绿色渐变 3D 按钮、绿字日志与提示；主界面保持原有深色科技风</div><div class="lg-item"><b>v1.3.21-m 修复+优化</b>：① 顶栏适配系统状态栏——顶栏整体下移至手机状态栏（刘海/挖孔屏）以下，不再被时钟/电量遮挡，主体区同步下移；② 航拍新增「🔑 自动登录」按钮——浏览器默认拦截第三方 cookie 时，隐藏 iframe 自动登录会失效（VR 弹出登录框），点此按钮用「顶层新窗口」POST 账号密码（顶层不受拦截），登录成功后自动跳转航拍，100% 可用；操作按钮改 flex 换行布局，窄屏不溢出</div><div class="lg-item"><b>v1.3.20-m 修复+优化</b>：适配真我GT5 Pro等高刷/高瘦屏——总览页底部新增「选房小结」卡（综合分、优势/短板、综合评价要点、采集时间），消除十大板块评分下方整片深色空白；hero/kpi/board 间距紧凑化；航拍/街景 iframe 高度 62vh→50vh 减少加载中空白</div><div class="lg-item"><b>v1.3.19-m</b>：<b style="color:#fbbf24">修复</b> Key 弹窗以流式 div 显示在 page 顶部、严重遮挡房源切换卡与 hero 区的问题（CSS 缺 .about-mask 样式所致，已补齐，弹窗恢复 fixed 居中默认隐藏）；底部 tab 文字 9→10px、icon 20→21px；房源切换卡分数 16→17px、名称 13→14px；总览小区名 20→22px</div><div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
+    <div class="lg-item"><b>v1.3.23-m 修复</b>：关于/Key 弹窗底色不协调且文字看不清——上一版智印块把弹窗改成白→浅绿渐变底，但正文文字仍是深色主题的浅色字（漏改），浅底浅字完全看不清；本次弹窗恢复为深色玻璃风格（与主界面协调），智印绿保留在航拍全屏层与按钮组</div><div class="lg-item"><b>v1.3.22-m 子页面风格统一</b>：弹窗（高德 Key 设置 / 关于）、航拍全屏层与操作按钮组全面模仿「智印PDF工坊」绿色风格——浅绿遮罩、白→浅绿渐变圆角卡、绿色渐变 3D 按钮、绿字日志与提示；主界面保持原有深色科技风</div><div class="lg-item"><b>v1.3.21-m 修复+优化</b>：① 顶栏适配系统状态栏——顶栏整体下移至手机状态栏（刘海/挖孔屏）以下，不再被时钟/电量遮挡，主体区同步下移；② 航拍新增「🔑 自动登录」按钮——浏览器默认拦截第三方 cookie 时，隐藏 iframe 自动登录会失效（VR 弹出登录框），点此按钮用「顶层新窗口」POST 账号密码（顶层不受拦截），登录成功后自动跳转航拍，100% 可用；操作按钮改 flex 换行布局，窄屏不溢出</div><div class="lg-item"><b>v1.3.20-m 修复+优化</b>：适配真我GT5 Pro等高刷/高瘦屏——总览页底部新增「选房小结」卡（综合分、优势/短板、综合评价要点、采集时间），消除十大板块评分下方整片深色空白；hero/kpi/board 间距紧凑化；航拍/街景 iframe 高度 62vh→50vh 减少加载中空白</div><div class="lg-item"><b>v1.3.19-m</b>：<b style="color:#fbbf24">修复</b> Key 弹窗以流式 div 显示在 page 顶部、严重遮挡房源切换卡与 hero 区的问题（CSS 缺 .about-mask 样式所致，已补齐，弹窗恢复 fixed 居中默认隐藏）；底部 tab 文字 9→10px、icon 20→21px；房源切换卡分数 16→17px、名称 13→14px；总览小区名 20→22px</div><div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
     <div class="lg-item"><b>v1.3.16-m</b>：内置高德地图默认 Key 与安全密钥，打开页面自动填入、开箱即用；「⚙」弹窗可随时替换或清除</div>
     <div class="lg-item"><b>v1.3.15-m</b>：接入高德地图官方 JS API 2.0 SDK：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏）；新增「⚙」Key 设置弹窗；未配置 Key 或 SDK 失败自动回退网页版</div>
     <div class="lg-item"><b>v1.3.14-m</b>：金福云航拍自动登录加固：航拍卡片与全屏层新增「↻ 重登」「↗ 新窗口」按钮（iPhone/微信拦截第三方 cookie 时，新窗口登录一次即恢复；cookie 24h 过期后一键重登）</div>
