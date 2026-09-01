@@ -279,6 +279,7 @@
   .secret-panel .sp-card p{font-size:12px;color:rgba(238,242,251,.6);line-height:1.7;flex:1;}
   .secret-panel .sp-card .tag{margin-top:12px;font-size:10.5px;padding:3px 10px;border-radius:20px;align-self:flex-start;
        border:1px solid var(--cb);color:var(--cc);background:var(--cbg);}
+  .secret-panel .sp-card .meta{font-size:10.5px;color:rgba(238,242,251,.55);opacity:.85;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
   .secret-panel .sp-empty{border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:40px;text-align:center;color:rgba(238,242,251,.55);font-size:13px;line-height:2;background:rgba(255,255,255,.04);}
   @media (max-width:1700px){.grid{grid-template-columns:repeat(6,1fr);}}
   @media (max-width:1300px){.grid{grid-template-columns:repeat(4,1fr);}}
@@ -634,7 +635,7 @@ var SECRET_TOOLS = [
   {
     name: '渝选房 v1.4.1',
     desc: '重庆主城智能选房：多维筛选（区域/总价/面积/地铁线）、十维深度分析、AI 多模型推荐、噪声分析、百度地图定位。',
-    href: 'yxf141.html',
+    href: 'yxf141.html', upd: '08-14',
     g1: '#0ea5e9', g2: '#6366f1', gs: 'rgba(14,165,233,.4)',
     tag: 'v1.4.1',
     tagColor: 'rgba(56,189,248,.4)', tagText: '#7dd3fc', tagBg: 'rgba(56,189,248,.1)'
@@ -642,23 +643,23 @@ var SECRET_TOOLS = [
   {
     name: '重庆8000楼盘 v1.7',
     desc: '重庆 8000+ 楼盘优劣势速查表：区域房价、楼盘对比、优势劣势一览，快速筛选目标楼盘。',
-    href: 'cq8000.html',
+    href: 'cq8000.html', upd: '08-15',
     g1: '#f59e0b', g2: '#ef4444', gs: 'rgba(245,158,11,.4)',
     tag: 'v1.7',
     tagColor: 'rgba(251,191,36,.4)', tagText: '#fcd34d', tagBg: 'rgba(251,191,36,.1)'
   },
   {
-    name: '渝居优选 v1.3.12',
+    name: '渝居优选 v1.3.13',
     desc: '重庆主城智能选房（十大板块版）：十大板块深度分析 + 十维综合评分 + 金福云航拍实景 + 高德街道图定位 + 已选房源导航。',
-    href: 'yjyx.html',
+    href: 'yjyx.html', upd: '09-01',
     g1: '#22c55e', g2: '#14b8a6', gs: 'rgba(34,197,94,.4)',
-    tag: 'v1.3.12',
+    tag: 'v1.3.13',
     tagColor: 'rgba(52,211,153,.4)', tagText: '#6ee7b7', tagBg: 'rgba(52,211,153,.1)'
   },
   {
     name: '渝居优选·手机版',
     desc: '渝居优选手机适配版：手机上浏览、筛选楼盘更顺手，界面为移动端优化。',
-    href: 'yjyx-m.html',
+    href: 'yjyx-m.html', upd: '09-01',
     g1: '#14b8a6', g2: '#0ea5e9', gs: 'rgba(20,184,166,.4)',
     tag: '手机版',
     tagColor: 'rgba(45,212,191,.4)', tagText: '#5eead4', tagBg: 'rgba(45,212,191,.1)'
@@ -666,7 +667,7 @@ var SECRET_TOOLS = [
   {
     name: '房览速记 v1.0.15',
     desc: '抖音/安居客等平台房源随手记：两行精简卡、详情表格行式、点赞踩排序、同步冲突自动修复，GitHub 双端互通。',
-    href: 'fanglian.html',
+    href: 'fanglian.html', upd: '08-26',
     g1: '#14b8a6', g2: '#0d9488', gs: 'rgba(20,184,166,.4)',
     tag: 'v1.0.15',
     tagColor: 'rgba(45,212,191,.4)', tagText: '#5eead4', tagBg: 'rgba(45,212,191,.1)'
@@ -674,7 +675,7 @@ var SECRET_TOOLS = [
   {
     name: '筑笺札记个人工程资料库 v1.0.13',
     desc: '个人工程资料库：工程资料 117 条 + 评审资料 112 条一站式检索，年份筛选/关键词搜索/备注检索（含[已出报告]、经办人名、地名+经办人）/类型统计看板。',
-    href: 'zqzhaji.html',
+    href: 'zqzhaji.html', upd: '08-26',
     g1: '#16a34a', g2: '#4ade80', gs: 'rgba(22,163,74,.4)',
     tag: 'v1.0.13',
     tagColor: 'rgba(74,222,128,.4)', tagText: '#86efac', tagBg: 'rgba(74,222,128,.1)'
@@ -682,7 +683,7 @@ var SECRET_TOOLS = [
   {
     name: 'WorkBuddy每日领取助手 v1.0',
     desc: 'WorkBuddy 积分每日自动领取：一键签到、7 天周期进度、运行日志，Token 本地保存，每天自动领取积分。',
-    href: 'wbcheckin.html',
+    href: 'wbcheckin.html', upd: '08-31',
     g1: '#16a34a', g2: '#22c55e', gs: 'rgba(34,197,94,.4)',
     tag: 'v1.0',
     tagColor: 'rgba(74,222,128,.4)', tagText: '#86efac', tagBg: 'rgba(74,222,128,.1)'
@@ -741,7 +742,8 @@ function renderSecretTools(){
     a.style.setProperty('--cbg', 'rgba(255,255,255,.05)');
     a.innerHTML = '<div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></div>'
       + '<h4>' + t.name + '</h4><p>' + t.desc + '</p>'
-      + '<span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>';
+      + '<span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>'
+      + (t.upd ? '<div class="meta"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg> 更新于 ' + t.upd + '</div>' : '');
     grid.appendChild(a);
   });
 }
@@ -931,7 +933,8 @@ function filterTools(q){
 })();
 
 // ===== ⑦ 公告栏 + 更新日志 =====
-var NEWS_LOG = [{d:'2026-08-31', t:'新增：我的私密收录 WorkBuddy每日领取助手 v1.0（WorkBuddy 积分每日自动领取：一键签到/7天周期进度/运行日志，Token 本地保存，智印风格界面）'},
+var NEWS_LOG = [{d:'2026-09-01', t:'更新：渝居优选 v1.3.13（新增第3套房源「保利云禧一期」·巴南龙洲湾·碧桂园保利联合开发·参考均价约0.9万/㎡·综合评分78）'},
+  ,,,{d:'2026-08-31', t:'新增：我的私密收录 WorkBuddy每日领取助手 v1.0（WorkBuddy 积分每日自动领取：一键签到/7天周期进度/运行日志，Token 本地保存，智印风格界面）'},
   ,,,{d:'2026-08-28', t:'新增：木材检测报告工具 v3.19（检测报告编辑：原件扫描彩色底图+红蓝章高清浮动、24处字段原位可改、基础参数双向同步、一键导出PDF直出）'},
   ,,,{d:'2026-08-26', t:'新增：我的私密收录筑笺札记个人工程资料库 v1.0.10（工程资料117条+评审资料112条一站式检索：年份筛选/关键词搜索/备注检索/类型统计看板，三栏布局钉住仅数据行滚动）'},
   ,,,{d:'2026-08-25', t:'新增：智印PDF工坊 PdfDocSprint v1.0.4（PDF 封面单面+内容页双面智能打印，份数可调、400dpi 高清渲染、横版自动旋转，全程本地解析）'},
@@ -974,9 +977,9 @@ function renderLog(){
 
 // ===== ⑨ 卡片元信息 + 新标签页 =====
 var CARD_META = {
-  'sgjht.html': '08-15', 'murus.html': '08-19', 'murus_old.html': '08-09', 'cqcost428.html': '08-15',
+  'sgjht.html': '08-17', 'murus.html': '08-19', 'murus_old.html': '08-09', 'cqcost428.html': '08-15',
   'cqcost19.html': '08-15', 'cq24q.html': '08-15', 'stampgen.html': '08-15',
-  'evalwrite.html': '08-15', 'bracecad.html': '08-22', 'batchimg.html': '08-22', 'pdfdocsprint.html': '08-25', 'woodreport.html': '08-28'
+  'evalwrite.html': '08-15', 'bracecad.html': '08-22', 'batchimg.html': '08-22', 'pdfdocsprint.html': '08-31', 'woodreport.html': '09-01'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
