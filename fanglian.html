@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%230ea5e9'/%3E%3Cpath d='M32 16 14 32h5v16h10V36h6v12h10V32h5z' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#f3f6fb; --card:#ffffff; --line:#e5eaf3; --txt:#1f2937; --sub:#6b7280; --mut:#9ca3af;
+  --bg:#eef5ee; --card:#ffffff; --line:#e5eaf3; --txt:#1f2937; --sub:#6b7280; --mut:#9ca3af;
   --pri:#0ea5e9; --pri2:#0284c7; --pri-bg:#e0f2fe; --teal:#0d9488; --amber:#f59e0b; --red:#ef4444;
   --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.14);
   --r:16px;
@@ -23,7 +23,7 @@ a{color:var(--pri2);text-decoration:none}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
 
 /* ===== 顶栏 ===== */
-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+header{position:sticky;top:0;z-index:50;background:rgba(238,245,238,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
 .hd{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#0284c7);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px -4px rgba(14,165,233,.5)}
 .logo svg{width:24px;height:24px}
@@ -284,7 +284,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.17 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.18 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -469,7 +469,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.17 =================
+/* ================= 房览速记 v1.0.18 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
@@ -478,7 +478,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
          拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
          卡片去掉优✓缺✗标记（更紧凑）、手机端隐藏标签筛选栏
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.17' };
+var APP = { name:'房览速记', version:'1.0.18' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
