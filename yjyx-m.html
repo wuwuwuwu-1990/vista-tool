@@ -135,7 +135,7 @@ body{
 <body>
 
 <div class="appbar">
-  <div class="logo">渝居优选<small>手机版 · v1.3.16-m</small></div>
+  <div class="logo">渝居优选<small>手机版 · v1.3.17-m</small></div>
   <div class="right">
     <button class="about-btn" onclick="showAbout()">关于</button>
   </div>
@@ -157,6 +157,7 @@ body{
     <span class="close" onclick="hideAbout()">×</span>
     <h3>渝居优选 <span style="color:var(--primary)">手机版</span></h3>
     <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-01</div>
+    <div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
     <div class="lg-item"><b>v1.3.16-m</b>：内置高德地图默认 Key 与安全密钥，打开页面自动填入、开箱即用；「⚙」弹窗可随时替换或清除</div>
     <div class="lg-item"><b>v1.3.15-m</b>：接入高德地图官方 JS API 2.0 SDK：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏）；新增「⚙」Key 设置弹窗；未配置 Key 或 SDK 失败自动回退网页版</div>
     <div class="lg-item"><b>v1.3.14-m</b>：金福云航拍自动登录加固：航拍卡片与全屏层新增「↻ 重登」「↗ 新窗口」按钮（iPhone/微信拦截第三方 cookie 时，新窗口登录一次即恢复；cookie 24h 过期后一键重登）</div>
@@ -349,15 +350,27 @@ try{
 }catch(e){}
 function amapKey(){try{var v=localStorage.getItem('yjyx_amap_key');return (v===null)?AMAP_BUILTIN_KEY:v.trim();}catch(e){return AMAP_BUILTIN_KEY;}}
 function amapSec(){try{var v=localStorage.getItem('yjyx_amap_sec');return (v===null)?AMAP_BUILTIN_SEC:v.trim();}catch(e){return AMAP_BUILTIN_SEC;}}
+/* 内置 Key 域名白名单（v1.3.17）：文件若被拷贝到别的站点，内置 Key 自动停用并回退网页版，
+   避免 Key 被第三方站点盗用（高德控制台也可再配一层域名白名单）。
+   放行：本地 file:// 打开（hostname 为空）、导航站、GitHub Pages 源站、本机调试。 */
+var AMAP_KEY_HOSTS=['tool.wbc2023.top','www.wbc2023.top','wbc2023.top','wuwuwuwu-1990.github.io','localhost','127.0.0.1'];
+function amapDomainOk(){
+  var h='';try{h=String(location.hostname||'').toLowerCase();}catch(e){}
+  if(!h)return true;                       // file:// 双击本地打开
+  return AMAP_KEY_HOSTS.indexOf(h)>=0;
+}
+/* 实际生效的 Key：内置 Key 仅在授权域名下生效，用户自填 Key 不受限制 */
+function amapActiveKey(){var k=amapKey();return (k===AMAP_BUILTIN_KEY&&!amapDomainOk())?'':k;}
+function amapActiveSec(){var s=amapSec();return (s===AMAP_BUILTIN_SEC&&!amapDomainOk())?'':s;}
 var amapObj=null,amapState=0,amapSatLayer=null,amapSatOn=false,amapCur=null;
 function amapLoad(cb){
   if(amapState===2)return cb(true);
-  if(amapState===3||!amapKey())return cb(false);
+  if(amapState===3||!amapActiveKey())return cb(false);
   if(amapState===1){var t=setInterval(function(){if(amapState===2){clearInterval(t);cb(true);}else if(amapState===3){clearInterval(t);cb(false);}},200);return;}
   amapState=1;
-  window._AMapSecurityConfig={securityJsCode:amapSec()};
+  window._AMapSecurityConfig={securityJsCode:amapActiveSec()};
   var s=document.createElement('script');
-  s.src='https://webapi.amap.com/maps?v=2.0&key='+encodeURIComponent(amapKey());
+  s.src='https://webapi.amap.com/maps?v=2.0&key='+encodeURIComponent(amapActiveKey());
   s.onload=function(){amapState=2;cb(true);};
   s.onerror=function(){amapState=3;cb(false);};
   document.head.appendChild(s);
@@ -401,6 +414,20 @@ function showAmapKey(){
   document.getElementById('keyMask').classList.add('show');
   document.getElementById('amapKeyInput').value=amapKey();
   document.getElementById('amapSecInput').value=amapSec();
+  var tip=document.getElementById('amapKeyTip');
+  if(tip){
+    var usingBuiltin=(amapKey()===AMAP_BUILTIN_KEY);
+    if(usingBuiltin&&amapDomainOk()){
+      tip.style.cssText='margin:12px 0;padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.6;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#86efac';
+      tip.innerHTML='✅ 当前使用内置默认 Key：<span style="font-family:monospace">e7fd7c3c…443055</span>，已自动填入下方输入框';
+    }else if(usingBuiltin){
+      tip.style.cssText='margin:12px 0;padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.6;background:rgba(251,146,60,.13);border:1px solid rgba(251,146,60,.4);color:#fdba74';
+      tip.innerHTML='⚠️ 内置 Key 未在当前域名「'+(location.hostname||'本地')+'」启用（防盗用保护），地图已回退网页版。请填入你自己的 Key，或把页面放回授权域名打开。';
+    }else{
+      tip.style.cssText='margin:12px 0;padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.6;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.35);color:#cbd5e1';
+      tip.innerHTML='当前使用你自行填写的 Key（不受域名限制）。清空并保存可恢复内置 Key。';
+    }
+  }
 }
 function hideAmapKey(){document.getElementById('keyMask').classList.remove('show');}
 function amapReset(){amapState=0;amapObj=null;amapSatLayer=null;amapSatOn=false;}
@@ -420,7 +447,7 @@ function clearAmapKey(){
 
 function renderMap(h){
   var s = '<div class="card"><h3><span class="bar"></span>高德地图</h3>';
-  if(amapKey()){
+  if(amapActiveKey()){
     s += '<div class="scene-box">'+
       '<button class="scene-open" style="right:100px" onclick="amapFullscreen()">⛶ 全屏</button>'+
       '<button class="scene-open" onclick="showAmapKey()">⚙</button>'+
@@ -432,12 +459,13 @@ function renderMap(h){
       '</div>'+
       '<div class="scene-tag">高德 SDK 交互地图 · 可拖动缩放</div>';
   } else if(h.mapUrl){
+    var mNotAuth=(amapKey()===AMAP_BUILTIN_KEY&&!amapDomainOk());
     s += '<div class="scene-box">'+
       '<button class="scene-open" style="right:100px" onclick="openScene(\'map\',\''+h.mapUrl+'\')">⛶ 全屏</button>'+
       '<button class="scene-open" onclick="showAmapKey()">⚙</button>'+
       '<div class="map-wrap"><iframe class="map-frame" src="'+h.mapUrl+'&platform=pc" loading="lazy" allowfullscreen></iframe></div></div>'+
       '<div class="map-ctl"><button class="btn" onclick="showAmapKey()">⚙ 配置 / 恢复高德 Key</button></div>'+
-      '<div class="scene-tag">高德街道图 · 网页版</div>';
+      '<div class="scene-tag"'+(mNotAuth?' style="color:#fdba74"':'')+'>'+(mNotAuth?'⚠️ 内置 Key 域名未授权（防盗用保护），已回退网页版':'高德街道图 · 网页版')+'</div>';
   } else if(h.mapImg){
     s += '<img src="'+h.mapImg+'" style="width:100%;border-radius:10px" alt=""></div>';
   } else {
@@ -447,7 +475,7 @@ function renderMap(h){
   return s;
 }
 function amapInitIfNeeded(){
-  if(!amapKey())return;
+  if(!amapActiveKey())return;
   if(!document.getElementById('amapBox'))return;
   amapLoad(function(ok){
     if(ok){try{initAmap(HOUSES[cur]);}catch(e){amapFallbackMobile('SDK 初始化失败：'+e.message);}}
@@ -621,7 +649,7 @@ render();
     <span class="ab-close" onclick="hideAmapKey()">×</span>
     <h3>高德地图 Key 设置</h3>
     <div class="ab-sub">已内置默认 Key（Web端 JS API），打开页面即自动填入，<b>一般无需改动</b>。如需用自己的 Key：在 lbs.amap.com 控制台创建「Web端(JS API)」类型 Key，<b>域名白名单留空</b>（本地打开与 tool.wbc2023.top 通用）。保存后仅存于本机浏览器。</div>
-    <div style="margin:12px 0;padding:8px 10px;border-radius:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#86efac;font-size:12.5px;line-height:1.6">✅ 当前使用内置默认 Key：<span style="font-family:monospace">e7fd7c3c…443055</span>，已自动填入下方输入框</div>
+    <div id="amapKeyTip" style="margin:12px 0;padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.6"></div>
     <div style="margin-top:14px;text-align:left">
       <div style="font-size:13px;margin-bottom:6px">Key（Web端 JS API，32 位）</div>
       <input id="amapKeyInput" placeholder="粘贴 32 位 Key" style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,.6);color:var(--text);font-size:13px">
