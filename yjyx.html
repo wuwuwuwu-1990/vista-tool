@@ -595,7 +595,9 @@ function saveAmapKey(){
   amapReset();hideAmapKey();renderMap(HOUSES[cur]);
 }
 function clearAmapKey(){
-  try{localStorage.removeItem('yjyx_amap_key');localStorage.removeItem('yjyx_amap_sec');}catch(e){}
+  /* 写入空串而非 removeItem：amapKey() 以「键为 null」判定首次打开，
+     removeItem 会让刷新后重新回填内置 Key，导致「清除」失效 */
+  try{localStorage.setItem('yjyx_amap_key','');localStorage.setItem('yjyx_amap_sec','');}catch(e){}
   amapReset();hideAmapKey();renderMap(HOUSES[cur]);
 }
 
