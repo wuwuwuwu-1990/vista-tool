@@ -265,7 +265,7 @@ footer{margin-top:30px;padding:14px 0 6px;border-top:1px solid var(--border);col
     </div>
   </nav>
   <div class="actions">
-    <span class="ver-badge" title="当前版本">v1.3.13</span>
+    <span class="ver-badge" title="当前版本">v1.3.14</span>
     <button class="btn" onclick="window.print()">打印 / 存 PDF</button>
     <button class="btn" onclick="showAbout()">关于</button>
   </div>
@@ -466,13 +466,62 @@ function renderTable(){
   document.getElementById('houseCount').textContent='共 '+HOUSES.length+' 套';
 }
 
+/* ===== 金福云航拍自动登录（v1.3.14）=====
+   原理：隐藏 iframe POST 账号密码到金福云登录接口，会话 cookie（SameSite=None）落地后
+   再加载航拍 iframe，实现免手动登录。
+   注意：iOS Safari / 微信 iPhone 内核默认拦截第三方 cookie，此时内嵌 iframe 无法带上登录
+   cookie —— 请点「↗ 新窗口打开」在顶级窗口登录一次即可（顶级窗口 cookie 100% 生效）。 */
+var JFY_ACCOUNT='18523591621', JFY_PASSWORD='wxf19900064wxf';
+var jfyLoginBusy=false, jfyLoginDone=false;
+function jfyAutoLogin(url){
+  if(jfyLoginBusy) return;
+  jfyLoginBusy=true;
+  var wrap=document.getElementById('hangWrap');
+  if(jfyLoginDone){
+    if(wrap) wrap.innerHTML='<iframe class="hang-frame" id="hangFrame" src="'+url+'" loading="lazy" allowfullscreen></iframe>';
+    jfyLoginBusy=false;
+    return;
+  }
+  // 建"可见但极小"的登录 iframe（display:none 的 iframe 提交 cookie 可能被浏览器丢弃）
+  var f=document.createElement('iframe');
+  f.name='jfyLoginFrame'; f.src='about:blank';
+  f.style.cssText='position:fixed;left:-9999px;top:-9999px;width:2px;height:2px;border:none';
+  document.body.appendChild(f);
+  var form=document.createElement('form');
+  form.method='POST'; form.target='jfyLoginFrame';
+  form.action='https://vr.jinfuyun.cn/passport/login?act=do_login';
+  var inp1=document.createElement('input'); inp1.name='phone'; inp1.value=JFY_ACCOUNT;
+  var inp2=document.createElement('input'); inp2.name='password'; inp2.value=JFY_PASSWORD;
+  form.appendChild(inp1); form.appendChild(inp2);
+  document.body.appendChild(form);
+  var timer=null;
+  var done=function(){
+    if(timer) clearTimeout(timer);
+    form.remove(); f.remove();
+    if(wrap) wrap.innerHTML='<iframe class="hang-frame" id="hangFrame" src="'+url+'" loading="lazy" allowfullscreen></iframe>';
+    jfyLoginDone=true; jfyLoginBusy=false;
+  };
+  f.onload=function(){ setTimeout(done, 1500); };  // 等 cookie 落地
+  timer=setTimeout(done, 6000);                    // 兜底
+  form.submit();
+}
+/* 手动重试登录（cookie 过期 24h 后或首次自动登录被浏览器拦截时用） */
+function jfyReLogin(){
+  if(jfyLoginBusy) return;
+  jfyLoginDone=false;
+  var wrap=document.getElementById('hangWrap');
+  if(wrap) wrap.innerHTML='<div style="color:var(--muted);padding:70px 14px;font-size:13px;text-align:center">⏳ 正在重新登录金福云…</div>';
+  jfyAutoLogin(HOUSES[cur].hangUrl);
+}
+
 function renderMap(h){
   var hc=document.getElementById('hangCard');
   if(h.hangUrl){
-    hc.innerHTML='<div class="hang-wrap"><iframe class="hang-frame" id="hangFrame" src="'+h.hangUrl+'" loading="lazy" allowfullscreen></iframe></div>'+
+    hc.innerHTML='<div class="hang-wrap" id="hangWrap"><div style="color:var(--muted);padding:70px 14px;font-size:13px;text-align:center">⏳ 航拍加载中（自动登录金福云）…</div></div>'+
       (h.hangImg?'<div class="hang-static"><img src="'+h.hangImg+'" alt="'+h.name+' 航拍静态图"></div>':'')+
-      '<div class="hang-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动旋转缩放 · 静态图为打印备份）</div>'+
-      '<div class="hang-zoom">'+'<button class="btn" onclick="zoomHang(1.15)">放大</button> <button class="btn" onclick="zoomHang(0.87)">缩小</button> <button class="btn" onclick="zoomHang(1)">还原</button>'+'</div>';
+      '<div class="hang-cap">'+h.name+' 航拍实景（金福云 VR · 可拖动旋转缩放 · 若弹出登录框请点「↗ 新窗口」登录一次）</div>'+
+      '<div class="hang-zoom">'+'<button class="btn" onclick="zoomHang(1.15)">放大</button> <button class="btn" onclick="zoomHang(0.87)">缩小</button> <button class="btn" onclick="zoomHang(1)">还原</button> <button class="btn" onclick="jfyReLogin()">↗ 重新登录</button> <button class="btn" onclick="window.open(HOUSES[cur].hangUrl,\'_blank\')">↗ 新窗口打开</button>'+'</div>';
+    jfyAutoLogin(h.hangUrl);
   }else if(h.hangImg){
     hc.innerHTML='<img src="'+h.hangImg+'" alt="'+h.name+' 航拍实景">'+
       '<div class="hang-cap">'+h.name+' 航拍实景</div>';
@@ -540,7 +589,7 @@ renderAll();
 <div class="about-mask" id="aboutMask" onclick="if(event.target===this)hideAbout()">
   <div class="about-box">
     <span class="ab-close" onclick="hideAbout()">×</span>
-    <h3>渝居优选 <span class="ab-ver">v1.3.13</span></h3>
+    <h3>渝居优选 <span class="ab-ver">v1.3.14</span></h3>
     <div class="ab-sub">重庆主城智能选房 · 十大板块分析 · 2026-08-16</div>
     <div class="ab-map">
       <div class="map-title">📐 界面布局注解图</div>
@@ -581,7 +630,7 @@ renderAll();
         <span class="map-lg">⑦ 高德街道图（iframe）</span><span class="map-lg">⑧ 十大板块分析卡片</span>
       </div>
     </div>
-    <div class="lg">更新日志</div><div class="lg-item"><span class="lg-ver">v1.3.13</span><b>新增第 3 套房源「保利云禧一期」</b>：巴南龙洲湾 · 碧桂园保利联合开发（绿化35%、人车分流）· 3号线鱼胡路站约650m · 划片龙洲湾小学 · 综合评分 78；航拍为用户提供金福云作品</div><div class="lg-item"><span class="lg-ver">v1.3.12</span><b>手机版顶栏优化</b>：移除「关于」按钮左侧旧版本号标签；版本号同步 v1.3.12</div><div class="lg-item"><span class="lg-ver">v1.3.11</span><b>手机版关于弹窗优化</b>：移除更新日志左侧版本号标签，界面更简洁</div><div class="lg-item"><span class="lg-ver">v1.3.10</span><b>首地江山赋·凌山樾改名与航拍更新</b>：名称去掉「北区」改为「首地江山赋·凌山樾」；航拍换为用户提供的新作品（金福云「首地江山赋凌山樾」），封面同步更新</div><div class="lg-item"><span class="lg-ver">v1.3.9</span><b>首地江山赋·凌山樾新增航拍实景</b>：金福云 VR 作品（首地江山赋·悦江城），封面图高清内嵌，点击可跳转全景；桌面版/手机版同步</div><div class="lg-item"><span class="lg-ver">v1.3.8</span><b>新增第 2 套房源「首地江山赋·凌山樾」</b>：两江新区悦来 · 国企低密洋房（容积率1.01）· 划片首地人和街小学 · 悦来站约400m · 综合评分 83；价格按二手挂牌修正为约1.12-1.17万/㎡</div>
+    <div class="lg">更新日志</div><div class="lg-item"><span class="lg-ver">v1.3.14</span><b>金福云航拍自动登录全覆盖</b>：桌面版补齐自动登录（原先只有手机版有）；新增「↗ 重新登录」按钮（cookie 24h 过期后一键重登）；新增「↗ 新窗口打开」按钮（iOS/微信等拦截第三方 cookie 时，新窗口登录一次即恢复）</div><div class="lg-item"><span class="lg-ver">v1.3.13</span><b>新增第 3 套房源「保利云禧一期」</b>：巴南龙洲湾 · 碧桂园保利联合开发（绿化35%、人车分流）· 3号线鱼胡路站约650m · 划片龙洲湾小学 · 综合评分 78；航拍为用户提供金福云作品</div><div class="lg-item"><span class="lg-ver">v1.3.12</span><b>手机版顶栏优化</b>：移除「关于」按钮左侧旧版本号标签；版本号同步 v1.3.12</div><div class="lg-item"><span class="lg-ver">v1.3.11</span><b>手机版关于弹窗优化</b>：移除更新日志左侧版本号标签，界面更简洁</div><div class="lg-item"><span class="lg-ver">v1.3.10</span><b>首地江山赋·凌山樾改名与航拍更新</b>：名称去掉「北区」改为「首地江山赋·凌山樾」；航拍换为用户提供的新作品（金福云「首地江山赋凌山樾」），封面同步更新</div><div class="lg-item"><span class="lg-ver">v1.3.9</span><b>首地江山赋·凌山樾新增航拍实景</b>：金福云 VR 作品（首地江山赋·悦江城），封面图高清内嵌，点击可跳转全景；桌面版/手机版同步</div><div class="lg-item"><span class="lg-ver">v1.3.8</span><b>新增第 2 套房源「首地江山赋·凌山樾」</b>：两江新区悦来 · 国企低密洋房（容积率1.01）· 划片首地人和街小学 · 悦来站约400m · 综合评分 83；价格按二手挂牌修正为约1.12-1.17万/㎡</div>
     <div class="lg-item"><span class="lg-ver">v1.3.7</span>手机端兼容性全面修复：侧边导航变横向滚动条、main 自然滚动、航拍/地图高度自适应、hero/KPI 紧凑布局、顶栏精简</div>
     <div class="lg-item"><span class="lg-ver">v1.3.6</span>「关于」弹窗新增<b>界面布局注解图</b>：标注顶栏 / 左侧导航 / hero 标题+chips / KPI 同排 / 评分条 / 航拍实景 / 高德街道图 / 十大板块卡片的位置</div>
     <div class="lg-item"><span class="lg-ver">v1.3.1</span><b>界面全面改版为 Vercel 现代渐变风</b>：深蓝渐变背景 + 半透明玻璃卡片 + 青/紫/粉霓虹点缀；顶栏新增版本号与「关于」入口</div>
