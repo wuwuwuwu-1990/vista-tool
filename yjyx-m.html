@@ -28,7 +28,7 @@ body{
 .appbar .about-btn{font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px}
 
 /* 主体容器（底部留 tab 高） */
-.page{position:fixed;top:52px;left:0;right:0;bottom:56px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 20px}
+.page{position:fixed;top:52px;left:0;right:0;bottom:56px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 14px}
 
 /* 房源切换卡 */
 .house-switch{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
@@ -45,13 +45,13 @@ body{
 .card h3 .bar{width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,var(--primary),var(--primary2));box-shadow:0 0 10px rgba(34,211,238,.7)}
 
 /* 总览 hero */
-.hero-top{margin-bottom:10px}
+.hero-top{margin-bottom:6px}
 .h-name{font-size:22px;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .h-grade{font-size:12px;font-weight:700;color:var(--text);background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);border-radius:8px;padding:3px 8px;white-space:nowrap}
 .h-sub{font-size:12px;color:var(--muted);margin-top:4px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .chip{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--primary2);white-space:nowrap}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
 .kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center}
 .kpi .k-label{font-size:9px;color:var(--muted)}
 .kpi .k-val{font-size:12px;font-weight:700;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -65,11 +65,11 @@ body{
 
 /* 实景位置 */
 .scene-box{position:relative;background:#0b1020;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.hang-wrap{height:62vh;min-height:320px}
-.hang-frame{width:100%;height:62vh;min-height:320px;border:none;display:block}
-.map-wrap{height:62vh;min-height:320px}
-.map-frame{width:100%;height:62vh;min-height:320px;border:none;background:#e8ecf1;display:block}
-.amap-box{width:100%;height:100%;min-height:320px;background:#e8ecf1}
+.hang-wrap{height:50vh;min-height:260px}
+.hang-frame{width:100%;height:50vh;min-height:260px;border:none;display:block}
+.map-wrap{height:50vh;min-height:260px}
+.map-frame{width:100%;height:50vh;min-height:260px;border:none;background:#e8ecf1;display:block}
+.amap-box{width:100%;height:100%;min-height:260px;background:#e8ecf1}
 .btn{background:rgba(13,20,38,.85);border:1px solid var(--primary);color:var(--primary);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
 .map-ctl{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .map-wrap.map-full{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;z-index:9999;border-radius:0!important}
@@ -87,7 +87,7 @@ body{
 .hang-static{display:none}
 
 /* 十大板块 */
-.board{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:10px}
+.board{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px}
 .board-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .b-no{flex:0 0 24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#06121f;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .b-title{font-size:14px;font-weight:700;flex:1}
@@ -141,13 +141,27 @@ body{
 .about-box .lg{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:700}
 .about-box .lg-item{font-size:12px;color:var(--text);padding:8px 0;border-bottom:1px solid var(--border);line-height:1.6}
 .about-box .lg-item:last-child{border-bottom:none}
+/* 选房小结卡（v1.3.20-m 填总览底部留白） */
+.sum-card{border:1px solid rgba(34,211,238,.35)!important;background:linear-gradient(160deg,rgba(34,211,238,.08),rgba(167,139,250,.08))!important}
+.sum-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sum-score{font:800 30px/1 var(--primary);text-shadow:0 0 14px rgba(34,211,238,.5)}
+.sum-meta{flex:1;min-width:0}
+.sum-name{font-size:13px;font-weight:700}
+.sum-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.sum-g{padding:7px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-size:11px}
+.sum-g span{display:block;color:var(--muted);font-size:10px;margin-bottom:2px}
+.sum-g.good b{color:var(--green);font-size:13px}
+.sum-g.warn b{color:var(--amber);font-size:13px}
+.sum-tip{font-size:12px;line-height:1.7;padding:8px 10px;background:var(--surface2);border-radius:7px;border-left:3px solid var(--primary);margin-bottom:8px}
+.sum-src{font-size:10px;color:var(--muted);text-align:right}
 .about-box .lg-item b{color:var(--primary)}
 </style>
 </head>
 <body>
 
 <div class="appbar">
-  <div class="logo">渝居优选<small>手机版 · v1.3.19-m</small></div>
+  <div class="logo">渝居优选<small>手机版 · v1.3.20-m</small></div>
   <div class="right">
     <button class="about-btn" onclick="showAbout()">关于</button>
   </div>
@@ -169,7 +183,7 @@ body{
     <span class="close" onclick="hideAbout()">×</span>
     <h3>渝居优选 <span style="color:var(--primary)">手机版</span></h3>
     <div class="sub">重庆主城智能选房 · 移动端专属界面 · 2026-09-01</div>
-    <div class="lg-item"><b>v1.3.19-m</b>：<b style="color:#fbbf24">修复</b> Key 弹窗以流式 div 显示在 page 顶部、严重遮挡房源切换卡与 hero 区的问题（CSS 缺 .about-mask 样式所致，已补齐，弹窗恢复 fixed 居中默认隐藏）；底部 tab 文字 9→10px、icon 20→21px；房源切换卡分数 16→17px、名称 13→14px；总览小区名 20→22px</div><div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
+    <div class="lg-item"><b>v1.3.20-m 修复+优化</b>：适配真我GT5 Pro等高刷/高瘦屏——总览页底部新增「选房小结」卡（综合分、优势/短板、综合评价要点、采集时间），消除十大板块评分下方整片深色空白；hero/kpi/board 间距紧凑化；航拍/街景 iframe 高度 62vh→50vh 减少加载中空白</div><div class="lg-item"><b>v1.3.19-m</b>：<b style="color:#fbbf24">修复</b> Key 弹窗以流式 div 显示在 page 顶部、严重遮挡房源切换卡与 hero 区的问题（CSS 缺 .about-mask 样式所致，已补齐，弹窗恢复 fixed 居中默认隐藏）；底部 tab 文字 9→10px、icon 20→21px；房源切换卡分数 16→17px、名称 13→14px；总览小区名 20→22px</div><div class="lg-item"><b>v1.3.18-m</b>：高德地图定位校正——SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与中心校正到小区真实位置（缓存本机）；geoobj 中点作离线兜底；信息窗口与「回到小区」跟随精确点</div><div class="lg-item"><b>v1.3.17-m</b>：内置 Key 增加域名白名单保护——仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）生效，页面被拷贝到其他站点时自动停用内置 Key 并回退网页版地图，防止 Key 被盗用；自填 Key 不受限制；「⚙」弹窗按域名状态显示绿/橙/灰提示</div>
     <div class="lg-item"><b>v1.3.16-m</b>：内置高德地图默认 Key 与安全密钥，打开页面自动填入、开箱即用；「⚙」弹窗可随时替换或清除</div>
     <div class="lg-item"><b>v1.3.15-m</b>：接入高德地图官方 JS API 2.0 SDK：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏）；新增「⚙」Key 设置弹窗；未配置 Key 或 SDK 失败自动回退网页版</div>
     <div class="lg-item"><b>v1.3.14-m</b>：金福云航拍自动登录加固：航拍卡片与全屏层新增「↻ 重登」「↗ 新窗口」按钮（iPhone/微信拦截第三方 cookie 时，新窗口登录一次即恢复；cookie 24h 过期后一键重登）</div>
@@ -621,13 +635,34 @@ function renderComment(h){
     '综合评分 <b style="font-size:22px;color:var(--primary)">'+last.s+'</b> / 100 · '+GRADE(last.s)+'</div></div>';
 }
 
+/* 选房小结（v1.3.20-m 填总览底部留白） */
+function renderSummary(h){
+  var top=Math.max.apply(null,h.boards.map(function(b){return b.s;}));
+  var bot=Math.min.apply(null,h.boards.map(function(b){return b.s;}));
+  var topB=h.boards.find(function(b){return b.s===top;});
+  var botB=h.boards.find(function(b){return b.s===bot;});
+  var last=h.boards[h.boards.length-1];
+  return '<div class="card sum-card">'+
+    '<h3><span class="bar"></span>选房小结</h3>'+
+    '<div class="sum-row"><div class="sum-score">'+h.score+'</div>'+
+      '<div class="sum-meta"><div class="sum-name">'+h.name+' · '+GRADE(h.score)+'</div>'+
+      '<div class="sum-sub">十维综合评分 · '+h.price+' · '+h.layout+' '+h.size+'</div></div></div>'+
+    '<div class="sum-grid">'+
+      '<div class="sum-g good"><span>优势</span><b>'+topB.t+' '+topB.s+'</b></div>'+
+      '<div class="sum-g warn"><span>短板</span><b>'+botB.t+' '+botB.s+'</b></div>'+
+    '</div>'+
+    '<div class="sum-tip">'+last.items.slice(0,2).map(function(it){return '<div>· '+it[0]+'：'+it[1]+'</div>';}).join('')+'</div>'+
+    '<div class="sum-src">采集于 2026-09 · 数据来源：实地踩盘 + 网络公开</div>'+
+  '</div>';
+}
+
 function render(){
   var h = HOUSES[cur];
   var page = document.getElementById('page');
   page.scrollTop = 0;
   var body = renderHouseSwitch();
   if(tab===0){
-    body += renderHero(h) + renderKpis(h) + renderScores(h);
+    body += renderHero(h) + renderKpis(h) + renderScores(h) + renderSummary(h);
   } else if(tab===1){
     body += renderHouseList();
   } else if(tab===2){
