@@ -209,6 +209,29 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   .m-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
   .stats .stat{min-width:calc(50% - 5px)}
 }
+/* ===== v1.0.16：子页面全面模仿「智印PDF工坊」绿色风格 =====
+   覆盖对象：弹窗（表单/设置/确认/详情）、弹窗按钮、详情行与标签。
+   主列表/搜索等页面保持原有浅色风格不动。 */
+.mask{background:rgba(15,40,20,.45)}
+.modal{background:linear-gradient(180deg,#ffffff 0%,#fbfefb 55%,#f3faf4 100%);border:1px solid #ddeadd;box-shadow:0 1px 2px rgba(20,60,30,.05),0 12px 30px -10px rgba(20,60,30,.22),0 30px 60px -24px rgba(20,60,30,.22),inset 0 1px 0 rgba(255,255,255,.95)}
+.m-head{border-bottom:1px solid #d9e8db}
+.m-head h2{color:#1f2b1f}
+.m-close{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 10px -3px rgba(22,163,74,.5)}
+.m-foot{border-top:1px solid #d9e8db}
+.btn-ok{background:linear-gradient(180deg,#23b95e,#128a3e 60%,#0e7a37);border:none;color:#fff;font-weight:700;box-shadow:0 4px 0 #0b5e2b,0 6px 14px rgba(22,163,74,.35);transition:all .12s}
+.btn-ok:active{transform:translateY(3px);box-shadow:0 1px 0 #0b5e2b,0 3px 8px rgba(22,163,74,.3)}
+.btn-ghost{border:1px solid #d5e8d8;color:#374a37;background:linear-gradient(180deg,#ffffff,#f0f7f1)}
+.btn-ghost:hover{border-color:#16a34a;color:#15803d}
+.btn-danger{border:1px solid #fecaca;color:#dc2626}
+.dtb .drow{border-bottom:1px dashed #e3efe4}
+.dtb .drow:nth-child(even){background:#f8fcf8}
+.dtb .drow .k{color:#647864}
+.dtb .dchip{background:#f0faf3;color:#15803d}
+.dtb .dup{border-bottom:1px dashed #e3efe4}
+.dtb .dup .col.l{border-right:1px dashed #e3efe4}
+.dtb .dup .col b{color:#15803d}
+.modal input[type=text],.modal input[type=password],.modal input[type=number],.modal input[type=date],.modal select,.modal textarea{border-color:#d5e8d8}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.12)}
 </style>
 </head>
 <body>
@@ -261,7 +284,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
   </div>
 </main>
 
-<footer>房览速记 v1.0.15 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.16 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -446,7 +469,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.15 =================
+/* ================= 房览速记 v1.0.16 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
@@ -455,7 +478,7 @@ footer{max-width:1080px;margin:24px auto 0;padding:0 16px;text-align:center;font
          拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
          卡片去掉优✓缺✗标记（更紧凑）、手机端隐藏标签筛选栏
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.15' };
+var APP = { name:'房览速记', version:'1.0.16' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
