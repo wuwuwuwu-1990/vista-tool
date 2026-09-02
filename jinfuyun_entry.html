@@ -3,107 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>金福云 VR 自动登录入口</title>
+<title>金福云 VR 直达</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b1020'/%3E%3Cpath d='M50 20 L76 38 V74 L50 92 L24 74 V38 Z' fill='none' stroke='%2322d3ee' stroke-width='6'/%3E%3Ccircle cx='50' cy='55' r='10' fill='%2322d3ee'/%3E%3C/svg%3E">
-<!-- 提前建链：省去首次 DNS+TLS 握手，登录请求与目标页加载都复用该连接 -->
+<!-- 提前建链：省去首次 DNS+TLS 握手，登录与目标页复用 -->
 <link rel="dns-prefetch" href="https://vr.jinfuyun.cn">
 <link rel="preconnect" href="https://vr.jinfuyun.cn" crossorigin>
 <style>
-  :root{
-    --bg:#0b1020;
-    --card:#121a33;
-    --cyan:#22d3ee;
-    --cyan2:#a78bfa;
-    --text:#eaf2ff;
-    --sub:#9fb3d8;
-    --ok:#34d399;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    min-height:100vh;
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#0b1020;overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  /* 全屏 iframe：先试直接打开目标页 */
+  #jfyFrame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0b1020;visibility:hidden}
+  #jfyFrame.ready{visibility:visible}
+  /* 进入遮罩（hidden 期间完成登录，用户无感） */
+  #mask{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(1200px 700px at 20% -10%,#1e2a4f 0%,transparent 60%),
-               radial-gradient(1000px 600px at 110% 110%,#2a1e4f 0%,transparent 55%),
-               var(--bg);
-    color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-    display:flex;align-items:center;justify-content:center;padding:24px;
-  }
-  .card{
-    width:100%;max-width:460px;
-    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
-    border:1px solid rgba(255,255,255,.09);
-    border-radius:22px;
-    padding:40px 34px 34px;
-    box-shadow:0 24px 60px rgba(0,0,0,.45);
-    text-align:center;
-    position:relative;overflow:hidden;
-  }
-  .card::before{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(120deg,rgba(34,211,238,.12),transparent 40%,transparent 60%,rgba(167,139,250,.12));
-  }
-  .logo{
-    width:74px;height:74px;margin:0 auto 18px;border-radius:20px;
-    background:linear-gradient(135deg,var(--cyan),var(--cyan2));
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 10px 30px rgba(34,211,238,.35);
-  }
-  .logo svg{width:40px;height:40px}
-  h1{font-size:21px;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
-  .sub{font-size:13.5px;color:var(--sub);margin-bottom:26px;line-height:1.7}
-  .status{
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.22);
-    border-radius:14px;padding:14px 18px;margin-bottom:22px;font-size:15px;font-weight:600;
-  }
-  .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);flex:none;
-    animation:pulse 1.2s ease-in-out infinite}
-  .dot.ok{background:var(--ok);animation:none}
+               radial-gradient(1000px 600px at 110% 110%,#2a1e4f 0%,transparent 55%),#0b1020;
+    color:#eaf2ff;transition:opacity .45s ease}
+  #mask.hide{opacity:0;pointer-events:none}
+  .box{text-align:center}
+  .logo{width:64px;height:64px;margin:0 auto 16px;border-radius:18px;
+    background:linear-gradient(135deg,#22d3ee,#a78bfa);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 30px rgba(34,211,238,.35)}
+  .logo svg{width:34px;height:34px}
+  .box h1{font-size:18px;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+  .box .sub{font-size:12.5px;color:#9fb3d8;line-height:1.7}
+  .box .acct{font-size:11.5px;color:#6d7fa3;margin-top:10px}
+  .box .acct b{color:#cfe3ff}
+  .box .new{display:inline-block;margin-top:14px;font-size:12px;color:#22d3ee;text-decoration:none;border:1px solid rgba(34,211,238,.3);padding:6px 12px;border-radius:10px}
+  .box .new:hover{background:rgba(34,211,238,.1)}
+  .dot{width:10px;height:10px;border-radius:50%;background:#22d3ee;display:inline-block;margin-right:8px;
+    animation:pulse 1.2s ease-in-out infinite;vertical-align:middle}
   @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
-  .acct{font-size:12px;color:var(--sub);margin:-8px 0 20px}
-  .acct b{color:#cfe3ff;font-weight:600}
-  .btn{
-    display:block;width:100%;border:none;cursor:pointer;border-radius:14px;
-    font-size:15.5px;font-weight:700;padding:15px 18px;letter-spacing:.5px;
-    transition:transform .12s ease,box-shadow .12s ease,filter .12s ease;
-    color:#04121a;
-    background:linear-gradient(180deg,#4de0f5,#0ea5c9);
-    box-shadow:0 6px 0 #06708a,0 14px 30px rgba(34,211,238,.25);
-  }
-  .btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
-  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #06708a}
-  .btn.ghost{
-    margin-top:14px;color:#cfe3ff;background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.14);box-shadow:none;
-  }
-  .btn.ghost:hover{background:rgba(255,255,255,.09)}
-  .hint{font-size:12px;color:#6d7fa3;margin-top:22px;line-height:1.7}
-  .hint a{color:var(--cyan);text-decoration:none}
-  .hint a:hover{text-decoration:underline}
+  /* 浮动自动登录按钮（网络失败兜底） */
+  #fab{position:fixed;right:14px;bottom:14px;z-index:30;display:none;border:none;cursor:pointer;
+    border-radius:14px;font-size:13.5px;font-weight:700;padding:11px 16px;color:#04121a;
+    background:linear-gradient(180deg,#4de0f5,#0ea5c9);box-shadow:0 6px 18px rgba(34,211,238,.35)}
+  #fab:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">
-      <svg viewBox="0 0 100 100" fill="none">
-        <path d="M50 14 L80 34 V72 L50 92 L20 72 V34 Z" stroke="#04121a" stroke-width="7" stroke-linejoin="round"/>
-        <circle cx="50" cy="54" r="11" fill="#04121a"/>
-      </svg>
-    </div>
-    <h1>金福云 VR 自动登录</h1>
-    <div class="sub">正在使用内置账号自动登录，<br>成功后自动打开目标页面</div>
-    <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">正在自动登录…</span></div>
-    <div class="acct">登录账号：<b id="acctTxt"></b></div>
-    <button class="btn" id="btnRelogin">🔑 重新自动登录（新窗口）</button>
-    <button class="btn ghost" id="btnOpen" onclick="openDirect()">↗ 直接打开目标页（已登录可秒开）</button>
-    <div class="hint">
-      若页面未自动跳转，说明浏览器拦截了第三方 Cookie。<br>
-      点击上方「重新自动登录」可 100% 成功；若你常在金福云登录，点「直接打开目标页」更快。
+  <iframe id="jfyFrame" src="about:blank" title="金福云" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+  <div id="mask">
+    <div class="box">
+      <div class="logo">
+        <svg viewBox="0 0 100 100" fill="none">
+          <path d="M50 14 L80 34 V72 L50 92 L20 72 V34 Z" stroke="#04121a" stroke-width="7" stroke-linejoin="round"/>
+          <circle cx="50" cy="54" r="11" fill="#04121a"/>
+        </svg>
+      </div>
+      <h1><span class="dot"></span>正在进入金福云…</h1>
+      <div class="sub">已登录将直接打开主页<br>未登录将自动登录后进入</div>
+      <div class="acct">登录账号：<b id="acctTxt"></b></div>
+      <a class="new" id="btnNew" href="#" target="_blank" rel="noopener">↗ 在新窗口打开</a>
     </div>
   </div>
 
+  <button id="fab">🔑 自动登录</button>
+
 <script>
-  // ===== 配置（可替换） =====
+  // ===== 配置 =====
   var JFY_ACCOUNT  = '18523591621';
   var JFY_PASSWORD = 'wxf19900064wxf';
   var LOGIN_URL    = 'https://vr.jinfuyun.cn/passport/login?act=do_login';
@@ -119,33 +79,29 @@
     }catch(e){}
   })();
 
-  // ===== UI =====
-  var statusEl = document.getElementById('status');
-  var statusTxt = document.getElementById('statusTxt');
-  var dotEl = document.getElementById('dot');
-  document.getElementById('acctTxt').textContent =
-    JFY_ACCOUNT.slice(0,3) + '****' + JFY_ACCOUNT.slice(-4);
+  var frame = document.getElementById('jfyFrame');
+  var mask  = document.getElementById('mask');
+  var fab   = document.getElementById('fab');
+  document.getElementById('acctTxt').textContent = JFY_ACCOUNT.slice(0,3) + '****' + JFY_ACCOUNT.slice(-4);
+  document.getElementById('btnNew').href = DEST;
 
-  function setStatus(msg, ok){
-    statusTxt.textContent = msg;
-    if(ok){ dotEl.classList.add('ok'); } else { dotEl.classList.remove('ok'); }
+  var shown = false;
+  function showFrame(){
+    if(shown) return;
+    shown = true;
+    frame.classList.add('ready');
+    mask.classList.add('hide');
+    fab.style.display = 'none';
+    setTimeout(function(){ try{ mask.remove(); }catch(e){} }, 600);
   }
 
-  // 登录完成立即进入目标页（preconnect 已建链，无人为延迟）
-  function goDest(){
-    setStatus('登录成功，正在打开目标页…', true);
-    window.location.replace(DEST);
-  }
+  function reloadFrame(){ frame.src = DEST; }
 
-  var finished = false;
-  function finish(){
-    if(finished) return;
-    finished = true;
-    goDest();
-  }
+  // ===== 先试直接打开（iframe 直接加载目标页）=====
+  frame.src = DEST;
 
-  // ===== 方式一：fetch 静默登录（no-cors + include，跨域也能种 cookie，响应一回来即跳转）=====
-  function fetchLogin(){
+  // ===== 后台静默登录：成功则刷新 iframe 进登录态 =====
+  function doLogin(cb){
     try{
       var fd = new URLSearchParams();
       fd.set('phone', JFY_ACCOUNT);
@@ -156,45 +112,36 @@
         body: fd.toString(),
         credentials: 'include',
         mode: 'no-cors'
-      }).then(finish, finish);
-    }catch(e){
-      iframeLogin(finish); // 老旧浏览器回退
+      }).then(function(){ cb(true); }, function(){ cb(false); });
+    }catch(e){ cb(false); }
+  }
+
+  doLogin(function(ok){
+    if(ok){
+      // cookie 已种：重新加载 iframe（此时即为登录态主页），加载完再显示，避免闪烁
+      frame.onload = function(){ showFrame(); };
+      reloadFrame();
+      // 保险：若 onload 迟迟不来也显示
+      setTimeout(showFrame, 2500);
+    } else {
+      // 登录失败：显示当前 iframe（可能未登录），给出浮动按钮兜底
+      showFrame();
+      fab.style.display = 'block';
     }
-    setTimeout(finish, 6000); // 网络异常兜底
-  }
+  });
 
-  // ===== 方式一B：iframe 兜底（fetch 不可用时）=====
-  function iframeLogin(cb){
-    var f = document.createElement('iframe');
-    f.name = 'jfyLoginFrame';
-    f.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:2px;height:2px;border:0;visibility:hidden';
-    document.body.appendChild(f);
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.target = 'jfyLoginFrame';
-    form.action = LOGIN_URL;
-    var a = document.createElement('input'); a.type='hidden'; a.name = 'phone';    a.value = JFY_ACCOUNT;
-    var b = document.createElement('input'); b.type='hidden'; b.name = 'password'; b.value = JFY_PASSWORD;
-    form.appendChild(a); form.appendChild(b);
-    form.style.display = 'none';
-    document.body.appendChild(form);
-    f.onload = function(){ setTimeout(cb, 300); };
-    form.submit();
-  }
+  // 兜底：6s 内未显示也强制显示
+  setTimeout(showFrame, 6000);
 
-  // ===== 方式二：顶层新窗口 POST（第三方 Cookie 被拦截时 100% 可用）=====
-  document.getElementById('btnRelogin').addEventListener('click', function(){
-    setStatus('正在新窗口自动登录…');
+  // ===== 浮动按钮：新窗口顶层 POST 登录（网络失败兜底）=====
+  fab.addEventListener('click', function(){
+    fab.textContent = '正在登录…';
     var w = window.open('about:blank', 'jfyAutoLoginWin');
-    if(!w){
-      alert('请允许弹出窗口后重试');
-      setStatus('弹窗被拦截，请允许弹出窗口');
-      return;
-    }
+    if(!w){ alert('请允许弹出窗口后重试'); fab.textContent = '🔑 自动登录'; return; }
     var d = w.document;
     d.write('<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
       '<body style="margin:0;background:#0b1020;color:#9fb3d8;font:14px/2 sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center">' +
-      '🔑 正在自动登录金福云…<br><small>登录成功后自动打开目标页</small></body></html>');
+      '🔑 正在自动登录金福云…<br><small>登录成功后自动进入</small></body></html>');
     d.close();
     var form = d.createElement('form');
     form.method = 'POST';
@@ -204,13 +151,13 @@
     form.appendChild(a); form.appendChild(b);
     d.body.appendChild(form);
     form.submit();
-    setTimeout(function(){ try{ w.location.href = DEST; }catch(e){} }, 2000);
+    setTimeout(function(){
+      try{ w.location.href = DEST; }catch(e){}
+      reloadFrame();      // 登录态已种，刷新 iframe 进入主页
+      showFrame();
+      fab.style.display = 'none';
+    }, 2000);
   });
-
-  function openDirect(){ window.open(DEST, '_blank'); }
-
-  // 启动：优先 fetch 静默登录，否则 iframe 兜底
-  if(window.fetch){ fetchLogin(); } else { iframeLogin(finish); }
 </script>
 </body>
 </html>
