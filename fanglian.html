@@ -245,6 +245,16 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 .modal .m-head{padding-top:calc(16px + env(safe-area-inset-top))}
 /* v1.0.23：弹窗背景由「半透明白玻璃」改为「淡灰渐变」——与页面底色融为一体（房源详情/表单/设置/确认全部弹窗统一） */
 .modal{background:linear-gradient(165deg,#f2f4f6 0%,#e9ebef 55%,#dfe2e8 100%);border:1px solid rgba(208,213,222,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px -18px rgba(30,41,59,.3)}
+/* v1.0.24：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
+   让弹窗底色单一通透（半透明淡灰渐变 + 背景模糊），信息靠细分隔线区分 */
+.modal{background:linear-gradient(165deg,rgba(241,243,246,.93) 0%,rgba(232,235,240,.9) 55%,rgba(222,226,232,.87) 100%)}
+.dtb{background:transparent;border:1px solid rgba(206,212,222,.6)}
+.dtb .drow,.dtb .dup{background:transparent}
+.dtb .drow{border-bottom:1px dashed rgba(206,212,222,.6)}
+.dtb .drow:nth-child(even){background:transparent}
+.dtb .dup{border-bottom:1px dashed rgba(206,212,222,.6)}
+.dtb .dup .col.l{border-right:1px dashed rgba(206,212,222,.6)}
+.dtb .dchip{background:rgba(100,112,130,.13);color:#46525f}
 </style>
 </head>
 <body>
@@ -297,7 +307,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
   </div>
 </main>
 
-<footer>房览速记 v1.0.23 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.24 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -482,7 +492,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.23 =================
+/* ================= 房览速记 v1.0.24 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
@@ -491,7 +501,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
          拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
          卡片去掉优✓缺✗标记（更紧凑）、手机端隐藏标签筛选栏
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.23' };
+var APP = { name:'房览速记', version:'1.0.24' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
 var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
