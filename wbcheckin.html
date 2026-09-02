@@ -34,7 +34,7 @@
   /* ===== 顶栏（立体玻璃） ===== */
   .topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid #e2eee4;box-shadow:0 10px 26px -14px rgba(20,60,30,.35)}
   [data-theme="dark"] .topbar{background:rgba(23,36,26,.85);border-bottom-color:#26382b}
-  .topbar-inner{max-width:820px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:12px}
+  .topbar-inner{max-width:1400px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:12px}
   .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#16a34a,#4ade80);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;box-shadow:0 5px 12px rgba(22,163,74,.4),inset 0 -3px 6px rgba(0,60,20,.25),inset 0 2px 3px rgba(255,255,255,.5)}
   .app-name{font-size:18px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
   .app-name .en{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px}
@@ -46,8 +46,12 @@
   .btn-about:hover{border-color:#16a34a;color:#15803d;transform:translateY(-1px);box-shadow:0 5px 10px rgba(20,60,30,.18)}
   [data-theme="dark"] .btn-about:hover{color:#4ade80}
 
-  /* ===== 主区 ===== */
-  main{max-width:820px;margin:0 auto;padding:22px 20px 60px;perspective:1400px}
+  /* ===== 主区（双列铺满） ===== */
+  main{max-width:1400px;margin:0 auto;padding:22px 24px 60px;perspective:1400px}
+  .main-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:start}
+  .right-col .card{position:sticky;top:76px}
+  @media (max-width:1180px){ .main-grid{grid-template-columns:minmax(0,1fr)} .right-col .card{position:static} }
+  .sub{color:var(--muted);font-size:13px;text-align:center;margin-bottom:20px}
 
   /* ===== 浮动立体卡片 ===== */
   .card{
@@ -104,6 +108,7 @@
   [data-theme="dark"] .btn-ghost{color:#4ade80;background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34;box-shadow:0 4px 0 #0d1710,0 6px 12px rgba(0,0,0,.3)}
   .btn-ghost:hover{transform:translateY(-2px);box-shadow:0 6px 0 #bdd8c9,0 10px 16px rgba(20,60,30,.16),inset 0 1px 1px rgba(255,255,255,.9)}
   .btn-ghost:active{transform:translateY(2px);box-shadow:0 2px 0 #c6ddd0,0 3px 8px rgba(20,60,30,.1)}
+  .btn-sm{padding:3px 10px;font-size:12px;border-radius:8px}
 
   /* ===== 状态区 ===== */
   .status-big{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
@@ -134,6 +139,47 @@
   .day.today::after{content:"今天";position:absolute;top:-9px;right:8px;font-size:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:6px;padding:1px 7px;box-shadow:0 2px 5px rgba(22,163,74,.35)}
   .cycle-hint{color:var(--muted);font-size:12px;margin-top:10px}
 
+  /* ===== 日历 ===== */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .cal-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .cal-title .cal-season{font-size:11px;color:#15803d;background:#effaf4;border:1px solid #bfe3c8;border-radius:20px;padding:1px 9px;font-weight:600}
+  [data-theme="dark"] .cal-title .cal-season{color:#4ade80;background:#14241a;border-color:#2c4a34}
+  .cal-nav{display:flex;gap:6px}
+  .cal-nav button{width:30px;height:30px;border-radius:9px;border:1px solid #d5e8d8;background:linear-gradient(180deg,#fff,#f0f7f1);color:#15803d;font-size:15px;font-weight:700;line-height:1;box-shadow:0 3px 0 #c6ddd0,0 4px 8px rgba(20,60,30,.1),inset 0 1px 1px rgba(255,255,255,.9);transition:all .12s}
+  [data-theme="dark"] .cal-nav button{background:linear-gradient(180deg,#1c2c20,#16241a);border-color:#2c4a34;color:#4ade80;box-shadow:0 3px 0 #0d1710}
+  .cal-nav button:hover{transform:translateY(-1px)}
+  .cal-nav button:active{transform:translateY(2px);box-shadow:0 1px 0 #c6ddd0}
+  .cal-nav button:disabled{opacity:.35;cursor:not-allowed;transform:none}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .cal-dow{text-align:center;font-size:11.5px;font-weight:700;color:var(--muted);padding:4px 0}
+  .cal-dow.we{color:#d9851a}
+  .cal-cell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--text);border:1px solid transparent;background:linear-gradient(180deg,#fbfefb,#f2f9f3);box-shadow:inset 0 1px 3px rgba(20,60,30,.05);position:relative;transition:all .15s}
+  [data-theme="dark"] .cal-cell{background:linear-gradient(180deg,#182519,#142016)}
+  .cal-cell.out{color:var(--muted);opacity:.38;background:transparent;box-shadow:none;border-color:transparent}
+  .cal-cell.future{opacity:.55}
+  .cal-cell .ck{font-size:9px;margin-top:1px;line-height:1;opacity:0;transition:opacity .15s}
+  .cal-cell.done{background:linear-gradient(180deg,#e8f8ed,#d2efd9);border-color:#6cc487;box-shadow:inset 0 1px 3px rgba(20,60,30,.06),0 0 0 1.5px rgba(22,163,74,.18)}
+  [data-theme="dark"] .cal-cell.done{background:linear-gradient(180deg,#143c22,#0f331c);border-color:#2e7a45}
+  .cal-cell.done .ck{opacity:1;color:#16a34a}
+  [data-theme="dark"] .cal-cell.done .ck{color:#4ade80}
+  .cal-cell.today{border-color:#16a34a;box-shadow:0 0 0 2px rgba(22,163,74,.35);color:#0e7a37;font-weight:800}
+  [data-theme="dark"] .cal-cell.today{color:#6ee7a0;box-shadow:0 0 0 2px rgba(74,222,128,.4)}
+  .cal-cell.today.done{background:linear-gradient(180deg,#34d97a,#1d9e56);color:#fff}
+  [data-theme="dark"] .cal-cell.today.done{background:linear-gradient(180deg,#1d9e56,#157a43)}
+  .cal-cell.today.done .ck{color:#fff;opacity:.95}
+  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--muted)}
+  .cal-legend span{display:flex;align-items:center;gap:5px}
+  .cal-legend .sw{width:13px;height:13px;border-radius:4px;border:1px solid}
+  .sw.done{background:linear-gradient(180deg,#d2efd9,#b5e3c0);border-color:#6cc487}
+  .sw.today{background:linear-gradient(180deg,#34d97a,#1d9e56);border-color:#16a34a}
+  .sw.plain{background:linear-gradient(180deg,#fbfefb,#f2f9f3);border-color:#d5e8d8}
+  .cal-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .cal-stat{flex:1;min-width:120px;background:linear-gradient(180deg,#f6fcf7,#eaf7ed);border:1px solid #c9e8d0;border-radius:12px;padding:10px 12px;text-align:center}
+  [data-theme="dark"] .cal-stat{background:linear-gradient(180deg,#15251a,#112016);border-color:#2c4a34}
+  .cal-stat b{display:block;font-size:20px;color:var(--primary-2);line-height:1.2}
+  .cal-stat span{font-size:11.5px;color:var(--muted)}
+  .cal-hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7}
+
   /* ===== 引导/说明 ===== */
   .guide-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed #dceadf;align-items:flex-start}
   [data-theme="dark"] .guide-item{border-bottom-color:#22301f}
@@ -162,93 +208,115 @@
     <div class="topbar-inner">
       <div class="logo">✦</div>
       <div class="app-name">WorkBuddy每日领取助手 <span class="en">DAILY CHECK-IN</span></div>
-      <div class="ver-badge">v1.1</div>
+      <div class="ver-badge">v1.2</div>
       <div class="spacer"></div>
       <button class="btn-about" id="themeBtn" title="切换主题">🌙 深色</button>
     </div>
   </header>
 
   <main>
-    <div class="sub" style="color:var(--muted);font-size:13px;text-align:center;margin-bottom:20px">云端每天 09:10 自动签到 · 本页只读查看状态 · 7 天周期 1600 分</div>
+    <div class="sub">云端每天自动签到 · 只读查看状态与签到日历 · 页面铺满双列</div>
+    <div class="main-grid">
 
-    <!-- 今日状态（只读） -->
-    <section class="card">
-      <div class="card-title"><span class="step">1</span>今日状态（自动刷新）</div>
-      <div class="status-big">
-        <div class="status-icon load" id="statusIcon">⏳</div>
-        <div class="status-txt">
-          <h3 id="statusTitle">正在读取云端状态 ...</h3>
-          <p id="statusDesc">数据来自云端自动签到的最新记录</p>
-        </div>
-      </div>
-      <div class="chips" id="chips">
-        <span class="chip">周期奖励：<b>第 1-6 天 100 分/天</b></span>
-        <span class="chip">第 7 天：<b>1000 分</b></span>
-        <span class="chip">单周期合计：<b>1600 分</b></span>
-      </div>
-      <div class="row">
-        <button class="btn btn-primary" id="btnRefresh">🔄 刷新状态</button>
-      </div>
-      <div class="note" id="statusNote">数据由 GitHub Actions 每天 09:10 自动签到后回写，首次部署后下一次签到生效；也可手动触发一次更新（见下方操作引导）。</div>
-    </section>
+      <!-- ===== 左列：状态 + 引导 ===== -->
+      <div class="left-col">
 
-    <!-- 操作引导 -->
-    <section class="card">
-      <div class="card-title"><span class="step">2</span>操作引导</div>
-      <div class="guide-item">
-        <div class="guide-num">A</div>
-        <div class="guide-txt">
-          <b>云端自动签到（推荐，已开启）</b>
-          <p>GitHub Actions 每天 09:10（北京时间）自动执行签到，结果推送到微信。无需任何操作。
-             <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/actions" target="_blank" rel="noopener">查看云端运行记录 →</a></p>
-        </div>
-      </div>
-      <div class="guide-item">
-        <div class="guide-num">B</div>
-        <div class="guide-txt">
-          <b>手动触发一次云端签到</b>
-          <p>打开 <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/actions" target="_blank" rel="noopener">Actions 页面</a> → 左侧点「WorkBuddy 每日积分签到」→ 右侧 Run workflow → 保持 main → 绿色按钮。约 30 秒完成，本页状态随即更新。</p>
-        </div>
-      </div>
-      <div class="guide-item">
-        <div class="guide-num">C</div>
-        <div class="guide-txt">
-          <b>本机命令行查询 / 签到</b>
-          <p>在电脑上打开「命令提示符」，粘贴以下命令回车（本机无跨域限制，可实时查询）：</p>
-          <div class="cmd-box">C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe "C:\Users\Administrator\WorkBuddy\2026-08-31-00-19-05\workbuddy_checkin\workbuddy_checkin.py" --dry-run</div>
-          <div class="row" style="margin-top:8px">
-            <button class="btn btn-ghost" id="btnCopyCmd">📋 复制查询命令</button>
+        <!-- 今日状态（只读） -->
+        <section class="card">
+          <div class="card-title"><span class="step">1</span>今日状态（自动刷新）</div>
+          <div class="status-big">
+            <div class="status-icon load" id="statusIcon">⏳</div>
+            <div class="status-txt">
+              <h3 id="statusTitle">正在读取云端状态 ...</h3>
+              <p id="statusDesc">数据来自云端自动签到的最新记录</p>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="guide-item">
-        <div class="guide-num">D</div>
-        <div class="guide-txt">
-          <b>Token 失效怎么办</b>
-          <p>微信会收到告警通知。打开本机文件 <span class="kbd">%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info</span>，复制 <span class="kbd">accessToken</span> 的值（eyJ 开头），到
-             <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/settings/secrets/actions" target="_blank" rel="noopener">Secrets 设置</a> 更新 <span class="kbd">WB_TOKEN</span> 即可，约 1 分钟。</p>
-        </div>
-      </div>
-    </section>
+          <div class="chips" id="chips"></div>
+          <div class="row">
+            <button class="btn btn-primary" id="btnRefresh">🔄 刷新状态</button>
+          </div>
+          <div class="note" id="statusNote">数据由 GitHub Actions 每天自动签到后回写。</div>
+        </section>
 
-    <!-- 周期说明 -->
-    <section class="card">
-      <div class="card-title"><span class="step">3</span>7 天签到周期</div>
-      <div class="cycle" id="cycle"></div>
-      <div class="cycle-hint" id="cycleHint">云端状态回写后显示真实周期进度；未回写前为规则示意。</div>
-    </section>
+        <!-- 操作引导 -->
+        <section class="card">
+          <div class="card-title"><span class="step">2</span>操作引导</div>
+          <div class="guide-item">
+            <div class="guide-num">A</div>
+            <div class="guide-txt">
+              <b>云端自动签到（推荐，已开启）</b>
+              <p>GitHub Actions 每天 09:10（北京时间）自动执行签到，结果推送到微信。无需任何操作。
+                 <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/actions" target="_blank" rel="noopener">查看云端运行记录 →</a></p>
+            </div>
+          </div>
+          <div class="guide-item">
+            <div class="guide-num">B</div>
+            <div class="guide-txt">
+              <b>手动触发一次云端签到</b>
+              <p>打开 <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/actions" target="_blank" rel="noopener">Actions 页面</a> → 左侧点「WorkBuddy 每日积分签到」→ 右侧 Run workflow → 保持 main → 绿色按钮。约 30 秒完成，本页状态随即更新。</p>
+            </div>
+          </div>
+          <div class="guide-item">
+            <div class="guide-num">C</div>
+            <div class="guide-txt">
+              <b>本机命令行查询 / 签到</b>
+              <p>在电脑上打开「命令提示符」，粘贴以下命令回车（本机无跨域限制，可实时查询）：</p>
+              <div class="cmd-box">C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe "C:\Users\Administrator\WorkBuddy\2026-08-31-00-19-05\workbuddy_checkin\workbuddy_checkin.py" --dry-run</div>
+              <div class="row" style="margin-top:8px">
+                <button class="btn btn-ghost" id="btnCopyCmd">📋 复制查询命令</button>
+              </div>
+            </div>
+          </div>
+          <div class="guide-item">
+            <div class="guide-num">D</div>
+            <div class="guide-txt">
+              <b>Token 失效怎么办</b>
+              <p>微信会收到告警通知。打开本机文件 <span class="kbd">%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info</span>，复制 <span class="kbd">accessToken</span> 的值（eyJ 开头），到
+                 <a href="https://github.com/wuwuwuwu-1990/workbuddy-checkin/settings/secrets/actions" target="_blank" rel="noopener">Secrets 设置</a> 更新 <span class="kbd">WB_TOKEN</span> 即可，约 1 分钟。</p>
+            </div>
+          </div>
+        </section>
 
-    <!-- 为什么网页不能直接领取 -->
-    <section class="card">
-      <div class="card-title"><span class="step">4</span>为什么网页不能直接领取</div>
-      <div class="note">
-        WorkBuddy 积分接口出于安全限制<b>不允许网页跨域调用</b>（CORS 拦截），因此本网页无法直接点击「签到」按钮——
-        无论本地打开还是部署到任何网站都一样。这是接口服务端限制，无法绕过。
-        解决方案就是本工具的做法：<b>由云端（GitHub Actions）代替浏览器调用接口</b>，网页只做只读状态展示和操作引导。
+        <!-- 为什么网页不能直接领取 -->
+        <section class="card">
+          <div class="card-title"><span class="step">3</span>为什么网页不能直接领取</div>
+          <div class="note">
+            WorkBuddy 积分接口出于安全限制<b>不允许网页跨域调用</b>（CORS 拦截），因此本网页无法直接点击「签到」按钮——
+            无论本地打开还是部署到任何网站都一样。这是接口服务端限制，无法绕过。
+            解决方案就是本工具的做法：<b>由云端（GitHub Actions）代替浏览器调用接口</b>，网页只做只读状态展示和操作引导。
+          </div>
+        </section>
+
       </div>
-    </section>
 
-    <footer>WorkBuddy每日领取助手 v1.1 · 云端自动签到 · 本页只读</footer>
+      <!-- ===== 右列：签到日历 ===== -->
+      <div class="right-col">
+        <section class="card">
+          <div class="card-title"><span class="step">⛅</span>签到日历（领取日期）</div>
+          <div class="cal-head">
+            <div class="cal-title"><span id="calMonth">----</span><span class="cal-season" id="calSeason"></span></div>
+            <div class="cal-nav">
+              <button id="calPrev" title="上一月">‹</button>
+              <button id="calNext" title="下一月">›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend">
+            <span><span class="sw done"></span>已领取</span>
+            <span><span class="sw today"></span>今天</span>
+            <span><span class="sw plain"></span>未领取</span>
+          </div>
+          <div class="cal-stats">
+            <div class="cal-stat"><b id="calTotal">0</b><span>累计领取天数</span></div>
+            <div class="cal-stat"><b id="calMonthCount">0</b><span>本月已领</span></div>
+            <div class="cal-stat"><b id="calStreak">0</b><span>当前连续</span></div>
+          </div>
+          <div class="cal-hint" id="calHint">日历按「实际领取日期」标记。数据来自云端签到回写，历史自动累积。</div>
+        </section>
+      </div>
+
+    </div>
+    <footer>WorkBuddy每日领取助手 v1.2 · 云端自动签到 · 只读状态 + 签到日历</footer>
   </main>
 
 <script>
@@ -259,6 +327,15 @@ const $=s=>document.querySelector(s);
 const STATUS_URL='https://tool.wbc2023.top/wbcheckin-status.json';
 const STATUS_FALLBACKS=['https://raw.githubusercontent.com/wuwuwuwu-1990/vista-tool/main/wbcheckin-status.json',
                         'https://cdn.jsdelivr.net/gh/wuwuwuwu-1990/vista-tool@main/wbcheckin-status.json'];
+const DOW=['一','二','三','四','五','六','日'];
+let calView=new Date();           // 日历当前查看的年月（日=1）
+let calDates=[];                  // 全部领取日期 ['YYYY-MM-DD',...]
+let seasonInfo='';                // 赛季徽章文本
+let todayStr=localDateStr(new Date());
+
+function pad(n){return (n<10?'0':'')+n}
+function localDateStr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function ymStr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)}
 
 /* ---------- 主题 ---------- */
 function setTheme(t){document.documentElement.dataset.theme=t;
@@ -279,26 +356,12 @@ function setStatus(ok,icon,title,desc){
   $('#statusDesc').textContent=desc;
   ic.classList.remove('pulse');void ic.offsetWidth;ic.classList.add('pulse');
 }
-function renderCycle(streak){
-  const box=$('#cycle');box.innerHTML='';
-  for(let i=1;i<=7;i++){
-    const d=document.createElement('div');
-    d.className='day'+(streak!==null&&i<=streak?' on':'')+(i===7?' bonus':'')+(i===streak?' today':'');
-    d.innerHTML='<b>第'+i+'天</b><span>'+(i===7?'🎁 1000':'+100')+'</span>';
-    box.appendChild(d);
-  }
-  if(streak===null){$('#cycleHint').textContent='云端状态回写后显示真实周期进度；未回写前为规则示意（第 1-6 天 100 分，第 7 天 1000 分）。'}
-  else{$('#cycleHint').textContent='当前周期第 '+Math.min(streak,7)+' 天'+(streak>=7?'，已满周期！':'，明天再领 +'+(streak===6?'1000（满7天大奖）':'100')+' 分')+'。'}
-}
 function loadStatus(){
   setStatus(null,'⏳','正在读取云端状态 ...','数据来自云端自动签到的最新记录');
   const ic=$('#statusIcon');
   ic.className='status-icon load';ic.textContent='⏳';
   const chips=$('#chips');
-  // 只保留前三项规则说明
-  chips.innerHTML='<span class="chip">周期奖励：<b>第 1-6 天 100 分/天</b></span><span class="chip">第 7 天：<b>1000 分</b></span><span class="chip">单周期合计：<b>1600 分</b></span>';
-  $('#cycle').innerHTML='';
-  $('#cycleHint').textContent='读取中 ...';
+  chips.innerHTML='';
   function fetchStatus(urls){
     if(!urls.length)return Promise.reject(new Error('所有地址均不可用'));
     const [u,...rest]=urls;
@@ -306,28 +369,89 @@ function loadStatus(){
   }
   fetchStatus([STATUS_URL].concat(STATUS_FALLBACKS))
   .then(j=>{
+    calDates=(j.checkin_dates||[]).slice().sort().reverse();
+    seasonInfo='第'+(j.season||'?')+'赛季 · '+(j.activity_name||'');
     const checked=!!j.today_checked_in;
     const streak=parseInt(j.streak_days,10);
     const week=parseInt(j.week_checkin_days,10);
     if(checked){setStatus(true,'✅','今日已签到','云端已于今天完成签到')}
     else{setStatus(false,'⚡','今日未签到','09:10 云端将自动签到')}
-    renderCycle(isNaN(week)?(isNaN(streak)?null:Math.min(streak,7)):week);
     const add=[];
-    if(!isNaN(streak))add.push('<span class="chip">连续签到：<b>'+streak+' 天</b></span>');
-    if(!isNaN(week))add.push('<span class="chip">本周：<b>'+week+'/7 天</b></span>');
-    if(j.total_credits!==undefined&&j.total_credits!==null)add.push('<span class="chip">周期总积分：<b>'+j.total_credits+'</b></span>');
-    if(j.theme_name)add.push('<span class="chip">活动：<b>'+j.theme_name+'</b></span>');
-    if(add.length){chips.innerHTML=add.join('')+chips.innerHTML}
+    if(!isNaN(streak))add.push('<span class="chip">当前连续：<b>'+streak+' 天</b></span>');
+    if(j.season)add.push('<span class="chip">赛季：<b>'+j.season+'</b></span>');
+    if(j.activity_name)add.push('<span class="chip">活动：<b>'+j.activity_name+'</b>');
+    if(j.season_start&&j.season_end)add.push('<span class="chip">本期：<b>'+j.season_start+' ~ '+j.season_end+'</b></span>');
+    if(j.total_credits!==undefined&&j.total_credits!==null)add.push('<span class="chip">本赛季积分：<b>'+j.total_credits+'</b></span>');
+    if(calDates.length)add.push('<span class="chip">累计领取：<b>'+calDates.length+' 天</b></span>');
+    if(add.length){chips.innerHTML=add.join('')}
     const up=j.updated_at?('最近更新：'+j.updated_at+'（北京时间）'):'';
-    const res=j.result==='checkin_ok'?' · 本次签到成功':(j.result==='status_ok'?' · 已签到':'');
-    $('#statusNote').textContent=(up?up+res:'云端状态已读取')+'。数据由 GitHub Actions 每天 09:10 自动签到后回写。';
+    $('#statusNote').textContent=(up||'云端状态已读取')+'。数据由 GitHub Actions 每天自动签到后回写，历史领取日期自动累积。';
+    renderCalendar();
   })
   .catch(e=>{
     setStatus(null,'⚠️','暂时无法读取状态','云端状态尚未生成（首次部署后需等一次签到回写）');
-    $('#cycleHint').textContent='尚未获取到云端状态数据。可手动触发一次云端签到（见操作引导 B），约 1 分钟后刷新本页即可看到。';
-    $('#statusNote').textContent='读取失败：'+e.message+'。云端状态由 GitHub Actions 每天 09:10 签到后回写，手动触发一次即可看到数据。';
+    $('#statusNote').textContent='读取失败：'+e.message+'。云端状态由 GitHub Actions 每天签到后回写，手动触发一次即可看到数据。';
+    $('#calHint').textContent='状态数据暂不可用，日历无法显示。可手动触发一次云端签到（见左列操作引导 B）。';
   });
 }
+
+/* ---------- 日历 ---------- */
+function renderCalendar(){
+  const y=calView.getFullYear(),m=calView.getMonth();
+  const ym=ymStr(calView);
+  const dateSet={};
+  calDates.forEach(ds=>{dateSet[ds]=1});
+  // 统计：累计 / 本月已领 / 当前连续（从今天往前数）
+  const countMap={};
+  calDates.forEach(ds=>{countMap[ds]=1});
+  const keys=Object.keys(countMap).sort();
+  $('#calTotal').textContent=keys.length;
+  const monthCnt=keys.filter(ds=>ds.indexOf(ym)===0).length;
+  $('#calMonthCount').textContent=monthCnt;
+  let streak=0;
+  const cur=new Date(todayStr+'T00:00:00');
+  while(countMap[localDateStr(cur)]){streak++;cur.setDate(cur.getDate()-1)}
+  $('#calStreak').textContent=streak;
+  $('#calMonth').textContent=y+' 年 '+(m+1)+' 月';
+  $('#calSeason').textContent=seasonInfo;
+  // 网格
+  const grid=$('#calGrid');
+  let html='';
+  for(let i=0;i<7;i++){html+='<div class="cal-dow'+(i>=5?' we':'')+'">'+DOW[i]+'</div>'}
+  const first=new Date(y,m,1);
+  const lead=(first.getDay()+6)%7;         // 周一开头
+  const dim=new Date(y,m+1,0).getDate();
+  const today=new Date(todayStr+'T00:00:00');
+  const viewToday=(y===today.getFullYear()&&m===today.getMonth());
+  for(let i=0;i<lead;i++){html+='<div class="cal-cell out"></div>'}
+  for(let d=1;d<=dim;d++){
+    const ds=y+'-'+pad(m+1)+'-'+pad(d);
+    const isToday=viewToday&&d===today.getDate();
+    const done=!!dateSet[ds];
+    const isFuture=(new Date(ds+'T00:00:00').getTime()>today.getTime());
+    let cls='cal-cell';
+    if(isFuture){cls+=' future'}
+    if(done){cls+=' done'}
+    if(isToday){cls+=' today'}
+    html+='<div class="'+cls+'" title="'+ds+(done?' · 已领取':'')+'">'+d+(done?'<span class="ck">✓</span>':'')+'</div>';
+  }
+  grid.innerHTML=html;
+  // 月份切换按钮可用性：不早于最早记录所在月，不晚于当前月
+  const now=new Date();
+  $('#calNext').disabled=(calView.getFullYear()===now.getFullYear()&&calView.getMonth()===now.getMonth());
+  if(keys.length){
+    const oldest=new Date(keys[0]+'T00:00:00');
+    $('#calPrev').disabled=(calView.getFullYear()===oldest.getFullYear()&&calView.getMonth()===oldest.getMonth());
+  }else{
+    $('#calPrev').disabled=false;
+  }
+  // 赛季提示文本
+  $('#calHint').textContent=calDates.length
+    ?('日历按实际领取日期标记（绿色 ✓）。累计 '+keys.length+' 天，最早 '+keys[0]+'，最近 '+keys[keys.length-1]+'。翻页可查看历史月份。')
+    :'暂无领取记录。云端每天自动签到后本日历会自动标记，也可以手动触发一次（见左列引导 B）。';
+}
+$('#calPrev').addEventListener('click',()=>{calView.setMonth(calView.getMonth()-1);calView.setDate(1);renderCalendar()});
+$('#calNext').addEventListener('click',()=>{calView.setMonth(calView.getMonth()+1);calView.setDate(1);renderCalendar()});
 
 /* ---------- 复制 ---------- */
 function copy(text,msg){
@@ -346,7 +470,8 @@ $('#btnCopyCmd').addEventListener('click',()=>copy('C:\\Users\\Administrator\\Ap
 $('#btnRefresh').addEventListener('click',loadStatus);
 
 /* ---------- 初始化 ---------- */
-renderCycle(null);
+calView=new Date();calView.setDate(1);
+renderCalendar();
 loadStatus();
 setInterval(()=>{if(document.visibilityState==='visible')loadStatus()},5*60*1000);
 })();
