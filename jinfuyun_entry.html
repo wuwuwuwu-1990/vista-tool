@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>金福云 VR 自动登录入口</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b1020'/%3E%3Cpath d='M50 20 L76 38 V74 L50 92 L24 74 V38 Z' fill='none' stroke='%2322d3ee' stroke-width='6'/%3E%3Ccircle cx='50' cy='55' r='10' fill='%2322d3ee'/%3E%3C/svg%3E">
+<!-- 提前建链：省去首次 DNS+TLS 握手，登录请求与目标页加载都复用该连接 -->
+<link rel="dns-prefetch" href="https://vr.jinfuyun.cn">
+<link rel="preconnect" href="https://vr.jinfuyun.cn" crossorigin>
 <style>
   :root{
     --bg:#0b1020;
@@ -92,10 +95,10 @@
     <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">正在自动登录…</span></div>
     <div class="acct">登录账号：<b id="acctTxt"></b></div>
     <button class="btn" id="btnRelogin">🔑 重新自动登录（新窗口）</button>
-    <button class="btn ghost" id="btnOpen" onclick="openDirect()">↗ 直接打开目标页</button>
+    <button class="btn ghost" id="btnOpen" onclick="openDirect()">↗ 直接打开目标页（已登录可秒开）</button>
     <div class="hint">
       若页面未自动跳转，说明浏览器拦截了第三方 Cookie。<br>
-      点击上方「重新自动登录」可 100% 成功。
+      点击上方「重新自动登录」可 100% 成功；若你常在金福云登录，点「直接打开目标页」更快。
     </div>
   </div>
 
@@ -128,20 +131,44 @@
     if(ok){ dotEl.classList.add('ok'); } else { dotEl.classList.remove('ok'); }
   }
 
+  // 登录完成立即进入目标页（preconnect 已建链，无人为延迟）
   function goDest(){
     setStatus('登录成功，正在打开目标页…', true);
-    setTimeout(function(){ window.location.href = DEST; }, 600);
+    window.location.replace(DEST);
   }
 
-  // ===== 方式一：隐藏 iframe POST 登录（无缝，大多数桌面浏览器可用） =====
-  function autoLogin(){
-    var finished = false;
+  var finished = false;
+  function finish(){
+    if(finished) return;
+    finished = true;
+    goDest();
+  }
+
+  // ===== 方式一：fetch 静默登录（no-cors + include，跨域也能种 cookie，响应一回来即跳转）=====
+  function fetchLogin(){
+    try{
+      var fd = new URLSearchParams();
+      fd.set('phone', JFY_ACCOUNT);
+      fd.set('password', JFY_PASSWORD);
+      fetch(LOGIN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: fd.toString(),
+        credentials: 'include',
+        mode: 'no-cors'
+      }).then(finish, finish);
+    }catch(e){
+      iframeLogin(finish); // 老旧浏览器回退
+    }
+    setTimeout(finish, 6000); // 网络异常兜底
+  }
+
+  // ===== 方式一B：iframe 兜底（fetch 不可用时）=====
+  function iframeLogin(cb){
     var f = document.createElement('iframe');
     f.name = 'jfyLoginFrame';
-    f.src = 'about:blank';
     f.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:2px;height:2px;border:0;visibility:hidden';
     document.body.appendChild(f);
-
     var form = document.createElement('form');
     form.method = 'POST';
     form.target = 'jfyLoginFrame';
@@ -151,20 +178,11 @@
     form.appendChild(a); form.appendChild(b);
     form.style.display = 'none';
     document.body.appendChild(form);
-
-    var go = function(){
-      if(finished) return;
-      finished = true;
-      try{ form.remove(); }catch(e){}
-      try{ f.remove(); }catch(e){}
-      goDest();
-    };
-    f.onload = function(){ setTimeout(go, 1500); };  // 等 cookie 落地
-    setTimeout(go, 7000);                            // 兜底
+    f.onload = function(){ setTimeout(cb, 300); };
     form.submit();
   }
 
-  // ===== 方式二：顶层新窗口 POST（第三方 Cookie 被拦截时 100% 可用） =====
+  // ===== 方式二：顶层新窗口 POST（第三方 Cookie 被拦截时 100% 可用）=====
   document.getElementById('btnRelogin').addEventListener('click', function(){
     setStatus('正在新窗口自动登录…');
     var w = window.open('about:blank', 'jfyAutoLoginWin');
@@ -191,8 +209,8 @@
 
   function openDirect(){ window.open(DEST, '_blank'); }
 
-  // 启动
-  autoLogin();
+  // 启动：优先 fetch 静默登录，否则 iframe 兜底
+  if(window.fetch){ fetchLogin(); } else { iframeLogin(finish); }
 </script>
 </body>
 </html>
