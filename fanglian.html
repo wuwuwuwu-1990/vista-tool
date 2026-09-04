@@ -244,7 +244,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 .modal .m-head{padding-top:calc(16px + env(safe-area-inset-top))}
 /* v1.0.23：弹窗背景由「半透明白玻璃」改为「淡灰渐变」——与页面底色融为一体（房源详情/表单/设置/确认全部弹窗统一） */
 .modal{background:linear-gradient(165deg,#f2f4f6 0%,#e9ebef 55%,#dfe2e8 100%);border:1px solid rgba(208,213,222,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px -18px rgba(30,41,59,.3)}
-/* v1.0.24：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
+/* v1.0.25：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
    让弹窗底色单一通透（半透明淡灰渐变 + 背景模糊），信息靠细分隔线区分 */
 .modal{background:linear-gradient(165deg,rgba(241,243,246,.93) 0%,rgba(232,235,240,.9) 55%,rgba(222,226,232,.87) 100%)}
 .dtb{background:transparent;border:1px solid rgba(206,212,222,.6)}
@@ -266,7 +266,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
       <p>抖音 / 安居客等平台房源随手记 · 手机/电脑双端同步</p>
     </div>
     <div class="hd-btns">
-      <span class="sync-pill" id="syncPill" title="GitHub 同步状态"><span class="dot"></span><span id="syncTxt">未连接同步</span></span>
+      <span class="sync-pill" id="syncPill" title="云端同步状态"><span class="dot"></span><span id="syncTxt">未连接同步</span></span>
       <button class="btn btn-ghost" onclick="doSync('pull')" id="syncBtn">⟳ 同步</button>
       <button class="btn btn-pri" onclick="openForm()">＋ 添加房源</button>
       <button class="btn btn-ghost" onclick="openSettings()">⚙</button>
@@ -302,11 +302,11 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
   <div class="empty" id="empty" style="display:none">
     <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg>
     <h3>还没有收录房源</h3>
-    <p style="font-size:13px">点击右上角「＋ 添加房源」，把抖音、安居客等来源平台刷到的房源、价格、优缺点随手记下来。<br>配置 GitHub 同步后，手机和电脑数据自动互通。</p>
+    <p style="font-size:13px">点击右上角「＋ 添加房源」，把抖音、安居客等来源平台刷到的房源、价格、优缺点随手记下来。<br>配置云端同步后，手机和电脑数据自动互通。</p>
   </div>
 </main>
 
-<footer>房览速记 v1.0.24 · 数据默认保存在本机浏览器，配置 GitHub 后全端同步 · 纯本地处理</footer>
+<footer>房览速记 v1.0.25 · 数据默认保存在本机浏览器，配置云端同步后全端互通 · 纯本地处理</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -426,20 +426,18 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
     <div class="m-head"><h2>设置</h2><button class="m-close" onclick="closeSettings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
     <div class="m-body">
       <div class="set-group">
-        <h3>☁️ GitHub 双端同步 <span class="tag2">手机+电脑 数据互通</span></h3>
-        <div class="set-row"><label>GitHub 仓库（owner/repo）</label><input id="s_repo" placeholder="wuwuwuwu-1990/vista-tool"></div>
-        <div class="set-row"><label>分支</label><input id="s_branch" placeholder="main"></div>
-        <div class="set-row"><label>数据文件名</label><input id="s_path" placeholder="fanglian-data.json"></div>
-        <div class="set-row"><label>访问令牌（Personal Access Token，仅存本机）</label><input id="s_token" type="password" placeholder="github_pat_…" autocomplete="off"></div>
-        <label class="switch" style="margin-bottom:10px"><input type="checkbox" id="s_auto"><span class="trk"></span>修改后自动同步到 GitHub</label>
+        <h3>☁️ 云端同步 <span class="tag2">手机+电脑 数据互通</span></h3>
+        <div class="set-row"><label>同步服务器</label><input id="s_api" value="http://47.109.99.227/sync" autocomplete="off"></div>
+        <div class="set-row"><label>同步令牌（服务器签发，仅存本机）</label><input id="s_token" type="password" placeholder="输入同步令牌" autocomplete="off"></div>
+        <label class="switch" style="margin-bottom:10px"><input type="checkbox" id="s_auto"><span class="trk"></span>修改后自动同步到云端</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ok" onclick="testSync()">测试连接</button>
           <button class="btn btn-pri" onclick="saveSettings(true)">保存并立即同步</button>
           <button class="btn btn-ghost" onclick="saveSettings(false)">仅保存</button>
         </div>
         <div class="hint" style="margin-top:10px">
-          <b>配置方法（一次性）：</b>① 登录 github.com → Settings → Developer settings → Fine-grained tokens → 生成令牌，勾选目标仓库的 <code>Contents: Read and write</code> 权限；② 把令牌粘贴到上方；③ 手机、电脑各自打开本页面并粘贴同一次生成的令牌，数据即互通。<br>
-          <b>默认仓库</b>：<code>wuwuwuwu-1990/vista-tool</code>（当前站点仓库，已内置数据文件 <code>fanglian-data.json</code>）。令牌只保存在本机浏览器 localStorage，不会上传到任何服务器。保存/修改/删除房源时自动同步，冲突按「谁后改谁生效」合并，删掉的房源不会复活。
+          <b>配置方法（一次性）：</b>① 在任一设备打开本页 → 设置 → 填入同步服务器与同步令牌 → 保存；② 手机、电脑各自打开本页面，粘贴<b>同一串同步令牌</b>，数据即互通。<br>
+          <b>同步服务器</b>：<code>http://47.109.99.227/sync</code>（自建服务器 · 国内直连快而稳定）；令牌由服务器签发、只保存在本机浏览器 localStorage，不会上传到其它任何地方。保存/修改/删除房源时自动同步，云端按「谁后改谁生效」记录级合并，删掉的房源不会复活。
         </div>
       </div>
       <div class="set-group">
@@ -450,7 +448,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
           <button class="btn btn-ghost" onclick="importCfg()">导入配置</button>
         </div>
         <textarea id="cfgBox" placeholder="粘贴配置文本到此处，然后点「导入配置」" style="width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:9px;min-height:64px;resize:vertical;font-size:12.5px"></textarea>
-        <div class="hint" style="margin-top:10px">「复制令牌」：只复制同步令牌本身，换设备时粘贴到访问令牌输入框即可；「复制当前配置」：包含仓库/令牌等全部同步设置，另一台设备粘贴导入一步到位（含令牌，请勿发给他人）。</div>
+        <div class="hint" style="margin-top:10px">「复制令牌」：只复制同步令牌本身，换设备粘贴到同步令牌输入框即可；「复制当前配置」：包含服务器与令牌全部设置，另一台设备粘贴导入一步到位（含令牌，请勿发给他人）。</div>
       </div>
       <div class="set-group">
         <h3>💾 数据备份</h3>
@@ -491,19 +489,19 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.24 =================
+/* ================= 房览速记 v1.0.25 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
-         JSON 导出导入、GitHub 双端同步（手机+网页数据互通，按记录时间智能合并）、
+         JSON 导出导入、云端双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
          点赞/踩功能（点赞多的排前面）、全站苹果字体、数字不显示千位分隔符、
          推送 409 自动重试合并、两行精简卡、删除评分机制、详情弹窗表格行式、
          拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
          卡片去掉优✓缺✗标记（更紧凑）、手机端隐藏标签筛选栏
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.24' };
-var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_gh_token';
-var DEFAULT_SET = { owner:'wuwuwuwu-1990', repo:'vista-tool', branch:'main', path:'fanglian-data.json', auto:true, lastSync:0, lastStatus:'' };
-var CFG_PREFIX = 'FLS-CFG-1:';  // 同步配置导入导出前缀
+var APP = { name:'房览速记', version:'1.0.25' };
+var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_sync_token';
+var DEFAULT_SET = { api:'http://47.109.99.227/sync', auto:true, lastSync:0, lastStatus:'' };
+var CFG_PREFIX = 'FLS-CFG-2:';  // 同步配置导入导出前缀
 
 var state = { records:[], deleted:[], updatedAt:0 };
 var settings = Object.assign({}, DEFAULT_SET);
@@ -788,21 +786,32 @@ function importData(input){
   rd.readAsText(f);
 }
 
-/* ---------- GitHub 同步 ---------- */
-function syncCfg(){ return { owner:settings.owner, repo:settings.repo, branch:settings.branch, path:settings.path, token:settings.token }; }
-function ghUrl(cfg, path){
-  return 'https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+path.split('/').map(encodeURIComponent).join('/')+'?ref='+encodeURIComponent(cfg.branch);
+/* ---------- 云端同步（自建同步服务器 · 记录级合并） ---------- */
+function syncCfg(){ return { api:(settings.api||'http://47.109.99.227/sync').replace(/\/+$/,''), token:settings.token }; }
+function syncUrl(cfg, act){ return cfg.api + '/' + act + '/fanglian'; }
+function syncHeaders(cfg){ var h = { 'Content-Type':'application/json' }; if(cfg.token) h['X-Token'] = cfg.token; return h; }
+/* 本地全量(含删除墓碑) -> 服务端记录 */
+function localToRemote(){
+  var out = [];
+  (state.records||[]).forEach(function(r){
+    out.push({ id:r.id, v:(r.updatedAt||r.createdAt||Date.now()), data:r, del:false });
+  });
+  (state.deleted||[]).forEach(function(t){
+    out.push({ id:t.id, v:(t.ts||0), data:null, del:true });
+  });
+  return { records: out };
 }
-function ghHeaders(cfg){
-  var h = { 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' };
-  if(cfg.token) h['Authorization'] = 'Bearer ' + cfg.token;
-  return h;
-}
-function b64Decode(s){
-  var bin = atob(s.replace(/\s/g,''));
-  var bytes = new Uint8Array(bin.length);
-  for(var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
-  try{ return new TextDecoder('utf-8').decode(bytes); }catch(e){ return decodeURIComponent(escape(bin)); }
+/* 服务端权威 records -> 本地 ds 结构 */
+function remoteToLocal(records){
+  var ds = { records:[], deleted:[], updatedAt:0 }, maxV = 0;
+  (records||[]).forEach(function(rc){
+    var v = rc.v||0; if(v>maxV) maxV = v;
+    if(rc.del){ ds.deleted.push({ id:rc.id, ts:v }); }
+    else if(rc.data){ ds.records.push(rc.data); }
+    else { ds.records.push(Object.assign({ id:rc.id }, rc)); }
+  });
+  ds.updatedAt = maxV;
+  return ds;
 }
 function mergeRemote(ds){
   var map = {}, allDel = {};
@@ -838,15 +847,11 @@ function updateSyncPill(){
   if(settings.lastSync){ setSyncOk('上次 '+fmtDate(settings.lastSync)); }
   else { setSyncOk('已配置，待同步'); }
 }
-function syncPayload(){
-  return { app:APP.name, version:APP.version, updatedAt:Date.now(), records:state.records, deleted:state.deleted };
-}
 function doSync(mode){
   var cfg = syncCfg();
-  if(!cfg.token){ toast('请先在设置里配置 GitHub 令牌', true); openSettings(); return; }
-  if(!cfg.owner || !cfg.repo || !cfg.path){ toast('仓库信息不完整', true); openSettings(); return; }
+  if(!cfg.token){ toast('请先在设置里配置同步令牌', true); openSettings(); return; }
   setBusy('同步中…');
-  var p = mode==='push' ? preMergeThenPush(cfg) : pullRemote(cfg);
+  var p = (mode==='push') ? pushRemote(cfg) : pullRemote(cfg);
   p.then(function(res){
     settings.lastSync = Date.now(); saveLocal();
     setSyncOk('已同步 '+fmtDate(settings.lastSync));
@@ -855,143 +860,79 @@ function doSync(mode){
   }).catch(function(err){
     setSyncErr('同步失败');
     var msg = err && err.message ? err.message : '';
-    if(/Failed to fetch|NetworkError|HTTP 0|networkerror/i.test(msg)){
-      toast('网络连接失败：请检查手机/电脑能否访问 api.github.com（国内网络偶尔不稳定，稍后重试）', true);
+    if(/Failed to fetch|NetworkError|HTTP 0|networkerror|Network request failed/i.test(msg)){
+      toast('网络连接失败：请检查能否访问同步服务器 '+cfg.api, true);
     }else{
       toast(msg||'同步失败，请检查令牌与网络', true);
     }
   });
 }
 function pullRemote(cfg){
-  return fetch(ghUrl(cfg, cfg.path), { headers:ghHeaders(cfg) }).then(function(resp){
-    if(resp.status===404) return { empty:true };
-    if(!resp.ok) return resp.json().then(function(j){ throw new Error('拉取失败 HTTP '+resp.status+(j.message?'：'+j.message:'')); });
+  return fetch(syncUrl(cfg,'pull'), { headers:syncHeaders(cfg) }).then(function(resp){
+    if(resp.status===401) throw new Error('同步令牌无效（HTTP 401）');
+    if(!resp.ok) throw new Error('拉取失败 HTTP '+resp.status);
     return resp.json();
-  }).then(function(meta){
-    if(meta.empty){
-      if(!state.records.length) return { msg:'远端无数据，已保持本地' };
-      return pushRemote(cfg).then(function(){ return { msg:'本地数据已上传' }; });
-    }
-    var remote = JSON.parse(b64Decode(meta.content));
-    var merged = mergeRemote(remote);
+  }).then(function(j){
+    if(!j || !j.records) throw new Error('服务器返回异常');
+    var remote = remoteToLocal(j.records);
     var before = state.records.length;
-    var changed = merged.records.length !== before || merged.updatedAt > state.updatedAt;
-    state.records = merged.records; state.deleted = merged.deleted;
-    state.updatedAt = merged.updatedAt; saveLocal();
-    // v1.0.12：拉取只做合并，不再反推（避免与其它设备自动推送竞争产生 409）
-    if(changed) return { msg:'已合并其他设备的最新数据，共 '+state.records.length+' 条' };
-    return { msg:'已是最新，共 '+state.records.length+' 条' };
+    var merged = mergeRemote(remote);
+    state.records = merged.records; state.deleted = merged.deleted; state.updatedAt = merged.updatedAt; saveLocal();
+    if(before===0 && merged.records.length===0) return { msg:'云端暂无数据，已就绪' };
+    if(merged.records.length!==before) return { msg:'已合并其他设备的数据，共 '+merged.records.length+' 条' };
+    return { msg:'已是最新，共 '+merged.records.length+' 条' };
   });
 }
-function pushRemote(cfg, _retry){
-  var retry = _retry||0;
-  var body = JSON.stringify(syncPayload());
-  var url = 'https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+cfg.path.split('/').map(encodeURIComponent).join('/');
-  var doPut = function(sha){
-    var payload = { message:'房览速记 同步 '+new Date().toLocaleString('zh-CN'), branch:cfg.branch,
-      content: btoa(unescape(encodeURIComponent(body))) };
-    if(sha) payload.sha = sha;
-    return fetch(url, { method:'PUT', headers:ghHeaders(cfg), body:JSON.stringify(payload) }).then(function(r){
-      return r.json().then(function(j){ return { status:r.status, json:j }; });
-    });
-  };
-  return fetch(url, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); }).then(function(meta){
-    return doPut(meta && meta.sha);
-  }).then(function(res){
-    // 409 = 远端已被其他设备/操作修改（sha 过期）：自动拉取最新 → 智能合并 → 重推，最多 3 次
-    if(res.status===409 && retry<3){
-      return fetch(url, { headers:ghHeaders(cfg) }).then(function(r){ return r.json(); }).then(function(meta2){
-        if(meta2 && meta2.sha && meta2.content){
-          try{
-            var remote = JSON.parse(b64Decode(meta2.content));
-            var merged = mergeRemote(remote);
-            state.records = merged.records; state.deleted = merged.deleted;
-            state.updatedAt = merged.updatedAt; saveLocal();
-            toast('检测到其他设备更新，已自动合并', false);
-          }catch(e){}
-        }
-        return pushRemote(cfg, retry+1);
-      });
-    }
-    if(res.status===403) throw new Error('写入被拒绝(403)：令牌没有写权限！请到 GitHub 令牌设置把 Contents 权限改为 Read and write');
-    if(res.status!==200 && res.status!==201) throw new Error('推送失败 HTTP '+res.status+((res.json&&res.json.message)?'：'+res.json.message:''));
-    return res.json;
-  }).then(function(){ return { msg:'已推送，数据全端同步' }; });
-}
-/* 方案B：推送前先拉取远端并智能合并到本地，再推送（从源头减少 409 冲突） */
-function preMergeThenPush(cfg){
-  var url = ghUrl(cfg, cfg.path);
-  return fetch(url, { headers:ghHeaders(cfg) }).then(function(resp){
-    if(resp.status===404) return null;  // 远端还没有数据文件，直接首次推送
-    if(!resp.ok) return resp.json().then(function(j){ throw new Error('推送前合并失败 HTTP '+resp.status+(j.message?'：'+j.message:'')); });
+function pushRemote(cfg){
+  var body = JSON.stringify(localToRemote());
+  return fetch(syncUrl(cfg,'push'), { method:'POST', headers:syncHeaders(cfg), body:body }).then(function(resp){
+    if(resp.status===401) throw new Error('同步令牌无效（HTTP 401）');
+    if(!resp.ok) throw new Error('推送失败 HTTP '+resp.status);
     return resp.json();
-  }).then(function(meta){
-    if(meta && meta.content){
-      try{
-        var remote = JSON.parse(b64Decode(meta.content));
-        var merged = mergeRemote(remote);
-        if(merged.records.length!==state.records.length || merged.updatedAt>state.updatedAt){
-          state.records = merged.records; state.deleted = merged.deleted;
-          state.updatedAt = merged.updatedAt; saveLocal();
-          toast('已合并其他设备的最新数据', false);
-        }
-      }catch(e){}
-    }
-    return pushRemote(cfg);
+  }).then(function(j){
+    if(!j || !j.records) throw new Error('服务器返回异常');
+    var remote = remoteToLocal(j.records);
+    var merged = mergeRemote(remote);
+    state.records = merged.records; state.deleted = merged.deleted; state.updatedAt = merged.updatedAt; saveLocal();
+    return { msg: (j.changed>0) ? ('已推送，云端合并完成，共 '+merged.records.length+' 条') : ('已推送，全端同步，共 '+merged.records.length+' 条') };
   });
 }
+/* 服务端权威合并：推送前无需预拉；保留此函数兼容旧调用 */
+function preMergeThenPush(cfg){ return pushRemote(cfg); }
 var pushTimer = null;
 function autoPush(){
-  if(!settings.auto || !settings.token) return;
+  var cfg = syncCfg();
+  if(!settings.auto || !cfg.token) return;
   clearTimeout(pushTimer);
   setBusy('待同步…');
-  pushTimer = setTimeout(function(){
-    doSync('push');
-  }, 900);
+  pushTimer = setTimeout(function(){ doSync('push'); }, 900);
 }
 function testSync(){
   var inpTok = document.getElementById('s_token').value.trim();
-  if(inpTok) settings.token = inpTok;   // 优先用输入框里刚填的令牌（未保存也可测）
+  if(inpTok) settings.token = inpTok;
   var cfg = syncCfg();
-  if(!cfg.token){ toast('请先填写令牌', true); return; }
+  if(!cfg.token){ toast('请先填写同步令牌', true); return; }
   setBusy('测试中…');
-  // 只读检测（不写入仓库、不产生提交）：身份 + 数据文件读取
-  var readUrl = ghUrl(cfg, cfg.path);
-  fetch('https://api.github.com/user', { headers:ghHeaders(cfg) })
-  .then(function(r){
-    if(!r.ok) throw new Error('令牌无效（HTTP '+r.status+'）');
-    return r.json();
-  })
-  .then(function(u){
-    return fetch(readUrl, { headers:ghHeaders(cfg) }).then(function(r){
-      if(r.status===403) throw new Error('没有读取权限：请检查令牌的 Repository access 是否选择了目标仓库');
-      if(r.status===404) return u.login;                       // 数据文件还不存在 = 正常
-      if(!r.ok) throw new Error('读取测试失败（HTTP '+r.status+'）');
-      return u.login;
-    });
-  })
-  .then(function(login){
+  fetch(syncUrl(cfg,'pull'), { headers:syncHeaders(cfg) }).then(function(resp){
+    if(resp.status===401) throw new Error('同步令牌无效或未授权（HTTP 401）');
+    if(!resp.ok) throw new Error('连接失败 HTTP '+resp.status);
+    return resp.json();
+  }).then(function(j){
     setSyncOk('连接正常');
-    toast('连接成功，读取正常：'+login+'。写入权限在首次同步时自动验证');
-  })
-  .catch(function(e){ setSyncErr('测试失败'); toast(e.message||'连接失败', true); });
+    toast('连接成功，同步服务正常（云端共 '+(j.records?j.records.length:0)+' 条）');
+  }).catch(function(e){
+    setSyncErr('测试失败'); toast(e.message||'连接失败', true);
+  });
 }
 
-/* ---------- 设置 ---------- */
+/* ---------- 设置 ---------- *//* ---------- 设置 ---------- */
 function fillSetForm(){
-  document.getElementById('s_repo').value = settings.owner+'/'+settings.repo;
-  document.getElementById('s_branch').value = settings.branch;
-  document.getElementById('s_path').value = settings.path;
+  document.getElementById('s_api').value = settings.api || 'http://47.109.99.227/sync';
   document.getElementById('s_token').value = settings.token||'';
   document.getElementById('s_auto').checked = !!settings.auto;
 }
 function saveSettings(doSyncNow){
-  var rp = document.getElementById('s_repo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
-  var parts = rp.split('/');
-  if(parts.length!==2 || !parts[0] || !parts[1]){ toast('仓库格式应为 owner/repo', true); return; }
-  settings.owner = parts[0]; settings.repo = parts[1];
-  settings.branch = document.getElementById('s_branch').value.trim() || 'main';
-  settings.path = document.getElementById('s_path').value.trim() || 'fanglian-data.json';
+  settings.api = (document.getElementById('s_api').value||'').trim().replace(/\/+$/,'') || 'http://47.109.99.227/sync';
   settings.token = document.getElementById('s_token').value.trim();
   settings.auto = document.getElementById('s_auto').checked;
   saveLocal(); updateSyncPill();
@@ -1015,7 +956,7 @@ function copyToken(){
   }
 }
 function exportCfg(){
-  var cfg = { v:1, owner:settings.owner, repo:settings.repo, branch:settings.branch, path:settings.path, auto:!!settings.auto, token:settings.token||'' };
+  var cfg = { v:2, api:(settings.api||'http://47.109.99.227/sync'), auto:!!settings.auto, token:settings.token||'' };
   var text = CFG_PREFIX + JSON.stringify(cfg);
   var done = function(){ toast('配置已复制，可粘贴到另一台设备导入'); };
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -1038,10 +979,9 @@ function importCfg(){
   if(json.indexOf(CFG_PREFIX) === 0) json = json.slice(CFG_PREFIX.length);
   var cfg;
   try{ cfg = JSON.parse(json); }catch(e){ toast('配置格式不正确', true); return; }
-  if(!cfg || cfg.v !== 1 || !cfg.owner || !cfg.repo){ toast('配置内容无效', true); return; }
-  settings.owner = String(cfg.owner); settings.repo = String(cfg.repo);
-  settings.branch = String(cfg.branch || 'main');
-  settings.path = String(cfg.path || 'fanglian-data.json');
+  if(cfg && cfg.v === 1){ toast('这是旧版 GitHub 同步配置，请改用新的同步令牌', true); return; }
+  if(!cfg || cfg.v !== 2 || !cfg.token){ toast('配置内容无效', true); return; }
+  settings.api = String(cfg.api || 'http://47.109.99.227/sync');
   settings.auto = !!cfg.auto;
   settings.token = String(cfg.token || '');
   saveLocal(); fillSetForm(); updateSyncPill();
@@ -1055,7 +995,7 @@ function importCfg(){
 
 /* ---------- 危险操作 ---------- */
 function clearAll(){
-  showConfirm('⚠️','清空全部数据？','本机全部房源记录将被清空（GitHub 上的数据不受影响）。此操作不可恢复，建议先导出备份。', function(){
+  showConfirm('⚠️','清空全部数据？','本机全部房源记录将被清空（云端数据不受影响）。此操作不可恢复，建议先导出备份。', function(){
     state.records=[]; state.deleted=[]; state.updatedAt=Date.now(); saveLocal(); render();
     toast('已清空本地数据'); autoPush();
   });
