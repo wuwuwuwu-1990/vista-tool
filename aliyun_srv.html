@@ -1,163 +1,164 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>阿里云服务器 · 价值全景与落地路线图</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+<html lang="zh-CN" data-page-node-id="o8oeon77Ej79MTcEtw7um7">
+<head data-page-node-id="ADoDBIUlcFPIgxpbqJyVfR">
+<meta charset="UTF-8" data-page-node-id="ShaWBpvXQjPvYfvxIGYj4p">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="2iWM8AGBKWoIrGOTl6yOB5">
+<title>阿里云服务器 · 价值全景与进度</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' data-page-node-id="mDAU6Wc6ebDmQPZnO5kYlC"><text y='.9em' font-size='90' data-page-node-id="EZui5eOnwDUsdUzVokaD7o">☁️</text></svg>">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:"HarmonyOS Sans SC","Microsoft YaHei","PingFang SC",sans-serif;background:#0a0f1e;color:#dbe4f5;min-height:100vh;background:
-    radial-gradient(1100px 500px at 85% -10%,rgba(56,132,255,.16),transparent 60%),
-    radial-gradient(900px 420px at -10% 20%,rgba(139,92,246,.13),transparent 55%),
-    #0a0f1e;}
-  .wrap{max-width:1060px;margin:0 auto;padding:40px 28px 60px}
-  .icon{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 auto}
-  /* ---- 头部 ---- */
-  .hero{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:8px}
-  .hero .logo{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 8px 28px rgba(99,102,241,.35)}
-  .hero h1{font-size:26px;color:#fff;letter-spacing:.5px}
-  .hero .sub{color:#8b9bc0;font-size:13px;margin-top:4px}
-  .specs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 30px}
-  .chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#aab8d6;font-size:12px;padding:5px 12px;border-radius:20px}
-  .chip b{color:#e6edfa}
-  .chip.hl{background:rgba(59,130,246,.15);border-color:rgba(96,165,250,.35);color:#93c5fd}
-  /* ---- 分区标题 ---- */
-  .sec{display:flex;align-items:center;gap:10px;margin:34px 0 16px}
-  .sec .bar{width:4px;height:18px;border-radius:2px;background:linear-gradient(#3b82f6,#8b5cf6)}
-  .sec h2{font-size:17px;color:#f1f5fe;letter-spacing:1px}
-  .sec .en{color:#5d6b8a;font-size:11px;letter-spacing:2px}
-  /* ---- 状态卡 ---- */
-  .status{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-  .scard{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;transition:.25s}
-  .scard:hover{transform:translateY(-2px);border-color:rgba(96,165,250,.35)}
-  .scard .ic{width:38px;height:38px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:17px}
-  .scard .t{font-size:14px;color:#eef3fd;font-weight:600}
-  .scard .d{font-size:12px;color:#8b9bc0;margin-top:3px;line-height:1.5}
-  .scard .s{font-size:11px;margin-top:6px;font-weight:600}
-  .ok{color:#34d399}.wait{color:#fbbf24}.run{color:#60a5fa}
-  .ic.blue{background:rgba(59,130,246,.15)}.ic.purple{background:rgba(139,92,246,.15)}
-  .ic.green{background:rgba(16,185,129,.14)}.ic.amber{background:rgba(245,158,11,.14)}
-  /* ---- 梯队卡 ---- */
-  .tier{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-  .tcard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;position:relative;overflow:hidden;transition:.25s}
-  .tcard:hover{transform:translateY(-3px)}
-  .tcard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--g,linear-gradient(90deg,#3b82f6,#8b5cf6))}
-  .tcard .num{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--c,#93c5fd)}
-  .tcard h3{font-size:15px;color:#fff;margin:6px 0 8px}
-  .tcard p{font-size:12.5px;color:#a5b3cf;line-height:1.75}
-  .tcard .fix{font-size:11.5px;color:#7e8dac;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.1)}
-  .p0{--c:#fda4af;--g:linear-gradient(90deg,#f43f5e,#fb923c)}
-  .p1{--c:#7dd3fc;--g:linear-gradient(90deg,#0ea5e9,#6366f1)}
-  .p2{--c:#a5b3cf;--g:linear-gradient(90deg,#64748b,#94a3b8)}
-  /* ---- 备案选项 ---- */
-  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-  .opt{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:16px}
-  .opt .hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .opt .let{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-  .opt b{color:#eef3fd;font-size:14px}
-  .opt p{font-size:12.5px;color:#a5b3cf;line-height:1.7}
-  /* ---- 时间线 ---- */
-  .road{display:flex;flex-direction:column;gap:0;margin-top:6px}
-  .rstep{position:relative;padding:0 0 20px 30px}
-  .rstep::before{content:"";position:absolute;left:8px;top:4px;bottom:0;width:2px;background:linear-gradient(#3b82f6,#8b5cf6);opacity:.25}
-  .rstep:last-child::before{display:none}
-  .rstep .dot{position:absolute;left:3px;top:2px;width:12px;height:12px;border-radius:50%;background:#0ea5e9;box-shadow:0 0 12px rgba(14,165,233,.7)}
-  .rstep.done .dot{background:#34d399;box-shadow:0 0 12px rgba(52,211,153,.6)}
-  .rstep h4{font-size:14px;color:#e8effc}
-  .rstep.done h4{color:#6ee7b7}
-  .rstep p{font-size:12px;color:#8b9bc0;margin-top:4px;line-height:1.6}
-  .rstep .st{font-size:10.5px;font-weight:700;letter-spacing:1px;margin-right:8px;padding:1px 8px;border-radius:10px}
-  .st0{background:rgba(52,211,153,.12);color:#34d399}
-  .st1{background:rgba(96,165,250,.12);color:#60a5fa}
-  .st2{background:rgba(167,139,250,.12);color:#a78bfa}
-  .st3{background:rgba(251,191,36,.12);color:#fbbf24}
-  /* ---- 天花板 ---- */
-  .warn{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
-  .wcard{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.25);border-radius:13px;padding:14px 16px}
-  .wcard b{color:#fdba74;font-size:13.5px;display:block;margin-bottom:5px}
-  .wcard p{font-size:12px;color:#c9a48c;line-height:1.65}
-  .footer{margin-top:44px;text-align:center;color:#4d5a75;font-size:11.5px;border-top:1px dashed rgba(255,255,255,.1);padding-top:18px;line-height:2}
-  @media(max-width:640px){.wrap{padding:24px 16px 40px}.hero h1{font-size:20px}}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#eef5ee; --card:#ffffff; --line:#d9e8db;
+  --text:#1f2b1f; --muted:#647864;
+  --primary:#16a34a; --primary-2:#15803d; --accent:#4ade80;
+  --green-bg:#f0faf3;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro SC","PingFang SC","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif;
+}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,#f4faf4 0%,#e9f3ea 40%,#dfeee2 100%);pointer-events:none;z-index:-1}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#d9e8db;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#bcd8c1}
+.wrap{max-width:1020px;margin:0 auto;padding:30px 22px 50px}
+/* 顶栏 */
+.bar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #e2eee4;box-shadow:0 10px 26px -14px rgba(20,60,30,.35);padding:8px 16px;display:flex;align-items:center;gap:10px}
+.bar .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#16a34a,#4ade80);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;box-shadow:0 4px 10px rgba(22,163,74,.32)}
+.bar .brand{font-weight:700;font-size:15.5px;letter-spacing:.3px}
+.bar .ver{font-size:11px;color:var(--muted);font-weight:400}
+.bar .spacer{flex:1}
+.bar .pill{font-size:11px;color:var(--primary-2);background:var(--green-bg);border:1px solid #cfe6d4;padding:4px 11px;border-radius:20px}
+/* 标题区 */
+.hero{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:18px;box-shadow:0 14px 40px -22px rgba(20,60,30,.35);display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.hero .ico{width:56px;height:56px;border-radius:15px;background:linear-gradient(135deg,#16a34a,#15803d);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;box-shadow:0 8px 22px rgba(22,163,74,.35);flex:0 0 auto}
+.hero h1{font-size:22px;color:#10240f;letter-spacing:.4px}
+.hero .sub{color:var(--muted);font-size:12.5px;margin-top:4px}
+.specs{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.chip{background:linear-gradient(180deg,#ffffff,#f2f7f1);border:1px solid #cfe0d2;color:var(--muted);font-size:12px;padding:4px 11px;border-radius:16px}
+.chip b{color:var(--text)}
+.chip.hl{border-color:var(--primary);color:var(--primary-2);background:linear-gradient(180deg,#ffffff,#eef8f0)}
+/* 区块 */
+.sec{display:flex;align-items:center;gap:9px;margin:26px 0 12px}
+.sec .ic{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.sec h2{font-size:16px;color:#10240f;letter-spacing:.4px}
+.sec .en{color:var(--muted);font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase}
+/* 卡片网格 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:11px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;transition:all .18s;box-shadow:0 2px 6px rgba(20,60,30,.05)}
+.card:hover{transform:translateY(-2px);border-color:#a9d4b2;box-shadow:0 8px 22px -12px rgba(22,163,74,.35)}
+.card .t{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:#10240f}
+.card .st{font-size:10px;font-weight:700;padding:2px 9px;border-radius:11px;letter-spacing:.5px;flex:0 0 auto}
+.st-ok{background:#e8f8ec;color:#15803d;border:1px solid #bfe6c9}
+.st-run{background:#eaf4fb;color:#0e6eb8;border:1px solid #c2dcf1}
+.st-wait{background:#fdf3e0;color:#b07d2a;border:1px solid #f0dcb2}
+.st-next{background:#f2ecfd;color:#6d4fc2;border:1px solid #ddd0f5}
+.card p{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7}
+.card .tag{font-size:11px;color:var(--primary-2);margin-top:7px;padding-top:6px;border-top:1px dashed #d9e8db;line-height:1.6}
+/* 大卡列表 */
+.big{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin-bottom:10px;box-shadow:0 2px 6px rgba(20,60,30,.05)}
+.big h3{font-size:14.5px;color:#10240f;display:flex;align-items:center;gap:8px}
+.big h3 .n{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:11.5px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.big p{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.8}
+.big .fix{font-size:12px;color:#5a6b5a;margin-top:8px;padding-top:8px;border-top:1px dashed #d9e8db;line-height:1.7}
+/* 时间线 */
+.road{margin-top:6px}
+.rstep{position:relative;padding:0 0 16px 26px}
+.rstep::before{content:'';position:absolute;left:7px;top:4px;bottom:0;width:2px;background:#bfe6c9}
+.rstep:last-child::before{display:none}
+.rstep .dot{position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #16a34a;box-shadow:0 0 0 3px #e2f5e6}
+.rstep.wait .dot{border-color:#b07d2a;box-shadow:0 0 0 3px #fbf0dc}
+.rstep h4{font-size:13.5px;color:#10240f}
+.rstep p{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.65}
+.rstep .ph{font-size:10.5px;font-weight:700;letter-spacing:.6px;padding:1px 9px;border-radius:10px;background:#e8f8ec;color:#15803d;margin-right:7px}
+.rstep.wait .ph{background:#fdf3e0;color:#b07d2a}
+/* 提示 */
+.tip{background:var(--green-bg);border:1px solid #bfe6c9;border-radius:12px;padding:12px 15px;font-size:12.5px;color:#3c5a3c;line-height:1.8;margin-top:8px}
+.tip b{color:#15803d}
+.tip.warn{background:#fdf8ef;border-color:#eeddb2;color:#7a6234}
+.tip.warn b{color:#b07d2a}
+.foot{margin-top:28px;border-top:1px dashed #d9e8db;padding-top:14px;text-align:center;color:var(--muted);font-size:11.5px;line-height:2}
+.btn{display:inline-block;background:linear-gradient(135deg,#16a34a,#15803d);border:none;color:#fff;font-size:12.5px;padding:7px 16px;border-radius:10px;font-weight:600;box-shadow:0 4px 12px rgba(22,163,74,.3);cursor:pointer;text-decoration:none}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(22,163,74,.4)}
+@media(max-width:640px){.hero h1{font-size:18px}}
 </style>
 </head>
-<body>
-<div class="wrap">
+<body data-page-node-id="WIaR84GdqdMcHN4qxQTEyf">
+<div class="bar" data-page-node-id="yERxu6QSm1jwz35kBUzhrE">
+  <div class="logo" data-page-node-id="L1EAViPzCpO2pU90kc0fkm">☁</div>
+  <span class="brand" data-page-node-id="RaCNQrRpY1rvB7yu5vsgsQ">阿里云服务器 · 价值全景</span><span class="ver" data-page-node-id="CIUAiHIdo8y75xf1AA52HP">ECS 99 计划</span>
+  <span class="spacer" data-page-node-id="cWcTuH4gFEIRANSLQuVQXd"></span>
+  <span class="pill" data-page-node-id="KlZS2p0JUKW2rZWH66h8Qp">更新于 2026-09-04 · 21:30</span>
+</div>
+<div class="wrap" data-page-node-id="fx8ZUMTCSew4bHjqQEsBZO">
 
-  <!-- 头部 -->
-  <div class="hero">
-    <div class="logo">☁️</div>
-    <div>
-      <h1>阿里云服务器 · 价值全景</h1>
-      <div class="sub">ECS 99 计划 ｜ 47.109.99.227 ｜ Ubuntu 22.04 ｜ 2026-09-04</div>
+  <div class="hero" data-page-node-id="BrCiSnDHFjfImjmP0JGDrP">
+    <div class="ico" data-page-node-id="oi59UDjsAfT6Enhu1tcmOr">☁</div>
+    <div style="flex:1;min-width:240px" data-page-node-id="LjCKbDHiMirjkpvt6NoQQb">
+      <h1 data-page-node-id="gFmDV9peun7s0vE5jPf0Dy">服务器价值全景与落地进度</h1>
+      <div class="sub" data-page-node-id="I3cfk06vodXe6TU0BJ9CPI">经济型 e · 2核2G · 3M 固定带宽 · 40G ESSD · ¥99/年续费同价 ｜ 47.109.99.227 ｜ Ubuntu 22.04</div>
+      <div class="specs" data-page-node-id="wkn1Ja5VUEZXxBPyF6qm9I">
+        <span class="chip" data-page-node-id="jwu7QWEf14JA9ngwLtZusg">处理器 <b data-page-node-id="aPScSLdJRFrkZWrNoVuoh8">2核</b></span>
+        <span class="chip" data-page-node-id="GyR9nLWeGpAf0Wfa4rnyCK">内存 <b data-page-node-id="J9fgmvy8zMQQdnST51jrIR">2G</b></span>
+        <span class="chip" data-page-node-id="qJzqehEr3fcWRMWx9aTqbv">带宽 <b data-page-node-id="BUitCfuthGvoD5V9KeSng5">3M</b></span>
+        <span class="chip" data-page-node-id="FLdn34TwJ4CJQPGB8FmmrB">存储 <b data-page-node-id="bucjxxRCMcDFZUPVKleaXl">40G</b></span>
+        <span class="chip hl" data-page-node-id="5PYX4woVlPDxcQJyOCrwkH">费用 <b data-page-node-id="QxQ08RgQjr21oETMvj9yJU">¥99/年 · 续费同价</b></span>
+      </div>
     </div>
   </div>
-  <div class="specs">
-    <span class="chip">处理器 <b>2核</b></span>
-    <span class="chip">内存 <b>2G</b></span>
-    <span class="chip">带宽 <b>3M 固定</b></span>
-    <span class="chip">存储 <b>40G ESSD</b></span>
-    <span class="chip hl">费用 <b>¥99/年 · 续费同价</b></span>
+
+  <div class="sec" data-page-node-id="JurwSF9bpp5BHzTUm10NnE"><div class="ic" data-page-node-id="6PYIu6m8JZAGGIw2XBT3T0">✓</div><h2 data-page-node-id="n5ftZHadgI78Ql99XID0CX">已落地</h2><span class="en" data-page-node-id="391PXusUYUXFs8yOP7eViI">LIVE · 2026-09-04</span></div>
+  <div class="grid" data-page-node-id="KgcvGEDaBh6lvk5rdhKfvV">
+    <div class="card" data-page-node-id="HRmWDzVO76D2U2h2fJbSFI"><div class="t" data-page-node-id="jm4BNY8P1iCCeaO6ZkRgwR">🛠 工具箱镜像站<span class="st st-ok" data-page-node-id="wyO4bSspjxMZIA0mnHoY7Z">运行中</span></div><p data-page-node-id="skIpRcutGfJszAVj7dD9gf">国内第二入口，与 EdgeOne 主站同源。</p><div class="tag" data-page-node-id="0T0H3OTs9eHBrfoO0FzWBM">GitHub push → Actions 自动同步，全程无人值守</div></div>
+    <div class="card" data-page-node-id="LzFF14NYYB7MqHVU6n2Tte"><div class="t" data-page-node-id="vH47BnOZAHp27tWlyTu6AW">🖥 frp RDP 中继<span class="st st-run" data-page-node-id="Ej4nrLVgiIUZYSAuWorzHD">运行中</span></div><p data-page-node-id="Mt6eguktIdFHhVoNm3eQh2">公司/外部 mstsc 远程家里电脑。</p><div class="tag" data-page-node-id="RBiF5EN6ZX5wykSKjMtX6I">47.109.99.227:33890</div></div>
+    <div class="card" data-page-node-id="gClrMhaAJmaCAkbjgzazCD"><div class="t" data-page-node-id="OyiVXSRs5kne8xAUxYlJTE">🔗 RustDesk 中继<span class="st st-run" data-page-node-id="IOWSms068dmsBriT58xXQ7">运行中</span></div><p data-page-node-id="7aPSdpHJQqCcHfgQZ9CO7S">跨网远程桌面，视频编码省带宽。</p><div class="tag" data-page-node-id="aM6KbR9vIo4M4E6qpTqNfj">hbbs + hbbr · 含局域网识别 mask</div></div>
+    <div class="card" data-page-node-id="9aUm8dQn3vZPRPAs6ouSxx"><div class="t" data-page-node-id="VqHzEsO0ElAjzIKsJTqgPc">📄 ICP 备案资源<span class="st st-wait" data-page-node-id="ZxZUB8AcLsqqiuCBFPz1Kk">审核中</span></div><p data-page-node-id="rKYJpPEKVefbS8lCfb4ra6">wbc2023.top 个人备案。</p><div class="tag" data-page-node-id="w6ngPZCVpPgJCE7DyjBNNt">留意管局短信核验 · 期间站点不受影响</div></div>
+    <div class="card" data-page-node-id="Thyp4pewW9VnRU2Rn2xMBP"><div class="t" data-page-node-id="w4IsfEeEoTHrDFZxjGq723">📡 云端同步 API <span class="st st-ok" data-page-node-id="cDVIpHbJkNzMvpN8qbfAha">已上线</span></div><p data-page-node-id="dzWgF7pkTW6vTmDol0mpJz">记录级合并 · Token 认证 · 多应用命名空间。</p><div class="tag" data-page-node-id="Jjsc4vFVU0tjHASzCypYDp">http://47.109.99.227/sync · 服务常驻自启</div></div>
+    <div class="card" data-page-node-id="kGlWBj4edeEBRdWCc3u1jO"><div class="t" data-page-node-id="8YjjznguZhlbz56ZDAugWG">🖼 公网图床<span class="st st-ok" data-page-node-id="0jKPzmb1UpeAs83FZzyWGj">已上线</span></div><p data-page-node-id="wjXsLXP2x9dZQoNplYGHR3">一键上传即得公网图片 URL。</p><div class="tag" data-page-node-id="chxeDPDVepAtiQQDPPg5ca">/img/ + putimg.py 上传脚本</div></div>
+    <div class="card" data-page-node-id="NRb38X95rBSDCaXlsoJkJI"><div class="t" data-page-node-id="9nZUgMEAkLo5jszWe7x5rU">🏠 房览速记 v1.0.25<span class="st st-ok" data-page-node-id="HLcrJC5FVVWdW4H8nYkvjj">云端落地</span></div><p data-page-node-id="45xdlWfjnf8ZKcrfgIwa3R">同步引擎升级到自建服务器，首个真实用例。</p><div class="tag" data-page-node-id="YFGpSpf9tWm1Bh4D0DJDVz">记录级合并 · 双端不丢数据 · 已上线主站</div></div>
+    <div class="card" data-page-node-id="95ClMs2h0cz52DUFbPdEPS"><div class="t" data-page-node-id="pq4WOJDpFgFaasC9BKRq96">📜 镜像同步链路<span class="st st-ok" data-page-node-id="dWtC9VhU2iUyZje15ghAjj">已打通</span></div><p data-page-node-id="fsCVlU8HUDmWzZUQm2BBD7">GitHub Actions → rsync → 服务器镜像。</p><div class="tag" data-page-node-id="JMVal2w1b4AOgiZS2FbgdY">push 一次 EdgeOne + 镜像全自动</div></div>
   </div>
 
-  <!-- 当前状态 -->
-  <div class="sec"><div class="bar"></div><h2>当前已就位</h2><span class="en">DEPLOYED</span></div>
-  <div class="status">
-    <div class="scard"><div class="ic green">🛠</div><div><div class="t">工具箱镜像站</div><div class="d">国内第二入口，与 EdgeOne 主站同源</div><div class="s ok">✅ GitHub push 全自动同步（Actions）</div></div></div>
-    <div class="scard"><div class="ic blue">🖥</div><div><div class="t">frp RDP 中继</div><div class="d">外部 mstsc 远程家里电脑</div><div class="s run">✅ 47.109.99.227:33890 运行中</div></div></div>
-    <div class="scard"><div class="ic purple">🔗</div><div><div class="t">RustDesk 中继</div><div class="d">跨网远程桌面（视频编码省带宽）</div><div class="s run">✅ hbbs + hbbr 运行中</div></div></div>
-    <div class="scard"><div class="ic amber">📄</div><div><div class="t">ICP 备案资源</div><div class="d">wbc2023.top 个人备案</div><div class="s wait">⏳ 管局审核中 · 留意短信核验</div></div></div>
+  <div class="sec" data-page-node-id="u35XKyLeuw8jLZI6yVvQVV"><div class="ic" data-page-node-id="suBLlj4ryuDouiHqWki0uV">→</div><h2 data-page-node-id="EdnRBXKdg1XJuoudyFxBz6">下一步 · 正在做 / 待做</h2><span class="en" data-page-node-id="UfXgvhY1yVqrucAauI5kYY">NEXT</span></div>
+  <div class="big" data-page-node-id="UemqWBzGnpP6ZiBZtXRyW9">
+    <h3 data-page-node-id="xbU0gNZBQEDn0XH9kvyBQT"><span class="n" data-page-node-id="pqVMTMiELFeRpS8PP5RwAL">1</span>渝选房（桌面 EXE v1.4.1）自定义小区 云端同步</h3>
+    <p data-page-node-id="ayP9JlWqNy0HDV4EElgV8C">把自定义小区库（yxf_houses.json）接入同一套 /sync 后端，多台电脑数据一致 —— 沿用房览速记同款令牌机制，出 v1.4.2 并重新打包。</p>
+    <div class="fix" data-page-node-id="MXNCRHepHk8BQ4hc7CcDcJ">范围待确认：A 仅桌面 EXE 多电脑同步 / B 网页手机版加自定义入口全端同步</div>
+  </div>
+  <div class="big" data-page-node-id="MoFOU0xFustdtqRuJEbN3m">
+    <h3 data-page-node-id="WtxuK2Bi50KxhZ0XvGwxru"><span class="n" data-page-node-id="4w7SWpOpRCaBn9fiqOfOPT">2</span>宝塔面板 / 定时任务中心 / 站点监控</h3>
+    <p data-page-node-id="hShNKX6rrGXKnTlRSEEtTZ">图形化管理 Nginx·数据库·定时任务；签到与备份定时跑；Uptime Kuma 宕机推微信。</p>
+    <div class="fix" data-page-node-id="X9czIikVCweLCPMMTxYYe5">低优先 · 需要时再上</div>
+  </div>
+  <div class="big" data-page-node-id="Mrz2dZqArWVGgtm6AtEjF0">
+    <h3 data-page-node-id="QWVn9VSGGyNkTlmTFeEb8D"><span class="n" data-page-node-id="6F614hqM3AjmqWCny2OaqS">3</span>frp 穿家群晖 NAS / alist / Docker / 密码库</h3>
+    <p data-page-node-id="540cvGWBeI1egaMXNibmmM">个人云扩展：人在外面访问 Z4pro-w0op 共享文件，轻量云盘、容器底座、密码自托管。</p>
+    <div class="fix" data-page-node-id="SVrizpt0IzLtwZzI7EVDXu">按需启用 · 注意 3M 带宽与 2G 内存边界</div>
   </div>
 
-  <!-- P0 -->
-  <div class="sec"><div class="bar"></div><h2>第一梯队 · 服务工具箱生态</h2><span class="en">P0 · 最该先做</span></div>
-  <div class="tier">
-    <div class="tcard p0"><div class="num">P0 · ①</div><h3>工具数据同步后端</h3><p>服务器跑轻量 API（几十行代码 + 数据文件），房览速记、渝居优选自定义小区、木材报告参数等工具的云端同步。</p><div class="fix">把 GitHub token 整文件覆盖升级为<b style="color:#fda4af">记录级合并</b>（按 id+时间戳），多设备各改各的不丢数据。</div></div>
-    <div class="tcard p0"><div class="num">P0 · ②</div><h3>公网图床</h3><p>服务器开静态目录放图片，经 Nginx 直接公网访问。</p><div class="fix">推送通知（PushPlus --image 图文）的图片从此有公网 URL，不再依赖导航站挂图。</div></div>
-    <div class="tcard p0"><div class="num">P0 · ③</div><h3>工具云端化 API</h3><p>渝选房房源库、检测报告模板与参数等放服务器，HTML 工具从纯离线升级为「可同步」。</p><div class="fix">每个 HTML 工具都能接上云，多端数据一致。</div></div>
+  <div class="sec" data-page-node-id="GSvmhmkCeBZDrqU0JCsTq9"><div class="ic" data-page-node-id="U3mX4qmXiKAeox4aNpWlTh">▣</div><h2 data-page-node-id="iw5xUPGxD5YG5H4L5BOtHX">备案通过后 · 域名转正三选一</h2><span class="en" data-page-node-id="9SFZL5niHnjpCz4llaklld">DOMAIN</span></div>
+  <div class="grid" data-page-node-id="PxNFoUrbfIrDiwzQvjgTIR">
+    <div class="card" data-page-node-id="1FdDrj0ERMo1i9QTA2DwAp"><div class="t" data-page-node-id="EtpAZ9hUBqbf00mnN3WHWz">A · 域名绑服务器</div><p data-page-node-id="E8qTfNspARkAbwIcSaSoF1">Nginx 挂 tool.wbc2023.top + 自动 HTTPS，DNS 指服务器 —— 整体搬主站时选。</p></div>
+    <div class="card" data-page-node-id="YBBY8tGOGjtSgJ6umEzTqe"><div class="t" data-page-node-id="oqfiThayzcweS8C33EcuEm">B · EdgeOne 切大陆区域</div><p data-page-node-id="eQ2euvWwXlpxsQSlwXGJpx">保持 0 元 CDN + push 自动部署，仅切加速区域，国内访问进 50~90ms。</p></div>
+    <div class="card" data-page-node-id="lwS2iHez6m8PyE8gO7nSJX"><div class="t" data-page-node-id="sLACK7XeXNb6mPOu3ncZGr">C · 双跑冗余</div><p data-page-node-id="DGCBOBBMUZgUSb6oFY9oEi">EdgeOne 主站提速 + 服务器镜像/后端，最稳。</p></div>
   </div>
 
-  <!-- P1 -->
-  <div class="sec"><div class="bar"></div><h2>第二梯队 · 自动化与运维</h2><span class="en">P1 · 推荐</span></div>
-  <div class="tier">
-    <div class="tcard p1"><div class="num">P1 · A</div><h3>宝塔面板</h3><p>图形化管理 Nginx / 数据库 / 定时任务 / 防火墙，自己也能点鼠标操作，不依赖代维护。</p></div>
-    <div class="tcard p1"><div class="num">P1 · B</div><h3>定时任务中心</h3><p>WorkBuddy 积分签到兜底、deploy 仓库定时异地备份、微信推送脚本定时触发。</p></div>
-    <div class="tcard p1"><div class="num">P1 · C</div><h3>站点监控告警</h3><p>Uptime Kuma 监控主站 / 镜像站 / 各中继端口，宕机自动推微信第一时间知道。</p></div>
+  <div class="sec" data-page-node-id="GJA09YUrypWAIlLDhdP6YQ"><div class="ic" data-page-node-id="0hg6OyH8DcV8KOx53HwRpN">↗</div><h2 data-page-node-id="ZjbB6Yh2fAMI2xBayOGSZS">落地路线图</h2><span class="en" data-page-node-id="dx8z8xwHQdrcMAiisKd7Nc">ROADMAP</span></div>
+  <div class="road" data-page-node-id="mscdfNZfYcijrIRwOfQgH3">
+    <div class="rstep" data-page-node-id="PDbC3SBQmMPVUFtNo31HFW"><span class="dot" data-page-node-id="wUAOdAoIFhQUNxlggGanHA"></span><h4 data-page-node-id="d2d0MVztLZGWikmvqyVno6"><span class="ph" data-page-node-id="EZV1ofT1ilYesG6Kk58uIn">阶段 0 · 已完成</span>镜像站 + frp + RustDesk + Actions 自动同步 + 备案提交</h4><p data-page-node-id="GCmBZka3LZbcVSk0qboQRL">发布一次，EdgeOne 主站与服务器镜像全自动跟上。</p></div>
+    <div class="rstep" data-page-node-id="IQdSdWQLvLkEMq1gn1uFaH"><span class="dot" data-page-node-id="DNQ3oG1JtYTGADUhN4gFos"></span><h4 data-page-node-id="QwE3d612pJ6CgF2TDU2iXB"><span class="ph" data-page-node-id="QmAEhUdRN6VsO7OxP6crRP">阶段 1 · 已完成大部分</span>同步后端上线 → 房览速记 v1.0.25 云端落地 → 图床就绪</h4><p data-page-node-id="CbKBgQD31atwP7x7Cg8cIM">记录级合并 API 常驻运行，第一用例已发布上线；图床一键上传可用。</p></div>
+    <div class="rstep wait" data-page-node-id="zgPqsCoRePE0g8CMdEgbnM"><span class="dot" data-page-node-id="AAam0ZVSlxADuhCKMqrObz"></span><h4 data-page-node-id="5BK8Gprg2jjQDa8cBT4flW"><span class="ph" data-page-node-id="JOLntSbMaF0aYFWCjgUQEz">阶段 1.5 · 进行中</span>渝选房自定义小区云同步</h4><p data-page-node-id="yoFjNn4iUnZvKZ0YVQVAA9">桌面 EXE 接入同一后端，多电脑自定义小区互通。</p></div>
+    <div class="rstep wait" data-page-node-id="6MJWt3DkFaS790NqM9Nrwn"><span class="dot" data-page-node-id="5qwduevcOz5vXTjRrKe2I4"></span><h4 data-page-node-id="k6CS8Eul8MWSZKL89O3EjN"><span class="ph" data-page-node-id="NaA4dtel21MOPqA23a35sE">阶段 2 · 待做</span>宝塔 / 定时任务 / 监控 / frp 穿 NAS</h4><p data-page-node-id="FkEfQA5aBycCnAZ4qymROo">自动化与个人云扩展，按需推进。</p></div>
+    <div class="rstep wait" data-page-node-id="2BFPhXIYEZYuWqkTvg7td9"><span class="dot" data-page-node-id="LlsVtYLWhbGR8A9sDA34Nt"></span><h4 data-page-node-id="3diVLsaSheNkgkFLxBV4dF"><span class="ph" data-page-node-id="3dUIaGehZ6TOvPW7reETUA">阶段 3 · 备案通过后</span>域名转正三选一</h4><p data-page-node-id="NA4N0gpfeFtsIziG6XGifE">在 A / B / C 中选，按需上 alist / Docker / Vaultwarden。</p></div>
   </div>
 
-  <!-- P2 -->
-  <div class="sec"><div class="bar"></div><h2>第三梯队 · 个人云扩展</h2><span class="en">P2 · 按需</span></div>
-  <div class="tier">
-    <div class="tcard p2"><div class="num">P2</div><h3>frp 穿回家群晖 NAS</h3><p>人在外面访问 Z4pro-w0op 共享文件夹 —— frp 架构现成，加一条映射即通。</p></div>
-    <div class="tcard p2"><div class="num">P2</div><h3>alist 私有云盘</h3><p>轻量网盘 / 文件管理，3M 带宽下适合小文件。</p></div>
-    <div class="tcard p2"><div class="num">P2</div><h3>Docker / 密码库</h3><p>Docker 底座让以后任意服务一条命令部署；Vaultwarden 多设备密码自托管。</p></div>
+  <div class="sec" data-page-node-id="DDaYw3wjDjC3jyQf5SIY3O"><div class="ic" data-page-node-id="QQOgx4AQo2w4BSpGQXz0AC">!</div><h2 data-page-node-id="9HYOA12jW10MGIZ1fzkyhs">两个天花板</h2><span class="en" data-page-node-id="SAGjd0LtTyeCKnf4aRivUW">LIMITS</span></div>
+  <div class="tip warn" data-page-node-id="FRHaxF65ACGVQjbRUa7dqJ"><b data-page-node-id="U02SiniSwEcQtebsPjKofO">⚠️ 3M 带宽</b>：对外传输上限 ≈ 384KB/s —— 图床 / 云盘只适合小文件；大文件与多人并发仍交给 EdgeOne CDN。<br data-page-node-id="jIgF0bLGnkqtNuaMAQPtc1"><b data-page-node-id="br9FhcEsmLoyTMDHZJPT5E">⚠️ 2G 内存</b>：别跑重型常驻服务；数据库优先 SQLite 或精简 MySQL，一次别堆太多。</div>
+
+  <div style="text-align:center;margin-top:18px" data-page-node-id="dC7kYBdAEtBFTkSEUzRJDf">
+    <a class="btn" href="http://47.109.99.227/" target="_blank" rel="noopener" data-page-node-id="SNLtgH9XRI6Tm6LucpRCEV">打开服务器镜像站</a>
   </div>
 
-  <!-- 备案转正 -->
-  <div class="sec"><div class="bar"></div><h2>备案通过后 · 域名转正三选一</h2><span class="en">DOMAIN</span></div>
-  <div class="opts">
-    <div class="opt"><div class="hd"><div class="let">A</div><b>域名绑服务器</b></div><p>Nginx 挂 tool.wbc2023.top + 自动 HTTPS 证书，DNS 指到服务器 —— 想整体搬主站时选它。</p></div>
-    <div class="opt"><div class="hd"><div class="let">B</div><b>EdgeOne 切大陆区域</b></div><p>保持 0 元 CDN + push 自动部署架构，仅切加速区域，国内访问进 50~90ms。</p></div>
-    <div class="opt"><div class="hd"><div class="let">C</div><b>双跑冗余</b></div><p>EdgeOne 主站提速 + 服务器镜像 / 后端 —— 冗余最大化，最稳。</p></div>
-  </div>
-
-  <!-- 路线图 -->
-  <div class="sec"><div class="bar"></div><h2>落地路线图</h2><span class="en">ROADMAP</span></div>
-  <div class="road">
-    <div class="rstep done"><span class="dot"></span><h4><span class="st st0">阶段 0 · 已完成</span>镜像站 + frp + RustDesk + 自动同步 + 备案提交</h4><p>GitHub push → EdgeOne 主站与服务器镜像全自动更新；两个远程中继在线。</p></div>
-    <div class="rstep"><span class="dot"></span><h4><span class="st st1">阶段 1 · 建议近期</span>宝塔 → 数据同步后端 → 图床</h4><p>首选房览速记做第一个真实后端用例：从 GitHub 整文件覆盖升级为记录级合并。</p></div>
-    <div class="rstep"><span class="dot"></span><h4><span class="st st2">阶段 2 · 有空做</span>定时任务 + 监控 + 穿 NAS</h4><p>签到 / 备份自动化，Uptime Kuma 宕机告警，frp 访问家里群晖。</p></div>
-    <div class="rstep"><span class="dot"></span><h4><span class="st st3">阶段 3 · 备案通过后</span>域名转正三选一</h4><p>按当时需求在 A / B / C 中选，之后按需上 alist / Docker / Vaultwarden。</p></div>
-  </div>
-
-  <!-- 天花板 -->
-  <div class="sec"><div class="bar"></div><h2>两个天花板</h2><span class="en">LIMITS</span></div>
-  <div class="warn">
-    <div class="wcard"><b>⚠️ 3M 带宽</b><p>对外传输上限 ≈ 384KB/s。图床 / 云盘只适合小文件；大文件与多人并发仍交给 EdgeOne CDN。</p></div>
-    <div class="wcard"><b>⚠️ 2G 内存</b><p>别跑重型常驻服务。数据库优先 SQLite 或精简 MySQL，一次别堆太多服务。</p></div>
-  </div>
-
-  <div class="footer">阿里云 ECS 99 计划 · 47.109.99.227<br>正式发布链路：GitHub push → EdgeOne 主站自动部署 + Actions 推送服务器镜像</div>
+  <div class="foot" data-page-node-id="9GywUxWhTDwMuHRXFzwvEU">阿里云 ECS 99 计划 · 47.109.99.227<br data-page-node-id="bqpFk0MZYE5u9LPBCRWbdj">正式发布链路：GitHub push → EdgeOne 主站自动部署 + Actions 推送服务器镜像</div>
 </div>
 </body>
 </html>
