@@ -277,6 +277,33 @@ body.show-new .ebox .eimg { display: none; }
   .ebox .txt { opacity: 0 !important; background: transparent !important; color: transparent !important; box-shadow: none !important; }
   .ebox .handle, .ebox .resize, .ebox .del { display: none !important; }
 }
+
+/* ===== v3.59：云端参数模板 玻璃弹窗 ===== */
+.cm-mask{position:fixed;inset:0;background:rgba(15,40,20,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:6000;display:none;align-items:center;justify-content:center;padding:18px}
+.cm-mask.show{display:flex}
+.cm-box{display:flex;flex-direction:column;width:min(580px,100%);max-height:86vh;overflow:hidden;background:linear-gradient(165deg,rgba(255,255,255,.86) 0%,rgba(248,251,248,.78) 60%,rgba(238,244,238,.72) 100%);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.75);border-radius:20px;box-shadow:0 4px 10px rgba(15,45,25,.08),0 22px 70px -16px rgba(15,45,25,.38),inset 0 1px 0 rgba(255,255,255,.95);animation:pop .18s ease}
+.cm-head{display:flex;align-items:center;gap:8px;padding:15px 18px 13px;border-bottom:1px dashed rgba(120,165,130,.55);font-size:15px;font-weight:800;color:#14532d}
+.cm-head .cm-t{flex:1}
+.cm-hint{font-size:11.5px;color:#7d8f83;font-weight:500;white-space:nowrap}
+.cm-x{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.7);border:1px solid rgba(140,180,150,.6);color:#4b6b55;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;flex:none;transition:all .15s}
+.cm-x:hover{background:linear-gradient(180deg,#23b95e,#0e7a37);color:#fff;border-color:#0e7a37}
+.cm-body{padding:6px 18px 16px;overflow-y:auto}
+.cd-list{max-height:40vh;overflow-y:auto;margin:8px 0 12px}
+.cd-row{display:flex;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid rgba(120,165,130,.25);font-size:13px}
+.cd-row:last-child{border-bottom:none}
+.cd-row .cd-nm{flex:1;font-weight:600;color:#22303f;word-break:break-all;min-width:0}
+.cd-row .cd-tm{color:#9aa7a0;font-size:11.5px;white-space:nowrap}
+.cd-btn{border:1px solid #bfd6c4;background:rgba(255,255,255,.75);border-radius:9px;padding:4px 12px;font-size:12.5px;cursor:pointer;color:#15803d;flex:none;transition:all .15s}
+.cd-btn:hover{border-color:#16a34a;background:#fff}
+.cd-btn.del{color:#dc2626;border-color:#f0cbc8}
+.cd-btn.del:hover{border-color:#dc2626}
+.cd-empty{color:#94a3b8;text-align:center;padding:16px 0;font-size:13px}
+.cd-save{display:flex;gap:8px;padding-top:12px;border-top:1px dashed rgba(120,165,130,.55)}
+.cd-save input{flex:1;border:1.5px solid rgba(160,195,168,.8);background:rgba(255,255,255,.8);border-radius:10px;padding:8px 11px;font-size:13px;outline:none;min-width:0}
+.cd-save input:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.14)}
+.cd-savebtn{background:linear-gradient(180deg,#23b95e,#0e7a37);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #0b5e2b,0 6px 14px rgba(22,163,74,.25);flex:none;transition:all .12s}
+.cd-savebtn:active{transform:translateY(2px);box-shadow:0 1px 0 #0b5e2b}
+.cd-foot{font-size:11.5px;color:#c2410c;padding:8px 4px 2px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -292,23 +319,6 @@ body.show-new .ebox .eimg { display: none; }
     </div>
   </div>
   <button type="button" onclick="toggleCloudMenu(event)">☁️ 云端参数</button>
-  <div class="cm-mask" id="cloudMenu" onclick="cloudClose(event)">
-    <div class="cm-box" onclick="event.stopPropagation()">
-      <div class="cm-head">
-        <span class="cm-t">☁️ 云端参数模板</span>
-        <span class="cm-hint" id="cloudHint"></span>
-        <span class="cm-x" title="关闭" onclick="cloudClose(event)">✕</span>
-      </div>
-      <div class="cm-body">
-        <div class="cd-list" id="cloudList"><div class="cd-empty">打开即同步云端模板…</div></div>
-        <div class="cd-save">
-          <input id="cloudName" type="text" placeholder="模板名称，如：XX项目-细木工板" maxlength="40">
-          <button type="button" class="cd-savebtn" onclick="cloudSave()">保存当前参数</button>
-        </div>
-        <div class="cd-foot" id="cloudFoot"></div>
-      </div>
-    </div>
-  </div>
   <button onclick="exportJson()">⬇ 导出已填参数</button>
   <button onclick="importJson()">⬆ 导入已填参数</button>
   <button onclick="clearAll()" class="danger">🗑 清空框</button>
@@ -1677,5 +1687,22 @@ window.addEventListener('DOMContentLoaded', () => {
   setBgQuality('ultra');   // 底图清晰度默认为高清
 });
 </script>
+<div class="cm-mask" id="cloudMenu" onclick="cloudClose(event)">
+    <div class="cm-box" onclick="event.stopPropagation()">
+      <div class="cm-head">
+        <span class="cm-t">☁️ 云端参数模板</span>
+        <span class="cm-hint" id="cloudHint"></span>
+        <span class="cm-x" title="关闭" onclick="cloudClose(event)">✕</span>
+      </div>
+      <div class="cm-body">
+        <div class="cd-list" id="cloudList"><div class="cd-empty">打开即同步云端模板…</div></div>
+        <div class="cd-save">
+          <input id="cloudName" type="text" placeholder="模板名称，如：XX项目-细木工板" maxlength="40">
+          <button type="button" class="cd-savebtn" onclick="cloudSave()">保存当前参数</button>
+        </div>
+        <div class="cd-foot" id="cloudFoot"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
