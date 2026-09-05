@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>木材检测报告工具 v3.59</title>
+<title>木材检测报告工具 v3.60</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='90'>🪵</text></svg>">
 <style>
 * { box-sizing: border-box; }
@@ -278,7 +278,7 @@ body.show-new .ebox .eimg { display: none; }
   .ebox .handle, .ebox .resize, .ebox .del { display: none !important; }
 }
 
-/* ===== v3.59：云端参数模板 玻璃弹窗 ===== */
+/* ===== v3.60：云端参数模板 玻璃弹窗 ===== */
 .cm-mask{position:fixed;inset:0;background:rgba(15,40,20,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:6000;display:none;align-items:center;justify-content:center;padding:18px}
 .cm-mask.show{display:flex}
 .cm-box{display:flex;flex-direction:column;width:min(580px,100%);max-height:86vh;overflow:hidden;background:linear-gradient(165deg,rgba(255,255,255,.86) 0%,rgba(248,251,248,.78) 60%,rgba(238,244,238,.72) 100%);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.75);border-radius:20px;box-shadow:0 4px 10px rgba(15,45,25,.08),0 22px 70px -16px rgba(15,45,25,.38),inset 0 1px 0 rgba(255,255,255,.95);animation:pop .18s ease}
@@ -304,12 +304,15 @@ body.show-new .ebox .eimg { display: none; }
 .cd-savebtn{background:linear-gradient(180deg,#23b95e,#0e7a37);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #0b5e2b,0 6px 14px rgba(22,163,74,.25);flex:none;transition:all .12s}
 .cd-savebtn:active{transform:translateY(2px);box-shadow:0 1px 0 #0b5e2b}
 .cd-foot{font-size:11.5px;color:#c2410c;padding:8px 4px 2px;line-height:1.6}
+.cd-rni{flex:1;min-width:0;border:1.5px solid rgba(160,195,168,.8);background:rgba(255,255,255,.9);border-radius:8px;padding:5px 10px;font-size:12.5px;outline:none}
+.cd-rni:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+.cd-rn-tip{width:100%;font-size:11px;color:#7d8f83;padding:2px 2px 4px}
 </style>
 </head>
 <body>
 
 <div class="toolbar">
-  <span class="brand">🪵 木材检测报告工具 <span class="ver">v3.59</span></span>
+  <span class="brand">🪵 木材检测报告工具 <span class="ver">v3.60</span></span>
   <div class="dropdown" id="bgDropdown">
     <button type="button" class="dd-btn" onclick="toggleBgMenu(event)">底图清晰度：<span id="bgQualityLabel">标准</span> ▾</button>
     <div class="dd-menu" id="bgMenu" style="display:none;">
@@ -434,7 +437,7 @@ body.show-new .ebox .eimg { display: none; }
 
 <div id="aboutModal" class="modal-mask hidden" onclick="if(event.target.id==='aboutModal')hideAbout()">
   <div class="modal">
-    <h3>🪵 木材检测报告工具 v3.59</h3>
+    <h3>🪵 木材检测报告工具 v3.60</h3>
     <p>印章抠图浮动；字段位置/字号/倾斜按原件校验；蓝色章有效期限弧形排布；<b>导出 PDF 直出文件</b>（不再走打印对话框）。</p>
     <ul style="margin:6px 0 6px 18px; padding:0;">
       <li>点文字框编辑；顶栏：文字−/+、文字变细/常规/加粗、↻倾斜±、◐虚化±、◑墨色±（−浅+深）、⇔⇕拉伸±</li>
@@ -1897,7 +1900,7 @@ function handleImport(ev) {
 }
 
 
-/* ===== 云端参数模板同步（v3.59：自建同步服务器，命名保存/列表导入/删除，手机与电脑互通） ===== */
+/* ===== 云端参数模板同步（v3.60：自建同步服务器，命名保存/列表导入/删除，手机与电脑互通） ===== */
 const CLOUD = { api:'http://47.109.99.227/sync', app:'woodreport', token:'af91def02e8a9a205fe630e970b1b39a' };
 let cloudCache = [];
 function cloudHttp(act, method, body) {
@@ -1933,8 +1936,9 @@ function cloudRefresh(){
     if (!cloudCache.length) { list.innerHTML = '<div class="cd-empty">云端暂无模板</div>'; return; }
     list.innerHTML = cloudCache.map(function(r){
       const nm = (r.data && r.data.name) || r.id;
-      return '<div class="cd-row"><span class="cd-nm">' + escH(nm) + '</span><span class="cd-tm">' + cloudFmt(r.v) + '</span>' +
+      return '<div class="cd-row" data-id="' + escH(r.id) + '"><span class="cd-nm">' + escH(nm) + '</span><span class="cd-tm">' + cloudFmt(r.v) + '</span>' +
         '<button type="button" class="cd-btn" data-act="imp" data-id="' + escH(r.id) + '">导入</button>' +
+        '<button type="button" class="cd-btn" data-act="ren" data-id="' + escH(r.id) + '">重命名</button>' +
         '<button type="button" class="cd-btn del" data-act="del" data-id="' + escH(r.id) + '">删除</button></div>';
     }).join('');
     document.getElementById('cloudHint').textContent = '(' + cloudCache.length + ' 套)';
@@ -1968,13 +1972,58 @@ function cloudDel(id){
     .then(function(){ toast('已删除模板「' + nm + '」', 'ok'); cloudRefresh(); })
     .catch(function(e){ toast('删除失败：' + (e.message || e), 'err'); });
 }
+function cloudRow(id){
+  const rows = document.querySelectorAll('#cloudList .cd-row');
+  for (let i = 0; i < rows.length; i++) if (rows[i].getAttribute('data-id') === id) return rows[i];
+  return null;
+}
+function cloudRename(id){   // 行内编辑：整行切换为输入框 + 确定/取消
+  const row = cloudRow(id);
+  const hit = cloudCache.find(function(x){ return x.id === id; });
+  const oldName = (hit && hit.data && hit.data.name) || id;
+  if (!row) return;
+  row.innerHTML = '<span class="cd-rn-tip">新名称：</span>' +
+    '<input type="text" class="cd-rni" value="' + escH(oldName) + '" maxlength="40">' +
+    '<button type="button" class="cd-btn" data-act="rn-ok" data-id="' + escH(id) + '">✓ 确定</button>' +
+    '<button type="button" class="cd-btn del" data-act="rn-no" data-id="' + escH(id) + '">取消</button>';
+  const inp = row.querySelector('.cd-rni');
+  inp.focus(); inp.select();
+  inp.addEventListener('keydown', function(ev){
+    if (ev.key === 'Enter') cloudRenameDo(id);
+    else if (ev.key === 'Escape') cloudRefresh();
+  });
+}
+function cloudRenameDo(id){
+  const row = cloudRow(id);
+  const inp = row && row.querySelector('.cd-rni');
+  const hit = cloudCache.find(function(x){ return x.id === id; });
+  const oldName = (hit && hit.data && hit.data.name) || id;
+  if (!inp) return;
+  const nn = inp.value.trim();
+  if (!nn) { toast('名称不能为空', 'err'); inp.focus(); return; }
+  if (nn === oldName) { cloudRefresh(); return; }
+  if (cloudCache.some(function(x){ return x.id === nn; })) { toast('已存在同名模板「' + nn + '」', 'err'); inp.focus(); return; }
+  inp.disabled = true;
+  const data = JSON.parse(JSON.stringify((hit && hit.data) || {}));
+  data.name = nn;
+  const v = Date.now();
+  cloudHttp('push', 'POST', { records: [
+    { id: nn, v: v, data: data, del: false },
+    { id: id, v: v + 1, data: null, del: true }
+  ]}).then(function(){ toast('已重命名为「' + nn + '」', 'ok'); cloudRefresh(); })
+    .catch(function(e){ toast('重命名失败：' + (e.message || e), 'err'); inp.disabled = false; });
+}
 document.addEventListener('click', function(e){
   // 委托处理弹窗列表内的 导入/删除（弹窗在 body 尾，此处执行时可能尚未解析，故挂 document）
   const btn = e.target && e.target.closest ? e.target.closest('#cloudList button[data-act]') : null;
   if (btn) {
     const id = btn.getAttribute('data-id');
-    if (btn.getAttribute('data-act') === 'imp') cloudImport(id);
-    else if (btn.getAttribute('data-act') === 'del') cloudDel(id);
+    const act = btn.getAttribute('data-act');
+    if (act === 'imp') cloudImport(id);
+    else if (act === 'ren') cloudRename(id);
+    else if (act === 'rn-ok') cloudRenameDo(id);
+    else if (act === 'rn-no') cloudRefresh();
+    else if (act === 'del') cloudDel(id);
     e.stopPropagation();
     return;
   }
