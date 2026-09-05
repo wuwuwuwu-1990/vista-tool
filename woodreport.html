@@ -304,9 +304,13 @@ body.show-new .ebox .eimg { display: none; }
 .cd-savebtn{background:linear-gradient(180deg,#23b95e,#0e7a37);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #0b5e2b,0 6px 14px rgba(22,163,74,.25);flex:none;transition:all .12s}
 .cd-savebtn:active{transform:translateY(2px);box-shadow:0 1px 0 #0b5e2b}
 .cd-foot{font-size:11.5px;color:#c2410c;padding:8px 4px 2px;line-height:1.6}
-.cd-rni{flex:1;min-width:0;border:1.5px solid rgba(160,195,168,.8);background:rgba(255,255,255,.9);border-radius:8px;padding:5px 10px;font-size:12.5px;outline:none}
-.cd-rni:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.12)}
-.cd-rn-tip{width:100%;font-size:11px;color:#7d8f83;padding:2px 2px 4px}
+.cm-rbox{width:min(470px,100%)}
+.cm-rlabel{font-size:13px;color:#4e6356;margin:4px 2px 10px;word-break:break-all;line-height:1.6;font-weight:600}
+#renameInput{width:100%;box-sizing:border-box;border:1.5px solid rgba(160,195,168,.85);background:rgba(255,255,255,.94);border-radius:11px;padding:12px 14px;font-size:16px;outline:none}
+#renameInput:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.16)}
+.cm-raction{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.cm-cbtn{border:1px solid #c9d8cc;background:rgba(255,255,255,.85);border-radius:10px;padding:9px 18px;font-size:13.5px;cursor:pointer;color:#55685c;flex:none}
+.cm-cbtn:hover{border-color:#94a3b8}
 </style>
 </head>
 <body>
@@ -1972,46 +1976,47 @@ function cloudDel(id){
     .then(function(){ toast('已删除模板「' + nm + '」', 'ok'); cloudRefresh(); })
     .catch(function(e){ toast('删除失败：' + (e.message || e), 'err'); });
 }
-function cloudRow(id){
-  const rows = document.querySelectorAll('#cloudList .cd-row');
-  for (let i = 0; i < rows.length; i++) if (rows[i].getAttribute('data-id') === id) return rows[i];
-  return null;
-}
-function cloudRename(id){   // 行内编辑：整行切换为输入框 + 确定/取消
-  const row = cloudRow(id);
+let cloudRenameTarget = null;
+function cloudRename(id){   // 玻璃子弹窗式重命名（大输入框）
   const hit = cloudCache.find(function(x){ return x.id === id; });
   const oldName = (hit && hit.data && hit.data.name) || id;
-  if (!row) return;
-  row.innerHTML = '<span class="cd-rn-tip">新名称：</span>' +
-    '<input type="text" class="cd-rni" value="' + escH(oldName) + '" maxlength="40">' +
-    '<button type="button" class="cd-btn" data-act="rn-ok" data-id="' + escH(id) + '">✓ 确定</button>' +
-    '<button type="button" class="cd-btn del" data-act="rn-no" data-id="' + escH(id) + '">取消</button>';
-  const inp = row.querySelector('.cd-rni');
-  inp.focus(); inp.select();
-  inp.addEventListener('keydown', function(ev){
-    if (ev.key === 'Enter') cloudRenameDo(id);
-    else if (ev.key === 'Escape') cloudRefresh();
-  });
+  cloudRenameTarget = id;
+  document.getElementById('renameOld').textContent = '原名称：' + oldName;
+  const inp = document.getElementById('renameInput');
+  inp.value = oldName;
+  document.getElementById('renameMask').classList.add('show');
+  setTimeout(function(){ inp.focus(); inp.select(); }, 80);
 }
-function cloudRenameDo(id){
-  const row = cloudRow(id);
-  const inp = row && row.querySelector('.cd-rni');
-  const hit = cloudCache.find(function(x){ return x.id === id; });
-  const oldName = (hit && hit.data && hit.data.name) || id;
-  if (!inp) return;
+function cloudRenameHide(ev){
+  if (ev && ev.target && ev.target !== ev.currentTarget && !(ev.currentTarget && ev.currentTarget.classList && ev.currentTarget.classList.contains('cm-x'))) return;
+  document.getElementById('renameMask').classList.remove('show');
+  cloudRenameTarget = null;
+}
+function cloudRenameOk(){
+  const inp = document.getElementById('renameInput');
   const nn = inp.value.trim();
+  const id = cloudRenameTarget;
+  const hit = cloudCache.find(function(x){ return x.id === id; });
+  const oldName = (hit && hit.data && hit.data.name) || id;
   if (!nn) { toast('名称不能为空', 'err'); inp.focus(); return; }
-  if (nn === oldName) { cloudRefresh(); return; }
+  if (nn === oldName) { cloudRenameHide(); return; }
   if (cloudCache.some(function(x){ return x.id === nn; })) { toast('已存在同名模板「' + nn + '」', 'err'); inp.focus(); return; }
-  inp.disabled = true;
+  const btn = document.querySelector('#renameMask .cd-savebtn');
+  if (btn) btn.disabled = true;
   const data = JSON.parse(JSON.stringify((hit && hit.data) || {}));
   data.name = nn;
   const v = Date.now();
   cloudHttp('push', 'POST', { records: [
     { id: nn, v: v, data: data, del: false },
     { id: id, v: v + 1, data: null, del: true }
-  ]}).then(function(){ toast('已重命名为「' + nn + '」', 'ok'); cloudRefresh(); })
-    .catch(function(e){ toast('重命名失败：' + (e.message || e), 'err'); inp.disabled = false; });
+  ]}).then(function(){
+    toast('已重命名为「' + nn + '」', 'ok');
+    cloudRenameHide();
+    cloudRefresh();
+  }).catch(function(e){
+    toast('重命名失败：' + (e.message || e), 'err');
+    if (btn) btn.disabled = false;
+  });
 }
 document.addEventListener('click', function(e){
   // 委托处理弹窗列表内的 导入/删除（弹窗在 body 尾，此处执行时可能尚未解析，故挂 document）
@@ -2021,8 +2026,6 @@ document.addEventListener('click', function(e){
     const act = btn.getAttribute('data-act');
     if (act === 'imp') cloudImport(id);
     else if (act === 'ren') cloudRename(id);
-    else if (act === 'rn-ok') cloudRenameDo(id);
-    else if (act === 'rn-no') cloudRefresh();
     else if (act === 'del') cloudDel(id);
     e.stopPropagation();
     return;
@@ -2036,7 +2039,15 @@ document.addEventListener('click', function(e){
     }
   }
 });
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') cloudClose(); });
+document.addEventListener('keydown', function(e){
+  const rm = document.getElementById('renameMask');
+  if (e.key === 'Escape') {
+    if (rm && rm.classList.contains('show')) cloudRenameHide();
+    else cloudClose();
+  } else if (e.key === 'Enter' && rm && rm.classList.contains('show')) {
+    cloudRenameOk();
+  }
+});
 
 /* ===== 导出 PDF 直出（内嵌 jsPDF + html2canvas） ===== */
 async function exportPdfDirect() {
@@ -2125,6 +2136,23 @@ window.addEventListener('DOMContentLoaded', () => {
           <button type="button" class="cd-savebtn" onclick="cloudSave()">保存当前参数</button>
         </div>
         <div class="cd-foot" id="cloudFoot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cm-mask" id="renameMask" style="z-index:6100" onclick="cloudRenameHide(event)">
+    <div class="cm-box cm-rbox">
+      <div class="cm-head">
+        <span class="cm-t">✏️ 重命名模板</span>
+        <span class="cm-x" title="关闭" onclick="cloudRenameHide(event)">✕</span>
+      </div>
+      <div class="cm-body">
+        <div class="cm-rlabel" id="renameOld"></div>
+        <input id="renameInput" type="text" maxlength="40" placeholder="输入新模板名称">
+        <div class="cm-raction">
+          <button type="button" class="cd-savebtn" onclick="cloudRenameOk()">✓ 确定重命名</button>
+          <button type="button" class="cm-cbtn" onclick="cloudRenameHide(event)">取消</button>
+        </div>
       </div>
     </div>
   </div>
