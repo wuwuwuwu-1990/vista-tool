@@ -244,7 +244,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 .modal .m-head{padding-top:calc(16px + env(safe-area-inset-top))}
 /* v1.0.23：弹窗背景由「半透明白玻璃」改为「淡灰渐变」——与页面底色融为一体（房源详情/表单/设置/确认全部弹窗统一） */
 .modal{background:linear-gradient(165deg,#f2f4f6 0%,#e9ebef 55%,#dfe2e8 100%);border:1px solid rgba(208,213,222,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px -18px rgba(30,41,59,.3)}
-/* v1.0.25：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
+/* v1.0.26：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
    让弹窗底色单一通透（半透明淡灰渐变 + 背景模糊），信息靠细分隔线区分 */
 .modal{background:linear-gradient(165deg,rgba(241,243,246,.93) 0%,rgba(232,235,240,.9) 55%,rgba(222,226,232,.87) 100%)}
 .dtb{background:transparent;border:1px solid rgba(206,212,222,.6)}
@@ -306,7 +306,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
   </div>
 </main>
 
-<footer>房览速记 v1.0.25 · 数据默认保存在本机浏览器，配置云端同步后全端互通 · 纯本地处理</footer>
+<footer>房览速记 v1.0.26 · 内置云端同步（打开即用·多端自动互通）· 数据本机保存 + 云端备份</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -436,8 +436,8 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
           <button class="btn btn-ghost" onclick="saveSettings(false)">仅保存</button>
         </div>
         <div class="hint" style="margin-top:10px">
-          <b>配置方法（一次性）：</b>① 在任一设备打开本页 → 设置 → 填入同步服务器与同步令牌 → 保存；② 手机、电脑各自打开本页面，粘贴<b>同一串同步令牌</b>，数据即互通。<br>
-          <b>同步服务器</b>：<code>http://47.109.99.227/sync</code>（自建服务器 · 国内直连快而稳定）；令牌由服务器签发、只保存在本机浏览器 localStorage，不会上传到其它任何地方。保存/修改/删除房源时自动同步，云端按「谁后改谁生效」记录级合并，删掉的房源不会复活。
+          <b>配置方法（一次性）：</b>本页已<b>内置同步令牌</b>，打开即自动连接云端；手机、电脑打开同一页面即互通（如需更换令牌，在下方修改后保存）。<br>
+          <b>同步服务器</b>：<code>http://47.109.99.227/sync</code>（自建服务器 · 国内直连快而稳定）；注意：令牌内置在页面中（公网可见），请勿把本页面链接分享给他人。保存/修改/删除房源时自动同步，云端按「谁后改谁生效」记录级合并，删掉的房源不会复活。
         </div>
       </div>
       <div class="set-group">
@@ -489,7 +489,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.25 =================
+/* ================= 房览速记 v1.0.26 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、云端双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
@@ -498,9 +498,9 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
          拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
          卡片去掉优✓缺✗标记（更紧凑）、手机端隐藏标签筛选栏
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.25' };
+var APP = { name:'房览速记', version:'1.0.26' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_sync_token';
-var DEFAULT_SET = { api:'http://47.109.99.227/sync', auto:true, lastSync:0, lastStatus:'' };
+var DEFAULT_SET = { api:'http://47.109.99.227/sync', token:'af91def02e8a9a205fe630e970b1b39a', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-2:';  // 同步配置导入导出前缀
 
 var state = { records:[], deleted:[], updatedAt:0 };
@@ -787,7 +787,7 @@ function importData(input){
 }
 
 /* ---------- 云端同步（自建同步服务器 · 记录级合并） ---------- */
-function syncCfg(){ return { api:(settings.api||'http://47.109.99.227/sync').replace(/\/+$/,''), token:settings.token }; }
+function syncCfg(){ return { api:(settings.api||'http://47.109.99.227/sync').replace(/\/+$/,''), token:(settings.token||'') || 'af91def02e8a9a205fe630e970b1b39a' }; }
 function syncUrl(cfg, act){ return cfg.api + '/' + act + '/fanglian'; }
 function syncHeaders(cfg){ var h = { 'Content-Type':'application/json' }; if(cfg.token) h['X-Token'] = cfg.token; return h; }
 /* 本地全量(含删除墓碑) -> 服务端记录 */
@@ -928,7 +928,7 @@ function testSync(){
 /* ---------- 设置 ---------- *//* ---------- 设置 ---------- */
 function fillSetForm(){
   document.getElementById('s_api').value = settings.api || 'http://47.109.99.227/sync';
-  document.getElementById('s_token').value = settings.token||'';
+  document.getElementById('s_token').value = settings.token || 'af91def02e8a9a205fe630e970b1b39a';
   document.getElementById('s_auto').checked = !!settings.auto;
 }
 function saveSettings(doSyncNow){
@@ -1030,6 +1030,9 @@ document.addEventListener('keydown', function(e){
 });
 
 loadAll();
+
+  /* v1.0.26 内置令牌后: 首次打开自动拉取云端 */
+  setTimeout(function(){ try{ if(settings.token && !settings.lastSync) doSync('pull'); }catch(e){} }, 900);
 </script>
 </body>
 </html>
