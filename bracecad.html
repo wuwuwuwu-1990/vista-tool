@@ -4,7 +4,7 @@
 <meta charset="UTF-8" data-page-node-id="cdNthns8QFDcbSiLaSDEJc">
 <meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="frPSTNHNB68bLJ0hxKAMJM">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232563eb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232563ebdd%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20font-size%3D%2234%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%20font-family%3D%22Microsoft%20YaHei%2Csans-serif%22%20font-weight%3D%22bold%22%3E%E5%9B%BA%3C%2Ftext%3E%3C%2Fsvg%3E">
-<title>固维挡墙断面CAD自动成图系统 BraceCad v0.1.53</title>
+<title>固维挡墙断面CAD自动成图系统 BraceCad v0.1.54</title>
 <style>
 /* ============ 设计令牌 ============ */
 :root{
@@ -255,6 +255,41 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
 .toast.warn{background:rgba(150,94,8,.96)}
 .toast.err{background:rgba(163,45,45,.96)}
 @keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ===== 云端方案弹窗（v0.1.54） ===== */
+.cm-mask{position:fixed;inset:0;background:rgba(7,20,40,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:9000;display:none;align-items:center;justify-content:center;padding:18px}
+.cm-mask.show{display:flex}
+.cm-box{display:flex;flex-direction:column;width:min(620px,100%);max-height:88vh;overflow:hidden;background:linear-gradient(165deg,rgba(255,255,255,.94),rgba(247,250,255,.87) 55%,rgba(238,244,253,.82));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 6px 16px rgba(13,40,80,.08),0 26px 74px -18px rgba(13,40,80,.48),inset 0 1px 0 #fff;animation:cmpop .18s ease}
+@keyframes cmpop{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:none}}
+.cm-head{display:flex;align-items:center;gap:8px;padding:15px 18px 13px;border-bottom:1px dashed rgba(90,140,205,.5);font-size:15px;font-weight:800;color:#0d3f6e}
+.cm-head .cm-t{flex:1}
+.cm-hint{font-size:11.5px;color:#8495ad;font-weight:500;white-space:nowrap}
+.cm-x{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(120,165,220,.7);color:#3a5a85;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;flex:none;transition:all .15s}
+.cm-x:hover{background:linear-gradient(180deg,#2f82e0,#1c6fd0);color:#fff;border-color:#1c6fd0}
+.cm-body{padding:8px 18px 16px;overflow-y:auto}
+.cd-list{max-height:42vh;overflow-y:auto;margin:8px 0 12px}
+.cd-row{display:flex;align-items:center;gap:7px;padding:9px 6px;border-bottom:1px solid rgba(110,150,215,.2);font-size:13px}
+.cd-row:last-child{border-bottom:none}
+.cd-row .cd-nm{flex:1;font-weight:600;color:#1a2c46;word-break:break-all;min-width:0}
+.cd-row .cd-tm{color:#93a3bd;font-size:11.5px;white-space:nowrap}
+.cd-btn{border:1px solid #c2d3ea;background:rgba(255,255,255,.88);border-radius:9px;padding:4px 10px;font-size:12.5px;cursor:pointer;color:#1c6fd0;flex:none;transition:all .15s}
+.cd-btn:hover{border-color:#2f82e0;background:#fff}
+.cd-btn.del{color:#c53b3b;border-color:#f0cbc8}
+.cd-btn.del:hover{border-color:#c53b3b}
+.cd-empty{color:#94a3b8;text-align:center;padding:16px 0;font-size:13px}
+.cd-save{display:flex;gap:8px;padding-top:12px;border-top:1px dashed rgba(90,140,205,.5)}
+.cd-save input{flex:1;border:1.5px solid rgba(140,175,225,.9);background:rgba(255,255,255,.92);border-radius:10px;padding:8px 11px;font-size:13px;outline:none;min-width:0}
+.cd-save input:focus{border-color:#2f82e0;box-shadow:0 0 0 3px rgba(47,130,224,.16)}
+.cd-savebtn{background:linear-gradient(180deg,#2f82e0,#1659ad);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #0d3f6e,0 6px 14px rgba(28,111,208,.3);flex:none;transition:all .12s}
+.cd-savebtn:active{transform:translateY(2px);box-shadow:0 1px 0 #0d3f6e}
+.cd-foot{font-size:11.5px;color:#b45309;padding:8px 4px 2px;line-height:1.6}
+.cm-rbox{width:min(470px,100%)}
+.cm-rlabel{font-size:13px;color:#3a5a85;margin:4px 2px 10px;word-break:break-all;line-height:1.6;font-weight:600}
+#renameInput{width:100%;box-sizing:border-box;border:1.5px solid rgba(140,175,225,.9);background:rgba(255,255,255,.96);border-radius:11px;padding:12px 14px;font-size:16px;outline:none}
+#renameInput:focus{border-color:#2f82e0;box-shadow:0 0 0 3px rgba(47,130,224,.16)}
+.cm-raction{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.cm-cbtn{border:1px solid #c2d3ea;background:rgba(255,255,255,.92);border-radius:10px;padding:9px 18px;font-size:13.5px;cursor:pointer;color:#3a5a85;flex:none}
+.cm-cbtn:hover{border-color:#8495ad}
 </style>
 </head>
 <body data-page-node-id="hlJJ8fuDDdE9e20E7L5hsc">
@@ -263,17 +298,18 @@ table.rec input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-colo
   <div class="brand" data-page-node-id="NvDTqrOkd47IMbJSHqKLbd">
     <img class="logo" id="logoImg" alt="BraceCad" data-page-node-id="gv7pqcGehesxKIuxClao1n">
     <div data-page-node-id="OB2AYOVCHYBjOJt97873c7">
-      <h1 data-page-node-id="dJGDbn0dSX1dh9OV6kRBsd">固维挡墙断面CAD自动成图系统 <em data-page-node-id="84mzTnOD05yoaSHYdFZQk2">BraceCad</em><span class="vbadge" id="hdVer" data-page-node-id="fZi5ZklKemybBllv1qP1ky">v0.1.53</span></h1>
+      <h1 data-page-node-id="dJGDbn0dSX1dh9OV6kRBsd">固维挡墙断面CAD自动成图系统 <em data-page-node-id="84mzTnOD05yoaSHYdFZQk2">BraceCad</em><span class="vbadge" id="hdVer" data-page-node-id="fZi5ZklKemybBllv1qP1ky">v0.1.54</span></h1>
     </div>
   </div>
   <div class="top-actions" data-page-node-id="7kFB0ENg8X5DHa8Fqkbxqe">
+    <button class="btn ghost" onclick="toggleCloudMenu(event)" title="整套断面参数保存到云端 / 随时导入复用" style="flex:none">☁️ 云端方案</button>
     <button class="btn ghost" id="btnTpl" data-page-node-id="rQlv13Afdp2L9DCZPgQ00y">标准表格模板</button>
     <button class="btn ghost" id="btnImport" data-page-node-id="zaqRAc0DfQpdnOpjFpcD21">导入 Excel</button>
     <button class="btn ghost" id="btnXlsxOut" data-page-node-id="xpOmjH1w7EOvuhEUB7XWjr">导出 Excel</button>
     <span class="divider" data-page-node-id="Y7OON1lFy1UmLVFbC9vCYr"></span>
     <button class="btn" id="btnPng" data-page-node-id="f6cXgwZhgzzKJgb2bHvdME">导出 PNG</button>
     <button class="btn primary" id="btnCad" title="导出当前断面为天正标准 DXF" data-page-node-id="DF1SZ5xq7gB6gsHLbVZoYK">导出 CAD</button>
-    <button class="btn icon" id="btnAbout" title="关于 BraceCad" data-page-node-id="rwiZhNJv5EojXYtmi2qCtF">?</button>
+    <button class="btn" id="btnAbout" title="关于 BraceCad" data-page-node-id="rwiZhNJv5EojXYtmi2qCtF">关于</button>
   </div>
 </header>
 
@@ -656,7 +692,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 </script>
 <script>
 /* =====================================================================
-   固维挡墙断面CAD自动成图系统 BraceCad v0.1.53
+   固维挡墙断面CAD自动成图系统 BraceCad v0.1.54
    基于 Murus v0.3.47 构建，新增「CAD 出图」功能：导出符合天正建筑标准
    的 R2010 DXF，CAD 打开后可直接在天正中继续编辑/打印。
    参数：编号 / 墙高H1 / 基础埋深H2 / 顶宽B1 / 底宽B2 / 外坡比W / 内坡比N
@@ -668,10 +704,11 @@ const CADFONT = '"仿宋","FangSong","STFangsong","SimSun","Songti SC",serif';
    版本与迭代更新
    单一事实来源：改这里即可升级版本；关于对话框与导出文件名自动同步。
    ===================================================================== */
-const APP_VERSION = '0.1.53';
+const APP_VERSION = '0.1.54';
 const APP_VERSION_LABEL = 'v' + APP_VERSION;
 const APP_CHANGELOG = [
-{ v:'0.1.53', date:'2026-09-04',
+{ v:'0.1.54', date:'2026-09-05', note:'新增 ☁️ 云端方案：整套断面参数命名保存云端、跨设备导入复用（支持重命名/删除）；顶栏「？」改「关于」' },
+  { v:'0.1.53', date:'2026-09-04',
     note:'修复「几何校核与计算」两种校核模式语义（用户反馈①底宽优先时断面参数内坡比未按反算同步；②坡比优先时图形应按坡比计算底宽）。修复：① 新增 geomSync(r) 按校核模式把「派生量」写回记录——slope 坡比优先：手动输入 H1/H2/B1/B2/W/N 时 r.B2 = round4(B1+(W+N)·(H1+H2)) 并刷新 f_B2（B2 由坡比反算，v0.1.52 基础上扩展 B2 编辑也触发）；width 底宽优先：编辑字段时 r.W/r.N = round4(按 B1/B2 反算，保持输入 W:N 比例) 并刷新 f_W/f_N（修复内坡比不同步）；② f_mode 模式切换后先 geomSync 再 loadForm（数据符合新模式语义）；③ 表格清单 B2 列改 f2 两位显示与图纸一致（新增全局 f2）。layout() slope 分支保持「记录 B1/B2 权威 + 微调 W/N」——手动输坡比联动已把 r.B2 更新到理论值故微调≈0（图形即按输入坡比出图），xlsx 整表导入仍保证 轮廓面积=参数表=按图面手算 全等（无条件坡比权威会让图集圆整 B2(1.91)与几何(1.905)并存、手算差 0.01，已否决）。验证：Playwright 双模式 UI 真操作（slope 改 N→f_B2/k_B2 反算、slope 改 B2 被联动覆写为理论值、width 改 B2/B1→f_N/f_W 同步、切模式数据自洽）+ xlsx 16 墙合并导出三方面积全等 + audit errors=0。' },
 { v:'0.1.52', date:'2026-09-04',
     note:'修复 bug：手动输入坡比（内坡比 N / 外坡比 W / H1 / H2 / B1）时，底宽未按几何公式反算（用户反馈「手动输入内坡比，底宽应当基于 B1、H1、H2、W、N 反算 B2」）。实证根因：表单 input 联动调用 layout(r) 想拿反算后的 B2，但 layout 的 slope 分支（v0.1.49）以 B2 为权威微调 W/N、从不更新 B2——输入内坡比后 B2 框纹丝不动、坡比还被几何静默改写。修复：slope 模式编辑 H1/H2/B1/W/N 时直接按 B2 = B1+(W+N)·(H1+H2) 反算并写回（round 4 位，与 v0.1.49 存储精度一致）；批量导入缺 B2 行同样直接反算（原调 layout 得 NaN）。layout() slope 分支（8f）保持不变——xlsx 整表导入 B2 有值时不编辑仍按 v0.1.49 保证轮廓面积=参数表=手算一致。验证：Playwright UI 真改 N/W/H1 断言 f_B2 反算正确 + xlsx 16 墙合并导出回归（面积三者一致、audit errors=0）。' },
@@ -856,7 +893,7 @@ const fmtDim = (v, unit) => {
   return String(cm*10);
 };
 const fmt3 = v => (v<0?'-':(v===0?'±':'')) + Math.abs(v).toFixed(3);
-const f2 = v => (Math.round(v*100 + 1e-9)/100).toFixed(2);   // v0.1.53 全局：2 位舍入（与尺寸标注/参数表同源）
+const f2 = v => (Math.round(v*100 + 1e-9)/100).toFixed(2);   // v0.1.54 全局：2 位舍入（与尺寸标注/参数表同源）
 function hash(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} return h>>>0; }
 function rng(seed){ let a=seed>>>0; return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
 function textW(str,mm){ let w=0; for(const c of String(str)) w += /[\x00-\xff]/.test(c)?0.56:1.0; return w*mm; }
@@ -892,7 +929,7 @@ function layout(rec, opt){
   if (B1 <= 0) return {bad:'墙体顶宽 B1 须大于 0'};
 
   if (opt.mode === 'slope'){
-    // v0.1.53：坡比优先（由 B1、W、N 反算 B2）采用「记录即权威 + 显示自洽」实现：
+    // v0.1.54：坡比优先（由 B1、W、N 反算 B2）采用「记录即权威 + 显示自洽」实现：
     // 用户手动输入坡比时 geomSync 联动已把 r.B2 更新为 round4(B1+(W+N)·H)（v0.1.52+），
     // 此处再以输入 B1/B2 微调 W/N（保持比例）——因 B2 已被联动更新到理论值，微调≈0，
     // 图形即按用户输入的坡比出图；对 xlsx 整表导入（B2 为图集圆整值，与坡比偏差 ≤0.005）
@@ -1453,7 +1490,7 @@ FIELDS.forEach(k=>{
   $('f_'+k).addEventListener('input', ()=>{
     const r = curRec(); if(!r) return;
     r[k] = (k==='id') ? $('f_'+k).value : num($('f_'+k).value);
-    if (k !== 'id' && ['H1','H2','B1','B2','W','N'].includes(k)) geomSync(r);   // v0.1.53：按校核模式同步派生量（slope→反算B2 / width→反算W·N）
+    if (k !== 'id' && ['H1','H2','B1','B2','W','N'].includes(k)) geomSync(r);   // v0.1.54：按校核模式同步派生量（slope→反算B2 / width→反算W·N）
     renderRecs(); updateCalc(); render();
   });
 });
@@ -3221,6 +3258,202 @@ $('c_one').onclick = exportCurrentDxf;
 $('c_batch').onclick = exportBatchDxf;
 $('c_merge').onclick = exportMergeDxf;
 
+
+/* ===== 云端方案模板同步（v0.1.54：自建同步服务器，命名保存/列表导入/重命名/删除，跨设备互通） ===== */
+const BCCLOUD = { api: 'http://47.109.99.227/sync', app: 'bracecad', token: 'af91def02e8a9a205fe630e970b1b39a' };
+let cloudCache = [];
+let cloudRenameTarget = null;
+function cloudHttp(act, method, body) {
+  const u = BCCLOUD.api + '/' + act + '/' + BCCLOUD.app;
+  const opt = { method: method || 'GET', headers: { 'Content-Type': 'application/json', 'X-Token': BCCLOUD.token } };
+  if (body) opt.body = JSON.stringify(body);
+  return fetch(u, opt).then(function(r){ if (r.status === 401) throw new Error('同步令牌无效'); if (!r.ok) throw new Error('云端响应 HTTP ' + r.status); return r.json(); });
+}
+function cloudE(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function cloudFmt(v){ const d = new Date(v); if (isNaN(d)) return ''; return (d.getMonth()+1)+'-'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function cloudClose(ev){
+  if (ev && ev.target && ev.target !== ev.currentTarget && !(ev.currentTarget && ev.currentTarget.classList && ev.currentTarget.classList.contains('cm-x'))) return;
+  const m = document.getElementById('cloudMenu'); if (m) m.classList.remove('show');
+}
+function toggleCloudMenu(ev){
+  ev.stopPropagation();
+  const m = document.getElementById('cloudMenu');
+  const willShow = !m.classList.contains('show');
+  m.classList.toggle('show', willShow);
+  if (willShow) {
+    document.getElementById('cloudFoot').textContent = (location.protocol === 'https:')
+      ? '⚠️ 当前为 https 安全页，浏览器会拦截对同步服务器(http)的请求——请改用 http://47.109.99.227/bracecad.html 打开使用云端方案'
+      : '';
+    cloudRefresh();
+  }
+}
+function cloudRefresh(){
+  const list = document.getElementById('cloudList');
+  list.innerHTML = '<div class="cd-empty">同步中…</div>';
+  document.getElementById('cloudHint').textContent = '';
+  cloudHttp('pull').then(function(j){
+    cloudCache = ((j && j.records) || []).filter(function(r){ return r && !r.del && r.data; });
+    if (!cloudCache.length) { list.innerHTML = '<div class="cd-empty">云端暂无方案</div>'; return; }
+    list.innerHTML = cloudCache.map(function(r){
+      const nm = (r.data && r.data.name) || r.id;
+      const n = (r.data && r.data.recs) ? r.data.recs.length : 0;
+      return '<div class="cd-row" data-id="' + cloudE(r.id) + '"><span class="cd-nm">' + cloudE(nm) + '</span>' +
+        '<span class="cd-tm">' + n + '面墙</span><span class="cd-tm">' + cloudFmt(r.v) + '</span>' +
+        '<button type="button" class="cd-btn" data-act="imp" data-id="' + cloudE(r.id) + '">导入</button>' +
+        '<button type="button" class="cd-btn" data-act="ren" data-id="' + cloudE(r.id) + '">重命名</button>' +
+        '<button type="button" class="cd-btn del" data-act="del" data-id="' + cloudE(r.id) + '">删除</button></div>';
+    }).join('');
+    document.getElementById('cloudHint').textContent = '(' + cloudCache.length + ' 套)';
+  }).catch(function(e){
+    list.innerHTML = '<div class="cd-empty">加载失败：' + cloudE(e.message || e) + '</div>';
+  });
+}
+function bcCollect(){
+  return {
+    recs: JSON.parse(JSON.stringify((state && state.recs) || [])),
+    cur: (state && typeof state.cur === 'number') ? state.cur : 0,
+    opt: JSON.parse(JSON.stringify((state && state.opt) || {})),
+    customNotes: JSON.parse(JSON.stringify((state && state.customNotes) || [])),
+    name: ''
+  };
+}
+function bcRestore(d){
+  const recs = ((d && d.recs) || []).map(function(r){ return JSON.parse(JSON.stringify(r)); });
+  state.recs = recs;
+  state.cur = Math.max(0, Math.min((d && typeof d.cur === 'number') ? d.cur : 0, Math.max(0, recs.length - 1)));
+  if (d && d.opt) state.opt = Object.assign({}, state.opt || {}, d.opt);
+  state.customNotes = JSON.parse(JSON.stringify((d && d.customNotes) || []));
+  try { if (typeof renderRecs === 'function') renderRecs(); } catch (e) {}
+  try { if (typeof loadForm === 'function') loadForm(); } catch (e) {}
+  try { if (typeof render === 'function') render(); } catch (e) {}
+}
+function cloudImport(id){
+  const r = cloudCache.find(function(x){ return x.id === id; });
+  if (!r) return;
+  try {
+    bcRestore(r.data);
+    document.getElementById('cloudMenu').classList.remove('show');
+    toast('已导入云端方案：' + ((r.data && r.data.name) || id) + '（' + ((r.data && r.data.recs) ? r.data.recs.length : 0) + ' 面墙）', 'ok');
+  } catch (e) { toast('导入失败：' + e.message, 'err'); }
+}
+function cloudSave(){
+  const inp = document.getElementById('cloudName');
+  const name = inp.value.trim();
+  if (!name) { toast('请先输入方案名称', 'err'); inp.focus(); return; }
+  if (!state.recs || !state.recs.length) { toast('当前没有断面记录，无法保存', 'err'); inp.focus(); return; }
+  const data = bcCollect(); data.name = name;
+  cloudHttp('push', 'POST', { records: [{ id: name, v: Date.now(), data: data, del: false }] })
+    .then(function(){ inp.value = ''; toast('已保存云端方案「' + name + '」（' + state.recs.length + ' 面墙）', 'ok'); cloudRefresh(); })
+    .catch(function(e){ toast('保存失败：' + (e.message || e), 'err'); });
+}
+function cloudDel(id){
+  const hit = cloudCache.find(function(x){ return x.id === id; });
+  const nm = (hit && hit.data && hit.data.name) || id;
+  if (!confirm('确认删除云端方案「' + nm + '」？')) return;
+  cloudHttp('push', 'POST', { records: [{ id: id, v: Date.now(), data: null, del: true }] })
+    .then(function(){ toast('已删除方案「' + nm + '」', 'ok'); cloudRefresh(); })
+    .catch(function(e){ toast('删除失败：' + (e.message || e), 'err'); });
+}
+function cloudRename(id){
+  const hit = cloudCache.find(function(x){ return x.id === id; });
+  const oldName = (hit && hit.data && hit.data.name) || id;
+  cloudRenameTarget = id;
+  document.getElementById('renameOld').textContent = '原名称：' + oldName;
+  const inp = document.getElementById('renameInput');
+  inp.value = oldName;
+  document.getElementById('renameMask').classList.add('show');
+  setTimeout(function(){ inp.focus(); inp.select(); }, 80);
+}
+function cloudRenameHide(ev){
+  if (ev && ev.target && ev.target !== ev.currentTarget && !(ev.currentTarget && ev.currentTarget.classList && ev.currentTarget.classList.contains('cm-x'))) return;
+  document.getElementById('renameMask').classList.remove('show');
+  cloudRenameTarget = null;
+}
+function cloudRenameOk(){
+  const inp = document.getElementById('renameInput');
+  const nn = inp.value.trim();
+  const id = cloudRenameTarget;
+  const hit = cloudCache.find(function(x){ return x.id === id; });
+  const oldName = (hit && hit.data && hit.data.name) || id;
+  if (!nn) { toast('名称不能为空', 'err'); inp.focus(); return; }
+  if (nn === oldName) { cloudRenameHide(); return; }
+  if (cloudCache.some(function(x){ return x.id === nn; })) { toast('已存在同名方案「' + nn + '」', 'err'); inp.focus(); return; }
+  const btn = document.querySelector('#renameMask .cd-savebtn');
+  if (btn) btn.disabled = true;
+  const data = JSON.parse(JSON.stringify((hit && hit.data) || {}));
+  data.name = nn;
+  const v = Date.now();
+  cloudHttp('push', 'POST', { records: [
+    { id: nn, v: v, data: data, del: false },
+    { id: id, v: v + 1, data: null, del: true }
+  ]}).then(function(){
+    toast('已重命名为「' + nn + '」', 'ok');
+    cloudRenameHide();
+    cloudRefresh();
+  }).catch(function(e){
+    toast('重命名失败：' + (e.message || e), 'err');
+    if (btn) btn.disabled = false;
+  });
+}
+document.addEventListener('click', function(e){
+  const btn = e.target && e.target.closest ? e.target.closest('#cloudList button[data-act]') : null;
+  if (btn) {
+    const id = btn.getAttribute('data-id');
+    const act = btn.getAttribute('data-act');
+    if (act === 'imp') cloudImport(id);
+    else if (act === 'ren') cloudRename(id);
+    else if (act === 'del') cloudDel(id);
+    e.stopPropagation();
+    return;
+  }
+  const m = document.getElementById('cloudMenu');
+  if (m && m.classList.contains('show')) {
+    const t = e.target;
+    if (t && t.closest && !t.closest('.cm-box') && !t.closest('button[onclick*="toggleCloudMenu"]') && !t.closest('#cloudList')) m.classList.remove('show');
+  }
+});
+document.addEventListener('keydown', function(e){
+  const rm = document.getElementById('renameMask');
+  if (e.key === 'Escape') {
+    if (rm && rm.classList.contains('show')) cloudRenameHide();
+    else cloudClose();
+  } else if (e.key === 'Enter' && rm && rm.classList.contains('show')) cloudRenameOk();
+});
+
 </script>
+
+  <div class="cm-mask" id="cloudMenu" onclick="cloudClose(event)">
+    <div class="cm-box">
+      <div class="cm-head">
+        <span class="cm-t">☁️ 云端方案模板</span>
+        <span class="cm-hint" id="cloudHint"></span>
+        <span class="cm-x" title="关闭" onclick="cloudClose(event)">✕</span>
+      </div>
+      <div class="cm-body">
+        <div class="cd-list" id="cloudList"><div class="cd-empty">打开即同步云端方案…</div></div>
+        <div class="cd-save">
+          <input id="cloudName" type="text" placeholder="方案名称，如：XX项目-路肩挡墙" maxlength="40">
+          <button type="button" class="cd-savebtn" onclick="cloudSave()">保存当前方案</button>
+        </div>
+        <div class="cd-foot" id="cloudFoot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="cm-mask" id="renameMask" style="z-index:9100" onclick="cloudRenameHide(event)">
+    <div class="cm-box cm-rbox">
+      <div class="cm-head">
+        <span class="cm-t">✏️ 重命名方案</span>
+        <span class="cm-x" title="关闭" onclick="cloudRenameHide(event)">✕</span>
+      </div>
+      <div class="cm-body">
+        <div class="cm-rlabel" id="renameOld"></div>
+        <input id="renameInput" type="text" maxlength="40" placeholder="输入新方案名称">
+        <div class="cm-raction">
+          <button type="button" class="cd-savebtn" onclick="cloudRenameOk()">✓ 确定重命名</button>
+          <button type="button" class="cm-cbtn" onclick="cloudRenameHide(event)">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
