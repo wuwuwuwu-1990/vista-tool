@@ -270,7 +270,7 @@ footer{margin-top:30px;padding:14px 0 6px;border-top:1px solid var(--border);col
     </div>
   </nav>
   <div class="actions">
-    <span class="ver-badge" title="当前版本">v1.3.18</span>
+    <span class="ver-badge" title="当前版本">v1.3.19</span>
     <button class="btn" onclick="window.print()">打印 / 存 PDF</button>
     <button class="btn" onclick="showAbout()">关于</button>
   </div>
@@ -535,7 +535,7 @@ function amapSec(){try{var v=localStorage.getItem('yjyx_amap_sec');return (v===n
 /* 内置 Key 域名白名单（v1.3.17）：文件若被拷贝到别的站点，内置 Key 自动停用并回退网页版，
    避免 Key 被第三方站点盗用（高德控制台也可再配一层域名白名单）。
    放行：本地 file:// 打开（hostname 为空）、导航站、GitHub Pages 源站、本机调试。 */
-var AMAP_KEY_HOSTS=['tool.wbc2023.top','www.wbc2023.top','wbc2023.top','wuwuwuwu-1990.github.io','localhost','127.0.0.1'];
+var AMAP_KEY_HOSTS=['tool.wbc2023.top','www.wbc2023.top','wbc2023.top','47.109.99.227','srv.wbc2023.top','wuwuwuwu-1990.github.io','localhost','127.0.0.1'];
 function amapDomainOk(){
   var h='';try{h=String(location.hostname||'').toLowerCase();}catch(e){}
   if(!h)return true;                       // file:// 双击本地打开
@@ -765,8 +765,8 @@ renderAll();
 <div class="about-mask" id="aboutMask" onclick="if(event.target===this)hideAbout()">
   <div class="about-box">
     <span class="ab-close" onclick="hideAbout()">×</span>
-    <h3>渝居优选 <span class="ab-ver">v1.3.18</span></h3>
-    <div class="ab-sub">重庆主城智能选房 · 十大板块分析 · 2026-08-16</div>
+    <h3>渝居优选 <span class="ab-ver">v1.3.19</span></h3>
+    <div class="ab-sub">重庆主城智能选房 · 十大板块分析 · 2026-09-05</div>
     <div class="ab-map">
       <div class="map-title">📐 界面布局注解图</div>
       <div class="map-canvas">
@@ -806,7 +806,7 @@ renderAll();
         <span class="map-lg">⑦ 高德地图 SDK</span><span class="map-lg">⑧ 十大板块分析卡片</span>
       </div>
     </div>
-    <div class="lg">更新日志</div><div class="lg-item"><span class="lg-ver">v1.3.18</span><b>高德地图定位校正</b>：SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与地图中心校正到小区真实位置（结果缓存本机避免重复联网）；geoobj 中点仅作离线兜底；信息窗口与「回到小区」同步跟随精确点</div><div class="lg-item"><span class="lg-ver">v1.3.17</span><b>内置 Key 域名白名单保护</b>：内置 Key 仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）下生效；页面若被拷贝到其他站点，内置 Key 自动停用并回退网页版地图，避免 Key 被第三方盗用（自填 Key 不受域名限制）。「⚙」弹窗按域名状态显示绿/橙/灰三色提示</div><div class="lg-item"><span class="lg-ver">v1.3.16</span><b>高德地图 Key 开箱即用</b>：内置默认 Key 与安全密钥（JS API 2.0 Web端），打开页面自动填入并生效，无需手动配置；「⚙」弹窗仍可随时替换为自己的 Key，「清除 Key」后立即回退网页版地图</div><div class="lg-item"><span class="lg-ver">v1.3.15</span><b>接入高德地图官方 JS API 2.0 SDK</b>：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏、缩放尺控件）；新增「⚙ Key 设置」弹窗（Key 存本机 localStorage）；未配置 Key 或 SDK 加载失败时自动回退网页版地图，打印仍用静态底图</div><div class="lg-item"><span class="lg-ver">v1.3.14</span><b>金福云航拍自动登录全覆盖</b>：桌面版补齐自动登录（原先只有手机版有）；新增「↗ 重新登录」按钮（cookie 24h 过期后一键重登）；新增「↗ 新窗口打开」按钮（iOS/微信等拦截第三方 cookie 时，新窗口登录一次即恢复）</div><div class="lg-item"><span class="lg-ver">v1.3.13</span><b>新增第 3 套房源「保利云禧一期」</b>：巴南龙洲湾 · 碧桂园保利联合开发（绿化35%、人车分流）· 3号线鱼胡路站约650m · 划片龙洲湾小学 · 综合评分 78；航拍为用户提供金福云作品</div><div class="lg-item"><span class="lg-ver">v1.3.12</span><b>手机版顶栏优化</b>：移除「关于」按钮左侧旧版本号标签；版本号同步 v1.3.12</div><div class="lg-item"><span class="lg-ver">v1.3.11</span><b>手机版关于弹窗优化</b>：移除更新日志左侧版本号标签，界面更简洁</div><div class="lg-item"><span class="lg-ver">v1.3.10</span><b>首地江山赋·凌山樾改名与航拍更新</b>：名称去掉「北区」改为「首地江山赋·凌山樾」；航拍换为用户提供的新作品（金福云「首地江山赋凌山樾」），封面同步更新</div><div class="lg-item"><span class="lg-ver">v1.3.9</span><b>首地江山赋·凌山樾新增航拍实景</b>：金福云 VR 作品（首地江山赋·悦江城），封面图高清内嵌，点击可跳转全景；桌面版/手机版同步</div><div class="lg-item"><span class="lg-ver">v1.3.8</span><b>新增第 2 套房源「首地江山赋·凌山樾」</b>：两江新区悦来 · 国企低密洋房（容积率1.01）· 划片首地人和街小学 · 悦来站约400m · 综合评分 83；价格按二手挂牌修正为约1.12-1.17万/㎡</div>
+    <div class="lg">更新日志</div><div class="lg-item"><span class="lg-ver">v1.3.19</span><b>高德 Key 白名单扩容</b>：内置 Key 授权域名新增自建服务器 47.109.99.227 与预留 srv.wbc2023.top——自建镜像站打开同样启用高清地图（此前防盗用机制会回退网页版）</div><div class="lg-item"><span class="lg-ver">v1.3.18</span><b>高德地图定位校正</b>：SDK 交互地图中心由 geoobj 矩形框中点改为按小区名在「重庆」做 POI 关键字搜索精确定位，Marker 与地图中心校正到小区真实位置（结果缓存本机避免重复联网）；geoobj 中点仅作离线兜底；信息窗口与「回到小区」同步跟随精确点</div><div class="lg-item"><span class="lg-ver">v1.3.17</span><b>内置 Key 域名白名单保护</b>：内置 Key 仅在授权域名（本地 file:// 打开 / tool.wbc2023.top / GitHub Pages 源站 / 本机调试）下生效；页面若被拷贝到其他站点，内置 Key 自动停用并回退网页版地图，避免 Key 被第三方盗用（自填 Key 不受域名限制）。「⚙」弹窗按域名状态显示绿/橙/灰三色提示</div><div class="lg-item"><span class="lg-ver">v1.3.16</span><b>高德地图 Key 开箱即用</b>：内置默认 Key 与安全密钥（JS API 2.0 Web端），打开页面自动填入并生效，无需手动配置；「⚙」弹窗仍可随时替换为自己的 Key，「清除 Key」后立即回退网页版地图</div><div class="lg-item"><span class="lg-ver">v1.3.15</span><b>接入高德地图官方 JS API 2.0 SDK</b>：地图卡片由网页 iframe 升级为 SDK 交互地图（小区标注+信息窗口、卫星/标准切换、回到小区、全屏、缩放尺控件）；新增「⚙ Key 设置」弹窗（Key 存本机 localStorage）；未配置 Key 或 SDK 加载失败时自动回退网页版地图，打印仍用静态底图</div><div class="lg-item"><span class="lg-ver">v1.3.14</span><b>金福云航拍自动登录全覆盖</b>：桌面版补齐自动登录（原先只有手机版有）；新增「↗ 重新登录」按钮（cookie 24h 过期后一键重登）；新增「↗ 新窗口打开」按钮（iOS/微信等拦截第三方 cookie 时，新窗口登录一次即恢复）</div><div class="lg-item"><span class="lg-ver">v1.3.13</span><b>新增第 3 套房源「保利云禧一期」</b>：巴南龙洲湾 · 碧桂园保利联合开发（绿化35%、人车分流）· 3号线鱼胡路站约650m · 划片龙洲湾小学 · 综合评分 78；航拍为用户提供金福云作品</div><div class="lg-item"><span class="lg-ver">v1.3.12</span><b>手机版顶栏优化</b>：移除「关于」按钮左侧旧版本号标签；版本号同步 v1.3.12</div><div class="lg-item"><span class="lg-ver">v1.3.11</span><b>手机版关于弹窗优化</b>：移除更新日志左侧版本号标签，界面更简洁</div><div class="lg-item"><span class="lg-ver">v1.3.10</span><b>首地江山赋·凌山樾改名与航拍更新</b>：名称去掉「北区」改为「首地江山赋·凌山樾」；航拍换为用户提供的新作品（金福云「首地江山赋凌山樾」），封面同步更新</div><div class="lg-item"><span class="lg-ver">v1.3.9</span><b>首地江山赋·凌山樾新增航拍实景</b>：金福云 VR 作品（首地江山赋·悦江城），封面图高清内嵌，点击可跳转全景；桌面版/手机版同步</div><div class="lg-item"><span class="lg-ver">v1.3.8</span><b>新增第 2 套房源「首地江山赋·凌山樾」</b>：两江新区悦来 · 国企低密洋房（容积率1.01）· 划片首地人和街小学 · 悦来站约400m · 综合评分 83；价格按二手挂牌修正为约1.12-1.17万/㎡</div>
     <div class="lg-item"><span class="lg-ver">v1.3.7</span>手机端兼容性全面修复：侧边导航变横向滚动条、main 自然滚动、航拍/地图高度自适应、hero/KPI 紧凑布局、顶栏精简</div>
     <div class="lg-item"><span class="lg-ver">v1.3.6</span>「关于」弹窗新增<b>界面布局注解图</b>：标注顶栏 / 左侧导航 / hero 标题+chips / KPI 同排 / 评分条 / 航拍实景 / 高德街道图 / 十大板块卡片的位置</div>
     <div class="lg-item"><span class="lg-ver">v1.3.1</span><b>界面全面改版为 Vercel 现代渐变风</b>：深蓝渐变背景 + 半透明玻璃卡片 + 青/紫/粉霓虹点缀；顶栏新增版本号与「关于」入口</div>
