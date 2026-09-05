@@ -244,7 +244,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 .modal .m-head{padding-top:calc(16px + env(safe-area-inset-top))}
 /* v1.0.23：弹窗背景由「半透明白玻璃」改为「淡灰渐变」——与页面底色融为一体（房源详情/表单/设置/确认全部弹窗统一） */
 .modal{background:linear-gradient(165deg,#f2f4f6 0%,#e9ebef 55%,#dfe2e8 100%);border:1px solid rgba(208,213,222,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px -18px rgba(30,41,59,.3)}
-/* v1.0.26：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
+/* v1.0.27：房源详情弹窗整体统一「淡灰半透明玻璃」——去掉偶数行白条纹、浅色实底标签等灰白相间成分，
    让弹窗底色单一通透（半透明淡灰渐变 + 背景模糊），信息靠细分隔线区分 */
 .modal{background:linear-gradient(165deg,rgba(241,243,246,.93) 0%,rgba(232,235,240,.9) 55%,rgba(222,226,232,.87) 100%)}
 .dtb{background:transparent;border:1px solid rgba(206,212,222,.6)}
@@ -254,6 +254,10 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 .dtb .dup{border-bottom:1px dashed rgba(206,212,222,.6)}
 .dtb .dup .col.l{border-right:1px dashed rgba(206,212,222,.6)}
 .dtb .dchip{background:rgba(100,112,130,.13);color:#46525f}
+
+/* ===== v1.0.27：弹窗打开锁定背景滚动（修复详情等弹窗滚动时主页面跟随滚动/触屏穿透） ===== */
+html.lock-scroll{overflow:hidden}
+.mask{overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -306,7 +310,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
   </div>
 </main>
 
-<footer>房览速记 v1.0.26 · 内置云端同步（打开即用·多端自动互通）· 数据本机保存 + 云端备份</footer>
+<footer>房览速记 v1.0.27 · 内置云端同步（打开即用·多端自动互通）· 数据本机保存 + 云端备份</footer>
 
 <!-- ===== 添加/编辑弹窗 ===== -->
 <div class="mask" id="formMask">
@@ -489,7 +493,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
 
 <script>
 'use strict';
-/* ================= 房览速记 v1.0.26 =================
+/* ================= 房览速记 v1.0.27 =================
    功能：房源手动记录（价格/面积/户型/优缺点/链接等）、卡片列表、搜索筛选排序、统计、
          JSON 导出导入、云端双端同步（手机+网页数据互通，按记录时间智能合并）、
          配置复制/粘贴导入（换设备免手输令牌）、一键复制令牌、连接测试（只读检测）、
@@ -498,7 +502,7 @@ body{background:linear-gradient(160deg,#eef0f4 0%,#e7eaef 55%,#e0e4ea 100%);padd
          拉取改为纯读不反推（减少409冲突）、弹窗关闭按钮品牌深蓝实底+悬停旋转、
          卡片去掉优✓缺✗标记（更紧凑）、手机端隐藏标签筛选栏
 ==================================================== */
-var APP = { name:'房览速记', version:'1.0.26' };
+var APP = { name:'房览速记', version:'1.0.27' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_sync_token';
 var DEFAULT_SET = { api:'http://47.109.99.227/sync', token:'af91def02e8a9a205fe630e970b1b39a', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-2:';  // 同步配置导入导出前缀
@@ -1002,8 +1006,27 @@ function clearAll(){
 }
 
 /* ---------- 通用 ---------- */
-function show(id){ document.getElementById(id).classList.add('show'); }
-function hide(id){ document.getElementById(id).classList.remove('show'); }
+function lockScroll(){
+  var el=document.body;
+  if(el.dataset.lockTop!==undefined) return;
+  var sy=window.pageYOffset||document.documentElement.scrollTop||0;
+  el.dataset.lockTop=String(sy);
+  el.style.position='fixed'; el.style.top='-'+sy+'px';
+  el.style.left='0'; el.style.right='0'; el.style.width='100%';
+  document.documentElement.classList.add('lock-scroll');
+}
+function unlockScroll(){
+  if(document.querySelector('.mask.show')) return;
+  var el=document.body;
+  if(el.dataset.lockTop===undefined) return;
+  document.documentElement.classList.remove('lock-scroll');
+  el.style.position=''; el.style.top=''; el.style.left=''; el.style.right=''; el.style.width='';
+  var sy=parseInt(el.dataset.lockTop||'0',10)||0;
+  delete el.dataset.lockTop;
+  window.scrollTo(0, sy);
+}
+function show(id){ document.getElementById(id).classList.add('show'); lockScroll(); }
+function hide(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); unlockScroll(); }
 var toastTimer=null;
 function toast(msg, isErr){
   var t=document.getElementById('toast');
@@ -1022,16 +1045,16 @@ document.getElementById('cfOk').addEventListener('click', function(){ var cb=con
 function closeConfirm(){ hide('confirmMask'); confirmCb=null; }
 document.querySelectorAll('.mask').forEach(function(m){
   m.addEventListener('click', function(e){
-    if(e.target===m && m.id!=='confirmMask') m.classList.remove('show');
+    if(e.target===m && m.id!=='confirmMask') hide(m.id);
   });
 });
 document.addEventListener('keydown', function(e){
-  if(e.key==='Escape') document.querySelectorAll('.mask.show').forEach(function(m){ m.classList.remove('show'); });
+  if(e.key==='Escape') document.querySelectorAll('.mask.show').forEach(function(m){ hide(m.id); });
 });
 
 loadAll();
 
-  /* v1.0.26 内置令牌后: 首次打开自动拉取云端 */
+  /* v1.0.27 内置令牌后: 首次打开自动拉取云端 */
   setTimeout(function(){ try{ if(settings.token && !settings.lastSync) doSync('pull'); }catch(e){} }, 900);
 </script>
 </body>
