@@ -551,6 +551,21 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">脚手架CAD</span>
       </div>
     </a>
+
+    <a class="card" href="deeppit.html" style="--g1:#0e7490;--g2:#14b8a6;--gs:rgba(14,116,144,.5);--a1:#2dd4bf;--a2:#0ea5a4;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V8l4-3 4 3v13M13 21V5l4-3 4 3v16" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11h2M9 14h2M17 11h2M17 14h2" stroke="#fff" stroke-width="1.2" opacity=".55"/><path d="M4 12h16" stroke="#fff" stroke-width="1.1" stroke-dasharray="3 2.4" opacity=".4"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>深基坑快绘坡面CAD系统</h3>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">导入基坑轮廓DXF一键生成向内/向外放坡：上=平面图（天正长短示坡线、A-A/B-B剖切线）、下=A-A/B-B剖面（三角标高符号+45°尺寸标注）；凹形/多基坑轮廓自动切分为 A-A(1)(2)… 多剖面；可导出 PNG/DXF 及平剖三图合并DXF。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(14,116,144,.4);--cc:#5eead4;--cbg:rgba(14,116,144,.14)">v1.0.2</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">基坑CAD</span>
+      </div>
+    </a>
   </div>
   <footer><span class="dot"></span>元枢工具箱 Vista Hub · 浏览器即开即用 · 数据全程本地处理</footer>
 </div>
@@ -966,7 +981,8 @@ function filterTools(q){
 })();
 
 // ===== ⑦ 公告栏 + 更新日志 =====
-var NEWS_LOG = [{d:'2026-09-06', t:'更新：脚手架快绘CAD系统 v1.0.15（图形背景与网格交互对齐 BraceCad：网格开（默认）=浅灰蓝 #eef1f6 底 + 5×5 参考网格（24px 细线、每5格深线），网格关=纯白底无网格；网格按钮=深蓝底白图标/关透明底深灰图标；修复 F 适应/+/- 缩放/G 切换快捷键从未注册的 bug）'},
+var NEWS_LOG = [{d:'2026-09-06', t:'新增：深基坑快绘坡面CAD系统 v1.0.2（导入基坑轮廓DXF一键生成向内/向外放坡：上=平面图下=A-A/B-B双剖面；凹形/多基坑轮廓自动切分 A-A(1)(2)…多剖面；天正三角标高+45°尺寸标注；DXF骨架升级修复CAD打开报错；参数步长0.01）'},
+{d:'2026-09-06', t:'更新：脚手架快绘CAD系统 v1.0.15（图形背景与网格交互对齐 BraceCad：网格开（默认）=浅灰蓝 #eef1f6 底 + 5×5 参考网格（24px 细线、每5格深线），网格关=纯白底无网格；网格按钮=深蓝底白图标/关透明底深灰图标；修复 F 适应/+/- 缩放/G 切换快捷键从未注册的 bug）'},
 {d:'2026-09-06', t:'更新：脚手架快绘CAD系统 v1.0.14（图形背景改造：网格开=均匀浅灰蓝 #eef1f6 无渐变，去掉画布 SVG 参考格线；网格关=透明白底）'},
 {d:'2026-09-06', t:'更新：脚手架快绘CAD系统 v1.0.13（网格按钮复刻 BraceCad：开启=深蓝底 #1c6fd0 白图标、关闭=透明底深灰蓝图标；背景随开关联动）'},
 {d:'2026-09-06', t:'更新：脚手架快绘CAD系统 v1.0.12（网格按钮两态样式仿 BraceCad：开启=纯白底无边框+深灰图标，关闭=纯白底淡灰图标，仅图标深浅区分开关；修复启动时按钮高亮与网格实际显示不同步的 bug；快捷键 G 仍可切换）'},
@@ -1030,7 +1046,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'woodreport.html': '2026-09-01', 'scaffold.html': '2026-09-06'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'woodreport.html': '2026-09-01', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
