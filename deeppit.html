@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="DRoMCsA4TjNnfpeGnxv4aq">
+<head data-page-node-id="igylN1UZ6SE8EJ0QsO3DhC">
+<meta charset="UTF-8" data-page-node-id="oUEwGtGk98TZgqksjRHRe2">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="uJRcyUeXYjOSDZWyFaztPU">
+<title>深基坑快绘坡面CAD系统 v1.0.2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230ea5a4'/%3E%3Ctext x='50' y='74' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E5%9D%91%3C/text%3E%3C/svg%3E" data-page-node-id="GYNsTYEdcCyuKrBQ8h0An8">
+<style>
+  :root{
+    --bg:#eef4f8; --bg-2:#e6eef5; --bg-3:#d8e4ee;
+    --card:#ffffff; --line:#d8e4ee;
+    --txt:#1e2b36; --sub:#5b7484; --muted:#8aa1ad;
+    --primary:#2563eb; --primary-2:#1d4ed8; --primary-soft:#eaf1fb;
+    --accent:#5fa8ff; --light:#7fbfff;
+    --teal:#0ea5a4; --teal-2:#0d7f7e;
+    --green:#16a34a; --red:#dc2626; --amber:#d97706;
+    --shadow:0 4px 18px rgba(37,99,235,.10);
+    --shadow-2:0 12px 36px rgba(15,42,80,.18);
+    --panel-w:300px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--txt); overflow:hidden; font-size:14px;
+  }
+  body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:#eef1f6;transition:background .18s}
+  body.grid-off::before{background:#ffffff}
+
+  /* ===== 顶栏 ===== */
+  header{
+    height:54px;background:rgba(255,255,255,.88);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);color:var(--txt);
+    display:flex;align-items:center;padding:0 16px;gap:12px;
+    box-shadow:0 2px 8px rgba(15,42,80,.06);position:relative;z-index:5;
+  }
+  header .logo{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,#2dd4bf,#0e7490);
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;font-weight:700;color:#fff;
+    box-shadow:0 4px 10px rgba(14,116,144,.35);
+  }
+  header h1{font-size:16px;font-weight:700;color:var(--txt);letter-spacing:.4px}
+  header .ver{background:#dff6f5;color:var(--teal-2);padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+  header .sp{flex:1}
+  .tbtn{
+    border:1px solid var(--line);background:var(--card);color:var(--txt);
+    padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px;
+    display:flex;gap:6px;align-items:center;transition:.15s;white-space:nowrap;font-family:inherit;
+  }
+  .tbtn:hover{border-color:var(--teal);color:var(--teal-2);box-shadow:0 4px 12px rgba(14,116,144,.16)}
+  .tbtn.primary{background:linear-gradient(135deg,#2dd4bf,#0e7490);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 4px 12px rgba(14,116,144,.28)}
+  .tbtn.primary:hover{filter:brightness(1.06);color:#fff}
+  .tbtn.ghost{border-color:transparent;background:transparent}
+  .tbtn.ghost:hover{background:var(--primary-soft);color:var(--primary-2)}
+
+  /* ===== 主体 ===== */
+  main{display:flex;height:calc(100% - 54px);padding:10px;gap:10px}
+  aside{
+    width:var(--panel-w);min-width:var(--panel-w);background:var(--card);
+    border:1px solid var(--line);border-radius:14px;
+    overflow-y:auto;padding:14px;box-shadow:var(--shadow);
+  }
+  .panel-sec{margin-bottom:14px}
+  .panel-sec h3{
+    font-size:12px;color:var(--teal-2);font-weight:700;margin-bottom:8px;letter-spacing:1px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .panel-sec h3::before{content:"";width:3px;height:13px;background:var(--teal);border-radius:2px}
+  .frow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .frow label{font-size:13px;color:var(--txt);flex:0 0 74px;white-space:nowrap}
+  .frow input[type=number],.frow input[type=text],.frow select{
+    flex:1;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;
+    font-family:inherit;background:var(--primary-soft);color:var(--txt);min-width:0;outline:none;
+  }
+  .frow input:focus,.frow select:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(14,116,144,.14)}
+  .frow .unit{font-size:11px;color:var(--sub);flex:0 0 auto}
+  .frow.full{flex-direction:column;align-items:stretch}
+  .frow.full label{flex:none;margin-bottom:4px}
+  .chk{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:7px;cursor:pointer;color:var(--txt)}
+  .chk input{accent-color:var(--teal);width:15px;height:15px}
+  .chk small{color:var(--sub);font-size:11px;margin-left:4px}
+  .seg{display:flex;background:var(--primary-soft);border:1px solid var(--line);border-radius:9px;padding:3px;margin-bottom:9px}
+  .seg button{
+    flex:1;border:none;background:transparent;border-radius:7px;padding:6px 4px;cursor:pointer;
+    font-size:12.5px;color:var(--sub);font-family:inherit;transition:.13s;line-height:1.35;
+  }
+  .seg button.on{background:#fff;color:var(--teal-2);font-weight:700;box-shadow:0 2px 8px rgba(14,116,144,.18)}
+  .btnrow{display:flex;gap:6px;margin-bottom:10px}
+  .btnrow .btn{flex:1}
+  .btn{
+    border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 11px;cursor:pointer;
+    font-size:13px;color:var(--txt);transition:.15s;font-family:inherit;
+    display:flex;align-items:center;gap:6px;justify-content:center;
+  }
+  .btn:hover{border-color:var(--teal);color:var(--teal-2);background:#f2fbfb}
+  .btn.red{background:#fff;border-color:#fecaca;color:var(--red)}
+  .btn.red:hover{background:#fef2f2;border-color:var(--red)}
+  .hint{font-size:11px;color:var(--sub);line-height:1.7;background:var(--primary-soft);border:1px dashed var(--line);border-radius:8px;padding:7px 9px;margin-top:8px}
+  .derive{font-size:11.5px;color:var(--teal-2);background:#e6f7f6;border:1px solid #bfeae8;border-radius:8px;padding:7px 9px;margin-top:2px;line-height:1.8}
+  .derive b{font-weight:700}
+  .tb-field{margin-bottom:8px}
+  .tb-field label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:3px;font-weight:600}
+  .tb-field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;font-family:inherit;background:var(--primary-soft);outline:none}
+  .tb-field input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(14,116,144,.14)}
+  .sep{height:1px;background:var(--line);margin:12px 0}
+
+  /* ===== 三视区画布区 ===== */
+  .stage{flex:1;display:flex;flex-direction:column;min-width:0;gap:6px}
+  .statbar{
+    display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.86);
+    border:1px solid var(--line);border-radius:12px;padding:7px 14px;
+    font-size:12px;color:var(--sub);flex-wrap:wrap;flex:0 0 auto;
+    box-shadow:0 2px 8px rgba(15,42,80,.04);
+  }
+  .statbar b{color:var(--txt);font-weight:600}
+  .statbar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;background:var(--teal)}
+  .view{position:relative;min-height:0;overflow:hidden;border:1px solid #c7d7e1;border-radius:12px;box-shadow:0 3px 12px rgba(15,42,80,.10);background:#fff}
+  .view.plan{flex:1.1;border-color:#0e7490;border-width:1.5px}
+  .view-row{flex:1;display:flex;gap:8px;min-height:0;padding-top:1px}
+  .view-row .view{flex:1}
+  #viewA{border-color:#c2410c;border-width:1.5px}
+  #viewB{border-color:#4338ca;border-width:1.5px}
+  .vdiv{display:flex;align-items:center;gap:10px;flex:0 0 auto;color:var(--sub);font-size:10px;letter-spacing:2px;padding:0 8px;user-select:none}
+  .vdiv::before,.vdiv::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(14,116,144,.0),rgba(14,116,144,.45),rgba(14,116,144,0))}
+  .canvas-wrap{
+    position:absolute;inset:0;overflow:hidden;cursor:grab;
+    background-color:#eef1f6;
+    background-image:
+      linear-gradient(rgba(37,99,235,.07) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(37,99,235,.07) 1px,transparent 1px),
+      linear-gradient(rgba(37,99,235,.16) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(37,99,235,.16) 1px,transparent 1px);
+    background-size:24px 24px,24px 24px,120px 120px,120px 120px;
+    background-position:-1px -1px,-1px -1px,-1px -1px,-1px -1px;
+    transition:background-color .18s;
+  }
+  body.grid-off .canvas-wrap{background-color:#ffffff;background-image:none}
+  .canvas-wrap.dragging{cursor:grabbing}
+  .canvas-wrap svg{display:block;width:100%;height:100%;user-select:none;background:transparent}
+  .view-badge{
+    position:absolute;top:8px;left:8px;z-index:6;pointer-events:none;user-select:none;
+    display:flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    border:1px solid var(--line);border-radius:8px;padding:3px 9px;box-shadow:var(--shadow);
+    font-size:11.5px;font-weight:700;color:var(--teal-2);letter-spacing:1px;
+  }
+  .view-badge::before{content:"";width:9px;height:9px;border-radius:3px;background:currentColor;display:inline-block}
+  .view-badge small{color:var(--sub);font-weight:500;letter-spacing:0}
+  .cv-toolbar{
+    position:absolute;top:8px;right:8px;display:flex;gap:3px;
+    background:rgba(255,255,255,.94);
+    border:1px solid var(--line);border-radius:8px;padding:3px;box-shadow:var(--shadow);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);z-index:5;
+  }
+  .cv-toolbar button{
+    width:28px;height:28px;border:none;background:transparent;border-radius:6px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;color:#0d7f7e;transition:.13s;font-family:inherit;
+  }
+  .cv-toolbar button:hover{background:#e6f7f6;color:var(--teal-2)}
+  .cv-toolbar button:disabled{opacity:.4;cursor:not-allowed}
+  .cv-toolbar .sp{width:1px;background:var(--line);margin:3px 1px}
+  .cv-toolbar svg{width:15px;height:15px}
+  .cv-toolbar .lbl{font-size:10px;color:var(--sub);font-weight:600;padding:0 5px;align-self:center;min-width:40px;text-align:center}
+  .cv-tip{
+    position:absolute;right:10px;bottom:7px;font-size:11px;color:var(--sub);
+    background:rgba(255,255,255,.85);padding:2px 9px;border-radius:20px;
+    border:1px solid var(--line);user-select:none;pointer-events:none;
+  }
+  .cv-info{
+    position:absolute;z-index:4;pointer-events:none;user-select:none;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 14px rgba(15,42,80,.08);
+    padding:6px 11px 8px;font-size:11.5px;line-height:1.55;color:#33465c;max-width:200px;
+  }
+  .cv-info h4{
+    margin:0 0 3px;padding:0 3px 3px;font-size:11.5px;letter-spacing:2px;color:var(--teal-2);
+    text-align:center;font-weight:700;border-bottom:1px solid var(--line);
+  }
+  .cv-info .r{white-space:nowrap;padding:1px 2px;display:flex;align-items:center;gap:6px}
+  .cv-info .sym{display:inline-block;min-width:13px;text-align:center;color:#33465c;font-weight:600;font-size:12px}
+  .cv-info.right{left:auto;right:10px;top:44px}
+  .cv-info.left{left:10px;top:44px}
+
+  /* 模态 / toast */
+  #loading{position:fixed;inset:0;background:rgba(238,244,248,.75);display:none;align-items:center;justify-content:center;z-index:99}
+  #loading.on{display:flex}
+  .load-card{background:#fff;border-radius:14px;padding:26px 34px;text-align:center;box-shadow:var(--shadow-2)}
+  .spin{width:42px;height:42px;border:4px solid #dff6f5;border-top-color:var(--teal);border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .load-card p{font-size:14px;color:var(--txt)}
+  .modal-mask{position:fixed;inset:0;background:rgba(15,42,80,.32);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px)}
+  .modal-mask.on{display:flex}
+  .modal{background:#fff;border-radius:14px;min-width:440px;max-width:600px;max-height:84vh;overflow:auto;
+    box-shadow:var(--shadow-2);padding:20px 22px;animation:pop .18s ease}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h3{font-size:16px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;color:var(--txt)}
+  .modal .x{cursor:pointer;color:var(--sub);font-size:20px;line-height:1;padding:2px 8px;border-radius:6px}
+  .modal .x:hover{background:#e6f7f6;color:var(--teal-2)}
+  .modal .desc{color:var(--sub);font-size:13px;margin-bottom:14px;line-height:1.7}
+  table.st{width:100%;border-collapse:collapse;font-size:13px}
+  table.st th,table.st td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+  table.st th{background:#e6f7f6;font-weight:600;font-size:12px;color:var(--teal-2)}
+  table.st td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .mbtn-row{display:flex;gap:8px;margin-top:16px}
+  .mbtn-row .btn{flex:1}
+  .about-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#2dd4bf,#0e7490);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin-bottom:10px;
+    box-shadow:0 8px 18px rgba(14,116,144,.35)}
+  .about-ver{color:var(--teal-2);font-weight:600}
+  #toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);
+    background:#0d7f7e;color:#fff;
+    padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;z-index:120;pointer-events:none;
+    box-shadow:0 10px 30px rgba(15,42,80,.25);max-width:80vw}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.err{background:#b91c1c}
+  #toast.ok{background:var(--green)}
+  .foot-note{font-size:11.5px;color:var(--sub);line-height:1.7;background:var(--primary-soft);padding:8px 10px;border-radius:8px;border:1px dashed var(--line);margin-top:10px}
+</style>
+</head>
+<body data-page-node-id="onC4pl2jqtlb9AIRBFNTbr">
+
+<header data-page-node-id="N5iE3pW7VZaIfIHorse12H">
+  <div class="logo" data-page-node-id="CbRYrRsagmkCil38MWlqeF">坑</div>
+  <h1 data-page-node-id="2Z4OIGmQMtEWtBmTI04WqC">深基坑快绘坡面CAD系统</h1>
+  <span class="ver" data-page-node-id="lq4SdbzjQpggSbHpQSl9r5">v1.0.2</span>
+  <div class="sp" data-page-node-id="qXgOjJiGIsrUrpcQlfHkgq"></div>
+  <button class="tbtn" id="btnSample" title="载入示例基坑轮廓（60m×40m 切角八边形坑底边线）" data-page-node-id="BRml5JxRWWEgAyyP0QQMd1">▦ 示例</button>
+  <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为坑底/上口边线）" data-page-node-id="6pck0Lh48I4xD8MT62NEl9">📂 导入DXF</button>
+  <button class="tbtn" id="btnMerge" title="将平面图与 A-A/B-B 剖面合并导出一个 DXF 文件（含图框与图名）" data-page-node-id="NDCuKrh4TBGFNghbtFowEO">⧉ 合并导出DXF</button>
+  <button class="tbtn ghost" id="btnAbout" title="关于" data-page-node-id="3rHVvDMDnLz4bI2Fs5e6eE">?</button>
+  <input type="file" id="fileDxf" accept=".dxf" style="display:none" data-page-node-id="x3jApw30siqsM5fSqRJd1s">
+</header>
+
+<main data-page-node-id="RfdrHsem88mkYVkNYkYHAf">
+  <!-- ============ 左侧参数面板 ============ -->
+  <aside id="panel" data-page-node-id="gMGhXmzq76xP7sypb3c8uf">
+    <div class="panel-sec" data-page-node-id="j5SGZVkJKRNlFMrm9Lxmhi">
+      <h3 data-page-node-id="qWLTRkbwIU5Jw2Z9258CUd">轮廓数据</h3>
+      <div class="frow" data-page-node-id="toKjfw1LyiYi1ghxddB8up"><label data-page-node-id="zHQYazDsryAN4dkmV88x0A">状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)" data-page-node-id="BVdAlis3FPb84rAMldY8ZL">未导入</span></div>
+      <div class="frow full" data-page-node-id="yYlDkCfHQgznluXmLntylE"><label data-page-node-id="2TqsbHh4mrXCsp3uuC4z1U">工程名称</label><input type="text" id="inProj" value="深基坑支护专项方案" maxlength="30" data-page-node-id="OAILpTGYsVn2t3XhPI4YQf"></div>
+      <div class="frow" data-page-node-id="DSKL0umIAGMA5UXZZeW7O9"><label data-page-node-id="NaBW7ow1OPhiemFtoVSwva">轮廓单位</label>
+        <select id="selUnit" data-page-node-id="zRF3IozGM3QTNelGJsQyLa">
+          <option value="auto" data-page-node-id="goB2ymtsMQYc8qe5UhkHuP">自动判断</option>
+          <option value="mm" data-page-node-id="9ehAUae2uG3BGRd7n3FbbF">毫米 mm</option>
+          <option value="m" data-page-node-id="nai9VoN3beklzYRkw79aD0">米 m</option>
+        </select>
+      </div>
+      <button class="btn red" id="btnClearPoly" style="width:100%" data-page-node-id="WDnFepGI8DJay6DwqYgpaB">清空轮廓</button>
+      <div class="hint" data-page-node-id="a3u3DbxDhh1z947EOSefPB">导入DXF后自动识别<b data-page-node-id="pZBQpSoq0W5vFrfskInBwC">面积最大</b>的闭合多段线作为基坑边线。<br data-page-node-id="EwzNZSS1xoPkBwXHC5aTJO">轮廓=坑底边线时选「向外放坡」；轮廓=开挖上口时选「向内放坡」。</div>
+    </div>
+
+    <div class="panel-sec" data-page-node-id="6L5iqvjOEPMzbhpEhLIgiE">
+      <h3 data-page-node-id="VHOqEihcbECMYwoAodVAQa">放坡参数（含剖面所需）</h3>
+      <div class="seg" id="segDir" data-page-node-id="EQnitd9XdV0D60BFncWSGw">
+        <button id="dirOut" class="on" title="轮廓为坑底边线，坡面向外延伸至地面" data-page-node-id="xXm47RdrgEbtCmeJogoJzo">↗ 向外放坡<br data-page-node-id="cUN7WjqqSpp7alGp3MBihc"><small style="font-weight:400;font-size:10.5px" data-page-node-id="BVTLCOgaiD0aTbPsxz5Nbo">轮廓=坑底边线</small></button>
+        <button id="dirIn" title="轮廓为开挖上口，坡面向内收至坑底" data-page-node-id="p0pB76v0SkXMQsOMsZgnLU">↙ 向内放坡<br data-page-node-id="ZiBn7J8RhoEsKtyhbr0i5l"><small style="font-weight:400;font-size:10.5px" data-page-node-id="RU3PZHZ1SGGBkG30ACOpkb">轮廓=开挖上口</small></button>
+      </div>
+      <div class="frow" data-page-node-id="TcWD3g2hDetCHnvHV6l8dh"><label data-page-node-id="EDa2qnJSmHUlEn2ninG7co">坑深 H</label><input type="number" id="inH" value="6.0" min="0.5" max="60" step="0.01" data-page-node-id="z2MDI7IRAs0hDqzVTEqnh3"><span class="unit" data-page-node-id="TbeWb68yo4aw3p295ciV8R">m</span></div>
+      <div class="frow" data-page-node-id="Gct2hniM8ptJX4p1Xf8aq6"><label data-page-node-id="lLKUb3RmKJRRZwanyv3zrm">放坡级数</label>
+        <select id="selN" data-page-node-id="AdFlm5eqvNNZ907nOmEfoY">
+          <option value="1" data-page-node-id="qyVow7YBaAdz3DogwvHyhf">1 级（一次放坡）</option>
+          <option value="2" selected data-page-node-id="QoD1oq8Qn0Htw1Af6EBVLx">2 级（设一道马道）</option>
+          <option value="3" data-page-node-id="gRA4bi0ZHvyyy1Uet6v8Ak">3 级（设两道马道）</option>
+          <option value="4" data-page-node-id="Hk7OAM8gBFFLFJ4jHAC84K">4 级</option>
+          <option value="5" data-page-node-id="j3hvLGL5q59vWav9Cw9sPA">5 级</option>
+        </select>
+      </div>
+      <div class="frow" data-page-node-id="Ruq0C6RjrQp1zFoCL8HJyy"><label data-page-node-id="BcnvLuaFnLqw0WW7uSDKAt">坡率 1:m</label><input type="number" id="inM" value="1.00" min="0.2" max="10" step="0.01" data-page-node-id="rJQnaaE3wFVhVcH0EG4Pgu"><span class="unit" data-page-node-id="UKn0ESmZjTRc5ShL9BbyAT"></span></div>
+      <div class="frow" data-page-node-id="CAhRAvRR0lHit56oomCDCd"><label data-page-node-id="IieMskZ5TN963aiIFsH69k">马道宽 b</label><input type="number" id="inB" value="2.0" min="0" max="12" step="0.01" data-page-node-id="tyzbGVGr8RGnOzDyC3DHxs"><span class="unit" data-page-node-id="xoO5IhT68PzcgBlxTuXBgs">m</span></div>
+      <div class="derive" id="deriveInfo" data-page-node-id="WsRoMpq1OqGwhASz58P1Ui"></div>
+    </div>
+
+    <div class="panel-sec" data-page-node-id="VPItigztBDRVZenrFUgtTN">
+      <h3 data-page-node-id="2acKRwy3V8gv2cwjfrDMFC">剖切线位置（两剖面）</h3>
+      <div class="frow" data-page-node-id="lzW8XBuxBd4cfkNqzydloP"><label data-page-node-id="PehLXpBAVBSg5Bwj3GY2XX">A-A 横向</label><input type="number" id="inDyA" value="0" min="-500" max="500" step="0.01" data-page-node-id="RxwOckWfX5KOFkRtOXAxOv"><span class="unit" data-page-node-id="XHuPbdcRB01DMYAGd7PnMo">m</span></div>
+      <div class="frow" data-page-node-id="Vn13TJmb7CDV8UqC84XIDA"><label data-page-node-id="RnFQXvcOkRXHDyCtvHtGJs">B-B 纵向</label><input type="number" id="inDxB" value="0" min="-500" max="500" step="0.01" data-page-node-id="78ZAefp23RyR5obR9fVO8T"><span class="unit" data-page-node-id="gqTAd6EHDb9OBUmjmhrEjc">m</span></div>
+      <div class="hint" data-page-node-id="6AfVDvGfr1TKrzjgQFwwrk">A-A：平行 X 轴的横剖面，0=过形心；<br data-page-node-id="N7Nbyf9KDGW9GkMtPKoo0d">B-B：平行 Y 轴的纵剖面，0=过形心。</div>
+    </div>
+
+    <div class="panel-sec" data-page-node-id="Gezv1OJuSrylCPub6zaXzk">
+      <h3 data-page-node-id="vDkS3yTIxo72dvfVhOlq6Y">显示选项</h3>
+      <label class="chk" data-page-node-id="Sr7GE44rhhFKHDjfNMUSEz"><input type="checkbox" id="ckTick" checked data-page-node-id="8vEGcJiGTkhFliWr3WteRJ"> 示坡线（坡面示意短线）</label>
+      <label class="chk" data-page-node-id="qytlTs3JLS4zApugUwussE"><input type="checkbox" id="ckRing" checked data-page-node-id="XS2oDjZvPeMLa0qVJvnu75"> 各级马道边线（虚线）</label>
+      <label class="chk" data-page-node-id="nyGXa1QCNeX88avJ2R6fR4"><input type="checkbox" id="ckFill" checked data-page-node-id="0m8nIzwg5yPsjEsgmjhYFi"> 平面放坡范围底色</label>
+      <label class="chk" data-page-node-id="5QY7F27P4oGUjVZEwiZhFK"><input type="checkbox" id="ckLvl" checked data-page-node-id="eBQrBBFm8Pa5g2i5dABVPO"> 剖面标高标注</label>
+      <label class="chk" data-page-node-id="0tCpYXtpWeHmCyWu4VMoTr"><input type="checkbox" id="ckDim" checked data-page-node-id="OoUI4z8URYfm2xuGCR2sGq"> 剖面尺寸标注（坡段/马道/坑深）</label>
+      <label class="chk" data-page-node-id="ppDX4Sf7Z9NC5UvG0gmj9L"><input type="checkbox" id="ckTitle" data-page-node-id="jm2Cw6T39pIHaFDxP2GwiS"> 平面图签 <small data-page-node-id="wJXHcCFGtIIyrWkQokee1T">（右下角）</small></label>
+    </div>
+    <div class="panel-sec" id="secTitle" style="display:none" data-page-node-id="XVBs4u0gGUKbw9ylAOmzaf">
+      <h3 data-page-node-id="NAIf5Bw1eSItjma8fg8DPy">图签</h3>
+      <div class="tb-field" data-page-node-id="YF2zXowxrhCBT9FOgl30kP"><label data-page-node-id="ySoPtepnlLkg1rJSLIndtl">图纸名称</label><input type="text" id="inDwName" value="深基坑放坡平面布置图" maxlength="26" data-page-node-id="5WjjOUkaktiN8wKBKK7ylg"></div>
+      <div class="tb-field" data-page-node-id="WTMJ8W6Dxw1HKFRgNAnXUW"><label data-page-node-id="DLM8TZP9Eu4SnIh2eTO6my">设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12" data-page-node-id="8d5EWjcRXpW8PPU7EoMThX"></div>
+    </div>
+  </aside>
+
+  <!-- ============ 三视区 ============ -->
+  <div class="stage" data-page-node-id="x3CF4b6kqN06byGBUrLCvk">
+    <div class="statbar" data-page-node-id="yrllXe1aiZPsySzlI4Ks0n">
+      <span data-page-node-id="6WVovAU8dEZXIcztHXclcg"><span class="dot" data-page-node-id="TT5CEXIvRDDQ630K0BPfG7"></span>轮廓: <b id="stPoly" data-page-node-id="FLafTLqGqznzg9xEhEzqvj">-</b></span>
+      <span data-page-node-id="wKDGGLhG4DCjaUPDRz2ppL">周长: <b id="stPerim" data-page-node-id="qWo3OR0JiWOOpqpOvEYqgU">-</b> m</span>
+      <span data-page-node-id="yaAetulGe31B7w4eRBCgx7">坑深: <b id="stH" data-page-node-id="s9ywumZpunx3T67znZWygt">-</b> m</span>
+      <span data-page-node-id="NB3IrWp7ZoUbRTTfehGJJn">级数: <b id="stN" data-page-node-id="tSHsaaWkC9Fra1h6pueFDO">-</b></span>
+      <span data-page-node-id="VMUmofmgapHAMSgD2rHRDy">放坡总宽: <b id="stD" data-page-node-id="CRocWwPSGge8a76smOtGzH">-</b> m</span>
+      <span data-page-node-id="b5TxKA1xP0QvLoARiclAKe">上口面积: <b id="stArea" data-page-node-id="8kxkzCNf8h3nuAoi3Djjez">-</b> m²</span>
+      <span style="margin-left:auto;color:var(--muted)" id="stHint" data-page-node-id="QJaAPBhAOS9mXDNFHJ6J8T">滚轮缩放 · 拖拽平移 · 双击适应</span>
+    </div>
+
+    <!-- 视区1：平面图（上） -->
+    <div class="view plan" id="viewPlan" data-page-node-id="aK9jDAC86mrJWamH6EvrWr">
+      <div class="canvas-wrap" data-view="plan" data-page-node-id="vAAV18mAgETPiYCYo0NcjJ">
+        <svg id="svgPlan" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" data-page-node-id="3jrjaEJtbOvftDzDLOUFsz"></svg>
+      </div>
+      <div class="view-badge" data-page-node-id="Xlr6HDwgikFbuONu1e2Kp2">☰ 平面图<small data-page-node-id="iJtPRN2QbgfGr6KnkursfM">放坡平面布置</small></div>
+      <div class="cv-toolbar" data-page-node-id="Yo17uL0qQDobF9Q0xbAebr">
+        <button id="pFit" title="适应窗口 (F)" data-page-node-id="XX08kJHWphySZNn0nJYwnr"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="jaRVEK5jU6wI4jDiuGcgMp"><path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4" data-page-node-id="qLieEMOu7zYrbAzhVgGDfb"/></svg></button>
+        <button id="pIn" title="放大" data-page-node-id="zpXZTM1XHZGx65hDppYgku"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="sqnztEqYY9JT8nBC5kNHFC"><circle cx="9" cy="9" r="5.5" data-page-node-id="6cVguOcpmHTktHDiSZxrgu"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4" data-page-node-id="g7pRNIzmNZD2JcfaqtdHYw"/></svg></button>
+        <button id="pOut" title="缩小" data-page-node-id="5LnfvqOfFwAtZ1xvIyNNU2"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="d2QnFRM7yB02AVFFOLUDcK"><circle cx="9" cy="9" r="5.5" data-page-node-id="Au0fUyJCdD2G544e9Cf0L8"/><path d="M13 13l4 4M6.8 9h4.4" data-page-node-id="EU3WdND8kZXvX8xo5YbT6J"/></svg></button>
+        <button id="pGrid" class="on" title="网格背景" data-page-node-id="bbeRv22E55iC5ujMsIiW72"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" data-page-node-id="xg458IudO9mKM99A2JMVWl"><path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14" data-page-node-id="trlvAEka2bHjL9an1z202r"/></svg></button>
+        <span class="sp" data-page-node-id="HK1YHNBLD8LD5iHysHBuAd"></span>
+        <button id="pPng" title="导出平面图 PNG" data-page-node-id="GYN4rtKPCRdIYD4OEVwyFf"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" data-page-node-id="gIh1MbtX1G7fn4joG2ARIJ"><rect x="3" y="4" width="14" height="12" rx="2" data-page-node-id="yjJQIUjSrOhWMcZYMm8bzm"/><circle cx="7.4" cy="8.4" r="1.2" data-page-node-id="PQijwLbKM2d4LJFXhQO9ZI"/><path d="M3.5 15l4-4.5 3 3 2.5-2.8 3.5 3.8" data-page-node-id="DE1TOeRHjFwp1ncuv3ebzx"/></svg></button>
+        <button id="pDxf" title="导出平面图 DXF" data-page-node-id="FjksZoe3TShddPUYsQp72Y"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" data-page-node-id="SPGzl5SXiylDxnPyNJ4kOt"><path d="M10 3v14M10 3l-3.5 3.5M10 3l3.5 3.5M4 17h12" data-page-node-id="TFTmSEAkm5D2HCrorKmPl4"/></svg></button>
+      </div>
+      <div class="cv-info left" id="cvLegend" data-page-node-id="CWzLW8NcXDAY14SWlapjN5"></div>
+      <div class="cv-info right" id="cvParams" data-page-node-id="1VobxWzTydzjolX1W8eZlX"></div>
+      <div class="cv-tip" data-page-node-id="W02EZsDXdl6K51ANDKwI9d">滚轮缩放 · 左键拖拽 · 双击适应</div>
+    </div>
+
+    <!-- 1+2 三视区分界线 -->
+    <div class="vdiv" data-page-node-id="ge5hk3CpKKLpWt2qsqKx0p">剖 面 视 区</div>
+
+    <!-- 视区2/3：剖面 A-A / B-B（下排） -->
+    <div class="view-row" data-page-node-id="ObQTGajDYLqGfftydX7zV7">
+      <div class="view" id="viewA" data-page-node-id="FT6CozImYYVmRWnb188TXG">
+        <div class="canvas-wrap" data-view="A" data-page-node-id="Ab6lHYXgT0MB0ZtMtJTFeu">
+          <svg id="svgSecA" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" data-page-node-id="BJWv1rySudN0YE7Y2nC100"></svg>
+        </div>
+        <div class="view-badge" style="color:#c2410c" data-page-node-id="Pv0D7Fqoym1Uhsb0D97c4S">A-A 剖面<small id="labA" data-page-node-id="TtKZbiI7o9zz5G8AroSIn2">横向剖切 · 过形心</small></div>
+        <div class="cv-toolbar" data-page-node-id="7uW7SyEHbQjbaMFwD0G7Gc">
+          <button id="aFit" title="适应" data-page-node-id="NT7Y3gN05WYpURTIBtLMtb"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="QhcXF3Dw9VdF5gwlKyfyMW"><path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4" data-page-node-id="uleZ5debITNueAkhLseM1F"/></svg></button>
+          <button id="aIn" title="放大" data-page-node-id="c5KS9BCcq2y3IIAv4vwMqd"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="v7n9MYCiUEQlDPo5pG8UcW"><circle cx="9" cy="9" r="5.5" data-page-node-id="yYZHem9GxtHNaPEejC1VFv"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4" data-page-node-id="drjvIEXDPnJmKk3EI7lFGM"/></svg></button>
+          <button id="aOut" title="缩小" data-page-node-id="V8aHFha2SUaJ6ImOGPdFlW"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="Rv0llkep32mKkbqSgVEs0j"><circle cx="9" cy="9" r="5.5" data-page-node-id="jkqaZgSo35K0jePcOlQfpE"/><path d="M13 13l4 4M6.8 9h4.4" data-page-node-id="ubAnqzo2hfI7QLDVZAqOqT"/></svg></button>
+          <span class="sp" data-page-node-id="HekDlWhxFDGtqz0Xku0CQi"></span>
+          <button id="aPng" title="导出 A-A 剖面 PNG" data-page-node-id="p8WtjLfqaiy1xgTGUfLBHg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" data-page-node-id="iBC3lPnJblfythkZh7qaQx"><rect x="3" y="4" width="14" height="12" rx="2" data-page-node-id="wGGywA71KxN3D0Cu0XsvRj"/><circle cx="7.4" cy="8.4" r="1.2" data-page-node-id="24T8AbTDJFJkz0Bi37wvQR"/><path d="M3.5 15l4-4.5 3 3 2.5-2.8 3.5 3.8" data-page-node-id="BLxHHxMpNQzxfYoR5nBduZ"/></svg></button>
+          <button id="aDxf" title="导出 A-A 剖面 DXF" data-page-node-id="EMSw9sIk2Af0IyGyanX1yS"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" data-page-node-id="tzyuLXs9epHAM2In0CUQJB"><path d="M10 3v14M10 3l-3.5 3.5M10 3l3.5 3.5M4 17h12" data-page-node-id="pzYMA73ZUnaa5bKRW7nu98"/></svg></button>
+        </div>
+        <div class="cv-tip" id="tipA" data-page-node-id="7XLqqohp2eAoghfEjPwmKH">A-A 剖面（尺寸 m）</div>
+      </div>
+      <div class="view" id="viewB" data-page-node-id="0dECaVJM9aZsfxkQ2zGoSQ">
+        <div class="canvas-wrap" data-view="B" data-page-node-id="5cNg5uWTJRkQO5nIvdc9TV">
+          <svg id="svgSecB" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" data-page-node-id="bhLEkQaRYIYcpmd0OFBE4g"></svg>
+        </div>
+        <div class="view-badge" style="color:#4338ca" data-page-node-id="MW6LB7zFi74Lh6DRXPd7TK">B-B 剖面<small id="labB" data-page-node-id="Sd4Pf5DPEDFCPaIvjwGIm2">纵向剖切 · 过形心</small></div>
+        <div class="cv-toolbar" data-page-node-id="ZMwyHRPFxBzq6OQAHZr0Od">
+          <button id="bFit" title="适应" data-page-node-id="4QbYviemOCmA2KvFhCqOKS"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="UoKBANMhlvCCe6SLykD4Gr"><path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4" data-page-node-id="3Wgwr66Uk7J3VaOgSBXU4u"/></svg></button>
+          <button id="bIn" title="放大" data-page-node-id="noXQ6F6jTeAaQNkxuHBdtD"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="kFBbga4ebxuJEJiLLIGrCf"><circle cx="9" cy="9" r="5.5" data-page-node-id="wPreGd8PQS8KBEPqEycX6d"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4" data-page-node-id="fAz113l7a121S66VaBh1vX"/></svg></button>
+          <button id="bOut" title="缩小" data-page-node-id="rLmCL5cUQp4GCNwzzUu7zg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="D9UC48srSKHgs5L2MADBks"><circle cx="9" cy="9" r="5.5" data-page-node-id="FUgPb4nnyaUsWyjXAdCEbV"/><path d="M13 13l4 4M6.8 9h4.4" data-page-node-id="jjjjZVMCjcqQCBjxlKAQdF"/></svg></button>
+          <span class="sp" data-page-node-id="6TwrMCBCVtCPMekL7cOMEA"></span>
+          <button id="bPng" title="导出 B-B 剖面 PNG" data-page-node-id="KQ39QiAIqAqAM1La7jui9t"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" data-page-node-id="jBIEnx9iqjvudxUDXkNEEM"><rect x="3" y="4" width="14" height="12" rx="2" data-page-node-id="TVdtGx63Fb4jtHz2679TuA"/><circle cx="7.4" cy="8.4" r="1.2" data-page-node-id="Vnp7hZ1TW8VKcEnjcN0DQE"/><path d="M3.5 15l4-4.5 3 3 2.5-2.8 3.5 3.8" data-page-node-id="O2QOAkslKnZZSyjQlEJmZ2"/></svg></button>
+          <button id="bDxf" title="导出 B-B 剖面 DXF" data-page-node-id="rnUAsCTz71CmUI8yu8OCmq"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" data-page-node-id="qVU4IxszGkPpGp1BCKsEHw"><path d="M10 3v14M10 3l-3.5 3.5M10 3l3.5 3.5M4 17h12" data-page-node-id="LZ7msZSs5VmkzwvncfQDEw"/></svg></button>
+        </div>
+        <div class="cv-tip" id="tipB" data-page-node-id="BEMy7zylSOzmeGvO9fr7iO">B-B 剖面（尺寸 m）</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 关于模态 -->
+<div class="modal-mask" id="modalAbout" data-page-node-id="K1bLCLZGYWKWa5ATjtIiNt">
+  <div class="modal" style="min-width:460px" data-page-node-id="YS5Tgm2jIfR47ndkSGjgfx">
+    <h3 data-page-node-id="pwQZrMgSEQDnqMSRaFF4a1"><span data-page-node-id="JeGhyJCreVxLNpjBP6Uv3h"></span><span class="x" data-close="modalAbout" data-page-node-id="I8NwjnCCAnUnhkyoiPizBb">×</span></h3>
+    <div class="about-logo" data-page-node-id="6gETEc6F6hjs5t6WTCuiSk">坑</div>
+    <h3 style="margin-bottom:2px" data-page-node-id="GA4QDb43DudXzd8A1w0hwi">深基坑快绘坡面CAD系统</h3>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px" data-page-node-id="9W7GpgriIUG5ygk8YHHFue">Deep-Pit Quick Slope CAD <span class="about-ver" data-page-node-id="6XnFRHkKBpR892J21WqvDX">v1.0.2</span></div>
+    <p class="desc" data-page-node-id="2LK6RmIp1etzBu5yGrLOj9">
+      依据导入的基坑轮廓多段线（DXF），按放坡参数自动生成<b data-page-node-id="2VMOydwzhTPCl19Em9s4bZ">向内/向外放坡</b>图形：<br data-page-node-id="wnYlWFZFMxlZlytqNAnldd">
+      ① 导入 DXF 识别最大闭合多段线为基坑边线；② 设置坑深/级数/坡率 1:m/马道宽，一键生成坡顶·马道·坑底逐级偏移环；<br data-page-node-id="J1CYJikRi3w7HZOikipSKo">
+      ③ 上视区为<b data-page-node-id="w9DYZ8PKImls2cELznGL8O">平面图</b>（放坡范围、天正长短示坡线、剖切线 A-A/B-B）；下排两视区自动生成<b data-page-node-id="rMtsWgV0tvcFOxGieA4iRA">A-A（横向）/ B-B（纵向）剖面图</b>，含天正标高符号、坡段/马道/坑深尺寸标注；<br data-page-node-id="4RwAIZy7AtBksB5GnnD8Ce">
+      ④ 三个视区各自缩放平移，可分别导出 PNG 与 DXF（R2000），亦可将<b data-page-node-id="cK8G1dw6xSaLrsIkOZxKcV">平面+两剖面合并导出一个 DXF</b>。
+    </p>
+    <table class="st" data-page-node-id="Dj1wtIv9fLL8vyc9yH3CZ2">
+      <tr data-page-node-id="b0ayLFx9VLMftPoHSBm3Ax"><th style="width:130px" data-page-node-id="lgF144kq7KP6riigSUlyY9">输入</th><td data-page-node-id="Gwl9huyjqaOmsftzHkB3it">DXF 闭合多段线（LWPOLYLINE/POLYLINE/LINE 环）</td></tr>
+      <tr data-page-node-id="qmKnXabsAojqBniPPFdVrD"><th data-page-node-id="9EJEe92ynGnUicn4pbecoO">放坡参数</th><td data-page-node-id="sVxJbtiuHVX9Gz78hfnWHC">坑深 H · 级数 n · 坡率 1:m · 马道宽 b · 放坡方向（外/内）</td></tr>
+      <tr data-page-node-id="9K8MqdxQsC1BVaXtyNS2fT"><th data-page-node-id="ycKMHSKq8RouGiqDRV3LoO">剖面构成</th><td data-page-node-id="c0M2MTuqhOUDhtKEtVP0IW">原地面线、各级坡面 1:m、马道平台、坑底线，天正标高符号与尺寸标注</td></tr>
+      <tr data-page-node-id="zfFjOBAR1Zx93046a7jo57"><th data-page-node-id="4tToQFr2nfqo3UNLe3NEDl">导出格式</th><td data-page-node-id="yGU20ydgmXAqOpzLsDsyyK">三视区独立导出 PNG / DXF R2000（1:1），顶栏支持平剖三图合并 DXF</td></tr>
+    </table>
+    <div class="foot-note" data-page-node-id="oPodBVy1lEGrJSChCYiA4d">单位说明：DXF 坐标按 mm 处理；自动单位仅在轮廓跨度过小（&lt;100）时按“米”放大 1000 倍，可用轮廓单位手动指定。剖面水平/垂直同比例绘制。</div>
+    <div class="mbtn-row" data-page-node-id="rYj5NclS53rRzhfoOuNnce"><button class="btn" id="btnAboutOk" style="background:linear-gradient(135deg,#2dd4bf,#0e7490);border:none;color:#fff;font-weight:600" data-page-node-id="oCUJ7xmSlDXjBphRvmeWhL">知道了</button></div>
+  </div>
+</div>
+
+<div id="loading" data-page-node-id="JxGmT5v5onF9zB40sdAO3A"><div class="load-card" data-page-node-id="RdN1UyltBWAqTF0qc55IxM"><div class="spin" data-page-node-id="lcg6yg8JHl1DVF8a0UmQEG"></div><p id="loadMsg" data-page-node-id="KUXCfBvej6zJsI6v7MX2A3">处理中…</p></div></div>
+<div id="toast" data-page-node-id="J4SOFpOr7HzeAtILZCzqYp"></div>
+
+<script>
+/* =====================================================================
+   深基坑快绘坡面CAD系统 v1.0.2 — 核心几何引擎（纯 JS，无 DOM）
+   功能：导入基坑轮廓多段线 → 生成向内/向外放坡环（坡脚/马道/坡顶）
+         + 沿剖切线生成 剖面轮廓（A-A 横向 / B-B 纵向）
+   坐标：世界坐标 mm，Y 向上（与 DXF 一致）；标高 v 向上为正（坑底 -H）。
+   ===================================================================== */
+(function (global) {
+  'use strict';
+
+  /* ---------- 基础几何 ---------- */
+  function signedArea(pts) { // 有向面积，>0 = CCW
+    var s = 0;
+    for (var i = 0; i < pts.length; i++) {
+      var a = pts[i], b = pts[(i + 1) % pts.length];
+      s += a.x * b.y - b.x * a.y;
+    }
+    return s / 2;
+  }
+  function ensureCCW(pts) {
+    return signedArea(pts) > 0 ? pts : pts.slice().reverse();
+  }
+  /* 点是否在多边形内（射线法） */
+  function pointInPoly(px, py, poly) {
+    var inside = false;
+    var n = poly.length;
+    for (var i = 0, j = n - 1; i < n; j = i++) {
+      var xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+      if (((yi > py) !== (yj > py)) &&
+        (px < (xj - xi) * (py - yi) / ((yj - yi) || 1e-18) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+  function segLen(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
+  function dedupePts(pts, tol) {
+    tol = tol || 1e-6;
+    var out = [];
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      if (!out.length || segLen(out[out.length - 1], p) > tol) out.push(p);
+    }
+    if (out.length > 2 && segLen(out[0], out[out.length - 1]) <= tol) out.pop();
+    return out;
+  }
+  function polyArea(pts) { return Math.abs(signedArea(pts)); }
+  function polyPerim(pts) {
+    var s = 0;
+    for (var i = 0; i < pts.length; i++) {
+      s += segLen(pts[i], pts[(i + 1) % pts.length]);
+    }
+    return s;
+  }
+  function polyBBox(pts) {
+    var minX = 1e18, minY = 1e18, maxX = -1e18, maxY = -1e18;
+    pts.forEach(function (p) {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    });
+    return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+  }
+  function lineIntersect(p1, v1, p3, v2) {
+    var den = v1.x * v2.y - v1.y * v2.x;
+    if (Math.abs(den) < 1e-9) return null;
+    var t = ((p3.x - p1.x) * v2.y - (p3.y - p1.y) * v2.x) / den;
+    return { x: p1.x + t * v1.x, y: p1.y + t * v1.y };
+  }
+  function unit(dx, dy) {
+    var L = Math.hypot(dx, dy) || 1;
+    return { x: dx / L, y: dy / L };
+  }
+
+  /* 多边形质心 */
+  function polyCentroid(pts) {
+    var A = 0, Cx = 0, Cy = 0, n = pts.length;
+    for (var i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n];
+      var f = a.x * b.y - b.x * a.y;
+      A += f; Cx += (a.x + b.x) * f; Cy += (a.y + b.y) * f;
+    }
+    A *= 0.5;
+    if (Math.abs(A) < 1e-9) {
+      var sx = 0, sy = 0;
+      pts.forEach(function (p) { sx += p.x; sy += p.y; });
+      return { x: sx / n, y: sy / n };
+    }
+    return { x: Cx / (6 * A), y: Cy / (6 * A) };
+  }
+
+  /* 线段 ab 与 cd 是否真正相交（开区间，共线/端点不计） */
+  function segsCross(a, b, c, d) {
+    function sgn(px, py, qx, qy, rx, ry) {
+      var v = (qx - px) * (ry - py) - (qy - py) * (rx - px);
+      return v > 1e-9 ? 1 : (v < -1e-9 ? -1 : 0);
+    }
+    var s1 = sgn(a.x, a.y, b.x, b.y, c.x, c.y), s2 = sgn(a.x, a.y, b.x, b.y, d.x, d.y);
+    var s3 = sgn(c.x, c.y, d.x, d.y, a.x, a.y), s4 = sgn(c.x, c.y, d.x, d.y, b.x, b.y);
+    return s1 * s2 < 0 && s3 * s4 < 0;
+  }
+  /* 多边形是否存在自交（非相邻边） */
+  function polySelfIntersect(pts) {
+    var n = pts.length;
+    for (var i = 0; i < n; i++) {
+      for (var j = i + 1; j < n; j++) {
+        if (j === i || j === (i + 1) % n || i === (j + 1) % n) continue;
+        if (segsCross(pts[i], pts[(i + 1) % n], pts[j], pts[(j + 1) % n])) return true;
+      }
+    }
+    return false;
+  }
+
+  /* 多边形等距偏移（miter）：d>0 外扩 / d<0 内缩。
+     每边外法线用射线法探测（不依赖顺逆时针、凸凹），内缩过大自交时返回 null */
+  function offsetPoly(pts, d) {
+    var n = pts.length;
+    if (n < 3) return null;
+    if (Math.abs(d) < 1e-9) return pts.slice();
+    var norms = [], segs = [];
+    for (var i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n];
+      var dx = b.x - a.x, dy = b.y - a.y;
+      var L = Math.hypot(dx, dy) || 1;
+      var ux = dx / L, uy = dy / L;
+      var ln = { x: -uy, y: ux };
+      var midx = (a.x + b.x) / 2, midy = (a.y + b.y) / 2;
+      var eps = Math.max(1, L * 1e-6);
+      var lInside = pointInPoly(midx + ln.x * eps, midy + ln.y * eps, pts);
+      var rInside = pointInPoly(midx - ln.x * eps, midy - ln.y * eps, pts);
+      var outward;
+      if (lInside && !rInside) outward = { x: -ln.x, y: -ln.y };
+      else if (!lInside && rInside) outward = ln;
+      else outward = { x: -ln.x, y: -ln.y };
+      norms.push(outward);
+      segs.push({ a: a, b: b });
+    }
+    var out = [];
+    for (var j = 0; j < n; j++) {
+      var p1 = pts[j], v1 = { x: segs[j].b.x - segs[j].a.x, y: segs[j].b.y - segs[j].a.y };
+      var p2 = pts[(j + 1) % n], v2 = { x: segs[(j + 1) % n].b.x - segs[(j + 1) % n].a.x, y: segs[(j + 1) % n].b.y - segs[(j + 1) % n].a.y };
+      var o1 = { x: p1.x + norms[j].x * d, y: p1.y + norms[j].y * d };
+      var o2 = { x: p2.x + norms[(j + 1) % n].x * d, y: p2.y + norms[(j + 1) % n].y * d };
+      var ip = lineIntersect(o1, v1, o2, v2);
+      if (!ip) {
+        var mid = { x: (segs[j].a.x + segs[j].b.x) / 2, y: (segs[j].a.y + segs[j].b.y) / 2 };
+        out.push({ x: mid.x + norms[j].x * d, y: mid.y + norms[j].y * d });
+      } else {
+        out.push(ip);
+      }
+    }
+    // 自交检测：内缩超限（凹口过深）时几何无意义 → 返回 null 由调用方提示
+    if (polySelfIntersect(out)) return null;
+    return out;
+  }
+
+  /* =====================================================================
+     放坡几何
+     poly：闭合轮廓（mm，任意顺逆时针）
+     p：{ dir: 'in'|'out', Hm:坑深m, n:级数, mRate:坡率分母(1:m), bm:马道宽m, }
+     单位换算：内部全部 mm
+     输出概念环 R_k (k=0..n)：R_0=坑底(标高-H) … R_n=开挖上口(标高0)
+     poly 的语义：dir='out' 时 poly=R_0(坑底边线)；dir='in' 时 poly=R_n(上口边线)
+   ===================================================================== */
+  function slopeGeo(poly, p) {
+    var n = Math.max(1, Math.min(8, Math.round(p.n || 1)));
+    var H = (p.Hm || 5) * 1000;          // mm
+    var h = H / n;
+    var mR = Math.max(0.05, p.mRate || 1); // 坡率 1:mRate
+    var B = Math.max(0, (p.bm || 0)) * 1000;
+    var L = mR * h;                        // 每级水平投影 mm
+    var off = [0];
+    for (var k = 1; k <= n; k++) off.push(k * L + (k - 1) * B); // 距坑底
+    var dirOut = p.dir === 'out';
+    var base = ensureCCW(dedupePts(poly, 0.5));
+    if (base.length < 3) throw new Error('轮廓点数不足');
+    // dirOff(k)：poly 的放坡方向偏移量（+向外 / -向内）
+    var dirOff = [];
+    var rings = [];
+    var offTop = off[n];                  // 每侧总水平投影 D
+    var sgnBase = signedArea(base);
+    for (var k2 = 0; k2 <= n; k2++) {
+      var dk = dirOut ? off[k2] : -(offTop - off[k2]);
+      dirOff.push(dk);
+      var r = offsetPoly(base, dk);
+      if (r === null) throw new Error('放坡偏移过大：轮廓内缩自交，请减小坑深/坡率或改用外放坡');
+      // 防御：偏移环方向必须与原始轮廓一致（畸形 miter 会让有向面积变号）
+      if (signedArea(r) * sgnBase < 0) throw new Error('放坡偏移过大：轮廓发生畸形翻转（凹口过深），请减小放坡宽度');
+      rings.push(r);
+    }
+    // 自检：概念环 R_0=坑底 … R_n=上口，面积随 k 严格递增（无论内/外放坡）→ 保证嵌套有效
+    var areas = rings.map(polyArea);
+    for (var a = 1; a <= n; a++) {
+      if (!(areas[a] > areas[a - 1])) throw new Error('放坡参数导致轮廓嵌套异常，请检查坑深/级数/坡率');
+    }
+    return {
+      poly: base, dir: p.dir, dirOut: dirOut,
+      n: n, H: H, h: h, mRate: mR, B: B, L: L,
+      off: off, offTop: offTop, dirOff: dirOff, rings: rings, areas: areas
+    };
+  }
+
+  /* ============ 环与直线（剖切线）求交 ============
+     ring：多边形；axis：'h'=水平线 y=y0（A-A 横向剖切）；'v'=竖直线 x=x0（B-B）
+     返回沿轴交点数组 [{u,v}]（u=轴上坐标= x for h / y for v） */
+  function ringAxisCut(ring, a0, axis) {
+    var hits = [];
+    var m = ring.length;
+    for (var i = 0; i < m; i++) {
+      var A = ring[i], B = ring[(i + 1) % m];
+      var t = null;
+      if (axis === 'h') { // 与 y=a0 相交
+        if (Math.abs(B.y - A.y) < 1e-9) continue;
+        t = (a0 - A.y) / (B.y - A.y);
+        if (t <= 1e-9 || t >= 1 - 1e-9) continue;
+      } else {
+        if (Math.abs(B.x - A.x) < 1e-9) continue;
+        t = (a0 - A.x) / (B.x - A.x);
+        if (t <= 1e-9 || t >= 1 - 1e-9) continue;
+      }
+      var px = A.x + (B.x - A.x) * t, py = A.y + (B.y - A.y) * t;
+      hits.push({ u: axis === 'h' ? px : py, v: axis === 'h' ? py : px, x: px, y: py });
+    }
+    // 去重（顶点恰好落在线上的相邻边会各算一次）
+    hits.sort(function (a, b) { return a.u - b.u; });
+    var out = [];
+    for (var j = 0; j < hits.length; j++) {
+      if (!out.length || Math.abs(hits[j].u - out[out.length - 1].u) > 0.5) out.push(hits[j]);
+    }
+    return out;
+  }
+  /* 环带最小/最大 u（axis 交点集合） */
+  function ringCutSpan(ring, a0, axis) {
+    var hs = ringAxisCut(ring, a0, axis);
+    if (!hs.length) return null;
+    return { uL: hs[0].u, uR: hs[hs.length - 1].u, hits: hs };
+  }
+
+  /* =====================================================================
+     剖面轮廓生成
+     geo：slopeGeo 结果
+     cut：{ k:'A'|'B', offM:剖切线偏移(相对形心,m)，取正向朝轴 + 方向 }
+     seg（可选）：{l0, r0} 坑底环在剖切线上的某一段区间 [l0,r0]（世界 mm，u 轴坐标）
+       —— 凹形/多基坑轮廓时剖切线可能穿过坑底环多次，每段各自生成独立标准剖面。
+       未提供 seg 时按整环首末交点生成单段剖面（凸形默认）。
+     返回 { axis, a0, spans[k]={uL,uR}, pts:[{u,v}...]（左地坪→坑底→右地坪→封闭点）, groundL, groundR,
+            ringU[k]={L,R, y}（环k左右端剖面坐标, y=标高）, D }
+     u = 剖面水平坐标（mm）；v = 标高（mm，上正下负）
+   ===================================================================== */
+  function sectionProfile(geo, cut, seg) {
+    var n = geo.n, H = geo.H, h = geo.h;
+    var poly = geo.poly;
+    var cen = polyCentroid(poly);
+    var axis = cut.k === 'A' ? 'h' : 'v';
+    var a0 = axis === 'h' ? cen.y + (cut.offM || 0) * 1000 : cen.x + (cut.offM || 0) * 1000;
+
+    // 每环左右端（spans）：
+    //  - seg 提供 → 以该坑底段为基准按各级放坡宽度对称外扩（凹形多基坑独立剖面近似）
+    //  - 未提供 → 真实环切（单段剖面）
+    var spans = [];
+    for (var k = 0; k <= n; k++) {
+      if (seg) {
+        var offK = geo.off[k];   // 距坑底水平偏移（mm）
+        spans.push({ uL: seg.l0 - offK, uR: seg.r0 + offK });
+      } else {
+        var sp = ringCutSpan(geo.rings[k], a0, axis);
+        if (!sp) {
+          throw new Error('剖切线 ' + cut.k + '-'
+            + cut.k + ' 未穿过第 ' + (k === 0 ? '坑底' : k + '级') + '边线，请调整剖切位置或轮廓');
+        }
+        spans.push(sp);
+      }
+    }
+    // 剖面水平坐标：u=min端在左。A-A 时轴=x，min x 天然左侧；B-B 时轴=y，min y 在"下"→ 需保证屏幕左=min
+    var u0 = function (sp) { return sp.uL; };
+    var u1 = function (sp) { return sp.uR; };
+
+    var pts = [];           // 开挖轮廓线（左地坪 → 沿坡下 → 坑底 → 沿坡上 → 右地坪）
+    var groundL, groundR;   // 地坪左右延伸端
+    var margin = Math.max(2000, geo.offTop * 0.06 + 1500);
+
+    // 左段：地坪 → 上口(R_n, v=0) → 逐级下降向坑内 → 坑底(R_0, v=-H)
+    // 关键：水平坐标自坑外向坑内单调递增（坡段跑 L，再沿平台跑 B 至下一环顶）
+    groundL = u0(spans[n]) - margin;
+    pts.push({ u: groundL, v: 0 });
+    pts.push({ u: u0(spans[n]), v: 0 });                    // 开挖上口（地面，环 n 左端）
+    for (var k = n; k >= 1; k--) {
+      // 环 k 交点标高 = -(n-k)*h；自环 k 左端向坑内(+u)下降 h、水平 L → 坡趾
+      var yk = -(n - k) * h;
+      var uToe = u0(spans[k]) + geo.L;
+      pts.push({ u: uToe, v: yk - h });
+      // 平台（仅 k>1 时存在）：自坡趾水平向外退 B 至环 k-1 左端（下一坡顶）
+      if (k > 1) {
+        pts.push({ u: u0(spans[k - 1]), v: yk - h });
+      }
+    }
+    // 坑底段：R_0 左右端（左端=最后一级坡趾=环0左端；右端=环0右端）
+    pts.push({ u: u1(spans[0]), v: -H });
+    // 右段：逐级上坡到上口 → 右地坪
+    for (var k2 = 1; k2 <= n; k2++) {
+      var yk2 = -(n - k2) * h;
+      if (k2 === 1) {
+        pts.push({ u: u1(spans[0]) + geo.L, v: -H + h });   // = 环1 右交点
+      } else {
+        // 平台外缘：环 k2-1 右交点 + B（平台水平段，标高同环 k2-1 = -(n-k2+1)h）
+        pts.push({ u: u1(spans[k2 - 1]) + geo.B, v: -(n - (k2 - 1)) * h });
+        pts.push({ u: u1(spans[k2]) , v: yk2 });            // 环 k2 右交点 = 坡顶
+      }
+    }
+    groundR = u1(spans[n]) + margin;
+    pts.push({ u: groundR, v: 0 });
+
+    // 供标注用：环 k 端点在剖面上的坐标
+    var ringU = [];
+    for (var kk = 0; kk <= n; kk++) {
+      var yk3 = -(n - kk) * h;
+      ringU.push({ L: u0(spans[kk]), R: u1(spans[kk]), y: yk3, k: kk });
+    }
+    return {
+      axis: axis, a0: a0, spans: spans, pts: pts,
+      groundL: groundL, groundR: groundR, ringU: ringU,
+      uL: groundL, uR: groundR, H: H, D: geo.offTop
+    };
+  }
+
+  /* 坑底环沿剖切线的多段切分：凸形=1 段；凹形/多基坑=多段
+     返回 [{l0,r0}] 按 u 递增排序（l0/r0 = 世界 u 轴 mm） */
+  function sectionSegs(geo, cut) {
+    var cen = polyCentroid(geo.poly);
+    var axis = cut.k === 'A' ? 'h' : 'v';
+    var a0 = axis === 'h' ? cen.y + (cut.offM || 0) * 1000 : cen.x + (cut.offM || 0) * 1000;
+    var ring = geo.rings[0];               // 坑底环
+    var hits = ringAxisCut(ring, a0, axis); // sorted by u
+    if (!hits.length) throw new Error('剖切线 ' + cut.k + '-' + cut.k + ' 未穿过坑底，请调整剖切位置');
+    var segs = [];
+    for (var i = 0; i + 1 < hits.length; i += 2) {
+      segs.push({ l0: hits[i].u, r0: hits[i + 1].u });
+    }
+    return segs;
+  }
+  /* 平面示坡线（天正/总图规范：长短相间、等距细实线，垂直等高线自高端指向低端）
+     沿开挖上口环 ring_n（高端）采样，方向=该边内侧法线（指向坑内低处）。
+     return [{x1,y1,x2,y2,long}] 世界坐标线段 */
+  function slopeTicks(geo, step) {
+    step = step || 3200;
+    var out = [];
+    var ring = geo.rings[geo.n];       // 上口环（开挖高端）
+    var m = ring.length;
+    var lenLong = Math.max(2400, Math.min(geo.L * 0.9, 9000));
+    var lenShort = lenLong * 0.62;
+    // 密度加大：间距与坡面水平投影/2 绑定，限制 2200~5200
+    var gap = Math.max(2200, Math.min(geo.L * 0.8, 5200));
+    // 内侧法线探测函数（CCW 轮廓：左法线=内）
+    function inwardNormal(A, B) {
+      var dx = B.x - A.x, dy = B.y - A.y;
+      var Ln = Math.hypot(dx, dy) || 1;
+      var ux = dx / Ln, uy = dy / Ln;
+      var mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+      var eps = Math.max(1, Ln * 1e-6);
+      var cand = [{ x: -uy, y: ux }, { x: uy, y: -ux }];
+      for (var c = 0; c < cand.length; c++) {
+        if (pointInPoly(mx + cand[c].x * eps, my + cand[c].y * eps, ring)) {
+          return cand[c];
+        }
+      }
+      return cand[0];
+    }
+    var idx = 0;
+    for (var i = 0; i < m; i++) {
+      var A = ring[i], B2 = ring[(i + 1) % m];
+      var Ln = Math.hypot(B2.x - A.x, B2.y - A.y);
+      var cnt = Math.max(1, Math.floor(Ln / gap));
+      var nv = inwardNormal(A, B2);
+      for (var j = 0; j < cnt; j++) {
+        var t = (j + 0.5) / cnt;
+        var px = A.x + (B2.x - A.x) * t, py = A.y + (B2.y - A.y) * t;
+        var long = (idx % 2 === 0);
+        var len = long ? lenLong : lenShort;
+        out.push({ x1: px, y1: py, x2: px + nv.x * len, y2: py + nv.y * len, long: long });
+        idx++;
+      }
+    }
+    return out;
+  }
+
+  /* ---------- Node 自检 ---------- */
+  function selftest() {
+    var ok = [];
+    // 外放坡：矩形坑底 60m×40m，H=6, n=2, 1:1, 马道2m → 每侧 D=2*1*3+1*2=8m
+    var rect = [{ x: 0, y: 0 }, { x: 60000, y: 0 }, { x: 60000, y: 40000 }, { x: 0, y: 40000 }];
+    var g = slopeGeo(rect, { dir: 'out', Hm: 6, n: 2, mRate: 1, bm: 2 });
+    ok.push(['外放坡D=8m', Math.abs(g.offTop - 8000) < 1]);
+    ok.push(['环数=n+1=3', g.rings.length === 3]);
+    ok.push(['环0=坑底原轮廓', Math.abs(g.areas[0] - 60 * 40 * 1e6) < 1e3]);
+    ok.push(['面积递增', g.areas[1] > g.areas[0] && g.areas[2] > g.areas[1]]);
+    ok.push(['上口=坑底+2×8m外扩', Math.abs(Math.sqrt(g.areas[2] / 1e6) - Math.sqrt(2400 + 2 * 8 * 60 * 4 / 1)) > 0]); // 粗检
+    // 上口外包络：宽 = 40+16=56? （仅垂直向 40+2*8=56，水平 60+2*8=76）→ 面积= (60+16)(40+16)-4*64 = 76*56-256=4000(m2)? 尖角切角未切: 矩形外扩 8 → bbox 76×56
+    var bb = polyBBox(g.rings[2]);
+    ok.push(['上口尺寸 76×56 m', Math.round(bb.maxX - bb.minX) === 76000 && Math.round(bb.maxY - bb.minY) === 56000]);
+    // A-A 剖面（过形心横向剖切线 y=20000）
+    var sec = sectionProfile(g, { k: 'A', offM: 0 });
+    ok.push(['A-A span0 宽=60m', Math.abs((sec.spans[0].uR - sec.spans[0].uL) - 60000) < 1]);
+    ok.push(['A-A 坑底标高 -6m', Math.min.apply(null, sec.pts.map(function (p) { return p.v; })) === -6000]);
+    ok.push(['A-A 坑底两折点', sec.ringU[0].L === sec.spans[0].uL && sec.ringU[0].R === sec.spans[0].uR]);
+    // 剖面 pts 首尾在地坪
+    ok.push(['剖面首点地坪', Math.abs(sec.pts[0].v) < 1 && Math.abs(sec.pts[sec.pts.length - 1].v) < 1]);
+    // 左坡走向：外放坡时左侧自上口(R_n左端,0) 逐级向坑内(+u)单调下降到坑底
+    var pts = sec.pts;
+    var uBotL = sec.spans[0].uL, uTopL = sec.spans[g.n].uL;
+    ok.push(['左坡逐级单调下降', (function () {
+      var uPrev = -1e18, vPrev = 1e18, good = true;
+      for (var q = 0; q < pts.length; q++) {
+        if (pts[q].u > uBotL + 0.5) break;   // 只到坑底左端为止（不含右坡）
+        if (pts[q].u < uPrev - 0.5) good = false;   // u 应单调增（向坑内）
+        if (pts[q].v > vPrev + 0.5) good = false;   // v 应单调降
+        uPrev = Math.max(uPrev, pts[q].u);
+        vPrev = Math.min(vPrev, pts[q].v);
+      }
+      return good;
+    })()]);
+    ok.push(['坑底左端折点存在', (function () {
+      return pts.some(function (p) { return Math.abs(p.v + g.H) < 1 && Math.abs(p.u - uBotL) < 1; });
+    })()]);
+    ok.push(['上口地面左端存在', (function () {
+      return pts.some(function (p) { return Math.abs(p.v) < 1 && Math.abs(p.u - uTopL) < 1; });
+    })()]);
+    // 内放坡：给定上口（60×40），向内收 8m 后坑底 bbox = 44×24（60-16 / 40-16）
+    var gIn = slopeGeo(rect, { dir: 'in', Hm: 6, n: 2, mRate: 1, bm: 2 });
+    var bbIn = polyBBox(gIn.rings[0]);
+    ok.push(['内放坡坑底 44×24 m', Math.round(bbIn.maxX - bbIn.minX) === 44000 && Math.round(bbIn.maxY - bbIn.minY) === 24000]);
+    var secIn = sectionProfile(gIn, { k: 'B', offM: 0 });
+    ok.push(['B-B 内放坡坑底宽 24m', Math.abs((secIn.spans[0].uR - secIn.spans[0].uL) - 24000) < 1]);
+    // 3级
+    var g3 = slopeGeo(rect, { dir: 'out', Hm: 9, n: 3, mRate: 0.75, bm: 1.5 });
+    ok.push(['3级D = 3*2.25+2*1.5 = 9.75m', Math.abs(g3.offTop - 9750) < 1]);
+    ok.push(['3级环4条', g3.rings.length === 4]);
+    // 示坡线
+    var tk = slopeTicks(g3, 8000);
+    ok.push(['示坡线采样非空', tk.length > 3 && tk.every(function (t) { return isFinite(t.x1) && isFinite(t.x2); })]);
+    ok.push(['示坡线长+短两种长度', tk.some(function (t) { return t.long; }) && tk.some(function (t) { return !t.long; })]);
+    // 凹口自交防御：内放坡过深应抛错（凹口深 5m、偏移 8m>5m 自交）
+    var notch = [{ x: 0, y: 0 }, { x: 20000, y: 0 }, { x: 20000, y: 20000 }, { x: 12000, y: 20000 },
+      { x: 12000, y: 15000 }, { x: 8000, y: 15000 }, { x: 8000, y: 20000 }, { x: 0, y: 20000 }];
+    var threw = false;
+    try { slopeGeo(notch, { dir: 'in', Hm: 8, n: 1, mRate: 1, bm: 0 }); } catch (e) { threw = true; }
+    ok.push(['凹口内缩自交防御抛错', threw]);
+    // 凹口浅内放坡可行
+    var gN = slopeGeo(notch, { dir: 'in', Hm: 2, n: 1, mRate: 0.75, bm: 0 });
+    ok.push(['凹口浅放坡成功', gN.rings.length === 2]);
+    var allPass = ok.every(function (r) { return r[1]; });
+    if (typeof console !== 'undefined') {
+      ok.forEach(function (r) { console.log((r[1] ? 'PASS' : 'FAIL'), r[0]); });
+      console.log(allPass ? 'ALL PASS' : 'SOME FAIL');
+    }
+    return allPass;
+  }
+
+  var api = {
+    signedArea: signedArea, ensureCCW: ensureCCW, segLen: segLen,
+    dedupePts: dedupePts, polyArea: polyArea, polyPerim: polyPerim, polyBBox: polyBBox,
+    polyCentroid: polyCentroid, pointInPoly: pointInPoly,
+    lineIntersect: lineIntersect, offsetPoly: offsetPoly,
+    polySelfIntersect: polySelfIntersect,
+    slopeGeo: slopeGeo, ringAxisCut: ringAxisCut, ringCutSpan: ringCutSpan,
+    sectionProfile: sectionProfile, sectionSegs: sectionSegs, slopeTicks: slopeTicks,
+    selftest: selftest
+  };
+  global.PitCore = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$DWGCODEPAGE\n  3\nANSI_1252\n  9\n$INSBASE\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$EXTMIN\n 10\n __$EXTMIN_10__\n 20\n __$EXTMIN_20__\n 30\n __$EXTMIN_30__\n  9\n$EXTMAX\n 10\n __$EXTMAX_10__\n 20\n __$EXTMAX_20__\n 30\n __$EXTMAX_30__\n  9\n$LIMMIN\n 10\n __$LIMMIN_10__\n 20\n __$LIMMIN_20__\n  9\n$LIMMAX\n 10\n __$LIMMAX_10__\n 20\n __$LIMMAX_20__\n  9\n$ORTHOMODE\n 70\n0\n  9\n$REGENMODE\n 70\n1\n  9\n$FILLMODE\n 70\n1\n  9\n$QTEXTMODE\n 70\n0\n  9\n$MIRRTEXT\n 70\n1\n  9\n$LTSCALE\n 40\n1.0\n  9\n$ATTMODE\n 70\n1\n  9\n$TEXTSIZE\n 40\n2.5\n  9\n$TRACEWID\n 40\n1.0\n  9\n$TEXTSTYLE\n  7\nOpenSans\n  9\n$CLAYER\n  8\n0\n  9\n$CELTYPE\n  6\nByLayer\n  9\n$CECOLOR\n 62\n256\n  9\n$CELTSCALE\n 40\n1.0\n  9\n$DISPSILH\n 70\n0\n  9\n$DIMSCALE\n 40\n1.0\n  9\n$DIMASZ\n 40\n0.175\n  9\n$DIMEXO\n 40\n0.125\n  9\n$DIMDLI\n 40\n3.75\n  9\n$DIMRND\n 40\n0.0\n  9\n$DIMDLE\n 40\n0.0\n  9\n$DIMEXE\n 40\n0.375\n  9\n$DIMTP\n 40\n0.0\n  9\n$DIMTM\n 40\n0.0\n  9\n$DIMTXT\n 40\n0.25\n  9\n$DIMCEN\n 40\n2.5\n  9\n$DIMTSZ\n 40\n0.0\n  9\n$DIMTOL\n 70\n0\n  9\n$DIMLIM\n 70\n0\n  9\n$DIMTIH\n 70\n0\n  9\n$DIMTOH\n 70\n0\n  9\n$DIMSE1\n 70\n0\n  9\n$DIMSE2\n 70\n0\n  9\n$DIMTAD\n 70\n1\n  9\n$DIMZIN\n 70\n12\n  9\n$DIMBLK\n  1\nARCHTICK\n  9\n$DIMASO\n 70\n1\n  9\n$DIMSHO\n 70\n1\n  9\n$DIMPOST\n  1\n\n  9\n$DIMAPOST\n  1\n\n  9\n$DIMALT\n 70\n0\n  9\n$DIMALTD\n 70\n3\n  9\n$DIMALTF\n 40\n0.03937007874\n  9\n$DIMLFAC\n 40\n100.0\n  9\n$DIMTOFL\n 70\n1\n  9\n$DIMTVP\n 40\n0.0\n  9\n$DIMTIX\n 70\n0\n  9\n$DIMSOXD\n 70\n0\n  9\n$DIMSAH\n 70\n0\n  9\n$DIMBLK1\n  1\n\n  9\n$DIMBLK2\n  1\n\n  9\n$DIMSTYLE\n  2\nEZDXF\n  9\n$DIMCLRD\n 70\n0\n  9\n$DIMCLRE\n 70\n0\n  9\n$DIMCLRT\n 70\n0\n  9\n$DIMTFAC\n 40\n0.5\n  9\n$DIMGAP\n 40\n0.1\n  9\n$DIMJUST\n 70\n0\n  9\n$DIMSD1\n 70\n0\n  9\n$DIMSD2\n 70\n0\n  9\n$DIMTOLJ\n 70\n0\n  9\n$DIMTZIN\n 70\n8\n  9\n$DIMALTZ\n 70\n0\n  9\n$DIMALTTZ\n 70\n0\n  9\n$DIMUPT\n 70\n1\n  9\n$DIMDEC\n 70\n2\n  9\n$DIMTDEC\n 70\n2\n  9\n$DIMALTU\n 70\n2\n  9\n$DIMALTTD\n 70\n3\n  9\n$DIMTXSTY\n  7\nOpenSansCondensed-Light\n  9\n$DIMAUNIT\n 70\n0\n  9\n$DIMADEC\n 70\n2\n  9\n$DIMALTRND\n 40\n0.0\n  9\n$DIMAZIN\n 70\n3\n  9\n$DIMDSEP\n 70\n46\n  9\n$DIMATFIT\n 70\n3\n  9\n$DIMFRAC\n 70\n0\n  9\n$DIMLDRBLK\n  1\n\n  9\n$DIMLUNIT\n 70\n2\n  9\n$DIMLWD\n 70\n-2\n  9\n$DIMLWE\n 70\n-2\n  9\n$DIMTMOVE\n 70\n2\n  9\n$LUNITS\n 70\n2\n  9\n$LUPREC\n 70\n4\n  9\n$SKETCHINC\n 40\n1.0\n  9\n$FILLETRAD\n 40\n10.0\n  9\n$AUNITS\n 70\n0\n  9\n$AUPREC\n 70\n2\n  9\n$MENU\n  1\n.\n  9\n$ELEVATION\n 40\n0.0\n  9\n$PELEVATION\n 40\n0.0\n  9\n$THICKNESS\n 40\n0.0\n  9\n$LIMCHECK\n 70\n0\n  9\n$CHAMFERA\n 40\n0.0\n  9\n$CHAMFERB\n 40\n0.0\n  9\n$CHAMFERC\n 40\n0.0\n  9\n$CHAMFERD\n 40\n0.0\n  9\n$SKPOLY\n 70\n0\n  9\n$TDCREATE\n 40\n2461290.9360069446\n  9\n$TDUCREATE\n 40\n2458532.153996898\n  9\n$TDUPDATE\n 40\n2461290.9360069446\n  9\n$TDUUPDATE\n 40\n2458532.1544311\n  9\n$TDINDWG\n 40\n0.0\n  9\n$TDUSRTIMER\n 40\n0.0\n  9\n$USRTIMER\n 70\n1\n  9\n$ANGBASE\n 50\n0.0\n  9\n$ANGDIR\n 70\n0\n  9\n$PDMODE\n 70\n0\n  9\n$PDSIZE\n 40\n0.0\n  9\n$PLINEWID\n 40\n0.0\n  9\n$SPLFRAME\n 70\n0\n  9\n$SPLINETYPE\n 70\n6\n  9\n$SPLINESEGS\n 70\n8\n  9\n$HANDSEED\n  5\n  __$HANDSEED_5__\n  9\n$SURFTAB1\n 70\n6\n  9\n$SURFTAB2\n 70\n6\n  9\n$SURFTYPE\n 70\n6\n  9\n$SURFU\n 70\n6\n  9\n$SURFV\n 70\n6\n  9\n$UCSBASE\n  2\n\n  9\n$UCSNAME\n  2\n\n  9\n$UCSORG\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSXDIR\n 10\n1.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSYDIR\n 10\n0.0\n 20\n1.0\n 30\n0.0\n  9\n$UCSORTHOREF\n  2\n\n  9\n$UCSORTHOVIEW\n 70\n0\n  9\n$UCSORGTOP\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGBOTTOM\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGLEFT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGRIGHT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGFRONT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGBACK\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSBASE\n  2\n\n  9\n$PUCSNAME\n  2\n\n  9\n$PUCSORG\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSXDIR\n 10\n1.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSYDIR\n 10\n0.0\n 20\n1.0\n 30\n0.0\n  9\n$PUCSORTHOREF\n  2\n\n  9\n$PUCSORTHOVIEW\n 70\n0\n  9\n$PUCSORGTOP\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGBOTTOM\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGLEFT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGRIGHT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGFRONT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGBACK\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$USERI1\n 70\n0\n  9\n$USERI2\n 70\n0\n  9\n$USERI3\n 70\n0\n  9\n$USERI4\n 70\n0\n  9\n$USERI5\n 70\n0\n  9\n$USERR1\n 40\n0.0\n  9\n$USERR2\n 40\n0.0\n  9\n$USERR3\n 40\n0.0\n  9\n$USERR4\n 40\n0.0\n  9\n$USERR5\n 40\n0.0\n  9\n$WORLDVIEW\n 70\n1\n  9\n$SHADEDGE\n 70\n3\n  9\n$SHADEDIF\n 70\n70\n  9\n$TILEMODE\n 70\n1\n  9\n$MAXACTVP\n 70\n64\n  9\n$PINSBASE\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PLIMCHECK\n 70\n0\n  9\n$PEXTMIN\n 10\n1e+20\n 20\n1e+20\n 30\n1e+20\n  9\n$PEXTMAX\n 10\n-1e+20\n 20\n-1e+20\n 30\n-1e+20\n  9\n$PLIMMIN\n 10\n0.0\n 20\n0.0\n  9\n$PLIMMAX\n 10\n420.0\n 20\n297.0\n  9\n$UNITMODE\n 70\n0\n  9\n$VISRETAIN\n 70\n1\n  9\n$PLINEGEN\n 70\n0\n  9\n$PSLTSCALE\n 70\n1\n  9\n$TREEDEPTH\n 70\n3020\n  9\n$CMLSTYLE\n  2\nStandard\n  9\n$CMLJUST\n 70\n0\n  9\n$CMLSCALE\n 40\n20.0\n  9\n$PROXYGRAPHICS\n 70\n1\n  9\n$MEASUREMENT\n 70\n1\n  9\n$CELWEIGHT\n370\n-1\n  9\n$ENDCAPS\n280\n0\n  9\n$JOINSTYLE\n280\n0\n  9\n$LWDISPLAY\n290\n0\n  9\n$INSUNITS\n 70\n4\n  9\n$HYPERLINKBASE\n  1\n\n  9\n$STYLESHEET\n  1\n\n  9\n$XEDIT\n290\n1\n  9\n$CEPSNTYPE\n380\n0\n  9\n$PSTYLEMODE\n290\n1\n  9\n$FINGERPRINTGUID\n  2\n{25942F84-31D9-40AB-9FCF-A0F9A622543B}\n  9\n$VERSIONGUID\n  2\n{4AD48C68-8A4E-418C-8AE4-B1886F2F3118}\n  9\n$EXTNAMES\n290\n1\n  9\n$PSVPSCALE\n 40\n0.0\n  9\n$OLESTARTUP\n290\n0\n  0\nENDSEC\n  0\nSECTION\n  2\nCLASSES\n  0\nCLASS\n  1\nACDBDICTIONARYWDFLT\n  2\nAcDbDictionaryWithDefault\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nSUN\n  2\nAcDbSun\n  3\nSCENEOE\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nVISUALSTYLE\n  2\nAcDbVisualStyle\n  3\nObjectDBX Classes\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nMATERIAL\n  2\nAcDbMaterial\n  3\nObjectDBX Classes\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nSCALE\n  2\nAcDbScale\n  3\nObjectDBX Classes\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nTABLESTYLE\n  2\nAcDbTableStyle\n  3\nObjectDBX Classes\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nMLEADERSTYLE\n  2\nAcDbMLeaderStyle\n  3\nACDB_MLEADERSTYLE_CLASS\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nDICTIONARYVAR\n  2\nAcDbDictionaryVar\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nCELLSTYLEMAP\n  2\nAcDbCellStyleMap\n  3\nObjectDBX Classes\n 90\n1152\n280\n0\n281\n0\n  0\nCLASS\n  1\nMENTALRAYRENDERSETTINGS\n  2\nAcDbMentalRayRenderSettings\n  3\nSCENEOE\n 90\n1024\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBDETAILVIEWSTYLE\n  2\nAcDbDetailViewStyle\n  3\nObjectDBX Classes\n 90\n1025\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBSECTIONVIEWSTYLE\n  2\nAcDbSectionViewStyle\n  3\nObjectDBX Classes\n 90\n1025\n280\n0\n281\n0\n  0\nCLASS\n  1\nRASTERVARIABLES\n  2\nAcDbRasterVariables\n  3\nISM\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBPLACEHOLDER\n  2\nAcDbPlaceHolder\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nLAYOUT\n  2\nAcDbLayout\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nENDSEC\n  0\nSECTION\n  2\nTABLES\n  0\nTABLE\n  2\nVPORT\n  5\n8\n330\n0\n100\nAcDbSymbolTable\n 70\n1\n  0\nVPORT\n  5\n23\n330\n8\n100\nAcDbSymbolTableRecord\n100\nAcDbViewportTableRecord\n  2\n*Active\n 70\n0\n 10\n0.0\n 20\n0.0\n 11\n1.0\n 21\n1.0\n 12\n0.0\n 22\n0.0\n 13\n0.0\n 23\n0.0\n 14\n0.5\n 24\n0.5\n 15\n0.5\n 25\n0.5\n 16\n0.0\n 26\n0.0\n 36\n1.0\n 17\n0.0\n 27\n0.0\n 37\n0.0\n 40\n1000.0\n 41\n1.34\n 42\n50.0\n 43\n0.0\n 44\n0.0\n 50\n0.0\n 51\n0.0\n 71\n0\n 72\n1000\n 73\n1\n 74\n3\n 75\n0\n 76\n0\n 77\n0\n 78\n0\n281\n0\n 65\n0\n146\n0.0\n  0\nENDTAB\n  0\nTABLE\n  2\nLTYPE\n  5\n2\n330\n0\n100\nAcDbSymbolTable\n 70\n21\n  0\nLTYPE\n  5\n24\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nByBlock\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n25\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nByLayer\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n26\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nContinuous\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n2F\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTER\n 70\n0\n  3\nCenter ____ _ ____ _ ____ _ ____ _ ____ _ ____\n 72\n65\n 73\n4\n 40\n5.08\n 49\n3.175\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n30\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTERX2\n 70\n0\n  3\nCenter (2x) ________  __  ________  __  ________\n 72\n65\n 73\n4\n 40\n8.89\n 49\n6.35\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n31\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTER2\n 70\n0\n  3\nCenter (.5x) ____ _ ____ _ ____ _ ____ _ ____\n 72\n65\n 73\n4\n 40\n2.54\n 49\n1.587\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n  0\nLTYPE\n  5\n32\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHED\n 70\n0\n  3\nDashed __ __ __ __ __ __ __ __ __ __ __ __ __ _\n 72\n65\n 73\n2\n 40\n1.524\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n33\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHEDX2\n 70\n0\n  3\nDashed (2x) ____  ____  ____  ____  ____  ____\n 72\n65\n 73\n2\n 40\n3.048\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n34\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHED2\n 70\n0\n  3\nDashed (.5x) _ _ _ _ _ _ _ _ _ _ _ _ _ _\n 72\n65\n 73\n2\n 40\n0.762\n 49\n0.635\n 74\n0\n 49\n-0.127\n 74\n0\n  0\nLTYPE\n  5\n35\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOM\n 70\n0\n  3\nPhantom ______  __  __  ______  __  __  ______\n 72\n65\n 73\n6\n 40\n6.35\n 49\n3.175\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n36\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOMX2\n 70\n0\n  3\nPhantom (2x)____________    ____    ____    ____________\n 72\n65\n 73\n6\n 40\n10.795\n 49\n6.35\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n37\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOM2\n 70\n0\n  3\nPhantom (.5x) ___ _ _ ___ _ _ ___ _ _ ___ _ _ ___\n 72\n65\n 73\n6\n 40\n3.175\n 49\n1.587\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n  0\nLTYPE\n  5\n38\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOT\n 70\n0\n  3\nDash dot __ . __ . __ . __ . __ . __ . __ . __\n 72\n65\n 73\n4\n 40\n3.556\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n39\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOTX2\n 70\n0\n  3\nDash dot (2x) ____  .  ____  .  ____  .  ____\n 72\n65\n 73\n4\n 40\n6.096\n 49\n5.08\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3A\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOT2\n 70\n0\n  3\nDash dot (.5x) _ . _ . _ . _ . _ . _ . _ . _\n 72\n65\n 73\n4\n 40\n1.778\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n3B\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOT\n 70\n0\n  3\nDot .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .\n 72\n65\n 73\n2\n 40\n0.508\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3C\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOTX2\n 70\n0\n  3\nDot (2x) .    .    .    .    .    .    .    . \n 72\n65\n 73\n2\n 40\n1.016\n 49\n0.0\n 74\n0\n 49\n-1.016\n 74\n0\n  0\nLTYPE\n  5\n3D\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOT2\n 70\n0\n  3\nDot (.5) . . . . . . . . . . . . . . . . . . . \n 72\n65\n 73\n2\n 40\n0.254\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n3E\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDE\n 70\n0\n  3\nDivide __ . . __ . . __ . . __ . . __ . . __\n 72\n65\n 73\n6\n 40\n4.064\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3F\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDEX2\n 70\n0\n  3\nDivide (2x) ____  . .  ____  . .  ____  . .  ____\n 72\n65\n 73\n6\n 40\n6.604\n 49\n5.08\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n40\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDE2\n 70\n0\n  3\nDivide(.5x) _ . _ . _ . _ . _ . _ . _ . _\n 72\n65\n 73\n6\n 40\n2.032\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nLAYER\n  5\n1\n330\n0\n100\nAcDbSymbolTable\n 70\n2\n  0\nLAYER\n  5\n27\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\n0\n 70\n0\n 62\n7\n  6\nContinuous\n370\n-3\n390\n13\n  0\nLAYER\n  5\n28\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nDefpoints\n 70\n0\n 62\n7\n  6\nContinuous\n290\n0\n370\n-3\n390\n13\n  0\nENDTAB\n  0\nTABLE\n  2\nSTYLE\n  5\n5\n330\n0\n100\nAcDbSymbolTable\n 70\n27\n  0\nSTYLE\n  5\n29\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nStandard\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\ntxt\n  4\n\n  0\nSTYLE\n  5\n41\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Light\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Light.ttf\n  4\n\n  0\nSTYLE\n  5\n42\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Light-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-LightItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n43\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n44\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n45\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-SemiBold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-SemiBold.ttf\n  4\n\n  0\nSTYLE\n  5\n46\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-SemiBoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-SemiBoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n47\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n48\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n49\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-ExtraBold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-ExtraBold.ttf\n  4\n\n  0\nSTYLE\n  5\n4A\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-ExtraBoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-ExtraBoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n4B\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSansCondensed-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSansCondensed-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n4C\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSansCondensed-Light\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSansCondensed-Light.ttf\n  4\n\n  0\nSTYLE\n  5\n4D\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSansCondensed-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSansCondensed-LightItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n4E\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n4F\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n50\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n51\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n52\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n53\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n54\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n55\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n56\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n57\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n58\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n59\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n8A\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nTXT_CN\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\ngbenor.shx\n  4\ngbcbig.shx\n  0\nENDTAB\n  0\nTABLE\n  2\nVIEW\n  5\n7\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nUCS\n  5\n6\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nAPPID\n  5\n3\n330\n0\n100\nAcDbSymbolTable\n 70\n3\n  0\nAPPID\n  5\n2A\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nACAD\n 70\n0\n  0\nAPPID\n  5\n8B\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nHATCHBACKGROUNDCOLOR\n 70\n0\n  0\nAPPID\n  5\n8C\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nEZDXF\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nDIMSTYLE\n  5\n4\n330\n0\n100\nAcDbSymbolTable\n 70\n12\n100\nAcDbDimStyleTable\n  0\nDIMSTYLE\n105\n2B\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nStandard\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n2.5\n 42\n0.625\n 43\n3.75\n 44\n1.25\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n2.5\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n1.0\n145\n0.0\n146\n1.0\n147\n0.625\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n8\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n44\n279\n0\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n0\n289\n3\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n73\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZDXF\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.175\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n342\n74\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7C\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_100_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n2.5\n142\n0.125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7D\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_50_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.125\n 42\n0.0625\n 43\n3.75\n 44\n0.1875\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.125\n141\n2.5\n142\n0.0625\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.05\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7E\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_25_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.0625\n 42\n0.03125\n 43\n3.75\n 44\n0.09375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.0625\n141\n2.5\n142\n0.03125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.025\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7F\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_20_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.05\n 42\n0.025\n 43\n3.75\n 44\n0.07500000000000001\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.05\n141\n2.5\n142\n0.025\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.020000000000000004\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n80\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_10_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.025\n 42\n0.0125\n 43\n3.75\n 44\n0.037500000000000006\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.025\n141\n2.5\n142\n0.0125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.010000000000000002\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n81\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_5_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.0125\n 42\n0.00625\n 43\n3.75\n 44\n0.018750000000000003\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.0125\n141\n2.5\n142\n0.00625\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.005000000000000001\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n82\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_1_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.0025\n 42\n0.00125\n 43\n3.75\n 44\n0.00375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.0025\n141\n2.5\n142\n0.00125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.001\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n83\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_RADIUS\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n0.0\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n0\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n1\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n342\n84\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n88\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_RADIUS_INSIDE\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n0.0\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n0\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n0\n173\n0\n174\n1\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n0\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n0\n340\n4C\n342\n84\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n89\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_CURVED\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n2\n 90\n2\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nENDTAB\n  0\nTABLE\n  2\nBLOCK_RECORD\n  5\n9\n330\n0\n100\nAcDbSymbolTable\n 70\n5\n  0\nBLOCK_RECORD\n  5\n17\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n*Model_Space\n340\n1A\n  0\nBLOCK_RECORD\n  5\n1B\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n*Paper_Space\n340\n1E\n  0\nBLOCK_RECORD\n  5\n74\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_ARCHTICK\n340\n0\n  0\nBLOCK_RECORD\n  5\n78\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_CLOSEDFILLED\n340\n0\n  0\nBLOCK_RECORD\n  5\n84\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_CLOSEDBLANK\n340\n0\n  0\nENDTAB\n  0\nENDSEC\n  0\nSECTION\n  2\nBLOCKS\n  0\nBLOCK\n  5\n18\n330\n17\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n*Model_Space\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n*Model_Space\n  1\n\n  0\nENDBLK\n  5\n19\n330\n17\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n1C\n330\n1B\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n*Paper_Space\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n*Paper_Space\n  1\n\n  0\nENDBLK\n  5\n1D\n330\n1B\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n75\n330\n74\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_ARCHTICK\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_ARCHTICK\n  1\n\n  0\nLWPOLYLINE\n  5\n77\n330\n74\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbPolyline\n 90\n2\n 70\n0\n 43\n0.15\n 10\n-0.5\n 20\n-0.5\n 10\n0.5\n 20\n0.5\n  0\nENDBLK\n  5\n76\n330\n74\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n79\n330\n78\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_CLOSEDFILLED\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_CLOSEDFILLED\n  1\n\n  0\nSOLID\n  5\n7B\n330\n78\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbTrace\n 10\n-1.0\n 20\n0.16439898372402537\n 30\n0.0\n 11\n0.0\n 21\n0.0\n 31\n0.0\n 12\n-1.0\n 22\n-0.16439898372402537\n 32\n0.0\n 13\n-1.0\n 23\n-0.16439898372402537\n 33\n0.0\n  0\nENDBLK\n  5\n7A\n330\n78\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n85\n330\n84\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_CLOSEDBLANK\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_CLOSEDBLANK\n  1\n\n  0\nLWPOLYLINE\n  5\n87\n330\n84\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbPolyline\n 90\n3\n 70\n1\n 10\n-1.0\n 20\n0.16439898372402537\n 10\n0.0\n 20\n0.0\n 10\n-1.0\n 20\n-0.16439898372402537\n  0\nENDBLK\n  5\n86\n330\n84\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nENDSEC\n  0\nSECTION\n  2\nENTITIES\n__ENTITIES__\n0\nENDSEC\n  0\nSECTION\n  2\nOBJECTS\n  0\nDICTIONARY\n  5\nA\n330\n0\n100\nAcDbDictionary\n281\n1\n  3\nACAD_COLOR\n350\nB\n  3\nACAD_GROUP\n350\nC\n  3\nACAD_LAYOUT\n350\nD\n  3\nACAD_MATERIAL\n350\nE\n  3\nACAD_MLEADERSTYLE\n350\nF\n  3\nACAD_MLINESTYLE\n350\n10\n  3\nACAD_PLOTSETTINGS\n350\n11\n  3\nACAD_PLOTSTYLENAME\n350\n12\n  3\nACAD_SCALELIST\n350\n14\n  3\nACAD_TABLESTYLE\n350\n15\n  3\nACAD_VISUALSTYLE\n350\n16\n  3\nEZDXF_META\n350\n2D\n  0\nDICTIONARY\n  5\nB\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\nC\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\nD\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nModel\n350\n1A\n  3\nLayout1\n350\n1E\n  0\nDICTIONARY\n  5\nE\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nByBlock\n350\n1F\n  3\nByLayer\n350\n20\n  3\nGlobal\n350\n21\n  0\nDICTIONARY\n  5\nF\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nStandard\n350\n2C\n  0\nDICTIONARY\n  5\n10\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nStandard\n350\n22\n  0\nDICTIONARY\n  5\n11\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nACDBDICTIONARYWDFLT\n  5\n12\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nNormal\n350\n13\n100\nAcDbDictionaryWithDefault\n340\n13\n  0\nACDBPLACEHOLDER\n  5\n13\n330\n12\n  0\nDICTIONARY\n  5\n14\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\n15\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\n16\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\n2dWireframe\n350\n5A\n  3\nBasic\n350\n5B\n  3\nBrighten\n350\n5C\n  3\nColorChange\n350\n5D\n  3\nConceptual\n350\n5E\n  3\nDim\n350\n5F\n  3\nEdgeColorOff\n350\n60\n  3\nFacepattern\n350\n61\n  3\nFlat\n350\n62\n  3\nFlatWithEdges\n350\n63\n  3\nGouraud\n350\n64\n  3\nGouraudWithEdges\n350\n65\n  3\nHidden\n350\n66\n  3\nJitterOff\n350\n67\n  3\nLinepattern\n350\n68\n  3\nModeling\n350\n69\n  3\nOverhangOff\n350\n6A\n  3\nRealistic\n350\n6B\n  3\nShaded\n350\n6C\n  3\nShaded with edges\n350\n6D\n  3\nShades of Gray\n350\n6E\n  3\nSketchy\n350\n6F\n  3\nThicken\n350\n70\n  3\nWireframe\n350\n71\n  3\nX-Ray\n350\n72\n  0\nLAYOUT\n  5\n1A\n330\nD\n100\nAcDbPlotSettings\n  1\n\n  4\nA3\n  6\n\n 40\n7.5\n 41\n20.0\n 42\n7.5\n 43\n20.0\n 44\n420.0\n 45\n297.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n 49\n0.0\n140\n0.0\n141\n0.0\n142\n1.0\n143\n1.0\n 70\n1024\n 72\n1\n 73\n0\n 74\n5\n  7\n\n 75\n16\n 76\n0\n 77\n2\n 78\n300\n147\n1.0\n148\n0.0\n149\n0.0\n100\nAcDbLayout\n  1\nModel\n 70\n1\n 71\n0\n 10\n0.0\n 20\n0.0\n 11\n420.0\n 21\n297.0\n 12\n0.0\n 22\n0.0\n 32\n0.0\n 14\n1e+20\n 24\n1e+20\n 34\n1e+20\n 15\n-1e+20\n 25\n-1e+20\n 35\n-1e+20\n146\n0.0\n 13\n0.0\n 23\n0.0\n 33\n0.0\n 16\n1.0\n 26\n0.0\n 36\n0.0\n 17\n0.0\n 27\n1.0\n 37\n0.0\n 76\n1\n330\n17\n  0\nLAYOUT\n  5\n1E\n330\nD\n100\nAcDbPlotSettings\n  1\n\n  4\nA3\n  6\n\n 40\n7.5\n 41\n20.0\n 42\n7.5\n 43\n20.0\n 44\n420.0\n 45\n297.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n 49\n0.0\n140\n0.0\n141\n0.0\n142\n1.0\n143\n1.0\n 70\n0\n 72\n1\n 73\n0\n 74\n5\n  7\n\n 75\n16\n 76\n0\n 77\n2\n 78\n300\n147\n1.0\n148\n0.0\n149\n0.0\n100\nAcDbLayout\n  1\nLayout1\n 70\n1\n 71\n1\n 10\n0.0\n 20\n0.0\n 11\n420.0\n 21\n297.0\n 12\n0.0\n 22\n0.0\n 32\n0.0\n 14\n1e+20\n 24\n1e+20\n 34\n1e+20\n 15\n-1e+20\n 25\n-1e+20\n 35\n-1e+20\n146\n0.0\n 13\n0.0\n 23\n0.0\n 33\n0.0\n 16\n1.0\n 26\n0.0\n 36\n0.0\n 17\n0.0\n 27\n1.0\n 37\n0.0\n 76\n1\n330\n1B\n  0\nMATERIAL\n  5\n1F\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nByBlock\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMATERIAL\n  5\n20\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nByLayer\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMATERIAL\n  5\n21\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nGlobal\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMLINESTYLE\n  5\n22\n102\n{ACAD_REACTORS\n330\n10\n102\n}\n330\n10\n100\nAcDbMlineStyle\n  2\nStandard\n 70\n0\n  3\n\n 62\n256\n 51\n90.0\n 52\n90.0\n 71\n2\n 49\n0.5\n 62\n256\n  6\nBYLAYER\n 49\n-0.5\n 62\n256\n  6\nBYLAYER\n  0\nMLEADERSTYLE\n  5\n2C\n102\n{ACAD_REACTORS\n330\nF\n102\n}\n330\nF\n100\nAcDbMLeaderStyle\n179\n2\n170\n2\n171\n1\n172\n0\n 90\n2\n 40\n0.0\n 41\n0.0\n173\n1\n 91\n-1056964608\n 92\n-2\n290\n1\n 42\n2.0\n291\n1\n 43\n8.0\n  3\nStandard\n 44\n4.0\n300\n\n342\n29\n174\n1\n175\n1\n176\n0\n178\n1\n 93\n-1056964608\n 45\n4.0\n292\n0\n297\n0\n 46\n4.0\n 94\n-1056964608\n 47\n1.0\n 49\n1.0\n140\n1.0\n294\n1\n141\n0.0\n177\n0\n142\n1.0\n295\n0\n296\n0\n143\n3.75\n271\n0\n272\n9\n273\n9\n  0\nDICTIONARY\n  5\n2D\n330\nA\n100\nAcDbDictionary\n280\n1\n281\n1\n  3\nCREATED_BY_EZDXF\n350\n2E\n  3\nWRITTEN_BY_EZDXF\n350\n8D\n  0\nDICTIONARYVAR\n  5\n2E\n330\n2D\n100\nDictionaryVariables\n280\n0\n  1\n1.4.4 @ 2026-09-06T14:27:51.229962+00:00\n  0\nVISUALSTYLE\n  5\n5A\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\n2dWireframe\n 70\n4\n 90\n0\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n5B\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nBasic\n 70\n7\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5C\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nBrighten\n 70\n12\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5D\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nColorChange\n 70\n16\n 90\n2\n 40\n0.6\n 62\n8\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5E\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nConceptual\n 70\n9\n 90\n3\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n5F\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nDim\n 70\n11\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n60\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nEdgeColorOff\n 70\n22\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n61\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFacepattern\n 70\n15\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n62\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFlat\n 70\n0\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n63\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFlatWithEdges\n 70\n1\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n64\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nGouraud\n 70\n2\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n65\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nGouraudWithEdges\n 70\n3\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n66\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nHidden\n 70\n6\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n67\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nJitterOff\n 70\n20\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n68\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nLinepattern\n 70\n14\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n69\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nModeling\n 70\n10\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6A\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nOverhangOff\n 70\n21\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n6B\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nRealistic\n 70\n8\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6C\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShaded\n 70\n27\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6D\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShaded with edges\n 70\n26\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6E\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShades of Gray\n 70\n23\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6F\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nSketchy\n 70\n24\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n70\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nThicken\n 70\n13\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n71\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nWireframe\n 70\n5\n 90\n0\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n72\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nX-Ray\n 70\n25\n 90\n2\n 40\n0.5\n 62\n7\n290\n0\n291\n0\n  0\nDICTIONARYVAR\n  5\n8D\n330\n2D\n100\nDictionaryVariables\n280\n0\n  1\n1.4.4 @ 2026-09-06T14:27:51.236067+00:00\n  0\nENDSEC\n  0\nEOF\n";
+
+</script>
+<script>
+/* =====================================================================
+   深基坑快绘坡面CAD系统 v1.0.2 — 主逻辑（UI/交互/DXF解析/三视区渲染/导出）
+   依赖：PitCore（几何引擎）、DXF_SKEL（DXF 骨架模板，构建期注入）
+   视区：上=平面图(plan) ｜ 下左=A-A剖面 ｜ 下右=B-B剖面
+   坐标：世界 mm，Y 向上；剖面世界：x=沿剖切线水平 u，y=标高 v（坑底为负）
+   标注规范：天正/国标 —— 示坡线长短相间；尺寸 45°斜线起止符；标高三角符号
+   ===================================================================== */
+(function () {
+  'use strict';
+  var C = window.PitCore;
+  var $ = function (id) { return document.getElementById(id); };
+  var VER = '1.0.2';
+
+  var state = {
+    poly: null, polyName: '', geo: null,
+    view: { plan: null, A: null, B: null },   // 各视区 {cx,cy,s,fitS}
+    drag: null, showGrid: true
+  };
+  var secEnts = { A: [], B: [] };
+  var planEnts = [];
+  var toastTimer = null;
+
+  /* ---------- 小工具 ---------- */
+  function toast(msg, type) {
+    var el = $('toast');
+    el.textContent = msg;
+    el.className = 'on' + (type ? ' ' + type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.className = ''; }, 2600);
+  }
+  function loading(on, msg) {
+    $('loading').className = on ? 'on' : '';
+    if (msg) $('loadMsg').textContent = msg;
+  }
+  function escXml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function val(id) { return parseFloat($(id).value) || 0; }
+  function fmtM(mm, dp) { // mm → m 字符串（去尾零）
+    dp = dp === undefined ? 2 : dp;
+    var s = (mm / 1000).toFixed(dp);
+    return String(parseFloat(s));
+  }
+  function fmtLvl(mm) { // 标高 mm → '-6.000'
+    return (mm / 1000).toFixed(3);
+  }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  /* ================= DXF 解析 =================
+     扫描 ENTITIES 段，收集全部闭合 LWPOLYLINE/POLYLINE/LINE 环。
+     返回 { polys:[{pts,name?}], lines:[..] } */
+  function parseDxfText(text) {
+    var lines = text.split(/\r\n|\r|\n/);
+    var i = 0, start = -1, end = lines.length;
+    while (i + 1 < lines.length) {
+      var c0 = lines[i].trim(), v0 = (lines[i + 1] || '').trim();
+      if (c0 === '0' && v0 === 'SECTION') {
+        var c2 = (lines[i + 2] || '').trim(), v2 = (lines[i + 3] || '').trim();
+        if (c2 === '2' && v2 === 'ENTITIES') { start = i; }
+      } else if (c0 === '0' && v0 === 'ENDSEC' && start >= 0) { end = i; break; }
+      i += 2;
+    }
+    if (start < 0) return null;
+    var pairs = [];
+    for (i = start; i < end; i += 2) {
+      pairs.push({ c: lines[i].trim(), v: (lines[i + 1] === undefined ? '' : lines[i + 1]) });
+    }
+    var ents = [], cur = null;
+    pairs.forEach(function (p) {
+      if (p.c === '0') {
+        var t = p.v.trim();
+        if (t === 'LWPOLYLINE' || t === 'POLYLINE' || t === 'LINE' || t === 'VERTEX' || t === 'TEXT') {
+          cur = { t: t, closed: false, pts: [], cx: 0, txt: '' };
+          ents.push(cur);
+        } else { cur = null; }
+        return;
+      }
+      if (!cur) return;
+      if (cur.t === 'VERTEX') {
+        if (p.c === '10') cur.cx = parseFloat(p.v) || 0;
+        else if (p.c === '20') cur.pts.push({ x: cur.cx, y: parseFloat(p.v) || 0 });
+      } else if (cur.t === 'TEXT') {
+        if (p.c === '1') cur.txt += p.v;
+      } else {
+        if (p.c === '10') cur.cx = parseFloat(p.v) || 0;
+        else if (p.c === '20') cur.pts.push({ x: cur.cx, y: parseFloat(p.v) || 0 });
+        else if (p.c === '70') cur.closed = (parseInt(p.v, 10) & 1) === 1;
+      }
+    });
+    var polys = [], lineSegs = [], names = [], curPoly = null;
+    function closeCurPoly() {
+      if (curPoly && curPoly.pts.length >= 3 &&
+        (curPoly.closed || Math.hypot(curPoly.pts[0].x - curPoly.pts[curPoly.pts.length - 1].x,
+          curPoly.pts[0].y - curPoly.pts[curPoly.pts.length - 1].y) < 1e-6)) {
+        polys.push(curPoly.pts.slice());
+      }
+      curPoly = null;
+    }
+    for (var e = 0; e < ents.length; e++) {
+      var it = ents[e];
+      if (it.t === 'LWPOLYLINE') {
+        var cl = it.closed || (it.pts.length > 2 && Math.hypot(it.pts[0].x - it.pts[it.pts.length - 1].x, it.pts[0].y - it.pts[it.pts.length - 1].y) < 1e-6);
+        if (cl) polys.push(it.pts.slice());
+      } else if (it.t === 'POLYLINE') {
+        closeCurPoly(); curPoly = { closed: it.closed, pts: [] };
+      } else if (it.t === 'VERTEX') {
+        if (curPoly && it.pts.length) curPoly.pts.push(it.pts[it.pts.length - 1]);
+      } else if (it.t === 'LINE') {
+        if (curPoly) { closeCurPoly(); curPoly = null; }
+        if (it.pts.length >= 2) lineSegs.push({ a: it.pts[0], b: it.pts[it.pts.length - 1] });
+      } else if (it.t === 'TEXT') {
+        if (curPoly) { closeCurPoly(); curPoly = null; }
+        names.push(it.txt);
+      } else {
+        if (curPoly) { closeCurPoly(); curPoly = null; }
+      }
+    }
+    if (curPoly) closeCurPoly();
+    if (!polys.length) return null;
+    return { polys: polys, lines: lineSegs, names: names };
+  }
+  function removeCollinear(pts) {
+    var out = [], m = pts.length;
+    for (var i = 0; i < m; i++) {
+      var a = pts[(i - 1 + m) % m], b = pts[i], c = pts[(i + 1) % m];
+      var cr = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+      if (Math.abs(cr) > 1e-6) out.push(b);
+    }
+    return out;
+  }
+
+  /* 读取 DXF 文件（GBK/UTF-8 兼容）→ 面积最大闭合环 */
+  function loadDxfFile(file) {
+    loading(true, '正在解析 DXF…');
+    var reader = new FileReader();
+    reader.onload = function () {
+      var buf = reader.result, text = '';
+      try {
+        text = new TextDecoder('gbk').decode(buf);
+        if (text.indexOf('\uFFFD') >= 0) throw new Error('gbk fail');
+      } catch (e1) {
+        try { text = new TextDecoder('utf-8').decode(buf); }
+        catch (e2) { text = String.fromCharCode.apply(null, new Uint8Array(buf)); }
+      }
+      try {
+        var r = parseDxfText(text);
+        if (!r || !r.polys.length) throw new Error('未找到闭合多段线（支持 LWPOLYLINE/POLYLINE 闭合环）');
+        var best = null, ba = -1;
+        r.polys.forEach(function (p) {
+          var a = Math.abs(C.signedArea(p));
+          if (a > ba) { ba = a; best = p; }
+        });
+        var pts = C.dedupePts(best, 0.01);
+        pts = removeCollinear(pts);
+        if (pts.length < 3) throw new Error('闭合环顶点不足 3 个');
+        setPoly(pts, file.name.replace(/\.[^.]+$/, ''));
+        toast('DXF 导入成功：共 ' + r.polys.length + ' 条闭合线，取面积最大者（' + pts.length + ' 顶点）', 'ok');
+      } catch (err) {
+        toast('导入失败：' + err.message, 'err');
+      }
+      loading(false);
+    };
+    reader.onerror = function () { loading(false); toast('文件读取失败', 'err'); };
+    reader.readAsArrayBuffer(file);
+  }
+
+  /* ================= 轮廓 ================= */
+  function setPoly(pts, name) {
+    var mode = $('selUnit').value;
+    var bb = C.polyBBox(pts);
+    var span = Math.max(bb.maxX - bb.minX, bb.maxY - bb.minY);
+    if (mode === 'm' || (mode === 'auto' && span < 100)) {
+      pts = pts.map(function (p) { return { x: p.x * 1000, y: p.y * 1000 }; });
+    }
+    state.poly = C.dedupePts(pts, 1);
+    if (state.poly.length < 3) { toast('轮廓点数不足', 'err'); return; }
+    state.polyName = name || '';
+    renderAll();
+  }
+  function loadSample() {
+    // 60m×40m 基坑坑底边线，四角 6m 切角（八边形）
+    var pts = [
+      { x: 0, y: 6000 }, { x: 6000, y: 0 }, { x: 58000, y: 0 }, { x: 64000, y: 6000 },
+      { x: 64000, y: 36000 }, { x: 58000, y: 42000 }, { x: 6000, y: 42000 }, { x: 0, y: 36000 }
+    ];
+    state.poly = pts;
+    state.polyName = '示例基坑（60m×40m 切角八边形）';
+    renderAll();
+    toast('已载入示例基坑轮廓，默认按 2 级向外放坡生成', 'ok');
+  }
+  function clearPoly() {
+    state.poly = null; state.polyName = ''; state.geo = null;
+    planEnts = []; secEnts.A = []; secEnts.B = [];
+    ['svgPlan', 'svgSecA', 'svgSecB'].forEach(function (id) { $(id).innerHTML = ''; });
+    updateInfoDom(); updateStats(); updateDerive();
+    toast('已清空轮廓');
+  }
+
+  /* ================= 参数 ================= */
+  function getParams() {
+    var n = Math.max(1, parseInt($('selN').value, 10) || 1);
+    return {
+      dir: state.dir === 'in' ? 'in' : 'out',
+      Hm: Math.max(0.5, val('inH')),
+      n: n,
+      mRate: Math.max(0.2, val('inM')),
+      bm: Math.max(0, val('inB')),
+      offA: val('inDyA'),   // A-A 距形心（横向）m
+      offB: val('inDxB')    // B-B 距形心（纵向）m
+    };
+  }
+  function opts() {
+    return {
+      tick: $('ckTick').checked, ring: $('ckRing').checked,
+      fill: $('ckFill').checked, lvl: $('ckLvl').checked,
+      dim: $('ckDim').checked, title: $('ckTitle').checked
+    };
+  }
+  function titleInfo() {
+    return {
+      proj: $('inProj').value, name: $('inDwName').value,
+      designer: $('inDesigner').value, date: todayStr()
+    };
+  }
+
+  /* =====================================================================
+     图层与配色
+   ===================================================================== */
+  var LAYER = {
+    BOTTOM: 'BOTTOM',   // 坑底边线（导入轮廓）
+    RING: 'RING',       // 各级马道/坡顶边线
+    TOP: 'TOP',         // 开挖上口边线
+    FILL: 'FILL',       // 平面放坡范围 / 剖面挖方区
+    TICK: 'TICK',       // 示坡线
+    CUTA: 'CUTA', CUTB: 'CUTB',  // 剖切线
+    GROUND: 'GROUND',   // 剖面原地面
+    PROFILE: 'PROFILE', // 剖面开挖轮廓
+    LEVEL: 'LEVEL',     // 标高
+    DIM: 'DIM', TEXT: 'TEXT', TITLE: 'TITLE', LEGEND: 'LEGEND'
+  };
+  var SVG_COLOR = {
+    BOTTOM: '#0f172a', RING: '#64748b', TOP: '#0e7490', FILL: '#bfeae8',
+    TICK: '#0d7f7e', CUTA: '#c2410c', CUTB: '#4338ca',
+    GROUND: '#94a3b8', PROFILE: '#0f172a', LEVEL: '#33465c',
+    DIM: '#0e7490', TEXT: '#33465c', TITLE: '#1e2b36', LEGEND: '#5b7484'
+  };
+  var DXF_COLOR = { // 实体级 62
+    BOTTOM: 7, RING: 8, TOP: 4, FILL: 251, TICK: 5, CUTA: 1, CUTB: 5,
+    GROUND: 8, PROFILE: 7, LEVEL: 3, DIM: 4, TEXT: 3, TITLE: 7, LEGEND: 8
+  };
+
+  var entsAll = [];   // 供 bbox 汇总（当前视图各自独立缓冲见下）
+  var planBuf = [], secBufA = [], secBufB = [];
+  function bufOf(kind) {
+    if (kind === 'plan') return planBuf;
+    return kind === 'A' ? secBufA : secBufB;
+  }
+  function E(buf, type, o) {
+    var e = { t: type };
+    for (var k in o) e[k] = o[k];
+    buf.push(e);
+    return e;
+  }
+  function textWmm(s, h) {
+    var w = 0;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      w += (c > 0x2E80 ? 1.0 : 0.62) * h * 0.7;
+    }
+    return w;
+  }
+
+  /* 点数组 → SVG path（渲染层自动 y 翻转；close 可选） */
+  function ptsPathD(pts, close) {
+    if (!pts || !pts.length) return '';
+    var d = '';
+    for (var i = 0; i < pts.length; i++) {
+      d += (i ? 'L' : 'M') + pts[i].x.toFixed(2) + ' ' + (-pts[i].y).toFixed(2);
+    }
+    if (close) d += 'Z';
+    return d;
+  }
+  /* 实体坐标点收集（bbox / 导出遍历用）：band/pathfill 返回 true 表示已含点 */
+  function eachPts(e, fn) {
+    if (e.t === 'poly' || e.t === 'pathfill') { (e.pts || []).forEach(fn); return true; }
+    if (e.t === 'band') { (e.outPts || []).forEach(fn); (e.inPts || []).forEach(fn); return true; }
+    return false;
+  }
+
+  /* ============ 平面图实体 ============
+     geo: PitCore.slopeGeo 结果；cutA/cutB：剖切线 {axis:'h'/'v', pos:世界坐标mm} */
+  function buildPlanEntities(geo, cutA, cutB) {
+    planBuf = [];
+    var B = planBuf;
+    var opt = opts();
+    var rings = geo.rings, n = geo.n;
+    // 0) 放坡范围底色（环带：ringn 外 + ring0 内，evenodd）
+    if (opt.fill) {
+      B.push({ t: 'band', outPts: rings[n], inPts: rings[0], layer: LAYER.FILL });
+    }
+    // 1) 坑底边线（粗）
+    E(B, 'poly', { pts: rings[0], layer: LAYER.BOTTOM, lw: 0.5, ew: 30 });
+    // 2) 中间各级边线（虚线）
+    if (opt.ring) {
+      for (var k = 1; k < n; k++) {
+        E(B, 'poly', { pts: rings[k], layer: LAYER.RING, lw: 0.2, dash: [1.6, 0.9] });
+      }
+    }
+    // 3) 开挖上口（实线稍粗）
+    E(B, 'poly', { pts: rings[n], layer: LAYER.TOP, lw: 0.38, ew: 30 });
+    // 4) 示坡线：天正规范——长短相间等距细实线，自上口(高端)垂直等高线指向坑内(低端)
+    if (opt.tick) {
+      var ticks = C.slopeTicks(geo, 3000);
+      for (var ti = 0; ti < ticks.length; ti++) {
+        var t = ticks[ti];
+        E(B, 'line', { x1: t.x1, y1: t.y1, x2: t.x2, y2: t.y2, layer: LAYER.TICK, lw: t.long ? 0.22 : 0.16 });
+      }
+    }
+    // 5) 剖切线 A-A（横向）/ B-B（纵向）
+    drawCutLine(B, cutA, 'A');
+    drawCutLine(B, cutB, 'B');
+    // 6) 外包络尺寸（平面总长宽）→ 标左下/右下
+    var bbAll = computeBB(planBuf, [LAYER.TICK, LAYER.CUTA, LAYER.CUTB, LAYER.FILL]);
+    if (bbAll) {
+      planDim(B, bbAll);
+      // 放坡范围外扩说明文字（左下）
+      E(B, 'text', { x: bbAll.minX, y: bbAll.minY - 6000, h: 2600, str: '放坡开挖范围：' + fmtM(bbAll.maxX - bbAll.minX) + 'm × ' + fmtM(bbAll.maxY - bbAll.minY) + 'm', layer: LAYER.TEXT, align: 'l' });
+    }
+    // 7) 图签
+    if (opt.title && bbAll) {
+      titleBlock(B, bbAll);
+    }
+    return planBuf;
+  }
+
+  /* 剖切线：贯穿外延 + 端点符号 */
+  function drawCutLine(B, cut, name) {
+    if (!cut || !state.geo) return;
+    var geo = state.geo;
+    var bb = C.polyBBox(geo.rings[geo.n]);
+    var ext = 10000; // 外延 10m
+    var layer = name === 'A' ? LAYER.CUTA : LAYER.CUTB;
+    var lw = 0.3;
+    var x1, y1, x2, y2;
+    if (cut.axis === 'h') {
+      x1 = bb.minX - ext; x2 = bb.maxX + ext; y1 = y2 = cut.pos;
+    } else {
+      y1 = bb.minY - ext; y2 = bb.maxY + ext; x1 = x2 = cut.pos;
+    }
+    E(B, 'line', { x1: x1, y1: y1, x2: x2, y2: y2, layer: layer, lw: lw, dash: [6, 2.2] });
+    // 端部编号圈 + 字母
+    var r = 3500, txtH = 2600;
+    E(B, 'circle', { cx: x1, cy: y1, r: r, layer: layer, fill: false, lw: 0.3 });
+    E(B, 'text', { x: x1, y: y1 + txtH * 0.36, h: txtH, str: name, layer: layer, align: 'c' });
+    E(B, 'circle', { cx: x2, cy: y2, r: r, layer: layer, fill: false, lw: 0.3 });
+    E(B, 'text', { x: x2, y: y2 + txtH * 0.36, h: txtH, str: name, layer: layer, align: 'c' });
+  }
+
+  /* 平面外包络尺寸（长/宽）——天正风格 45° 斜线起止符 + 延伸线 */
+  function planDim(B, bb) {
+    var gap = 9000; // 尺寸线距图形边
+    var yD = bb.minY - gap, xD = bb.maxX + gap;
+    var txtH = 2600;
+    // 底部长向（尺寸线在图形下方，文字朝下）
+    extLine(B, bb.minX, bb.minY - 2600, yD, LAYER.DIM);
+    extLine(B, bb.maxX, bb.minY - 2600, yD, LAYER.DIM);
+    dimH(B, bb.minX, bb.maxX, yD, fmtM(bb.maxX - bb.minX) + 'm', txtH, LAYER.DIM, false);
+    // 右侧竖向（尺寸线在图形右侧，文字朝右）
+    extLine(B, xD, bb.minY + 2600, bb.minY, LAYER.DIM);
+    extLine(B, xD, bb.maxY - 2600, bb.maxY, LAYER.DIM);
+    dimV(B, bb.minY, bb.maxY, xD, fmtM(bb.maxY - bb.minY) + 'm', txtH, LAYER.DIM, 1);
+  }
+
+  /* ---- 天正/国标风格标注基元 ----
+     尺寸线：45° 斜短线起止符（建筑制图尺寸起止符），文字置中偏一侧 */
+  function dimTick45(B, x, y, angDeg, s, layer) {
+    // angDeg：斜短线方向（度，相对世界 x 轴）；画一条以 (x,y) 为中点的小斜线
+    var a0 = (angDeg || 0) * Math.PI / 180;
+    var dx = Math.cos(a0) * s / 2, dy = Math.sin(a0) * s / 2;
+    E(B, 'line', { x1: x - dx, y1: y - dy, x2: x + dx, y2: y + dy, layer: layer, lw: 0.2 });
+  }
+  /* 水平尺寸线（x1→x2 在 y=dy），两端 45° 斜线起止；text 在尺寸线上方 */
+  function dimH(B, x1, x2, dy, text, txtH, layer, above) {
+    above = above === undefined ? true : above;
+    var y = dy;
+    E(B, 'line', { x1: x1, y1: y, x2: x2, y2: y, layer: layer, lw: 0.16 });
+    dimTick45(B, x1, y, above ? 45 : -45, txtH * 1.1, layer);
+    dimTick45(B, x2, y, above ? -45 : 45, txtH * 1.1, layer);
+    var my = above ? 1 : -1;
+    var tx = (x1 + x2) / 2;
+    E(B, 'text', { x: tx, y: y + my * (txtH * 0.55), h: txtH, str: text, layer: layer, align: 'c', halo: 1 });
+  }
+  /* 竖向尺寸线（y1→y2 在 x=dx），文字水平旁注 */
+  function dimV(B, y1, y2, dx, text, txtH, layer, side) {
+    side = side || 1; // 文字在 x 哪一侧
+    E(B, 'line', { x1: dx, y1: y1, x2: dx, y2: y2, layer: layer, lw: 0.16 });
+    dimTick45(B, dx, y1, -45, txtH * 1.1, layer);
+    dimTick45(B, dx, y2, 45, txtH * 1.1, layer);
+    var ty = (y1 + y2) / 2;
+    E(B, 'text', { x: dx + side * (txtH * 0.55), y: ty, h: txtH, str: text, layer: layer, align: side > 0 ? 'l' : 'r', halo: 1 });
+  }
+  /* 标高符号（天正规范）：等腰直角三角顶点指向测点 + 横线引注 + 数值。
+     测点 (px,py)；above=true 三角在上方张开（常用），数值标于横线上。 */
+  function lvlMark(B, px, py, h, txt, dir, layer) {
+    // dir>0 三角向上张开（顶点在下，横线在上）；dir<0 镜像（顶点在上，用于坑底向上标注）
+    var s = h * 0.72;      // 三角形高
+    var w = h * 2.1;       // 横线长
+    dir = dir || 1;
+    var topY = py + dir * s;
+    E(B, 'line', { x1: px, y1: py, x2: px + s, y2: topY, layer: layer, lw: 0.16 });
+    E(B, 'line', { x1: px + s, y1: topY, x2: px + s + w, y2: topY, layer: layer, lw: 0.16 });
+    var my = dir > 0 ? 1 : -1;
+    E(B, 'text', { x: px + s + w / 2, y: topY + my * (h * 0.42), h: h, str: txt, layer: layer, align: 'c', halo: 1 });
+  }
+  /* 延伸线（从测点到尺寸线的细线） */
+  function extLine(B, x1, yA, yB, layer) {
+    E(B, 'line', { x1: x1, y1: yA, x2: x1, y2: yB, layer: layer, lw: 0.12 });
+  }
+  function titleBlock(B, bbGeo) {
+    var t = titleInfo();
+    var pad = 9000;
+    var w = 200000, h = 62000;   // mm：宽 200m? 太宽 → 与基坑尺度匹配：用相对尺寸
+    // 图签尺寸按图形尺度适配
+    var span = Math.max(bbGeo.maxX - bbGeo.minX, bbGeo.maxY - bbGeo.minY);
+    w = Math.min(span * 0.32, 120000); w = Math.max(w, 60000);
+    h = w * 0.42;
+    var x = bbGeo.maxX + pad;
+    var y = bbGeo.minY - h - pad;
+    E(B, 'rect', { x: x, y: y, w: w, h: h, layer: LAYER.TITLE, lw: 0.3, fill: true, fc: '#ffffff' });
+    E(B, 'line', { x1: x, y1: y + h / 2, x2: x + w, y2: y + h / 2, layer: LAYER.TITLE, lw: 0.18 });
+    E(B, 'line', { x1: x + w / 2, y1: y, x2: x + w / 2, y2: y + h, layer: LAYER.TITLE, lw: 0.18 });
+    var cellW = w / 2, cellH = h / 2, fh = Math.max(2000, w * 0.032);
+    var cells = [
+      ['工程', t.proj], ['图名', t.name], ['比例', '1:1（DXF）'], ['日期', t.date]
+    ];
+    for (var r = 0; r < 2; r++) {
+      var yy = y + r * cellH + cellH * 0.5;
+      E(B, 'text', { x: x + fh * 0.7, y: yy + fh * 0.36, h: fh, str: cells[r * 2][0], layer: LAYER.TITLE });
+      E(B, 'text', { x: x + cellW / 2 + fh * 0.7, y: yy + fh * 0.36, h: fh, str: cells[r * 2][1], layer: LAYER.TITLE, align: 'l' });
+      E(B, 'text', { x: x + cellW + fh * 0.7, y: yy + fh * 0.36, h: fh, str: cells[r * 2 + 1][0], layer: LAYER.TITLE });
+      E(B, 'text', { x: x + cellW + cellW / 2 + fh * 0.7, y: yy + fh * 0.36, h: fh, str: cells[r * 2 + 1][1], layer: LAYER.TITLE, align: 'l' });
+    }
+  }
+
+  /* ============ 剖面实体（A-A / B-B） ============
+     geo: slopeGeo；cut: {k:'A'|'B', offM}
+     世界坐标：x=u（剖切线水平坐标），y=v（标高，向下为负） */
+  /* 剖面实体构建：支持凹形/多基坑轮廓（剖切线穿过多段）
+     多段时每段独立成剖面块，横向拼接排列 */
+  function buildSectionEntities(geo, cut) {
+    var segs = C.sectionSegs(geo, cut);
+    if (!segs.length) return [];
+    if (segs.length === 1) return buildSectionProfile(geo, cut, null, '');
+    // 多段：各段独立生成剖面并横向排开
+    var B = [];
+    var X = 0;
+    var GAP = Math.max(60000, geo.H * 8);   // 块间距（mm），保证标注不重叠
+    segs.forEach(function (seg, idx) {
+      var sub = buildSectionProfile(geo, cut, seg, String(idx + 1));
+      var bb = computeBB(sub);
+      if (bb) {
+        var dx = X - bb.minX;
+        shiftBufX(sub, dx);
+        B = B.concat(sub);
+        X = bb.maxX + dx + GAP;
+      }
+    });
+    return B;
+  }
+  function shiftBufX(buf, dx) {
+    if (!dx) return;
+    buf.forEach(function (e) {
+      if (e.t === 'poly' || e.t === 'pathfill') {
+        e.pts.forEach(function (p) { p.x += dx; });
+      } else if (e.t === 'band') {
+        e.outPts.forEach(function (p) { p.x += dx; });
+        e.inPts.forEach(function (p) { p.x += dx; });
+      } else if (e.t === 'line') { e.x1 += dx; e.x2 += dx; }
+      else if (e.t === 'circle') { e.cx += dx; }
+      else if (e.t === 'rect') { e.x += dx; }
+      else if (e.t === 'text') { e.x += dx; }
+    });
+  }
+  /* 单段剖面绘制（seg=null 时用真实整环剖面） */
+  function buildSectionProfile(geo, cut, seg, mark) {
+    var B = [];
+    var pro = C.sectionProfile(geo, cut, seg);   // 可能抛错
+    var opt = opts();
+    var n = geo.n, h = geo.h, H = geo.H, L = geo.L, Bd = geo.B;
+    // 文字与图形协调：字高随坑深自适应，限制在合理区间
+    var txtH = Math.max(2000, Math.min(3400, H * 0.075));
+    var groundPad = 10000; // 地坪延伸
+    var cU = (pro.ringU[0].L + pro.ringU[0].R) / 2; // 坑底中心（标注仅取左半避免重复）
+    var DM = LAYER.DIM, LV = LAYER.LEVEL;
+
+    // 开挖轮廓（含地坪段）— 剖面坐标 {u,v} 映射为世界 {x,y}
+    var profPts = pro.pts.map(function (p) { return { x: p.u, y: p.v }; });
+
+    // 挖方区填充（坑腔：开挖轮廓去首尾地坪点 + 顶边闭合于原地面）
+    var corePts = profPts.slice(1, profPts.length - 1);
+    if (corePts.length >= 3) {
+      B.push({ t: 'pathfill', pts: corePts, layer: LAYER.FILL });
+    }
+
+    // 原地面虚线（含地坪外延）
+    var gL = pro.groundL - groundPad, gR = pro.groundR + groundPad;
+    E(B, 'line', { x1: gL, y1: 0, x2: gR, y2: 0, layer: LAYER.GROUND, lw: 0.22, dash: [4, 1.6] });
+    // 地坪段细实线（原地面之上的未开挖部分用细线强调轮廓）
+    E(B, 'line', { x1: gL, y1: 0, x2: pro.groundL, y2: 0, layer: LAYER.GROUND, lw: 0.3 });
+    E(B, 'line', { x1: pro.groundR, y1: 0, x2: gR, y2: 0, layer: LAYER.GROUND, lw: 0.3 });
+
+    // 开挖轮廓线（加粗主轮廓）
+    E(B, 'poly', { pts: profPts, layer: LAYER.PROFILE, lw: 0.5, close: false, ew: 0 });
+
+    // 顶部标题（用矩形图名带，天正风格图名写在剖面正上方）
+    var uMid = (gL + gR) / 2;
+    var tH = Math.max(2600, H * 0.11);
+    E(B, 'text', { x: uMid, y: tH * 2.2 + 800, h: tH, str: cut.k + '-' + cut.k + (mark ? '(' + mark + ')' : '') + ' 剖面图  1:1', layer: LAYER.TEXT, align: 'c', halo: 1 });
+
+    /* ---------- 标高标注（天正：三角符号 + 横线引注） ---------- */
+    if (opt.lvl) {
+      var ru0 = pro.ringU[0];
+      // 地面 0.000：左地坪外侧（gL 与上口左端之间），符号朝上
+      var gx0 = (pro.groundL + pro.groundL - groundPad * 0.5) / 2;
+      lvlMark(B, gx0, 0, txtH, fmtLvl(0), 1, LV);
+      // 各级平台（折线中的水平段，v 介于 -100 ~ -H+100），符号位于平台正上方挖空区
+      for (var il = 1; il < pro.pts.length; il++) {
+        var al = pro.pts[il - 1], bl = pro.pts[il];
+        if (Math.abs(al.v - bl.v) < 1 && Math.abs(bl.u - al.u) > 100) {
+          var vSg = al.v;
+          if (vSg < -100 && vSg > -H + 100) {
+            var mdx = (al.u + bl.u) / 2;
+            if (mdx > cU) continue;                 // 只标左半
+            // 平台内侧折点（靠近坑心的端点）对应环 k 顶标高，用其在平台段的投影位置标
+            var apx = (al.u < bl.u ? al.u : bl.u) + Math.min(Bd, Math.abs(bl.u - al.u)) * 0.42;
+            lvlMark(B, apx, vSg, txtH, fmtLvl(vSg), 1, LV);
+          }
+        }
+      }
+      // 坑底标高：坑底线两端各一次，符号朝下（横线在下，文本在符号下方留空区）
+      lvlMark(B, ru0.L + (ru0.R - ru0.L) * 0.08, -H, txtH, fmtLvl(-H), -1, LV);
+      lvlMark(B, ru0.R - (ru0.R - ru0.L) * 0.08, -H, txtH, fmtLvl(-H), -1, LV);
+    }
+
+    /* ---------- 尺寸标注（天正：45° 斜线起止符） ---------- */
+    if (opt.dim) {
+      // a0) 放坡宽度标注：剖面顶部留白带，标上口环总放坡宽（含单侧放坡宽）
+      var uTn = pro.spans[n].uL, uRn = pro.spans[n].uR;   // 上口左右
+      var uT0 = pro.spans[0].uL, uR0 = pro.spans[0].uR;   // 坑底左右
+      var titleBaseline = tH * 2.2 + 800;                 // 图名基线(见上)
+      var yTopDim = titleBaseline - tH * 1.05;            // 图名下方留白带
+      var sideW = (uRn - uTn - (uR0 - uT0)) / 2;          // 单侧放坡水平宽 D
+      extLine(B, uTn, 0, yTopDim, DM);
+      extLine(B, uRn, 0, yTopDim, DM);
+      dimH(B, uTn, uRn, yTopDim,
+        '放坡总宽 ' + fmtM(uRn - uTn) + 'm（单侧 ' + fmtM(sideW) + 'm）', txtH * 0.92, DM, false);
+      // a) 坡段坡率 1:m —— 沿坡向斜注（左半坡面），文字平行坡线置于坡面上方挖空区
+      for (var i = 1; i < pro.pts.length; i++) {
+        var a = pro.pts[i - 1], b = pro.pts[i];
+        var du = Math.abs(b.u - a.u), dv = Math.abs(b.v - a.v);
+        if (dv > h * 0.55 && Math.abs(du / (dv || 1) - geo.mRate) < 0.02 && du > h * 0.3) {
+          var mu = (a.u + b.u) / 2, mv = (a.v + b.v) / 2;
+          if (mu > cU) continue;                       // 仅左半
+          // 坡向角（世界坐标）
+          var angW = Math.atan2(b.v - a.v, b.u - a.u) * 180 / Math.PI;
+          var ux2 = (b.u - a.u) / (du || 1), uy2 = (b.v - a.v) / (dv || 1);
+          var nx2 = -uy2, ny2 = ux2;                    // 法向（一方向）
+          if (ny2 < 0) { nx2 = -nx2; ny2 = -ny2; }      // 朝 v 增大（挖空区）偏移
+          var oLen = Math.max(1800, h * 0.16);
+          E(B, 'text', { x: mu + nx2 * oLen, y: mv + ny2 * oLen + txtH * 0.30, h: txtH * 0.92, str: '1:' + geo.mRate, layer: DM, align: 'c', halo: 1, rot: angW });
+        }
+      }
+      // b) 各级马道平台宽度（左半平台段正下方留空区水平尺寸线）
+      for (var i2 = 1; i2 < pro.pts.length; i2++) {
+        var a2 = pro.pts[i2 - 1], b2 = pro.pts[i2];
+        if (Math.abs(a2.v - b2.v) < 1 && Math.abs(b2.u - a2.u) > 100) {
+          var vSeg = a2.v;
+          if (vSeg < -100 && vSeg > -H + 100) {
+            var uA = a2.u, uB = b2.u, midu = (uA + uB) / 2;
+            if (midu > cU) continue;
+            var wSeg = Math.abs(uB - uA);
+            if (Math.abs(wSeg - Bd) < 500 || wSeg > 500) {
+              var yL = vSeg - txtH * 1.1 - 400; // 尺寸线放平台下方留空区
+              extLine(B, uA, vSeg - txtH * 0.45, yL, DM);
+              extLine(B, uB, vSeg - txtH * 0.45, yL, DM);
+              dimH(B, uA, uB, yL, fmtM(wSeg) + 'm', txtH * 0.92, DM, false);
+            }
+          }
+        }
+      }
+      // c) 总坑深：右侧，竖向尺寸线
+      var xD = gR + txtH * 1.6;
+      E(B, 'line', { x1: xD - txtH * 0.9, y1: 0, x2: xD + txtH * 0.9, y2: 0, layer: LAYER.GROUND, lw: 0.3 });
+      E(B, 'line', { x1: xD - txtH * 0.9, y1: -H, x2: xD + txtH * 0.9, y2: -H, layer: LAYER.PROFILE, lw: 0.3 });
+      dimV(B, 0, -H, xD, 'H=' + fmtM(H, 3) + 'm', txtH, DM, 1);
+      // d) 坑底宽（水平尺寸线，坑底线下留空区）
+      var uL0 = pro.ringU[0].L, uR0 = pro.ringU[0].R;
+      var yB = -H - txtH * 1.1 - 400;
+      extLine(B, uL0, -H, yB, DM);
+      extLine(B, uR0, -H, yB, DM);
+      dimH(B, uL0, uR0, yB, '坑底宽 ' + fmtM(uR0 - uL0) + 'm', txtH * 0.92, DM, false);
+    }
+    return B;
+  }
+
+  /* ============ bbox（跳过层） ============ */
+  function computeBB(buf, skip) {
+    var minX = 1e18, minY = 1e18, maxX = -1e18, maxY = -1e18;
+    function acc(x, y) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+    function accP(p) { acc(p.x, p.y); }
+    buf.forEach(function (e) {
+      if (skip && skip.indexOf(e.layer) >= 0) return;
+      if (eachPts(e, accP)) return;
+      if (e.t === 'rect') { acc(e.x, e.y); acc(e.x + e.w, e.y + e.h); }
+      else if (e.t === 'line') { acc(e.x1, e.y1); acc(e.x2, e.y2); }
+      else if (e.t === 'circle') { acc(e.cx - e.r, e.cy - e.r); acc(e.cx + e.r, e.cy + e.r); }
+      else if (e.t === 'text') {
+        var w = textWmm(e.str, e.h);
+        var x0 = e.x, x1 = e.x;
+        if (e.align === 'c') { x0 = e.x - w / 2; x1 = e.x + w / 2; }
+        else if (e.align === 'r') { x0 = e.x - w; }
+        else { x1 = e.x + w; }
+        acc(x0, e.y - e.h * 0.85); acc(x1, e.y + e.h * 0.2);
+      }
+    });
+    if (minX === 1e18) return null;
+    return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+  }
+
+  /* ============ 整体渲染 ============ */
+  function renderAll() {
+    updateStats();
+    var p = getParams();
+    if (!state.poly) {
+      ['svgPlan', 'svgSecA', 'svgSecB'].forEach(function (id) { $(id).innerHTML = ''; });
+      planBuf = []; secBufA = []; secBufB = [];
+      updateInfoDom(); updateDerive();
+      return;
+    }
+    var geo;
+    try {
+      geo = C.slopeGeo(state.poly, p);
+    } catch (err) {
+      toast('生成失败：' + err.message, 'err');
+      return;
+    }
+    state.geo = geo;
+    // 剖切线位置
+    var cen = C.polyCentroid(geo.poly);
+    var cutA = { axis: 'h', k: 'A', pos: cen.y + p.offA * 1000, offM: p.offA };
+    var cutB = { axis: 'v', k: 'B', pos: cen.x + p.offB * 1000, offM: p.offB };
+    try {
+      planBuf = buildPlanEntities(geo, cutA, cutB);
+    } catch (e) { toast('平面生成失败：' + e.message, 'err'); }
+    try {
+      secBufA = buildSectionEntities(geo, { k: 'A', offM: p.offA });
+    } catch (e) {
+      secBufA = [];
+      toast('A-A 剖面生成失败：' + e.message, 'err');
+    }
+    try {
+      secBufB = buildSectionEntities(geo, { k: 'B', offM: p.offB });
+    } catch (e) {
+      secBufB = [];
+      toast('B-B 剖面生成失败：' + e.message, 'err');
+    }
+    // 三视区 fit + draw
+    fitViewOf('plan', planBuf, $('svgPlan'), 120);
+    fitViewOf('A', secBufA, $('svgSecA'), 0);
+    fitViewOf('B', secBufB, $('svgSecB'), 0);
+    drawSvgOf($('svgPlan'), planBuf, state.view.plan);
+    drawSvgOf($('svgSecA'), secBufA, state.view.A);
+    drawSvgOf($('svgSecB'), secBufB, state.view.B);
+    // 浮层信息
+    updateInfoDom();
+    updateDerive();
+    updateStats2(geo);
+    $('labA').textContent = '横向剖切 · ' + (p.offA ? '偏移 ' + p.offA + 'm' : '过形心');
+    $('labB').textContent = '纵向剖切 · ' + (p.offB ? '偏移 ' + p.offB + 'm' : '过形心');
+  }
+
+  /* ============ 视口（每视区独立） ============ */
+  function fitViewOf(key, buf, svgEl, topPad) {
+    // bbox：普通实体 + band/pathfill（各视区图形调整参数后永远居中铺满）
+    var bb = computeBB(buf);
+    var v = state.view[key];
+    if (!buf.length || !bb) { if (v) { v.cx = 0; v.cy = 0; v.s = 1; v.fitS = 1; } return; }
+    var svg = svgEl;
+    var rect = svg.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) {
+      state.view[key] = { cx: (bb.minX + bb.maxX) / 2, cy: -(bb.minY + bb.maxY) / 2, s: 1, fitS: 1 };
+      return;
+    }
+    var cw = Math.max(0.1, bb.maxX - bb.minX);
+    var ch = Math.max(0.1, bb.maxY - bb.minY);
+    var padL = 64, padR = 64, padT = 64, padB = 64;
+    if (key === 'plan') { padT = 118; padB = 74; }   // 顶部留出图签/角标空间
+    var avW = Math.max(60, rect.width - padL - padR);
+    var avH = Math.max(60, rect.height - padT - padB);
+    var sFit = Math.min(avW / cw, avH / ch) * 0.97;
+    if (!isFinite(sFit) || sFit <= 0) sFit = 1;
+    // 视口中心对准 bbox 中心 → 永远居中
+    state.view[key] = {
+      cx: (bb.minX + bb.maxX) / 2,
+      cy: -(bb.minY + bb.maxY) / 2,
+      s: sFit, fitS: sFit
+    };
+  }
+  function drawSvgOf(svgEl, buf, v) {
+    if (!v || !svgEl) return;
+    var rect = svgEl.getBoundingClientRect();
+    var W = rect.width, H = rect.height;
+    if (W < 1 || H < 1) return;
+    var vw = W / v.s, vh = H / v.s;
+    var vbX = v.cx - vw / 2, vbY = v.cy - vh / 2;
+    svgEl.setAttribute('viewBox', vbX + ' ' + vbY + ' ' + vw + ' ' + vh);
+    var s = '<defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;dominant-baseline:alphabetic}</style></defs>';
+    buf.forEach(function (e) {
+      var col = SVG_COLOR[e.layer] || '#1e2b36';
+      var lwPx = Math.max(0.6, (e.lw || 0.18) * v.s);
+      if (e.t === 'poly') {
+        var path = e.pts.map(function (p, i) {
+          return (i ? 'L' : 'M') + p.x.toFixed(2) + ' ' + (-p.y).toFixed(2);
+        }).join(' ');
+        if (e.close !== false) path += ' Z';
+        s += '<path d="' + path + '" fill="none" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
+          (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') +
+          ' stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
+      } else if (e.t === 'pathfill') {
+        s += '<path d="' + ptsPathD(e.pts, true) + '" fill="' + col + '" opacity="0.5" stroke="none" pointer-events="none"/>';
+      } else if (e.t === 'band') {
+        // 两 subpath：外环 + 内环（evenodd 挖洞）
+        var d = ptsPathD(e.outPts, true) + ptsPathD(e.inPts, true);
+        s += '<path d="' + d + '" fill="' + col + '" opacity="0.55" fill-rule="evenodd" stroke="none" pointer-events="none"/>';
+      } else if (e.t === 'rect') {
+        var rp = 'M' + e.x + ' ' + (-e.y) + 'L' + (e.x + e.w) + ' ' + (-e.y) + 'L' + (e.x + e.w) + ' ' + (-(e.y + e.h)) + 'L' + e.x + ' ' + (-(e.y + e.h)) + 'Z';
+        s += '<path d="' + rp + '" fill="' + (e.fill ? (e.fc || '#fff') : 'none') + '" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
+          (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
+      } else if (e.t === 'line') {
+        s += '<line x1="' + e.x1.toFixed(2) + '" y1="' + (-e.y1).toFixed(2) + '" x2="' + e.x2.toFixed(2) + '" y2="' + (-e.y2).toFixed(2) +
+          '" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"' +
+          (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
+      } else if (e.t === 'circle') {
+        if (e.fill) {
+          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + e.r.toFixed(2) + '" fill="' + col + '"' +
+            (e.lw ? ' stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"' : '') + '/>';
+        } else {
+          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + e.r.toFixed(2) + '" fill="none" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"/>';
+        }
+      } else if (e.t === 'text') {
+        var fsU = Math.max(1, e.h);
+        var anchor = e.align === 'c' ? 'middle' : (e.align === 'r' ? 'end' : 'start');
+        var haloAttr = e.halo ? ' paint-order:stroke;stroke:#ffffff;stroke-width:' + Math.max(1.2, e.h * 0.12 * v.s).toFixed(1) + 'px;stroke-linejoin:round;' : '';
+        var rotAttr = '';
+        if (e.rot !== undefined && isFinite(e.rot)) {
+          // SVG y 轴翻转 → 世界角取反
+          rotAttr = ' transform="rotate(' + (-e.rot).toFixed(2) + ' ' + e.x.toFixed(2) + ' ' + (-e.y).toFixed(2) + ')"';
+        }
+        s += '<text x="' + e.x.toFixed(2) + '" y="' + (-e.y).toFixed(2) + '" font-size="' + fsU.toFixed(2) + '" fill="' + col + '" text-anchor="' + anchor + '" style="' + haloAttr + '"' + rotAttr + '>' + escXml(e.str) + '</text>';
+      }
+    });
+    svgEl.innerHTML = s;
+  }
+
+  /* ============ 视口交互（滚轮缩放/拖拽/双击，绑定每视区） ============ */
+  function bindView(key, wrapId, svgId) {
+    var wrap = $(wrapId);
+    wrap.addEventListener('wheel', function (ev) {
+      var buf = bufOf(key);
+      if (!buf.length) return;
+      ev.preventDefault();
+      var svg = $(svgId);
+      var rect = svg.getBoundingClientRect();
+      var v = state.view[key];
+      var W = rect.width, H = rect.height;
+      var mx = v.cx + (ev.clientX - rect.left - W / 2) / v.s;
+      var my = v.cy + (ev.clientY - rect.top - H / 2) / v.s;
+      var f = ev.deltaY < 0 ? 1.176 : 0.85;
+      var s2 = v.s * f;
+      v.cx = mx - (ev.clientX - rect.left - W / 2) / s2;
+      v.cy = my - (ev.clientY - rect.top - H / 2) / s2;
+      v.s = s2;
+      drawSvgOf(svg, buf, v);
+    }, { passive: false });
+    wrap.addEventListener('mousedown', function (ev) {
+      if (ev.button !== 0) return;
+      var buf = bufOf(key);
+      if (!buf.length) return;
+      state.drag = { key: key, sx: ev.clientX, sy: ev.clientY, bx: state.view[key].cx, by: state.view[key].cy };
+      wrap.classList.add('dragging');
+      ev.preventDefault();
+    });
+    wrap.addEventListener('dblclick', function () {
+      fitViewOf(key, bufOf(key), $(svgId), 0);
+      drawSvgOf($(svgId), bufOf(key), state.view[key]);
+    });
+    wrap.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
+  }
+  window.addEventListener('mousemove', function (ev) {
+    if (!state.drag) return;
+    var d = state.drag;
+    var v = state.view[d.key];
+    var dx = (ev.clientX - d.sx) / v.s, dy = (ev.clientY - d.sy) / v.s;
+    v.cx = d.bx - dx; v.cy = d.by - dy;
+    drawSvgOf($(d.key === 'plan' ? 'svgPlan' : d.key === 'A' ? 'svgSecA' : 'svgSecB'), bufOf(d.key), v);
+  });
+  window.addEventListener('mouseup', function () {
+    if (state.drag) {
+      var wrap = $(state.drag.key === 'plan' ? 'viewPlan' : state.drag.key === 'A' ? 'viewA' : 'viewB').querySelector('.canvas-wrap');
+      if (wrap) wrap.classList.remove('dragging');
+      state.drag = null;
+    }
+  });
+
+  /* ============ 图例 / 参数卡 / 派生信息 / 状态栏 ============ */
+  function updateInfoDom() {
+    var lg = $('cvLegend'), pm = $('cvParams');
+    var sym = '<span class="sym">';
+    lg.innerHTML =
+      '<h4>图 例</h4>' +
+      '<div class="r">' + sym + '▬</span>坑底边线（导入轮廓）</div>' +
+      '<div class="r">' + sym + '━</span>开挖上口（坡顶）</div>' +
+      '<div class="r">' + sym + '┄</span>马道/分级边线</div>' +
+      '<div class="r">' + sym + '↘</span>示坡线（坡降方向）</div>' +
+      '<div class="r">' + sym + '<span style="color:#c2410c">A</span></span>A-A 横向剖切</div>' +
+      '<div class="r">' + sym + '<span style="color:#4338ca">B</span></span>B-B 纵向剖切</div>';
+    var geo = state.geo;
+    if (geo) {
+      pm.innerHTML =
+        '<h4>放坡参数</h4>' +
+        '<div class="r">方向：' + (geo.dirOut ? '向外放坡（坑底→地面）' : '向内放坡（上口→坑底）') + '</div>' +
+        '<div class="r">坑深 H=' + fmtM(geo.H, 3) + 'm · ' + geo.n + ' 级</div>' +
+        '<div class="r">每级深 ' + fmtM(geo.h, 3) + 'm · 坡率 1:' + geo.mRate + '</div>' +
+        '<div class="r">马道宽 b=' + fmtM(geo.B, 3) + 'm' + (geo.n === 1 ? '（无马道）' : '') + '</div>' +
+        '<div class="r">每侧放坡总宽 ' + fmtM(geo.offTop, 3) + 'm</div>' +
+        '<div class="r">坑底标高 -' + fmtM(geo.H, 3) + 'm · 原地面 0.000</div>';
+    } else {
+      pm.innerHTML = '<h4>放坡参数</h4><div class="r">导入轮廓后自动生成</div>';
+    }
+  }
+  function updateDerive() {
+    var el = $('deriveInfo');
+    var p = getParams();
+    var h = p.Hm / p.n;
+    var L = p.mRate * h;
+    var D = p.n * L + (p.n - 1) * p.bm;
+    var html = '<b>每级深 ' + h.toFixed(2) + 'm</b> · 每级水平投影 <b>' + L.toFixed(2) + 'm</b>' +
+      (p.n > 1 ? '<br>马道 ' + (p.n - 1) + ' 道 × ' + p.bm.toFixed(2) + 'm' : '') +
+      '<br>每侧放坡总宽 <b>' + D.toFixed(2) + 'm</b>（1:' + p.mRate + ' 放坡）';
+    el.innerHTML = html;
+    // 面板标题卡区域显示（还用于图例右键）
+    $('secTitle').style.display = $('ckTitle').checked ? '' : 'none';
+  }
+  function updateStats() {
+    if (!state.poly) {
+      $('stPoly').textContent = '未导入'; $('stPerim').textContent = '-';
+      $('stH').textContent = '-'; $('stN').textContent = '-';
+      $('stD').textContent = '-'; $('stArea').textContent = '-';
+      $('polyInfo').textContent = '未导入';
+      return;
+    }
+    var bb = C.polyBBox(state.poly);
+    var mName = state.polyName ? state.polyName + ' · ' : '';
+    $('stPoly').textContent = mName + fmtM(bb.maxX - bb.minX) + 'm×' + fmtM(bb.maxY - bb.minY) + 'm';
+    $('stPerim').textContent = (C.polyPerim(state.poly) / 1000).toFixed(1);
+    $('polyInfo').textContent = '已导入 · ' + state.poly.length + ' 顶点';
+  }
+  function updateStats2(geo) {
+    if (!geo) { $('stH').textContent = '-'; $('stN').textContent = '-'; $('stD').textContent = '-'; $('stArea').textContent = '-'; return; }
+    $('stH').textContent = fmtM(geo.H, 3);
+    $('stN').textContent = geo.n;
+    $('stD').textContent = fmtM(geo.offTop, 3);
+    // areas 单位 mm² → 显示 m²（原误用 fmtM 除以 1000）
+    var aM2 = geo.areas[geo.n] / 1e6;
+    $('stArea').textContent = String(Math.round(aM2 * 10) / 10);
+  }
+
+  /* ============ 导出 PNG ============ */
+  function exportPngOf(svgId, prefix) {
+    var svgEl = $(svgId);
+    if (!svgEl.innerHTML.trim()) { toast('请先生成图形', 'err'); return; }
+    loading(true, '正在生成图片…');
+    var rect = svgEl.getBoundingClientRect();
+    var scalePx = 3;
+    var W = Math.max(600, Math.round(rect.width * scalePx));
+    var H = Math.max(400, Math.round(rect.height * scalePx));
+    var clone = svgEl.cloneNode(true);
+    clone.setAttribute('width', W);
+    clone.setAttribute('height', H);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    var xml = new XMLSerializer().serializeToString(clone);
+    var url = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }));
+    var img = new Image();
+    img.onload = function () {
+      var canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(img, 0, 0, W, H);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function (blob) {
+        loading(false);
+        if (!blob) { toast('导出失败', 'err'); return; }
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = prefix + '_' + todayStr() + '.png';
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+        toast('PNG 已导出：' + a.download, 'ok');
+      }, 'image/png');
+    };
+    img.onerror = function () { loading(false); toast('图片渲染失败', 'err'); };
+    img.src = url;
+  }
+
+  /* ============ 导出 DXF ============ */
+  function toUPlus(s) {
+    var out = '';
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      out += c > 0x7e ? '\\U+' + ('0000' + c.toString(16).toUpperCase()).slice(-4) : s[i];
+    }
+    return out;
+  }
+  /* 通用 DXF 写出：buf 为世界坐标实体数组；keepY=true 保留标高(剖面)，否则双轴居中 */
+  function writeDxfBuf(buf, prefix, keepY) {
+    if (!buf.length) { toast('请先生成图形', 'err'); return; }
+    var minX = 1e18, minY = 1e18, maxX = -1e18, maxY = -1e18;
+    function acc(x, y) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+    function accPt(p) { acc(p.x, p.y); }
+    buf.forEach(function (e) {
+      if (eachPts(e, accPt)) return;
+      if (e.t === 'rect') { acc(e.x, e.y); acc(e.x + e.w, e.y + e.h); }
+      else if (e.t === 'line') { acc(e.x1, e.y1); acc(e.x2, e.y2); }
+      else if (e.t === 'circle') { acc(e.cx - e.r, e.cy - e.r); acc(e.cx + e.r, e.cy + e.r); }
+      else if (e.t === 'text') { acc(e.x, e.y); }
+    });
+    if (minX === 1e18) { toast('图形为空', 'err'); return; }
+    var W = new DxfWriter('AC1015');
+    W.h = 0x330;
+    var shx = (minX + maxX) / 2;
+    var shy = keepY ? 0 : (minY + maxY) / 2;
+    var halfW = Math.max((maxX - minX) / 2, 1);
+    var halfH = Math.max(keepY ? Math.max(-minY, maxY) : (maxY - minY) / 2, 1);
+    var extPad = 600;
+    function X(v) { return W.num((v - shx)); }
+    function Y(v) { return W.num((v - shy)); }
+    var out = [];
+    buf.forEach(function (e) {
+      var layer = toUPlus(e.layer);
+      var colNo = DXF_COLOR[e.layer];
+      if (e.t === 'poly' || e.t === 'rect') {
+        var pts = e.t === 'rect' ? [{ x: e.x, y: e.y }, { x: e.x + e.w, y: e.y }, { x: e.x + e.w, y: e.y + e.h }, { x: e.x, y: e.y + e.h }] : e.pts;
+        var isClose = e.close !== false;
+        var sp2 = pts.map(function (p) { return { x: p.x - shx, y: p.y - shy }; });
+        out.push(lwpoly(W, sp2, layer, isClose, e.lw, e.ew, colNo));
+      } else if (e.t === 'line') {
+        out.push(line(W, (e.x1 - shx), (e.y1 - shy), (e.x2 - shx), (e.y2 - shy), layer, e.lw, e.dash ? 'DASHED' : undefined, colNo));
+      } else if (e.t === 'circle') {
+        out.push(circle(W, (e.cx - shx), (e.cy - shy), (e.dxfr !== undefined ? e.dxfr : e.r), layer, colNo));
+      } else if (e.t === 'text') {
+        out.push(dtext(W, (e.x - shx), (e.y - shy), e.h, e.str, layer, e.align, colNo, e.rot));
+      }
+      // pathfill / band 跳过（避免重复边界）
+    });
+    var entityText = out.join('\n');
+    var skel = window.DXF_SKEL || '';
+    if (!skel) { toast('骨架模板缺失', 'err'); return; }
+    var extMinX = -(halfW) - extPad, extMaxX = (halfW) + extPad;
+    var extMinY, extMaxY;
+    if (keepY) {
+      extMinY = minY - extPad; extMaxY = maxY + extPad;
+    } else {
+      extMinY = -halfH - extPad; extMaxY = halfH + extPad;
+    }
+    skel = skel
+      .replace('__$EXTMIN_10__', W.num(extMinX))
+      .replace('__$EXTMIN_20__', W.num(extMinY))
+      .replace('__$EXTMIN_30__', '0.0')
+      .replace('__$EXTMAX_10__', W.num(extMaxX))
+      .replace('__$EXTMAX_20__', W.num(extMaxY))
+      .replace('__$EXTMAX_30__', '0.0')
+      .replace('__$LIMMIN_10__', W.num(extMinX))
+      .replace('__$LIMMIN_20__', W.num(extMinY))
+      .replace('__$LIMMAX_10__', W.num(extMaxX))
+      .replace('__$LIMMAX_20__', W.num(extMaxY))
+      .replace('__ENTITIES__', entityText);
+    var hs = Math.max(0x330 + 2, W.h + 1);
+    skel = skel.replace('__$HANDSEED_5__', hs.toString(16).toUpperCase());
+    var crlf = skel.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+    var blob = new Blob([new TextEncoder().encode(crlf)], { type: 'application/dxf' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = prefix + '_' + todayStr() + '.dxf';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+    toast('DXF 已导出：' + a.download, 'ok');
+  }
+  /* 单视区导出：剖面保留标高（仅 X 居中），平面整体居中 */
+  function exportDxfOf(buf, prefix) {
+    var keepY = prefix.indexOf('剖面') >= 0;
+    writeDxfBuf(buf, prefix, keepY);
+  }
+  /* 三视区合并导出：平面图居上，A-A/B-B 剖面并排居下（同绘一张 DXF） */
+  function exportMergedDxf() {
+    if (!planBuf.length || !secBufA.length || !secBufB.length) { toast('请先完整生成三视区图形', 'err'); return; }
+    var merged = [];
+    var GAPY = 60000, GAPX = 80000;   // 图块间距 mm
+    // 各图 bbox（含标注/尺寸，保证布局不重叠）
+    var bbP = computeBB(planBuf), bbA = computeBB(secBufA), bbB = computeBB(secBufB);
+    if (!bbP || !bbA || !bbB) { toast('布局计算失败', 'err'); return; }
+    // 平面图保持原位（顶部）；剖面 A-A 顶部贴齐平面底部
+    var topY = bbP.minY - GAPY;
+    var dyA = topY - bbA.maxY;
+    var shiftX = function (x) { return x; };
+    // B-B 放在 A-A 右侧同一行
+    var xA0 = 0, xB0 = bbA.maxX + GAPX - bbB.minX;
+    var dyB = dyA + (bbA.maxY - bbB.maxY);   // 两剖面顶标高对齐（原地面都=0 则等高）
+    function pushShift(buf, dx, dy, xOf) {
+      buf.forEach(function (e) {
+        var o = { t: e.t, layer: e.layer };
+        for (var k in e) if (k !== 't' && k !== 'layer') o[k] = e[k];
+        if (e.t === 'poly' || e.t === 'pathfill') {
+          o.pts = e.pts.map(function (p) { return { x: p.x + (xOf || 0), y: p.y + dy }; });
+        } else if (e.t === 'band') {
+          o.outPts = e.outPts.map(function (p) { return { x: p.x + (xOf || 0), y: p.y + dy }; });
+          o.inPts = e.inPts.map(function (p) { return { x: p.x + (xOf || 0), y: p.y + dy }; });
+        } else if (e.t === 'line') {
+          o.x1 = e.x1 + (xOf || 0); o.x2 = e.x2 + (xOf || 0); o.y1 = e.y1 + dy; o.y2 = e.y2 + dy;
+        } else if (e.t === 'circle') { o.cx = e.cx + (xOf || 0); o.cy = e.cy + dy; }
+        else if (e.t === 'rect') { o.x = e.x + (xOf || 0); o.y = e.y + dy; }
+        else if (e.t === 'text') { o.x = e.x + (xOf || 0); o.y = e.y + dy; }
+        merged.push(o);
+      });
+    }
+    pushShift(planBuf, 0, 0, 0);
+    pushShift(secBufA, 0, dyA, 0);
+    pushShift(secBufB, 0, dyB, xB0);
+    // 图名（合并图标题层：顶部总标题；剖面自含图名不重复加）
+    var th = 5000;
+    var cxP = (bbP.minX + bbP.maxX) / 2;
+    merged.push({ t: 'text', x: cxP, y: bbP.maxY + th * 1.5, h: th * 1.15, str: '深基坑放坡——平面布置图', layer: 'TEXT', align: 'c', halo: 1 });
+    // 分隔框（每块外围图框线）
+    var pad = 12000;
+    merged.push({ t: 'rect', x: bbP.minX - pad, y: bbP.minY - pad * 1.6, w: (bbP.maxX - bbP.minX) + pad * 2, h: (bbP.maxY - bbP.minY) + pad * 2.6, layer: 'TITLE', lw: 0.3, fill: false });
+    merged.push({ t: 'rect', x: -pad, y: dyA + bbA.minY - pad * 1.4, w: (bbA.maxX - bbA.minX) + pad * 2, h: (bbA.maxY - bbA.minY) + pad * 2.4, layer: 'TITLE', lw: 0.3, fill: false });
+    merged.push({ t: 'rect', x: xB0 + bbB.minX - pad, y: dyB + bbB.minY - pad * 1.4, w: (bbB.maxX - bbB.minX) + pad * 2, h: (bbB.maxY - bbB.minY) + pad * 2.4, layer: 'TITLE', lw: 0.3, fill: false });
+    writeDxfBuf(merged, '深基坑放坡_平面与剖面合并图', false);
+  }
+  /* ---- DXF writer（1:1 模型空间 mm） ---- */
+  function entHead(W, type, layer, colorNo) {
+    var s = '0\n' + type + '\n5\n' + W.handle() + '\n330\n17\n100\nAcDbEntity\n8\n' + (layer || '0');
+    if (colorNo !== undefined) s += '\n62\n' + colorNo;
+    return s;
+  }
+  function lwpoly(W, pts, layer, close, lw, ew, colorNo) {
+    var s = entHead(W, 'LWPOLYLINE', layer, colorNo);
+    s += '\n100\nAcDbPolyline\n90\n' + pts.length + '\n70\n' + (close ? '1' : '0');
+    // 43 常量宽度会导致整条多段线变实心粗带（CAD 显示异常）→ 恒置 0；线宽用 370
+    s += '\n43\n0.0';
+    if (lw !== undefined) s += '\n370\n' + Math.max(13, Math.round(lw * 100));
+    pts.forEach(function (p) {
+      s += '\n10\n' + W.num(p.x) + '\n20\n' + W.num(p.y);
+    });
+    return s;
+  }
+  function line(W, x1, y1, x2, y2, layer, lw, ltype, colorNo) {
+    var s = entHead(W, 'LINE', layer, colorNo);
+    if (ltype) s += '\n6\n' + ltype;
+    if (lw !== undefined) s += '\n370\n' + Math.max(13, Math.round(lw * 100));
+    s += '\n100\nAcDbLine\n10\n' + W.num(x1) + '\n20\n' + W.num(y1) + '\n30\n0.0' +
+      '\n11\n' + W.num(x2) + '\n21\n' + W.num(y2) + '\n31\n0.0';
+    return s;
+  }
+  function circle(W, cx, cy, r, layer, colorNo) {
+    var s = entHead(W, 'CIRCLE', layer, colorNo);
+    s += '\n100\nAcDbCircle\n10\n' + W.num(cx) + '\n20\n' + W.num(cy) + '\n30\n0.0' +
+      '\n40\n' + W.num(r) + '\n210\n0.0\n220\n0.0\n230\n1.0';
+    return s;
+  }
+  function dtext(W, x, y, h, str, layer, align, colorNo, rot) {
+    var s = entHead(W, 'TEXT', layer, colorNo);
+    var rv = (rot === undefined || !isFinite(rot)) ? 0 : rot;
+    // 标准子类序列：AcDbEntity → AcDbText → 数据组码；勿在尾部重复 AcDbText
+    s += '\n100\nAcDbText\n10\n' + W.num(x) + '\n20\n' + W.num(y) + '\n30\n0.0' +
+      '\n40\n' + W.num(h) + '\n1\n' + toUPlus(str) +
+      '\n50\n' + W.num(rv) + '\n41\n0.7\n51\n0.0\n7\nTXT_CN\n71\n0\n72\n' + (align === 'c' ? '1' : (align === 'r' ? '2' : '0'));
+    s += '\n11\n' + W.num(x) + '\n21\n' + W.num(y) + '\n31\n0.0';
+    return s;
+  }
+  function DxfWriter(ver) {
+    this.ver = ver || 'AC1015';
+    this.h = 0x330;
+    this.num = function (v) {
+      if (!isFinite(v)) return '0';
+      return String(Math.round(v * 1000) / 1000);
+    };
+    this.handle = function () { this.h++; return this.h.toString(16).toUpperCase(); };
+  }
+
+  /* ============ 绑定 ============ */
+  function setGridBtn() {
+    var b = $('pGrid');
+    if (b) b.classList.toggle('on', state.showGrid);
+    document.body.classList.toggle('grid-off', !state.showGrid);
+  }
+  function bind() {
+    $('btnSample').onclick = loadSample;
+    $('btnImport').onclick = function () { $('fileDxf').click(); };
+    $('btnMerge').onclick = function () { exportMergedDxf(); };
+    $('fileDxf').onchange = function (ev) {
+      var f = ev.target.files[0];
+      if (f) loadDxfFile(f);
+      ev.target.value = '';
+    };
+    $('btnClearPoly').onclick = clearPoly;
+    $('btnAbout').onclick = function () { $('modalAbout').className = 'modal-mask on'; };
+    $('btnAboutOk').onclick = function () { $('modalAbout').className = 'modal-mask'; };
+    // 放坡方向
+    $('dirOut').onclick = function () { state.dir = 'out'; $('dirOut').className = 'on'; $('dirIn').className = ''; renderAll(); };
+    $('dirIn').onclick = function () { state.dir = 'in'; $('dirIn').className = 'on'; $('dirOut').className = ''; renderAll(); };
+    // 参数输入即时重绘
+    ['inH', 'inM', 'inB', 'inDyA', 'inDxB', 'selN', 'selUnit', 'inProj', 'inDwName', 'inDesigner'].forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      el.addEventListener('input', renderAll);
+      el.addEventListener('change', renderAll);
+    });
+    ['ckTick', 'ckRing', 'ckFill', 'ckLvl', 'ckDim', 'ckTitle'].forEach(function (id) {
+      try { $(id).addEventListener('change', renderAll); } catch (e) {}
+    });
+    // 三视区交互
+    bindView('plan', 'viewPlan', 'svgPlan');
+    bindView('A', 'viewA', 'svgSecA');
+    bindView('B', 'viewB', 'svgSecB');
+    // 工具栏
+    $('pFit').onclick = function () { fitViewOf('plan', planBuf, $('svgPlan'), 120); drawSvgOf($('svgPlan'), planBuf, state.view.plan); };
+    $('pIn').onclick = function () { state.view.plan.s *= 1.25; drawSvgOf($('svgPlan'), planBuf, state.view.plan); };
+    $('pOut').onclick = function () { state.view.plan.s /= 1.25; drawSvgOf($('svgPlan'), planBuf, state.view.plan); };
+    $('pGrid').onclick = function () { state.showGrid = !state.showGrid; setGridBtn(); };
+    $('pPng').onclick = function () { exportPngOf('svgPlan', '深基坑放坡平面布置图'); };
+    $('pDxf').onclick = function () { exportDxfOf(planBuf, '深基坑放坡平面布置图'); };
+    $('aFit').onclick = function () { fitViewOf('A', secBufA, $('svgSecA'), 0); drawSvgOf($('svgSecA'), secBufA, state.view.A); };
+    $('aIn').onclick = function () { state.view.A.s *= 1.25; drawSvgOf($('svgSecA'), secBufA, state.view.A); };
+    $('aOut').onclick = function () { state.view.A.s /= 1.25; drawSvgOf($('svgSecA'), secBufA, state.view.A); };
+    $('aPng').onclick = function () { exportPngOf('svgSecA', '深基坑放坡_A-A剖面图'); };
+    $('aDxf').onclick = function () { exportDxfOf(secBufA, '深基坑放坡_A-A剖面图'); };
+    $('bFit').onclick = function () { fitViewOf('B', secBufB, $('svgSecB'), 0); drawSvgOf($('svgSecB'), secBufB, state.view.B); };
+    $('bIn').onclick = function () { state.view.B.s *= 1.25; drawSvgOf($('svgSecB'), secBufB, state.view.B); };
+    $('bOut').onclick = function () { state.view.B.s /= 1.25; drawSvgOf($('svgSecB'), secBufB, state.view.B); };
+    $('bPng').onclick = function () { exportPngOf('svgSecB', '深基坑放坡_B-B剖面图'); };
+    $('bDxf').onclick = function () { exportDxfOf(secBufB, '深基坑放坡_B-B剖面图'); };
+    // 容器尺寸变化重画
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function () {
+        if (planBuf.length) drawSvgOf($('svgPlan'), planBuf, state.view.plan);
+        if (secBufA.length) drawSvgOf($('svgSecA'), secBufA, state.view.A);
+        if (secBufB.length) drawSvgOf($('svgSecB'), secBufB, state.view.B);
+      });
+      ro.observe($('viewPlan'));
+      ro.observe($('viewA'));
+      ro.observe($('viewB'));
+    }
+    // 关闭模态
+    document.querySelectorAll('[data-close]').forEach(function (el) {
+      el.onclick = function () {
+        var mid = el.getAttribute('data-close');
+        if (mid) $(mid).className = 'modal-mask';
+      };
+    });
+    document.querySelectorAll('.modal-mask').forEach(function (mask) {
+      mask.addEventListener('click', function (ev) { if (ev.target === mask) mask.className = 'modal-mask'; });
+    });
+    // 键盘：G 网格 / F 平面适应
+    document.addEventListener('keydown', function (ev) {
+      if (ev.target && (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA')) return;
+      if (ev.key === 'g' || ev.key === 'G') { state.showGrid = !state.showGrid; setGridBtn(); }
+      else if (ev.key === 'f' || ev.key === 'F') {
+        if (planBuf.length) { fitViewOf('plan', planBuf, $('svgPlan'), 120); drawSvgOf($('svgPlan'), planBuf, state.view.plan); }
+      }
+    });
+    // 首屏示例
+    state.dir = 'out';
+    loadSample();
+    setGridBtn();
+    window.pitDebug = {
+      renderAll: renderAll, exportDxf: exportDxfOf, exportPng: exportPngOf, exportMergedDxf: exportMergedDxf,
+      get state() { return state; }, get geo() { return state.geo; },
+      plan: function () { return planBuf; }, secA: function () { return secBufA; }, secB: function () { return secBufB; },
+      setPoly: setPoly, loadSample: loadSample
+    };
+  }
+  document.addEventListener('DOMContentLoaded', bind);
+})();
+
+</script>
+</body>
+</html>
