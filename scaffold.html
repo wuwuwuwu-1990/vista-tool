@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>脚手架快绘CAD系统 v1.0.6</title>
+<title>脚手架快绘CAD系统 v1.0.7</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E">
 <style>
   :root{
@@ -225,7 +225,7 @@
 <header>
   <div class="logo">架</div>
   <h1>脚手架快绘CAD系统</h1>
-  <span class="ver">v1.0.6</span>
+  <span class="ver">v1.0.7</span>
   <div class="sp"></div>
   <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）">▦ 示例</button>
   <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）">📂 导入DXF</button>
@@ -340,7 +340,7 @@
     <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
     <div class="about-logo">架</div>
     <h3 style="margin-bottom:2px">脚手架快绘CAD系统</h3>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.6</span></div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.7</span></div>
     <p class="desc">
       依据 <b>GB55023《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br>
       ① 导入DXF / 手动绘制建筑外轮廓；② 自动布置内/外两排立杆与阳角外侧立杆（空心圆示意，两排径向对齐、用线连接表示连接钢管）；③ 离墙距 a / 排距 b / 纵距 La 可调即时重排；④ 可选尺寸标注、立杆编号、连墙件示意；⑤ 画面无图框、画布铺网格，左上工具栏适应/缩放/网格，滚轮缩放、左键拖拽平移；图例与架体参数以卡片形式浮于画面左上/右上，不随缩放变形；⑥ 导出 PNG（所见即所得）与 CAD 可编辑 DXF（R2000）。
@@ -544,7 +544,7 @@
         var t = j / k;
         var A = innerRing[i], B = innerRing[(i + 1) % m];
         var pi = { x: A.x + (B.x - A.x) * t, y: A.y + (B.y - A.y) * t };
-        // 外排：内排 + 内环边外法线 × b（严格 b 距离，径向对齐，所有列含角点统一此规则）
+        // 非角点：外排 = 内排 + 内环边外法线 × b（直边段严格 b、径向对齐、连接钢管垂直墙）
         var n = norms[i];
         var po = { x: pi.x + n.x * b, y: pi.y + n.y * b };
         var isCorner = (j === 0);
@@ -552,6 +552,11 @@
           var key = Math.round(pi.x * 100) + ',' + Math.round(pi.y * 100);
           if (seenCorner[key]) continue;
           seenCorner[key] = true;
+          // 角点（阳/阴角）外排 = 外环 miter 角杆 outerRing[i]：
+          // 与内排角杆 innerRing[i] 同沿角平分线、同一顶点 → 外排随外环闭环不断口。
+          // 代价：角点内外排间距 = b/cos(θ/2)（90° 角 = b√2≈1.414b），角点不画 inner→outer
+          // 连接线（否则就是沿角平分线的斜杆），角部传力由环线承担（v1.0.7 设计）。
+          po = { x: outerRing[i].x, y: outerRing[i].y };
         }
         innerPoles.push({ x: pi.x, y: pi.y, edge: i, t: t, corner: isCorner });
         outerPoles.push({ x: po.x, y: po.y, edge: i, t: t, corner: isCorner });
@@ -590,23 +595,26 @@
     ok.push(['外排杆', lay.outerPoles.length > 30]);
     ok.push(['列数', lay.columns.length > 30]);
     ok.push(['角点列', lay.columns.filter(function (c) { return c.corner; }).length === 4]);
-    ok.push(['所有列内外排距离=b', lay.columns.every(function (c) {
+    ok.push(['非角点列内外排距离=b', lay.columns.filter(function (c) { return !c.corner; }).every(function (c) {
       return Math.abs(Math.hypot(c.outer.x - c.inner.x, c.outer.y - c.inner.y) - 900) < 1;
     })]);
-    ok.push(['角点列外排=内排+边外法线×b', lay.outerRing && lay.columns.filter(function (c) { return c.corner; }).every(function (c) {
-      // 凸/凹角外排立杆不再落到 miter 尖点，而是沿边外法线径向偏移 b
-      var A = lay.innerRing[c.edge], B = lay.innerRing[(c.edge + 1) % lay.innerRing.length];
-      var dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1;
-      var nx = dy / L, ny = -dx / L; // 边外法线
-      return Math.hypot(c.outer.x - c.inner.x - nx * 900, c.outer.y - c.inner.y - ny * 900) < 1;
+    ok.push(['角点列外排=外环miter角杆outerRing[edge]', lay.outerRing && lay.columns.filter(function (c) { return c.corner; }).every(function (c) {
+      // 角点（阳/阴角）外排立杆 = 外环 offset 的 miter 尖点 → 外排随环线封闭不断口
+      return Math.hypot(c.outer.x - lay.outerRing[c.edge].x, c.outer.y - lay.outerRing[c.edge].y) < 1;
+    })]);
+    ok.push(['角点内外排角杆不重合', lay.columns.filter(function (c) { return c.corner; }).every(function (c) {
+      return Math.hypot(c.outer.x - c.inner.x, c.outer.y - c.inner.y) > 100;
     })]);
     // 凹口轮廓：角点列数 = 多边形顶点数；角点外排与内排必须不同（否则圈重叠）
     var notch = [{ x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 }, { x: 16000, y: 15000 }, { x: 16000, y: 9000 }, { x: 8000, y: 9000 }, { x: 8000, y: 15000 }, { x: 0, y: 15000 }];
     var layN = layoutScaffold(notch, { a: 300, b: 900, La: 1500, d: 48 });
     ok.push(['凹口：角点列数=顶点数', layN.columns.filter(function (c) { return c.corner; }).length === notch.length]);
     ok.push(['凹口：内外排一一对应', layN.innerPoles.length === layN.outerPoles.length && layN.innerPoles.length === layN.columns.length]);
-    ok.push(['凹口：所有列内外排距离=b', layN.columns.every(function (c) {
+    ok.push(['凹口：非角点列内外排距离=b', layN.columns.filter(function (c) { return !c.corner; }).every(function (c) {
       return Math.abs(Math.hypot(c.outer.x - c.inner.x, c.outer.y - c.inner.y) - 900) < 1;
+    })]);
+    ok.push(['凹口：角点外排均在建筑外', layN.columns.filter(function (c) { return c.corner; }).every(function (c) {
+      return !pointInPoly(c.outer.x, c.outer.y, layN.poly);
     })]);
     var Lshp = [{ x: 0, y: 0 }, { x: 20000, y: 0 }, { x: 20000, y: 10000 }, { x: 12000, y: 10000 }, { x: 12000, y: 18000 }, { x: 0, y: 18000 }];
     var lay2 = layoutScaffold(Lshp, { a: 300, b: 900, La: 1500, d: 48 });
@@ -638,7 +646,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
 </script>
 <script>
 /* =====================================================================
-   脚手架快绘CAD系统 v1.0.6 — 主逻辑（UI/交互/DXF解析/渲染/导出）
+   脚手架快绘CAD系统 v1.0.7 — 主逻辑（UI/交互/DXF解析/渲染/导出）
    依赖：ScaffoldCore（几何）、DXF_SKEL（骨架模板，构建期注入）
    坐标系约定：
      - 几何世界坐标系 = 世界 mm（Y 向上，与 DXF 一致）
@@ -1018,25 +1026,24 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     /* --- 1. 建筑轮廓 OUTLINE（默认 lw=0.3 → DXF 370=30） --- */
     E('poly', { pts: polyPts, layer: LAYER.OUTLINE, lw: 0.3 });
 
-    /* --- 2. 排架环线 + 连接钢管（v1.0.6 恢复：内外排严格径向对齐 b，环线串起立杆） ---
-       a) 内排环线：沿 innerRing 闭合多边形（miter 连续，串内排 miter 角杆+直杆投影）
-       b) 外排环线：按 edge 分组 cols.outer，每条边一段线序列，凸角处断开（避免沿两外排立杆连出角部斜线）
-       c) 连接钢管：所有列 inner→outer 短横线（垂直墙、长度=b、方向=内环边外法线，无斜线） --- */
-    /* a) 内排环线 */
+    /* --- 2. 排架环线 + 连接钢管（v1.0.7：外排闭环、角点用 miter 角杆不断口） ---
+       a) 内排环线：沿 innerRing 闭合多边形（miter 连续，阳角处内排角杆在角平分线）→ 内排封闭
+       b) 外排环线：沿 cols.outer 全序列（edge 0..m-1 顺序）闭合 —— 角点列 outer 是外环
+          miter 角杆 outerRing[edge]，环线经角杆自然绕角，整体封闭无缺口
+       c) 连接钢管：仅非角点列 inner→outer 短横线（垂直墙、长度=b）；角点列不画 ——
+          角点内外排角杆间距 = b/cos(θ/2)（90° 角 ≈1.414b），连线会沿角平分线成斜杆（老问题），
+          角部闭合由外排环线承担 --- */
+    /* a) 内排环线（闭合） */
     var innerChain = lay.innerRing.map(P);
     E('poly', { pts: innerChain, layer: LAYER.ROWLN, lw: 0.2 });
-    /* b) 外排环线（按 edge 分组，每段开口 polyline） */
-    var byEdge = {};
+    /* b) 外排环线（cols.outer 按列序闭合 = 沿外环绕圈，阳角经 miter 角杆连续） */
+    var outerChain = lay.columns.map(function (col) { return P(col.outer); });
+    if (outerChain.length >= 3) {
+      E('poly', { pts: outerChain, layer: LAYER.ROWLN, lw: 0.2 });
+    }
+    /* c) 连接钢管（仅非角点列：垂直墙、长度 b） */
     lay.columns.forEach(function (col) {
-      if (!byEdge[col.edge]) byEdge[col.edge] = [];
-      byEdge[col.edge].push(P(col.outer));
-    });
-    Object.keys(byEdge).sort(function (a, b) { return (+a) - (+b); }).forEach(function (ek) {
-      var seg = byEdge[ek];
-      if (seg.length >= 2) E('poly', { pts: seg, layer: LAYER.ROWLN, lw: 0.2, close: false });
-    });
-    /* c) 连接钢管（所有列，含角点列） */
-    lay.columns.forEach(function (col) {
+      if (col.corner) return;
       var pi = P(col.inner), po = P(col.outer);
       E('line', { x1: pi.x, y1: pi.y, x2: po.x, y2: po.y, layer: LAYER.ROWLN, lw: 0.2 });
     });
