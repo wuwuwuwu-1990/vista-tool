@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>脚手架快绘CAD系统 v1.0.4</title>
+<title>脚手架快绘CAD系统 v1.0.5</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E">
 <style>
   :root{
@@ -225,7 +225,7 @@
 <header>
   <div class="logo">架</div>
   <h1>脚手架快绘CAD系统</h1>
-  <span class="ver">v1.0.4</span>
+  <span class="ver">v1.0.5</span>
   <div class="sp"></div>
   <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）">▦ 示例</button>
   <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）">📂 导入DXF</button>
@@ -340,7 +340,7 @@
     <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
     <div class="about-logo">架</div>
     <h3 style="margin-bottom:2px">脚手架快绘CAD系统</h3>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.4</span></div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.5</span></div>
     <p class="desc">
       依据 <b>GB55023《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br>
       ① 导入DXF / 手动绘制建筑外轮廓；② 自动布置内/外两排立杆与阳角外侧立杆（空心圆示意，两排径向对齐、用线连接表示连接钢管）；③ 离墙距 a / 排距 b / 纵距 La 可调即时重排；④ 可选尺寸标注、立杆编号、连墙件示意；⑤ 画面无图框、画布铺网格，左上工具栏适应/缩放/网格，滚轮缩放、左键拖拽平移；图例与架体参数以卡片形式浮于画面左上/右上，不随缩放变形；⑥ 导出 PNG（所见即所得）与 CAD 可编辑 DXF（R2000）。
@@ -378,6 +378,19 @@
   }
   function ensureCCW(pts) {
     return signedArea(pts) > 0 ? pts : pts.slice().reverse();
+  }
+  /* 点是否在多边形内（射线法，简单多边形） */
+  function pointInPoly(px, py, poly) {
+    var inside = false;
+    var n = poly.length;
+    for (var i = 0, j = n - 1; i < n; j = i++) {
+      var xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+      if (((yi > py) !== (yj > py)) &&
+        (px < (xj - xi) * (py - yi) / ((yj - yi) || 1e-18) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
   }
   function segLen(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
   function dedupePts(pts, tol) { // 去掉重复/过近点
@@ -429,21 +442,49 @@
     return { x: -u.y, y: u.x };
   }
 
+  /* 多边形质心（有向面积加权，对简单多边形可靠） */
+  function polyCentroid(pts) {
+    var A = 0, Cx = 0, Cy = 0, n = pts.length;
+    for (var i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n];
+      var f = a.x * b.y - b.x * a.y;
+      A += f;
+      Cx += (a.x + b.x) * f;
+      Cy += (a.y + b.y) * f;
+    }
+    A *= 0.5;
+    if (Math.abs(A) < 1e-9) {
+      // 退化：用顶点均值
+      var sx = 0, sy = 0;
+      pts.forEach(function (p) { sx += p.x; sy += p.y; });
+      return { x: sx / n, y: sy / n };
+    }
+    return { x: Cx / (6 * A), y: Cy / (6 * A) };
+  }
+
   /* ---------- 多边形等距外扩（miter offset） ----------
-     对 CCW 多边形向外偏移 d（d>0 外扩，d<0 内缩）。
-     每边向外平移 d，相邻边求交形成新顶点。
-     凹角（法线相对外）可能自交——首版对典型凸/浅凹轮廓可靠。 */
+     对任意简单多边形向外偏移 d（d>0 外扩，d<0 内缩）。
+     每边 outward 用"射线法探测"判定 —— 在边中点两侧分别打 epsilon
+     距离的探针，取在多边形外的那个方向作为外法线。
+     不依赖 CCW/CW、不依赖凸/凹，自动对凹口外墙取正确外向法线。 */
   function offsetPoly(pts, d) {
     var n = pts.length;
     if (n < 3) return pts.slice();
-    // 每条边的外法线（CCW 的外侧 = 右法线；用 左法线 取反）
     var norms = [], segs = [];
     for (var i = 0; i < n; i++) {
       var a = pts[i], b = pts[(i + 1) % n];
-      var ln = leftNormal(a, b);          // 左法线（CCW 指向内部? 验证）
-      // CCW: 内部在边左侧。故外侧法线 = 右法线 = -左法线
-      var outward = { x: -ln.x, y: -ln.y };
-      // 但 DXF 建筑轮廓通常顺时针给；本模块强制 ensureCCW 后调用，故按 CCW。
+      var dx = b.x - a.x, dy = b.y - a.y;
+      var L = Math.hypot(dx, dy) || 1;
+      var ux = dx / L, uy = dy / L;
+      var ln = { x: -uy, y: ux }; // 左法线
+      var midx = (a.x + b.x) / 2, midy = (a.y + b.y) / 2;
+      var eps = Math.max(1, L * 1e-6);
+      var lInside = pointInPoly(midx + ln.x * eps, midy + ln.y * eps, pts);
+      var rInside = pointInPoly(midx - ln.x * eps, midy - ln.y * eps, pts);
+      var outward;
+      if (lInside && !rInside) outward = { x: -ln.x, y: -ln.y };   // 右法线朝外
+      else if (!lInside && rInside) outward = ln;                  // 左法线朝外
+      else outward = { x: -ln.x, y: -ln.y };                       // 退化兜底
       norms.push(outward);
       segs.push({ a: a, b: b });
     }
@@ -451,12 +492,10 @@
     for (var j = 0; j < n; j++) {
       var p1 = pts[j], v1 = { x: segs[j].b.x - segs[j].a.x, y: segs[j].b.y - segs[j].a.y };
       var p2 = pts[(j + 1) % n], v2 = { x: segs[(j + 1) % n].b.x - segs[(j + 1) % n].a.x, y: segs[(j + 1) % n].b.y - segs[(j + 1) % n].a.y };
-      // 平移后的两条边所在直线
       var o1 = { x: p1.x + norms[j].x * d, y: p1.y + norms[j].y * d };
       var o2 = { x: p2.x + norms[(j + 1) % n].x * d, y: p2.y + norms[(j + 1) % n].y * d };
       var ip = lineIntersect(o1, v1, o2, v2);
       if (!ip) {
-        // 平行（共线边）：取边中点偏移
         var mid = { x: (segs[j].a.x + segs[j].b.x) / 2, y: (segs[j].a.y + segs[j].b.y) / 2 };
         out.push({ x: mid.x + norms[j].x * d, y: mid.y + norms[j].y * d });
       } else {
@@ -516,23 +555,17 @@
         }
         innerPoles.push({ x: pi.x, y: pi.y, edge: i, t: t, corner: isCorner });
         outerPoles.push({ x: po.x, y: po.y, edge: i, t: t, corner: isCorner });
-        // 角点列：凸角外排立杆直接落在外环角点（角部加强立杆位置）；
-        // 凹角不存在外侧加强，沿内环边外法线方向偏置 b 作为外排立杆。
-        var poOut;
-        var isConvex = false;
+        // 角点列外排立杆：直接落在外环 miter 顶点 outerRing[i]
+        // （新 outward 算法对凸/凹角都落在空气侧，位置均有效）
         if (isCorner) {
-          var vp2 = poly[(i - 1 + m) % m], vc2 = poly[i], vn2 = poly[(i + 1) % m];
-          var cr2 = (vc2.x - vp2.x) * (vn2.y - vc2.y) - (vc2.y - vp2.y) * (vn2.x - vc2.x); // CCW 凸角 >0
-          if (cr2 > 0) { poOut = { x: outerRing[i].x, y: outerRing[i].y }; isConvex = true; }
+          po = { x: outerRing[i].x, y: outerRing[i].y };
         }
-        if (!poOut) poOut = { x: pi.x + n.x * b, y: pi.y + n.y * b };
         cols.push({
           inner: { x: pi.x, y: pi.y },
-          outer: { x: poOut.x, y: poOut.y },
+          outer: { x: po.x, y: po.y },
           align: cols.length,
           corner: isCorner,
-          edge: i,
-          convex: isConvex
+          edge: i
         });
       }
     }
@@ -562,20 +595,20 @@
     ok.push(['外排杆', lay.outerPoles.length > 30]);
     ok.push(['列数', lay.columns.length > 30]);
     ok.push(['角点列', lay.columns.filter(function (c) { return c.corner; }).length === 4]);
-    ok.push(['凸角外排对齐外环角点', lay.columns.filter(function (c) { return c.corner && c.convex; }).length === 4 &&
-      lay.columns.filter(function (c) { return c.corner && c.convex; }).every(function (c) {
-        return Math.hypot(c.outer.x - lay.outerRing[c.edge].x, c.outer.y - lay.outerRing[c.edge].y) < 1;
-      })]);
-    // 外扩验证：内环 bbox 应大于原
-    var ib = polyBBox(lay.innerRing), ob = polyBBox(lay.outerRing);
-    ok.push(['外扩', ob.maxX > ib.maxX && ob.maxY > ib.maxY]);
+    ok.push(['角点外排对齐外环角点', lay.columns.filter(function (c) { return c.corner; }).every(function (c) {
+      return Math.hypot(c.outer.x - lay.outerRing[c.edge].x, c.outer.y - lay.outerRing[c.edge].y) < 1;
+    })]);
+    // 凹口轮廓：角点列数 = 多边形顶点数；角点外排与内排必须不同（否则圈重叠）
+    var notch = [{ x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 }, { x: 16000, y: 15000 }, { x: 16000, y: 9000 }, { x: 8000, y: 9000 }, { x: 8000, y: 15000 }, { x: 0, y: 15000 }];
+    var layN = layoutScaffold(notch, { a: 300, b: 900, La: 1500, d: 48 });
+    ok.push(['凹口：角点列数=顶点数', layN.columns.filter(function (c) { return c.corner; }).length === notch.length]);
+    ok.push(['凹口：角点内外排不重合', layN.columns.filter(function (c) { return c.corner; }).every(function (c) {
+      return Math.hypot(c.inner.x - c.outer.x, c.inner.y - c.outer.y) > 100;
+    })]);
     var Lshp = [{ x: 0, y: 0 }, { x: 20000, y: 0 }, { x: 20000, y: 10000 }, { x: 12000, y: 10000 }, { x: 12000, y: 18000 }, { x: 0, y: 18000 }];
     var lay2 = layoutScaffold(Lshp, { a: 300, b: 900, La: 1500, d: 48 });
     ok.push(['L形内排', lay2.innerPoles.length > 25]);
     ok.push(['L形外排', lay2.outerPoles.length > 25]);
-    var notch = [{ x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 }, { x: 16000, y: 15000 }, { x: 16000, y: 9000 }, { x: 8000, y: 9000 }, { x: 8000, y: 15000 }, { x: 0, y: 15000 }];
-    var lay3 = layoutScaffold(notch, { a: 300, b: 900, La: 1500, d: 48 });
-    ok.push(['凹口内排', lay3.innerPoles.length > 30]);
     var allPass = ok.every(function (r) { return r[1]; });
     if (typeof console !== 'undefined') {
       ok.forEach(function (r) { console.log((r[1] ? 'PASS' : 'FAIL'), r[0]); });
@@ -587,8 +620,9 @@
   var api = {
     signedArea: signedArea, ensureCCW: ensureCCW, segLen: segLen,
     dedupePts: dedupePts, closePoly: closePoly, polyPerim: polyPerim,
-    polyArea: polyArea, polyBBox: polyBBox, lineIntersect: lineIntersect,
-    leftNormal: leftNormal, offsetPoly: offsetPoly,
+    polyArea: polyArea, polyBBox: polyBBox, polyCentroid: polyCentroid,
+    pointInPoly: pointInPoly,
+    lineIntersect: lineIntersect, leftNormal: leftNormal, offsetPoly: offsetPoly,
     layoutScaffold: layoutScaffold, longestEdge: longestEdge,
     selftest: selftest
   };
@@ -601,7 +635,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
 </script>
 <script>
 /* =====================================================================
-   脚手架快绘CAD系统 v1.0.4 — 主逻辑（UI/交互/DXF解析/渲染/导出）
+   脚手架快绘CAD系统 v1.0.5 — 主逻辑（UI/交互/DXF解析/渲染/导出）
    依赖：ScaffoldCore（几何）、DXF_SKEL（骨架模板，构建期注入）
    坐标系约定：
      - 几何世界坐标系 = 世界 mm（Y 向上，与 DXF 一致）
@@ -981,19 +1015,15 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     /* --- 1. 建筑轮廓 OUTLINE（默认 lw=0.3 → DXF 370=30） --- */
     E('poly', { pts: polyPts, layer: LAYER.OUTLINE, lw: 0.3 });
 
-    /* --- 2. 内外排环线 ROWLN（实线示意排架走向） --- */
-    E('poly', { pts: lay.innerRing.map(P), layer: LAYER.ROWLN, lw: 0.15 });
-    E('poly', { pts: lay.outerRing.map(P), layer: LAYER.ROWLN, lw: 0.15 });
-
-    /* --- 3. 连接钢管横线（每对 columns 连线，表示横向水平杆） --- */
+    /* --- 2. 连接钢管横线（仅非角点列；角点列不画：否则凸角沿角平分线射出对角线、凹角会从相邻两边反向射出 X 形乱线） --- */
     lay.columns.forEach(function (col) {
+      if (col.corner) return;
       var pi = P(col.inner), po = P(col.outer);
-      if (Math.hypot(po.x - pi.x, po.y - pi.y) < 0.1) return; // 角点几乎重合则跳过
       E('line', { x1: pi.x, y1: pi.y, x2: po.x, y2: po.y, layer: LAYER.ROWLN, lw: 0.2 });
     });
 
-    /* --- 4. 立杆（空心圆圈示意；内外排统一大小颜色；凸角外排=外环角点） --- */
-    var poleR = Math.max(1.4, (d.d / 2) * k);
+    /* --- 3. 立杆（空心圆圈；内外排统一大小；凸/凹角外排=外环角点 miter，全在空气侧） --- */
+    var poleR = Math.max(1.8, (d.d / 2) * k);
     lay.columns.forEach(function (col) {
       var pi = P(col.inner), po = P(col.outer);
       E('circle', { cx: pi.x, cy: pi.y, r: poleR, layer: LAYER.POLE, fill: false, lw: 0.3 });
@@ -1881,6 +1911,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     window.scaffoldDebug = {
       renderAll: renderAll, exportDxf: exportDxf, exportPng: exportPng,
       computeStats: computeStats, showStats: showStats,
+      fitView: fitView, drawSvg: drawSvg,
       get state() { return state; }, get geom() { return geom; },
       get entities() { return entities; }, loadSample: loadSample
     };
