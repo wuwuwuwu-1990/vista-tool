@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>脚手架快绘CAD系统 v1.0.1</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E">
+<html lang="zh-CN" data-page-node-id="hzMZq4alNHJngokoPQoM5g">
+<head data-page-node-id="EoKV8Du7CLQ9Evw9o5jZf2">
+<meta charset="UTF-8" data-page-node-id="NiwpU2HaWGmvo7g5ZyEchv">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="XeGS27uyE9sb8LCmhj7tNQ">
+<title>脚手架快绘CAD系统 v1.0.2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E" data-page-node-id="I7MlA6wUussxD8GNvqUFBd">
 <style>
   :root{
     --bg:#eef4f8; --bg-2:#e6eef5; --bg-3:#d8e4ee;
@@ -113,7 +113,7 @@
   .tb-field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;font-family:inherit;background:var(--primary-soft);outline:none}
   .tb-field input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.14)}
 
-  /* 画布区（铺满中央） */
+  /* 画布区（铺满中央 + 全部网格） */
   .stage{flex:1;display:flex;flex-direction:column;min-width:0;background:transparent;gap:8px}
   .statbar{
     display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.86);
@@ -124,28 +124,44 @@
   .statbar b{color:var(--txt);font-weight:600}
   .statbar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;background:var(--primary)}
   .canvas-wrap{
-    flex:1;background:#ffffff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    flex:1;border:1px solid var(--line);border-radius:14px;overflow:hidden;
     position:relative;display:block;min-height:0;box-shadow:var(--shadow);
+    background:#ffffff;
     background-image:
-      linear-gradient(rgba(37,99,235,.05) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(37,99,235,.05) 1px,transparent 1px);
-    background-size:24px 24px;background-color:#fbfdff;
+      linear-gradient(rgba(37,99,235,.08) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(37,99,235,.08) 1px,transparent 1px),
+      linear-gradient(rgba(37,99,235,.18) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(37,99,235,.18) 1px,transparent 1px);
+    background-size:24px 24px,24px 24px,120px 120px,120px 120px;
+    background-position:-1px -1px,-1px -1px,-1px -1px,-1px -1px;
     cursor:grab;
   }
   .canvas-wrap.dragging{cursor:grabbing}
-  #svgCanvas{display:block;width:100%;height:100%;user-select:none}
-  .zoomtip{
+  #svgCanvas{display:block;width:100%;height:100%;user-select:none;background:transparent}
+
+  /* 左上角悬浮工具栏（BraceCad 同款） */
+  .cv-toolbar{
+    position:absolute;top:12px;left:12px;display:flex;gap:4px;
+    background:rgba(255,255,255,.94);
+    border:1px solid var(--line);border-radius:9px;padding:4px;box-shadow:var(--shadow);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    z-index:5;
+  }
+  .cv-toolbar button{
+    width:30px;height:30px;border:none;background:transparent;border-radius:6px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;color:var(--primary-2);transition:.13s;font-family:inherit;
+  }
+  .cv-toolbar button:hover{background:var(--primary-soft);color:var(--primary-2)}
+  .cv-toolbar button.on{background:var(--primary-2);color:#fff}
+  .cv-toolbar button:disabled{opacity:.4;cursor:not-allowed}
+  .cv-toolbar .sp{width:1px;background:var(--line);margin:4px 2px}
+  .cv-toolbar svg{width:16px;height:16px}
+  .cv-toolbar .lbl{font-size:10px;color:var(--sub);font-weight:600;padding:0 6px;align-self:center;letter-spacing:.5px;min-width:42px;text-align:center}
+  .cv-tip{
     position:absolute;right:12px;bottom:10px;font-size:11.5px;color:var(--sub);
     background:rgba(255,255,255,.85);padding:4px 10px;border-radius:20px;
     border:1px solid var(--line);user-select:none;pointer-events:none;
     backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-  }
-  .zoom-info{
-    position:absolute;left:12px;top:10px;font-size:11.5px;color:var(--primary-2);
-    background:rgba(255,255,255,.85);padding:4px 10px;border-radius:20px;
-    border:1px solid var(--line);user-select:none;pointer-events:none;
-    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-    font-weight:600;
   }
 
   /* 加载遮罩 */
@@ -187,112 +203,141 @@
   #toast.ok{background:var(--green)}
 </style>
 </head>
-<body>
+<body data-page-node-id="aVxDitJ1hzLzGXseZQjDSU">
 
-<header>
-  <div class="logo">架</div>
-  <h1>脚手架快绘CAD系统</h1>
-  <span class="ver">v1.0.1</span>
-  <div class="sp"></div>
-  <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）">▦ 示例</button>
-  <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）">📂 导入DXF</button>
-  <button class="tbtn green" id="btnPng" title="导出当前画面为 PNG（所见即所得）">🖼 导出图片</button>
-  <button class="tbtn primary" id="btnDxf" title="导出双排脚手架平面图 DXF（CAD 可编辑）">⤓ 导出DXF</button>
-  <button class="tbtn ghost" id="btnAbout" title="关于">?</button>
-  <input type="file" id="fileDxf" accept=".dxf" style="display:none">
+<header data-page-node-id="2SYMku9WCoQ1SFRCJ2rGSB">
+  <div class="logo" data-page-node-id="mByk9p3CWFFtwNfuCh3OfG">架</div>
+  <h1 data-page-node-id="RWgGxyFlsGyQBbI3fuwHtX">脚手架快绘CAD系统</h1>
+  <span class="ver" data-page-node-id="rIMj00I4MmfX6CC42Il6YX">v1.0.2</span>
+  <div class="sp" data-page-node-id="fm5nSFbwGASGRHkh3s3dT6"></div>
+  <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）" data-page-node-id="BhuDldujuGmgjkOx2LVaaz">▦ 示例</button>
+  <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）" data-page-node-id="Urf3J3H1gJRmNRWuzEupB8">📂 导入DXF</button>
+  <button class="tbtn green" id="btnPng" title="导出当前画面为 PNG（所见即所得）" data-page-node-id="qrI7Mm3yAeIB7JPJJA89f3">🖼 导出图片</button>
+  <button class="tbtn primary" id="btnDxf" title="导出双排脚手架平面图 DXF（CAD 可编辑）" data-page-node-id="D89Y2C8H7SdSBee5wITxIZ">⤓ 导出DXF</button>
+  <button class="tbtn ghost" id="btnAbout" title="关于" data-page-node-id="8vZA2J30ZbPAck9Cq5cKyu">?</button>
+  <input type="file" id="fileDxf" accept=".dxf" style="display:none" data-page-node-id="NG0ZT2XzlJY8hnBSDdbpTc">
 </header>
 
-<main>
+<main data-page-node-id="KOlnIE3W0tJpSw2eOqKfzs">
   <!-- ============ 左侧参数面板 ============ -->
-  <aside id="panel">
-    <div class="panel-sec">
-      <h3>轮廓数据</h3>
-      <div class="frow"><label>状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)">未导入</span></div>
-      <div class="frow full"><label>工程名称</label><input type="text" id="inProj" value="脚手架专项施工方案" maxlength="30"></div>
-      <div class="btnrow">
-        <button class="btn" id="btnDrawPoly" title="在画布点击绘制建筑轮廓">✏️ 绘制轮廓</button>
-        <button class="btn red" id="btnClearPoly" title="清除当前轮廓">清空</button>
+  <aside id="panel" data-page-node-id="2I8vEDg3vApqugld7OKLF7">
+    <div class="panel-sec" data-page-node-id="vfPQQ2PQxUuSTWvrfOgY0t">
+      <h3 data-page-node-id="DvrM1SMUIaDPSbibxQ1FNi">轮廓数据</h3>
+      <div class="frow" data-page-node-id="Jh2KL6yI3yF7IiqagN8RDi"><label data-page-node-id="8KYYlaIYkW4f2fJOghKKVu">状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)" data-page-node-id="3ILqz3knlw6eEMKIgeAOOA">未导入</span></div>
+      <div class="frow full" data-page-node-id="BHrC1u1RA7KPHd8HgEzWns"><label data-page-node-id="0fkIE2wGq8I0695y2B4uHv">工程名称</label><input type="text" id="inProj" value="脚手架专项施工方案" maxlength="30" data-page-node-id="DFXrgKUi8RG9OZwPx8oNSl"></div>
+      <div class="btnrow" data-page-node-id="9oDEzZEzf6lxQRFtOpnpGG">
+        <button class="btn" id="btnDrawPoly" title="在画布点击绘制建筑轮廓" data-page-node-id="cfWXtbxSFZLo3stYzlGzQT">✏️ 绘制轮廓</button>
+        <button class="btn red" id="btnClearPoly" title="清除当前轮廓" data-page-node-id="vED2atO2McfXM9I9l35w3F">清空</button>
       </div>
-      <div class="hint">导入DXF后自动识别<b>面积最大</b>的闭合多段线/直线环作为建筑外轮廓。也可手动绘制多边形。</div>
+      <div class="hint" data-page-node-id="9SRpR2ktrhBBnw3xmBJ4Eq">导入DXF后自动识别<b data-page-node-id="y7wEsiLb9dOV5YeOfPe1BO">面积最大</b>的闭合多段线/直线环作为建筑外轮廓。也可手动绘制多边形。</div>
     </div>
 
-    <div class="panel-sec">
-      <h3>架体参数</h3>
-      <div class="frow"><label>离墙距 a</label><input type="number" id="inA" value="300" min="100" max="800" step="50"><span class="unit">mm</span></div>
-      <div class="frow"><label>排距(横距) b</label><input type="number" id="inB" value="1050" min="700" max="1500" step="50"><span class="unit">mm</span></div>
-      <div class="frow"><label>纵距 La</label><input type="number" id="inLa" value="1500" min="800" max="2000" step="100"><span class="unit">mm</span></div>
-      <div class="frow"><label>立杆直径</label><input type="number" id="inD" value="48" min="20" max="100" step="1"><span class="unit">mm</span></div>
+    <div class="panel-sec" data-page-node-id="JhSq0W0TFSxUj0S4cA9Dgk">
+      <h3 data-page-node-id="Wk6jc33AohAiNfPBwwnCTs">架体参数</h3>
+      <div class="frow" data-page-node-id="PvBjVF8xc6mk3BRuuNuPup"><label data-page-node-id="441vVOBE8e1kf2vQ27qEEt">离墙距 a</label><input type="number" id="inA" value="300" min="100" max="800" step="50" data-page-node-id="Lnd6bWR51gdRActco8lrrx"><span class="unit" data-page-node-id="tcfDpCF1sUQrF9BFtg1jTA">mm</span></div>
+      <div class="frow" data-page-node-id="pAS6Mz0el4VEeX4HQ5dIh4"><label data-page-node-id="2SlOpj0qcu39oxNOs26ibu">排距(横距) b</label><input type="number" id="inB" value="1050" min="700" max="1500" step="50" data-page-node-id="f9dC4dkKaCfT3ZzLinTuAT"><span class="unit" data-page-node-id="wqkgADrBh79yQDvuejKMA1">mm</span></div>
+      <div class="frow" data-page-node-id="4Rhf80th98TrVslbA6YHED"><label data-page-node-id="9Xxd2Zzlt3sDUFBuBj0GPi">纵距 La</label><input type="number" id="inLa" value="1500" min="800" max="2000" step="100" data-page-node-id="t4FAMUpbM1826t9aflGDHX"><span class="unit" data-page-node-id="PgrQoWozpVvnlY9AK2bUXp">mm</span></div>
+      <div class="frow" data-page-node-id="P9t0SS69GlDBxPtzx8VzuD"><label data-page-node-id="97w0HXOoYRH5gO0FoC1apW">立杆直径</label><input type="number" id="inD" value="48" min="20" max="100" step="1" data-page-node-id="Hq77nyGDhHJZJHP5P8V4BF"><span class="unit" data-page-node-id="L5GFjrA4LtBJmFxHTg3T2r">mm</span></div>
     </div>
 
-    <div class="panel-sec">
-      <h3>布置选项</h3>
-      <label class="chk"><input type="checkbox" id="ckNo"> 立杆编号</label>
-      <label class="chk"><input type="checkbox" id="ckLian"> 连墙件标记 <small>≤3跨/≤3步</small></label>
-      <label class="chk"><input type="checkbox" id="ckJd"> 转角加强杆示意</label>
-      <label class="chk"><input type="checkbox" id="ckDim"> 尺寸标注</label>
-      <div class="frow"><label>连墙件间距</label><input type="number" id="inLian" value="3" min="1" max="6"><span class="unit">跨</span></div>
+    <div class="panel-sec" data-page-node-id="I1XraiFrrlbekZFoWELQcw">
+      <h3 data-page-node-id="E9PFEKNuZSad8CpUaEi58k">布置选项</h3>
+      <label class="chk" data-page-node-id="cuRDCoCsv2XDXF7dEwMQgU"><input type="checkbox" id="ckNo" data-page-node-id="TyER5nwrB8bUH67NTaolSR"> 立杆编号</label>
+      <label class="chk" data-page-node-id="mzsHaQJQyV2KzycqWpKTUm"><input type="checkbox" id="ckLian" data-page-node-id="OMZpZynaF3x1rnwguSHvoW"> 连墙件标记 <small data-page-node-id="6tQwZ9LkMog0M9TOwZLjsz">≤3跨/≤3步</small></label>
+      <label class="chk" data-page-node-id="ziXD63HmWZGbKlLqsWwJmi"><input type="checkbox" id="ckJd" data-page-node-id="L8rwT4xBEOKBE5zKkrefIM"> 转角加强杆示意</label>
+      <label class="chk" data-page-node-id="DuQH47o9kE57TVrq5sIjyK"><input type="checkbox" id="ckDim" data-page-node-id="VMzikrUmjqk8slZnx7hRjG"> 尺寸标注</label>
+      <div class="frow" data-page-node-id="WZAGSdvx6BlWXANBoOIuNH"><label data-page-node-id="Ky3yHEcsII5SW5iOPSxCoB">连墙件间距</label><input type="number" id="inLian" value="3" min="1" max="6" data-page-node-id="DXsypD042F6EPm6rUsTEna"><span class="unit" data-page-node-id="6ScWPoCwU1jy1d7CLplFni">跨</span></div>
     </div>
 
-    <div class="panel-sec">
-      <h3>图签</h3>
-      <label class="chk"><input type="checkbox" id="ckTitle"> 在画面右下角显示图签 <small>（默认关）</small></label>
-      <div class="tb-field"><label>图纸名称</label><input type="text" id="inDwName" value="双排脚手架平面布置图" maxlength="26"></div>
-      <div class="tb-field"><label>设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12"></div>
+    <div class="panel-sec" data-page-node-id="xkWXqxcQTHBZV7wxcjQ6nA">
+      <h3 data-page-node-id="IBromXFMBW0P9u8nCC1aFF">图签</h3>
+      <label class="chk" data-page-node-id="f98atNBxB4GqUgPTPM11my"><input type="checkbox" id="ckTitle" data-page-node-id="PeTJ3rjH4y3mogZDpjrZoY"> 在画面右下角显示图签 <small data-page-node-id="gTmrbYDTjbAcPWJ47qL4pZ">（默认关）</small></label>
+      <div class="tb-field" data-page-node-id="bIhK2btUdi6eW47eXi9On2"><label data-page-node-id="ozLC6yRwFmDxExGgZANI9e">图纸名称</label><input type="text" id="inDwName" value="双排脚手架平面布置图" maxlength="26" data-page-node-id="iCT4NVBAsBSG37ojVBa6QQ"></div>
+      <div class="tb-field" data-page-node-id="65x86wsQZoDMXcniGDT7nS"><label data-page-node-id="wyRu6nz8pOCA6DIDaotYJD">设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12" data-page-node-id="7sHAtUw3xABAxO8d2jFiWu"></div>
     </div>
-    <div class="hint">依据 <b>GB55023-2022《施工脚手架通用规范》</b> 生成。<br>图中 a=离墙距、b=排距、La=纵距。<br>画面可滚轮缩放、空格+拖拽平移。</div>
+    <div class="hint" data-page-node-id="fy2ZFtH3K47TM8H1y7M55g">依据 <b data-page-node-id="IMbckAADCAKITgRNvryUJM">GB55023-2022《施工脚手架通用规范》</b> 生成。<br data-page-node-id="56k8BtsOBRFVlGRzlQwvfQ">图中 a=离墙距、b=排距、La=纵距。<br data-page-node-id="DBvHzQ5tDsAMQ5vHFFrBOm">画面可滚轮缩放、左键拖拽平移。</div>
   </aside>
 
   <!-- ============ 画布 ============ -->
-  <div class="stage">
-    <div class="statbar" id="statbar">
-      <span>轮廓: <b id="stPoly">-</b></span>
-      <span>周长: <b id="stPerim">-</b> m</span>
-      <span>立杆数: <b id="stPoles">-</b></span>
-      <span>列数: <b id="stCols">-</b></span>
-      <span>架体: a=<b id="stA">300</b>mm · b=<b id="stB">1050</b>mm · La=<b id="stLa">1500</b>mm</span>
+  <div class="stage" data-page-node-id="az53mkWGLVnF7kguMdIb3B">
+    <div class="statbar" id="statbar" data-page-node-id="rHR4iziee1An3xXdNw7KqR">
+      <span data-page-node-id="mrCDWRQXwc3BY3yTbHtsFy">轮廓: <b id="stPoly" data-page-node-id="eCwuBdKTEE7VdONzca9huk">-</b></span>
+      <span data-page-node-id="jc9wJdupwnk6ItN29zbJbe">周长: <b id="stPerim" data-page-node-id="R2bCTYouP30iVGeGip98c9">-</b> m</span>
+      <span data-page-node-id="OdVjXniGx9YKcoxQ00i7BM">立杆数: <b id="stPoles" data-page-node-id="lcUgSdu4oCJWxTHeUZMz1B">-</b></span>
+      <span data-page-node-id="sZqFxPW03m541AFAfrHt7B">列数: <b id="stCols" data-page-node-id="kc29skwyfZGBFGCRjmnFWo">-</b></span>
+      <span data-page-node-id="RUMSqS5JhJmiK9np7M2xOD">架体: a=<b id="stA" data-page-node-id="SpQEJ7SSXNX6o3LO1KAWPq">300</b>mm · b=<b id="stB" data-page-node-id="R1w9blTZIoEUAPw9Dr6pL8">1050</b>mm · La=<b id="stLa" data-page-node-id="0pPotbAIVPaf6K7TjIFmr3">1500</b>mm</span>
     </div>
-    <div class="canvas-wrap" id="canvasWrap">
-      <svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 700"></svg>
-      <div class="zoom-info" id="zoomInfo">100%</div>
-      <div class="zoomtip">滚轮缩放 · 空格+拖拽平移 · 双击重置</div>
+    <div class="canvas-wrap" id="canvasWrap" data-page-node-id="nndXBpac0GPzaHjC8t4YXU">
+      <svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 700" data-page-node-id="xKJsNA2RkTmnE3ShhEFxH6"></svg>
+      <!-- 左上角工具栏（仿 BraceCad） -->
+      <div class="cv-toolbar" id="cvToolbar" data-page-node-id="6H3lVXKNuVwLlKK67bU2Pj">
+        <button id="tbFit" title="适应窗口 (F)" data-page-node-id="PkE0XviKGw16EfUsOljOfK">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="DnL62cR7Zz6WdiCvvPAqel">
+            <path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4" data-page-node-id="f15ZIsGezYtH5cCQuCvDvy"/>
+          </svg>
+        </button>
+        <button id="tbIn" title="放大" data-page-node-id="OBgdcWnzxpEt2O3FbgI6IT">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="n32T2nSoirHpSwUNxeTYcC">
+            <circle cx="9" cy="9" r="5.5" data-page-node-id="OoUiGkwmLvRk4dmCxMb362"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4" data-page-node-id="rwz6RNVTbVzTzhkl2nd1cV"/>
+          </svg>
+        </button>
+        <button id="tbOut" title="缩小" data-page-node-id="PE2CCwnaFAzPTJQdg65ppn">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="KEEGCVDYlNgCdv3Q2tI7B6">
+            <circle cx="9" cy="9" r="5.5" data-page-node-id="HdP8d38b3qrsgWUjlmaY5A"/><path d="M13 13l4 4M6.8 9h4.4" data-page-node-id="ovV3wcTDpI2XFFEUrVpdlU"/>
+          </svg>
+        </button>
+        <span class="sp" data-page-node-id="9guBkYuXbIu11sZ03PPRGw"></span>
+        <button id="tbGrid" class="on" title="显示网格" data-page-node-id="eAeCfN9edKHFwZSLZWK4GD">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" data-page-node-id="XOx2KsdOuH1KFLlsNOHcon">
+            <path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14" data-page-node-id="qsE8V1WiEL1uj3SqlAQEWZ"/>
+          </svg>
+        </button>
+        <button id="tbOne" title="实际大小 (100%)" data-page-node-id="CH8kO1y8OcBTHJZqwE2B2o">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="0zNsHQPw5dYLIfDUlDwmON">
+            <circle cx="10" cy="10" r="6" data-page-node-id="S7FQvuSk5ImnFSFvyll0rl"/><path d="M10 7v6M7 10h6" data-page-node-id="MGIByVI9ImU3M11uxksoNF"/>
+          </svg>
+        </button>
+        <span class="lbl" id="zoomInfo" data-page-node-id="BDXqYMH5RkZzJpY3WiaHYM">100%</span>
+      </div>
+      <div class="cv-tip" data-page-node-id="TuaGBXIFEcQGm0xIum6lB5">滚轮缩放 · 左键拖拽平移 · 双击重置</div>
     </div>
   </div>
 </main>
 
 <!-- 统计模态 -->
-<div class="modal-mask" id="modalStat">
-  <div class="modal" style="min-width:460px">
-    <h3>构配件用量统计（估算）<span class="x" data-close="modalStat">×</span></h3>
-    <p class="desc">依据轮廓周长与架体参数估算，正式用量应以专项施工方案计算为准。</p>
-    <table class="st" id="statTable"></table>
-    <div class="mbtn-row"><button class="btn blue" data-close="modalStat">关闭</button></div>
-    <div class="footer-note">说明：连墙件按水平间距≤3跨、竖向间距≤3步(≤4.5m)梅花布置；剪刀撑沿外侧立面全长连续设置，与地面夹角45°~60°。立杆接长采用对接扣件。</div>
+<div class="modal-mask" id="modalStat" data-page-node-id="f6lMG5f3XJC1hOMbKfSfnN">
+  <div class="modal" style="min-width:460px" data-page-node-id="qV3cu3bR6E50hvjFm4IbDW">
+    <h3 data-page-node-id="XbZygaToh8mCfgsEwGV8sh">构配件用量统计（估算）<span class="x" data-close="modalStat" data-page-node-id="sd5Bl6tJEnQLPiTTvZD9jP">×</span></h3>
+    <p class="desc" data-page-node-id="eMl1nOUJuFyHz9cfcBHtij">依据轮廓周长与架体参数估算，正式用量应以专项施工方案计算为准。</p>
+    <table class="st" id="statTable" data-page-node-id="PzXfHNgizEOStp3j8B9TPD"></table>
+    <div class="mbtn-row" data-page-node-id="JOIEkaD119Ni7KgdWfywJW"><button class="btn blue" data-close="modalStat" data-page-node-id="UHI0aQTUPjlQKIGdFYHtwR">关闭</button></div>
+    <div class="footer-note" data-page-node-id="QJ5rc7n60XEIoAJMVSWtp8">说明：连墙件按水平间距≤3跨、竖向间距≤3步(≤4.5m)梅花布置；剪刀撑沿外侧立面全长连续设置，与地面夹角45°~60°。立杆接长采用对接扣件。</div>
   </div>
 </div>
 
 <!-- 关于模态 -->
-<div class="modal-mask" id="modalAbout">
-  <div class="modal" style="min-width:440px">
-    <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
-    <div class="about-logo">架</div>
-    <h3 style="margin-bottom:2px">脚手架快绘CAD系统</h3>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.1</span></div>
-    <p class="desc">
-      依据 <b>GB55023-2022《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br>
+<div class="modal-mask" id="modalAbout" data-page-node-id="vNKFsmdmFeKMS58xPOOuVN">
+  <div class="modal" style="min-width:440px" data-page-node-id="dkQBC8M9MB7eOefTrsFtet">
+    <h3 data-page-node-id="1EToeCGMApPLQ0rROtKYEm"><span data-page-node-id="fZ1g7hfdWhcHpha7hGeIM1"></span><span class="x" data-close="modalAbout" data-page-node-id="iiTxSg43ZjT62QHvOpIvOw">×</span></h3>
+    <div class="about-logo" data-page-node-id="ds955UzCfEdATNmSUi1xNO">架</div>
+    <h3 style="margin-bottom:2px" data-page-node-id="BwgVvKhb4yojEwJimB0Jbx">脚手架快绘CAD系统</h3>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px" data-page-node-id="KFy3jzWnORWic0L8FT7asi">Scaffold Quick-CAD <span class="about-ver" data-page-node-id="n28filAXHTMPWRSFrIbgmK">v1.0.2</span></div>
+    <p class="desc" data-page-node-id="3JI0MYHTCD2pWlSQAWvJ8w">
+      依据 <b data-page-node-id="juMeA8vE1TIChcmhiw9WJJ">GB55023-2022《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br data-page-node-id="MzBI90F4Els1RPphkTGzwW">
       ① 导入DXF / 手动绘制建筑外轮廓；② 自动布置内/外两排立杆（径向严格对齐，用线连接表示连接钢管）；③ 离墙距 a / 排距 b / 纵距 La 可调即时重排；④ 可选尺寸标注、立杆编号、连墙件与转角加强示意；⑤ 画面无图框、可滚轮缩放与拖拽平移；⑥ 导出 PNG（所见即所得）与 CAD 可编辑 DXF（R2000）。
     </p>
-    <table class="st">
-      <tr><th style="width:120px">规范依据</th><td>GB55023-2022《施工脚手架通用规范》（全文强制）</td></tr>
-      <tr><th>默认参数</th><td>a=300 · b=1050 · La=1500 · φ48×3.6 钢管</td></tr>
-      <tr><th>强条要点</th><td>连墙件水平≤3跨/竖向≤3步；开口型两端必须设连墙件；剪刀撑45°~60°</td></tr>
-      <tr><th>导出格式</th><td>PNG 图片 / DXF R2000（AutoCAD、浩辰、中望均可打开编辑）</td></tr>
+    <table class="st" data-page-node-id="3FhfCZXtOqZBKxBC3eDbRv">
+      <tr data-page-node-id="8iCrsxxbeix8EPMESYMgJp"><th style="width:120px" data-page-node-id="vicQwVvo5cDR77DyqCiGJR">规范依据</th><td data-page-node-id="NCHkaQjWsJ3woNi0k41gud">GB55023-2022《施工脚手架通用规范》（全文强制）</td></tr>
+      <tr data-page-node-id="3BMf2GK0gwpHlmZa4jEVgg"><th data-page-node-id="33ICWFPsGOtiIPcD7AF8w3">默认参数</th><td data-page-node-id="2slrOw3y69xMc3lo5FUPdq">a=300 · b=1050 · La=1500 · φ48×3.6 钢管</td></tr>
+      <tr data-page-node-id="v5u3tHvxz6Rc5dPb3KbDW3"><th data-page-node-id="nz7hPMXxs8d41AFsj3zTor">强条要点</th><td data-page-node-id="vSm8FxB164UY9bMAKRkJC9">连墙件水平≤3跨/竖向≤3步；开口型两端必须设连墙件；剪刀撑45°~60°</td></tr>
+      <tr data-page-node-id="TLiEkHqFIPSJWdiUePNk22"><th data-page-node-id="EJdz9iHiROuvits6U9eMcE">导出格式</th><td data-page-node-id="Hrw9pXCIGSH2KRv8XhSTae">PNG 图片 / DXF R2000（AutoCAD、浩辰、中望均可打开编辑）</td></tr>
     </table>
-    <div class="mbtn-row"><button class="btn blue" data-close="modalAbout">知道了</button></div>
+    <div class="mbtn-row" data-page-node-id="RHznB6o9KSYtMCy7jOy03Q"><button class="btn blue" data-close="modalAbout" data-page-node-id="eEXPNxCB4WtPzRy2Kcb3pc">知道了</button></div>
   </div>
 </div>
 
-<div id="loading"><div class="load-card"><div class="spin"></div><p id="loadMsg">处理中…</p></div></div>
-<div id="toast"></div>
+<div id="loading" data-page-node-id="eDxwOvKLceq5pqGZsSecCV"><div class="load-card" data-page-node-id="DBMdvza4ScmS7NDw8CXxEP"><div class="spin" data-page-node-id="Km2BgjKjWeiCWCmYNsWGL5"></div><p id="loadMsg" data-page-node-id="BWdyOS7ltoqMHOIso6AN3F">处理中…</p></div></div>
+<div id="toast" data-page-node-id="qVGOHC29LlU0G2e8Y2VfP1"></div>
 
 <script>
 /* =====================================================================
@@ -452,11 +497,22 @@
         }
         innerPoles.push({ x: pi.x, y: pi.y, edge: i, t: t, corner: isCorner });
         outerPoles.push({ x: po.x, y: po.y, edge: i, t: t, corner: isCorner });
+        var strong = null;
+        if (isCorner) {
+          // 阳角加强立杆：沿前后两边的外法线 bisector 方向 × b×0.55（外凸一根）
+          var prev = norms[(i - 1 + m) % m];
+          var bx = norms[i].x + prev.x, by = norms[i].y + prev.y;
+          var bl = Math.hypot(bx, by) || 1;
+          bx /= bl; by /= bl;
+          var mx = (pi.x + po.x) / 2, my = (pi.y + po.y) / 2;
+          strong = { x: mx + bx * b * 0.55, y: my + by * b * 0.55 };
+        }
         cols.push({
           inner: { x: pi.x, y: pi.y },
           outer: { x: po.x, y: po.y },
           align: cols.length,
-          corner: isCorner
+          corner: isCorner,
+          strong: strong
         });
       }
     }
@@ -485,6 +541,8 @@
     ok.push(['内排杆', lay.innerPoles.length > 30]);
     ok.push(['外排杆', lay.outerPoles.length > 30]);
     ok.push(['列数', lay.columns.length > 30]);
+    ok.push(['角点列', lay.columns.filter(function (c) { return c.corner; }).length === 4]);
+    ok.push(['角点加强', lay.columns.filter(function (c) { return c.corner && c.strong; }).length === 4]);
     // 外扩验证：内环 bbox 应大于原
     var ib = polyBBox(lay.innerRing), ob = polyBBox(lay.outerRing);
     ok.push(['外扩', ob.maxX > ib.maxX && ob.maxY > ib.maxY]);
@@ -520,16 +578,16 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
 </script>
 <script>
 /* =====================================================================
-   脚手架快绘CAD系统 v1.0.0 — 主逻辑（UI/交互/DXF解析/渲染/导出）
+   脚手架快绘CAD系统 v1.0.2 — 主逻辑（UI/交互/DXF解析/渲染/导出）
    依赖：ScaffoldCore（几何）、DXF_SKEL（骨架模板，构建期注入）
    坐标系约定：
-     - 建筑轮廓/几何计算均用“世界坐标 mm”（Y 向上，与 DXF 一致）
-     - 显示层 SVG：Y 向下翻转
-     - 导出层：世界坐标 mm 1:1 进模型空间，图框/标题栏按 1:1 mm 真实尺寸？
-       否——按图纸惯例：模型空间单位=mm 真实尺寸，标题栏与图框
-       按真实 mm（A2=594×420mm 图纸 → 需乘比例）。本项目采用
-       BraceCad 同款：图纸 mm → 绘图单位，即所有实体按图纸 mm 直接
-       绘制（denom 比例尺下建筑轮廓缩放进图框）。
+     - 几何世界坐标系 = 世界 mm（Y 向上，与 DXF 一致）
+     - 显示坐标系 = viewBox：x = world.x, y = -world.y（Y-down 自动翻转）
+     - 视图变换：state.view = {cx,cy,s,fitS,showGrid}
+       cx,cy = viewBox 中心（显示坐标，单位=图纸mm）
+       s = 屏幕像素 / 图纸mm；fitView 时算 fitS 作为 100% 基准
+     - 所有几何在世界坐标内计算；绘制时统一把 world.y → -world.y
+     - viewBox 纵横比 永远等于容器宽高比（无 letterbox，缩放围绕鼠标精准）
    ===================================================================== */
 (function () {
   'use strict';
@@ -922,6 +980,20 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
         E('circle', { cx: pi.x, cy: pi.y, r: poleR + 0.9, layer: LAYER.BRACE, fill: false, dash: [1.2, 0.8] });
       }
     });
+    /* --- 4.5 阳角加强立杆（每个 corner 默认显示：外凸一根加强立杆 + 加强圈 + × 加强标记） --- */
+    lay.columns.forEach(function (col) {
+      if (!(col.corner && col.strong)) return;
+      var ps = P(col.strong);
+      // 加强立杆（蓝色实心圆）
+      E('circle', { cx: ps.x, cy: ps.y, r: poleR * 1.25, layer: LAYER.BRACE, fill: true, lw: 0.3 });
+      // 加强圈（虚线）
+      E('circle', { cx: ps.x, cy: ps.y, r: poleR * 1.25 + 0.7, layer: LAYER.BRACE, fill: false, dash: [1.2, 0.8] });
+      // × 加强标记（两条对角线）
+      var s2 = poleR * 1.25 + 0.4;
+      var py = ps.y;
+      E('line', { x1: ps.x - s2, y1: py + s2, x2: ps.x + s2, y2: py - s2, layer: LAYER.BRACE, lw: 0.25 });
+      E('line', { x1: ps.x - s2, y1: py - s2, x2: ps.x + s2, y2: py + s2, layer: LAYER.BRACE, lw: 0.25 });
+    });
     // 手动杆
     state.manual.forEach(function (m) {
       var pm = P(m);
@@ -964,12 +1036,13 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       dims(polyPts, lay, bbP, P, k, d);
     }
 
-    /* --- 8. 图例块（左上角外侧，独立图元；始终显示） --- */
-    legendBlock(bbP, d, opt);
+    /* --- 8. 图例块 + 架体参数块（始终显示，位于图形整体 bbox 上方） --- */
+    var bbGeo = computeGeoBBox();
+    if (bbGeo) legendBlock(bbGeo, d, opt);
 
     /* --- 9. 图签块（右下角外侧；ckTitle 默认关） --- */
-    if (opt.title) {
-      titleBlock(bbP);
+    if (opt.title && bbGeo) {
+      titleBlock(bbGeo);
     }
     return entities;
   }
@@ -1108,13 +1181,13 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
   }
 
   /* ============ 图签块（右下角外侧；勾选 ckTitle 时显示） ============ */
-  function titleBlock(bbP) {
+  function titleBlock(bbGeo) {
     var t = getTitle();
     var pad = 8;
     var w = 110, h = 26;
-    var x = bbP.maxX + pad;
-    var y = bbP.minY - h - pad;   // 内容下方右侧（Y-up）
-    E('rect', { x: x, y: y, w: w, h: h, layer: LAYER.TITLE, lw: 0.3 });
+    var x = bbGeo.maxX + pad;
+    var y = bbGeo.minY - h - pad;   // 内容下方右侧（Y-up）
+    E('rect', { x: x, y: y, w: w, h: h, layer: LAYER.TITLE, lw: 0.3, fill: true, fc: '#ffffff' });
     E('line', { x1: x, y1: y + h / 2, x2: x + w, y2: y + h / 2, layer: LAYER.TITLE, lw: 0.2 });
     E('line', { x1: x + w / 2, y1: y, x2: x + w / 2, y2: y + h, layer: LAYER.TITLE, lw: 0.2 });
     var cellW = w / 2, cellH = h / 2;
@@ -1137,30 +1210,86 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   }
 
-  /* ============ 图例块（左上角外侧；始终显示） ============ */
-  function legendBlock(bbP, d, opt) {
-    var pad = 8;
-    var x = bbP.minX;
-    var y = bbP.maxY + pad;    // 内容上方（Y-up：顶部=maxY）
-    E('text', { x: x, y: y + 3, h: 2.4, str: '图 例', layer: LAYER.LEGEND });
-    var items = [
+  /* ============ 图例块（图例 + 架体参数 各自独立成块，标题置顶；位于图形整体内容 bbox 上方不与图形重合） ============ */
+  function legendBlock(bbGeo, d, opt) {
+    var legendItems = [
       '● 立杆（内外排统一大小）',
       '┄ 排架环线 + 连接钢管横线',
-      '◯ 转角加强杆（勾选时显示）',
+      '✕ 阳角加强立杆',
       '╳ 连墙件（勾选时显示）',
       '— 建筑外轮廓'
     ];
-    for (var k = 0; k < items.length; k++) {
-      E('text', { x: x, y: y + 7 + k * 4, h: 2.0, str: items[k], layer: LAYER.LEGEND });
+    var paramItems = [
+      '离墙距 a = ' + Math.round(d.a) + ' mm',
+      '排距 b = ' + Math.round(d.b) + ' mm',
+      '纵距 La = ' + Math.round(d.La) + ' mm',
+      '立杆 φ' + Math.round(d.d) + ' × 3.6 mm',
+      '规范 GB55023-2022',
+      '剪刀撑 45°~60° 沿全高连续',
+      '比例 ' + scaleText
+    ];
+    var pad = 3;        // 块内边距
+    var rowH = 4.4;     // 条目行高
+    var titleH = 5;     // 标题区高度
+    var fontTitle = 2.4;
+    var fontRow = 2.0;
+    function blockW(items) {
+      var mw = textWmm('图例', fontTitle);
+      items.forEach(function (it) { var w = textWmm(it, fontRow); if (w > mw) mw = w; });
+      return mw + pad * 2;
     }
-    var px = 90;
-    E('text', { x: x + px, y: y + 3, h: 2.4, str: '架体参数', layer: LAYER.LEGEND });
-    E('text', { x: x + px, y: y + 7, h: 2.0, str: '离墙距 a=' + Math.round(d.a) + 'mm', layer: LAYER.LEGEND });
-    E('text', { x: x + px, y: y + 11, h: 2.0, str: '排距 b=' + Math.round(d.b) + 'mm', layer: LAYER.LEGEND });
-    E('text', { x: x + px, y: y + 15, h: 2.0, str: '纵距 La=' + Math.round(d.La) + 'mm', layer: LAYER.LEGEND });
-    E('text', { x: x + px, y: y + 19, h: 2.0, str: '立杆 φ' + Math.round(d.d) + '×3.6mm', layer: LAYER.LEGEND });
-    E('text', { x: x + px, y: y + 25, h: 2.0, str: '规范 GB55023-2022  ' + scaleText, layer: LAYER.LEGEND });
-    E('text', { x: x + px, y: y + 29, h: 2.0, str: '剪刀撑 45°~60° 沿全高连续', layer: LAYER.LEGEND });
+    function blockH(items) { return titleH + rowH * items.length + pad * 2 - rowH * 0.4; }
+    var w1 = blockW(legendItems);
+    var h1 = blockH(legendItems);
+    var w2 = blockW(paramItems);
+    var h2 = blockH(paramItems);
+    var gap = 4;
+    var x0 = bbGeo.minX;
+    // y0 设在整体内容 bbox 上方 22mm 处（避开画布左上角工具栏浮层）
+    var y0 = bbGeo.maxY + 22;
+    drawInfoBlock(x0, y0, w1, h1, titleH, pad, fontTitle, fontRow, '图 例', legendItems);
+    drawInfoBlock(x0 + w1 + gap, y0, w2, h2, titleH, pad, fontTitle, fontRow, '架体参数', paramItems);
+  }
+  function drawInfoBlock(x, y, w, h, titleH, pad, titleFs, rowFs, title, items) {
+    // 块背景（白底）+ 边框
+    E('rect', { x: x, y: y, w: w, h: h, layer: LAYER.LEGEND, lw: 0.22, fill: true, fc: '#ffffff' });
+    // 标题（块顶部居中）
+    E('text', { x: x + w / 2, y: y + titleH * 0.68, h: titleFs, str: title, layer: LAYER.LEGEND, align: 'c' });
+    // 标题下分隔线
+    E('line', { x1: x, y1: y + titleH, x2: x + w, y2: y + titleH, layer: LAYER.LEGEND, lw: 0.18 });
+    // 条目
+    for (var i = 0; i < items.length; i++) {
+      E('text', { x: x + pad, y: y + titleH + (i + 1) * 3.4 + rowFs * 0.7, h: rowFs, str: items[i], layer: LAYER.LEGEND, align: 'l' });
+    }
+  }
+
+  /* ============ 计算"图形"实体 bbox（不含图例/图签块，用于 legend/titleBlock 定位） ============ */
+  function computeGeoBBox() {
+    var minX = 1e18, maxX = -1e18, minY = 1e18, maxY = -1e18;
+    function acc(x, y) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+    function accP(p) { acc(p.x, p.y); }
+    function accText(e) {
+      var w = textWmm(e.str, e.h);
+      var x0 = e.x, x1 = e.x;
+      if (e.align === 'c') { x0 = e.x - w / 2; x1 = e.x + w / 2; }
+      else if (e.align === 'r') { x0 = e.x - w; }
+      else { x1 = e.x + w; }
+      acc(x0, e.y - e.h * 0.85);
+      acc(x1, e.y + e.h * 0.2);
+    }
+    entities.forEach(function (e) {
+      if (e.layer === LAYER.LEGEND || e.layer === LAYER.TITLE) return;
+      if (e.t === 'poly') e.pts.forEach(accP);
+      else if (e.t === 'rect') { acc(e.x, e.y); acc(e.x + e.w, e.y + e.h); }
+      else if (e.t === 'line') { acc(e.x1, e.y1); acc(e.x2, e.y2); }
+      else if (e.t === 'circle') { acc(e.cx - e.r, e.cy - e.r); acc(e.cx + e.r, e.cy + e.r); }
+      else if (e.t === 'text') accText(e);
+    });
+    if (minX === 1e18) return null;
+    return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
   }
 
   /* ============ SVG 渲染（图纸坐标 → 显示坐标，Y 翻转；fit-content viewBox） ============ */
@@ -1195,7 +1324,8 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     updateStats2();
   }
 
-  /* 计算所有实体的 bbox（图纸mm 坐标），写回 state.view.bb */
+  /* ============ 视图（cx, cy, s 模型） ============
+     计算所有实体的 bbox（世界 mm 坐标，Y-up），写回 state.view 与 geom.bbGeo */
   function fitView() {
     if (!entities.length) return;
     var minX = 1e18, minY = 1e18, maxX = -1e18, maxY = -1e18;
@@ -1204,117 +1334,187 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       if (y < minY) minY = y; if (y > maxY) maxY = y;
     }
     function accPt(p) { acc(p.x, p.y); }
+    function accText(e) {
+      var w = textWmm(e.str, e.h);
+      var x0 = e.x, x1 = e.x;
+      if (e.align === 'c') { x0 = e.x - w / 2; x1 = e.x + w / 2; }
+      else if (e.align === 'r') { x0 = e.x - w; }
+      else { x1 = e.x + w; }
+      acc(x0, e.y - e.h * 0.85);
+      acc(x1, e.y + e.h * 0.2);
+    }
     entities.forEach(function (e) {
       if (e.t === 'poly') e.pts.forEach(accPt);
       else if (e.t === 'rect') { acc(e.x, e.y); acc(e.x + e.w, e.y + e.h); }
-      else if (e.t === 'line') { accPt({ x: e.x1, y: e.y1 }); accPt({ x: e.x2, y: e.y2 }); }
+      else if (e.t === 'line') { acc(e.x1, e.y1); acc(e.x2, e.y2); }
       else if (e.t === 'circle') { acc(e.cx - e.r, e.cy - e.r); acc(e.cx + e.r, e.cy + e.r); }
-      else if (e.t === 'text') { acc(e.x, e.y); }
+      else if (e.t === 'text') accText(e);
     });
-    var padX = Math.max((maxX - minX) * 0.06, 4);
-    var padY = Math.max((maxY - minY) * 0.06, 4);
-    state.view.bb = { x: minX - padX, y: minY - padY, w: (maxX - minX) + 2 * padX, h: (maxY - minY) + 2 * padY };
-    state.view.zoom = 1;
+    geom.bbGeo = { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+    var svg = $('svgCanvas');
+    var rect = svg.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) {
+      state.view = { cx: (minX + maxX) / 2, cy: -(minY + maxY) / 2, s: 1, fitS: 1, showGrid: state.view.showGrid !== false };
+      return;
+    }
+    var cw = Math.max(0.1, maxX - minX);
+    var ch = Math.max(0.1, maxY - minY);
+    var sFit = Math.min(rect.width / cw, rect.height / ch) * 0.94;
+    state.view.cx = (minX + maxX) / 2;
+    state.view.cy = -(minY + maxY) / 2;
+    state.view.s = sFit;
+    state.view.fitS = sFit;
   }
 
-  /* SVG 图元绘制 */
+  /* SVG 图元绘制（v1.0.2：viewBox 贴合容器、动态网格层、屏幕像素线宽） */
   function drawSvg() {
     var svg = $('svgCanvas');
-    var bb = state.view.bb;
-    svg.setAttribute('viewBox', bb.x + ' ' + bb.y + ' ' + bb.w + ' ' + bb.h);
-    var topY = bb.y + bb.h;     // Y-up → Y-down 翻转基准
+    var rect = svg.getBoundingClientRect();
+    var W = rect.width, H = rect.height;
+    if (W < 1 || H < 1) return;
+    var v = state.view;
+    var vw = W / v.s, vh = H / v.s;
+    var vbX = v.cx - vw / 2, vbY = v.cy - vh / 2;
+    svg.setAttribute('viewBox', vbX + ' ' + vbY + ' ' + vw + ' ' + vh);
     var s = '';
     s += '<defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif}</style></defs>';
-    s += '<rect x="' + bb.x + '" y="' + bb.y + '" width="' + bb.w + '" height="' + bb.h + '" fill="#ffffff"/>';
+    /* ===== 1. 网格层（按 viewBox 覆盖，步长自适应缩放） ===== */
+    if (v.showGrid) {
+      var step = pickGridStep(v.s);
+      var x0 = Math.floor(vbX / step) * step;
+      var x1 = vbX + vw;
+      var y0 = Math.floor(vbY / step) * step;
+      var y1 = vbY + vh;
+      s += '<g stroke="#cdd9e3" stroke-width="1" vector-effect="non-scaling-stroke">';
+      for (var gx = x0; gx <= x1 + 1e-6; gx += step) {
+        s += '<line x1="' + gx.toFixed(2) + '" y1="' + y0.toFixed(2) + '" x2="' + gx.toFixed(2) + '" y2="' + y1.toFixed(2) + '"/>';
+      }
+      for (var gy = y0; gy <= y1 + 1e-6; gy += step) {
+        s += '<line x1="' + x0.toFixed(2) + '" y1="' + gy.toFixed(2) + '" x2="' + x1.toFixed(2) + '" y2="' + gy.toFixed(2) + '"/>';
+      }
+      s += '</g>';
+      // 每 5 格加粗一次
+      var stepBig = step * 5;
+      var bx0 = Math.floor(vbX / stepBig) * stepBig;
+      var by0 = Math.floor(vbY / stepBig) * stepBig;
+      s += '<g stroke="#7c95aa" stroke-width="1" vector-effect="non-scaling-stroke">';
+      for (var gxb = bx0; gxb <= x1 + 1e-6; gxb += stepBig) {
+        s += '<line x1="' + gxb.toFixed(2) + '" y1="' + y0.toFixed(2) + '" x2="' + gxb.toFixed(2) + '" y2="' + y1.toFixed(2) + '"/>';
+      }
+      for (var gyb = by0; gyb <= y1 + 1e-6; gyb += stepBig) {
+        s += '<line x1="' + x0.toFixed(2) + '" y1="' + gyb.toFixed(2) + '" x2="' + x1.toFixed(2) + '" y2="' + gyb.toFixed(2) + '"/>';
+      }
+      s += '</g>';
+    }
+    /* ===== 2. 实体层（世界坐标 Y-up，绘制时翻 Y） ===== */
+    var pxScale = v.s; // 像素/图纸mm
     entities.forEach(function (e) {
+      var col = SVG_COLOR[e.layer] || '#1e2b36';
+      var lwPx = Math.max(0.6, (e.lw || 0.18) * pxScale);
       if (e.t === 'poly' || e.t === 'rect') {
         var pts = e.t === 'rect' ? [{ x: e.x, y: e.y }, { x: e.x + e.w, y: e.y }, { x: e.x + e.w, y: e.y + e.h }, { x: e.x, y: e.y + e.h }] : e.pts;
-        var d = pts.map(function (p, i) {
-          var X = p.x, Y = topY - p.y;
-          return (i ? 'L' : 'M') + X.toFixed(2) + ' ' + Y.toFixed(2);
+        var path = pts.map(function (p, i) {
+          return (i ? 'L' : 'M') + p.x.toFixed(2) + ' ' + (-p.y).toFixed(2);
         }).join(' ');
-        if (e.t === 'rect' || e.pts) d += ' Z';
-        s += '<path d="' + d + '" fill="none" stroke="' + (SVG_COLOR[e.layer] || '#000') + '" stroke-width="' + (e.lw || 0.2) + '"' +
-             (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' stroke-linejoin="round"/>';
+        path += ' Z';
+        var fillStr = e.fill ? (e.fc || '#ffffff') : 'none';
+        s += '<path d="' + path + '" fill="' + fillStr + '" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
+          (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
       } else if (e.t === 'line') {
-        var X1 = e.x1, Y1 = topY - e.y1, X2 = e.x2, Y2 = topY - e.y2;
-        s += '<line x1="' + X1.toFixed(2) + '" y1="' + Y1.toFixed(2) + '" x2="' + X2.toFixed(2) + '" y2="' + Y2.toFixed(2) +
-             '" stroke="' + (SVG_COLOR[e.layer] || '#000') + '" stroke-width="' + (e.lw || 0.15) + '"' +
-             (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
+        s += '<line x1="' + e.x1.toFixed(2) + '" y1="' + (-e.y1).toFixed(2) + '" x2="' + e.x2.toFixed(2) + '" y2="' + (-e.y2).toFixed(2) +
+          '" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"' +
+          (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
       } else if (e.t === 'circle') {
-        var Cx = e.cx, Cy = topY - e.cy;
-        if (e.fill) s += '<circle cx="' + Cx.toFixed(2) + '" cy="' + Cy.toFixed(2) + '" r="' + e.r + '" fill="' + (SVG_COLOR[e.layer] || '#000') + '"/>';
-        else s += '<circle cx="' + Cx.toFixed(2) + '" cy="' + Cy.toFixed(2) + '" r="' + e.r + '" fill="none" stroke="' + (SVG_COLOR[e.layer] || '#000') + '" stroke-width="0.15"' +
-                  (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
+        var rPx = Math.max(0.6, e.r * pxScale);
+        if (e.fill) {
+          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + rPx.toFixed(2) + '" fill="' + col + '"' +
+            (e.lw ? ' stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"' : '') + '/>';
+        } else {
+          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + rPx.toFixed(2) + '" fill="none" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
+            (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' vector-effect="non-scaling-stroke"/>';
+        }
       } else if (e.t === 'text') {
-        var Tx = e.x, Ty = topY - e.y;
         var anchor = e.align === 'c' ? 'middle' : (e.align === 'r' ? 'end' : 'start');
-        var col = SVG_COLOR[e.layer] || '#111';
-        s += '<text x="' + Tx.toFixed(2) + '" y="' + Ty.toFixed(2) + '" font-size="' + e.h + '" fill="' + col + '" text-anchor="' + anchor + '">' + escXml(e.str) + '</text>';
+        var fsPx = Math.max(8, e.h * pxScale);
+        s += '<text x="' + e.x.toFixed(2) + '" y="' + (-e.y).toFixed(2) + '" font-size="' + fsPx.toFixed(2) + '" fill="' + col + '" text-anchor="' + anchor + '">' + escXml(e.str) + '</text>';
       }
     });
     svg.innerHTML = s;
     var zi = $('zoomInfo');
-    if (zi) zi.textContent = Math.round(state.view.zoom * 100) + '%';
+    if (zi) zi.textContent = Math.round(v.s / v.fitS * 100) + '%';
+  }
+  function pickGridStep(s) {
+    // 目标屏幕约 60px（图纸 mm × s = 屏幕 px）
+    var cands = [0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    var target = 60;
+    for (var i = 0; i < cands.length; i++) {
+      if (cands[i] * s >= target) return cands[i];
+    }
+    return cands[cands.length - 1];
   }
   function escXml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /* ============ 滚轮缩放（以鼠标点为中心） ============ */
+  /* ============ 滚轮缩放（以鼠标点为中心；viewBox 贴合容器，无 letterbox 误差） ============ */
   function onWheel(e) {
     if (!entities.length) return;
     e.preventDefault();
     var svg = $('svgCanvas');
     var rect = svg.getBoundingClientRect();
-    var bb = state.view.bb;
-    // 鼠标在 viewBox 坐标
-    var mx = bb.x + (e.clientX - rect.left) / rect.width * bb.w;
-    var my = bb.y + (e.clientY - rect.top) / rect.height * bb.h;
-    var factor = e.deltaY < 0 ? 0.88 : 1.14;   // 缩放因子（<1 放大）
-    var nw = bb.w * factor, nh = bb.h * factor;
-    var nx = mx - (mx - bb.x) * factor;
-    var ny = my - (my - bb.y) * factor;
-    state.view.bb = { x: nx, y: ny, w: nw, h: nh };
-    state.view.zoom *= 1 / factor;
+    var W = rect.width, H = rect.height;
+    var v = state.view;
+    // 鼠标在显示坐标
+    var mx = v.cx + (e.clientX - rect.left - W / 2) / v.s;
+    var my = v.cy + (e.clientY - rect.top - H / 2) / v.s;
+    var f = e.deltaY < 0 ? 0.85 : 1.176;
+    var s2 = v.s * f;
+    v.cx = mx - (e.clientX - rect.left - W / 2) / s2;
+    v.cy = my - (e.clientY - rect.top - H / 2) / s2;
+    v.s = s2;
     drawSvg();
   }
 
-  /* ============ 拖拽平移（按下空格 + 鼠标拖拽） ============ */
+  /* ============ 左键拖拽平移（直接按左键即可，无需空格） ============ */
   function onMouseDown(e) {
-    if (e.button !== 0 || !state.spaceHeld) return;
+    if (e.button !== 0) return;
+    if (drawMode) return; // 手动绘制模式由 svgClick 处理
     state.drag.active = true;
-    state.drag.sx = e.clientX;
-    state.drag.sy = e.clientY;
-    state.drag.bx = state.view.bb.x;
-    state.drag.by = state.view.bb.y;
+    state.drag.sx = e.clientX; state.drag.sy = e.clientY;
+    state.drag.bx = state.view.cx; state.drag.by = state.view.cy;
     $('canvasWrap').classList.add('dragging');
     e.preventDefault();
   }
   function onMouseMove(e) {
     if (!state.drag.active) return;
-    var svg = $('svgCanvas');
-    var rect = svg.getBoundingClientRect();
-    var bb = state.view.bb;
-    var dx = (e.clientX - state.drag.sx) / rect.width * bb.w;
-    var dy = (e.clientY - state.drag.sy) / rect.height * bb.h;
-    state.view.bb.x = state.drag.bx - dx;
-    state.view.bb.y = state.drag.by - dy;
+    var dx = (e.clientX - state.drag.sx) / state.view.s;
+    var dy = (e.clientY - state.drag.sy) / state.view.s;
+    state.view.cx = state.drag.bx - dx;
+    state.view.cy = state.drag.by - dy;
     drawSvg();
   }
   function onMouseUp() {
-    if (state.drag.active) { state.drag.active = false; $('canvasWrap').classList.remove('dragging'); }
-  }
-  function onKeyDown(e) {
-    if (e.code === 'Space' && !state.spaceHeld) { state.spaceHeld = true; e.preventDefault(); }
-  }
-  function onKeyUp(e) {
-    if (e.code === 'Space') state.spaceHeld = false;
+    if (state.drag.active) {
+      state.drag.active = false;
+      $('canvasWrap').classList.remove('dragging');
+    }
   }
   function onCanvasDblClick(e) {
     if (drawMode) return;
     fitView();
     drawSvg();
+  }
+  function onKeyGlobal(evt) {
+    // F = fit, + = 放大, - = 缩小, G = 网格切换
+    if (evt.target && (evt.target.tagName === 'INPUT' || evt.target.tagName === 'TEXTAREA')) return;
+    if (evt.key === 'f' || evt.key === 'F') { fitView(); drawSvg(); }
+    else if (evt.key === '+' || evt.key === '=') { state.view.s *= 1.25; drawSvg(); }
+    else if (evt.key === '-' || evt.key === '_') { state.view.s /= 1.25; drawSvg(); }
+    else if (evt.key === 'g' || evt.key === 'G') {
+      state.view.showGrid = !state.view.showGrid;
+      var btn = $('tbGrid'); if (btn) btn.classList.toggle('on', state.view.showGrid);
+      drawSvg();
+    }
   }
 
   /* ============ 构配件统计 ============ */
@@ -1550,23 +1750,19 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     }
   }
   function canvasToWorld(evt) {
-    if (!geom) return null;
+    if (!entities.length) return null;
     var svg = $('svgCanvas');
     var rect = svg.getBoundingClientRect();
-    var scale = svg.viewBox.baseVal.width / rect.width;
-    var vx = (evt.clientX - rect.left) * scale;   // 图纸 x
-    var vy = (evt.clientY - rect.top) * scale;    // 图纸 y（向下）
-    // 反算真实：图纸坐标 → 世界
-    var g = geom;
-    var rx = (vx - g.ox) / g.k + g.bbReal.minX - g.padReal;
-    var ry = (g.sheet.h - vy - g.oy) / g.k + g.bbReal.minY - g.padReal;
-    return { x: rx, y: ry };
+    var W = rect.width, H = rect.height;
+    var v = state.view;
+    var x = v.cx + (evt.clientX - rect.left - W / 2) / v.s;
+    var y = -(v.cy + (evt.clientY - rect.top - H / 2) / v.s);
+    return { x: x, y: y };
   }
   function svgClick(evt) {
     if (!drawMode) return;
     var w = canvasToWorld(evt);
     if (!w) return;
-    // 吸附已有点？
     draftPts.push(w);
     overlayDraft();
   }
@@ -1577,7 +1773,6 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
   }
   function finishDraft() {
     if (draftPts.length >= 3) {
-      // 闭合：去除重复终点
       var arr = C.dedupePts(draftPts, 1);
       if (arr.length >= 3) {
         setPoly(arr, '手动绘制轮廓');
@@ -1594,33 +1789,16 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     renderAll();
   }
   function overlayDraft() {
-    if (!drawMode || !draftPts.length || !geom) return;
-    // 轻量预览：在 svg 中画一条辅助线（保存后统一 render）
+    if (!drawMode || !draftPts.length) return;
     var svg = $('svgCanvas');
-    var g = geom;
     var s = svg.innerHTML;
     var d = '';
     draftPts.forEach(function (p, i) {
-      var vx = (p.x - (g.bbReal.minX - g.padReal)) * g.k + g.ox;
-      var vy = g.sheet.h - ((p.y - (g.bbReal.minY - g.padReal)) * g.k + g.oy);
-      d += (i ? 'L' : 'M') + vx.toFixed(1) + ' ' + vy.toFixed(1);
+      d += (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + (-p.y).toFixed(1);
     });
-    s += '<path d="' + d + '" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,2" pointer-events="none"/>';
-    // 移除旧 preview
-    var i0 = s.indexOf('<!--draft-->');
-    if (i0 >= 0) {
-      var i1 = s.indexOf('<!--/draft-->');
-      if (i1 > i0) s = s.slice(0, i0) + s.slice(i1 + 13);
-    }
-    s = s + '<!--draft--><!--/draft-->';
-    // 简单替换方式：重新挂 preview path
-    var j0 = s.indexOf('<!--draft-->');
-    if (j0 >= 0) {
-      s = s.replace(/<!--draft-->.*<!--\/draft-->/, '<!--draft-->' + d.replace(/"/g, '') + '<!--/draft-->');
-    }
-    svg.innerHTML = s.replace(/<!--draft-->([^<]*)<!--\/draft-->/, function (m, dd) {
-      return '<path d="' + dd + '" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,2" pointer-events="none"/><circle cx="0" cy="0" r="0"/>';
-    });
+    var rep = '<path d="' + d + '" fill="none" stroke="#f59e0b" stroke-width="1.6" stroke-dasharray="5,3" pointer-events="none" vector-effect="non-scaling-stroke"/>';
+    s = s.replace(/<!--draft-->[\s\S]*?<!--\/draft-->/, '');
+    svg.innerHTML = s + '<!--draft-->' + rep + '<!--/draft-->';
   }
 
   /* ============ 键盘 ============ */
@@ -1667,15 +1845,22 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       try { $(id).addEventListener('change', renderAll); } catch (e) {}
     });
 
-    // 滚轮缩放 / 双击重置 / 拖拽平移（空格+拖拽）
+    // 滚轮缩放 / 双击重置 / 左键直接拖拽平移
     var wrap = $('canvasWrap');
     wrap.addEventListener('wheel', onWheel, { passive: false });
     wrap.addEventListener('mousedown', onMouseDown);
     wrap.addEventListener('dblclick', onCanvasDblClick);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
+
+    // 工具栏（cv-toolbar 仿 BraceCad）
+    function setGridBtn() { var b = $('tbGrid'); if (b) b.classList.toggle('on', state.view.showGrid); }
+    $('tbFit').onclick = function () { fitView(); drawSvg(); };
+    $('tbIn').onclick = function () { state.view.s *= 1.25; drawSvg(); };
+    $('tbOut').onclick = function () { state.view.s /= 1.25; drawSvg(); };
+    $('tbOne').onclick = function () { state.view.s = state.view.fitS; drawSvg(); };
+    $('tbGrid').onclick = function () { state.view.showGrid = !state.view.showGrid; setGridBtn(); drawSvg(); };
+    setGridBtn();
 
     // 容器尺寸变化时重画（保持 fit-content）
     if (window.ResizeObserver) {
