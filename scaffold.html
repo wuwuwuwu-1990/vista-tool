@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-page-node-id="uvMUHiTjZ3AoAkC2TBHV8p">
-<head data-page-node-id="zkaAxwjBGpzDTU2hbPYw4c">
-<meta charset="UTF-8" data-page-node-id="UIFdHWFcVxYbVDXBqOq1eE">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="dHhCuYHh85tdckJbK67s1F">
-<title>脚手架快绘CAD系统 v1.0.3</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E" data-page-node-id="yeChIbYOrPxBAIFfpzm6vt">
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脚手架快绘CAD系统 v1.0.4</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E">
 <style>
   :root{
     --bg:#eef4f8; --bg-2:#e6eef5; --bg-3:#d8e4ee;
@@ -220,148 +220,148 @@
   #toast.ok{background:var(--green)}
 </style>
 </head>
-<body data-page-node-id="gglUIt6Yj4uKCHDOCM1h1z">
+<body>
 
-<header data-page-node-id="2tTwNhBbWbVkrfOdy0qOGn">
-  <div class="logo" data-page-node-id="IW4mWf3o3Yw3zjfDVEMgqe">架</div>
-  <h1 data-page-node-id="jeE7NzMCMm4iB4Z7aM73i1">脚手架快绘CAD系统</h1>
-  <span class="ver" data-page-node-id="uF7cJI47QJtrgeNPAD44P3">v1.0.3</span>
-  <div class="sp" data-page-node-id="ayMfVOC29FoMvOSdypPMeY"></div>
-  <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）" data-page-node-id="tjzMm7SMo6h9q235OaZl7r">▦ 示例</button>
-  <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）" data-page-node-id="3VuIFQB0wWqAmfAy2OkNMC">📂 导入DXF</button>
-  <button class="tbtn green" id="btnPng" title="导出当前画面为 PNG（所见即所得）" data-page-node-id="bWxS9pQIASt4G5HeZhuacg">🖼 导出图片</button>
-  <button class="tbtn primary" id="btnDxf" title="导出双排脚手架平面图 DXF（CAD 可编辑）" data-page-node-id="MBywjXEBKsK5XAaBwlxBqV">⤓ 导出DXF</button>
-  <button class="tbtn ghost" id="btnAbout" title="关于" data-page-node-id="5FD67tniMR8iKIf2xKyMLA">?</button>
-  <input type="file" id="fileDxf" accept=".dxf" style="display:none" data-page-node-id="3c7bSTMd4hOuIHiN7zD54U">
+<header>
+  <div class="logo">架</div>
+  <h1>脚手架快绘CAD系统</h1>
+  <span class="ver">v1.0.4</span>
+  <div class="sp"></div>
+  <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）">▦ 示例</button>
+  <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）">📂 导入DXF</button>
+  <button class="tbtn green" id="btnPng" title="导出当前画面为 PNG（所见即所得）">🖼 导出图片</button>
+  <button class="tbtn primary" id="btnDxf" title="导出双排脚手架平面图 DXF（CAD 可编辑）">⤓ 导出DXF</button>
+  <button class="tbtn ghost" id="btnAbout" title="关于">?</button>
+  <input type="file" id="fileDxf" accept=".dxf" style="display:none">
 </header>
 
-<main data-page-node-id="4wAn28E0MRYRW2Pxt5i2eD">
+<main>
   <!-- ============ 左侧参数面板 ============ -->
-  <aside id="panel" data-page-node-id="GpAEeQbKXzIhhg9DYGngU8">
-    <div class="panel-sec" data-page-node-id="9htxaVJW84uwrBdGYDiBEC">
-      <h3 data-page-node-id="70GkTdVALce6CCsxS23DO1">轮廓数据</h3>
-      <div class="frow" data-page-node-id="ULfoTFeBuhtYqOFsgrjTO3"><label data-page-node-id="YZOGfNA2BsjowtvT1u6k4t">状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)" data-page-node-id="pYNtd8L0ZoE0VsAOCGy9xm">未导入</span></div>
-      <div class="frow full" data-page-node-id="OnlAP7QG1BCe1rJwWvk5N7"><label data-page-node-id="dzs64xp6lHF3p4fOIFTnwK">工程名称</label><input type="text" id="inProj" value="脚手架专项施工方案" maxlength="30" data-page-node-id="j5tyvEtALdbdZw7SP3HYE2"></div>
-      <div class="btnrow" data-page-node-id="2crWGJ39gTo7UiSdgYsoMw">
-        <button class="btn" id="btnDrawPoly" title="在画布点击绘制建筑轮廓" data-page-node-id="NWZAtfPgc7GxOkkTxLpR26">✏️ 绘制轮廓</button>
-        <button class="btn red" id="btnClearPoly" title="清除当前轮廓" data-page-node-id="E2VctcB0xGY9sfCTz3H5iU">清空</button>
+  <aside id="panel">
+    <div class="panel-sec">
+      <h3>轮廓数据</h3>
+      <div class="frow"><label>状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)">未导入</span></div>
+      <div class="frow full"><label>工程名称</label><input type="text" id="inProj" value="脚手架专项施工方案" maxlength="30"></div>
+      <div class="btnrow">
+        <button class="btn" id="btnDrawPoly" title="在画布点击绘制建筑轮廓">✏️ 绘制轮廓</button>
+        <button class="btn red" id="btnClearPoly" title="清除当前轮廓">清空</button>
       </div>
-      <div class="hint" data-page-node-id="Tc1U0nvI9poetp7nTmhAWi">导入DXF后自动识别<b data-page-node-id="rWYycfDISWAtPIE6Yxricg">面积最大</b>的闭合多段线/直线环作为建筑外轮廓。也可手动绘制多边形。</div>
+      <div class="hint">导入DXF后自动识别<b>面积最大</b>的闭合多段线/直线环作为建筑外轮廓。也可手动绘制多边形。</div>
     </div>
 
-    <div class="panel-sec" data-page-node-id="ynG9eUgFFxPRqS0KnqDveH">
-      <h3 data-page-node-id="4VEq7hWD39KUt5dhkbbhFQ">架体参数</h3>
-      <div class="frow" data-page-node-id="jHmRodhVu9TMeBrxg66FrB"><label data-page-node-id="s9RAKDoSVeK0wVFS9YnPX7">离墙距 a</label><input type="number" id="inA" value="300" min="100" max="800" step="50" data-page-node-id="j5eZBVmPZYOhmeGjlOeFwk"><span class="unit" data-page-node-id="lsu2OWYeeH2NkVB4SBQkop">mm</span></div>
-      <div class="frow" data-page-node-id="myAFa9qUp68ESkBdIksKqu"><label data-page-node-id="z6dmXDmoEuBoAglZhz7Dna">排距(横距) b</label><input type="number" id="inB" value="1050" min="700" max="1500" step="50" data-page-node-id="BvvkMqUGdUmMvoJmyHVdHH"><span class="unit" data-page-node-id="h5ZFEhIO7ReMVJ1hPHf8PE">mm</span></div>
-      <div class="frow" data-page-node-id="QhEXTT4ghdCwVVX5STSXHS"><label data-page-node-id="u9YxzBa0QKB62hm7AnjBzO">纵距 La</label><input type="number" id="inLa" value="1500" min="800" max="2000" step="100" data-page-node-id="7VqczK5CfLX4Ygv97fsqfW"><span class="unit" data-page-node-id="PvD9OB3Ep3iYr67of28vUi">mm</span></div>
-      <div class="frow" data-page-node-id="UTpzxCTTaodFQrJqmJkJkl"><label data-page-node-id="1ZJzvTyvS7WdkQ0FHPaNb6">立杆直径</label><input type="number" id="inD" value="48" min="20" max="100" step="1" data-page-node-id="7OJaFfvOuFfzoWUzixENGe"><span class="unit" data-page-node-id="krzCCL9OeIAv878YZJI4b2">mm</span></div>
+    <div class="panel-sec">
+      <h3>架体参数</h3>
+      <div class="frow"><label>离墙距 a</label><input type="number" id="inA" value="300" min="100" max="800" step="50"><span class="unit">mm</span></div>
+      <div class="frow"><label>排距(横距) b</label><input type="number" id="inB" value="1050" min="700" max="1500" step="50"><span class="unit">mm</span></div>
+      <div class="frow"><label>纵距 La</label><input type="number" id="inLa" value="1500" min="800" max="2000" step="100"><span class="unit">mm</span></div>
+      <div class="frow"><label>立杆直径</label><input type="number" id="inD" value="48" min="20" max="100" step="1"><span class="unit">mm</span></div>
     </div>
 
-    <div class="panel-sec" data-page-node-id="CXj3imFEajQfLEnGs32bYl">
-      <h3 data-page-node-id="AsNVGISRv6tZhmfGlfGg1i">布置选项</h3>
-      <label class="chk" data-page-node-id="7U1KnhqaRcck7kCXFYCkrq"><input type="checkbox" id="ckNo" data-page-node-id="HOGTfvjYw6qyUSpuGqdIMk"> 立杆编号</label>
-      <label class="chk" data-page-node-id="KBnz5VITfxaAwpHhDgGBik"><input type="checkbox" id="ckLian" data-page-node-id="6srqmHMwHCn8rBXpxMs3Em"> 连墙件标记 <small data-page-node-id="AeZsjYCV5tCvarYTAHYyBR">≤3跨/≤3步</small></label>
-      <label class="chk" data-page-node-id="HtbTCgd8g1GnmfhXnh8BVt"><input type="checkbox" id="ckDim" data-page-node-id="lDqQyL0LiyIZawtfBAirZK"> 尺寸标注</label>
-      <div class="frow" data-page-node-id="vcs8DxHtFpkzF1PxHxtidx"><label data-page-node-id="KRbRvMeQdB8AUCVQTfxumw">连墙件间距</label><input type="number" id="inLian" value="3" min="1" max="6" data-page-node-id="JZ0UkhyxEOSeNOUFXpWQBY"><span class="unit" data-page-node-id="jV70h5bkEQCxO2VHd69CFQ">跨</span></div>
+    <div class="panel-sec">
+      <h3>布置选项</h3>
+      <label class="chk"><input type="checkbox" id="ckNo"> 立杆编号</label>
+      <label class="chk"><input type="checkbox" id="ckLian"> 连墙件标记 <small>≤3跨/≤3步</small></label>
+      <label class="chk"><input type="checkbox" id="ckDim"> 尺寸标注</label>
+      <div class="frow"><label>连墙件间距</label><input type="number" id="inLian" value="3" min="1" max="6"><span class="unit">跨</span></div>
     </div>
 
-    <div class="panel-sec" data-page-node-id="hMWXC6vF9ojbEgq4kUPtmD">
-      <h3 data-page-node-id="CBCmmoI6mFYNKyaAvtezM0">图签</h3>
-      <label class="chk" data-page-node-id="fq1RlqoyLFwxRlPGSLF4lc"><input type="checkbox" id="ckTitle" data-page-node-id="Y5SJGE7NdnJttxVw9K2vt3"> 在画面右下角显示图签 <small data-page-node-id="PumUDaNAvYdd0DU3uHB7ij">（默认关）</small></label>
-      <div class="tb-field" data-page-node-id="GYD6fvFXd921wr2b9G9oHE"><label data-page-node-id="rP9qHeuHzh7IOHUYxhRDMp">图纸名称</label><input type="text" id="inDwName" value="双排脚手架平面布置图" maxlength="26" data-page-node-id="5sg6UUKHEvPxCl4a0h3vmr"></div>
-      <div class="tb-field" data-page-node-id="sdLerAy3VoCmpCSSBmODqw"><label data-page-node-id="IwWHWB2wBevHVaGCYxLwz1">设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12" data-page-node-id="Mo0CTZKiduYjNJQgzwjFGk"></div>
+    <div class="panel-sec">
+      <h3>图签</h3>
+      <label class="chk"><input type="checkbox" id="ckTitle"> 在画面右下角显示图签 <small>（默认关）</small></label>
+      <div class="tb-field"><label>图纸名称</label><input type="text" id="inDwName" value="双排脚手架平面布置图" maxlength="26"></div>
+      <div class="tb-field"><label>设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12"></div>
     </div>
-    <div class="hint" data-page-node-id="Pj36if3CEMdz1WEf5LNz5N">依据 <b data-page-node-id="ZU99j7E4z5k15HiN58uesd">GB55023-2022《施工脚手架通用规范》</b> 生成。<br data-page-node-id="t7mFvvCUiC7VKagrdrKRZH">图中 a=离墙距、b=排距、La=纵距。<br data-page-node-id="J8FTPPZlwQho3sZC2aWlyQ">画面可滚轮缩放、左键拖拽平移。</div>
+    <div class="hint">依据 <b>GB55023《施工脚手架通用规范》</b> 生成。<br>图中 a=离墙距、b=排距、La=纵距。<br>画面可滚轮缩放、左键拖拽平移。</div>
   </aside>
 
   <!-- ============ 画布 ============ -->
-  <div class="stage" data-page-node-id="MBRmmJDua8a4oyiAedlS8Z">
-    <div class="statbar" id="statbar" data-page-node-id="09VnmCYIceoa3YyG7qsHsl">
-      <span data-page-node-id="OgHYJBXE44RwGI2MLz0Bxh">轮廓: <b id="stPoly" data-page-node-id="v9ASqIF3ZJxbBhCFQHWrgz">-</b></span>
-      <span data-page-node-id="DCqtOao7eGlcGTFMElB6Wg">周长: <b id="stPerim" data-page-node-id="p1dxiL4EdsEfuofOD1T2fC">-</b> m</span>
-      <span data-page-node-id="kfCdGZ732EH24O31XoKoV7">立杆数: <b id="stPoles" data-page-node-id="WLIAt4VZgMqeuHtU3BK9gd">-</b></span>
-      <span data-page-node-id="LpiusvMJWobczAxpxsgv7S">列数: <b id="stCols" data-page-node-id="Jsd5P2cZsOakoZSbhMb2wz">-</b></span>
-      <span data-page-node-id="9UNwfoFX5TTceqyG7wiKc4">架体: a=<b id="stA" data-page-node-id="ODtJlaBd1e4x5JA9WNl0hT">300</b>mm · b=<b id="stB" data-page-node-id="4x3mDQdm7PRHMivQfIZsjo">1050</b>mm · La=<b id="stLa" data-page-node-id="ig0i3t0taFiCN3H6tQp61g">1500</b>mm</span>
+  <div class="stage">
+    <div class="statbar" id="statbar">
+      <span>轮廓: <b id="stPoly">-</b></span>
+      <span>周长: <b id="stPerim">-</b> m</span>
+      <span>立杆数: <b id="stPoles">-</b></span>
+      <span>列数: <b id="stCols">-</b></span>
+      <span>架体: a=<b id="stA">300</b>mm · b=<b id="stB">1050</b>mm · La=<b id="stLa">1500</b>mm</span>
     </div>
-    <div class="canvas-wrap" id="canvasWrap" data-page-node-id="EbCmxY9NluSXwNyriAo88W">
-      <svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 700" data-page-node-id="zAvQLkV7JY8IhufSq78rdp"></svg>
+    <div class="canvas-wrap" id="canvasWrap">
+      <svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 700"></svg>
       <!-- 左上角工具栏（仿 BraceCad） -->
-      <div class="cv-toolbar" id="cvToolbar" data-page-node-id="yUZFcZziVOvELHwkkKhxoS">
-        <button id="tbFit" title="适应窗口 (F)" data-page-node-id="5o60i8fA95HGe5z1L4W1EF">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="AUgpVJtIQc2UvQ4GXcibEj">
-            <path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4" data-page-node-id="46xL0rAr4zqR3TedmtpFl9"/>
+      <div class="cv-toolbar" id="cvToolbar">
+        <button id="tbFit" title="适应窗口 (F)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4"/>
           </svg>
         </button>
-        <button id="tbIn" title="放大" data-page-node-id="obdBDKGQGJX5iT6PuYdvxD">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="2Y8G5QiThI0eh1FHd5iAGi">
-            <circle cx="9" cy="9" r="5.5" data-page-node-id="xGcZpbQCFr7lcZDut0xUII"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4" data-page-node-id="Idyh62IouNSqJxFIPC6gd0"/>
+        <button id="tbIn" title="放大">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4"/>
           </svg>
         </button>
-        <button id="tbOut" title="缩小" data-page-node-id="FTpvrC9q6GE1eI18rs8U42">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="PwSSyMToZ3S24nzxZQnwrT">
-            <circle cx="9" cy="9" r="5.5" data-page-node-id="nMvEZRnMoHPqCUAtieO4h1"/><path d="M13 13l4 4M6.8 9h4.4" data-page-node-id="ByFsjzkuzHpawc3ESDDIYl"/>
+        <button id="tbOut" title="缩小">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M6.8 9h4.4"/>
           </svg>
         </button>
-        <span class="sp" data-page-node-id="GJRztbvPGBVrS0fpcNYos6"></span>
-        <button id="tbGrid" class="on" title="显示网格" data-page-node-id="k1a66iF8iDuLhu3e6JRHIn">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" data-page-node-id="2OBbZDnzBIlV2GSMZD6Sz2">
-            <path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14" data-page-node-id="KRQRXJWY6RC1aVjmU25Da6"/>
+        <span class="sp"></span>
+        <button id="tbGrid" class="on" title="显示网格">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14"/>
           </svg>
         </button>
-        <button id="tbOne" title="实际大小 (100%)" data-page-node-id="jFmNncdvEIaSBQuFs8Ntke">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-page-node-id="kLqxYJWDk4ILsh4LfQnll7">
-            <circle cx="10" cy="10" r="6" data-page-node-id="Z2T6OadBeRWpKzdxiiKBSJ"/><path d="M10 7v6M7 10h6" data-page-node-id="dmqUA8Mx05t8rc7zuSUIsS"/>
+        <button id="tbOne" title="实际大小 (100%)">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="10" cy="10" r="6"/><path d="M10 7v6M7 10h6"/>
           </svg>
         </button>
-        <span class="lbl" id="zoomInfo" data-page-node-id="AdlDvWfFYjo0NQYSEECQaD">100%</span>
+        <span class="lbl" id="zoomInfo">100%</span>
       </div>
       <!-- 图例 / 架体参数（HTML 浮层卡片，标题置顶，不随缩放挤压） -->
-      <div class="cv-info left" id="cvLegend" data-page-node-id="dE96LYlPBlkGTp6JpXzBp4"></div>
-      <div class="cv-info right" id="cvParams" data-page-node-id="r4hr3lOcwgA17X0mfZHeJ6"></div>
-      <div class="cv-tip" data-page-node-id="6CB9VQHE5wGoFS6O6FZ0Oj">滚轮缩放 · 左键拖拽平移 · 双击重置</div>
+      <div class="cv-info left" id="cvLegend"></div>
+      <div class="cv-info right" id="cvParams"></div>
+      <div class="cv-tip">滚轮缩放 · 左键拖拽平移 · 双击重置</div>
     </div>
   </div>
 </main>
 
 <!-- 统计模态 -->
-<div class="modal-mask" id="modalStat" data-page-node-id="2zANizRKDLfQl4Mo1EEnsm">
-  <div class="modal" style="min-width:460px" data-page-node-id="XivwQ57P3Ug4lXXQDLv5KR">
-    <h3 data-page-node-id="yfs1SqAnQUKnXIi91vXjws">构配件用量统计（估算）<span class="x" data-close="modalStat" data-page-node-id="mCdXYyblWAlu6efanBBEFx">×</span></h3>
-    <p class="desc" data-page-node-id="mA86taJOzWdDyrMxj69fSE">依据轮廓周长与架体参数估算，正式用量应以专项施工方案计算为准。</p>
-    <table class="st" id="statTable" data-page-node-id="GwmnWLYOAFIfioXLoyH09F"></table>
-    <div class="mbtn-row" data-page-node-id="BYviea7Z6FQRZ5nqxFBvC7"><button class="btn blue" data-close="modalStat" data-page-node-id="gimYVsGDIQmScnCPNkpDz8">关闭</button></div>
-    <div class="footer-note" data-page-node-id="xdI3ipgBsNdYRQhDB0Stf4">说明：连墙件按水平间距≤3跨、竖向间距≤3步(≤4.5m)梅花布置；剪刀撑沿外侧立面全长连续设置，与地面夹角45°~60°。立杆接长采用对接扣件。</div>
+<div class="modal-mask" id="modalStat">
+  <div class="modal" style="min-width:460px">
+    <h3>构配件用量统计（估算）<span class="x" data-close="modalStat">×</span></h3>
+    <p class="desc">依据轮廓周长与架体参数估算，正式用量应以专项施工方案计算为准。</p>
+    <table class="st" id="statTable"></table>
+    <div class="mbtn-row"><button class="btn blue" data-close="modalStat">关闭</button></div>
+    <div class="footer-note">说明：连墙件按水平间距≤3跨、竖向间距≤3步(≤4.5m)梅花布置；剪刀撑沿外侧立面全长连续设置，与地面夹角45°~60°。立杆接长采用对接扣件。</div>
   </div>
 </div>
 
 <!-- 关于模态 -->
-<div class="modal-mask" id="modalAbout" data-page-node-id="RIiW4QRrPxjtLjPWXsGEE7">
-  <div class="modal" style="min-width:440px" data-page-node-id="gHNGBm2MzmzWPONLYEatzF">
-    <h3 data-page-node-id="ls0rXT1EU04DbkVUykBBxF"><span data-page-node-id="FWJJk8CO4qQtPD8DTSgT3K"></span><span class="x" data-close="modalAbout" data-page-node-id="sNNW0mHDgQlAbqsW9RhR7F">×</span></h3>
-    <div class="about-logo" data-page-node-id="9v7kfX16MFtxvMsxtLh05g">架</div>
-    <h3 style="margin-bottom:2px" data-page-node-id="5lV6CeA6iPTK2fDssqmGSR">脚手架快绘CAD系统</h3>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px" data-page-node-id="P7xAkBIRAetNGlv6JtIEuH">Scaffold Quick-CAD <span class="about-ver" data-page-node-id="BYFXfLBgOc3a6sSvOPq5bu">v1.0.3</span></div>
-    <p class="desc" data-page-node-id="v7NhcugDBQX8GkflW0HPSS">
-      依据 <b data-page-node-id="XjE0VWFEgS3MEzCZG5vPRJ">GB55023-2022《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br data-page-node-id="gTAzEa3bzMfOpjk8bAR6Py">
+<div class="modal-mask" id="modalAbout">
+  <div class="modal" style="min-width:440px">
+    <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
+    <div class="about-logo">架</div>
+    <h3 style="margin-bottom:2px">脚手架快绘CAD系统</h3>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.4</span></div>
+    <p class="desc">
+      依据 <b>GB55023《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br>
       ① 导入DXF / 手动绘制建筑外轮廓；② 自动布置内/外两排立杆与阳角外侧立杆（空心圆示意，两排径向对齐、用线连接表示连接钢管）；③ 离墙距 a / 排距 b / 纵距 La 可调即时重排；④ 可选尺寸标注、立杆编号、连墙件示意；⑤ 画面无图框、画布铺网格，左上工具栏适应/缩放/网格，滚轮缩放、左键拖拽平移；图例与架体参数以卡片形式浮于画面左上/右上，不随缩放变形；⑥ 导出 PNG（所见即所得）与 CAD 可编辑 DXF（R2000）。
     </p>
-    <table class="st" data-page-node-id="YQtxv6xzIHI2Dc5Bw1g86F">
-      <tr data-page-node-id="ppet3MrqGjj4DEXdCDoASq"><th style="width:120px" data-page-node-id="j5sc2wSB8ApB8qrzspJ3vq">规范依据</th><td data-page-node-id="V8uFDeuQsQopVsl7bmh9lB">GB55023-2022《施工脚手架通用规范》（全文强制）</td></tr>
-      <tr data-page-node-id="iLMrUxWu8KSPrVAThnf1jY"><th data-page-node-id="GIcypTaPLVakpN4LjoHFxx">默认参数</th><td data-page-node-id="gESpB7IeAMfhKvwAlktOww">a=300 · b=1050 · La=1500 · φ48×3.6 钢管</td></tr>
-      <tr data-page-node-id="stjYbSMJfA4oUtjcBnxl5F"><th data-page-node-id="pKZ5JpNLBcjW5xMGyhgGTB">强条要点</th><td data-page-node-id="PvzGcywI7S4DobylenCc7a">连墙件水平≤3跨/竖向≤3步；开口型两端必须设连墙件；剪刀撑45°~60°</td></tr>
-      <tr data-page-node-id="zDFTUd9ND9JKHA64KlFv3F"><th data-page-node-id="ov6ku9wdypvz6SkStoKnfV">导出格式</th><td data-page-node-id="pzxUbCYY6yqeHklThraLLk">PNG 图片 / DXF R2000（AutoCAD、浩辰、中望均可打开编辑）</td></tr>
+    <table class="st">
+      <tr><th style="width:120px">规范依据</th><td>GB55023《施工脚手架通用规范》（全文强制）</td></tr>
+      <tr><th>默认参数</th><td>a=300 · b=1050 · La=1500 · φ48×3.6 钢管</td></tr>
+      <tr><th>强条要点</th><td>连墙件水平≤3跨/竖向≤3步；开口型两端必须设连墙件；剪刀撑45°~60°</td></tr>
+      <tr><th>导出格式</th><td>PNG 图片 / DXF R2000（AutoCAD、浩辰、中望均可打开编辑）</td></tr>
     </table>
-    <div class="mbtn-row" data-page-node-id="VPxIfEpB3isPJdcIr2XDHj"><button class="btn blue" data-close="modalAbout" data-page-node-id="BT8I1hwv2P0U4YAE3zb9r4">知道了</button></div>
+    <div class="mbtn-row"><button class="btn blue" data-close="modalAbout">知道了</button></div>
   </div>
 </div>
 
-<div id="loading" data-page-node-id="lqlECXBEXQakT7XjDOi6dg"><div class="load-card" data-page-node-id="nwvK4Wu6WmHh3dBQ5vAnFD"><div class="spin" data-page-node-id="imG98fTuDEq38NPSmtnm8h"></div><p id="loadMsg" data-page-node-id="P4EshEz1vwa15Mnp2bqtmB">处理中…</p></div></div>
-<div id="toast" data-page-node-id="8BdU48m7NxCAGe7CA9bAFg"></div>
+<div id="loading"><div class="load-card"><div class="spin"></div><p id="loadMsg">处理中…</p></div></div>
+<div id="toast"></div>
 
 <script>
 /* =====================================================================
    脚手架快绘CAD系统 — 核心几何与布局引擎（纯 JS，无 DOM）
-   GB55023-2022《施工脚手架通用规范》· 双排脚手架平面布置生成
+   GB55023《施工脚手架通用规范》· 双排脚手架平面布置生成
    坐标：世界坐标 mm，Y 向上（与 DXF 一致）。图纸输出时再按比例缩放。
    ===================================================================== */
 (function (global) {
@@ -516,22 +516,23 @@
         }
         innerPoles.push({ x: pi.x, y: pi.y, edge: i, t: t, corner: isCorner });
         outerPoles.push({ x: po.x, y: po.y, edge: i, t: t, corner: isCorner });
-        var strong = null;
+        // 角点列：凸角外排立杆直接落在外环角点（角部加强立杆位置）；
+        // 凹角不存在外侧加强，沿内环边外法线方向偏置 b 作为外排立杆。
+        var poOut;
+        var isConvex = false;
         if (isCorner) {
-          // 阳角（建筑外凸角）外侧增设“转角立杆”：位置 = 外环 miter 顶点 outerRing[i]，
-          // 与外排环线恰好闭合；凹角（内凹处）外侧无墙面，不增设。
-          var vp = poly[(i - 1 + m) % m], vc = poly[i], vn = poly[(i + 1) % m];
-          var cr = (vc.x - vp.x) * (vn.y - vc.y) - (vc.y - vp.y) * (vn.x - vc.x); // CCW 凸角 >0
-          if (cr > 0) {
-            strong = { x: outerRing[i].x, y: outerRing[i].y };
-          }
+          var vp2 = poly[(i - 1 + m) % m], vc2 = poly[i], vn2 = poly[(i + 1) % m];
+          var cr2 = (vc2.x - vp2.x) * (vn2.y - vc2.y) - (vc2.y - vp2.y) * (vn2.x - vc2.x); // CCW 凸角 >0
+          if (cr2 > 0) { poOut = { x: outerRing[i].x, y: outerRing[i].y }; isConvex = true; }
         }
+        if (!poOut) poOut = { x: pi.x + n.x * b, y: pi.y + n.y * b };
         cols.push({
           inner: { x: pi.x, y: pi.y },
-          outer: { x: po.x, y: po.y },
+          outer: { x: poOut.x, y: poOut.y },
           align: cols.length,
           corner: isCorner,
-          strong: strong
+          edge: i,
+          convex: isConvex
         });
       }
     }
@@ -561,7 +562,10 @@
     ok.push(['外排杆', lay.outerPoles.length > 30]);
     ok.push(['列数', lay.columns.length > 30]);
     ok.push(['角点列', lay.columns.filter(function (c) { return c.corner; }).length === 4]);
-    ok.push(['角点加强', lay.columns.filter(function (c) { return c.corner && c.strong; }).length === 4]);
+    ok.push(['凸角外排对齐外环角点', lay.columns.filter(function (c) { return c.corner && c.convex; }).length === 4 &&
+      lay.columns.filter(function (c) { return c.corner && c.convex; }).every(function (c) {
+        return Math.hypot(c.outer.x - lay.outerRing[c.edge].x, c.outer.y - lay.outerRing[c.edge].y) < 1;
+      })]);
     // 外扩验证：内环 bbox 应大于原
     var ib = polyBBox(lay.innerRing), ob = polyBBox(lay.outerRing);
     ok.push(['外扩', ob.maxX > ib.maxX && ob.maxY > ib.maxY]);
@@ -597,7 +601,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
 </script>
 <script>
 /* =====================================================================
-   脚手架快绘CAD系统 v1.0.3 — 主逻辑（UI/交互/DXF解析/渲染/导出）
+   脚手架快绘CAD系统 v1.0.4 — 主逻辑（UI/交互/DXF解析/渲染/导出）
    依赖：ScaffoldCore（几何）、DXF_SKEL（骨架模板，构建期注入）
    坐标系约定：
      - 几何世界坐标系 = 世界 mm（Y 向上，与 DXF 一致）
@@ -988,18 +992,12 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       E('line', { x1: pi.x, y1: pi.y, x2: po.x, y2: po.y, layer: LAYER.ROWLN, lw: 0.2 });
     });
 
-    /* --- 4. 立杆（空心圆圈示意；内外排统一大小颜色） --- */
-    var poleR = Math.max(0.7, (d.d / 2) * k);
+    /* --- 4. 立杆（空心圆圈示意；内外排统一大小颜色；凸角外排=外环角点） --- */
+    var poleR = Math.max(1.4, (d.d / 2) * k);
     lay.columns.forEach(function (col) {
       var pi = P(col.inner), po = P(col.outer);
       E('circle', { cx: pi.x, cy: pi.y, r: poleR, layer: LAYER.POLE, fill: false, lw: 0.3 });
       E('circle', { cx: po.x, cy: po.y, r: poleR, layer: LAYER.POLE, fill: false, lw: 0.3 });
-    });
-    /* --- 4.5 阳角外侧转角立杆（凸角外环顶点处，与普通立杆同样式空心圆，随布置默认补齐） --- */
-    lay.columns.forEach(function (col) {
-      if (!(col.corner && col.strong)) return;
-      var ps = P(col.strong);
-      E('circle', { cx: ps.x, cy: ps.y, r: poleR, layer: LAYER.POLE, fill: false, lw: 0.3 });
     });
     // 手动杆
     state.manual.forEach(function (m) {
@@ -1234,7 +1232,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       '<div class="r">纵距 La = ' + Math.round(d.La) + ' mm</div>' +
       '<div class="r">立杆 φ' + Math.round(d.d) + '×3.6 · 连墙≤3跨3步</div>' +
       '<div class="r">剪刀撑 45°~60° 沿全高连续</div>' +
-      '<div class="r">比例 ' + scaleText + ' · GB55023-2022</div>';
+      '<div class="r">比例 ' + scaleText + ' · GB55023</div>';
   }
 
   /* ============ 计算"图形"实体 bbox（不含图例/图签块，用于 legend/titleBlock 定位） ============ */
@@ -1404,18 +1402,20 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
           '" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"' +
           (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
       } else if (e.t === 'circle') {
-        var rPx = Math.max(0.6, e.r * pxScale);
+        // 圆 r 在图纸 mm（viewBox 用户单位）→ 与几何等比缩放；线宽靠 vector-effect=non-scaling-stroke 保持屏幕像素恒定
+        var rU = e.r;
         if (e.fill) {
-          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + rPx.toFixed(2) + '" fill="' + col + '"' +
+          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + rU.toFixed(2) + '" fill="' + col + '"' +
             (e.lw ? ' stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '" vector-effect="non-scaling-stroke"' : '') + '/>';
         } else {
-          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + rPx.toFixed(2) + '" fill="none" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
+          s += '<circle cx="' + e.cx.toFixed(2) + '" cy="' + (-e.cy).toFixed(2) + '" r="' + rU.toFixed(2) + '" fill="none" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
             (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' vector-effect="non-scaling-stroke"/>';
         }
       } else if (e.t === 'text') {
+        // 字号用图纸 mm（用户单位）→ 随 viewBox 等比；最小 1mm 保证可读
+        var fsU = Math.max(1, e.h);
         var anchor = e.align === 'c' ? 'middle' : (e.align === 'r' ? 'end' : 'start');
-        var fsPx = Math.max(8, e.h * pxScale);
-        s += '<text x="' + e.x.toFixed(2) + '" y="' + (-e.y).toFixed(2) + '" font-size="' + fsPx.toFixed(2) + '" fill="' + col + '" text-anchor="' + anchor + '">' + escXml(e.str) + '</text>';
+        s += '<text x="' + e.x.toFixed(2) + '" y="' + (-e.y).toFixed(2) + '" font-size="' + fsU.toFixed(2) + '" fill="' + col + '" text-anchor="' + anchor + '">' + escXml(e.str) + '</text>';
       }
     });
     svg.innerHTML = s;
