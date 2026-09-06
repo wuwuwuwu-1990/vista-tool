@@ -276,7 +276,7 @@
        background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 8px 22px var(--gs);margin-bottom:14px;}
   .secret-panel .sp-card .ic svg{width:24px;height:24px;}
   .secret-panel .sp-card h4{font-size:15.5px;font-weight:600;margin-bottom:7px;color:#eef2fb;line-height:1.4;}
-  .secret-panel .sp-card p{font-size:12px;color:rgba(238,242,251,.6);line-height:1.7;flex:1;}
+  .secret-panel .sp-card p{font-size:12px;color:rgba(238,242,251,.6);line-height:1.7;flex:1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
   .secret-panel .sp-card .tag{margin-top:14px;font-size:11px;padding:4px 12px;border-radius:20px;align-self:flex-start;
        border:1px solid var(--cb);color:var(--cc);background:var(--cbg);}
   .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
@@ -665,7 +665,7 @@ var SECRET_TOOLS = [
   },
   {
     name: '渝居优选 v1.3.19',
-    desc: '重庆主城智能选房（十大板块版）：十大板块深度分析 + 十维综合评分 + 金福云航拍实景（自动登录+重登+新窗口兜底）+ 高德地图 SDK 交互底图（内置 Key 开箱即用、授权域名生效，外站自动回退防滥用，卫星/标准切换+小区标注）+ 已选房源导航。',
+    desc: '重庆主城智能选房：十大板块深度分析+十维综合评分，金福云航拍实景自动登录，高德地图底图（内置Key+小区标注）+已选房源导航。',
     href: 'yjyx.html', upd: '09-05',
     g1: '#22c55e', g2: '#14b8a6', gs: 'rgba(34,197,94,.4)',
     tag: 'v1.3.19',
@@ -673,7 +673,7 @@ var SECRET_TOOLS = [
   },
   {
     name: '渝居优选·手机版',
-    desc: '渝居优选手机适配版 v1.3.24-m：关于/Key 弹窗恢复深色玻璃风格（与主界面协调，修复浅绿底文字看不清）；航拍全屏与按钮组智印绿风格；顶栏适配状态栏；航拍「🔑 自动登录」；高德内置 Key + POI 精确定位。',
+    desc: '渝居优选手机适配版：深色玻璃弹窗、航拍全屏智印绿风格、顶栏适配状态栏、自动登录、高德内置 Key+POI 定位。',
     href: 'yjyx-m.html', upd: '09-05',
     g1: '#14b8a6', g2: '#0ea5e9', gs: 'rgba(20,184,166,.4)',
     tag: '手机版',
@@ -681,7 +681,7 @@ var SECRET_TOOLS = [
   },
   {
     name: '房览速记 v1.0.27',
-    desc: '抖音/安居客等平台房源随手记：内置云端同步令牌（打开即自动拉取最新·记录级合并·多端不丢数据）；修复详情弹窗滚动时背景主页面跟随滚动（锁定背景）；两行精简卡、玻璃风格弹窗。',
+    desc: '抖音/安居客房源随手记：内置云端令牌打开即同步（记录级合并·多端不丢）；修复弹窗滚动背景联动；两行精简卡玻璃弹窗。',
     href: 'fanglian.html', upd: '09-05',
     g1: '#14b8a6', g2: '#0d9488', gs: 'rgba(20,184,166,.4)',
     tag: 'v1.0.27',
@@ -705,7 +705,7 @@ var SECRET_TOOLS = [
   }
   ,{
     name: '金福云VR自动登录入口 v1.1',
-    desc: '金福云航拍/个人主页自动登录直达：内置账号自动 POST 登录，登录成功自动跳转目标页；浏览器拦截第三方 Cookie 时支持新窗口兜底一键登录。默认打开 people?uid=17065，支持 ?uid= 自定义。v1.1 提速：预连接 + fetch 静默登录，进入主页面更快。',
+    desc: '金福云航拍/个人主页自动登录直达：内置账号 POST 登录即跳转，预连接+fetch 静默提速，支持 ?uid= 自定义主页。',
     href: 'jinfuyun_entry.html', upd: '09-02',
     g1: '#22d3ee', g2: '#a78bfa', gs: 'rgba(34,211,238,.4)',
     tag: 'v1.1',
