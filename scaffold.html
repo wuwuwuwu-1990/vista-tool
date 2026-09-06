@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脚手架快绘CAD系统 v1.0.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --blue:#2563eb; --blue2:#1d4ed8; --bg:#f1f5f9; --card:#ffffff; --line:#dbe2ea;
+    --txt:#0f172a; --sub:#5b6b7f; --green:#16a34a; --red:#dc2626; --amber:#d97706;
+    --dark:#0b1220; --panel-w:270px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--txt); overflow:hidden; font-size:14px;
+  }
+  /* ===== 顶栏 ===== */
+  header{
+    height:52px; background:var(--dark); color:#fff; display:flex; align-items:center;
+    padding:0 16px; gap:12px; box-shadow:0 2px 10px rgba(0,0,0,.15); position:relative; z-index:5;
+  }
+  header .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#2563eb);
+    display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+  header h1{font-size:16px;font-weight:600;letter-spacing:.5px}
+  header .ver{background:rgba(255,255,255,.14);padding:2px 8px;border-radius:20px;font-size:11px;color:#cfe2ff}
+  header .sp{flex:1}
+  .tbtn{
+    border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;
+    padding:6px 13px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;gap:6px;align-items:center;
+    transition:.15s;white-space:nowrap;font-family:inherit;
+  }
+  .tbtn:hover{background:rgba(255,255,255,.16)}
+  .tbtn.primary{background:var(--blue);border-color:var(--blue)}
+  .tbtn.primary:hover{background:var(--blue2)}
+  .tbtn.green{background:var(--green);border-color:var(--green)}
+  .tbtn.green:hover{filter:brightness(1.1)}
+  .tbtn.ghost{border-color:transparent;background:transparent}
+  .tbtn.ghost:hover{background:rgba(255,255,255,.1)}
+  .tbtn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* ===== 主体 ===== */
+  main{display:flex;height:calc(100% - 52px)}
+  /* 参数面板 */
+  aside{
+    width:var(--panel-w);min-width:var(--panel-w);background:var(--card);border-right:1px solid var(--line);
+    overflow-y:auto;padding:12px;
+  }
+  .panel-sec{margin-bottom:14px}
+  .panel-sec h3{
+    font-size:12px;color:var(--sub);font-weight:600;margin-bottom:8px;letter-spacing:1px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .panel-sec h3::before{content:"";width:3px;height:12px;background:var(--blue);border-radius:2px}
+  .frow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .frow label{font-size:13px;color:var(--txt);flex:0 0 74px;white-space:nowrap}
+  .frow label small{color:var(--sub);font-size:11px}
+  .frow input[type=number],.frow input[type=text],.frow select{
+    flex:1;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:13px;
+    font-family:inherit;background:#fff;color:var(--txt);min-width:0;
+  }
+  .frow input:focus,.frow select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+  .frow .unit{font-size:11px;color:var(--sub);flex:0 0 auto}
+  .frow.full{flex-direction:column;align-items:stretch}
+  .frow.full label{flex:none;margin-bottom:4px}
+  .chk{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:7px;cursor:pointer}
+  .chk input{accent-color:var(--blue);width:15px;height:15px}
+  .btn{
+    border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;
+    font-size:13px;color:var(--txt);transition:.15s;font-family:inherit;display:flex;align-items:center;gap:6px;justify-content:center;
+  }
+  .btn:hover{border-color:var(--blue);color:var(--blue)}
+  .btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.blue:hover{background:var(--blue2)}
+  .btn.green{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.red{background:#fff;border-color:#fecaca;color:var(--red)}
+  .btn.red:hover{background:#fef2f2;border-color:var(--red)}
+  .btnrow{display:flex;gap:6px;margin-bottom:10px}
+  .btnrow .btn{flex:1}
+  .sep{height:1px;background:var(--line);margin:12px 0}
+  .hint{font-size:11px;color:var(--sub);line-height:1.6;background:#f8fafc;border:1px dashed var(--line);border-radius:6px;padding:6px 8px;margin-top:8px}
+
+  /* 标题栏输入 */
+  .tb-field{margin-bottom:7px}
+  .tb-field label{display:block;font-size:11px;color:var(--sub);margin-bottom:3px}
+  .tb-field input{width:100%;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit}
+
+  /* 画布区 */
+  .stage{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);padding:10px 10px 10px 10px;gap:8px}
+  .statbar{
+    display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-radius:9px;padding:7px 14px;font-size:12px;color:var(--sub);flex-wrap:wrap;flex:0 0 auto;
+  }
+  .statbar b{color:var(--txt);font-weight:600}
+  .statbar .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+  .canvas-wrap{
+    flex:1;background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden;
+    position:relative;display:flex;align-items:center;justify-content:center;min-height:0;
+  }
+  #svgCanvas{max-width:100%;max-height:100%;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+  .zoomtip{position:absolute;right:10px;bottom:8px;font-size:11px;color:#94a3b8;user-select:none}
+
+  /* 加载遮罩 */
+  #loading{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:99}
+  #loading.on{display:flex}
+  .load-card{background:#fff;border-radius:14px;padding:26px 34px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .spin{width:42px;height:42px;border:4px solid #e2e8f0;border-top-color:var(--blue);border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .load-card p{font-size:14px;color:var(--txt)}
+
+  /* 模态 */
+  .modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal-mask.on{display:flex}
+  .modal{background:#fff;border-radius:14px;min-width:420px;max-width:560px;max-height:82vh;overflow:auto;
+    box-shadow:0 24px 70px rgba(0,0,0,.3);padding:20px 22px;animation:pop .18s ease}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h3{font-size:16px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+  .modal .x{cursor:pointer;color:var(--sub);font-size:20px;line-height:1;padding:2px 6px;border-radius:6px}
+  .modal .x:hover{background:#f1f5f9;color:var(--txt)}
+  .modal .desc{color:var(--sub);font-size:13px;margin-bottom:14px;line-height:1.7}
+  table.st{width:100%;border-collapse:collapse;font-size:13px}
+  table.st th,table.st td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+  table.st th{background:#f8fafc;font-weight:600;font-size:12px;color:var(--sub)}
+  table.st td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .mbtn-row{display:flex;gap:8px;margin-top:16px}
+  .mbtn-row .btn{flex:1}
+  .footer-note{margin-top:12px;font-size:11px;color:#94a3b8;line-height:1.7}
+  .about-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;margin-bottom:10px}
+  .about-ver{color:var(--blue);font-weight:600}
+  /* toast */
+  #toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;
+    padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;z-index:120;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:80vw}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.err{background:#b91c1c}
+  #toast.ok{background:#15803d}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">架</div>
+  <h1>脚手架快绘CAD系统</h1>
+  <span class="ver">v1.0.0</span>
+  <div class="sp"></div>
+  <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（矩形）">▦ 示例</button>
+  <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）">📂 导入DXF</button>
+  <button class="tbtn green" id="btnPng" title="将当前平面图导出为 PNG 图片">🖼 导出图片</button>
+  <button class="tbtn primary" id="btnDxf" title="导出双排脚手架平面图 DXF（CAD 可编辑）">⤓ 导出DXF</button>
+  <button class="tbtn ghost" id="btnAbout" title="关于">?</button>
+  <input type="file" id="fileDxf" accept=".dxf" style="display:none">
+</header>
+
+<main>
+  <!-- ============ 左侧参数面板 ============ -->
+  <aside id="panel">
+    <div class="panel-sec">
+      <h3>轮廓数据</h3>
+      <div class="frow"><label>状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)">未导入</span></div>
+      <div class="frow full"><label>工程名称</label><input type="text" id="inProj" value="脚手架专项施工方案" maxlength="30"></div>
+      <div class="btnrow">
+        <button class="btn" id="btnDrawPoly" title="在画布点击绘制建筑轮廓">✏️ 绘制轮廓</button>
+        <button class="btn red" id="btnClearPoly" title="清除当前轮廓">清空</button>
+      </div>
+      <div class="hint">导入DXF后自动识别<b>面积最大</b>的闭合多段线/直线环作为建筑外轮廓。也可手动绘制多边形。</div>
+    </div>
+
+    <div class="panel-sec">
+      <h3>架体参数</h3>
+      <div class="frow"><label>离墙距 a</label><input type="number" id="inA" value="300" min="100" max="800" step="50"><span class="unit">mm</span></div>
+      <div class="frow"><label>排距(横距) b</label><input type="number" id="inB" value="1050" min="700" max="1500" step="50"><span class="unit">mm</span></div>
+      <div class="frow"><label>纵距 La</label><input type="number" id="inLa" value="1500" min="800" max="2000" step="100"><span class="unit">mm</span></div>
+      <div class="frow"><label>立杆直径</label><input type="number" id="inD" value="48" min="20" max="100" step="1"><span class="unit">mm</span></div>
+    </div>
+
+    <div class="panel-sec">
+      <h3>布置选项</h3>
+      <label class="chk"><input type="checkbox" id="ckNo" checked> 立杆编号</label>
+      <label class="chk"><input type="checkbox" id="ckLian" checked> 连墙件标记（≤3跨/≤3步）</label>
+      <label class="chk"><input type="checkbox" id="ckJd" checked> 转角加强杆示意</label>
+      <label class="chk"><input type="checkbox" id="ckDim" checked> 尺寸标注</label>
+      <div class="frow"><label>连墙件间距</label><input type="number" id="inLian" value="3" min="1" max="6"><span class="unit">跨</span></div>
+    </div>
+
+    <div class="panel-sec">
+      <h3>标题栏 &amp; 图框</h3>
+      <div class="tb-field"><label>图纸名称</label><input type="text" id="inDwName" value="双排脚手架平面布置图" maxlength="26"></div>
+      <div class="tb-field"><label>设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12"></div>
+      <div class="frow"><label>比例</label>
+        <select id="inScale">
+          <option value="auto" selected>自动适配</option>
+          <option value="1:50">1:50</option>
+          <option value="1:100">1:100</option>
+          <option value="1:150">1:150</option>
+          <option value="1:200">1:200</option>
+        </select>
+      </div>
+      <div class="frow"><label>图幅</label>
+        <select id="inSheet">
+          <option value="A2" selected>A2 (594×420)</option>
+          <option value="A3">A3 (420×297)</option>
+        </select>
+      </div>
+    </div>
+    <div class="hint">依据 GB55023-2022《施工脚手架通用规范》生成。<br>图中 a=离墙距、b=排距、La=纵距。</div>
+  </aside>
+
+  <!-- ============ 画布 ============ -->
+  <div class="stage">
+    <div class="statbar" id="statbar">
+      <span>轮廓: <b id="stPoly">-</b></span>
+      <span>周长: <b id="stPerim">-</b> m</span>
+      <span>内排立杆: <b id="stInner">-</b></span>
+      <span>外排立杆: <b id="stOuter">-</b></span>
+      <span style="display:flex;align-items:center"><span class="dot" style="background:#2563eb"></span>内排</span>
+      <span style="display:flex;align-items:center"><span class="dot" style="background:#dc2626"></span>外排</span>
+      <span style="display:flex;align-items:center"><span class="dot" style="background:#94a3b8"></span>轮廓</span>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap">
+      <svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg" width="900" height="600"></svg>
+      <div class="zoomtip">滚轮缩放 · 空格拖拽平移</div>
+    </div>
+  </div>
+</main>
+
+<!-- 统计模态 -->
+<div class="modal-mask" id="modalStat">
+  <div class="modal" style="min-width:460px">
+    <h3>构配件用量统计（估算）<span class="x" data-close="modalStat">×</span></h3>
+    <p class="desc">依据轮廓周长与架体参数估算，正式用量应以专项施工方案计算为准。</p>
+    <table class="st" id="statTable"></table>
+    <div class="mbtn-row"><button class="btn blue" data-close="modalStat">关闭</button></div>
+    <div class="footer-note">说明：连墙件按水平间距≤3跨、竖向间距≤3步(≤4.5m)梅花布置；剪刀撑沿外侧立面全长连续设置，与地面夹角45°~60°。立杆接长采用对接扣件。</div>
+  </div>
+</div>
+
+<!-- 关于模态 -->
+<div class="modal-mask" id="modalAbout">
+  <div class="modal" style="min-width:440px">
+    <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
+    <div class="about-logo">架</div>
+    <h3 style="margin-bottom:2px">脚手架快绘CAD系统</h3>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.0</span></div>
+    <p class="desc">
+      依据 <b>GB55023-2022《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br>
+      ① 导入DXF / 手动绘制建筑外轮廓；② 自动布置内、外两排立杆（离墙距 a、排距 b、纵距 La 可调即时重排）；③ 尺寸标注、立杆编号、连墙件与转角加强示意；④ 图框标题栏 + 构配件用量统计；⑤ 导出高清 PNG 与 CAD 可编辑 DXF（R2000）。
+    </p>
+    <table class="st">
+      <tr><th style="width:120px">规范依据</th><td>GB55023-2022《施工脚手架通用规范》（全文强制）</td></tr>
+      <tr><th>默认参数</th><td>a=300 · b=1050 · La=1500 · φ48×3.6 钢管</td></tr>
+      <tr><th>强条要点</th><td>连墙件水平≤3跨/竖向≤3步；开口型两端必须设连墙件；剪刀撑45°~60°</td></tr>
+      <tr><th>导出格式</th><td>PNG 图片 / DXF R2000（AutoCAD、浩辰、中望均可打开编辑）</td></tr>
+    </table>
+    <div class="mbtn-row"><button class="btn blue" data-close="modalAbout">知道了</button></div>
+  </div>
+</div>
+
+<div id="loading"><div class="load-card"><div class="spin"></div><p id="loadMsg">处理中…</p></div></div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   脚手架快绘CAD系统 — 核心几何与布局引擎（纯 JS，无 DOM）
+   GB55023-2022《施工脚手架通用规范》· 双排脚手架平面布置生成
+   坐标：世界坐标 mm，Y 向上（与 DXF 一致）。图纸输出时再按比例缩放。
+   ===================================================================== */
+(function (global) {
+  'use strict';
+
+  /* ---------- 基础几何 ---------- */
+  function signedArea(pts) { // 有向面积，>0 = CCW
+    var s = 0;
+    for (var i = 0; i < pts.length; i++) {
+      var a = pts[i], b = pts[(i + 1) % pts.length];
+      s += a.x * b.y - b.x * a.y;
+    }
+    return s / 2;
+  }
+  function ensureCCW(pts) {
+    return signedArea(pts) > 0 ? pts : pts.slice().reverse();
+  }
+  function segLen(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
+  function dedupePts(pts, tol) { // 去掉重复/过近点
+    tol = tol || 1e-6;
+    var out = [];
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      if (!out.length || segLen(out[out.length - 1], p) > tol) out.push(p);
+    }
+    // 首尾若重合，去掉尾（保持开环的点列）
+    if (out.length > 2 && segLen(out[0], out[out.length - 1]) <= tol) out.pop();
+    return out;
+  }
+  function closePoly(pts) { // 返回闭合多边形（首尾相同则去掉尾点）
+    var d = dedupePts(pts, 0.5);
+    return d;
+  }
+  function polyPerim(pts) {
+    var s = 0;
+    for (var i = 0; i < pts.length; i++) {
+      s += segLen(pts[i], pts[(i + 1) % pts.length]);
+    }
+    return s;
+  }
+  function polyArea(pts) { return Math.abs(signedArea(pts)); }
+  function polyBBox(pts) {
+    var minX = 1e18, minY = 1e18, maxX = -1e18, maxY = -1e18;
+    pts.forEach(function (p) {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    });
+    return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+  }
+  /* 两直线交点：l1 过 p1 方向 v1，l2 过 p3 方向 v2；平行返回 null */
+  function lineIntersect(p1, v1, p3, v2) {
+    var den = v1.x * v2.y - v1.y * v2.x;
+    if (Math.abs(den) < 1e-9) return null;
+    var t = ((p3.x - p1.x) * v2.y - (p3.y - p1.y) * v2.x) / den;
+    return { x: p1.x + t * v1.x, y: p1.y + t * v1.y };
+  }
+  /* 单位向量 */
+  function unit(dx, dy) {
+    var L = Math.hypot(dx, dy) || 1;
+    return { x: dx / L, y: dy / L };
+  }
+  /* 有向线段 ab 的左法线（单位） */
+  function leftNormal(a, b) {
+    var u = unit(b.x - a.x, b.y - a.y);
+    return { x: -u.y, y: u.x };
+  }
+
+  /* ---------- 多边形等距外扩（miter offset） ----------
+     对 CCW 多边形向外偏移 d（d>0 外扩，d<0 内缩）。
+     每边向外平移 d，相邻边求交形成新顶点。
+     凹角（法线相对外）可能自交——首版对典型凸/浅凹轮廓可靠。 */
+  function offsetPoly(pts, d) {
+    var n = pts.length;
+    if (n < 3) return pts.slice();
+    // 每条边的外法线（CCW 的外侧 = 右法线；用 左法线 取反）
+    var norms = [], segs = [];
+    for (var i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n];
+      var ln = leftNormal(a, b);          // 左法线（CCW 指向内部? 验证）
+      // CCW: 内部在边左侧。故外侧法线 = 右法线 = -左法线
+      var outward = { x: -ln.x, y: -ln.y };
+      // 但 DXF 建筑轮廓通常顺时针给；本模块强制 ensureCCW 后调用，故按 CCW。
+      norms.push(outward);
+      segs.push({ a: a, b: b });
+    }
+    var out = [];
+    for (var j = 0; j < n; j++) {
+      var p1 = pts[j], v1 = { x: segs[j].b.x - segs[j].a.x, y: segs[j].b.y - segs[j].a.y };
+      var p2 = pts[(j + 1) % n], v2 = { x: segs[(j + 1) % n].b.x - segs[(j + 1) % n].a.x, y: segs[(j + 1) % n].b.y - segs[(j + 1) % n].a.y };
+      // 平移后的两条边所在直线
+      var o1 = { x: p1.x + norms[j].x * d, y: p1.y + norms[j].y * d };
+      var o2 = { x: p2.x + norms[(j + 1) % n].x * d, y: p2.y + norms[(j + 1) % n].y * d };
+      var ip = lineIntersect(o1, v1, o2, v2);
+      if (!ip) {
+        // 平行（共线边）：取边中点偏移
+        var mid = { x: (segs[j].a.x + segs[j].b.x) / 2, y: (segs[j].a.y + segs[j].b.y) / 2 };
+        out.push({ x: mid.x + norms[j].x * d, y: mid.y + norms[j].y * d });
+      } else {
+        out.push(ip);
+      }
+    }
+    return out;
+  }
+
+  /* ---------- 双排脚手架布局 ----------
+     building: 闭合外轮廓（任意方向，自动 CCW，mm）
+     p: { a:离墙距, b:排距(横距), La:纵距, d:立杆显示直径(mm) }
+     返回 { innerRing, outerRing, innerPoles[], outerPoles[], columns[] }
+     columns[k] = {inner:{x,y}, outer:{x,y}, edgeIdx} 内外杆一一对应列 */
+  function layoutScaffold(building, p) {
+    var a = p.a, b = p.b, La = p.La;
+    var poly = closePoly(ensureCCW(building));
+    if (poly.length < 3) throw new Error('轮廓点数不足');
+    var innerRing = offsetPoly(poly, a);
+    var outerRing = offsetPoly(poly, a + b);
+
+    // 沿每边按纵距均布列。每边起点（j=0）即环顶点→corner=true。
+    function placeCols(ring) {
+      var list = [];
+      var m = ring.length;
+      for (var i = 0; i < m; i++) {
+        var A = ring[i], B = ring[(i + 1) % m];
+        var L = segLen(A, B);
+        if (L < 1) continue;
+        // 用 ceil 保证间距不超过 La（规范限制）
+        var k = Math.max(1, Math.ceil(L / La - 1e-9));
+        for (var j = 0; j < k; j++) {
+          var t = j / k;
+          var pt = { x: A.x + (B.x - A.x) * t, y: A.y + (B.y - A.y) * t, edge: i, t: t, k: k, corner: j === 0 };
+          list.push(pt);
+        }
+      }
+      return list;
+    }
+    var innerRaw = placeCols(innerRing);
+    var outerRaw = placeCols(outerRing);
+    // 去重（角点：同一位置只留一条记录，corner=true）
+    function dedupeTagged(arr) {
+      var out = [];
+      for (var q = 0; q < arr.length; q++) {
+        var p = arr[q], dupIdx = -1;
+        for (var r = 0; r < out.length; r++) {
+          if (segLen(out[r], p) < 1) { dupIdx = r; break; }
+        }
+        if (dupIdx < 0) out.push(p);
+        else out[dupIdx].corner = !!(out[dupIdx].corner || p.corner);
+      }
+      return out;
+    }
+    var innerPoles = dedupeTagged(innerRaw);
+    var outerPoles = dedupeTagged(outerRaw);
+    // 列配对：按“距离最近”将内外杆两两配对（数目应一致）
+    var columns = [];
+    var used = {};
+    for (var ii = 0; ii < innerPoles.length; ii++) {
+      var best = -1, bd = 1e18;
+      for (var oo = 0; oo < outerPoles.length; oo++) {
+        if (used[oo]) continue;
+        var dd = segLen(innerPoles[ii], outerPoles[oo]);
+        if (dd < bd) { bd = dd; best = oo; }
+      }
+      if (best >= 0) {
+        used[best] = true;
+        columns.push({ inner: innerPoles[ii], outer: outerPoles[best], corner: !!(innerPoles[ii].corner || outerPoles[best].corner) });
+      } else {
+        columns.push({ inner: innerPoles[ii], outer: innerPoles[ii] });
+      }
+    }
+    return {
+      poly: poly, innerRing: innerRing, outerRing: outerRing,
+      innerPoles: innerPoles, outerPoles: outerPoles, columns: columns
+    };
+  }
+
+  /* 最长边索引 */
+  function longestEdge(pts) {
+    var bi = 0, bl = -1;
+    for (var i = 0; i < pts.length; i++) {
+      var L = segLen(pts[i], pts[(i + 1) % pts.length]);
+      if (L > bl) { bl = L; bi = i; }
+    }
+    return bi;
+  }
+
+  /* ---------- Node 自检 ---------- */
+  function selftest() {
+    var rect = [{ x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 }, { x: 0, y: 15000 }];
+    var lay = layoutScaffold(rect, { a: 300, b: 900, La: 1500, d: 48 });
+    var ok = [];
+    ok.push(['面积', Math.round(polyArea(lay.poly)) === 360000000]);
+    ok.push(['内排杆', lay.innerPoles.length > 30]);
+    ok.push(['外排杆', lay.outerPoles.length > 30]);
+    ok.push(['列数', lay.columns.length > 30]);
+    // 外扩验证：内环 bbox 应大于原
+    var ib = polyBBox(lay.innerRing), ob = polyBBox(lay.outerRing);
+    ok.push(['外扩', ob.maxX > ib.maxX && ob.maxY > ib.maxY]);
+    var Lshp = [{ x: 0, y: 0 }, { x: 20000, y: 0 }, { x: 20000, y: 10000 }, { x: 12000, y: 10000 }, { x: 12000, y: 18000 }, { x: 0, y: 18000 }];
+    var lay2 = layoutScaffold(Lshp, { a: 300, b: 900, La: 1500, d: 48 });
+    ok.push(['L形内排', lay2.innerPoles.length > 25]);
+    ok.push(['L形外排', lay2.outerPoles.length > 25]);
+    var notch = [{ x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 }, { x: 16000, y: 15000 }, { x: 16000, y: 9000 }, { x: 8000, y: 9000 }, { x: 8000, y: 15000 }, { x: 0, y: 15000 }];
+    var lay3 = layoutScaffold(notch, { a: 300, b: 900, La: 1500, d: 48 });
+    ok.push(['凹口内排', lay3.innerPoles.length > 30]);
+    var allPass = ok.every(function (r) { return r[1]; });
+    if (typeof console !== 'undefined') {
+      ok.forEach(function (r) { console.log((r[1] ? 'PASS' : 'FAIL'), r[0]); });
+      console.log(allPass ? 'ALL PASS' : 'SOME FAIL');
+    }
+    return allPass;
+  }
+
+  var api = {
+    signedArea: signedArea, ensureCCW: ensureCCW, segLen: segLen,
+    dedupePts: dedupePts, closePoly: closePoly, polyPerim: polyPerim,
+    polyArea: polyArea, polyBBox: polyBBox, lineIntersect: lineIntersect,
+    leftNormal: leftNormal, offsetPoly: offsetPoly,
+    layoutScaffold: layoutScaffold, longestEdge: longestEdge,
+    selftest: selftest
+  };
+  global.ScaffoldCore = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$ACADMAINTVER\n 70\n6\n  9\n$DWGCODEPAGE\n  3\nANSI_1252\n  9\n$INSBASE\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$EXTMIN\n 10\n__$EXTMIN_10__\n 20\n__$EXTMIN_20__\n 30\n__$EXTMIN_30__\n  9\n$EXTMAX\n 10\n__$EXTMAX_10__\n 20\n__$EXTMAX_20__\n 30\n__$EXTMAX_30__\n  9\n$LIMMIN\n 10\n__$LIMMIN_10__\n 20\n__$LIMMIN_20__\n  9\n$LIMMAX\n 10\n__$LIMMAX_10__\n 20\n__$LIMMAX_20__\n  9\n$ORTHOMODE\n 70\n0\n  9\n$REGENMODE\n 70\n1\n  9\n$FILLMODE\n 70\n1\n  9\n$QTEXTMODE\n 70\n0\n  9\n$MIRRTEXT\n 70\n1\n  9\n$LTSCALE\n 40\n1.0\n  9\n$ATTMODE\n 70\n1\n  9\n$TEXTSIZE\n 40\n2.5\n  9\n$TRACEWID\n 40\n1.0\n  9\n$TEXTSTYLE\n  7\nOpenSans\n  9\n$CLAYER\n  8\n0\n  9\n$CELTYPE\n  6\nByLayer\n  9\n$CECOLOR\n 62\n256\n  9\n$CELTSCALE\n 40\n1.0\n  9\n$DISPSILH\n 70\n0\n  9\n$DIMSCALE\n 40\n1.0\n  9\n$DIMASZ\n 40\n0.175\n  9\n$DIMEXO\n 40\n0.125\n  9\n$DIMDLI\n 40\n3.75\n  9\n$DIMRND\n 40\n0.0\n  9\n$DIMDLE\n 40\n0.0\n  9\n$DIMEXE\n 40\n0.375\n  9\n$DIMTP\n 40\n0.0\n  9\n$DIMTM\n 40\n0.0\n  9\n$DIMTXT\n 40\n0.25\n  9\n$DIMCEN\n 40\n2.5\n  9\n$DIMTSZ\n 40\n0.0\n  9\n$DIMTOL\n 70\n0\n  9\n$DIMLIM\n 70\n0\n  9\n$DIMTIH\n 70\n0\n  9\n$DIMTOH\n 70\n0\n  9\n$DIMSE1\n 70\n0\n  9\n$DIMSE2\n 70\n0\n  9\n$DIMTAD\n 70\n1\n  9\n$DIMZIN\n 70\n12\n  9\n$DIMBLK\n  1\nARCHTICK\n  9\n$DIMASO\n 70\n1\n  9\n$DIMSHO\n 70\n1\n  9\n$DIMPOST\n  1\n\n  9\n$DIMAPOST\n  1\n\n  9\n$DIMALT\n 70\n0\n  9\n$DIMALTD\n 70\n3\n  9\n$DIMALTF\n 40\n0.03937007874\n  9\n$DIMLFAC\n 40\n100.0\n  9\n$DIMTOFL\n 70\n1\n  9\n$DIMTVP\n 40\n0.0\n  9\n$DIMTIX\n 70\n0\n  9\n$DIMSOXD\n 70\n0\n  9\n$DIMSAH\n 70\n0\n  9\n$DIMBLK1\n  1\n\n  9\n$DIMBLK2\n  1\n\n  9\n$DIMSTYLE\n  2\nEZDXF\n  9\n$DIMCLRD\n 70\n0\n  9\n$DIMCLRE\n 70\n0\n  9\n$DIMCLRT\n 70\n0\n  9\n$DIMTFAC\n 40\n0.5\n  9\n$DIMGAP\n 40\n0.1\n  9\n$DIMJUST\n 70\n0\n  9\n$DIMSD1\n 70\n0\n  9\n$DIMSD2\n 70\n0\n  9\n$DIMTOLJ\n 70\n0\n  9\n$DIMTZIN\n 70\n8\n  9\n$DIMALTZ\n 70\n0\n  9\n$DIMALTTZ\n 70\n0\n  9\n$DIMUPT\n 70\n1\n  9\n$DIMDEC\n 70\n2\n  9\n$DIMTDEC\n 70\n2\n  9\n$DIMALTU\n 70\n2\n  9\n$DIMALTTD\n 70\n3\n  9\n$DIMTXSTY\n  7\nOpenSansCondensed-Light\n  9\n$DIMAUNIT\n 70\n0\n  9\n$DIMADEC\n 70\n2\n  9\n$DIMALTRND\n 40\n0.0\n  9\n$DIMAZIN\n 70\n3\n  9\n$DIMDSEP\n 70\n46\n  9\n$DIMATFIT\n 70\n3\n  9\n$DIMFRAC\n 70\n0\n  9\n$DIMLDRBLK\n  1\n\n  9\n$DIMLUNIT\n 70\n2\n  9\n$DIMLWD\n 70\n-2\n  9\n$DIMLWE\n 70\n-2\n  9\n$DIMTMOVE\n 70\n2\n  9\n$LUNITS\n 70\n2\n  9\n$LUPREC\n 70\n4\n  9\n$SKETCHINC\n 40\n1.0\n  9\n$FILLETRAD\n 40\n10.0\n  9\n$AUNITS\n 70\n0\n  9\n$AUPREC\n 70\n2\n  9\n$MENU\n  1\n.\n  9\n$ELEVATION\n 40\n0.0\n  9\n$PELEVATION\n 40\n0.0\n  9\n$THICKNESS\n 40\n0.0\n  9\n$LIMCHECK\n 70\n0\n  9\n$CHAMFERA\n 40\n0.0\n  9\n$CHAMFERB\n 40\n0.0\n  9\n$CHAMFERC\n 40\n0.0\n  9\n$CHAMFERD\n 40\n0.0\n  9\n$SKPOLY\n 70\n0\n  9\n$TDCREATE\n 40\n2461290.1069791666\n  9\n$TDUCREATE\n 40\n2458532.153996898\n  9\n$TDUPDATE\n 40\n2461290.1069791666\n  9\n$TDUUPDATE\n 40\n2458532.1544311\n  9\n$TDINDWG\n 40\n0.0\n  9\n$TDUSRTIMER\n 40\n0.0\n  9\n$USRTIMER\n 70\n1\n  9\n$ANGBASE\n 50\n0.0\n  9\n$ANGDIR\n 70\n0\n  9\n$PDMODE\n 70\n0\n  9\n$PDSIZE\n 40\n0.0\n  9\n$PLINEWID\n 40\n0.0\n  9\n$SPLFRAME\n 70\n0\n  9\n$SPLINETYPE\n 70\n6\n  9\n$SPLINESEGS\n 70\n8\n  9\n$HANDSEED\n  5\n__$HANDSEED_5__\n  9\n$SURFTAB1\n 70\n6\n  9\n$SURFTAB2\n 70\n6\n  9\n$SURFTYPE\n 70\n6\n  9\n$SURFU\n 70\n6\n  9\n$SURFV\n 70\n6\n  9\n$UCSBASE\n  2\n\n  9\n$UCSNAME\n  2\n\n  9\n$UCSORG\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSXDIR\n 10\n1.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSYDIR\n 10\n0.0\n 20\n1.0\n 30\n0.0\n  9\n$UCSORTHOREF\n  2\n\n  9\n$UCSORTHOVIEW\n 70\n0\n  9\n$UCSORGTOP\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGBOTTOM\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGLEFT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGRIGHT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGFRONT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGBACK\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSBASE\n  2\n\n  9\n$PUCSNAME\n  2\n\n  9\n$PUCSORG\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSXDIR\n 10\n1.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSYDIR\n 10\n0.0\n 20\n1.0\n 30\n0.0\n  9\n$PUCSORTHOREF\n  2\n\n  9\n$PUCSORTHOVIEW\n 70\n0\n  9\n$PUCSORGTOP\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGBOTTOM\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGLEFT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGRIGHT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGFRONT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGBACK\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$USERI1\n 70\n0\n  9\n$USERI2\n 70\n0\n  9\n$USERI3\n 70\n0\n  9\n$USERI4\n 70\n0\n  9\n$USERI5\n 70\n0\n  9\n$USERR1\n 40\n0.0\n  9\n$USERR2\n 40\n0.0\n  9\n$USERR3\n 40\n0.0\n  9\n$USERR4\n 40\n0.0\n  9\n$USERR5\n 40\n0.0\n  9\n$WORLDVIEW\n 70\n1\n  9\n$SHADEDGE\n 70\n3\n  9\n$SHADEDIF\n 70\n70\n  9\n$TILEMODE\n 70\n1\n  9\n$MAXACTVP\n 70\n64\n  9\n$PINSBASE\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PLIMCHECK\n 70\n0\n  9\n$PEXTMIN\n 10\n1e+20\n 20\n1e+20\n 30\n1e+20\n  9\n$PEXTMAX\n 10\n-1e+20\n 20\n-1e+20\n 30\n-1e+20\n  9\n$PLIMMIN\n 10\n0.0\n 20\n0.0\n  9\n$PLIMMAX\n 10\n420.0\n 20\n297.0\n  9\n$UNITMODE\n 70\n0\n  9\n$VISRETAIN\n 70\n1\n  9\n$PLINEGEN\n 70\n0\n  9\n$PSLTSCALE\n 70\n1\n  9\n$TREEDEPTH\n 70\n3020\n  9\n$CMLSTYLE\n  2\nStandard\n  9\n$CMLJUST\n 70\n0\n  9\n$CMLSCALE\n 40\n20.0\n  9\n$PROXYGRAPHICS\n 70\n1\n  9\n$MEASUREMENT\n 70\n1\n  9\n$CELWEIGHT\n370\n-1\n  9\n$ENDCAPS\n280\n0\n  9\n$JOINSTYLE\n280\n0\n  9\n$LWDISPLAY\n290\n0\n  9\n$INSUNITS\n 70\n6\n  9\n$HYPERLINKBASE\n  1\n\n  9\n$STYLESHEET\n  1\n\n  9\n$XEDIT\n290\n1\n  9\n$CEPSNTYPE\n380\n0\n  9\n$PSTYLEMODE\n290\n1\n  9\n$FINGERPRINTGUID\n  2\n{057A407F-4384-4BBB-8714-80CE2C645CD9}\n  9\n$VERSIONGUID\n  2\n{1DECBE7D-E4AB-4849-8E34-62403D08DAB3}\n  9\n$EXTNAMES\n290\n1\n  9\n$PSVPSCALE\n 40\n0.0\n  9\n$OLESTARTUP\n290\n0\n  0\nENDSEC\n  0\nSECTION\n  2\nCLASSES\n  0\nCLASS\n  1\nACDBDICTIONARYWDFLT\n  2\nAcDbDictionaryWithDefault\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nSUN\n  2\nAcDbSun\n  3\nSCENEOE\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nVISUALSTYLE\n  2\nAcDbVisualStyle\n  3\nObjectDBX Classes\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nMATERIAL\n  2\nAcDbMaterial\n  3\nObjectDBX Classes\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nSCALE\n  2\nAcDbScale\n  3\nObjectDBX Classes\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nTABLESTYLE\n  2\nAcDbTableStyle\n  3\nObjectDBX Classes\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nMLEADERSTYLE\n  2\nAcDbMLeaderStyle\n  3\nACDB_MLEADERSTYLE_CLASS\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nDICTIONARYVAR\n  2\nAcDbDictionaryVar\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nCELLSTYLEMAP\n  2\nAcDbCellStyleMap\n  3\nObjectDBX Classes\n 90\n1152\n280\n0\n281\n0\n  0\nCLASS\n  1\nMENTALRAYRENDERSETTINGS\n  2\nAcDbMentalRayRenderSettings\n  3\nSCENEOE\n 90\n1024\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBDETAILVIEWSTYLE\n  2\nAcDbDetailViewStyle\n  3\nObjectDBX Classes\n 90\n1025\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBSECTIONVIEWSTYLE\n  2\nAcDbSectionViewStyle\n  3\nObjectDBX Classes\n 90\n1025\n280\n0\n281\n0\n  0\nCLASS\n  1\nRASTERVARIABLES\n  2\nAcDbRasterVariables\n  3\nISM\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBPLACEHOLDER\n  2\nAcDbPlaceHolder\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nLAYOUT\n  2\nAcDbLayout\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nENDSEC\n  0\nSECTION\n  2\nTABLES\n  0\nTABLE\n  2\nVPORT\n  5\n8\n330\n0\n100\nAcDbSymbolTable\n 70\n1\n  0\nVPORT\n  5\n23\n330\n8\n100\nAcDbSymbolTableRecord\n100\nAcDbViewportTableRecord\n  2\n*Active\n 70\n0\n 10\n0.0\n 20\n0.0\n 11\n1.0\n 21\n1.0\n 12\n0.0\n 22\n0.0\n 13\n0.0\n 23\n0.0\n 14\n0.5\n 24\n0.5\n 15\n0.5\n 25\n0.5\n 16\n0.0\n 26\n0.0\n 36\n1.0\n 17\n0.0\n 27\n0.0\n 37\n0.0\n 40\n1000.0\n 41\n1.34\n 42\n50.0\n 43\n0.0\n 44\n0.0\n 50\n0.0\n 51\n0.0\n 71\n0\n 72\n1000\n 73\n1\n 74\n3\n 75\n0\n 76\n0\n 77\n0\n 78\n0\n281\n0\n 65\n0\n146\n0.0\n  0\nENDTAB\n  0\nTABLE\n  2\nLTYPE\n  5\n2\n330\n0\n100\nAcDbSymbolTable\n 70\n21\n  0\nLTYPE\n  5\n24\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nByBlock\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n25\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nByLayer\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n26\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nContinuous\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n2F\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTER\n 70\n0\n  3\nCenter ____ _ ____ _ ____ _ ____ _ ____ _ ____\n 72\n65\n 73\n4\n 40\n5.08\n 49\n3.175\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n30\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTERX2\n 70\n0\n  3\nCenter (2x) ________  __  ________  __  ________\n 72\n65\n 73\n4\n 40\n8.89\n 49\n6.35\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n31\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTER2\n 70\n0\n  3\nCenter (.5x) ____ _ ____ _ ____ _ ____ _ ____\n 72\n65\n 73\n4\n 40\n2.54\n 49\n1.587\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n  0\nLTYPE\n  5\n32\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHED\n 70\n0\n  3\nDashed __ __ __ __ __ __ __ __ __ __ __ __ __ _\n 72\n65\n 73\n2\n 40\n1.524\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n33\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHEDX2\n 70\n0\n  3\nDashed (2x) ____  ____  ____  ____  ____  ____\n 72\n65\n 73\n2\n 40\n3.048\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n34\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHED2\n 70\n0\n  3\nDashed (.5x) _ _ _ _ _ _ _ _ _ _ _ _ _ _\n 72\n65\n 73\n2\n 40\n0.762\n 49\n0.635\n 74\n0\n 49\n-0.127\n 74\n0\n  0\nLTYPE\n  5\n35\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOM\n 70\n0\n  3\nPhantom ______  __  __  ______  __  __  ______\n 72\n65\n 73\n6\n 40\n6.35\n 49\n3.175\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n36\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOMX2\n 70\n0\n  3\nPhantom (2x)____________    ____    ____    ____________\n 72\n65\n 73\n6\n 40\n10.795\n 49\n6.35\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n37\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOM2\n 70\n0\n  3\nPhantom (.5x) ___ _ _ ___ _ _ ___ _ _ ___ _ _ ___\n 72\n65\n 73\n6\n 40\n3.175\n 49\n1.587\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n  0\nLTYPE\n  5\n38\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOT\n 70\n0\n  3\nDash dot __ . __ . __ . __ . __ . __ . __ . __\n 72\n65\n 73\n4\n 40\n3.556\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n39\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOTX2\n 70\n0\n  3\nDash dot (2x) ____  .  ____  .  ____  .  ____\n 72\n65\n 73\n4\n 40\n6.096\n 49\n5.08\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3A\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOT2\n 70\n0\n  3\nDash dot (.5x) _ . _ . _ . _ . _ . _ . _ . _\n 72\n65\n 73\n4\n 40\n1.778\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n3B\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOT\n 70\n0\n  3\nDot .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .\n 72\n65\n 73\n2\n 40\n0.508\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3C\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOTX2\n 70\n0\n  3\nDot (2x) .    .    .    .    .    .    .    . \n 72\n65\n 73\n2\n 40\n1.016\n 49\n0.0\n 74\n0\n 49\n-1.016\n 74\n0\n  0\nLTYPE\n  5\n3D\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOT2\n 70\n0\n  3\nDot (.5) . . . . . . . . . . . . . . . . . . . \n 72\n65\n 73\n2\n 40\n0.254\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n3E\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDE\n 70\n0\n  3\nDivide __ . . __ . . __ . . __ . . __ . . __\n 72\n65\n 73\n6\n 40\n4.064\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3F\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDEX2\n 70\n0\n  3\nDivide (2x) ____  . .  ____  . .  ____  . .  ____\n 72\n65\n 73\n6\n 40\n6.604\n 49\n5.08\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n40\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDE2\n 70\n0\n  3\nDivide(.5x) _ . _ . _ . _ . _ . _ . _ . _\n 72\n65\n 73\n6\n 40\n2.032\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nLAYER\n  5\n1\n330\n0\n100\nAcDbSymbolTable\n 70\n13\n  0\nLAYER\n  5\n27\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\n0\n 70\n0\n 62\n7\n  6\nContinuous\n370\n-3\n390\n13\n  0\nLAYER\n  5\n28\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nDefpoints\n 70\n0\n 62\n7\n  6\nContinuous\n290\n0\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8A\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nOUTLINE\n 70\n0\n 62\n7\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8B\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nPOLE_IN\n 70\n0\n 62\n1\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8C\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nPOLE_OUT\n 70\n0\n 62\n5\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8D\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nROWLN\n 70\n0\n 62\n8\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8E\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nTIE\n 70\n0\n 62\n2\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8F\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nBRACE\n 70\n0\n 62\n3\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n90\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nDIM\n 70\n0\n 62\n4\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n91\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nTEXT\n 70\n0\n 62\n3\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n92\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nFRAME\n 70\n0\n 62\n7\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n93\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nTABLE\n 70\n0\n 62\n7\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n94\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nHATCHX\n 70\n0\n 62\n8\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nENDTAB\n  0\nTABLE\n  2\nSTYLE\n  5\n5\n330\n0\n100\nAcDbSymbolTable\n 70\n27\n  0\nSTYLE\n  5\n29\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nStandard\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\ntxt\n  4\n\n  0\nSTYLE\n  5\n41\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Light\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Light.ttf\n  4\n\n  0\nSTYLE\n  5\n42\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Light-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-LightItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n43\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n44\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n45\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-SemiBold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-SemiBold.ttf\n  4\n\n  0\nSTYLE\n  5\n46\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-SemiBoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-SemiBoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n47\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n48\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n49\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-ExtraBold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-ExtraBold.ttf\n  4\n\n  0\nSTYLE\n  5\n4A\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSans-ExtraBoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSans-ExtraBoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n4B\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSansCondensed-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSansCondensed-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n4C\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSansCondensed-Light\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSansCondensed-Light.ttf\n  4\n\n  0\nSTYLE\n  5\n4D\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nOpenSansCondensed-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nOpenSansCondensed-LightItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n4E\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n4F\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n50\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n51\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSans-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSans-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n52\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n53\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n54\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n55\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationSerif-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationSerif-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n56\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-Regular.ttf\n  4\n\n  0\nSTYLE\n  5\n57\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono-Bold\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-Bold.ttf\n  4\n\n  0\nSTYLE\n  5\n58\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono-BoldItalic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-BoldItalic.ttf\n  4\n\n  0\nSTYLE\n  5\n59\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nLiberationMono-Italic\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nLiberationMono-Italic.ttf\n  4\n\n  0\nSTYLE\n  5\n95\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nTXT_CN\n 70\n0\n 40\n0.0\n 41\n1.0\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nsimfang.ttf\n  4\n\n  0\nENDTAB\n  0\nTABLE\n  2\nVIEW\n  5\n7\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nUCS\n  5\n6\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nAPPID\n  5\n3\n330\n0\n100\nAcDbSymbolTable\n 70\n3\n  0\nAPPID\n  5\n2A\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nACAD\n 70\n0\n  0\nAPPID\n  5\n96\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nHATCHBACKGROUNDCOLOR\n 70\n0\n  0\nAPPID\n  5\n97\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nEZDXF\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nDIMSTYLE\n  5\n4\n330\n0\n100\nAcDbSymbolTable\n 70\n12\n100\nAcDbDimStyleTable\n  0\nDIMSTYLE\n105\n2B\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nStandard\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n2.5\n 42\n0.625\n 43\n3.75\n 44\n1.25\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n2.5\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n1.0\n145\n0.0\n146\n1.0\n147\n0.625\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n8\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n44\n279\n0\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n0\n289\n3\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n73\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZDXF\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.175\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n342\n74\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7C\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_100_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n2.5\n142\n0.125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7D\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_50_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.125\n 42\n0.0625\n 43\n3.75\n 44\n0.1875\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.125\n141\n2.5\n142\n0.0625\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.05\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7E\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_25_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.0625\n 42\n0.03125\n 43\n3.75\n 44\n0.09375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.0625\n141\n2.5\n142\n0.03125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.025\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n7F\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_20_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.05\n 42\n0.025\n 43\n3.75\n 44\n0.07500000000000001\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.05\n141\n2.5\n142\n0.025\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.020000000000000004\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n80\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_10_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.025\n 42\n0.0125\n 43\n3.75\n 44\n0.037500000000000006\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.025\n141\n2.5\n142\n0.0125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.010000000000000002\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n81\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_5_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.0125\n 42\n0.00625\n 43\n3.75\n 44\n0.018750000000000003\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.0125\n141\n2.5\n142\n0.00625\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.005000000000000001\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n82\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_M_1_H25_CM\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.0025\n 42\n0.00125\n 43\n3.75\n 44\n0.00375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.0025\n141\n2.5\n142\n0.00125\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.001\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n83\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_RADIUS\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n0.0\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n0\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n1\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n342\n84\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n88\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_RADIUS_INSIDE\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n0.0\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n0\n 78\n12\n 79\n3\n170\n0\n171\n3\n172\n0\n173\n0\n174\n1\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n0\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n0\n340\n4C\n342\n84\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n89\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nEZ_CURVED\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n0.25\n 42\n0.125\n 43\n3.75\n 44\n0.375\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n0.25\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n100.0\n145\n0.0\n146\n0.5\n147\n0.1\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n12\n 79\n2\n 90\n2\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n46\n279\n2\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n1\n289\n3\n340\n4C\n371\n-2\n372\n-2\n  0\nENDTAB\n  0\nTABLE\n  2\nBLOCK_RECORD\n  5\n9\n330\n0\n100\nAcDbSymbolTable\n 70\n5\n  0\nBLOCK_RECORD\n  5\n17\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n*Model_Space\n340\n1A\n  0\nBLOCK_RECORD\n  5\n1B\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n*Paper_Space\n340\n1E\n  0\nBLOCK_RECORD\n  5\n74\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_ARCHTICK\n340\n0\n  0\nBLOCK_RECORD\n  5\n78\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_CLOSEDFILLED\n340\n0\n  0\nBLOCK_RECORD\n  5\n84\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_CLOSEDBLANK\n340\n0\n  0\nENDTAB\n  0\nENDSEC\n  0\nSECTION\n  2\nBLOCKS\n  0\nBLOCK\n  5\n18\n330\n17\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n*Model_Space\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n*Model_Space\n  1\n\n  0\nENDBLK\n  5\n19\n330\n17\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n1C\n330\n1B\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n*Paper_Space\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n*Paper_Space\n  1\n\n  0\nENDBLK\n  5\n1D\n330\n1B\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n75\n330\n74\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_ARCHTICK\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_ARCHTICK\n  1\n\n  0\nLWPOLYLINE\n  5\n77\n330\n74\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbPolyline\n 90\n2\n 70\n0\n 43\n0.15\n 10\n-0.5\n 20\n-0.5\n 10\n0.5\n 20\n0.5\n  0\nENDBLK\n  5\n76\n330\n74\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n79\n330\n78\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_CLOSEDFILLED\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_CLOSEDFILLED\n  1\n\n  0\nSOLID\n  5\n7B\n330\n78\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbTrace\n 10\n-1.0\n 20\n0.16439898372402537\n 30\n0.0\n 11\n0.0\n 21\n0.0\n 31\n0.0\n 12\n-1.0\n 22\n-0.16439898372402537\n 32\n0.0\n 13\n-1.0\n 23\n-0.16439898372402537\n 33\n0.0\n  0\nENDBLK\n  5\n7A\n330\n78\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n85\n330\n84\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_CLOSEDBLANK\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_CLOSEDBLANK\n  1\n\n  0\nLWPOLYLINE\n  5\n87\n330\n84\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbPolyline\n 90\n3\n 70\n1\n 10\n-1.0\n 20\n0.16439898372402537\n 10\n0.0\n 20\n0.0\n 10\n-1.0\n 20\n-0.16439898372402537\n  0\nENDBLK\n  5\n86\n330\n84\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nENDSEC\n  0\nSECTION\n  2\nENTITIES\n__ENTITIES__\n  0\nENDSEC\n  0\nSECTION\n  2\nOBJECTS\n  0\nDICTIONARY\n  5\nA\n330\n0\n100\nAcDbDictionary\n281\n1\n  3\nACAD_COLOR\n350\nB\n  3\nACAD_GROUP\n350\nC\n  3\nACAD_LAYOUT\n350\nD\n  3\nACAD_MATERIAL\n350\nE\n  3\nACAD_MLEADERSTYLE\n350\nF\n  3\nACAD_MLINESTYLE\n350\n10\n  3\nACAD_PLOTSETTINGS\n350\n11\n  3\nACAD_PLOTSTYLENAME\n350\n12\n  3\nACAD_SCALELIST\n350\n14\n  3\nACAD_TABLESTYLE\n350\n15\n  3\nACAD_VISUALSTYLE\n350\n16\n  3\nEZDXF_META\n350\n2D\n  0\nDICTIONARY\n  5\nB\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\nC\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\nD\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nModel\n350\n1A\n  3\nLayout1\n350\n1E\n  0\nDICTIONARY\n  5\nE\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nByBlock\n350\n1F\n  3\nByLayer\n350\n20\n  3\nGlobal\n350\n21\n  0\nDICTIONARY\n  5\nF\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nStandard\n350\n2C\n  0\nDICTIONARY\n  5\n10\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nStandard\n350\n22\n  0\nDICTIONARY\n  5\n11\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nACDBDICTIONARYWDFLT\n  5\n12\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nNormal\n350\n13\n100\nAcDbDictionaryWithDefault\n340\n13\n  0\nACDBPLACEHOLDER\n  5\n13\n330\n12\n  0\nDICTIONARY\n  5\n14\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\n15\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\n16\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\n2dWireframe\n350\n5A\n  3\nBasic\n350\n5B\n  3\nBrighten\n350\n5C\n  3\nColorChange\n350\n5D\n  3\nConceptual\n350\n5E\n  3\nDim\n350\n5F\n  3\nEdgeColorOff\n350\n60\n  3\nFacepattern\n350\n61\n  3\nFlat\n350\n62\n  3\nFlatWithEdges\n350\n63\n  3\nGouraud\n350\n64\n  3\nGouraudWithEdges\n350\n65\n  3\nHidden\n350\n66\n  3\nJitterOff\n350\n67\n  3\nLinepattern\n350\n68\n  3\nModeling\n350\n69\n  3\nOverhangOff\n350\n6A\n  3\nRealistic\n350\n6B\n  3\nShaded\n350\n6C\n  3\nShaded with edges\n350\n6D\n  3\nShades of Gray\n350\n6E\n  3\nSketchy\n350\n6F\n  3\nThicken\n350\n70\n  3\nWireframe\n350\n71\n  3\nX-Ray\n350\n72\n  0\nLAYOUT\n  5\n1A\n330\nD\n100\nAcDbPlotSettings\n  1\n\n  4\nA3\n  6\n\n 40\n7.5\n 41\n20.0\n 42\n7.5\n 43\n20.0\n 44\n420.0\n 45\n297.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n 49\n0.0\n140\n0.0\n141\n0.0\n142\n1.0\n143\n1.0\n 70\n1024\n 72\n1\n 73\n0\n 74\n5\n  7\n\n 75\n16\n 76\n0\n 77\n2\n 78\n300\n147\n1.0\n148\n0.0\n149\n0.0\n100\nAcDbLayout\n  1\nModel\n 70\n1\n 71\n0\n 10\n0.0\n 20\n0.0\n 11\n420.0\n 21\n297.0\n 12\n0.0\n 22\n0.0\n 32\n0.0\n 14\n1e+20\n 24\n1e+20\n 34\n1e+20\n 15\n-1e+20\n 25\n-1e+20\n 35\n-1e+20\n146\n0.0\n 13\n0.0\n 23\n0.0\n 33\n0.0\n 16\n1.0\n 26\n0.0\n 36\n0.0\n 17\n0.0\n 27\n1.0\n 37\n0.0\n 76\n1\n330\n17\n  0\nLAYOUT\n  5\n1E\n330\nD\n100\nAcDbPlotSettings\n  1\n\n  4\nA3\n  6\n\n 40\n7.5\n 41\n20.0\n 42\n7.5\n 43\n20.0\n 44\n420.0\n 45\n297.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n 49\n0.0\n140\n0.0\n141\n0.0\n142\n1.0\n143\n1.0\n 70\n0\n 72\n1\n 73\n0\n 74\n5\n  7\n\n 75\n16\n 76\n0\n 77\n2\n 78\n300\n147\n1.0\n148\n0.0\n149\n0.0\n100\nAcDbLayout\n  1\nLayout1\n 70\n1\n 71\n1\n 10\n0.0\n 20\n0.0\n 11\n420.0\n 21\n297.0\n 12\n0.0\n 22\n0.0\n 32\n0.0\n 14\n1e+20\n 24\n1e+20\n 34\n1e+20\n 15\n-1e+20\n 25\n-1e+20\n 35\n-1e+20\n146\n0.0\n 13\n0.0\n 23\n0.0\n 33\n0.0\n 16\n1.0\n 26\n0.0\n 36\n0.0\n 17\n0.0\n 27\n1.0\n 37\n0.0\n 76\n1\n330\n1B\n  0\nMATERIAL\n  5\n1F\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nByBlock\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMATERIAL\n  5\n20\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nByLayer\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMATERIAL\n  5\n21\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nGlobal\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMLINESTYLE\n  5\n22\n102\n{ACAD_REACTORS\n330\n10\n102\n}\n330\n10\n100\nAcDbMlineStyle\n  2\nStandard\n 70\n0\n  3\n\n 62\n256\n 51\n90.0\n 52\n90.0\n 71\n2\n 49\n0.5\n 62\n256\n  6\nBYLAYER\n 49\n-0.5\n 62\n256\n  6\nBYLAYER\n  0\nMLEADERSTYLE\n  5\n2C\n102\n{ACAD_REACTORS\n330\nF\n102\n}\n330\nF\n100\nAcDbMLeaderStyle\n179\n2\n170\n2\n171\n1\n172\n0\n 90\n2\n 40\n0.0\n 41\n0.0\n173\n1\n 91\n-1056964608\n 92\n-2\n290\n1\n 42\n2.0\n291\n1\n 43\n8.0\n  3\nStandard\n 44\n4.0\n300\n\n342\n29\n174\n1\n175\n1\n176\n0\n178\n1\n 93\n-1056964608\n 45\n4.0\n292\n0\n297\n0\n 46\n4.0\n 94\n-1056964608\n 47\n1.0\n 49\n1.0\n140\n1.0\n294\n1\n141\n0.0\n177\n0\n142\n1.0\n295\n0\n296\n0\n143\n3.75\n271\n0\n272\n9\n273\n9\n  0\nDICTIONARY\n  5\n2D\n330\nA\n100\nAcDbDictionary\n280\n1\n281\n1\n  3\nCREATED_BY_EZDXF\n350\n2E\n  3\nWRITTEN_BY_EZDXF\n350\n98\n  0\nDICTIONARYVAR\n  5\n2E\n330\n2D\n100\nDictionaryVariables\n280\n0\n  1\n1.4.4 @ 2026-09-05T18:34:03.684588+00:00\n  0\nVISUALSTYLE\n  5\n5A\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\n2dWireframe\n 70\n4\n 90\n0\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n5B\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nBasic\n 70\n7\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5C\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nBrighten\n 70\n12\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5D\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nColorChange\n 70\n16\n 90\n2\n 40\n0.6\n 62\n8\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5E\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nConceptual\n 70\n9\n 90\n3\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n5F\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nDim\n 70\n11\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n60\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nEdgeColorOff\n 70\n22\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n61\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFacepattern\n 70\n15\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n62\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFlat\n 70\n0\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n63\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFlatWithEdges\n 70\n1\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n64\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nGouraud\n 70\n2\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n65\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nGouraudWithEdges\n 70\n3\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n66\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nHidden\n 70\n6\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n67\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nJitterOff\n 70\n20\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n68\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nLinepattern\n 70\n14\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n69\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nModeling\n 70\n10\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6A\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nOverhangOff\n 70\n21\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n6B\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nRealistic\n 70\n8\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6C\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShaded\n 70\n27\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6D\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShaded with edges\n 70\n26\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6E\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShades of Gray\n 70\n23\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6F\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nSketchy\n 70\n24\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n70\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nThicken\n 70\n13\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n71\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nWireframe\n 70\n5\n 90\n0\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n72\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nX-Ray\n 70\n25\n 90\n2\n 40\n0.5\n 62\n7\n290\n0\n291\n0\n  0\nDICTIONARYVAR\n  5\n98\n330\n2D\n100\nDictionaryVariables\n280\n0\n  1\n1.4.4 @ 2026-09-05T18:34:03.690252+00:00\n  0\nENDSEC\n  0\nEOF\n";
+
+</script>
+<script>
+/* =====================================================================
+   脚手架快绘CAD系统 v1.0.0 — 主逻辑（UI/交互/DXF解析/渲染/导出）
+   依赖：ScaffoldCore（几何）、DXF_SKEL（骨架模板，构建期注入）
+   坐标系约定：
+     - 建筑轮廓/几何计算均用“世界坐标 mm”（Y 向上，与 DXF 一致）
+     - 显示层 SVG：Y 向下翻转
+     - 导出层：世界坐标 mm 1:1 进模型空间，图框/标题栏按 1:1 mm 真实尺寸？
+       否——按图纸惯例：模型空间单位=mm 真实尺寸，标题栏与图框
+       按真实 mm（A2=594×420mm 图纸 → 需乘比例）。本项目采用
+       BraceCad 同款：图纸 mm → 绘图单位，即所有实体按图纸 mm 直接
+       绘制（denom 比例尺下建筑轮廓缩放进图框）。
+   ===================================================================== */
+(function () {
+  'use strict';
+  var C = window.ScaffoldCore;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ================= 状态 ================= */
+  var state = {
+    poly: null,            // 建筑轮廓 [ {x,y}... ] 世界 mm
+    polyName: '',
+    layout: null,          // layoutScaffold 结果
+    building: null,        // 适配后建筑（含简化）
+    manual: [],            // 手动增补立杆 [{x,y}]（世界 mm）
+    denom: 100,            // 出图比例 1:denom（自动/手动）
+    lastPts: null,
+    view: { scale: 1, tx: 0, ty: 0 }, // 显示缩放（SVG 像素/图纸mm）
+  };
+
+  /* 输入读取（mm/m 单位换算） */
+  function val(id) { return parseFloat($(id).value) || 0; }
+  function getParams() {
+    return {
+      a: val('inA'),          // 离墙距 mm
+      b: val('inB'),          // 排距 mm
+      La: val('inLa'),        // 纵距 mm
+      d: val('inD'),          // 立杆直径 mm（显示用）
+      lianX: parseInt($('inLian').value, 10) || 3, // 连墙件水平间距（跨）
+    };
+  }
+
+  function getSheet() { // 图框图纸尺寸 mm
+    return $('inSheet').value === 'A3' ? { w: 420, h: 297 } : { w: 594, h: 420 };
+  }
+  function getTitle() {
+    return {
+      proj: $('inProj').value.trim() || '脚手架专项施工方案',
+      name: $('inDwName').value.trim() || '双排脚手架平面布置图',
+      designer: $('inDesigner').value.trim() || 'AI',
+    };
+  }
+
+  /* ================= Toast / 加载 ================= */
+  var toastTimer = null;
+  function toast(msg, type) {
+    var el = $('toast');
+    el.textContent = msg;
+    el.className = 'on' + (type ? ' ' + type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.className = ''; }, 2600);
+  }
+  function loading(on, msg) {
+    var l = $('loading');
+    l.className = on ? 'on' : '';
+    if (msg) $('loadMsg').textContent = msg;
+  }
+
+  /* ================= DXF 解析 =================
+     输入：DXF 文本（可能含中文，按 UTF-8/GBK 兼容读入）
+     目标：找出“面积最大的闭合轮廓”。
+     支持实体：LWPOLYLINE（闭合位=1）、POLYLINE/VERTEX（闭合）、LINE（自动首尾连成环）。
+     只扫描 ENTITIES 段。输出 {x,y}[] 世界坐标 mm。 */
+  function parseDxfText(text) {
+    var lines = text.split(/\r\n|\r|\n/);
+    var i = 0;
+    // 定位 ENTITIES 段
+    var start = -1, end = lines.length;
+    while (i + 1 < lines.length) {
+      var c0 = lines[i].trim(), v0 = (lines[i + 1] || '').trim();
+      if (c0 === '0' && v0 === 'SECTION') {
+        var c2 = (lines[i + 2] || '').trim(), v2 = (lines[i + 3] || '').trim();
+        if (c2 === '2' && v2 === 'ENTITIES') { start = i; }
+      } else if (c0 === '0' && v0 === 'ENDSEC' && start >= 0) {
+        end = i; break;
+      }
+      i += 2;
+    }
+    if (start < 0) return null;
+    var pairs = [];
+    for (i = start; i < end; i += 2) {
+      pairs.push({ c: lines[i].trim(), v: lines[i + 1] === undefined ? '' : lines[i + 1] });
+    }
+
+    // 解析为实体列表
+    var ents = [];
+    var cur = null;
+    pairs.forEach(function (p) {
+      if (p.c === '0') {
+        var t = p.v.trim();
+        if (t === 'LWPOLYLINE' || t === 'POLYLINE' || t === 'LINE' || t === 'VERTEX') {
+          cur = { t: t, closed: false, pts: [], cx: 0 };
+          ents.push(cur);
+        } else {
+          cur = null;
+        }
+        return;
+      }
+      if (!cur) return;
+      if (cur.t === 'VERTEX') {
+        if (p.c === '10') cur.cx = parseFloat(p.v) || 0;
+        else if (p.c === '20') cur.pts.push({ x: cur.cx, y: parseFloat(p.v) || 0 });
+      } else {
+        if (p.c === '10') cur.cx = parseFloat(p.v) || 0;
+        else if (p.c === '20') cur.pts.push({ x: cur.cx, y: parseFloat(p.v) || 0 });
+        else if (p.c === '70') cur.closed = (parseInt(p.v, 10) & 1) === 1;
+      }
+    });
+
+    // 重组
+    var polys = [], lineSegs = [];
+    var curPoly = null;
+    for (var e = 0; e < ents.length; e++) {
+      var it = ents[e];
+      if (it.t === 'LWPOLYLINE') {
+        if (it.pts.length >= 3) {
+          var cl = it.closed || dist(it.pts[0], it.pts[it.pts.length - 1]) < 1e-6;
+          if (cl) polys.push(it.pts.slice());
+        }
+      } else if (it.t === 'POLYLINE') {
+        curPoly = { closed: it.closed, pts: [] };
+      } else if (it.t === 'VERTEX') {
+        if (curPoly && it.pts.length) curPoly.pts.push(it.pts[it.pts.length - 1]);
+      } else if (it.t === 'LINE') {
+        if (curPoly) { closeCurPoly(); curPoly = null; }
+        if (it.pts.length >= 2) lineSegs.push({ a: it.pts[0], b: it.pts[it.pts.length - 1] });
+      } else {
+        if (curPoly) { closeCurPoly(); curPoly = null; }
+      }
+      if (it.t !== 'VERTEX' && it.t !== 'POLYLINE' && it.t !== 'LWPOLYLINE' && it.t !== 'LINE' && curPoly) {
+        closeCurPoly(); curPoly = null;
+      }
+    }
+    if (curPoly) closeCurPoly();
+    function closeCurPoly() {
+      if (curPoly && curPoly.pts.length >= 3 &&
+          (curPoly.closed || dist(curPoly.pts[0], curPoly.pts[curPoly.pts.length - 1]) < 1e-6)) {
+        polys.push(curPoly.pts.slice());
+      }
+      curPoly = null;
+    }
+
+    var chosen = null;
+    if (polys.length) {
+      var bestArea = -1;
+      for (var p = 0; p < polys.length; p++) {
+        var area = Math.abs(C.signedArea(polys[p]));
+        if (area > bestArea) { bestArea = area; chosen = polys[p]; }
+      }
+    } else if (lineSegs.length) {
+      chosen = chainLinesToPoly(lineSegs);
+    }
+    if (!chosen) return null;
+    var pts = C.dedupePts(chosen, 0.01);
+    if (pts.length < 3) return null;
+    pts = removeCollinear(pts);
+    if (pts.length < 3) return null;
+    return pts;
+  }
+
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+  /* LINE 首尾相接追踪成闭合多边形（启发式：从最左点出发沿最右转前进直到回到起点或走投无路；再取最大面积环） */
+  function chainLinesToPoly(lines) {
+    // 收集端点
+    var nodes = [];
+    var idx = {};
+    function ni(p) {
+      var key = p.x.toFixed(2) + '_' + p.y.toFixed(2);
+      if (!(key in idx)) { idx[key] = nodes.length; nodes.push({ x: p.x, y: p.y }); }
+      return idx[key];
+    }
+    var adj = [];
+    lines.forEach(function (l) {
+      var ia = ni(l.a), ib = ni(l.b);
+      if (!adj[ia]) adj[ia] = [];
+      if (!adj[ib]) adj[ib] = [];
+      adj[ia].push(ib); adj[ib].push(ia);
+    });
+    // 每个节点度数 <=2 才可追踪；超过则拆分（简单处理：仅用度2连通主链）
+    // 找最大简单环：DFS 枚举（节点数受限）
+    var best = null, bestArea = -1;
+    var n = nodes.length;
+    if (n > 400) return null; // 太大放弃
+    for (var s = 0; s < n; s++) {
+      // DFS 从 s 找环
+      var stack = [[s, [s], new Set([s])]];
+      while (stack.length) {
+        var top = stack.pop();
+        var cur = top[0], path = top[1], seen = top[2];
+        var nbs = adj[cur] || [];
+        for (var k = 0; k < nbs.length; k++) {
+          var nb = nbs[k];
+          if (nb === s && path.length >= 4) {
+            var poly = path.map(function (v) { return nodes[v]; });
+            var ar = Math.abs(C.signedArea(poly));
+            if (ar > bestArea) { bestArea = ar; best = poly; }
+          } else if (!seen.has(nb) && path.length < 30) {
+            var np = path.concat([nb]);
+            var ns = new Set(seen); ns.add(nb);
+            stack.push([nb, np, ns]);
+          }
+        }
+      }
+    }
+    return best ? { pts: best, src: 'line' } : null;
+  }
+
+  function removeCollinear(pts) {
+    var out = [];
+    var m = pts.length;
+    for (var i = 0; i < m; i++) {
+      var a = pts[(i - 1 + m) % m], b = pts[i], c = pts[(i + 1) % m];
+      var cr = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+      if (Math.abs(cr) > 1e-6) out.push(b);
+    }
+    return out;
+  }
+
+  /* 读取 DXF 文件（兼容 GBK） */
+  function loadDxfFile(file) {
+    loading(true, '正在解析 DXF…');
+    var reader = new FileReader();
+    reader.onload = function () {
+      var buf = reader.result;
+      var text = '';
+      try {
+        // 优先 GBK 解码尝试（CAD 中文默认 ANSI_936），失败则 UTF-8
+        text = new TextDecoder('gbk').decode(buf);
+        // 若出现明显乱码替换符则回退 utf-8
+        if (text.indexOf('\uFFFD') >= 0) throw new Error('gbk fail');
+      } catch (e) {
+        try { text = new TextDecoder('utf-8').decode(buf); }
+        catch (e2) { text = String.fromCharCode.apply(null, new Uint8Array(buf)); }
+      }
+      try {
+        var pts = parseDxfText(text);
+        if (!pts || pts.length < 3) throw new Error('未找到闭合轮廓（支持 LWPOLYLINE/POLYLINE/LINE 闭合环）');
+        setPoly(pts, file.name);
+        toast('DXF 导入成功：识别到建筑轮廓（' + pts.length + ' 顶点）', 'ok');
+      } catch (err) {
+        toast('导入失败：' + err.message, 'err');
+      }
+      loading(false);
+    };
+    reader.onerror = function () { loading(false); toast('文件读取失败', 'err'); };
+    reader.readAsArrayBuffer(file);
+  }
+
+  /* ================= 轮廓设置 ================= */
+  function setPoly(pts, name) {
+    // 按 mm 处理：若轮廓范围很小(像是 m 为单位)，放大 1000 倍到 mm
+    var bb = C.polyBBox(pts);
+    var span = Math.max(bb.maxX - bb.minX, bb.maxY - bb.minY);
+    if (span < 100) { // 图纸以米计（典型建筑 10~200m）
+      pts = pts.map(function (p) { return { x: p.x * 1000, y: p.y * 1000 }; });
+    }
+    state.poly = C.dedupePts(pts, 1);
+    if (state.poly.length < 3) { toast('轮廓点数不足', 'err'); return; }
+    state.polyName = name || '';
+    state.manual = [];
+    renderAll();
+  }
+
+  /* 载入示例轮廓（矩形带凹口，模拟典型建筑 24m×15m） */
+  function loadSample() {
+    var pts = [
+      { x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 },
+      { x: 16000, y: 15000 }, { x: 16000, y: 9000 }, { x: 8000, y: 9000 },
+      { x: 8000, y: 15000 }, { x: 0, y: 15000 }
+    ];
+    state.poly = pts;
+    state.polyName = '示例建筑轮廓';
+    state.manual = [];
+    renderAll();
+    toast('已载入示例建筑轮廓（24m×15m 带凹口）', 'ok');
+  }
+
+  /* =====================================================================
+     内部绘图坐标系 = 图纸 mm（Y 向上，原点图框左下角）
+     DXF 导出 = 图纸坐标 × denom 即真实 mm（1:1 模型空间）
+     ===================================================================== */
+  var LAYER = {
+    OUTLINE: 'OUTLINE', POLE_IN: 'POLE_IN', POLE_OUT: 'POLE_OUT',
+    ROWLN: 'ROWLN', TIE: 'TIE', BRACE: 'BRACE', DIM: 'DIM',
+    TEXT: 'TEXT', FRAME: 'FRAME', TABLE: 'TABLE', HATCHX: 'HATCHX'
+  };
+  var SVG_COLOR = {
+    OUTLINE: '#1f2937', POLE_IN: '#dc2626', POLE_OUT: '#2563eb',
+    ROWLN: '#94a3b8', TIE: '#d97706', BRACE: '#16a34a', DIM: '#0e7490',
+    TEXT: '#16a34a', FRAME: '#0f172a', TABLE: '#0f172a', HATCHX: '#64748b'
+  };
+  var LAYER_COLOR_NO = { // 供 DXF 实体级颜色 62（叠加）
+    OUTLINE: 7, POLE_IN: 1, POLE_OUT: 5, ROWLN: 8, TIE: 2, BRACE: 3,
+    DIM: 4, TEXT: 3, FRAME: 7, TABLE: 7, HATCHX: 8
+  };
+
+  var entities = [];        // 图元缓冲
+  var geom = {};            // 图纸坐标几何摘要（bbox 等）
+  var curDenom = 100;
+  var scaleText = '1:100';
+
+  function E(type, o) { var e = { t: type }; for (var k in o) e[k] = o[k]; entities.push(e); return e; }
+
+  /* 文本宽度粗估（mm，宽高比 0.7，中文字符全宽） */
+  function textWmm(s, h) {
+    var w = 0;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      w += (c > 0x2E80 ? 1.0 : 0.62) * h * 0.7;
+    }
+    return w;
+  }
+
+  /* ============ 布局 ============
+     输入 state.poly（真实mm）、params（真实mm）
+     1) 调用 C.layoutScaffold 得 layout（真实mm）
+     2) 计算内容 bbox（建筑+外环+延伸标注预留 1500mm）
+     3) 定 denom & 偏移 → 映射全部真实点至图纸坐标
+     4) 生成图元 */
+  function computeLayout() {
+    entities = [];
+    if (!state.poly) return null;
+    var p = getParams();
+    var lay;
+    try {
+      lay = C.layoutScaffold(state.poly, p);
+    } catch (err) {
+      toast('布置失败：' + err.message, 'err');
+      return null;
+    }
+    var sheet = getSheet();
+    var area = { // 可用绘图区（mm 图纸）：左右 40，底部留 60（图例/标题栏带），顶部留 75（图名）
+      x0: 40, y0: 62, x1: sheet.w - 40, y1: sheet.h - 75
+    };
+    var aw = area.x1 - area.x0, ah = area.y1 - area.y0;
+    // 内容 bbox（真实 mm）：建筑 + 外排杆 + 标注延伸 1500
+    var all = lay.poly.concat(lay.outerRing);
+    var bb = C.polyBBox(all);
+    var padReal = 1600;
+    var cw = (bb.maxX - bb.minX) + 2 * padReal;
+    var ch = (bb.maxY - bb.minY) + 2 * padReal;
+    // 自动档位（图纸上不能超可用区）
+    var opts = [50, 100, 150, 200, 250, 300, 400, 500];
+    var userScale = $('inScale').value;
+    var denom;
+    if (userScale === 'auto') {
+      denom = null;
+      for (var i = 0; i < opts.length; i++) {
+        if (cw / opts[i] <= aw && ch / opts[i] <= ah) { denom = opts[i]; break; }
+      }
+      if (!denom) denom = opts[opts.length - 1];
+    } else {
+      denom = parseInt(userScale.split(':')[1], 10) || 100;
+    }
+    curDenom = denom;
+    scaleText = '1:' + denom;
+    var k = 1 / denom;   // 真实mm → 图纸mm
+    // 图纸上实际占用
+    var pw = cw * k, ph = ch * k;
+    var ox = area.x0 + (aw - pw) / 2;  // 内容左下（图纸mm）
+    var oy = area.y0 + (ah - ph) / 2;
+    function P(pt) { // 真实 → 图纸
+      return { x: (pt.x - bb.minX + padReal) * k + ox, y: (pt.y - bb.minY + padReal) * k + oy };
+    }
+    geom = { sheet: sheet, area: area, k: k, denom: denom,
+             bbReal: bb, padReal: padReal, ox: ox, oy: oy, P: P, lay: lay };
+    return lay;
+  }
+
+  /* ============ 图元生成 ============ */
+  function buildEntities() {
+    entities = [];
+    if (!state.poly || !geom || !geom.lay) return;
+    var lay = geom.lay, g = geom, P = g.P, k = g.k, d = getParams();
+    var sheet = g.sheet;
+    var opts = {
+      no: $('ckNo').checked, lian: $('ckLian').checked,
+      jd: $('ckJd').checked, dim: $('ckDim').checked
+    };
+
+    /* --- 0. 图框与标题栏占位（FRAME/TEXT） --- */
+    frameAndTitle(sheet, opts);
+
+    /* --- 1. 建筑轮廓 OUTLINE --- */
+    var polyPts = lay.poly.map(P);
+    var outlineW = Math.max(0.3, 0.5 * k * 1000); // 0.5mm 图纸线宽? 线宽用图纸mm恒定
+    E('poly', { pts: polyPts, layer: LAYER.OUTLINE, lw: 0.5 });
+    var bbP = C.polyBBox(polyPts);
+    geom.bbP = bbP;
+
+    /* --- 2. 内/外排连线 ROWLN（示意排架走向，细虚线） --- */
+    E('poly', { pts: lay.innerRing.map(P), layer: LAYER.ROWLN, dash: [4, 2], lw: 0.18 });
+    E('poly', { pts: lay.outerRing.map(P), layer: LAYER.ROWLN, dash: [4, 2], lw: 0.18 });
+
+    /* --- 3. 立杆（内排红点、外排蓝点；角部放大带圈=加强杆） --- */
+    var poleR = Math.max(0.9, (d.d / 2) * k);   // 立杆截面，图纸最小 0.9mm
+    var iN = 0, oN = 0;
+    lay.columns.forEach(function (col, idx) {
+      var pin = P(col.inner), pout = P(col.outer);
+      var corner = col.corner;
+      // 内排
+      E('circle', { cx: pin.x, cy: pin.y, r: corner ? poleR + 0.8 : poleR, layer: LAYER.POLE_IN, fill: true });
+      // 外排
+      E('circle', { cx: pout.x, cy: pout.y, r: corner ? poleR + 0.8 : poleR, layer: LAYER.POLE_OUT, fill: true });
+      if (corner) { // 加强杆外圈
+        E('circle', { cx: pout.x, cy: pout.y, r: poleR + 1.6, layer: LAYER.BRACE, dash: [1.5, 1.2] });
+      }
+      iN++; oN++;
+    });
+    // 手动杆
+    state.manual.forEach(function (m) {
+      var pm = P(m);
+      E('circle', { cx: pm.x, cy: pm.y, r: poleR + 1.4, layer: LAYER.HATCHX, fill: true });
+    });
+
+    /* --- 4. 立杆编号（外排沿周长编号 1..n，文字偏外） --- */
+    if (opts.no && lay.outerPoles.length <= 220) {
+      // 从最接近左下的杆起按逆序编号太复杂：直接按 columns 顺序（沿外扩轨迹首尾相接已顺序）
+      lay.columns.forEach(function (col, idx) {
+        var pout = P(col.outer);
+        var no = idx + 1;
+        // 编号文字方向：向外排外侧（指向远离建筑 bbox 中心）
+        var cen = { x: (bbP.minX + bbP.maxX) / 2, y: (bbP.minY + bbP.maxY) / 2 };
+        var vx = pout.x - cen.x, vy = pout.y - cen.y;
+        var L = Math.hypot(vx, vy) || 1;
+        var h = 2.0;
+        var tx = pout.x + (vx / L) * (poleR + 1.8 + h * 0.25);
+        var ty = pout.y + (vy / L) * (poleR + 1.8 + h * 0.25);
+        E('text', { x: tx, y: ty, h: h, str: String(no), layer: LAYER.DIM, align: 'c', rot: 0 });
+      });
+    }
+
+    /* --- 5. 连墙件（TIE 黄，沿内排杆与建筑之间每 lianX 跨设一个，画短线+圈） --- */
+    if (opts.lian) {
+      var step = Math.max(1, parseInt($('inLian').value, 10) || 3);
+      for (var ci = step - 1; ci < lay.columns.length; ci += step) {
+        var col2 = lay.columns[ci];
+        // 找该列内排杆最近建筑边上的投影点作为连墙件锚点：取建筑边到内排杆垂足——简化：沿径向
+        var pi = P(col2.inner);
+        // 建筑轮廓最近点
+        var near = nearestOnPoly(lay.poly, col2.inner);
+        if (!near) continue;
+        var pn = P(near.pt);
+        // 画：小方块在线（墙→内排连线中点），+ 竖向短线
+        var mx = (pn.x + pi.x) / 2, my = (pn.y + pi.y) / 2;
+        var s = 1.2;
+        E('line', { x1: pn.x, y1: pn.y, x2: pi.x, y2: pi.y, layer: LAYER.TIE, lw: 0.15, dash: [2, 1.5] });
+        // 横线两端短线形成“×”即连墙件符号
+        E('line', { x1: mx - s, y1: my, x2: mx + s, y2: my, layer: LAYER.TIE, lw: 0.3 });
+        E('line', { x1: mx, y1: my - s, x2: mx, y2: my + s, layer: LAYER.TIE, lw: 0.3 });
+      }
+    }
+
+    /* --- 6. 尺寸标注（DIM 青，手绘标注：尺寸线+斜箭头+文字） --- */
+    if (opts.dim) {
+      dims(polyPts, lay, g, d);
+    }
+
+    /* --- 7. 图例与说明（TEXT 块，左下角） --- */
+    legend(sheet, opts, lay, d);
+    return entities;
+  }
+
+  /* 建筑轮廓最近点 */
+  function nearestOnPoly(poly, pt) {
+    var best = null, bd = 1e18;
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      var pr = projOnSeg(a, b, pt);
+      var dd = Math.hypot(pr.x - pt.x, pr.y - pt.y);
+      if (dd < bd) { bd = dd; best = { pt: pr, d: dd }; }
+    }
+    return best;
+  }
+  function projOnSeg(a, b, p) {
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var L2 = dx * dx + dy * dy;
+    var t = L2 ? ((p.x - a.x) * dx + (p.y - a.y) * dy) / L2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    return { x: a.x + t * dx, y: a.y + t * dy };
+  }
+
+  /* ============ 手绘尺寸标注（跨列尺寸/离墙距/排距/总尺寸） ============ */
+  function arrowDim(x1, y1, x2, y2, text, txtH, above) {
+    // 尺寸线 (x1,y1)-(x2,y2)，两端 45° 斜箭头，文字上方
+    E('line', { x1: x1, y1: y1, x2: x2, y2: y2, layer: LAYER.DIM, lw: 0.2 });
+    // 箭头
+    var ang = Math.atan2(y2 - y1, x2 - x1);
+    var as = 1.6;
+    function arrow(x, y, a) {
+      var p1 = { x: x + as * Math.cos(a + 2.5), y: y + as * Math.sin(a + 2.5) };
+      var p2 = { x: x + as * Math.cos(a - 2.5), y: y + as * Math.sin(a - 2.5) };
+      E('line', { x1: x, y1: y, x2: p1.x, y2: p1.y, layer: LAYER.DIM, lw: 0.2 });
+      E('line', { x1: x, y1: y, x2: p2.x, y2: p2.y, layer: LAYER.DIM, lw: 0.2 });
+    }
+    arrow(x1, y1, ang + Math.PI);
+    arrow(x2, y2, ang);
+    // 文字置中，图纸字高
+    var cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
+    var mx = 0, my = (above ? 1 : -1) * (txtH + 1.0);
+    E('text', { x: cx + mx, y: cy + my + txtH * 0.35, h: txtH, str: text, layer: LAYER.DIM, align: 'c' });
+  }
+
+  function dims(polyPts, lay, g, d) {
+    var k = g.k, P = g.P, denom = g.denom;
+    var bbP = g.bbP;
+    var txtH = Math.max(2.2, 3.2);
+    var ext = 8; // 延伸线伸出
+    function mm(v) { return Math.round(v); } // 显示值（真实mm）
+
+    // --- A. 底部总尺寸（建筑总长）---
+    var yb = bbP.minY - ext - 4;   // 尺寸线 y（底部）
+    // 界线从轮廓最低点向下
+    // 用两个竖线把 bbP 宽包起来
+    var xL = bbP.minX, xR = bbP.maxX;
+    // 底边若有非水平边，界线画在 bbox 左右边界即可
+    E('line', { x1: xL, y1: bbP.minY - 2, x2: xL, y2: yb - 2, layer: LAYER.DIM, lw: 0.15, dash: [1.5, 1] });
+    E('line', { x1: xR, y1: bbP.minY - 2, x2: xR, y2: yb - 2, layer: LAYER.DIM, lw: 0.15, dash: [1.5, 1] });
+    var realW = (xR - xL) * denom;
+    arrowDim(xL, yb, xR, yb, mm(realW) + 'mm', txtH, false);
+
+    // --- B. 右侧总尺寸（总宽）---
+    var xr = bbP.maxX + ext + 4;
+    E('line', { x1: bbP.maxX + 2, y1: bbP.minY, x2: xr + 2, y2: bbP.minY, layer: LAYER.DIM, lw: 0.15, dash: [1.5, 1] });
+    E('line', { x1: bbP.maxX + 2, y1: bbP.maxY, x2: xr + 2, y2: bbP.maxY, layer: LAYER.DIM, lw: 0.15, dash: [1.5, 1] });
+    var realH = (bbP.maxY - bbP.minY) * denom;
+    arrowDim(xr, bbP.minY, xr, bbP.maxY, mm(realH) + 'mm', txtH, true);
+
+    // --- C. 离墙距 a 与排距 b：取建筑某条长直边作剖面示意 ---
+    // 找一个底边近似水平的长边
+    var edge = pickBottomishEdge(lay.poly);
+    if (edge) {
+      var a = lay.poly[edge.i], b2 = lay.poly[edge.i + 1];
+      // 该边外法线方向（向外部）
+      var ex = b2.x - a.x, ey = b2.y - a.y;
+      var L = Math.hypot(ex, ey) || 1;
+      var nx = -ey / L, ny = ex / L;  // 先按左法线
+      // 建筑为 CCW 已归一，外法线=右法线 = (ey/L, -ex/L)；检查 a+外法线是否远离质心
+      var cen = C.polyBBox(lay.poly);
+      var ccx = (cen.minX + cen.maxX) / 2, ccy = (cen.minY + cen.maxY) / 2;
+      var midx = (a.x + b2.x) / 2, midy = (a.y + b2.y) / 2;
+      // 外法线：指向远离质心
+      var fx = midx - ccx, fy = midy - ccy;
+      var fL = Math.hypot(fx, fy) || 1;
+      var ux = fx / fL, uy = fy / fL;
+      // 但外法线应垂直于该边
+      // 取两个候选法线，选点积>0的
+      var c1 = { x: -ey / L, y: ex / L }, c2 = { x: ey / L, y: -ex / L };
+      var on = (c1.x * ux + c1.y * uy) > (c2.x * ux + c2.y * uy) ? c1 : c2;
+      // 在边中点沿外法线画 a、b 两段尺寸（示意）
+      var s = { x: midx, y: midy };
+      // 内排杆位置应在 a 处：找此边中垂线上 内排杆 投影
+      var pIn = { x: s.x + on.x * d.a, y: s.y + on.y * d.a };   // 理论内排
+      var pOut = { x: s.x + on.x * (d.a + d.b), y: s.y + on.y * (d.a + d.b) };
+      // 尺寸线沿法线方向，从 s 到 pOut，双箭头整段 b? 我们标 a 与 b：
+      // a 段：s → pIn（离墙距）
+      var ps = P(s), pi = P(pIn), po = P(pOut);
+      // 平移该线避免与立杆重叠：沿边方向偏移
+      var offAlong = 12; // 图纸mm
+      var ax2 = -(on.y), ay2 = on.x; // 沿边单位
+      var dxp = ax2 * offAlong, dyp = ay2 * offAlong;
+      var ax0 = ps.x + dxp, ay0 = ps.y + dyp;
+      var ax1 = pi.x + dxp, ay1 = pi.y + dyp;
+      var ax2b = po.x + dxp, ay2b = po.y + dyp;
+      // 引出线（虚线）
+      E('line', { x1: ps.x, y1: ps.y, x2: ax0, y2: ay0, layer: LAYER.DIM, lw: 0.15, dash: [1.2, 1] });
+      E('line', { x1: pi.x, y1: pi.y, x2: ax1, y2: ay1, layer: LAYER.DIM, lw: 0.15, dash: [1.2, 1] });
+      E('line', { x1: po.x, y1: po.y, x2: ax2b, y2: ay2b, layer: LAYER.DIM, lw: 0.15, dash: [1.2, 1] });
+      var txtH2 = Math.max(2, 2.8);
+      arrowDim(ax0, ay0, ax1, ay1, 'a=' + mm(d.a) + 'mm', txtH2, false);
+      arrowDim(ax1, ay1, ax2b, ay2b, 'b=' + mm(d.b) + 'mm', txtH2, false);
+      // La 纵距示意：在该边某相邻两外排杆之间标注
+      // 找位于该边法线上最近的两个外排杆
+      var linePts = [];
+      lay.columns.forEach(function (col) {
+        var po2 = P(col.outer);
+        if (Math.abs((po2.x - ps.x) * on.y - (po2.y - ps.y) * on.x) < 1e-6 * 0 + 0.5) {
+          linePts.push({ x: po2.x, y: po2.y });
+        }
+      });
+      if (linePts.length >= 2) {
+        // 按边方向排序
+        var dv = { x: ax2, y: ay2 };
+        linePts.sort(function (p, q) {
+          return (p.x * dv.x + p.y * dv.y) - (q.x * dv.x + q.y * dv.y);
+        });
+        var p0 = linePts[0], p1 = linePts[1];
+        // 若间距≈纵距则标
+        var sp = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        if (sp > 0.5) {
+          var off2 = offAlong + 8;
+          var q0 = { x: p0.x + ax2 * off2, y: p0.y + ay2 * off2 };
+          var q1 = { x: p1.x + ax2 * off2, y: p1.y + ay2 * off2 };
+          var valLa = Math.round(sp * denom);
+          arrowDim(q0.x, q0.y, q1.x, q1.y, 'La=' + valLa + 'mm', txtH2, false);
+        }
+      }
+    }
+
+    // --- 图形整体框内说明（GB55023-2022）---
+    // （顶部标题已在 frameAndTitle 输出）
+  }
+
+  /* 找接近水平的底部长边 */
+  function pickBottomishEdge(poly) {
+    var best = -1, bs = -1e18;
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      var L = Math.hypot(b.x - a.x, b.y - a.y);
+      if (L < 500) continue;
+      var hor = Math.abs(b.y - a.y) / L;  // 0=水平
+      // 优先长 + 水平(底)；给分
+      var ymid = (a.y + b.y) / 2;
+      var bb = C.polyBBox(poly);
+      var score = L - 3000 * hor - (bb.maxY - ymid) * 2; // 越低越好
+      if (score > bs) { bs = score; best = i; }
+    }
+    if (best >= 0) return { i: best, ok: true };
+    return null;
+  }
+
+  /* ============ 图框 + 标题栏（置于图纸底部右侧） ============ */
+  function frameAndTitle(sheet, opts) {
+    var m = 8;               // 图框边距
+    var w = sheet.w, h = sheet.h;
+    // 外框粗线
+    E('rect', { x: m, y: m, w: w - 2 * m, h: h - 2 * m, layer: LAYER.FRAME, lw: 1.0 });
+    E('rect', { x: m + 3, y: m + 3, w: w - 2 * (m + 3), h: h - 2 * (m + 3), layer: LAYER.FRAME, lw: 0.25 });
+
+    // 顶部绘图标题（居中）
+    E('text', { x: w / 2, y: h - 14, h: 5, str: getTitle().name, layer: LAYER.TEXT, align: 'c' });
+    E('text', { x: w / 2, y: h - 24, h: 3, str: '双排脚手架平面布置示意  依据 GB55023-2022《施工脚手架通用规范》', layer: LAYER.TEXT, align: 'c' });
+
+    // 标题栏右下角 180×34
+    var tw = 180, th = 34;
+    var tx = w - m - tw, ty = m;   // 左下角（Y-up，靠近底边）
+    E('rect', { x: tx, y: ty, w: tw, h: th, layer: LAYER.TABLE, lw: 0.35 });
+    var col1 = 60;
+    var rows = [['工程名称', getTitle().proj], ['图纸名称', getTitle().name],
+                ['比例', scaleText], ['设计', getTitle().designer],
+                ['日期', todayStr()], ['规范', 'GB55023-2022']];
+    var cellH = th / 3;    // 3 行，每行两小格
+    var cellW = tw / 2;
+    // 行分隔线 + 中分隔线
+    for (var r2 = 1; r2 < 3; r2++) {
+      E('line', { x1: tx, y1: ty + r2 * cellH, x2: tx + tw, y2: ty + r2 * cellH, layer: LAYER.TABLE, lw: 0.2 });
+    }
+    E('line', { x1: tx + cellW, y1: ty, x2: tx + cellW, y2: ty + th, layer: LAYER.TABLE, lw: 0.2 });
+    // 每行：左标签 右值
+    for (var rr = 0; rr < 3; rr++) {
+      var cell1 = rows[rr * 2], cell2 = rows[rr * 2 + 1];
+      var yy = ty + rr * cellH + cellH * 0.5;
+      E('text', { x: tx + 2, y: yy + 1.2, h: 2.4, str: cell1[0], layer: LAYER.TEXT });
+      E('text', { x: tx + cellW / 2 + 1, y: yy + 1.2, h: 2.4, str: cell1[1], layer: LAYER.TEXT, align: 'c' });
+      E('text', { x: tx + cellW + 2, y: yy + 1.2, h: 2.4, str: cell2[0], layer: LAYER.TEXT });
+      E('text', { x: tx + cellW + cellW / 2 + 1, y: yy + 1.2, h: 2.4, str: cell2[1], layer: LAYER.TEXT, align: 'c' });
+    }
+  }
+  function todayStr() {
+    var dt = new Date();
+    return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+  }
+
+  /* ============ 图例与说明（置于图纸底部左侧留白带） ============ */
+  function legend(sheet, opts, lay, d) {
+    var x0 = 14, y0 = 16;   // 底部左侧（Y-up 坐标，从底部往上）
+    var t = getTitle();
+    E('text', { x: x0, y: y0, h: 3.0, str: '图 例', layer: LAYER.TEXT });
+    var items = [
+      '● 内排立杆（离墙 a）',
+      '◯ 外排立杆',
+      '╳ 连墙件（水平≤3跨/竖向≤3步）',
+      '◎ 转角加强立杆（JGJ130 要求）',
+      '┄ 排架连系线',
+      '— 建筑外轮廓'
+    ];
+    for (var k = 0; k < items.length; k++) {
+      E('text', { x: x0, y: y0 + 6 + k * 5, h: 2.3, str: items[k], layer: LAYER.TEXT });
+    }
+    // 参数说明（图例右侧或换行）
+    var px = 210;
+    E('text', { x: x0 + px, y: y0, h: 2.8, str: '架体参数', layer: LAYER.TEXT });
+    E('text', { x: x0 + px, y: y0 + 5.5, h: 2.3, str: '离墙距 a=' + Math.round(d.a) + 'mm  排距 b=' + Math.round(d.b) + 'mm  纵距 La=' + Math.round(d.La) + 'mm', layer: LAYER.TEXT });
+    E('text', { x: x0 + px, y: y0 + 11, h: 2.3, str: '立杆钢管 φ' + Math.round(d.d) + '×3.6mm  剪刀撑沿全高连续设置 45°~60°', layer: LAYER.TEXT });
+    E('text', { x: x0 + px, y: y0 + 16.5, h: 2.3, str: '连墙件：每 ≤3 跨（' + (Math.round(d.La) * (parseInt($('inLian').value, 10) || 3) / 1000).toFixed(1) + 'm）设一处，梅花形布置', layer: LAYER.TEXT });
+  }
+
+  /* ============ SVG 渲染（图纸坐标 → 显示坐标，Y 翻转） ============ */
+  function renderAll() {
+    updateStats();
+    var lay = computeLayout();
+    if (!lay) { $('svgCanvas').innerHTML = ''; return; }
+    buildEntities();
+    drawSvg();
+    updateStats2();
+  }
+
+  function updateStats() {
+    if (!state.poly) {
+      $('stPoly').textContent = '未导入';
+      $('stPerim').textContent = '-'; $('stInner').textContent = '-'; $('stOuter').textContent = '-';
+      return;
+    }
+    var bb = C.polyBBox(state.poly);
+    $('stPoly').textContent = (state.polyName ? state.polyName + ' · ' : '') + Math.round((bb.maxX - bb.minX) / 1000) + 'm×' + Math.round((bb.maxY - bb.minY) / 1000) + 'm';
+    $('stPerim').textContent = (C.polyPerim(state.poly) / 1000).toFixed(1);
+  }
+  function updateStats2() {
+    if (!geom || !geom.lay) return;
+    var l = geom.lay;
+    $('stInner').textContent = l.innerPoles.length;
+    $('stOuter').textContent = l.outerPoles.length;
+  }
+
+  /* SVG 图元绘制 */
+  function drawSvg() {
+    var svg = $('svgCanvas');
+    var sheet = geom.sheet;
+    // 先按画布容器适应
+    var wrap = $('canvasWrap');
+    var cw = wrap.clientWidth - 24, ch = wrap.clientHeight - 24;
+    var viewScale = Math.min(cw / sheet.w, ch / sheet.h);
+    state.view.scale = viewScale;
+    // 高分辨率内部像素
+    var pxW = Math.max(600, Math.round(sheet.w * viewScale));
+    var pxH = Math.max(400, Math.round(sheet.h * viewScale));
+    svg.setAttribute('width', pxW);
+    svg.setAttribute('height', pxH);
+    svg.setAttribute('viewBox', '0 0 ' + sheet.w + ' ' + sheet.h);
+    var ns = 'http://www.w3.org/2000/svg';
+    var s = '';
+    s += '<defs><style>text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif}</style></defs>';
+    s += '<rect x="0" y="0" width="' + sheet.w + '" height="' + sheet.h + '" fill="#ffffff"/>';
+    entities.forEach(function (e) {
+      if (e.t === 'poly' || e.t === 'rect') {
+        var pts = e.t === 'rect' ? [{ x: e.x, y: e.y }, { x: e.x + e.w, y: e.y }, { x: e.x + e.w, y: e.y + e.h }, { x: e.x, y: e.y + e.h }] : e.pts;
+        var d = pts.map(function (p, i) {
+          var X = p.x, Y = sheet.h - p.y;
+          return (i ? 'L' : 'M') + X.toFixed(2) + ' ' + Y.toFixed(2);
+        }).join(' ');
+        if (e.t === 'rect' || e.pts) d += ' Z';
+        s += '<path d="' + d + '" fill="none" stroke="' + (SVG_COLOR[e.layer] || '#000') + '" stroke-width="' + (e.lw || 0.2) + '"' +
+             (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' stroke-linejoin="round"/>';
+      } else if (e.t === 'line') {
+        var X1 = e.x1, Y1 = sheet.h - e.y1, X2 = e.x2, Y2 = sheet.h - e.y2;
+        s += '<line x1="' + X1.toFixed(2) + '" y1="' + Y1.toFixed(2) + '" x2="' + X2.toFixed(2) + '" y2="' + Y2.toFixed(2) +
+             '" stroke="' + (SVG_COLOR[e.layer] || '#000') + '" stroke-width="' + (e.lw || 0.15) + '"' +
+             (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
+      } else if (e.t === 'circle') {
+        var Cx = e.cx, Cy = sheet.h - e.cy;
+        if (e.fill) s += '<circle cx="' + Cx.toFixed(2) + '" cy="' + Cy.toFixed(2) + '" r="' + e.r + '" fill="' + (SVG_COLOR[e.layer] || '#000') + '"/>';
+        else s += '<circle cx="' + Cx.toFixed(2) + '" cy="' + Cy.toFixed(2) + '" r="' + e.r + '" fill="none" stroke="' + (SVG_COLOR[e.layer] || '#000') + '" stroke-width="0.15"' +
+                  (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + '/>';
+      } else if (e.t === 'text') {
+        var Tx = e.x, Ty = sheet.h - e.y;
+        var anchor = e.align === 'c' ? 'middle' : (e.align === 'r' ? 'end' : 'start');
+        var col = SVG_COLOR[e.layer] || '#111';
+        s += '<text x="' + Tx.toFixed(2) + '" y="' + Ty.toFixed(2) + '" font-size="' + e.h + '" fill="' + col + '" text-anchor="' + anchor + '">' + escXml(e.str) + '</text>';
+      }
+    });
+    svg.innerHTML = s;
+  }
+  function escXml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ============ 构配件统计 ============ */
+  function computeStats() {
+    if (!state.poly || !geom || !geom.lay) return null;
+    var l = geom.lay;
+    var perim = C.polyPerim(state.poly) / 1000;    // m
+    var innerPerim = C.polyPerim(l.innerRing) / 1000;
+    var outerPerim = C.polyPerim(l.outerRing) / 1000;
+    var nIn = l.innerPoles.length, nOut = l.outerPoles.length;
+    var d = getParams();
+    var lianGapM = (d.La / 1000) * (parseInt($('inLian').value, 10) || 3);
+    var lianN = Math.max(4, Math.ceil(perim / lianGapM));
+    var rows = [
+      ['建筑外轮廓周长', perim.toFixed(1), 'm'],
+      ['内排立杆数', String(nIn), '根'],
+      ['外排立杆数', String(nOut), '根'],
+      ['立杆合计', String(nIn + nOut), '根'],
+      ['纵距 La', (d.La / 1000).toFixed(2), 'm'],
+      ['排距 b', (d.b / 1000).toFixed(2), 'm'],
+      ['离墙距 a', (d.a / 1000).toFixed(2), 'm'],
+      ['连墙件估算', String(lianN), '个'],
+      ['钢管主材估算', ((nIn + nOut) * 0 + perim * 3.2 + innerPerim * 2 + outerPerim * 2).toFixed(0), 'm']
+    ];
+    return { rows: rows, perim: perim, nIn: nIn, nOut: nOut };
+  }
+  function showStats() {
+    var st = computeStats();
+    if (!st) { toast('请先载入轮廓', 'err'); return; }
+    var html = '<tr><th style="width:60%">项目</th><th>数值</th><th>单位</th></tr>';
+    st.rows.forEach(function (r) {
+      html += '<tr><td>' + r[0] + '</td><td class="num">' + r[1] + '</td><td>' + r[2] + '</td></tr>';
+    });
+    $('statTable').innerHTML = html;
+    $('modalStat').className = 'modal-mask on';
+  }
+
+  /* ============ 导出 PNG ============ */
+  function exportPng() {
+    if (!state.poly || !entities.length) { toast('请先载入轮廓生成图形', 'err'); return; }
+    loading(true, '正在生成图片…');
+    var svgEl = $('svgCanvas');
+    var sheet = geom.sheet;
+    var scalePx = 4;  // 图纸mm → 像素（高清）
+    var W = Math.round(sheet.w * scalePx), H = Math.round(sheet.h * scalePx);
+    var xml = new XMLSerializer().serializeToString(svgEl);
+    // 重设宽高为高清
+    xml = xml.replace('width="' + svgEl.getAttribute('width') + '"', 'width="' + W + '"')
+             .replace('height="' + svgEl.getAttribute('height') + '"', 'height="' + H + '"');
+    var svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(svgBlob);
+    var img = new Image();
+    img.onload = function () {
+      var canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(img, 0, 0, W, H);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function (blob) {
+        loading(false);
+        if (!blob) { toast('导出失败', 'err'); return; }
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '脚手架平面图_' + (state.polyName ? state.polyName.replace(/[\\/:*?"<>|.]/g, '_') : '布置') + '_' + scaleText.replace(':', '-') + '.png';
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+        toast('PNG 已导出', 'ok');
+      }, 'image/png');
+    };
+    img.onerror = function () { loading(false); toast('图片渲染失败', 'err'); };
+    img.src = url;
+  }
+
+  /* ============ DXF 文本工具 ============ */
+  function toUPlus(s) {
+    var out = '';
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      out += c > 0x7e ? '\\U+' + ('0000' + c.toString(16).toUpperCase()).slice(-4) : s[i];
+    }
+    return out;
+  }
+
+  /* ============ 导出 DXF（模型空间 1:1 真实 mm：图纸mm × denom） ============ */
+  function exportDxf() {
+    if (!state.poly || !entities.length) { toast('请先载入轮廓生成图形', 'err'); return; }
+    var denom = curDenom;
+    var sheet = geom.sheet;
+    // 模型空间 bbox（mm）：包含全部图元 × denom
+    var minX = 1e18, minY = 1e18, maxX = -1e18, maxY = -1e18;
+    function acc(x, y) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+    function accPt(p) { acc(p.x, p.y); }
+    entities.forEach(function (e) {
+      if (e.t === 'poly') e.pts.forEach(accPt);
+      else if (e.t === 'rect') { acc(e.x, e.y); acc(e.x + e.w, e.y + e.h); }
+      else if (e.t === 'line') { accPt({ x: e.x1, y: e.y1 }); accPt({ x: e.x2, y: e.y2 }); }
+      else if (e.t === 'circle') { acc(e.cx - e.r, e.cy - e.r); acc(e.cx + e.r, e.cy + e.r); }
+      else if (e.t === 'text') { acc(e.x, e.y); }
+    });
+
+    var W = new DxfWriter('AC1015');
+    // 句柄从模板最大 0x330 之后起算
+    W.h = 0x330;
+    var M = 1;  // 已为图纸mm 坐标，直接乘 denom
+    function X(v) { return W.num(v * denom); }
+    // 实体输出
+    var out = [];
+    entities.forEach(function (e) {
+      var layer = toUPlus(e.layer);
+      if (e.t === 'poly' || e.t === 'rect') {
+        var pts = e.t === 'rect' ? [{ x: e.x, y: e.y }, { x: e.x + e.w, y: e.y }, { x: e.x + e.w, y: e.y + e.h }, { x: e.x, y: e.y + e.h }] : e.pts;
+        if (pts.length === 4 && e.t === 'rect') {
+          // LWPOLYLINE 矩形
+          out.push(lwpoly(W, pts, layer, true, e.lw));
+        } else {
+          out.push(lwpoly(W, pts, layer, true, e.lw));
+        }
+      } else if (e.t === 'line') {
+        out.push(line(W, e.x1 * denom, e.y1 * denom, e.x2 * denom, e.y2 * denom, layer, e.lw, e.dash ? 'DASHED' : undefined));
+      } else if (e.t === 'circle') {
+        out.push(circle(W, e.cx * denom, e.cy * denom, e.r * denom, layer));
+      } else if (e.t === 'text') {
+        out.push(dtext(W, e.x * denom, e.y * denom, e.h * denom, e.str, layer, e.align));
+      }
+    });
+    var entityText = out.join('\n');
+
+    // 组装：替换骨架占位
+    var skel = window.DXF_SKEL || '';
+    if (!skel) { toast('骨架模板缺失', 'err'); return; }
+    var extPad = 5 * denom;
+    skel = skel
+      .replace('__$EXTMIN_10__', W.num(minX * denom - extPad))
+      .replace('__$EXTMIN_20__', W.num(minY * denom - extPad))
+      .replace('__$EXTMIN_30__', '0.0')
+      .replace('__$EXTMAX_10__', W.num(maxX * denom + extPad))
+      .replace('__$EXTMAX_20__', W.num(maxY * denom + extPad))
+      .replace('__$EXTMAX_30__', '0.0')
+      .replace('__$LIMMIN_10__', W.num(minX * denom - extPad))
+      .replace('__$LIMMIN_20__', W.num(minY * denom - extPad))
+      .replace('__$LIMMAX_10__', W.num(maxX * denom + extPad))
+      .replace('__$LIMMAX_20__', W.num(maxY * denom + extPad))
+      .replace('__ENTITIES__', entityText);
+    // $HANDSEED：实体句柄最大值 +1
+    var hs = Math.max(0x330 + 2, W.h + 1);
+    skel = skel.replace('__$HANDSEED_5__', hs.toString(16).toUpperCase());
+    // 行尾统一 CRLF、无 BOM
+    var crlf = skel.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+    var bytes = new TextEncoder().encode(crlf);
+    var blob = new Blob([bytes], { type: 'application/dxf' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var base = (state.polyName ? state.polyName.replace(/[\\/:*?"<>|.]/g, '_') : '双排脚手架') + '_' + scaleText.replace(':', '-');
+    a.download = base + '.dxf';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+    toast('DXF 已导出（比例 ' + scaleText + '）', 'ok');
+  }
+
+  /* ---- 实体 writer ---- */
+  function entHead(W, type, layer, colorNo) {
+    var s = '0\n' + type + '\n5\n' + W.handle() + '\n330\n17\n100\nAcDbEntity\n8\n' + (layer || '0');
+    if (colorNo !== undefined) s += '\n62\n' + colorNo;
+    return s;
+  }
+  function lwpoly(W, pts, layer, close, lw) {
+    var s = entHead(W, 'LWPOLYLINE', layer);
+    s += '\n100\nAcDbPolyline\n90\n' + pts.length + '\n70\n' + (close ? '1' : '0');
+    s += '\n43\n0.0';
+    if (lw !== undefined) s += '\n370\n' + Math.max(13, Math.round(lw * 100)); // 打印线宽 1/100mm（不随比例缩放）
+    pts.forEach(function (p) {
+      s += '\n10\n' + W.num(p.x * curDenom) + '\n20\n' + W.num(p.y * curDenom);
+    });
+    return s;
+  }
+  function line(W, x1, y1, x2, y2, layer, lw, ltype) {
+    var s = entHead(W, 'LINE', layer);
+    if (ltype) s += '\n6\n' + ltype;
+    if (lw !== undefined) s += '\n370\n' + Math.max(13, Math.round(lw * 100));
+    s += '\n100\nAcDbLine\n10\n' + W.num(x1) + '\n20\n' + W.num(y1) + '\n30\n0.0' +
+         '\n11\n' + W.num(x2) + '\n21\n' + W.num(y2) + '\n31\n0.0';
+    return s;
+  }
+  function circle(W, cx, cy, r, layer) {
+    var s = entHead(W, 'CIRCLE', layer);
+    s += '\n100\nAcDbCircle\n10\n' + W.num(cx) + '\n20\n' + W.num(cy) + '\n30\n0.0' +
+         '\n40\n' + W.num(r) + '\n210\n0.0\n220\n0.0\n230\n1.0';
+    return s;
+  }
+  function dtext(W, x, y, h, str, layer, align) {
+    var s = entHead(W, 'TEXT', layer);
+    s += '\n100\nAcDbText\n10\n' + W.num(x) + '\n20\n' + W.num(y) + '\n30\n0.0' +
+         '\n40\n' + W.num(h) + '\n1\n' + toUPlus(str) +
+         '\n50\n0.0\n41\n0.7\n51\n0.0\n7\nTXT_CN\n71\n0\n72\n' + (align === 'c' ? '1' : (align === 'r' ? '2' : '0'));
+    s += '\n11\n' + W.num(x) + '\n21\n' + W.num(y) + '\n31\n0.0';
+    s += '\n100\nAcDbText';
+    return s;
+  }
+  function DxfWriter(ver) {
+    this.ver = ver || 'AC1015';
+    this.h = 0x330;
+    this.w = function () {};
+    this.num = function (v) {
+      if (!isFinite(v)) return '0';
+      var r = Math.round(v * 1000) / 1000;
+      return String(r);
+    };
+    this.handle = function () { this.h++; return this.h.toString(16).toUpperCase(); };
+  }
+
+  /* =====================================================================
+     画布交互：手动绘制轮廓
+     ===================================================================== */
+  var drawMode = false;
+  var draftPts = [];   // 世界坐标点（未确认）
+  function toggleDraw() {
+    var btn = $('btnDrawPoly');
+    if (!state.poly && !geom) { toast('请先载入示例或 DXF 建立画布基准', 'err'); return; }
+    drawMode = !drawMode;
+    if (drawMode) {
+      draftPts = [];
+      btn.classList.add('blue');
+      btn.textContent = '绘制中·左键加点';
+      toast('在画布上单击添加轮廓顶点，右键/Esc 完成');
+    } else {
+      btn.classList.remove('blue');
+      btn.textContent = '✏️ 绘制轮廓';
+    }
+  }
+  function canvasToWorld(evt) {
+    if (!geom) return null;
+    var svg = $('svgCanvas');
+    var rect = svg.getBoundingClientRect();
+    var scale = svg.viewBox.baseVal.width / rect.width;
+    var vx = (evt.clientX - rect.left) * scale;   // 图纸 x
+    var vy = (evt.clientY - rect.top) * scale;    // 图纸 y（向下）
+    // 反算真实：图纸坐标 → 世界
+    var g = geom;
+    var rx = (vx - g.ox) / g.k + g.bbReal.minX - g.padReal;
+    var ry = (g.sheet.h - vy - g.oy) / g.k + g.bbReal.minY - g.padReal;
+    return { x: rx, y: ry };
+  }
+  function svgClick(evt) {
+    if (!drawMode) return;
+    var w = canvasToWorld(evt);
+    if (!w) return;
+    // 吸附已有点？
+    draftPts.push(w);
+    overlayDraft();
+  }
+  function svgRClick(evt) {
+    if (!drawMode) return;
+    evt.preventDefault();
+    finishDraft();
+  }
+  function finishDraft() {
+    if (draftPts.length >= 3) {
+      // 闭合：去除重复终点
+      var arr = C.dedupePts(draftPts, 1);
+      if (arr.length >= 3) {
+        setPoly(arr, '手动绘制轮廓');
+        toast('手动轮廓已生成（' + arr.length + ' 顶点）', 'ok');
+      } else toast('顶点不足 3 个', 'err');
+    } else {
+      toast('至少需要 3 个顶点', 'err');
+    }
+    draftPts = [];
+    drawMode = false;
+    var btn = $('btnDrawPoly');
+    btn.classList.remove('blue');
+    btn.textContent = '✏️ 绘制轮廓';
+    renderAll();
+  }
+  function overlayDraft() {
+    if (!drawMode || !draftPts.length || !geom) return;
+    // 轻量预览：在 svg 中画一条辅助线（保存后统一 render）
+    var svg = $('svgCanvas');
+    var g = geom;
+    var s = svg.innerHTML;
+    var d = '';
+    draftPts.forEach(function (p, i) {
+      var vx = (p.x - (g.bbReal.minX - g.padReal)) * g.k + g.ox;
+      var vy = g.sheet.h - ((p.y - (g.bbReal.minY - g.padReal)) * g.k + g.oy);
+      d += (i ? 'L' : 'M') + vx.toFixed(1) + ' ' + vy.toFixed(1);
+    });
+    s += '<path d="' + d + '" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,2" pointer-events="none"/>';
+    // 移除旧 preview
+    var i0 = s.indexOf('<!--draft-->');
+    if (i0 >= 0) {
+      var i1 = s.indexOf('<!--/draft-->');
+      if (i1 > i0) s = s.slice(0, i0) + s.slice(i1 + 13);
+    }
+    s = s + '<!--draft--><!--/draft-->';
+    // 简单替换方式：重新挂 preview path
+    var j0 = s.indexOf('<!--draft-->');
+    if (j0 >= 0) {
+      s = s.replace(/<!--draft-->.*<!--\/draft-->/, '<!--draft-->' + d.replace(/"/g, '') + '<!--/draft-->');
+    }
+    svg.innerHTML = s.replace(/<!--draft-->([^<]*)<!--\/draft-->/, function (m, dd) {
+      return '<path d="' + dd + '" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,2" pointer-events="none"/><circle cx="0" cy="0" r="0"/>';
+    });
+  }
+
+  /* ============ 键盘 ============ */
+  function onKey(evt) {
+    if (evt.key === 'Escape' && drawMode) {
+      draftPts = [];
+      drawMode = false;
+      var btn = $('btnDrawPoly');
+      btn.classList.remove('blue');
+      btn.textContent = '✏️ 绘制轮廓';
+      renderAll();
+    }
+  }
+
+  /* ============ 初始化绑定 ============ */
+  function bind() {
+    $('btnSample').onclick = loadSample;
+    $('btnImport').onclick = function () { $('fileDxf').click(); };
+    $('fileDxf').onchange = function (ev) {
+      var f = ev.target.files[0];
+      if (f) loadDxfFile(f);
+      ev.target.value = '';
+    };
+    $('btnPng').onclick = exportPng;
+    $('btnDxf').onclick = exportDxf;
+    $('btnClearPoly').onclick = function () {
+      state.poly = null; state.polyName = ''; state.manual = [];
+      entities = []; geom = null;
+      renderAll();
+      toast('已清空轮廓');
+    };
+    $('btnDrawPoly').onclick = toggleDraw;
+    $('btnAbout').onclick = function () { $('modalAbout').className = 'modal-mask on'; };
+    // 统计按钮（画布右下加一个小按钮？直接放顶栏? 用图例中? 用快捷键? 绑定到 statbar 双栏?）
+    // 增加：双击 statbar 显示统计
+    $('statbar').ondblclick = showStats;
+
+    // 所有参数输入即时重绘
+    var inputs = ['inA', 'inB', 'inLa', 'inD', 'inLian', 'inScale', 'inSheet',
+                  'inProj', 'inDwName', 'inDesigner'];
+    inputs.forEach(function (id) {
+      $(id).addEventListener('input', renderAll);
+      $(id).addEventListener('change', renderAll);
+    });
+    var cks = ['ckNo', 'ckLian', 'ckJd', 'ckDim'];
+    cks.forEach(function (id) { $(id).addEventListener('change', renderAll); });
+
+    // 关闭模态
+    document.querySelectorAll('[data-close]').forEach(function (el) {
+      el.onclick = function () {
+        var mid = el.getAttribute('data-close');
+        if (mid) $(mid).className = 'modal-mask';
+      };
+    });
+    document.querySelectorAll('.modal-mask').forEach(function (mask) {
+      mask.addEventListener('click', function (ev) {
+        if (ev.target === mask) mask.className = 'modal-mask';
+      });
+    });
+
+    // 画布交互
+    var wrap = $('canvasWrap');
+    wrap.addEventListener('mousedown', function () { return true; });
+    var svg = $('svgCanvas');
+    svg.addEventListener('click', svgClick);
+    svg.addEventListener('contextmenu', svgRClick);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', function () { if (state.poly) renderAll(); });
+  }
+
+  /* ============ 启动 ============ */
+  function init() {
+    bind();
+    loadSample();
+    // 控制台调试
+    window.scaffoldDebug = {
+      renderAll: renderAll, exportDxf: exportDxf, exportPng: exportPng,
+      computeStats: computeStats, showStats: showStats,
+      get state() { return state; }, get geom() { return geom; },
+      get entities() { return entities; }, loadSample: loadSample
+    };
+  }
+  document.addEventListener('DOMContentLoaded', init);
+})();
+
+</script>
+</body>
+</html>
