@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>脚手架快绘CAD系统 v1.0.5</title>
+<title>脚手架快绘CAD系统 v1.0.6</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E6%9E%B6%3C/text%3E%3C/svg%3E">
 <style>
   :root{
@@ -225,7 +225,7 @@
 <header>
   <div class="logo">架</div>
   <h1>脚手架快绘CAD系统</h1>
-  <span class="ver">v1.0.5</span>
+  <span class="ver">v1.0.6</span>
   <div class="sp"></div>
   <button class="tbtn" id="btnSample" title="载入示例建筑轮廓（24m×15m 带凹口）">▦ 示例</button>
   <button class="tbtn" id="btnImport" title="导入 DXF 文件（识别最大闭合多段线为建筑轮廓）">📂 导入DXF</button>
@@ -340,7 +340,7 @@
     <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
     <div class="about-logo">架</div>
     <h3 style="margin-bottom:2px">脚手架快绘CAD系统</h3>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.5</span></div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Scaffold Quick-CAD <span class="about-ver">v1.0.6</span></div>
     <p class="desc">
       依据 <b>GB55023《施工脚手架通用规范》</b> 自动生成双排脚手架平面布置图：<br>
       ① 导入DXF / 手动绘制建筑外轮廓；② 自动布置内/外两排立杆与阳角外侧立杆（空心圆示意，两排径向对齐、用线连接表示连接钢管）；③ 离墙距 a / 排距 b / 纵距 La 可调即时重排；④ 可选尺寸标注、立杆编号、连墙件示意；⑤ 画面无图框、画布铺网格，左上工具栏适应/缩放/网格，滚轮缩放、左键拖拽平移；图例与架体参数以卡片形式浮于画面左上/右上，不随缩放变形；⑥ 导出 PNG（所见即所得）与 CAD 可编辑 DXF（R2000）。
@@ -544,7 +544,7 @@
         var t = j / k;
         var A = innerRing[i], B = innerRing[(i + 1) % m];
         var pi = { x: A.x + (B.x - A.x) * t, y: A.y + (B.y - A.y) * t };
-        // 外排：内排 + 内环边外法线 × b（严格 b 距离，径向对齐）
+        // 外排：内排 + 内环边外法线 × b（严格 b 距离，径向对齐，所有列含角点统一此规则）
         var n = norms[i];
         var po = { x: pi.x + n.x * b, y: pi.y + n.y * b };
         var isCorner = (j === 0);
@@ -555,11 +555,6 @@
         }
         innerPoles.push({ x: pi.x, y: pi.y, edge: i, t: t, corner: isCorner });
         outerPoles.push({ x: po.x, y: po.y, edge: i, t: t, corner: isCorner });
-        // 角点列外排立杆：直接落在外环 miter 顶点 outerRing[i]
-        // （新 outward 算法对凸/凹角都落在空气侧，位置均有效）
-        if (isCorner) {
-          po = { x: outerRing[i].x, y: outerRing[i].y };
-        }
         cols.push({
           inner: { x: pi.x, y: pi.y },
           outer: { x: po.x, y: po.y },
@@ -595,15 +590,23 @@
     ok.push(['外排杆', lay.outerPoles.length > 30]);
     ok.push(['列数', lay.columns.length > 30]);
     ok.push(['角点列', lay.columns.filter(function (c) { return c.corner; }).length === 4]);
-    ok.push(['角点外排对齐外环角点', lay.columns.filter(function (c) { return c.corner; }).every(function (c) {
-      return Math.hypot(c.outer.x - lay.outerRing[c.edge].x, c.outer.y - lay.outerRing[c.edge].y) < 1;
+    ok.push(['所有列内外排距离=b', lay.columns.every(function (c) {
+      return Math.abs(Math.hypot(c.outer.x - c.inner.x, c.outer.y - c.inner.y) - 900) < 1;
+    })]);
+    ok.push(['角点列外排=内排+边外法线×b', lay.outerRing && lay.columns.filter(function (c) { return c.corner; }).every(function (c) {
+      // 凸/凹角外排立杆不再落到 miter 尖点，而是沿边外法线径向偏移 b
+      var A = lay.innerRing[c.edge], B = lay.innerRing[(c.edge + 1) % lay.innerRing.length];
+      var dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1;
+      var nx = dy / L, ny = -dx / L; // 边外法线
+      return Math.hypot(c.outer.x - c.inner.x - nx * 900, c.outer.y - c.inner.y - ny * 900) < 1;
     })]);
     // 凹口轮廓：角点列数 = 多边形顶点数；角点外排与内排必须不同（否则圈重叠）
     var notch = [{ x: 0, y: 0 }, { x: 24000, y: 0 }, { x: 24000, y: 15000 }, { x: 16000, y: 15000 }, { x: 16000, y: 9000 }, { x: 8000, y: 9000 }, { x: 8000, y: 15000 }, { x: 0, y: 15000 }];
     var layN = layoutScaffold(notch, { a: 300, b: 900, La: 1500, d: 48 });
     ok.push(['凹口：角点列数=顶点数', layN.columns.filter(function (c) { return c.corner; }).length === notch.length]);
-    ok.push(['凹口：角点内外排不重合', layN.columns.filter(function (c) { return c.corner; }).every(function (c) {
-      return Math.hypot(c.inner.x - c.outer.x, c.inner.y - c.outer.y) > 100;
+    ok.push(['凹口：内外排一一对应', layN.innerPoles.length === layN.outerPoles.length && layN.innerPoles.length === layN.columns.length]);
+    ok.push(['凹口：所有列内外排距离=b', layN.columns.every(function (c) {
+      return Math.abs(Math.hypot(c.outer.x - c.inner.x, c.outer.y - c.inner.y) - 900) < 1;
     })]);
     var Lshp = [{ x: 0, y: 0 }, { x: 20000, y: 0 }, { x: 20000, y: 10000 }, { x: 12000, y: 10000 }, { x: 12000, y: 18000 }, { x: 0, y: 18000 }];
     var lay2 = layoutScaffold(Lshp, { a: 300, b: 900, La: 1500, d: 48 });
@@ -635,7 +638,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
 </script>
 <script>
 /* =====================================================================
-   脚手架快绘CAD系统 v1.0.5 — 主逻辑（UI/交互/DXF解析/渲染/导出）
+   脚手架快绘CAD系统 v1.0.6 — 主逻辑（UI/交互/DXF解析/渲染/导出）
    依赖：ScaffoldCore（几何）、DXF_SKEL（骨架模板，构建期注入）
    坐标系约定：
      - 几何世界坐标系 = 世界 mm（Y 向上，与 DXF 一致）
@@ -1015,14 +1018,30 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     /* --- 1. 建筑轮廓 OUTLINE（默认 lw=0.3 → DXF 370=30） --- */
     E('poly', { pts: polyPts, layer: LAYER.OUTLINE, lw: 0.3 });
 
-    /* --- 2. 连接钢管横线（仅非角点列；角点列不画：否则凸角沿角平分线射出对角线、凹角会从相邻两边反向射出 X 形乱线） --- */
+    /* --- 2. 排架环线 + 连接钢管（v1.0.6 恢复：内外排严格径向对齐 b，环线串起立杆） ---
+       a) 内排环线：沿 innerRing 闭合多边形（miter 连续，串内排 miter 角杆+直杆投影）
+       b) 外排环线：按 edge 分组 cols.outer，每条边一段线序列，凸角处断开（避免沿两外排立杆连出角部斜线）
+       c) 连接钢管：所有列 inner→outer 短横线（垂直墙、长度=b、方向=内环边外法线，无斜线） --- */
+    /* a) 内排环线 */
+    var innerChain = lay.innerRing.map(P);
+    E('poly', { pts: innerChain, layer: LAYER.ROWLN, lw: 0.2 });
+    /* b) 外排环线（按 edge 分组，每段开口 polyline） */
+    var byEdge = {};
     lay.columns.forEach(function (col) {
-      if (col.corner) return;
+      if (!byEdge[col.edge]) byEdge[col.edge] = [];
+      byEdge[col.edge].push(P(col.outer));
+    });
+    Object.keys(byEdge).sort(function (a, b) { return (+a) - (+b); }).forEach(function (ek) {
+      var seg = byEdge[ek];
+      if (seg.length >= 2) E('poly', { pts: seg, layer: LAYER.ROWLN, lw: 0.2, close: false });
+    });
+    /* c) 连接钢管（所有列，含角点列） */
+    lay.columns.forEach(function (col) {
       var pi = P(col.inner), po = P(col.outer);
       E('line', { x1: pi.x, y1: pi.y, x2: po.x, y2: po.y, layer: LAYER.ROWLN, lw: 0.2 });
     });
 
-    /* --- 3. 立杆（空心圆圈；内外排统一大小；凸/凹角外排=外环角点 miter，全在空气侧） --- */
+    /* --- 3. 立杆（空心圆圈；内外排一一对应，每列一对，距离严格 = b=排距） --- */
     var poleR = Math.max(1.8, (d.d / 2) * k);
     lay.columns.forEach(function (col) {
       var pi = P(col.inner), po = P(col.outer);
@@ -1423,7 +1442,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
         var path = pts.map(function (p, i) {
           return (i ? 'L' : 'M') + p.x.toFixed(2) + ' ' + (-p.y).toFixed(2);
         }).join(' ');
-        path += ' Z';
+        if (e.close !== false) path += ' Z';
         var fillStr = e.fill ? (e.fc || '#ffffff') : 'none';
         s += '<path d="' + path + '" fill="' + fillStr + '" stroke="' + col + '" stroke-width="' + lwPx.toFixed(2) + '"' +
           (e.dash ? ' stroke-dasharray="' + e.dash.join(',') + '"' : '') + ' stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
@@ -1641,12 +1660,8 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       var layer = toUPlus(e.layer);
       if (e.t === 'poly' || e.t === 'rect') {
         var pts = e.t === 'rect' ? [{ x: e.x, y: e.y }, { x: e.x + e.w, y: e.y }, { x: e.x + e.w, y: e.y + e.h }, { x: e.x, y: e.y + e.h }] : e.pts;
-        if (pts.length === 4 && e.t === 'rect') {
-          // LWPOLYLINE 矩形
-          out.push(lwpoly(W, pts, layer, true, e.lw));
-        } else {
-          out.push(lwpoly(W, pts, layer, true, e.lw));
-        }
+        var isClose = e.close !== false;
+        out.push(lwpoly(W, pts, layer, isClose, e.lw));
       } else if (e.t === 'line') {
         out.push(line(W, e.x1 * denom, e.y1 * denom, e.x2 * denom, e.y2 * denom, layer, e.lw, e.dash ? 'DASHED' : undefined));
       } else if (e.t === 'circle') {
