@@ -1905,7 +1905,7 @@ function handleImport(ev) {
 
 
 /* ===== 云端参数模板同步（v3.60：自建同步服务器，命名保存/列表导入/删除，手机与电脑互通） ===== */
-const CLOUD = { api:'http://47.109.99.227/sync', app:'woodreport', token:'af91def02e8a9a205fe630e970b1b39a' };
+const CLOUD = { api:'https://srv.wbc2023.top/sync', app:'woodreport', token:'af91def02e8a9a205fe630e970b1b39a' };
 let cloudCache = [];
 function cloudHttp(act, method, body) {
   const u = CLOUD.api + '/' + act + '/' + CLOUD.app;
@@ -1924,9 +1924,7 @@ function toggleCloudMenu(ev){
   const willShow = !m.classList.contains('show');
   m.classList.toggle('show', willShow);
   if (willShow) {
-    document.getElementById('cloudFoot').textContent = (location.protocol === 'https:')
-      ? '⚠️ 当前为 https 安全页，浏览器会拦截对同步服务器(http)的请求——请改用 http://47.109.99.227/woodreport.html 打开使用云同步'
-      : '';
+    document.getElementById('cloudFoot').textContent = '☁️ HTTPS 云同步已启用';
     cloudRefresh();
   }
 }
