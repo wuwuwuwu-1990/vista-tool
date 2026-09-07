@@ -431,7 +431,7 @@ html.lock-scroll{overflow:hidden}
     <div class="m-body">
       <div class="set-group">
         <h3>☁️ 云端同步 <span class="tag2">手机+电脑 数据互通</span></h3>
-        <div class="set-row"><label>同步服务器</label><input id="s_api" value="http://47.109.99.227/sync" autocomplete="off"></div>
+        <div class="set-row"><label>同步服务器</label><input id="s_api" value="https://srv.wbc2023.top/sync" autocomplete="off"></div>
         <div class="set-row"><label>同步令牌（服务器签发，仅存本机）</label><input id="s_token" type="password" placeholder="输入同步令牌" autocomplete="off"></div>
         <label class="switch" style="margin-bottom:10px"><input type="checkbox" id="s_auto"><span class="trk"></span>修改后自动同步到云端</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -441,7 +441,7 @@ html.lock-scroll{overflow:hidden}
         </div>
         <div class="hint" style="margin-top:10px">
           <b>配置方法（一次性）：</b>本页已<b>内置同步令牌</b>，打开即自动连接云端；手机、电脑打开同一页面即互通（如需更换令牌，在下方修改后保存）。<br>
-          <b>同步服务器</b>：<code>http://47.109.99.227/sync</code>（自建服务器 · 国内直连快而稳定）；注意：令牌内置在页面中（公网可见），请勿把本页面链接分享给他人。保存/修改/删除房源时自动同步，云端按「谁后改谁生效」记录级合并，删掉的房源不会复活。
+          <b>同步服务器</b>：<code>https://srv.wbc2023.top/sync</code>（自建服务器 · 国内直连快而稳定）；注意：令牌内置在页面中（公网可见），请勿把本页面链接分享给他人。保存/修改/删除房源时自动同步，云端按「谁后改谁生效」记录级合并，删掉的房源不会复活。
         </div>
       </div>
       <div class="set-group">
@@ -504,7 +504,7 @@ html.lock-scroll{overflow:hidden}
 ==================================================== */
 var APP = { name:'房览速记', version:'1.0.27' };
 var LS_DATA='fls_data_v1', LS_SET='fls_settings_v1', LS_TOKEN='fls_sync_token';
-var DEFAULT_SET = { api:'http://47.109.99.227/sync', token:'af91def02e8a9a205fe630e970b1b39a', auto:true, lastSync:0, lastStatus:'' };
+var DEFAULT_SET = { api:'https://srv.wbc2023.top/sync', token:'af91def02e8a9a205fe630e970b1b39a', auto:true, lastSync:0, lastStatus:'' };
 var CFG_PREFIX = 'FLS-CFG-2:';  // 同步配置导入导出前缀
 
 var state = { records:[], deleted:[], updatedAt:0 };
@@ -791,7 +791,7 @@ function importData(input){
 }
 
 /* ---------- 云端同步（自建同步服务器 · 记录级合并） ---------- */
-function syncCfg(){ return { api:(settings.api||'http://47.109.99.227/sync').replace(/\/+$/,''), token:(settings.token||'') || 'af91def02e8a9a205fe630e970b1b39a' }; }
+function syncCfg(){ var a=(settings.api||'https://srv.wbc2023.top/sync')||''; a=a.replace('http://47.109.99.227/sync','https://srv.wbc2023.top/sync').replace(/\/+$/,''); return { api:a, token:(settings.token||'') || 'af91def02e8a9a205fe630e970b1b39a' }; }
 function syncUrl(cfg, act){ return cfg.api + '/' + act + '/fanglian'; }
 function syncHeaders(cfg){ var h = { 'Content-Type':'application/json' }; if(cfg.token) h['X-Token'] = cfg.token; return h; }
 /* 本地全量(含删除墓碑) -> 服务端记录 */
@@ -931,12 +931,12 @@ function testSync(){
 
 /* ---------- 设置 ---------- *//* ---------- 设置 ---------- */
 function fillSetForm(){
-  document.getElementById('s_api').value = settings.api || 'http://47.109.99.227/sync';
+  document.getElementById('s_api').value = settings.api || 'https://srv.wbc2023.top/sync';
   document.getElementById('s_token').value = settings.token || 'af91def02e8a9a205fe630e970b1b39a';
   document.getElementById('s_auto').checked = !!settings.auto;
 }
 function saveSettings(doSyncNow){
-  settings.api = (document.getElementById('s_api').value||'').trim().replace(/\/+$/,'') || 'http://47.109.99.227/sync';
+  settings.api = (document.getElementById('s_api').value||'').trim().replace(/\/+$/,'') || 'https://srv.wbc2023.top/sync';
   settings.token = document.getElementById('s_token').value.trim();
   settings.auto = document.getElementById('s_auto').checked;
   saveLocal(); updateSyncPill();
@@ -960,7 +960,7 @@ function copyToken(){
   }
 }
 function exportCfg(){
-  var cfg = { v:2, api:(settings.api||'http://47.109.99.227/sync'), auto:!!settings.auto, token:settings.token||'' };
+  var cfg = { v:2, api:(settings.api||'https://srv.wbc2023.top/sync'), auto:!!settings.auto, token:settings.token||'' };
   var text = CFG_PREFIX + JSON.stringify(cfg);
   var done = function(){ toast('配置已复制，可粘贴到另一台设备导入'); };
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -985,7 +985,7 @@ function importCfg(){
   try{ cfg = JSON.parse(json); }catch(e){ toast('配置格式不正确', true); return; }
   if(cfg && cfg.v === 1){ toast('这是旧版 GitHub 同步配置，请改用新的同步令牌', true); return; }
   if(!cfg || cfg.v !== 2 || !cfg.token){ toast('配置内容无效', true); return; }
-  settings.api = String(cfg.api || 'http://47.109.99.227/sync');
+  settings.api = String(cfg.api || 'https://srv.wbc2023.top/sync');
   settings.auto = !!cfg.auto;
   settings.token = String(cfg.token || '');
   saveLocal(); fillSetForm(); updateSyncPill();
