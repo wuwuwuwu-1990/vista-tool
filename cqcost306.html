@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>酉阳造价咨询收费计算器_基于酉阳府函〔2011〕306号_V1.0.0</title>
+<html lang="zh-CN" data-page-node-id="2q6EKI65FXgxFpFGTBTrm0">
+<head data-page-node-id="ouuaEqQjmHzImUEDEUlqIw">
+<meta charset="UTF-8" data-page-node-id="NOyRyvXXEO07t8iwuEeYwE">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="8WVPuaIT2CAM7XZxhbQkYj">
+<title>酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号_V1.0.0</title>
 <style>
 :root{
   --navy:#7C2D12; --navy2:#C2410C; --blue:#EA580C; --blue-hover:#C2410C;
@@ -66,105 +66,105 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 @media print{header,.actions,footer,.btn,.card h2 .hint{display:none!important;}}
 </style>
 </head>
-<body>
+<body data-page-node-id="EcaePr3BpTmtJsyV7MoFCM">
 
-<header>
-  <h1>酉阳造价咨询收费计算器_基于酉阳府函〔2011〕306号</h1>
-  <div><span class="ver">V1.0.0</span><span class="sub">政府性投资评审（审计）服务费用 · 累进分档</span></div>
-  <div class="about" onclick="showAbout()">关于</div>
+<header data-page-node-id="0n6KlByrleOMPUwvMptULp">
+  <h1 data-page-node-id="zsWuDyEAdN0z72Ih9QfCfP">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号</h1>
+  <div data-page-node-id="yalONCRZCdJ2ScE86QL8wX"><span class="ver" data-page-node-id="UeTqweZp6fcd7rKjLny6NK">V1.0.0</span><span class="sub" data-page-node-id="rvKq5KWZELISDKreDxbji5">政府性投资评审（审计）服务费用 · 累进分档</span></div>
+  <div class="about" onclick="showAbout()" data-page-node-id="gIh9MBkubZphxZmD6H8Ard">关于</div>
 </header>
 
-<div class="page">
+<div class="page" data-page-node-id="BrsrN1smNFNBuqLAo0ww6F">
 
   <!-- 工程名称 -->
-  <div class="card">
-    <h2>工程名称</h2>
-    <input id="projectName" type="text" placeholder="请输入工程名称（如：XX道路工程结算审计）" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;" onfocus="if(this.value==='请输入工程名称（如：XX道路工程结算审计）')this.value='';" onblur="if(!this.value.trim())this.value='请输入工程名称（如：XX道路工程结算审计）'">
+  <div class="card" data-page-node-id="vJ061yd1tyEeqUxhjlPwQW">
+    <h2 data-page-node-id="rGbReXel1LSxDOaqFP9rNN">工程名称</h2>
+    <input id="projectName" type="text" placeholder="请输入工程名称（如：XX道路工程结算审计）" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;" onfocus="if(this.value==='请输入工程名称（如：XX道路工程结算审计）')this.value='';" onblur="if(!this.value.trim())this.value='请输入工程名称（如：XX道路工程结算审计）'" data-page-node-id="d6FpV6NYcFinp0x5YFYtZQ">
   </div>
 
   <!-- 计算参数 -->
-  <div class="card">
-    <h2>计算参数<span class="hint">酉阳府函〔2011〕306号 · 费率单位 ‰（千分率）· 累进分档计算</span></h2>
-    <div class="grid">
-      <div class="field">
-        <label>收费项目</label>
-        <select id="projectType" onchange="updateCategories()"></select>
+  <div class="card" data-page-node-id="YkYV67Ly0ioAkE9QAOvRdy">
+    <h2 data-page-node-id="O2uUcQC08ywTAnJsly7SDl">计算参数<span class="hint" data-page-node-id="jbsoqsy1DtTZByEtAfEPPk">酉阳府函〔2011〕306号 · 费率单位 ‰（千分率）· 累进分档计算</span></h2>
+    <div class="grid" data-page-node-id="1pjzpER9ATVMa3h6J1l4j3">
+      <div class="field" data-page-node-id="lZmsABjzB5KPbpXN8NX5P8">
+        <label data-page-node-id="fyAsipYDAGlESZSKEhSzJg">收费项目</label>
+        <select id="projectType" onchange="updateCategories()" data-page-node-id="F3qKpFsGCVmUa7yhdvKvnD"></select>
       </div>
-      <div class="field">
-        <label>工程类别</label>
-        <select id="category"></select>
+      <div class="field" data-page-node-id="6sWZ1C4gcMS8JVvOzJle9r">
+        <label data-page-node-id="EA4ggvrmpkaZssf01Dfhxg">工程类别</label>
+        <select id="category" data-page-node-id="vO2H6VjA79Ds0AtHfHgwyN"></select>
       </div>
-      <div class="field">
-        <label>计费基数（万元）</label>
-        <input id="amount" type="number" value="2000" min="0" step="any" class="mono">
+      <div class="field" data-page-node-id="IpMCXeWYul9HkPcYQ5ZTaq">
+        <label data-page-node-id="MeiGRa6J17G5NDeZWa46wa">计费基数（万元）</label>
+        <input id="amount" type="number" value="2000" min="0" step="any" class="mono" data-page-node-id="RE26JkBNGLOHh4ktIuHZpf">
       </div>
-      <div class="field">
-        <label>基本收费下浮（%）</label>
-        <input id="discount" type="number" value="0" min="0" step="any" class="mono">
+      <div class="field" data-page-node-id="DlqvFGShtFkfrEpgpElVGS">
+        <label data-page-node-id="6bAFpAgAp5WRJrFsnCZpSw">基本收费下浮（%）</label>
+        <input id="discount" type="number" value="0" min="0" step="any" class="mono" data-page-node-id="SpTFW9VGpnfACAM5XHiNVI">
       </div>
-      <div class="field">
-        <label>审减额（万元，结算审计专用）</label>
-        <input id="reduced" type="number" value="" min="0" step="any" class="mono" placeholder="结算评审/决算审计时填写" disabled>
+      <div class="field" data-page-node-id="jWpSqaEsZmplL5kHX424vr">
+        <label data-page-node-id="ZLQ0NziU8H83nup37kgYGn">审减额（万元，结算审计专用）</label>
+        <input id="reduced" type="number" value="" min="0" step="any" class="mono" placeholder="结算评审/决算审计时填写" disabled data-page-node-id="cXoJr7E8efkQZixuVAnlB7">
       </div>
-      <div class="hint-text" style="align-self:flex-end;padding-bottom:9px;font-size:12px;color:var(--muted);">结算有审减时另按审减金额 × 3% 计审减效益费</div>
+      <div class="hint-text" style="align-self:flex-end;padding-bottom:9px;font-size:12px;color:var(--muted);" data-page-node-id="jRLYGjFaJcO2A2qgxbFoaz">结算有审减时另按审减金额 × 3% 计审减效益费</div>
     </div>
   </div>
 
   <!-- 按钮 -->
-  <div class="actions">
-    <button class="btn btn-primary" onclick="calculate()">开始计算</button>
-    <button class="btn btn-ghost" onclick="clearAll()">重置</button>
-    <button class="btn btn-ghost right" onclick="exportPng()">导出 PNG</button>
-    <button class="btn btn-ghost" onclick="exportCsv()">导出 CSV</button>
+  <div class="actions" data-page-node-id="3U5PdgYfLngcFmRZvdXcd1">
+    <button class="btn btn-primary" onclick="calculate()" data-page-node-id="mAfFwv2g2y33Nmsi1BkMxE">开始计算</button>
+    <button class="btn btn-ghost" onclick="clearAll()" data-page-node-id="7jaa90wfdl5mlicR65kK9Q">重置</button>
+    <button class="btn btn-ghost right" onclick="exportPng()" data-page-node-id="Gtwz56lAXmYKUdLYgBeqOL">导出 PNG</button>
+    <button class="btn btn-ghost" onclick="exportCsv()" data-page-node-id="vmwo3M6KPNoMJ3be76NyZA">导出 CSV</button>
   </div>
 
   <!-- 结果 -->
-  <div class="result">
-    <div class="top">
-      <div><div class="label">评审（审计）服务费总计</div><div class="fee">¥ 0.0000 万元</div></div>
+  <div class="result" data-page-node-id="GXHzlRsKkrBznsZE6KdODf">
+    <div class="top" data-page-node-id="JERwKTiGJeBVeA81CJPTDv">
+      <div data-page-node-id="yIfQ9vi9rbiNwE9uih0BDR"><div class="label" data-page-node-id="AAu7NHP7AMXm8onZoHSIG2">评审（审计）服务费总计</div><div class="fee" data-page-node-id="MQxyd8dcOJgBTMdRcHsWqF">¥ 0.0000 万元</div></div>
     </div>
-    <div class="ref" id="refLine">基本收费：—   ｜   审减效益费：—</div>
-    <div class="headline" id="headline">填写参数后点击“开始计算”查看分档明细</div>
+    <div class="ref" id="refLine" data-page-node-id="xXIGizNkn1EMqarxVjpQLm">基本收费：—   ｜   审减效益费：—</div>
+    <div class="headline" id="headline" data-page-node-id="ISDTTQtGCBaFpHYvOGki0s">填写参数后点击“开始计算”查看分档明细</div>
   </div>
 
   <!-- 明细表 -->
-  <div class="card">
-    <h2>分档明细</h2>
-    <div style="overflow:auto;max-height:430px;">
-      <table id="detail">
-        <thead>
-          <tr><th style="text-align:left;min-width:190px;">收费项目 / 分档区间</th><th>100万以下</th><th>101–500万</th><th>501–1000万</th><th>1001–5000万</th><th>5001万–1亿</th><th>1亿元以上</th><th>小计（万元）</th></tr>
+  <div class="card" data-page-node-id="etuhC7R8Rg2xDoC9lnw4wI">
+    <h2 data-page-node-id="n1VkJkJ22tR4gw3RRoBlLJ">分档明细</h2>
+    <div style="overflow:auto;max-height:430px;" data-page-node-id="5RDtGJl8OjiEEH2cUoFUnq">
+      <table id="detail" data-page-node-id="isfHAsKD7RNFJi7t7GwO4v">
+        <thead data-page-node-id="8fT3hHoMFZiADtMQFy1Doo">
+          <tr data-page-node-id="0GSYIUyIAfOzMWL1mF0RvL"><th style="text-align:left;min-width:190px;" data-page-node-id="shcgyWHcoJazXpZwyB9uYb">收费项目 / 分档区间</th><th data-page-node-id="LvfHriuzAAuucz5M0G1EuX">100万以下</th><th data-page-node-id="RFCSBbJSYh744qJJRxnATt">101–500万</th><th data-page-node-id="WR0ulmNGLq8YecCDyW6bgh">501–1000万</th><th data-page-node-id="6Usw826LONUBRKXkttMwLV">1001–5000万</th><th data-page-node-id="l11amz9xKp6v4tUBmrabGK">5001万–1亿</th><th data-page-node-id="EAY0aQO9cXjx9b0Eb3q3Ix">1亿元以上</th><th data-page-node-id="SGPTMXkPwGfqDICXCi3D31">小计（万元）</th></tr>
         </thead>
-        <tbody id="detailBody"></tbody>
+        <tbody id="detailBody" data-page-node-id="4y0aoDe8ivFP8eystjM11H"></tbody>
       </table>
     </div>
-    <div class="note">说明：按送审投资额累进分档计取；公路、铁路项目按 70% 计费；预算评审不足 1500 元按 1500 元收费，结算评审及决算审计不足 2000 元（不含审减效益费）按 2000 元收费；概算编审咨询费按同等预算计费标准的 30% 执行。</div>
+    <div class="note" data-page-node-id="x7DFy2GyyBrlpQzpAaRJKF">说明：按送审投资额累进分档计取；公路、铁路项目按 70% 计费；预算评审不足 1500 元按 1500 元收费，结算评审及决算审计不足 2000 元（不含审减效益费）按 2000 元收费；概算编审咨询费按同等预算计费标准的 30% 执行。</div>
   </div>
 
-  <footer>
-    <span>V1.0.0 · 酉阳府函〔2011〕306号 · 2011年10月1日起执行</span>
-    <span>支持 导出 CSV / 导出 PNG 存档</span>
+  <footer data-page-node-id="JvlUvx0C68nxgL8FEIjgtY">
+    <span data-page-node-id="P5QBXkdob295uDOJKnZqcc">V1.0.0 · 酉阳府函〔2011〕306号 · 2011年10月1日起执行</span>
+    <span data-page-node-id="psfyB4Y3N60ReciFgrP0jK">支持 导出 CSV / 导出 PNG 存档</span>
   </footer>
 </div>
 
 <!-- 关于 -->
-<div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
-  <div class="modal">
-    <div class="modal-head">酉阳造价咨询收费计算器_基于酉阳府函〔2011〕306号<small>版本 V1.0.0 · 酉阳府函〔2011〕306号</small></div>
-    <div class="modal-body">
-      <div style="font-weight:700;font-size:15px;margin-bottom:10px;">软件功能</div>
-      <div class="ft">· 按酉阳府函〔2011〕306号《关于进一步规范政府性投资评审（审计）服务费用管理的批复》制作</div>
-      <div class="ft">· 2 类收费项目：预算、最高限价（标底）编审 / 工程结算评审及项目决算审计</div>
-      <div class="ft">· 6 档累进（100万以下～1亿元以上），费率‰；房屋建筑、装饰、桥梁、隧道、市政、水利等为标准</div>
-      <div class="ft">· 公路、铁路项目按标准 70% 计费</div>
-      <div class="ft">· 结算评审有审减的另按审减金额 × 3% 计审减效益费</div>
-      <div class="ft">· 保底：预算评审不足 1500 元按 1500 元；结算不足 2000 元按 2000 元</div>
-      <div class="ft">· 概算编审咨询费 = 同等预算标准 × 30%</div>
-      <div class="ft">· 一键导出 CSV 数据表 · 一键导出 PNG 截图存档</div>
-      <div class="dev">开发者：吴工 ｜ QQ：641296512</div>
-      <div class="dev2">按酉阳府函〔2011〕306号 计费规则制作，如有疑问欢迎联系。</div>
+<div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()" data-page-node-id="mTMh9QukFDy5rWZ1ThuMz9">
+  <div class="modal" data-page-node-id="7jRrrAG67kiofoRtNjjG9m">
+    <div class="modal-head" data-page-node-id="cYxiBVM98Sa5MMQMDacs3u">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号<small data-page-node-id="iQFI7uJLVxqAULs2HcAGLU">版本 V1.0.0 · 酉阳府函〔2011〕306号</small></div>
+    <div class="modal-body" data-page-node-id="i3HiOTiFBSekzK5QZYvyGy">
+      <div style="font-weight:700;font-size:15px;margin-bottom:10px;" data-page-node-id="MxLMtvM0PEfAoDZeAc8UqB">软件功能</div>
+      <div class="ft" data-page-node-id="aFUV7m1PG2e38AzXmuKfpe">· 按酉阳府函〔2011〕306号《关于进一步规范政府性投资评审（审计）服务费用管理的批复》制作</div>
+      <div class="ft" data-page-node-id="afNPtyQe281IYcYageNINH">· 2 类收费项目：预算、最高限价（标底）编审 / 工程结算评审及项目决算审计</div>
+      <div class="ft" data-page-node-id="o337DgyZBZxhc7YLJhvXAa">· 6 档累进（100万以下～1亿元以上），费率‰；房屋建筑、装饰、桥梁、隧道、市政、水利等为标准</div>
+      <div class="ft" data-page-node-id="jPhhP9f1qHQiyyaEWPcHF9">· 公路、铁路项目按标准 70% 计费</div>
+      <div class="ft" data-page-node-id="Tt575hi55oxxCFOo7eD38s">· 结算评审有审减的另按审减金额 × 3% 计审减效益费</div>
+      <div class="ft" data-page-node-id="gGgQgQxEdT60LqUrFDdATo">· 保底：预算评审不足 1500 元按 1500 元；结算不足 2000 元按 2000 元</div>
+      <div class="ft" data-page-node-id="8fDmUaDAsxiaU6CGeNEsgq">· 概算编审咨询费 = 同等预算标准 × 30%</div>
+      <div class="ft" data-page-node-id="T26EAMvZzrJk621WnBrIPA">· 一键导出 CSV 数据表 · 一键导出 PNG 截图存档</div>
+      <div class="dev" data-page-node-id="wlSJcde62ntnaxm4MdVA4r">开发者：吴工 ｜ QQ：641296512</div>
+      <div class="dev2" data-page-node-id="dQU08TnnsRsgorvqOlmOLT">按酉阳府函〔2011〕306号 计费规则制作，如有疑问欢迎联系。</div>
     </div>
-    <div class="modal-close"><button class="btn btn-primary" onclick="closeAbout()">关闭</button></div>
+    <div class="modal-close" data-page-node-id="hyVe095lY7fdIzCKnIp9hO"><button class="btn btn-primary" onclick="closeAbout()" data-page-node-id="STbRb6VQeg8RMF1NvKmvXk">关闭</button></div>
   </div>
 </div>
 
@@ -366,7 +366,7 @@ function exportPng(){
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, titleH);
   ctx.fillStyle = '#FDBA74'; ctx.fillRect(0, titleH - 2, W, 2);
   ctx.fillStyle = '#fff'; ctx.font = 'bold 22px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
-  ctx.fillText('酉阳造价咨询收费计算器_基于酉阳府函〔2011〕306号', pad, 24);
+  ctx.fillText('酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号', pad, 24);
   ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 15px Consolas,monospace';
   ctx.fillText('V1.0.0', pad, 60);
   ctx.fillStyle = '#FFE7D1'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
