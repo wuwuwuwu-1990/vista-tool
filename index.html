@@ -208,8 +208,12 @@
   .card .chip{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--cb,var(--chip-def-bd));color:var(--cc,var(--chip-def-c));
        background:var(--cbg,var(--chip-def-bg));letter-spacing:.5px;}
   footer{position:fixed;left:0;right:0;bottom:0;text-align:center;color:var(--foot-c);font-size:12px;
-       letter-spacing:1px;padding:8px 16px;background:var(--card);border-top:1px solid var(--card-b);
-       backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:40;}
+       letter-spacing:1px;padding:6px 16px 7px;background:var(--card);border-top:1px solid var(--card-b);
+       backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:40;line-height:1.9;}
+   footer .foot-line1{display:flex;align-items:center;justify-content:center;}
+   footer .foot-icp{display:flex;align-items:center;justify-content:center;}
+   footer .foot-icp a{color:var(--foot-c);text-decoration:none;font-size:11.5px;opacity:.8;transition:opacity .2s,color .2s;}
+   footer .foot-icp a:hover{opacity:1;color:var(--teal);text-decoration:underline;}
   .theme-picker,.tp,.ver,.about-btn,.secret-btn,.chip,.sec-title h2,.sec-title span,.kicker,header p,footer{
        transition:background .4s ease,color .4s ease,border-color .4s ease;}
   header h1{transition:color .4s ease;}
@@ -567,7 +571,10 @@
       </div>
     </a>
   </div>
-  <footer><span class="dot"></span>元枢工具箱 Vista Hub · 浏览器即开即用 · 数据全程本地处理</footer>
+  <footer>
+  <div class="foot-line1"><span class="dot"></span>元枢工具箱 Vista Hub · 浏览器即开即用 · 数据全程本地处理</div>
+  <div class="foot-icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">蜀ICP备2026052775号</a></div>
+</footer>
 </div>
 <!-- 密码弹窗 -->
 <div class="modal-mask" id="pwdMask">
