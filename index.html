@@ -540,20 +540,7 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">PDF打印</span>
       </div>
     </a>
-<a class="card" href="woodreport.html" style="--g1:#16a34a;--g2:#065f46;--gs:rgba(22,163,74,.5);--a1:#4ade80;--a2:#34d399;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M5 4h10l4 4v12H5z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M15 4v4h4" stroke="#fff" stroke-width="1.7" stroke-linejoin="round" opacity=".65"/><path d="M8 12h8M8 15.5h6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".85"/><circle cx="8" cy="17.6" r="1.1" fill="#4ade80"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <h3>木材检测报告工具</h3>
-      <div class="desc">原件扫描彩色底图+红蓝章高清浮动，24 处字段原位抹除可改，贴合原件排版一键导出 PDF（GB/T 5849-2016）；☁️ 云端参数模板跨设备复用。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(22,163,74,.4);--cc:#6ee7b7;--cbg:rgba(22,163,74,.12)">v3.60</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">检测报告</span>
-      </div>
-    </a>
+
 
     <a class="card" href="scaffold.html" style="--g1:#2563eb;--g2:#3b82f6;--gs:rgba(37,99,235,.5);--a1:#60a5fa;--a2:#38bdf8;">
       <div class="top">
@@ -756,6 +743,14 @@ var SECRET_TOOLS = [
     g1: '#3b82f6', g2: '#8b5cf6', gs: 'rgba(59,130,246,.4)',
     tag: '规划',
     tagColor: 'rgba(139,92,246,.45)', tagText: '#c4b5fd', tagBg: 'rgba(139,92,246,.12)'
+  }
+  ,{
+    name: '木材检测报告工具 v3.60',
+    desc: '细木工板检测报告（GB/T 5849-2016）：原件扫描彩色底图+电子印章，24 处字段原位抹除可改，贴合原件排版一键导出 PDF，云端参数模板复用。',
+    href: 'woodreport.html', upd: '2026-09-08',
+    g1: '#b45309', g2: '#92400e', gs: 'rgba(180,83,9,.45)',
+    tag: 'v3.60',
+    tagColor: 'rgba(251,191,36,.5)', tagText: '#fbbf24', tagBg: 'rgba(251,191,36,.12)'
   }
 ];
 function openSecret(){
@@ -1003,6 +998,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-09-08', t:'新增：我的私密收录木材检测报告工具 v3.60（由普通区移入，需密码访问）'},
   {d:'2026-09-07', t:'新增：酉阳财政造价咨询收费计算器 v1.0.0（按酉阳府函〔2011〕306号 政府性投资评审（审计）服务费用批复：预算/最高限价编审、结算评审及决算审计累进分档，公路铁路70%、概算30%、审减效益费3%、1500/2000元保底）'},{d:'2026-09-07', t:'升级：云端同步全链路 HTTPS（ICP 备案通过，同步服务器启用 https://srv.wbc2023.top 证书）——木材检测报告/施工计划图/BraceCad/房览速记 云端 API 全部切至 https，https 页面直接可用云端功能，原 http 提示已移除'},
 ,{d:'2026-09-06', t:'新增：深基坑快绘坡面CAD系统 v1.0.2（导入基坑轮廓DXF一键生成向内/向外放坡：上=平面图下=A-A/B-B双剖面；凹形/多基坑轮廓自动切分 A-A(1)(2)…多剖面；天正三角标高+45°尺寸标注；DXF骨架升级修复CAD打开报错；参数步长0.01）'},
 ,{d:'2026-09-06', t:'新增：脚手架快绘CAD系统 v1.0.0（依据 GB55023《施工脚手架通用规范》快绘双排脚手架平面布置图：导入DXF/手绘建筑外轮廓自动布置内外双排立杆，离墙距/排距/纵距可调即时重排，尺寸标注+立杆编号+连墙件/剪刀撑示意+图框标题栏+构配件统计，导出PNG高清图与DXF R2000）'},
@@ -1051,7 +1047,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'woodreport.html': '2026-09-01', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
