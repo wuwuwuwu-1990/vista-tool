@@ -203,6 +203,9 @@ button{cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:tr
 .vbtn--primary{background:linear-gradient(135deg,#16a34a,#4ade80);color:#fff}
 .vbtn--primary:hover{background:linear-gradient(135deg,#15803d,#3ecb6f)}
 .vbtn[hidden]{display:none}
+/* 访客模式（?img=&share=1）：只看全景，藏起管理按钮 */
+body.is-guest #vBack,body.is-guest #vKeep,body.is-guest #vUpload,
+body.is-guest #vLink,body.is-guest #vShare{display:none!important}
 .vshow{
   position:absolute;top:16px;right:16px;z-index:200;padding:8px 14px;border-radius:999px;
   background:rgba(28,28,30,.66);backdrop-filter:blur(16px);color:#f5f5f7;font-size:13.5px;
@@ -236,6 +239,7 @@ button{cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:tr
   display:flex;gap:12px;align-items:flex-start;padding:13px;border-radius:12px;border:1px solid var(--line);
   margin-top:12px;background:#fff;transition:all .16s ease;
 }
+.share-opt--main{border-color:rgba(22,163,74,.45);background:linear-gradient(135deg,rgba(74,222,128,.08),rgba(255,255,255,0));}
 .share-opt:hover{border-color:#a9d4b2;box-shadow:var(--shadow-sm)}
 .share-opt__icon{width:36px;height:36px;flex:0 0 36px;border-radius:10px;display:grid;place-items:center;background:#e8f8ec;border:1px solid #bfe6c9;color:var(--primary-dark);font-size:17px}
 .share-opt__body{flex:1 1 auto;min-width:0}
@@ -307,7 +311,7 @@ button{cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:tr
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.2</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.3</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -335,7 +339,8 @@ button{cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:tr
     <div class="selbar" id="selBar" hidden>
       <span id="selText">已选 0 项</span>
       <button class="btn btn--sm btn--primary" id="selUploadBtn">上传服务器</button>
-      <button class="btn btn--sm" id="selShareBtn">生成分享页</button>
+      <button class="btn btn--sm btn--primary" id="selLinkBtn">生成在线链接</button>
+      <button class="btn btn--sm" id="selShareBtn">HTML文件</button>
       <button class="btn btn--sm btn--danger" id="selDelBtn">删除</button>
       <button class="btn btn--sm btn--ghost" id="selClearBtn">取消选择</button>
     </div>
@@ -439,7 +444,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.0.2
+   在线浏览全景照片 · v1.0.3
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -448,7 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.2';
+  var APP_VERSION = '1.0.3';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -496,6 +501,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     selText: document.getElementById('selText'),
     selUploadBtn: document.getElementById('selUploadBtn'),
     selShareBtn: document.getElementById('selShareBtn'),
+    selLinkBtn: document.getElementById('selLinkBtn'),
     selDelBtn: document.getElementById('selDelBtn'),
     selClearBtn: document.getElementById('selClearBtn'),
     fileInput: document.getElementById('fileInput'),
@@ -1585,7 +1591,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
   function directLink(item) {
     var src = publicUrlOf(item);
-    return pageBaseUrl() + '?img=' + encodeURIComponent(src) + '&title=' + encodeURIComponent(item.name);
+    return pageBaseUrl() + '?img=' + encodeURIComponent(src) + '&title=' + encodeURIComponent(item.name) + '&share=1';
   }
 
   function libScripts() {
@@ -1743,53 +1749,115 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     });
   }
 
+  /* ---------- 在线分享链接：服务器生成极简全景页，别人点开就是 360° ---------- */
+  function mkShareOnline(items, onDone) {
+    if (!cloudCfg.token) {
+      openModal(
+        '<h3>还没配置服务器</h3>' +
+        '<p class="sheet__desc">在线分享链接需要先把照片传到你的阿里服务器（' + esc(cloudHost() || 'srv.wbc2023.top') + '），由服务器生成一个极简全景页。</p>' +
+        '<div class="sheet__acts"><button class="btn btn--ghost" data-close>取消</button>' +
+        '<button class="btn btn--primary" id="goCfg">去配置</button></div>',
+        function (sheet) {
+          sheet.querySelector('#goCfg').addEventListener('click', function () { closeModal(); serverModal(); });
+        });
+      return;
+    }
+    /* 第一步：确保每张照片都有公网直链（本地未上传的先传） */
+    var needUp = items.filter(function (it) { return !publicUrlOf(it); });
+    var doShare = function () {
+      var urls = items.map(function (it) { return publicUrlOf(it); });
+      var titles = items.map(function (it) { return it.name; });
+      if (urls.some(function (u) { return !u; })) { toast('有照片缺少公网直链，无法生成', 3600); return; }
+      toast('正在生成分享链接…', 12000);
+      cloudHttp('mkshare', 'POST', {
+        title: items.length === 1 ? items[0].name : (items[0].name + ' 等 ' + items.length + ' 张'),
+        imgs: urls, titles: titles
+      }).then(function (res) {
+        if (onDone) { onDone(res.url); }
+        return res;
+      }).then(function (res) {
+        openModal(
+          '<h3>✅ 分享链接已生成</h3>' +
+          '<p class="sheet__desc">把下面这条链接发给任何人（微信 / QQ / 短信都行），点开就是全屏 360° 全景，自动旋转环视，手机电脑都能看。</p>' +
+          '<div class="linkbox" id="shareUrlBox">' + esc(res.url) + '</div>' +
+          '<div class="sheet__note">链接永久有效（照片存在你的服务器上）。删除服务器照片或删除该分享文件后链接失效。</div>' +
+          '<div class="sheet__acts">' +
+            '<button class="btn btn--ghost" data-close>关闭</button>' +
+            '<button class="btn btn--sm" id="openShare">打开看看</button>' +
+            '<button class="btn btn--primary" id="cpShare">复制链接</button>' +
+          '</div>',
+          function (sheet2) {
+            sheet2.querySelector('#cpShare').addEventListener('click', function () {
+              copyText(res.url).then(function () { toast('分享链接已复制，去粘贴给朋友吧'); });
+            });
+            sheet2.querySelector('#openShare').addEventListener('click', function () {
+              window.open(res.url, '_blank');
+            });
+          });
+      })['catch'](function (error) {
+        toast('生成失败：' + (error && error.message ? error.message : error), 4600);
+      });
+    };
+    if (!needUp.length) { doShare(); return; }
+    toast('先把 ' + needUp.length + ' 张本地照片传到服务器…', 30000);
+    needUp.reduce(function (p, it) {
+      return p.then(function () { return uploadBlob(it).then(function (res) { return markUploaded(it, res); }); });
+    }, Promise.resolve()).then(function () {
+      return refresh();
+    }).then(doShare)['catch'](function (error) {
+      toast('上传失败：' + (error && error.message ? error.message : error), 4600);
+    });
+  }
+
   function shareModal(item) {
     var pub = publicUrlOf(item);
     var isInline = item.source === 'local' && item.blob && !item.remoteUrl;
     var html = '' +
       '<h3>分享「' + esc(item.name) + '」</h3>' +
-      '<p class="sheet__desc">照片在服务器上有公网直链，别人任何设备都能打开；也可以打包成单文件分享页。</p>' +
+      '<p class="sheet__desc">推荐用「在线分享链接」——对方点开就是全屏 360° 全景，不用装任何东西。</p>' +
+
+      '<div class="share-opt share-opt--main">' +
+        '<div class="share-opt__icon">🌐</div>' +
+        '<div class="share-opt__body">' +
+          '<div class="share-opt__title">在线分享链接（推荐 · 发人看 360°）</div>' +
+          '<div class="share-opt__text">在你的服务器上生成一个极简全景页，得到 <code>' + esc(cloudHost() || 'srv.wbc2023.top') + '/s/xxx.html</code> 短链。' +
+            (pub ? '' : '本地照片会先自动上传到服务器。') + '</div>' +
+          '<div style="margin-top:9px"><button class="btn btn--primary btn--sm" id="mkOnline">生成在线分享链接</button></div>' +
+        '</div>' +
+      '</div>' +
 
       (pub
         ? '<div class="share-opt">' +
             '<div class="share-opt__icon">🔗</div>' +
             '<div class="share-opt__body">' +
-              '<div class="share-opt__title">公网图片直链（照片本体）</div>' +
-              '<div class="share-opt__text">这条地址就是照片本身，贴在浏览器、微信、说明书里都能打开。</div>' +
+              '<div class="share-opt__title">公网图片直链（照片本体 · 技术用途）</div>' +
+              '<div class="share-opt__text">⚠️ 这条地址直接打开只会显示<b>平面照片</b>，别用它发给别人看；它适合贴进说明书、程序或再加工。</div>' +
               '<div class="linkbox" id="pubBox">' + esc(pub) + '</div>' +
               '<div style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap">' +
-                '<button class="btn btn--primary btn--sm" id="cpPub">复制图片直链</button>' +
-                '<button class="btn btn--sm" id="cpView">复制全景查看链接</button>' +
+                '<button class="btn btn--sm" id="cpPub">复制图片直链</button>' +
                 '<button class="btn btn--sm" id="probePub">体检直链</button>' +
               '</div>' +
               '<div class="probe" id="probeBox"></div>' +
             '</div>' +
           '</div>'
-        : '<div class="share-opt">' +
-            '<div class="share-opt__icon">☁</div>' +
-            '<div class="share-opt__body">' +
-              '<div class="share-opt__title">先上传到服务器，拿到公网直链</div>' +
-              '<div class="share-opt__text">本地照片只存在本机浏览器里，没法直接变成网址。点一下上传到 ' +
-                esc(cloudHost()) + '，立刻得到 <code>https://' + esc(cloudHost()) + '/img/xxx.jpg</code> 这样的直链。</div>' +
-              '<div style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap">' +
-                '<button class="btn btn--primary btn--sm" id="upNow">上传到服务器</button>' +
-                '<button class="btn btn--sm" id="upCfg2">服务器设置</button>' +
-              '</div>' +
-            '</div>' +
-          '</div>') +
+        : '') +
 
       '<div class="share-opt">' +
         '<div class="share-opt__icon">⬇</div>' +
         '<div class="share-opt__body">' +
-          '<div class="share-opt__title">生成分享页 HTML' + (isInline ? '（照片已内嵌，可离线看）' : '（体积小，打开时联网取图）') + '</div>' +
-          '<div class="share-opt__text">生成一个自包含的 360° 查看网页，发给别人双击就能看；放到你的服务器或工具箱就得到在线链接。</div>' +
-          '<div style="margin-top:9px"><button class="btn btn--primary btn--sm" id="mkPage">生成分享页</button></div>' +
+          '<div class="share-opt__title">分享页 HTML 文件（离线可看）</div>' +
+          '<div class="share-opt__text">生成自包含网页文件' + (isInline ? '（照片内嵌，不联网也能看）' : '') + '，适合 U 盘拷贝、内网环境或存档。</div>' +
+          '<div style="margin-top:9px"><button class="btn btn--sm" id="mkPage">生成 HTML 文件</button></div>' +
         '</div>' +
       '</div>' +
 
       '<div class="sheet__acts"><button class="btn btn--ghost" data-close>关闭</button></div>';
 
     openModal(html, function (sheet) {
+      sheet.querySelector('#mkOnline').addEventListener('click', function () {
+        closeModal();
+        mkShareOnline([item]);
+      });
       var mk = sheet.querySelector('#mkPage');
       if (mk) { mk.addEventListener('click', function () { exportSharePage([item]); }); }
       var cpp = sheet.querySelector('#cpPub');
@@ -1798,20 +1866,8 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
           copyText(pub).then(function () { toast('公网图片直链已复制'); });
         });
       }
-      var cpv = sheet.querySelector('#cpView');
-      if (cpv) {
-        cpv.addEventListener('click', function () {
-          copyText(directLink(item)).then(function () { toast('全景查看链接已复制'); });
-        });
-      }
       var pp = sheet.querySelector('#probePub');
       if (pp) { pp.addEventListener('click', function () { runProbe(pub, sheet.querySelector('#probeBox')); }); }
-      var un = sheet.querySelector('#upNow');
-      if (un) {
-        un.addEventListener('click', function () { closeModal(); uploadModal([item]); });
-      }
-      var uc = sheet.querySelector('#upCfg2');
-      if (uc) { uc.addEventListener('click', function () { closeModal(); serverModal(); }); }
     });
   }
 
@@ -2096,6 +2152,12 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     uploadModal(picked);
   });
 
+  els.selLinkBtn.addEventListener('click', function () {
+    var picked = pickedItems();
+    if (!picked.length) { return; }
+    mkShareOnline(picked);
+  });
+
   els.selShareBtn.addEventListener('click', function () {
     var picked = pickedItems();
     if (!picked.length) { return; }
@@ -2182,6 +2244,11 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     var img = params.get('img');
     if (!img) { return false; }
     var title = params.get('title') || decodeURIComponent(img.split('?')[0].split('/').pop() || '全景图');
+    /* share=1：访客模式——只看全景，不露管理功能 */
+    if (params.get('share') === '1') {
+      document.body.classList.add('is-guest');
+      document.title = title + ' · 全景照片';
+    }
     state.tempView = [{
       id: 'query', temp: true, name: title, source: 'url', url: img, remoteUrl: '', blob: null, thumb: null,
       w: 0, h: 0, size: 0, type: 'image/jpeg', createdAt: Date.now(), updatedAt: Date.now()
