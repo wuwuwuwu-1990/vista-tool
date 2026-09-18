@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.3</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.6</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -444,7 +444,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.0.3
+   在线浏览全景照片 · v1.0.6
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -453,7 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.3';
+  var APP_VERSION = '1.0.6';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -775,17 +775,18 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     return '<span class="badge badge--local">本地</span>';
   }
 
+  /* v1.0.4：原来的「复制公网直链」只给图片本体地址，对方打开是平面照片，
+     已替换为「分享」——直接进分享面板，一键生成能看 360° 的在线链接。
+     图片本体直链仍保留在分享面板的「公网图片直链」一栏里（技术用途）。 */
   function rowActions(it) {
-    var mid = it.source === 'local'
-      ? (it.remoteUrl
-          ? '<button class="icon-btn" data-act="copylink" title="复制公网直链">' + ICONS.link + '</button>'
-          : '<button class="icon-btn" data-act="upload" title="上传到服务器，拿公网直链">' + ICONS.cloud + '</button>')
-      : '<button class="icon-btn" data-act="copylink" title="复制图片直链">' + ICONS.link + '</button>';
+    var up = (it.source === 'local' && !it.remoteUrl)
+      ? '<button class="icon-btn" data-act="upload" title="上传到服务器">' + ICONS.cloud + '</button>'
+      : '';
     return '' +
       '<div class="row__acts">' +
         '<button class="icon-btn" data-act="view" title="查看">' + ICONS.view + '</button>' +
-        mid +
         '<button class="icon-btn" data-act="share" title="分享">' + ICONS.share + '</button>' +
+        up +
         '<button class="icon-btn" data-act="rename" title="重命名">' + ICONS.rename + '</button>' +
         '<button class="icon-btn icon-btn--danger" data-act="del" title="删除">' + ICONS.del + '</button>' +
       '</div>';
@@ -1357,7 +1358,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         bar.style.width = '100%';
         note.innerHTML = '上传结束：成功 <b>' + done + '</b> 张' +
           (failed ? '，失败 <b>' + failed + '</b> 张（' + esc(failedNames.slice(0, 3).join('、')) + (failed > 3 ? '…' : '') + '，可关掉重开再试）' : '') +
-          '。<br>资源库里的这些照片已标上「☁ 公网」，点行尾的链接图标即可复制直链。';
+          '。<br>资源库里的这些照片已标上「☁ 公网」，点行尾的「分享」即可生成给别人看的 360° 在线链接。';
         toast('服务器上传完成：成功 ' + done + ' 张' + (failed ? '，失败 ' + failed + ' 张' : ''), 4200);
         var btn = sheet.querySelector('#upGo');
         if (btn) { btn.disabled = false; btn.textContent = '再传一次'; }
@@ -1767,28 +1768,35 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     var doShare = function () {
       var urls = items.map(function (it) { return publicUrlOf(it); });
       var titles = items.map(function (it) { return it.name; });
+      var shareName = (items.length === 1 ? items[0].name : (items[0].name + ' 等 ' + items.length + ' 张')) + '-全景照片';
       if (urls.some(function (u) { return !u; })) { toast('有照片缺少公网直链，无法生成', 3600); return; }
       toast('正在生成分享链接…', 12000);
       cloudHttp('mkshare', 'POST', {
-        title: items.length === 1 ? items[0].name : (items[0].name + ' 等 ' + items.length + ' 张'),
+        title: shareName,
         imgs: urls, titles: titles
       }).then(function (res) {
         if (onDone) { onDone(res.url); }
         return res;
       }).then(function (res) {
+        /* v1.0.5：复制出来的内容 = 照片名称 + 链接（两行），发给微信直接可读 */
+        var shareText = shareName + '\n' + res.url;
         openModal(
           '<h3>✅ 分享链接已生成</h3>' +
-          '<p class="sheet__desc">把下面这条链接发给任何人（微信 / QQ / 短信都行），点开就是全屏 360° 全景，自动旋转环视，手机电脑都能看。</p>' +
-          '<div class="linkbox" id="shareUrlBox">' + esc(res.url) + '</div>' +
+          '<p class="sheet__desc">把下面这段发给任何人（微信 / QQ / 短信都行），点开就是全屏 360° 全景，自动旋转环视，手机电脑都能看。</p>' +
+          '<div class="linkbox" id="shareUrlBox">' + esc(shareName) + '<br>' + esc(res.url) + '</div>' +
           '<div class="sheet__note">链接永久有效（照片存在你的服务器上）。删除服务器照片或删除该分享文件后链接失效。</div>' +
           '<div class="sheet__acts">' +
             '<button class="btn btn--ghost" data-close>关闭</button>' +
+            '<button class="btn btn--sm" id="cpShareRaw">只复制链接</button>' +
             '<button class="btn btn--sm" id="openShare">打开看看</button>' +
-            '<button class="btn btn--primary" id="cpShare">复制链接</button>' +
+            '<button class="btn btn--primary" id="cpShare">复制名称+链接</button>' +
           '</div>',
           function (sheet2) {
             sheet2.querySelector('#cpShare').addEventListener('click', function () {
-              copyText(res.url).then(function () { toast('分享链接已复制，去粘贴给朋友吧'); });
+              copyText(shareText).then(function () { toast('已复制：照片名称 + 链接，去粘贴给朋友吧'); });
+            });
+            sheet2.querySelector('#cpShareRaw').addEventListener('click', function () {
+              copyText(res.url).then(function () { toast('纯链接已复制'); });
             });
             sheet2.querySelector('#openShare').addEventListener('click', function () {
               window.open(res.url, '_blank');
@@ -2123,12 +2131,6 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     if (act === 'rename') { renameModal(item); return; }
     if (act === 'share') { shareModal(item); return; }
     if (act === 'upload') { uploadModal([item]); return; }
-    if (act === 'copylink') {
-      copyText(publicUrlOf(item)).then(function () {
-        toast(item.remoteUrl ? '公网图片直链已复制' : '图片直链已复制');
-      });
-      return;
-    }
     if (act === 'del') { delModal([item]); }
   });
 
