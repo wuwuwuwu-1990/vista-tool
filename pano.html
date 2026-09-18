@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.6</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.7</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -444,7 +444,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.0.6
+   在线浏览全景照片 · v1.0.7
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -453,7 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.6';
+  var APP_VERSION = '1.0.7';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -1149,17 +1149,119 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     return base + '-' + String(item.id).replace(/[^A-Za-z0-9]/g, '').slice(-6) + ext;
   }
 
-  function uploadBlob(item, onProgress) {
+  /* ---------- 低清预览图（分享页「秒开」用）：<原名>.pv.jpg ---------- */
+  var PV_EXT = '.pv.jpg';
+  var PV_TARGET = 900 * 1024;   /* 低清图目标上限 ~900KB，3M 带宽约 2 秒出画面 */
+
+  function imgBase() {
+    return cloudBase().replace(/\/[^/]*\/?$/, '') + '/img/';
+  }
+
+  function pvUrlOf(u) {
+    u = String(u || '');
+    if (!u) { return ''; }
+    if (u.indexOf(imgBase()) !== 0) { return ''; }   /* 非本服务器图床的直链不做低清图 */
+    return u.replace(/\.[A-Za-z0-9]+$/, '') + PV_EXT;
+  }
+
+  function pvNameFor(item) {
+    return uploadNameFor(item).replace(/\.[A-Za-z0-9]+$/, '') + PV_EXT;
+  }
+
+  function canvasJpeg(cv, q) {
+    return new Promise(function (ok) { cv.toBlob(function (b) { ok(b); }, 'image/jpeg', q); });
+  }
+
+  /* 从原图（Blob）生成一张低清全景图：等比分档，尽量压到 PV_TARGET 以内 */
+  function makePreview(blob) {
+    return new Promise(function (resolve) {
+      var src = URL.createObjectURL(blob);
+      var img = new Image();
+      var done = function (r) { URL.revokeObjectURL(src); resolve(r); };
+      img.onload = function () {
+        var w0 = img.naturalWidth || 0, h0 = img.naturalHeight || 0;
+        if (w0 < 1600) { done(null); return; }        /* 原图本来就小，直接看原图 */
+        var tries = [[2560, 0.72], [2048, 0.72], [1600, 0.70]];
+        var i = 0, best = null;
+        var next = function () {
+          if (i >= tries.length || (best && best.size <= PV_TARGET)) { done(best); return; }
+          var tw = Math.min(tries[i][0], w0);
+          var th = Math.max(1, Math.round(h0 * (tw / w0)));
+          var cv = document.createElement('canvas');
+          cv.width = tw; cv.height = th;
+          var ctx = cv.getContext('2d');
+          try { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; } catch (e) { /* ignore */ }
+          ctx.drawImage(img, 0, 0, tw, th);
+          canvasJpeg(cv, tries[i][1]).then(function (b) {
+            if (b && (!best || b.size < best.size)) { best = { blob: b, w: tw, h: th, size: b.size }; }
+            i += 1;
+            next();
+          })['catch'](function () { i += 1; next(); });
+        };
+        next();
+      };
+      img.onerror = function () { done(null); };
+      img.src = src;
+    });
+  }
+
+  /* 拿原图字节：本地有副本就用副本，没有就回服务器取（图床已开 CORS） */
+  function sourceBlobFor(item) {
+    if (item && item.blob) { return Promise.resolve(item.blob); }
+    var u = item && item.remoteUrl;
+    if (!u) { return Promise.resolve(null); }
+    return fetch(u).then(function (r) { return r.ok ? r.blob() : null; })['catch'](function () { return null; });
+  }
+
+  function makeAndUploadPreview(item, blob, onProgress) {
+    return makePreview(blob).then(function (pv) {
+      if (!pv) { return false; }
+      return uploadRaw(pvNameFor(item), pv.blob, 'image/jpeg', onProgress).then(function (res) {
+        item.pvName = res.name; item.pvSize = res.size; item.pvUrl = res.url;
+        if (item.id) { item.updatedAt = item.updatedAt || Date.now(); }
+        return true;
+      });
+    });
+  }
+
+  /* 上传本地照片时顺带传一张低清图（失败不影响主流程） */
+  function uploadPreviewFor(item, onProgress) {
+    if (!item || !item.remoteUrl || !pvUrlOf(item.remoteUrl)) { return Promise.resolve(false); }
+    return sourceBlobFor(item).then(function (b) {
+      if (!b) { return false; }
+      return makeAndUploadPreview(item, b, onProgress);
+    })['catch'](function () { return false; });
+  }
+
+  /* 已有照片补低清图：先探一次，缺了才上传 */
+  function pvExists(u) {
+    if (!u) { return Promise.resolve(false); }
+    return fetch(u, { method: 'HEAD', cache: 'no-store' })
+      .then(function (r) { return !!r.ok; })['catch'](function () { return false; });
+  }
+
+  function ensurePreview(item, onProgress) {
+    if (!item) { return Promise.resolve(false); }
+    if (item.pvUrl) { return Promise.resolve(true); }
+    var pvUrl = pvUrlOf(publicUrlOf(item));
+    if (!pvUrl) { return Promise.resolve(false); }
+    return pvExists(pvUrl).then(function (ok) {
+      if (ok) { item.pvUrl = pvUrl; return true; }
+      return uploadPreviewFor(item, onProgress);
+    });
+  }
+
+  function uploadRaw(name, blob, type, onProgress) {
     return new Promise(function (resolve, reject) {
       if (!cloudCfg.token) { reject(new Error('还没配置服务器令牌')); return; }
-      if (!item.blob) { reject(new Error('本地副本已不在（可能是别台设备同步来的）')); return; }
+      if (!blob) { reject(new Error('没有可上传的内容')); return; }
       var url = cloudBase() + '/upload/' + encodeURIComponent(cloudCfg.app) +
         '?token=' + encodeURIComponent(cloudCfg.token) +
-        '&name=' + encodeURIComponent(uploadNameFor(item));
+        '&name=' + encodeURIComponent(name);
       var xhr = new XMLHttpRequest();
       xhr.open('POST', url, true);
       xhr.timeout = 900000;
-      xhr.setRequestHeader('Content-Type', item.type || 'application/octet-stream');
+      xhr.setRequestHeader('Content-Type', type || 'application/octet-stream');
       xhr.upload.onprogress = function (e) { if (e.lengthComputable && onProgress) { onProgress(e.loaded / e.total); } };
       xhr.onload = function () {
         var j = {};
@@ -1169,8 +1271,13 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       };
       xhr.onerror = function () { reject(new Error('网络错误：服务器不可达或已被拦截')); };
       xhr.ontimeout = function () { reject(new Error('上传超时')); };
-      xhr.send(item.blob);
+      xhr.send(blob);
     });
+  }
+
+  function uploadBlob(item, onProgress) {
+    if (!item.blob) { return Promise.reject(new Error('本地副本已不在（可能是别台设备同步来的）')); }
+    return uploadRaw(uploadNameFor(item), item.blob, item.type, onProgress);
   }
 
   function markUploaded(item, res) {
@@ -1320,7 +1427,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       '<div class="progress" id="upProg"><div class="progress__bar" id="upBar"></div></div>' +
       '<div class="sheet__note" id="upNote">共 ' + pool.length + ' 张：待上传 <b>' + pending.length + '</b> 张' +
         (pool.length - pending.length ? '，已上传 ' + (pool.length - pending.length) + ' 张' : '') +
-        '。服务器是 3M 带宽，一张 10MB 的图约需 30 秒，请让它跑完。</div>' +
+        '。服务器是 3M 带宽，一张 10MB 的图约需 30 秒，请让它跑完。每张还会附带一张约 0.5MB 的低清预览图（分享页靠它 1~2 秒先出画面）。</div>' +
       '<div class="sheet__acts">' +
         '<button class="btn btn--ghost" id="upCfg">服务器设置</button>' +
         '<button class="btn btn--ghost" data-close>关闭</button>' +
@@ -1373,11 +1480,18 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         '（' + fmtSize(item.size) + '）→ ' + cloudHost();
       uploadBlob(item, function (p) {
         setRow(item, '上传中 ' + Math.round(p * 100) + '%', 'is-run');
-        bar.style.width = Math.round(((idx + p) / targets.length) * 100) + '%';
+        bar.style.width = Math.round(((idx + p * 0.85) / targets.length) * 100) + '%';
       }).then(function (res) {
         return markUploaded(item, res).then(function () {
           done += 1;
           setRow(item, '已上传', 'is-ok');
+          /* 顺带传一张低清预览图：分享页靠它秒开，失败不影响主流程 */
+          return uploadPreviewFor(item, function (p) {
+            setRow(item, '低清图 ' + Math.round(p * 100) + '%', 'is-run');
+            bar.style.width = Math.round(((idx + 0.85 + p * 0.15) / targets.length) * 100) + '%';
+          }).then(function (ok) {
+            setRow(item, ok ? '已上传 + 低清图' : '已上传', 'is-ok');
+          });
         });
       })['catch'](function (err) {
         failed += 1;
@@ -1768,12 +1882,23 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     var doShare = function () {
       var urls = items.map(function (it) { return publicUrlOf(it); });
       var titles = items.map(function (it) { return it.name; });
+      var pvs = urls.map(function (u) { return pvUrlOf(u); });
       var shareName = (items.length === 1 ? items[0].name : (items[0].name + ' 等 ' + items.length + ' 张')) + '-全景照片';
       if (urls.some(function (u) { return !u; })) { toast('有照片缺少公网直链，无法生成', 3600); return; }
-      toast('正在生成分享链接…', 12000);
-      cloudHttp('mkshare', 'POST', {
-        title: shareName,
-        imgs: urls, titles: titles
+      toast('正在检查低清预览图…', 9000);
+      /* 低清预览图：缺的现场补一张（分享页靠它 1~2 秒出画面，再把原图换上） */
+      var todo = items.filter(function (it) { return pvUrlOf(publicUrlOf(it)) && !it.pvUrl; });
+      var ensureAll = todo.reduce(function (p, it) {
+        return p.then(function () {
+          return ensurePreview(it)['catch'](function () { return false; });
+        });
+      }, Promise.resolve())['catch'](function () { /* 低清图失败也照常生成分享链接 */ });
+      ensureAll.then(function () {
+        toast('正在生成分享链接…', 12000);
+        return cloudHttp('mkshare', 'POST', {
+          title: shareName,
+          imgs: urls, titles: titles, pvs: pvs
+        });
       }).then(function (res) {
         if (onDone) { onDone(res.url); }
         return res;
@@ -1784,7 +1909,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
           '<h3>✅ 分享链接已生成</h3>' +
           '<p class="sheet__desc">把下面这段发给任何人（微信 / QQ / 短信都行），点开就是全屏 360° 全景，自动旋转环视，手机电脑都能看。</p>' +
           '<div class="linkbox" id="shareUrlBox">' + esc(shareName) + '<br>' + esc(res.url) + '</div>' +
-          '<div class="sheet__note">链接永久有效（照片存在你的服务器上）。删除服务器照片或删除该分享文件后链接失效。</div>' +
+          '<div class="sheet__note">⚡ 对方点开先出低清画面（1~2 秒），随后自动切换成高清原图。<br>链接永久有效（照片存在你的服务器上）。删除服务器照片或删除该分享文件后链接失效。</div>' +
           '<div class="sheet__acts">' +
             '<button class="btn btn--ghost" data-close>关闭</button>' +
             '<button class="btn btn--sm" id="cpShareRaw">只复制链接</button>' +
@@ -1829,7 +1954,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         '<div class="share-opt__body">' +
           '<div class="share-opt__title">在线分享链接（推荐 · 发人看 360°）</div>' +
           '<div class="share-opt__text">在你的服务器上生成一个极简全景页，得到 <code>' + esc(cloudHost() || 'srv.wbc2023.top') + '/s/xxx.html</code> 短链。' +
-            (pub ? '' : '本地照片会先自动上传到服务器。') + '</div>' +
+            (pub ? '' : '本地照片会先自动上传到服务器。') + '<br>⚡ 已自动附带低清预览图：对方点开先出画面，再自动换成高清原图。</div>' +
           '<div style="margin-top:9px"><button class="btn btn--primary btn--sm" id="mkOnline">生成在线分享链接</button></div>' +
         '</div>' +
       '</div>' +
