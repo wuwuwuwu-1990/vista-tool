@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>在线浏览全景照片</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2316a34a'/%3E%3Cstop offset='1' stop-color='%234ade80'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23fff' stroke-width='3.6'/%3E%3Cellipse cx='32' cy='32' rx='7.5' ry='17' fill='none' stroke='%23fff' stroke-width='2.8'/%3E%3Cline x1='15' y1='32' x2='49' y2='32' stroke='%23fff' stroke-width='2.8'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2316a34a'/%3E%3Cstop offset='1' stop-color='%234ade80'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ccircle cx='32' cy='29' r='14.5' fill='%23fff'/%3E%3Cellipse cx='32' cy='29' rx='5.8' ry='14.5' fill='none' stroke='%2316a34a' stroke-width='2.2'/%3E%3Cline x1='17.5' y1='29' x2='46.5' y2='29' stroke='%2316a34a' stroke-width='2.2'/%3E%3Cpath d='M13 49 Q32 58.5 51 49' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M50.5 41 L54.5 51.5 L44 50.5 Z' fill='%23fff'/%3E%3C/svg%3E">
 <meta name="description" content="在线浏览全景照片 · 上传、管理、重命名 360° 全景图，一键上传服务器拿公网直链，生成可分享链接与分享页。">
 <style data-psp-css>/**
  * Minified by jsDelivr using clean-css v5.3.3.
@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.7</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.8</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -444,7 +444,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.0.7
+   在线浏览全景照片 · v1.0.8
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -453,7 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.7';
+  var APP_VERSION = '1.0.8';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -1725,7 +1725,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n' +
       '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
       '<title>' + esc(pageTitle) + '</title>\n' +
-      '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'30\' fill=\'%23f2f2f7\'/%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'19\' fill=\'none\' stroke=\'%23007aff\' stroke-width=\'4\'/%3E%3Cellipse cx=\'32\' cy=\'32\' rx=\'8\' ry=\'19\' fill=\'none\' stroke=\'%2334c759\' stroke-width=\'3\'/%3E%3Cline x1=\'4\' y1=\'32\' x2=\'60\' y2=\'32\' stroke=\'%23007aff\' stroke-width=\'3\'/%3E%3C/svg%3E">\n' +
+      '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Cdefs%3E%3ClinearGradient id=\'g\' x1=\'0\' y1=\'0\' x2=\'1\' y2=\'1\'%3E%3Cstop offset=\'0\' stop-color=\'%2316a34a\'/%3E%3Cstop offset=\'1\' stop-color=\'%234ade80\'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=\'64\' height=\'64\' rx=\'14\' fill=\'url(%23g)\'/%3E%3Ccircle cx=\'32\' cy=\'29\' r=\'14.5\' fill=\'%23fff\'/%3E%3Cellipse cx=\'32\' cy=\'29\' rx=\'5.8\' ry=\'14.5\' fill=\'none\' stroke=\'%2316a34a\' stroke-width=\'2.2\'/%3E%3Cline x1=\'17.5\' y1=\'29\' x2=\'46.5\' y2=\'29\' stroke=\'%2316a34a\' stroke-width=\'2.2\'/%3E%3Cpath d=\'M13 49 Q32 58.5 51 49\' fill=\'none\' stroke=\'%23fff\' stroke-width=\'4\' stroke-linecap=\'round\'/%3E%3Cpath d=\'M50.5 41 L54.5 51.5 L44 50.5 Z\' fill=\'%23fff\'/%3E%3C/svg%3E">\n' +
       '<style>' + lib.css + '</style>\n<style>\n' +
       ':root{--font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif}\n' +
       '*{margin:0;padding:0;box-sizing:border-box}\n' +
