@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.8</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.9</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -444,7 +444,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.0.8
+   在线浏览全景照片 · v1.0.9
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -453,7 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.8';
+  var APP_VERSION = '1.0.9';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -1592,7 +1592,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
   function ensureViewer(source) {
     if (!state.viewer) {
-      state.viewer = new PhotoSphereViewer.Viewer({
+      var v = new PhotoSphereViewer.Viewer({
         container: els.psv,
         panorama: source,
         navbar: false,
@@ -1603,7 +1603,12 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         maxFov: 100,
         moveSpeed: 1.1
       });
-      return Promise.resolve();
+      state.viewer = v;
+      /* 必须等首张全景真正渲染完（ready），否则后续 setPanorama 会打断首图显示 */
+      return new Promise(function (resolve) {
+        if (v.prop && v.prop.ready) { resolve(); return; }
+        v.once('ready', function () { resolve(); });
+      });
     }
     return state.viewer.setPanorama(source);
   }
@@ -1622,15 +1627,37 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     releaseViewerUrl();
     if (item.blob) { state.viewerUrl = source; }
 
-    ensureViewer(source).then(function () {
+    var failMsg = function (error) {
+      console.warn(error);
+      setStatus('加载失败：图片可能无法跨域访问或地址失效', 'error');
+    };
+    var doneMsg = function () {
       setStatus('已加载 · ' + (item.w && item.h ? item.w + '×' + item.h + ' · ' : '') +
         (item.blob ? fmtSize(item.size) : '网络直链') +
         (item.remoteUrl ? ' · ☁ 已上传' : '') +
         ' · 第 ' + (state.viewerIndex + 1) + '/' + list.length + ' 张', 'success');
-    })['catch'](function (error) {
-      console.warn(error);
-      setStatus('加载失败：图片可能无法跨域访问或地址失效', 'error');
-    });
+    };
+
+    var pv = (!item.blob) ? pvUrlOf(publicUrlOf(item)) : '';
+    if (pv) {
+      /* 低清优先：先出低清画面，后台静默换高清原图（与分享页同款体验） */
+      var myIndex = index;
+      setStatus('低清加载中…', 'idle');
+      pvExists(pv).then(function (ok) {
+        if (!ok || state.viewerIndex !== myIndex) { return null; }
+        return ensureViewer(pv).then(function () {
+          if (state.viewerIndex !== myIndex) { return null; }
+          setStatus('低清预览 · 高清原图后台加载中…', 'idle');
+          return state.viewer.setPanorama(source, { transition: 900, showLoader: false })
+            .then(function () {
+              if (state.viewerIndex !== myIndex) { return; }
+              doneMsg();
+            });
+        });
+      })['catch'](failMsg);
+    } else {
+      ensureViewer(source).then(doneMsg)['catch'](failMsg);
+    }
 
     els.vKeep.hidden = !item.temp;
     els.vUpload.hidden = !item.blob;
