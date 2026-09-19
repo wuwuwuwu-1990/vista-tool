@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>在线浏览全景照片 · 安卓APP下载</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2316a34a'/%3E%3Cstop offset='1' stop-color='%234ade80'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ccircle cx='32' cy='29' r='14.5' fill='%23fff'/%3E%3Cellipse cx='32' cy='29' rx='5.8' ry='14.5' fill='none' stroke='%2316a34a' stroke-width='2.2'/%3E%3Cline x1='17.5' y1='29' x2='46.5' y2='29' stroke='%2316a34a' stroke-width='2.2'/%3E%3Cpath d='M13 49 Q32 58.5 51 49' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M50.5 41 L54.5 51.5 L44 50.5 Z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#f0faf3 0%,#ffffff 55%,#f2fbf6 100%);
+    color:#1f2937; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:48px 20px 40px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .card {
+    width:100%; max-width:560px;
+    background:#fff; border-radius:24px;
+    box-shadow:0 12px 40px rgba(22,163,74,.12), 0 2px 8px rgba(22,163,74,.06);
+    padding:40px 36px 32px; text-align:center;
+    border:1px solid rgba(22,163,74,.08);
+  }
+  .appicon {
+    width:96px; height:96px; border-radius:22px; margin:0 auto 18px;
+    box-shadow:0 10px 26px rgba(22,163,74,.28);
+    display:block;
+  }
+  h1 { font-size:24px; font-weight:700; letter-spacing:.5px; color:#111827; }
+  .sub { font-size:14px; color:#6b7280; margin-top:8px; line-height:1.6; }
+  .meta {
+    display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:22px 0 26px;
+  }
+  .meta span {
+    font-size:12.5px; color:#15803d; background:rgba(22,163,74,.08);
+    border:1px solid rgba(22,163,74,.15);
+    padding:5px 12px; border-radius:999px; font-weight:500;
+  }
+  .dlbtn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; max-width:380px; margin:0 auto;
+    background:linear-gradient(135deg,#16a34a,#4ade80);
+    color:#fff; text-decoration:none;
+    font-size:17.5px; font-weight:600; letter-spacing:1px;
+    padding:16px 0; border-radius:14px;
+    box-shadow:0 8px 22px rgba(22,163,74,.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .dlbtn:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(22,163,74,.42); }
+  .dlbtn:active { transform:translateY(0); }
+  .dlbtn svg { width:20px; height:20px; fill:#fff; }
+  .dlhint { font-size:12.5px; color:#9ca3af; margin-top:12px; }
+  .divider { height:1px; background:rgba(22,163,74,.1); margin:28px 0 24px; }
+  .steps { text-align:left; }
+  .steps h2 { font-size:15px; font-weight:600; color:#111827; margin-bottom:14px; }
+  .step { display:flex; gap:12px; margin-bottom:12px; align-items:flex-start; }
+  .step .n {
+    flex:0 0 22px; width:22px; height:22px; border-radius:50%;
+    background:#16a34a; color:#fff; font-size:12.5px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .step p { font-size:13.5px; color:#4b5563; line-height:1.65; }
+  .step p b { color:#111827; font-weight:600; }
+  .feat { text-align:left; margin-top:24px; }
+  .feat h2 { font-size:15px; font-weight:600; color:#111827; margin-bottom:12px; }
+  .feat ul { list-style:none; }
+  .feat li { font-size:13.5px; color:#4b5563; line-height:1.9; padding-left:20px; position:relative; }
+  .feat li::before { content:''; position:absolute; left:2px; top:9px; width:7px; height:7px; border-radius:50%; background:#4ade80; }
+  .web-link {
+    display:inline-block; margin-top:24px; font-size:13.5px; color:#16a34a;
+    text-decoration:none; font-weight:500;
+    border-bottom:1px dashed rgba(22,163,74,.4); padding-bottom:2px;
+  }
+  .web-link:hover { color:#15803d; }
+  .foot { margin-top:30px; font-size:12px; color:#b6c2bc; text-align:center; line-height:1.8; }
+  @media (max-width:480px){
+    body{ padding:32px 14px 30px; }
+    .card{ padding:32px 22px 26px; border-radius:20px; }
+    h1{ font-size:21px; }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="appicon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a34a"/><stop offset="1" stop-color="#4ade80"/></linearGradient></defs>
+      <rect width="64" height="64" rx="14" fill="url(#g)"/>
+      <circle cx="32" cy="29" r="14.5" fill="#fff"/>
+      <ellipse cx="32" cy="29" rx="5.8" ry="14.5" fill="none" stroke="#16a34a" stroke-width="2.2"/>
+      <line x1="17.5" y1="29" x2="46.5" y2="29" stroke="#16a34a" stroke-width="2.2"/>
+      <path d="M13 49 Q32 58.5 51 49" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+      <path d="M50.5 41 L54.5 51.5 L44 50.5 Z" fill="#fff"/>
+    </svg>
+    <h1>在线浏览全景照片</h1>
+    <p class="sub">安卓客户端 · 360°全景照片随身看<br>上传 · 查看 · 分享一键直达</p>
+    <div class="meta">
+      <span>版本 v1.0.0</span>
+      <span>大小 489 KB</span>
+      <span>Android 7.0 及以上</span>
+      <span>更新 2026-09-19</span>
+    </div>
+    <a class="dlbtn" href="pano-app-v1.0.0.apk" download>
+      <svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
+      下载安卓安装包（APK）
+    </a>
+    <p class="dlhint">v1.0.0 · pano-app-v1.0.0.apk · 已签名，可直接安装</p>
+
+    <div class="divider"></div>
+
+    <div class="steps">
+      <h2>安装步骤</h2>
+      <div class="step"><span class="n">1</span><p>点击上方按钮下载安装包到手机。</p></div>
+      <div class="step"><span class="n">2</span><p>首次安装如提示「禁止安装未知来源应用」，请在系统弹窗中选择<b>允许 / 仍要安装</b>（不同品牌手机表述略有差异）。</p></div>
+      <div class="step"><span class="n">3</span><p>安装完成后打开 APP，即可上传、查看与分享 360° 全景照片，数据与网页版互通。</p></div>
+    </div>
+
+    <div class="feat">
+      <h2>主要功能</h2>
+      <ul>
+        <li>手机相册直接上传全景照片到阿里云服务器</li>
+        <li>360° 环视查看，低清秒开 + 加载百分比实时显示</li>
+        <li>一键分享「照片名称-全景照片 + 链接」，微信粘贴即可读</li>
+        <li>重命名 / 删除 / 资源库云端多设备同步</li>
+      </ul>
+    </div>
+
+    <a class="web-link" href="pano.html">电脑 / iPhone 用户请使用网页版 →</a>
+  </div>
+  <p class="foot">元枢工具箱 · tool.wbc2023.top<br>安装即代表同意仅用于个人工程资料用途</p>
+</body>
+</html>
