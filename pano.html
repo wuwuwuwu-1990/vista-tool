@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.0.9</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.1.0</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -444,7 +444,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.0.9
+   在线浏览全景照片 · v1.1.0
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -453,7 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.9';
+  var APP_VERSION = '1.1.0';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -1613,6 +1613,26 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     return state.viewer.setPanorama(source);
   }
 
+  /* XHR 下载为 blob 并回调进度（PSV 自行加载 URL 时没有进度事件，百分比必须自己下） */
+  function fetchPanoramaWithProgress(url, onProgress) {
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+      xhr.timeout = 900000;
+      xhr.onprogress = function (e) {
+        if (e.lengthComputable && onProgress) { onProgress(e.loaded / e.total, e.loaded, e.total); }
+      };
+      xhr.onload = function () {
+        if (xhr.status === 200 && xhr.response) { resolve(xhr.response); }
+        else { reject(new Error('HTTP ' + xhr.status)); }
+      };
+      xhr.onerror = function () { reject(new Error('网络错误或被跨域策略拦截')); };
+      xhr.ontimeout = function () { reject(new Error('下载超时')); };
+      xhr.send();
+    });
+  }
+
   function openViewer(index) {
     var list = activeList();
     var item = list[index];
@@ -1633,28 +1653,54 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     };
     var doneMsg = function () {
       setStatus('已加载 · ' + (item.w && item.h ? item.w + '×' + item.h + ' · ' : '') +
-        (item.blob ? fmtSize(item.size) : '网络直链') +
+        (item.blob ? fmtSize(item.size) : '已下载完整原图') +
         (item.remoteUrl ? ' · ☁ 已上传' : '') +
         ' · 第 ' + (state.viewerIndex + 1) + '/' + list.length + ' 张', 'success');
     };
 
     var pv = (!item.blob) ? pvUrlOf(publicUrlOf(item)) : '';
-    if (pv) {
-      /* 低清优先：先出低清画面，后台静默换高清原图（与分享页同款体验） */
+    if (!item.blob && /^https?:\/\//i.test(source)) {
+      /* 云端照片：低清图先出画面，原图带百分比下载完再渐变切换 */
       var myIndex = index;
-      setStatus('低清加载中…', 'idle');
+      setStatus('准备加载…', 'idle');
       pvExists(pv).then(function (ok) {
-        if (!ok || state.viewerIndex !== myIndex) { return null; }
-        return ensureViewer(pv).then(function () {
+        if (state.viewerIndex !== myIndex) { return null; }
+        if (!ok || !pv) { return { skipPv: true }; }  /* 低清图缺失：直接带百分比下原图，不再干等 */
+        return fetchPanoramaWithProgress(pv, function (p, loaded) {
+          if (state.viewerIndex === myIndex) { setStatus('低清加载 ' + Math.round(p * 100) + '% · ' + fmtSize(loaded), 'idle'); }
+        }).then(function (blob) {
           if (state.viewerIndex !== myIndex) { return null; }
-          setStatus('低清预览 · 高清原图后台加载中…', 'idle');
-          return state.viewer.setPanorama(source, { transition: 900, showLoader: false })
-            .then(function () {
-              if (state.viewerIndex !== myIndex) { return; }
-              doneMsg();
-            });
+          releaseViewerUrl();
+          state.viewerUrl = URL.createObjectURL(blob);
+          return ensureViewer(state.viewerUrl).then(function () {
+            return state.viewerIndex === myIndex ? { pvReady: true } : null;
+          });
         });
-      })['catch'](failMsg);
+      }).then(function (phase) {
+        if (!phase || state.viewerIndex !== myIndex) { return; }
+        var label = phase.pvReady ? '低清预览 · 高清原图 ' : '高清原图 ';
+        return fetchPanoramaWithProgress(source, function (p, loaded, total) {
+          if (state.viewerIndex === myIndex) {
+            setStatus(label + Math.round(p * 100) + '% · ' + fmtSize(loaded) + '/' + fmtSize(total), 'idle');
+          }
+        }).then(function (blob) {
+          if (state.viewerIndex !== myIndex) { return; }
+          releaseViewerUrl();
+          state.viewerUrl = URL.createObjectURL(blob);
+          return state.viewer.setPanorama(state.viewerUrl, { transition: 900, showLoader: false });
+        }).then(function () {
+          if (state.viewerIndex !== myIndex) { return; }
+          doneMsg();
+        });
+      })['catch'](function (error) {
+        console.warn(error);
+        /* XHR 被跨域策略等拦截：退回让 PSV 直连 URL（无百分比，但不比旧版差） */
+        if (state.viewer && state.viewerIndex === myIndex) {
+          state.viewer.setPanorama(source).then(doneMsg)['catch'](failMsg);
+        } else {
+          ensureViewer(source).then(doneMsg)['catch'](failMsg);
+        }
+      });
     } else {
       ensureViewer(source).then(doneMsg)['catch'](failMsg);
     }
