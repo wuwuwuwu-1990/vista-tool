@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.1.1</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.1.2</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -448,7 +448,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.1.1
+   在线浏览全景照片 · v1.1.2
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -457,7 +457,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.1.1';
+  var APP_VERSION = '1.1.2';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
@@ -688,6 +688,105 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     remove: function (id) { return dbRun('readwrite', function (s) { return s.delete(id); }); },
     clear: function () { return dbRun('readwrite', function (s) { return s.clear(); }); }
   };
+
+  /* --------------------- 原图本地缓存（v1.1.2） ---------------------
+   * 云端照片看一次就把原图存进独立 IndexedDB 库，再次打开免下载秒出；
+   * 总量超过上限时按「最久未打开」淘汰（LRU）。只缓存本服务器图床直链，
+   * 外链与本地 blob 不缓存；所有缓存操作失败均静默降级，不影响主流程。 */
+  var PVS_DB = 'pano-pvcache';
+  var PVS_META = 'meta';    /* {u, ts, size}，按 ts 建索引做 LRU */
+  var PVS_BLOB = 'blobs';   /* {u, b:Blob} */
+  var PVS_LIMIT = 256 * 1024 * 1024;  /* 256MB */
+  var pvsDbPromise = null;
+
+  function openPvsDb() {
+    if (pvsDbPromise) { return pvsDbPromise; }
+    pvsDbPromise = new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { reject(new Error('当前环境不支持 IndexedDB')); return; }
+      var req = indexedDB.open(PVS_DB, 1);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(PVS_BLOB)) { db.createObjectStore(PVS_BLOB, { keyPath: 'u' }); }
+        if (!db.objectStoreNames.contains(PVS_META)) {
+          var os = db.createObjectStore(PVS_META, { keyPath: 'u' });
+          os.createIndex('ts', 'ts');
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error || new Error('缓存库打开失败')); };
+    });
+    return pvsDbPromise;
+  }
+
+  function pvsTx(mode, fn) {
+    return openPvsDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction([PVS_BLOB, PVS_META], mode);
+        var out;
+        try { out = fn(tx); } catch (e) { reject(e); return; }
+        tx.oncomplete = function () { resolve(out); };
+        tx.onerror = function () { reject(tx.error); };
+        tx.onabort = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  /* 命中返回 Blob；同时触碰 LRU 时间戳 */
+  function cacheGet(u) {
+    if (!u) { return Promise.resolve(null); }
+    return pvsTx('readonly', function (tx) {
+      return {
+        b: tx.objectStore(PVS_BLOB).get(u),
+        m: tx.objectStore(PVS_META).get(u)
+      };
+    }).then(function (r) {
+      var rec = r && r.b && r.b.result ? r.b.result : null;
+      if (!rec || !rec.b) { return null; }
+      pvsTx('readwrite', function (tx) {
+        tx.objectStore(PVS_META).put({ u: u, ts: Date.now(), size: rec.b.size });
+      })['catch'](function () {});
+      return rec.b;
+    })['catch'](function () { return null; });
+  }
+
+  /* 存入并触发 LRU 清理；只关心成功与否，失败静默 */
+  function cachePut(u, blob) {
+    if (!u || !blob) { return Promise.resolve(false); }
+    return pvsTx('readwrite', function (tx) {
+      tx.objectStore(PVS_BLOB).put({ u: u, b: blob });
+      tx.objectStore(PVS_META).put({ u: u, ts: Date.now(), size: blob.size });
+    }).then(function () { return cacheTrim(); })['catch'](function () { return false; });
+  }
+
+  function cacheDel(u) {
+    if (!u) { return Promise.resolve(); }
+    return pvsTx('readwrite', function (tx) {
+      tx.objectStore(PVS_BLOB)['delete'](u);
+      tx.objectStore(PVS_META)['delete'](u);
+    })['catch'](function () {});
+  }
+
+  /* 总量超限时按 ts 从旧到新淘汰 */
+  function cacheTrim() {
+    return pvsTx('readwrite', function (tx) {
+      var metaOS = tx.objectStore(PVS_META);
+      var blobOS = tx.objectStore(PVS_BLOB);
+      var entries = [];
+      var req = metaOS.index('ts').openCursor();
+      req.onsuccess = function () {
+        var c = req.result;
+        if (c) { entries.push({ u: c.value.u, size: c.value.size || 0 }); c['continue'](); return; }
+        var total = entries.reduce(function (s, e) { return s + e.size; }, 0);
+        var i = 0;
+        while (total > PVS_LIMIT && i < entries.length) {
+          total -= entries[i].size;
+          blobOS['delete'](entries[i].u);
+          metaOS['delete'](entries[i].u);
+          i++;
+        }
+      };
+    })['catch'](function () {});
+  }
 
   /* ------------------------------ 缩略图 ------------------------------ */
   function makeThumb(blob) {
@@ -1333,7 +1432,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     for (var i = 0; i < state.items.length; i += 1) {
       if (state.items[i].id === rec.id) { local = state.items[i]; break; }
     }
-    if (rec.del) { return local ? Store.remove(rec.id) : Promise.resolve(); }
+    if (rec.del) {
+      if (local && local.remoteUrl) { cacheDel(local.remoteUrl); }
+      return local ? Store.remove(rec.id) : Promise.resolve();
+    }
     if (local) {
       if ((rec.v || 0) <= (local.updatedAt || 0)) { return Promise.resolve(); }
       local.name = data.name || local.name;
@@ -1655,56 +1757,76 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       console.warn(error);
       setStatus('加载失败：图片可能无法跨域访问或地址失效', 'error');
     };
-    var doneMsg = function () {
+    var doneMsg = function (note) {
       setStatus('已加载 · ' + (item.w && item.h ? item.w + '×' + item.h + ' · ' : '') +
-        (item.blob ? fmtSize(item.size) : '已下载完整原图') +
+        (item.blob ? fmtSize(item.size) : (note || '已下载完整原图')) +
         (item.remoteUrl ? ' · ☁ 已上传' : '') +
         ' · 第 ' + (state.viewerIndex + 1) + '/' + list.length + ' 张', 'success');
     };
 
     var pv = (!item.blob) ? pvUrlOf(publicUrlOf(item)) : '';
     if (!item.blob && /^https?:\/\//i.test(source)) {
-      /* 云端照片：低清图先出画面，原图带百分比下载完再渐变切换 */
+      /* 云端照片：有本地缓存直接秒出；没有则低清图先出画面，原图带百分比下载完再渐变切换 */
       var myIndex = index;
-      setStatus('准备加载…', 'idle');
-      pvExists(pv).then(function (ok) {
-        if (state.viewerIndex !== myIndex) { return null; }
-        if (!ok || !pv) { return { skipPv: true }; }  /* 低清图缺失：直接带百分比下原图，不再干等 */
-        return fetchPanoramaWithProgress(pv, function (p, loaded) {
-          if (state.viewerIndex === myIndex) { setStatus('低清加载 ' + Math.round(p * 100) + '% · ' + fmtSize(loaded), 'idle'); }
-        }).then(function (blob) {
+      var ck = pv ? source : '';   /* 只缓存本服务器图床直链 */
+      var startCloud = function () {
+        setStatus('准备加载…', 'idle');
+        return pvExists(pv).then(function (ok) {
           if (state.viewerIndex !== myIndex) { return null; }
-          releaseViewerUrl();
-          state.viewerUrl = URL.createObjectURL(blob);
-          return ensureViewer(state.viewerUrl).then(function () {
-            return state.viewerIndex === myIndex ? { pvReady: true } : null;
+          if (!ok || !pv) { return { skipPv: true }; }  /* 低清图缺失：直接带百分比下原图，不再干等 */
+          return fetchPanoramaWithProgress(pv, function (p, loaded) {
+            if (state.viewerIndex === myIndex) { setStatus('低清加载 ' + Math.round(p * 100) + '% · ' + fmtSize(loaded), 'idle'); }
+          }).then(function (blob) {
+            if (state.viewerIndex !== myIndex) { return null; }
+            releaseViewerUrl();
+            state.viewerUrl = URL.createObjectURL(blob);
+            return ensureViewer(state.viewerUrl).then(function () {
+              return state.viewerIndex === myIndex ? { pvReady: true } : null;
+            });
           });
-        });
-      }).then(function (phase) {
-        if (!phase || state.viewerIndex !== myIndex) { return; }
-        var label = phase.pvReady ? '低清预览 · 高清原图 ' : '高清原图 ';
-        return fetchPanoramaWithProgress(source, function (p, loaded, total) {
-          if (state.viewerIndex === myIndex) {
-            setStatus(label + Math.round(p * 100) + '% · ' + fmtSize(loaded) + '/' + fmtSize(total), 'idle');
+        }).then(function (phase) {
+          if (!phase || state.viewerIndex !== myIndex) { return; }
+          var label = phase.pvReady ? '低清预览 · 高清原图 ' : '高清原图 ';
+          return fetchPanoramaWithProgress(source, function (p, loaded, total) {
+            if (state.viewerIndex === myIndex) {
+              setStatus(label + Math.round(p * 100) + '% · ' + fmtSize(loaded) + '/' + fmtSize(total), 'idle');
+            }
+          }).then(function (blob) {
+            if (state.viewerIndex !== myIndex) { return; }
+            if (ck) { cachePut(ck, blob); }   /* 看过即缓存，下次秒开 */
+            releaseViewerUrl();
+            state.viewerUrl = URL.createObjectURL(blob);
+            return state.viewer.setPanorama(state.viewerUrl, { transition: 900, showLoader: false });
+          }).then(function () {
+            if (state.viewerIndex !== myIndex) { return; }
+            doneMsg(ck ? '原图已存本地缓存，再开秒出' : '');
+          });
+        })['catch'](function (error) {
+          console.warn(error);
+          /* XHR 被跨域策略等拦截：退回让 PSV 直连 URL（无百分比，但不比旧版差） */
+          if (state.viewer && state.viewerIndex === myIndex) {
+            state.viewer.setPanorama(source).then(doneMsg)['catch'](failMsg);
+          } else {
+            ensureViewer(source).then(doneMsg)['catch'](failMsg);
           }
-        }).then(function (blob) {
-          if (state.viewerIndex !== myIndex) { return; }
-          releaseViewerUrl();
-          state.viewerUrl = URL.createObjectURL(blob);
-          return state.viewer.setPanorama(state.viewerUrl, { transition: 900, showLoader: false });
-        }).then(function () {
-          if (state.viewerIndex !== myIndex) { return; }
-          doneMsg();
         });
-      })['catch'](function (error) {
-        console.warn(error);
-        /* XHR 被跨域策略等拦截：退回让 PSV 直连 URL（无百分比，但不比旧版差） */
-        if (state.viewer && state.viewerIndex === myIndex) {
-          state.viewer.setPanorama(source).then(doneMsg)['catch'](failMsg);
-        } else {
-          ensureViewer(source).then(doneMsg)['catch'](failMsg);
-        }
-      });
+      };
+      if (ck) {
+        cacheGet(ck).then(function (cached) {
+          if (state.viewerIndex !== myIndex) { return; }
+          if (!cached) { startCloud(); return; }
+          releaseViewerUrl();
+          state.viewerUrl = URL.createObjectURL(cached);
+          return ensureViewer(state.viewerUrl).then(function () {
+            if (state.viewerIndex !== myIndex) { return; }
+            setStatus('已加载 · 本地缓存秒开 · ' + (item.w && item.h ? item.w + '×' + item.h + ' · ' : '') +
+              fmtSize(cached.size) + (item.remoteUrl ? ' · ☁ 已上传' : '') +
+              ' · 第 ' + (state.viewerIndex + 1) + '/' + list.length + ' 张', 'success');
+          });
+        })['catch'](function () { startCloud(); });
+      } else {
+        startCloud();
+      }
     } else {
       ensureViewer(source).then(doneMsg)['catch'](failMsg);
     }
@@ -2109,6 +2231,8 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
               if (alsoRemote && it.remoteName) { tasks.push(deleteRemote(it)); }
               tasks.push(cloudDelete(it));
               tasks.push(Store.remove(it.id));
+              var purl = it.remoteUrl || (it.source === 'url' ? it.url : '');
+              if (purl) { cacheDel(purl); }   /* 本地原图缓存一并清理 */
               return Promise.all(tasks);
             };
           });
