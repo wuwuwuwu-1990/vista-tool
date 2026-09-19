@@ -311,7 +311,7 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
   <div class="brand">
     <div class="brand__icon">360</div>
     <div class="brand__text">
-      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.1.0</span></div>
+      <div class="brand__title">在线浏览全景照片 <span class="ver" id="verChip">v1.1.1</span></div>
       <div class="brand__sub">上传 · 服务器直链 · 预览 · 重命名 · 分享</div>
     </div>
   </div>
@@ -325,6 +325,10 @@ body.is-guest #vLink,body.is-guest #vShare{display:none!important}
     <button class="btn btn--primary" id="uploadBtn">上传照片</button>
     <button class="btn" id="cloudBtn">上传服务器</button>
     <button class="btn" id="addUrlBtn">添加直链</button>
+    <a class="btn" id="apkBtn" href="https://tool.wbc2023.top/pano-app.html" target="_blank" rel="noopener" title="安卓APP下载（安装包 v1.0.0）" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.66-.38l-1.87 3.24a11.4 11.4 0 0 0-9.82 0L5.22 5.92a.38.38 0 0 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>
+      安卓APP
+    </a>
     <button class="btn" id="syncBtn">同步</button>
   </div>
 </header>
@@ -444,7 +448,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 //# sourceMappingURL=/sm/dce078b95e47b9f85f89fa732221721ed1144911885d4726fb84316bf07db36f.map</script>
 <script>
 /* =========================================================================
-   在线浏览全景照片 · v1.1.0
+   在线浏览全景照片 · v1.1.1
    单文件 HTML：本地资源库（IndexedDB）+ 全景查看（Photo Sphere Viewer 4.8.1）
    + 阿里云服务器图床上传（公网直链）+ 资源库云端同步（/sync 记录级合并）
    + 分享直链 / 自包含分享页导出 + 打开图片即看
@@ -453,7 +457,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.1.0';
+  var APP_VERSION = '1.1.1';
   var APP_NAME = '在线浏览全景照片';
   var DB_NAME = 'pano-library';
   var STORE = 'items';
