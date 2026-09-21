@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>施工用电负荷计算书 v1.0.3</title>
+<title>施工用电负荷计算书 v1.0.4</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316a34a'/%3E%3Cpath d='M36 8 18 36h12l-4 20 22-30H34l6-18z' fill='%23fde047'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -46,30 +46,80 @@
   }
   .dd-menu button.pitem:hover{background:#f0fdf4; color:var(--primary-2);}
   .dd-menu button.pitem span{color:var(--muted);}
-  .cm-box{width:360px; padding:10px; max-height:420px;}
-  .cm-head{font-size:13px; color:var(--primary-2); font-weight:600; margin-bottom:8px; display:flex; justify-content:space-between;}
-  .cm-head span{font-weight:400; color:var(--muted); font-size:12px;}
-  .cm-save{display:flex; gap:6px; margin-bottom:8px;}
+  /* ===== 云端同步：模糊弹窗（仿施工计划图软件） ===== */
+  .cm-mask{
+    position:fixed; inset:0; background:rgba(6,26,14,.42); z-index:8000; display:none;
+    align-items:center; justify-content:center; padding:18px;
+    backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);
+  }
+  .cm-mask.show{display:flex;}
+  .cm-box{
+    display:flex; flex-direction:column; width:min(600px,100%); max-height:88vh; overflow:hidden; color:var(--text);
+    background:linear-gradient(165deg,rgba(255,255,255,.95) 0%,rgba(244,252,246,.9) 55%,rgba(232,248,237,.86) 100%);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.85); border-radius:18px;
+    box-shadow:0 4px 12px rgba(15,60,30,.08), 0 24px 72px -18px rgba(15,60,30,.45), inset 0 1px 0 #fff;
+    animation:cmpop .18s ease;
+  }
+  @keyframes cmpop{from{opacity:0; transform:scale(.96) translateY(6px);} to{opacity:1; transform:none;}}
+  .cm-head{
+    display:flex; align-items:center; gap:8px; padding:15px 18px 13px;
+    border-bottom:1px dashed rgba(22,163,74,.35); font-size:15px; font-weight:700; color:var(--primary-2);
+  }
+  .cm-head .cm-t{flex:1;}
+  .cm-head .cm-hint{font-size:11.5px; color:var(--muted); font-weight:500; white-space:nowrap;}
+  .cm-x{
+    width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.85); border:1px solid var(--line);
+    color:var(--primary-2); cursor:pointer; font-size:13px; line-height:1; flex:none;
+    display:flex; align-items:center; justify-content:center; transition:all .15s;
+  }
+  .cm-x:hover{background:var(--primary); color:#fff; border-color:var(--primary);}
+  .cm-body{padding:14px 18px 16px; overflow-y:auto;}
+  .cm-save{display:flex; gap:8px;}
   .cm-save input{
-    flex:1; font-family:inherit; font-size:13px; padding:6px 9px;
-    border:1px solid var(--line); border-radius:8px; background:#fbfefb;
+    flex:1; min-width:0; font-family:inherit; font-size:13.5px; padding:9px 12px;
+    border:1.5px solid var(--line); border-radius:10px; background:rgba(255,255,255,.92); outline:none;
   }
+  .cm-save input:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(22,163,74,.15);}
   .cm-savebtn{
-    font-family:inherit; font-size:13px; padding:6px 12px; border:none; border-radius:8px;
-    background:var(--primary); color:#fff; cursor:pointer; white-space:nowrap;
+    flex:none; font-family:inherit; font-size:13px; padding:9px 16px; border:none; border-radius:10px; cursor:pointer;
+    background:linear-gradient(180deg,#22c55e,#15803d); color:#fff;
+    box-shadow:0 3px 0 #106b32, 0 6px 14px rgba(21,128,61,.25); transition:all .12s;
   }
-  .cd-list{max-height:250px; overflow:auto;}
-  .cd-empty{font-size:12px; color:var(--muted); text-align:center; padding:14px 0;}
-  .cd-row{display:flex; align-items:center; gap:6px; padding:6px 4px; border-bottom:1px dashed var(--line);}
-  .cd-nm{flex:1; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .cd-tm{font-size:11px; color:var(--muted); white-space:nowrap;}
+  .cm-savebtn:active{transform:translateY(2px); box-shadow:0 1px 0 #106b32;}
+  .cm-sub{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin:14px 2px 6px;}
+  .cd-list{max-height:44vh; overflow-y:auto;}
+  .cd-row{display:flex; align-items:center; gap:8px; padding:9px 6px; border-bottom:1px solid rgba(22,163,74,.14); font-size:13px;}
+  .cd-row:last-child{border-bottom:none;}
+  .cd-nm{flex:1; min-width:0; font-weight:600; word-break:break-all;}
+  .cd-tm{color:var(--muted); font-size:11.5px; white-space:nowrap;}
   .cd-btn{
-    font-family:inherit; font-size:11px; padding:3px 8px; border:1px solid var(--line);
-    background:#f8faf8; color:var(--primary-2); border-radius:6px; cursor:pointer;
+    flex:none; font-family:inherit; font-size:12.5px; padding:5px 11px; border:1px solid var(--line);
+    background:rgba(255,255,255,.9); color:var(--primary-2); border-radius:9px; cursor:pointer; transition:all .15s;
   }
-  .cd-btn:hover{background:#dcfce7;}
-  .cd-btn.del{color:var(--warn);}
-  .cm-foot{font-size:11px; color:var(--muted); margin-top:6px; text-align:right;}
+  .cd-btn:hover{border-color:var(--primary); background:#fff;}
+  .cd-btn.del{color:var(--warn); border-color:#f0cbc8;}
+  .cd-btn.del:hover{border-color:var(--warn);}
+  .cd-empty{font-size:13px; color:var(--muted); text-align:center; padding:18px 0;}
+  .cm-foot{font-size:11.5px; color:var(--muted); padding-top:10px; text-align:right;}
+  .cm-rbox{width:min(460px,100%);}
+  .cm-rlabel{font-size:13px; color:var(--muted); margin:2px 2px 10px; word-break:break-all; line-height:1.6;}
+  .cm-inp{
+    width:100%; font-family:inherit; font-size:15px; padding:11px 13px;
+    border:1.5px solid var(--line); border-radius:11px; background:rgba(255,255,255,.95); outline:none;
+  }
+  .cm-inp:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(22,163,74,.15);}
+  .cm-raction{display:flex; gap:10px; justify-content:flex-end; margin-top:16px;}
+  .cm-cbtn{
+    font-family:inherit; font-size:13.5px; padding:9px 18px; border-radius:10px; cursor:pointer;
+    border:1px solid var(--line); background:rgba(255,255,255,.9); color:var(--text);
+  }
+  .cm-cbtn:hover{border-color:var(--muted);}
+  .cm-cbtn.ok{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none; box-shadow:0 3px 0 #106b32;}
+  .cm-cbtn.danger{background:linear-gradient(180deg,#f87171,#dc2626); color:#fff; border:none; box-shadow:0 3px 0 #991b1b;}
+  .cm-deltxt{font-size:14px; line-height:1.9;}
+  .cm-deltxt b{color:var(--warn); word-break:break-all;}
+  .cm-deltxt .sub{display:block; font-size:12.5px; color:var(--muted); margin-top:4px;}
   .wrap{
     width:100%; max-width:none; padding:16px 18px 40px;
     display:grid; grid-template-columns:minmax(560px,1fr) minmax(430px,.92fr);
@@ -184,24 +234,13 @@
 <body>
 
 <div class="toolbar">
-  <div class="brand"><span class="logo">⚡</span><b>施工用电负荷计算书</b><span class="ver">v1.0.3</span></div>
+  <div class="brand"><span class="logo">⚡</span><b>施工用电负荷计算书</b><span class="ver">v1.0.4</span></div>
   <div class="dd">
     <button type="button" onclick="togglePresetMenu(event)">➕ 常用设备 ▾</button>
     <div class="dd-menu" id="presetMenu"></div>
   </div>
   <button onclick="addRow()">➕ 添加设备</button>
-  <div class="dd">
-    <button type="button" onclick="toggleCloudMenu(event)">☁️ 云端计算书 ▾</button>
-    <div class="dd-menu cm-box" id="cloudMenu">
-      <div class="cm-head">☁️ 云端计算书模板 <span id="cloudHint"></span></div>
-      <div class="cm-save">
-        <input id="cloudName" placeholder="输入计算书名称，如：××项目用电方案">
-        <button type="button" class="cm-savebtn" onclick="cloudSave()">保存当前</button>
-      </div>
-      <div class="cd-list" id="cloudList"><div class="cd-empty">打开即同步云端…</div></div>
-      <div class="cm-foot" id="cloudFoot"></div>
-    </div>
-  </div>
+  <button type="button" onclick="cloudOpen()">☁️ 云端同步</button>
   <button onclick="clearAll()" class="danger">🗑 清空</button>
   <button onclick="exportWord()" class="primary">📄 导出Word计算书</button>
   <button onclick="showAbout()">关于</button>
@@ -327,13 +366,87 @@
 <div class="mask" id="aboutMask">
   <div class="about">
     <h2>⚡ 施工用电负荷计算书</h2>
-    <p><b>版本：</b>v1.0.3</p>
+    <p><b>版本：</b>v1.0.4</p>
     <p><b>功能：</b>输入施工现场机械设备及额定功率，按需要系数法自动完成额定功率之和、有功计算负荷、视在计算负荷、总计算电流计算，自动选配电缆并生成计算书，可一键导出 Word。</p>
     <p><b>电缆选型参数：</b>芯数（单芯/三芯/四芯/五芯）、导体材质（铜芯/铝芯）、绝缘类型（XLPE 交联聚乙烯 / PVC 聚氯乙烯）、环境温度修正；载流量数据参照《工业与民用供配电设计手册》第四版 / IEC 60364-5-523（30℃空气中），N 线及 PE 线截面按 GB/T 12706 配比自动匹配。</p>
     <p><b>依据：</b>《建筑与市政工程施工现场临时用电安全技术标准》JGJ/T 46-2024；《电力工程电缆设计标准》GB 50217-2018。</p>
-    <p><b>云端同步：</b>整套计算参数可命名保存到云端（srv.wbc2023.top），跨设备随时导入复用。</p>
+    <p><b>云端同步：</b>点击工具栏「☁️ 云端同步」打开弹窗，可命名保存当前计算书到云端（srv.wbc2023.top），列表内支持<b>导入 / 重命名 / 删除</b>，跨设备随时复用。</p>
     <p><b>说明：</b>工程名称、编制人、编制日期可留空 —— 留空时计算书中对应项自动隐藏（导出 Word 同样生效）。数据同时自动保存在本机浏览器；计算结果供方案编制参考，应以现场实际与规范复核为准。</p>
     <button onclick="hideAbout()">知道了</button>
+  </div>
+</div>
+
+<!-- 云端同步弹窗（模糊玻璃，仿施工计划图软件） -->
+<div class="cm-mask" id="cloudMask" onclick="cloudClose(event)">
+  <div class="cm-box">
+    <div class="cm-head">
+      <span class="cm-t">☁️ 云端计算书同步</span>
+      <span class="cm-hint" id="cloudHint"></span>
+      <button type="button" class="cm-x" onclick="cloudClose()" title="关闭">✕</button>
+    </div>
+    <div class="cm-body">
+      <div class="cm-save">
+        <input id="cloudName" placeholder="输入计算书名称，如：××项目用电方案">
+        <button type="button" class="cm-savebtn" onclick="cloudSave()">保存当前</button>
+      </div>
+      <div class="cm-sub"><span>云端计算书列表</span><span>导入 / 重命名 / 删除</span></div>
+      <div class="cd-list" id="cloudList"><div class="cd-empty">打开即同步云端…</div></div>
+      <div class="cm-foot" id="cloudFoot">☁️ HTTPS 云同步 · 跨设备互通</div>
+    </div>
+  </div>
+</div>
+
+<!-- 重命名弹窗 -->
+<div class="cm-mask" id="renameMask" style="z-index:8100" onclick="cloudRenameHide(event)">
+  <div class="cm-box cm-rbox">
+    <div class="cm-head">
+      <span class="cm-t">✏️ 重命名计算书</span>
+      <button type="button" class="cm-x" onclick="cloudRenameHide()" title="关闭">✕</button>
+    </div>
+    <div class="cm-body">
+      <div class="cm-rlabel" id="renameOld"></div>
+      <input class="cm-inp" id="renameInput" maxlength="40" placeholder="输入新名称">
+      <div class="cm-raction">
+        <button type="button" class="cm-cbtn" onclick="cloudRenameHide()">取消</button>
+        <button type="button" class="cm-cbtn ok" onclick="cloudRenameOk()">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="cm-mask" id="delMask" style="z-index:8100" onclick="cloudDelHide(event)">
+  <div class="cm-box cm-rbox">
+    <div class="cm-head">
+      <span class="cm-t">🗑 删除计算书</span>
+      <button type="button" class="cm-x" onclick="cloudDelHide()" title="关闭">✕</button>
+    </div>
+    <div class="cm-body">
+      <div class="cm-deltxt">确认删除云端计算书 <b id="delName"></b> ？
+        <span class="sub">删除后不可恢复（仅删除云端副本，本机数据不受影响）。</span>
+      </div>
+      <div class="cm-raction">
+        <button type="button" class="cm-cbtn" onclick="cloudDelHide()">取消</button>
+        <button type="button" class="cm-cbtn danger" onclick="cloudDelOk()">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 通用确认弹窗（敏感操作，模糊玻璃） -->
+<div class="cm-mask" id="askMask" style="z-index:8200" onclick="askHide(event)">
+  <div class="cm-box cm-rbox">
+    <div class="cm-head">
+      <span class="cm-t" id="askTitle">确认操作</span>
+      <button type="button" class="cm-x" onclick="askHide()" title="关闭">✕</button>
+    </div>
+    <div class="cm-body">
+      <div class="cm-deltxt" id="askText"></div>
+      <div class="cm-raction">
+        <button type="button" class="cm-cbtn" onclick="askHide()">取消</button>
+        <button type="button" class="cm-cbtn danger" id="askOkBtn" onclick="askOk()">确定</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -616,7 +729,7 @@ function exportWord(){
     'h1{font-family:"黑体",SimHei,sans-serif; font-size:16.0pt; text-align:center; letter-spacing:2pt; font-weight:bold; margin:0 0 6pt 0;}' +
     '.rt{text-align:center; margin-bottom:12pt;}' +
     '.rt .sub{font-size:10.5pt; color:#444;}' +
-    'sub{font-size:70%; vertical-align:sub;}' +
+    'sub{font-size:16.0pt; vertical-align:sub;}' +   /* 下标文字＝三号（16pt） */
     '.sec{font-family:"黑体",SimHei,sans-serif; font-size:12.0pt; font-weight:bold; margin:9pt 0 4pt 0;}' +
     'p{font-size:12.0pt; margin:3pt 0;}' +
     '.dev{font-size:12.0pt; margin:1pt 0 1pt 12pt;}' +
@@ -665,12 +778,16 @@ function cloudFmt(v){
   var d = new Date(v); if(isNaN(d.getTime())) return '';
   return (d.getMonth()+1) + '-' + d.getDate() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
 }
-function toggleCloudMenu(ev){
-  ev.stopPropagation();
-  var m = $('cloudMenu'), willShow = !m.classList.contains('show');
-  document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); });
-  m.classList.toggle('show', willShow);
-  if(willShow){ $('cloudFoot').textContent = '☁️ HTTPS 云同步已启用'; cloudRefresh(); }
+/* ---- 弹窗开关（模糊弹窗） ---- */
+function cloudOpen(){
+  $('cloudFoot').textContent = '☁️ HTTPS 云同步 · 跨设备互通';
+  $('cloudMask').classList.add('show');
+  cloudRefresh();
+  setTimeout(function(){ var i = $('cloudName'); if(i) i.focus(); }, 120);
+}
+function cloudClose(ev){
+  if(ev && ev.target && ev.target !== ev.currentTarget) return;   // 点面板内部不关闭
+  $('cloudMask').classList.remove('show');
 }
 var cloudCache = [];
 function cloudRefresh(){
@@ -741,34 +858,78 @@ function cloudImport(id){
   try{
     colRestore(rc.data);
     $('cloudName').value = (rc.data && rc.data.name) || id;
-    $('cloudMenu').classList.remove('show');
+    $('cloudMask').classList.remove('show');
     toast('已导入云端计算书：' + ((rc.data && rc.data.name) || id));
   }catch(e){ toast('导入失败：' + (e.message || e)); }
 }
+/* ---- 重命名（模糊弹窗） ---- */
+var cloudRenameTarget = null;
+function cloudFind(id){
+  for(var i=0;i<cloudCache.length;i++){ if(cloudCache[i].id === id) return cloudCache[i]; }
+  return null;
+}
 function cloudRename(id){
-  var rc = null;
-  for(var i=0;i<cloudCache.length;i++){ if(cloudCache[i].id === id){ rc = cloudCache[i]; break; } }
+  var rc = cloudFind(id);
   var oldName = (rc && rc.data && rc.data.name) || id;
-  var nn = prompt('重命名计算书：', oldName);
-  if(nn == null) return;
-  nn = nn.trim();
-  if(!nn || nn === oldName) return;
+  cloudRenameTarget = id;
+  $('renameOld').textContent = '原名称：' + oldName;
+  var inp = $('renameInput');
+  inp.value = oldName;
+  $('renameMask').classList.add('show');
+  setTimeout(function(){ inp.focus(); inp.select(); }, 100);
+}
+function cloudRenameHide(ev){
+  if(ev && ev.target && ev.target !== ev.currentTarget) return;
+  $('renameMask').classList.remove('show');
+  cloudRenameTarget = null;
+}
+function cloudRenameOk(){
+  var inp = $('renameInput'), nn = inp.value.trim(), id = cloudRenameTarget;
+  if(!id) return;
+  var rc = cloudFind(id);
+  var oldName = (rc && rc.data && rc.data.name) || id;
+  if(!nn){ toast('名称不能为空'); inp.focus(); return; }
+  if(nn === oldName){ cloudRenameHide(); return; }
+  if(cloudFind(nn)){ toast('已存在同名计算书「' + nn + '」'); inp.focus(); return; }
   var data = JSON.parse(JSON.stringify((rc && rc.data) || {}));
   data.name = nn;
   var v = Date.now();
   cloudHttp('push', 'POST', { records:[
     { id:nn, v:v, data:data, del:false },
     { id:id, v:v+1, data:null, del:true }
-  ]}).then(function(){ toast('已重命名为「' + nn + '」'); cloudRefresh(); })
-     .catch(function(e){ toast('重命名失败：' + (e.message || e)); });
+  ]}).then(function(){
+    $('renameMask').classList.remove('show');
+    cloudRenameTarget = null;
+    toast('已重命名为「' + nn + '」');
+    cloudRefresh();
+  }).catch(function(e){ toast('重命名失败：' + (e.message || e)); });
 }
+/* ---- 删除（模糊弹窗确认） ---- */
+var cloudDelTarget = null;
 function cloudDel(id){
-  var rc = null;
-  for(var i=0;i<cloudCache.length;i++){ if(cloudCache[i].id === id){ rc = cloudCache[i]; break; } }
+  var rc = cloudFind(id);
   var nm = (rc && rc.data && rc.data.name) || id;
-  if(!confirm('确认删除云端计算书「' + nm + '」？')) return;
+  cloudDelTarget = id;
+  $('delName').textContent = '「' + nm + '」';
+  $('delMask').classList.add('show');
+}
+function cloudDelHide(ev){
+  if(ev && ev.target && ev.target !== ev.currentTarget) return;
+  $('delMask').classList.remove('show');
+  cloudDelTarget = null;
+}
+function cloudDelOk(){
+  var id = cloudDelTarget;
+  if(!id) return;
+  var rc = cloudFind(id);
+  var nm = (rc && rc.data && rc.data.name) || id;
   cloudHttp('push', 'POST', { records:[{ id:id, v:Date.now(), data:null, del:true }] })
-    .then(function(){ toast('已删除「' + nm + '」'); cloudRefresh(); })
+    .then(function(){
+      $('delMask').classList.remove('show');
+      cloudDelTarget = null;
+      toast('已删除「' + nm + '」');
+      cloudRefresh();
+    })
     .catch(function(e){ toast('删除失败：' + (e.message || e)); });
 }
 
@@ -797,11 +958,34 @@ function loadLocal(){
   return false;
 }
 function clearAll(){
-  if(!confirm('确定清空所有设备与参数？')) return;
+  askConfirm('清空全部数据', '确定清空所有设备与参数？（本机数据将被重置为默认示例）', '确认清空', doClearAll);
+}
+function doClearAll(){
   $('eqBody').innerHTML='';
   $('projName').value=''; $('editor').value='';
   addRow('冲击成孔钻机', 45, 1, 'd'); addLightRow();
   sync();
+}
+
+/* ---- 通用确认弹窗（模糊） ---- */
+var askCb = null;
+function askConfirm(title, text, okText, cb){
+  $('askTitle').textContent = title;
+  $('askText').textContent = text;
+  $('askOkBtn').textContent = okText || '确定';
+  askCb = cb;
+  $('askMask').classList.add('show');
+}
+function askHide(ev){
+  if(ev && ev.target && ev.target !== ev.currentTarget) return;
+  $('askMask').classList.remove('show');
+  askCb = null;
+}
+function askOk(){
+  var f = askCb;
+  askCb = null;
+  $('askMask').classList.remove('show');
+  if(typeof f === 'function') f();
 }
 
 /* ================= 关于 ================= */
@@ -824,7 +1008,15 @@ document.addEventListener('click', function(e){
   }
 });
 document.addEventListener('keydown', function(e){
-  if(e.key === 'Escape'){ document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); }); hideAbout(); }
+  if(e.key === 'Escape'){
+    document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); });
+    hideAbout();
+    // 模糊弹窗逐层关闭：先子弹窗，再主弹窗
+    if($('askMask').classList.contains('show')){ askHide(); return; }
+    if($('renameMask').classList.contains('show')){ cloudRenameHide(); return; }
+    if($('delMask').classList.contains('show')){ cloudDelHide(); return; }
+    if($('cloudMask').classList.contains('show')){ cloudClose(); return; }
+  }
 });
 
 /* ================= 初始化 ================= */
