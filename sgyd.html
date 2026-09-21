@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>施工用电负荷计算书 v1.0.3</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316a34a'/%3E%3Cpath d='M36 8 18 36h12l-4 20 22-30H34l6-18z' fill='%23fde047'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#eef5ee; --card:#ffffff; --line:#d9e8db;
+    --primary:#16a34a; --primary-2:#15803d; --accent:#4ade80;
+    --text:#1f2937; --muted:#6b7280; --warn:#dc2626;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","SF Pro SC","SF Pro Text","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); font-size:14px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .toolbar{
+    position:sticky; top:0; z-index:100; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:10px 18px; background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 100%);
+    color:#fff; box-shadow:0 2px 8px rgba(22,163,74,.25);
+  }
+  .toolbar .brand{display:flex; align-items:center; gap:8px; margin-right:8px;}
+  .toolbar .brand .logo{font-size:20px;}
+  .toolbar .brand b{font-size:16px; letter-spacing:.5px;}
+  .toolbar .ver{font-size:11px; background:rgba(255,255,255,.22); border-radius:20px; padding:1px 9px;}
+  .toolbar button{
+    font-family:inherit; font-size:13px; padding:6px 13px; border:none; border-radius:8px; cursor:pointer;
+    background:rgba(255,255,255,.16); color:#fff; transition:background .15s;
+  }
+  .toolbar button:hover{background:rgba(255,255,255,.30);}
+  .toolbar button.primary{background:#fff; color:var(--primary-2); font-weight:600;}
+  .toolbar button.danger{background:#fecaca; color:#991b1b;}
+  .dd{position:relative; display:inline-block;}
+  .dd-menu{
+    display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:110;
+    background:#fff; color:var(--text); border:1px solid var(--line); border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.14); padding:6px; width:280px; max-height:360px; overflow:auto;
+  }
+  .dd-menu.show{display:block;}
+  .dd-menu button.pitem{
+    display:flex; justify-content:space-between; width:100%; text-align:left;
+    background:transparent; color:var(--text); padding:7px 10px; border-radius:6px; font-size:13px;
+  }
+  .dd-menu button.pitem:hover{background:#f0fdf4; color:var(--primary-2);}
+  .dd-menu button.pitem span{color:var(--muted);}
+  .cm-box{width:360px; padding:10px; max-height:420px;}
+  .cm-head{font-size:13px; color:var(--primary-2); font-weight:600; margin-bottom:8px; display:flex; justify-content:space-between;}
+  .cm-head span{font-weight:400; color:var(--muted); font-size:12px;}
+  .cm-save{display:flex; gap:6px; margin-bottom:8px;}
+  .cm-save input{
+    flex:1; font-family:inherit; font-size:13px; padding:6px 9px;
+    border:1px solid var(--line); border-radius:8px; background:#fbfefb;
+  }
+  .cm-savebtn{
+    font-family:inherit; font-size:13px; padding:6px 12px; border:none; border-radius:8px;
+    background:var(--primary); color:#fff; cursor:pointer; white-space:nowrap;
+  }
+  .cd-list{max-height:250px; overflow:auto;}
+  .cd-empty{font-size:12px; color:var(--muted); text-align:center; padding:14px 0;}
+  .cd-row{display:flex; align-items:center; gap:6px; padding:6px 4px; border-bottom:1px dashed var(--line);}
+  .cd-nm{flex:1; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cd-tm{font-size:11px; color:var(--muted); white-space:nowrap;}
+  .cd-btn{
+    font-family:inherit; font-size:11px; padding:3px 8px; border:1px solid var(--line);
+    background:#f8faf8; color:var(--primary-2); border-radius:6px; cursor:pointer;
+  }
+  .cd-btn:hover{background:#dcfce7;}
+  .cd-btn.del{color:var(--warn);}
+  .cm-foot{font-size:11px; color:var(--muted); margin-top:6px; text-align:right;}
+  .wrap{
+    width:100%; max-width:none; padding:16px 18px 40px;
+    display:grid; grid-template-columns:minmax(560px,1fr) minmax(430px,.92fr);
+    gap:16px; align-items:start;
+  }
+  .col-left{display:block; min-width:0;}
+  .col-right{position:sticky; top:64px; min-width:0;}
+  @media (max-width:1180px){
+    .wrap{grid-template-columns:1fr;}
+    .col-right{position:static;}
+  }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; margin-bottom:14px; box-shadow:0 1px 4px rgba(22,163,74,.06);
+  }
+  .card h2{font-size:15px; color:var(--primary-2); margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .card h2 .n{
+    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    background:var(--primary); color:#fff; border-radius:6px; font-size:12px;
+  }
+  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;}
+  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:4px;}
+  .field input,.field select{
+    width:100%; font-family:inherit; font-size:14px; padding:7px 10px;
+    border:1px solid var(--line); border-radius:8px; background:#fbfefb; color:var(--text);
+  }
+  .field input:focus,.field select:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(22,163,74,.12);}
+  table{width:100%; border-collapse:collapse;}
+  th,td{border:1px solid var(--line); padding:6px 8px; font-size:13px; text-align:center;}
+  th{background:#f0fdf4; color:var(--primary-2); font-weight:600; white-space:nowrap;}
+  td input,td select{
+    width:100%; font-family:inherit; font-size:13px; padding:5px 7px; text-align:center;
+    border:1px solid transparent; border-radius:6px; background:#fbfefb;
+  }
+  td input:focus,td select:focus{outline:none; border-color:var(--primary); background:#fff;}
+  td input[name="ename"]{text-align:left;}
+  td .del{color:var(--warn); cursor:pointer; font-weight:700; background:none; border:none; font-size:15px;}
+  tfoot td{background:#f0fdf4; font-weight:600;}
+  .addrow{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;}
+  .addrow button{
+    font-family:inherit; font-size:13px; padding:6px 14px; border-radius:8px; cursor:pointer;
+    border:1px dashed var(--primary); background:#f0fdf4; color:var(--primary-2);
+  }
+  .addrow button:hover{background:#dcfce7;}
+  .hint{font-size:12px; color:var(--muted); align-self:center;}
+  .result-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;}
+  .kpi{
+    background:linear-gradient(160deg,#f0fdf4,#ffffff); border:1px solid var(--line);
+    border-radius:12px; padding:10px 12px; text-align:center;
+  }
+  .kpi .lab{font-size:12px; color:var(--muted);}
+  .kpi .val{font-size:22px; font-weight:700; color:var(--primary-2); font-variant-numeric:tabular-nums;}
+  .kpi .val small{font-size:11px; font-weight:400; color:var(--muted);}
+  .kpi.hl{border-color:var(--primary); background:linear-gradient(160deg,#dcfce7,#ffffff);}
+  .cable-box{
+    margin-top:12px; padding:12px 16px; border-radius:12px; text-align:center;
+    background:linear-gradient(135deg,#16a34a,#15803d); color:#fff;
+  }
+  .cable-box .lab{font-size:12px; opacity:.85;}
+  .cable-box .val{font-size:20px; font-weight:700; letter-spacing:.5px; margin-top:2px; word-break:break-all;}
+  .cable-box .note{font-size:11px; opacity:.85; margin-top:4px;}
+  #reportCard{padding:0; overflow:hidden;}
+  .rc-bar{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 16px; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; font-size:13px;
+  }
+  .rc-bar b{font-size:14px;}
+  #reportScroll{max-height:calc(100vh - 150px); overflow:auto; padding:18px 20px; background:#fff;}
+  .report{max-width:100%;}
+  .report .rt{text-align:center; margin-bottom:14px;}
+  .report .rt h1{font-size:19px; letter-spacing:2px; color:#111; font-weight:700;}
+  .report .rt .sub{font-size:12px; color:var(--muted); margin-top:2px;}
+  sub{font-size:.72em; vertical-align:-.22em; line-height:0; font-style:normal;}
+  .report .sec{font-size:13.5px; font-weight:600; color:#111; margin:14px 0 6px;}
+  .report p{font-size:13px; margin:5px 0; color:#222;}
+  .report .dev{font-size:13px; margin:3px 0 3px 2px; color:#222;}
+  .report .formula{
+    background:#f7fbf7; border-left:3px solid var(--primary); border-radius:6px;
+    padding:7px 11px; font-size:13px; margin:6px 0; color:#1f2937; word-break:break-all;
+  }
+  .report .hr{border-top:1px dashed var(--line); margin:12px 0;}
+  .report .concl{
+    border:1px solid var(--line); background:#f0fdf4; border-radius:8px;
+    padding:10px 13px; font-size:13px; margin-top:10px; line-height:1.75;
+  }
+  .report .meta{display:flex; justify-content:space-between; font-size:13px; margin-top:26px; color:#111;}
+  .mask{display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center;}
+  .mask.show{display:flex;}
+  .about{
+    background:#fff; border-radius:16px; padding:26px 30px; width:440px; max-width:92vw;
+    box-shadow:0 20px 50px rgba(0,0,0,.25); text-align:center;
+  }
+  .about h2{color:var(--primary-2); margin-bottom:8px;}
+  .about p{font-size:13px; color:var(--muted); margin:4px 0; text-align:left;}
+  .about button{margin-top:14px; font-family:inherit; padding:7px 26px; border:none; border-radius:8px;
+    background:var(--primary); color:#fff; cursor:pointer; font-size:14px;}
+  #toast{
+    position:fixed; left:50%; bottom:42px; transform:translateX(-50%) translateY(20px);
+    background:rgba(31,41,55,.92); color:#fff; font-size:13px; padding:9px 18px; border-radius:10px;
+    opacity:0; pointer-events:none; transition:all .22s; z-index:300; max-width:80vw;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  @media print{
+    body{background:#fff;}
+    .toolbar,.col-left{display:none !important;}
+    .wrap{display:block; padding:0;}
+    .col-right{position:static;}
+    #reportScroll{max-height:none; overflow:visible; padding:0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="brand"><span class="logo">⚡</span><b>施工用电负荷计算书</b><span class="ver">v1.0.3</span></div>
+  <div class="dd">
+    <button type="button" onclick="togglePresetMenu(event)">➕ 常用设备 ▾</button>
+    <div class="dd-menu" id="presetMenu"></div>
+  </div>
+  <button onclick="addRow()">➕ 添加设备</button>
+  <div class="dd">
+    <button type="button" onclick="toggleCloudMenu(event)">☁️ 云端计算书 ▾</button>
+    <div class="dd-menu cm-box" id="cloudMenu">
+      <div class="cm-head">☁️ 云端计算书模板 <span id="cloudHint"></span></div>
+      <div class="cm-save">
+        <input id="cloudName" placeholder="输入计算书名称，如：××项目用电方案">
+        <button type="button" class="cm-savebtn" onclick="cloudSave()">保存当前</button>
+      </div>
+      <div class="cd-list" id="cloudList"><div class="cd-empty">打开即同步云端…</div></div>
+      <div class="cm-foot" id="cloudFoot"></div>
+    </div>
+  </div>
+  <button onclick="clearAll()" class="danger">🗑 清空</button>
+  <button onclick="exportWord()" class="primary">📄 导出Word计算书</button>
+  <button onclick="showAbout()">关于</button>
+</div>
+
+<div class="wrap">
+
+  <div class="col-left">
+
+    <div class="card">
+      <h2><span class="n">1</span>工程信息</h2>
+      <div class="grid2">
+        <div class="field"><label>工程名称</label><input id="projName" placeholder="如：××项目施工临时用电（留空则不显示）" oninput="sync()"></div>
+        <div class="field"><label>编制人</label><input id="editor" placeholder="编制人姓名" oninput="sync()"></div>
+        <div class="field"><label>编制日期</label><input id="edate" type="date" oninput="sync()"></div>
+        <div class="field"><label>供电电压（三相380V）</label>
+          <select id="voltage" onchange="sync()">
+            <option value="0.38" selected>380V（三相）</option>
+            <option value="0.22">220V（单相）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">2</span>用电设备清单（额定功率 × 数量）</h2>
+      <table id="eqTable">
+        <thead>
+          <tr>
+            <th style="width:44px">序号</th>
+            <th>设备名称</th>
+            <th style="width:120px">额定功率(kW)</th>
+            <th style="width:80px">数量</th>
+            <th style="width:100px">用电类别</th>
+            <th style="width:100px">小计(kW)</th>
+            <th style="width:40px">删</th>
+          </tr>
+        </thead>
+        <tbody id="eqBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5">合计</td>
+            <td id="totalPe">0.00</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="addrow">
+        <button onclick="addRow()">＋ 空行</button>
+        <button onclick="addLightRow()">＋ 照明用电行</button>
+        <span class="hint">提示：点击顶部「常用设备」可一键带入典型施工机械设备</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">3</span>计算参数</h2>
+      <div class="grid2">
+        <div class="field"><label>动力需要系数 K<sub>1</sub>（常用 0.6）</label><input id="k1" type="number" step="0.05" min="0" max="1" value="0.6" oninput="sync()"></div>
+        <div class="field"><label>照明需要系数 K<sub>2</sub>（常用 0.9）</label><input id="k2" type="number" step="0.05" min="0" max="1" value="0.9" oninput="sync()"></div>
+        <div class="field"><label>功率因数 cosφ（常用 0.85）</label><input id="cosfi" type="number" step="0.01" min="0.1" max="1" value="0.85" oninput="sync()"></div>
+        <div class="field"><label>电缆芯数</label>
+          <select id="cores" onchange="sync()">
+            <option value="1">单芯（1×S，三相需3根）</option>
+            <option value="3">三芯（3×S）</option>
+            <option value="4">四芯（3×S+1×N）</option>
+            <option value="5" selected>五芯（3×S+2×N）</option>
+          </select>
+        </div>
+        <div class="field"><label>导体材质</label>
+          <select id="material" onchange="sync()">
+            <option value="copper" selected>铜芯（Cu）</option>
+            <option value="aluminum">铝芯（Al）</option>
+          </select>
+        </div>
+        <div class="field"><label>绝缘类型</label>
+          <select id="insulation" onchange="sync()">
+            <option value="xlpe" selected>交联聚乙烯 XLPE（YJV，90℃）</option>
+            <option value="pvc">聚氯乙烯 PVC（VV，70℃）</option>
+          </select>
+        </div>
+        <div class="field"><label>环境温度修正（空气中敷设）</label>
+          <select id="ambtemp" onchange="sync()">
+            <option value="1.00" selected>30℃（系数 1.00）</option>
+            <option value="0.94">35℃（系数 0.94）</option>
+            <option value="0.87">40℃（系数 0.87）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">4</span>计算结果（实时）</h2>
+      <div class="result-grid">
+        <div class="kpi"><div class="lab">动力设备额定功率之和</div><div class="val" id="rPd">0<small> kW</small></div></div>
+        <div class="kpi"><div class="lab">照明额定功率之和</div><div class="val" id="rPl">0<small> kW</small></div></div>
+        <div class="kpi"><div class="lab">有功计算负荷 P<sub>js</sub></div><div class="val" id="rPjs">0<small> kW</small></div></div>
+        <div class="kpi"><div class="lab">视在计算负荷 S<sub>js</sub></div><div class="val" id="rSjs">0<small> kVA</small></div></div>
+        <div class="kpi hl"><div class="lab">总计算电流 I<sub>js</sub></div><div class="val" id="rIjs">0<small> A</small></div></div>
+      </div>
+      <div class="cable-box">
+        <div class="lab">推荐总干线电缆</div>
+        <div class="val" id="rCable">—</div>
+        <div class="note" id="rCableNote"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-right">
+    <div class="card" id="reportCard">
+      <div class="rc-bar">
+        <b>📋 施工用电负荷计算书</b>
+        <span id="reportState">实时生成</span>
+      </div>
+      <div id="reportScroll">
+        <div class="report" id="reportHtml"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="mask" id="aboutMask">
+  <div class="about">
+    <h2>⚡ 施工用电负荷计算书</h2>
+    <p><b>版本：</b>v1.0.3</p>
+    <p><b>功能：</b>输入施工现场机械设备及额定功率，按需要系数法自动完成额定功率之和、有功计算负荷、视在计算负荷、总计算电流计算，自动选配电缆并生成计算书，可一键导出 Word。</p>
+    <p><b>电缆选型参数：</b>芯数（单芯/三芯/四芯/五芯）、导体材质（铜芯/铝芯）、绝缘类型（XLPE 交联聚乙烯 / PVC 聚氯乙烯）、环境温度修正；载流量数据参照《工业与民用供配电设计手册》第四版 / IEC 60364-5-523（30℃空气中），N 线及 PE 线截面按 GB/T 12706 配比自动匹配。</p>
+    <p><b>依据：</b>《建筑与市政工程施工现场临时用电安全技术标准》JGJ/T 46-2024；《电力工程电缆设计标准》GB 50217-2018。</p>
+    <p><b>云端同步：</b>整套计算参数可命名保存到云端（srv.wbc2023.top），跨设备随时导入复用。</p>
+    <p><b>说明：</b>工程名称、编制人、编制日期可留空 —— 留空时计算书中对应项自动隐藏（导出 Word 同样生效）。数据同时自动保存在本机浏览器；计算结果供方案编制参考，应以现场实际与规范复核为准。</p>
+    <button onclick="hideAbout()">知道了</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= 常用设备预设 ================= */
+var PRESETS = [
+  {n:'冲击成孔钻机', p:45}, {n:'旋挖钻机', p:90}, {n:'泥浆泵', p:7.5},
+  {n:'钢筋切断机', p:3}, {n:'钢筋弯曲机', p:3}, {n:'钢筋调直切断机', p:9},
+  {n:'直螺纹套丝机', p:4}, {n:'交流弧焊电焊机', p:11}, {n:'对焊机', p:100},
+  {n:'空压机', p:37}, {n:'冲击电镐', p:1.75}, {n:'混凝土输送泵', p:45},
+  {n:'插入式振动器', p:1.5}, {n:'平板振动器', p:2.2}, {n:'蛙式打夯机', p:3},
+  {n:'木工圆锯', p:4}, {n:'卷扬机', p:7.5}, {n:'塔式起重机', p:30},
+  {n:'施工电梯', p:22}, {n:'潜水泵', p:2.2}, {n:'污水泵', p:5.5},
+  {n:'砂轮切割机', p:2.2}, {n:'手持电动工具', p:1}, {n:'现场照明', p:10, t:'l'}
+];
+
+/* ================= 电缆基础数据（引自「电缆选型校验工具」）
+   载流量基准：30℃ 空气中敷设，按芯数（1/3/4/5）分别取值
+   铜芯 3 芯：10mm²=57A、16=76、25=96、35=119、50=144、70=184、95=223、120=259、150=299、185=341、240=400、300=458
+   数据来源：IEC 60364-5-523 /《工业与民用供配电设计手册》第四版 ================= */
+var CABLE_DB = {
+  sections: [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300],
+  copper: {
+    ampacity: {
+      1: [24, 32, 42, 54, 73, 95, 120, 150, 185, 230, 280, 325, 370, 425, 500, 570],
+      3: [17, 24, 32, 41, 57, 76, 96, 119, 144, 184, 223, 259, 299, 341, 400, 458],
+      4: [15, 21, 28, 36, 50, 68, 86, 107, 130, 166, 201, 233, 269, 307, 360, 412],
+      5: [14, 20, 27, 35, 48, 65, 82, 101, 122, 156, 189, 220, 254, 290, 340, 389]
+    }
+  },
+  aluminum: {
+    ampacity: {
+      1: [19, 25, 33, 42, 57, 74, 93, 116, 143, 178, 217, 252, 287, 329, 388, 442],
+      3: [13, 19, 25, 32, 44, 59, 74, 92, 112, 143, 173, 201, 232, 264, 310, 355],
+      4: [12, 16, 22, 28, 39, 53, 67, 83, 101, 129, 156, 181, 208, 238, 279, 319],
+      5: [11, 15, 21, 27, 37, 50, 64, 78, 95, 121, 146, 171, 197, 225, 264, 301]
+    }
+  }
+};
+/* N 线 / PE 线标准截面配比（GB/T 12706）：相线截面 → N(PE) 截面 */
+var NEUTRAL_MAP = {
+  1.5:1.5, 2.5:2.5, 4:4, 6:6, 10:10, 16:16,
+  25:16, 35:16, 50:25, 70:35, 95:50, 120:70, 150:70, 185:95, 240:120, 300:150
+};
+/* 绝缘类型：XLPE 允许工作温度 90℃，载流量较 PVC(70℃) 基准提高 10% */
+var INSULATION = {
+  xlpe: { name:'交联聚乙烯 XLPE', temp:90, factor:1.10, modelCu:'YJV',  modelAl:'YJLV', short:'XLPE' },
+  pvc:  { name:'聚氯乙烯 PVC',   temp:70, factor:1.00, modelCu:'VV',   modelAl:'VLV',  short:'PVC'  }
+};
+
+/* ================= 云端同步（共用自建同步服务） ================= */
+const CCLOUD = { api:'https://srv.wbc2023.top/sync', app:'cablecalc', token:'af91def02e8a9a205fe630e970b1b39a' };
+
+function f2(v){ if(!isFinite(v)) return '0.00'; return (Math.round(v*100)/100).toFixed(2); }
+function num(v){ var n = parseFloat(v); return isFinite(n)?n:0; }
+function trimNum(v){ var s = (Math.round(v*100)/100).toString(); return s; }
+function escH(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function $(id){ return document.getElementById(id); }
+function toast(msg){
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* ================= 设备表 ================= */
+function addRow(name, power, qty, type){
+  var tb = $('eqBody');
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td class="idx"></td>' +
+    '<td><input name="ename" placeholder="设备名称" value="' + escH(name||'') + '"></td>' +
+    '<td><input name="epower" type="number" step="0.01" min="0" placeholder="kW" value="' + (power!=null?power:'') + '"></td>' +
+    '<td><input name="eqty" type="number" step="1" min="1" value="' + (qty||1) + '"></td>' +
+    '<td><select name="etype"><option value="d"' + (type!=='l'?' selected':'') + '>动力</option><option value="l"' + (type==='l'?' selected':'') + '>照明</option></select></td>' +
+    '<td class="sub">0.00</td>' +
+    '<td><button type="button" class="del" onclick="delRow(this)">✕</button></td>';
+  tb.appendChild(tr);
+  var ins = tr.querySelectorAll('input,select');
+  for(var i=0;i<ins.length;i++){ ins[i].addEventListener('input', sync); ins[i].addEventListener('change', sync); }
+  sync();
+}
+function addLightRow(){ addRow('照明用电', 10, 1, 'l'); }
+function delRow(btn){
+  var tr = btn.closest('tr');
+  tr.style.transition='opacity .18s'; tr.style.opacity='0';
+  setTimeout(function(){ tr.remove(); sync(); }, 160);
+}
+function renumber(){
+  var rows = $('eqBody').querySelectorAll('tr');
+  for(var i=0;i<rows.length;i++){ rows[i].querySelector('.idx').textContent = i+1; }
+}
+function rowsData(){
+  var rows = $('eqBody').querySelectorAll('tr'), arr = [];
+  for(var i=0;i<rows.length;i++){
+    var r = rows[i];
+    arr.push({
+      name: r.querySelector('[name=ename]').value,
+      power: num(r.querySelector('[name=epower]').value),
+      qty: parseInt(r.querySelector('[name=eqty]').value,10) || 1,
+      type: r.querySelector('[name=etype]').value
+    });
+  }
+  return arr;
+}
+
+/* ================= 电缆选型 ================= */
+function pickCable(Ijs, opt){
+  var db = CABLE_DB[opt.material], ins = INSULATION[opt.insulation];
+  var row = db.ampacity[opt.cores];
+  var kTotal = opt.kt * ins.factor;
+  for(var i=0;i<CABLE_DB.sections.length;i++){
+    var base = row[i], eff = base * kTotal;
+    if(eff >= Ijs){
+      var S = CABLE_DB.sections[i];
+      return { idx:i, section:S, base:base, eff:eff, kTotal:kTotal,
+               spec:cableSpec(opt.cores, S), model:(opt.material==='copper'?ins.modelCu:ins.modelAl) };
+    }
+  }
+  return null;
+}
+/* 型号规格：芯数 → 3×S+2×N 等 */
+function cableSpec(cores, S){
+  var N = NEUTRAL_MAP[S] || S;
+  var s = trimNum(S), n = trimNum(N);
+  if(cores === 1) return '1×' + s;
+  if(cores === 3) return '3×' + s;
+  if(cores === 4) return (S === N) ? ('4×' + s) : ('3×' + s + '+1×' + n);
+  return (S === N) ? ('5×' + s) : ('3×' + s + '+2×' + n);
+}
+function matName(m){ return m === 'copper' ? '铜芯' : '铝芯'; }
+
+/* ================= 核心计算 ================= */
+function calc(){
+  var data = rowsData(), Pd = 0, Pl = 0, dList = [], lList = [];
+  for(var i=0;i<data.length;i++){
+    var d = data[i], sub = d.power * d.qty;
+    var item = { n: d.name || '', p: d.power, q: d.qty, s: sub };
+    if(d.type === 'l'){ Pl += sub; lList.push(item); } else { Pd += sub; dList.push(item); }
+  }
+  var k1 = num($('k1').value), k2 = num($('k2').value), cf = num($('cosfi').value) || 0.85;
+  var U = num($('voltage').value) || 0.38;
+  var opt = {
+    cores: parseInt($('cores').value,10) || 5,
+    material: $('material').value,
+    insulation: $('insulation').value,
+    kt: num($('ambtemp').value) || 1
+  };
+  var Pjs = k1*Pd + k2*Pl;
+  var Sjs = cf > 0 ? Pjs/cf : 0;
+  var Ijs = (cf > 0 && U > 0) ? Sjs/(1.732*U) : 0;
+  var cable = pickCable(Ijs, opt);
+  return { data:data, dList:dList, lList:lList, Pd:Pd, Pl:Pl, Pe:Pd+Pl, k1:k1, k2:k2, cf:cf, U:U,
+           opt:opt, Pjs:Pjs, Sjs:Sjs, Ijs:Ijs, cable:cable };
+}
+
+/* 单一设备描述：冲击成孔钻机45×1=45KW（无空格） */
+function devLine(it){
+  var nm = it.n || '未命名设备';
+  return escH(nm) + trimNum(it.p) + '×' + it.q + '=' + trimNum(it.s) + 'KW';
+}
+function sumExpr(list){
+  if(!list.length) return '0';
+  var parts = [];
+  for(var i=0;i<list.length;i++){ parts.push(trimNum(list[i].s)); }
+  return parts.join('+');
+}
+
+/* ================= 计算书（无空格排版） ================= */
+function reportBody(r){
+  var proj = String($('projName').value || '').trim();
+  var ed = String($('editor').value || '').trim();
+  var dt = String($('edate').value || '').trim();
+  var ins = INSULATION[r.opt.insulation];
+  var h = '';
+  /* 抬头：工程名称、编制日期（留空则不显示） */
+  var sub = '';
+  if(proj){ sub += escH(proj); }
+  if(dt){ sub += (sub ? '　' : '') + '编制日期：' + escH(dt); }
+  h += '<div class="rt"><h1>施工用电负荷计算书</h1>' + (sub ? ('<div class="sub">' + sub + '</div>') : '') + '</div>';
+
+  /* 一、设备额定功率 */
+  h += '<div class="sec">一、用电设备额定功率</div>';
+  if(r.dList.length){
+    h += '<p><b>动力设备用电额定功率：</b></p>';
+    for(var i=0;i<r.dList.length;i++){ h += '<div class="dev">' + devLine(r.dList[i]) + '</div>'; }
+  }
+  if(r.lList.length){
+    h += '<p style="margin-top:8px;"><b>照明用电额定功率：</b></p>';
+    for(var j=0;j<r.lList.length;j++){ h += '<div class="dev">' + devLine(r.lList[j]) + '</div>'; }
+  }
+  h += '<div class="hr"></div>';
+
+  /* 1、额定有功功率之和 */
+  h += '<div class="sec">1、设备额定有功功率之和</div>';
+  h += '<div class="formula">P<sub>e</sub>=' + sumExpr(r.dList) + (r.lList.length ? ('+' + sumExpr(r.lList)) : '') + '=' + f2(r.Pe) + 'kW</div>';
+  h += '<p>临电规范：需要乘同时系数K，动力K<sub>1</sub>，照明K<sub>2</sub>；工地常用取值：动力K<sub>1</sub>=' + r.k1 + '，照明K<sub>2</sub>=' + r.k2 + '。</p>';
+  h += '<div class="formula">动力设备：' + sumExpr(r.dList) + '=' + f2(r.Pd) + 'kW</div>';
+  h += '<div class="formula">照明：' + (r.lList.length > 1 ? (sumExpr(r.lList) + '=') : '') + f2(r.Pl) + 'kW</div>';
+
+  /* 2、有功计算负荷 */
+  h += '<div class="sec">2、有功计算负荷计算</div>';
+  h += '<p>计算公式：P<sub>js</sub>=K<sub>1</sub>×ΣP+K<sub>2</sub>×ΣP，即P<sub>js</sub>=K<sub>1</sub>×P<sub>e</sub>(动力)+K<sub>2</sub>×P<sub>e</sub>(照明)</p>';
+  h += '<div class="formula">P<sub>js</sub>=' + r.k1 + '×' + f2(r.Pd) + '+' + r.k2 + '×' + f2(r.Pl) + '=' + f2(r.k1*r.Pd) + '+' + f2(r.k2*r.Pl) + '≈' + f2(r.Pjs) + 'kW</div>';
+
+  /* 3、视在计算负荷 */
+  h += '<div class="sec">3、视在计算负荷计算</div>';
+  h += '<p>计算公式：S<sub>js</sub>=P÷cosφ</p>';
+  h += '<div class="formula">S<sub>js</sub>=' + f2(r.Pjs) + '÷' + r.cf + '≈' + f2(r.Sjs) + 'kVA</div>';
+
+  /* 4、总计算电流 */
+  h += '<div class="sec">4、总计算电流计算（' + (r.U === 0.38 ? '三相380V' : '单相220V') + '）</div>';
+  h += '<p>计算公式：I<sub>js</sub>=S÷(√3×U)</p>';
+  h += '<div class="formula">I<sub>js</sub>=' + f2(r.Sjs) + '÷(1.732×' + r.U + ')≈' + f2(r.Ijs) + 'A</div>';
+  h += '<div class="hr"></div>';
+
+  /* 5、电缆选型 */
+  h += '<div class="sec">5、电缆选型结论</div>';
+  h += '<p>选型参数：' + matName(r.opt.material) + '·' + ins.name + '（导体允许工作温度' + ins.temp + '℃）·';
+  if(r.opt.cores === 1){ h += '单芯（三相回路3根并联）'; }
+  else if(r.opt.cores === 3){ h += '三芯'; }
+  else if(r.opt.cores === 4){ h += '四芯（含N线）'; }
+  else { h += '五芯（含N线、PE线）'; }
+  h += '·环境温度修正系数' + f2(r.opt.kt) + '。</p>';
+  if(r.cable){
+    h += '<div class="concl">根据实际用电计算，依据《建筑与市政工程施工现场临时用电安全技术标准》(JGJ/T46-2024)，《电力工程电缆设计标准》(GB50217-2018)，需选用总线电缆' +
+         r.cable.model + '-0.6/1kV-' + r.cable.spec + 'mm²' + matName(r.opt.material) + '电缆。' +
+         '该规格基准载流量' + r.cable.base + 'A（30℃空气中' + r.opt.cores + '芯' + matName(r.opt.material) + '），经绝缘类型系数' + f2(INSULATION[r.opt.insulation].factor) + '与环境温度系数' + f2(r.opt.kt) + '修正后为' + f2(r.cable.eff) + 'A，大于总计算电流I<sub>js</sub>=' + f2(r.Ijs) + 'A，满足要求。</div>';
+  } else {
+    h += '<div class="concl">总计算电流I<sub>js</sub>=' + f2(r.Ijs) + 'A已超过单根YJV-3×300+2×150电缆的允许载流量，建议采用多根并联敷设或加大供电电压，并经短路校验后确定。</div>';
+  }
+  /* 落款：编制人、日期（留空则不显示） */
+  var meta = '';
+  if(ed){ meta += '<span>编制人：' + escH(ed) + '</span>'; }
+  if(dt){ meta += '<span>日期：' + escH(dt) + '</span>'; }
+  if(meta){ h += '<div class="meta">' + meta + '</div>'; }
+  return h;
+}
+
+/* ================= 实时渲染 ================= */
+function sync(){
+  var r = calc();
+  renumber();
+  var rows = $('eqBody').querySelectorAll('tr'), total = 0;
+  for(var i=0;i<rows.length;i++){
+    var p = num(rows[i].querySelector('[name=epower]').value);
+    var q = parseInt(rows[i].querySelector('[name=eqty]').value,10) || 1;
+    var sub = p*q; total += sub;
+    rows[i].querySelector('.sub').textContent = f2(sub);
+  }
+  $('totalPe').textContent = f2(total);
+  $('rPd').innerHTML = f2(r.Pd)+'<small> kW</small>';
+  $('rPl').innerHTML = f2(r.Pl)+'<small> kW</small>';
+  $('rPjs').innerHTML = f2(r.Pjs)+'<small> kW</small>';
+  $('rSjs').innerHTML = f2(r.Sjs)+'<small> kVA</small>';
+  $('rIjs').innerHTML = f2(r.Ijs)+'<small> A</small>';
+  if(r.cable){
+    $('rCable').textContent = r.cable.model + '-0.6/1kV-' + r.cable.spec + 'mm²';
+    $('rCableNote').textContent = '基准载流量' + r.cable.base + 'A → 修正后' + f2(r.cable.eff) + 'A ≥ 计算电流' + f2(r.Ijs) + 'A，满足要求';
+  } else {
+    $('rCable').textContent = '超出单根电缆范围，建议并联敷设';
+    $('rCableNote').textContent = '计算电流' + f2(r.Ijs) + 'A已超过最大规格载流量，需采用多根并联或封闭母线';
+  }
+  $('reportHtml').innerHTML = reportBody(r);
+  saveLocal();
+}
+
+/* ================= 导出 Word 计算书 ================= */
+/* 文件名安全化：去掉 \ / : * ? " < > | 等非法字符 */
+function safeFile(s){ return String(s || '').replace(/[\\/:*?"<>|]/g, '_').replace(/^[\s._]+|[\s._]+$/g, '').slice(0, 40); }
+function exportWord(){
+  var r = calc();
+  var proj = safeFile($('projName').value);
+  var dt = String($('edate').value || '').trim();
+  var body = reportBody(r);
+  var css =
+    '@page{size:21.0cm 29.7cm; margin:2.54cm 3.17cm;}' +
+    'body{font-family:"宋体",SimSun,serif; font-size:12.0pt; line-height:1.5; color:#000;}' +
+    'h1{font-family:"黑体",SimHei,sans-serif; font-size:16.0pt; text-align:center; letter-spacing:2pt; font-weight:bold; margin:0 0 6pt 0;}' +
+    '.rt{text-align:center; margin-bottom:12pt;}' +
+    '.rt .sub{font-size:10.5pt; color:#444;}' +
+    'sub{font-size:70%; vertical-align:sub;}' +
+    '.sec{font-family:"黑体",SimHei,sans-serif; font-size:12.0pt; font-weight:bold; margin:9pt 0 4pt 0;}' +
+    'p{font-size:12.0pt; margin:3pt 0;}' +
+    '.dev{font-size:12.0pt; margin:1pt 0 1pt 12pt;}' +
+    '.formula{font-size:12.0pt; margin:4pt 0 4pt 12pt;}' +
+    '.concl{font-size:12.0pt; margin:5pt 0; line-height:1.6;}' +
+    '.hr{border-top:1px solid #999; margin:9pt 0;}' +
+    '.meta{font-size:12.0pt; margin-top:22pt;}' +
+    '.meta span{margin-right:60pt;}';
+  var html =
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+    '<head><meta charset="utf-8"><title>施工用电负荷计算书</title>' +
+    '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->' +
+    '<style>' + css + '</style></head><body>' + body + '</body></html>';
+  var blob = new Blob(['\ufeff' + html], { type:'application/msword;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '施工用电负荷计算书' + (proj ? ('_' + proj) : '') + (dt ? ('_' + dt) : '') + '.doc';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  toast('已导出 Word 计算书：' + a.download);
+}
+
+/* ================= 预设菜单 ================= */
+function togglePresetMenu(e){ e.stopPropagation(); $('presetMenu').classList.toggle('show'); }
+function buildPresetMenu(){
+  var h = '';
+  for(var i=0;i<PRESETS.length;i++){
+    var p = PRESETS[i];
+    h += '<button type="button" class="pitem" onclick="addRow(\'' + escH(p.n) + '\',' + p.p + ',1,\'' + (p.t||'d') + '\');this.parentNode.classList.remove(\'show\')">' + escH(p.n) + '<span>' + p.p + ' kW</span></button>';
+  }
+  $('presetMenu').innerHTML = h;
+}
+
+/* ================= 云端同步 ================= */
+function cloudHttp(act, method, body){
+  var u = CCLOUD.api + '/' + act + '/' + CCLOUD.app;
+  var opt = { method: method || 'GET', headers: { 'Content-Type':'application/json', 'X-Token': CCLOUD.token } };
+  if(body) opt.body = JSON.stringify(body);
+  return fetch(u, opt).then(function(resp){
+    if(resp.status === 401) throw new Error('同步令牌无效');
+    if(!resp.ok) throw new Error('云端响应 HTTP ' + resp.status);
+    return resp.json();
+  });
+}
+function cloudFmt(v){
+  var d = new Date(v); if(isNaN(d.getTime())) return '';
+  return (d.getMonth()+1) + '-' + d.getDate() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function toggleCloudMenu(ev){
+  ev.stopPropagation();
+  var m = $('cloudMenu'), willShow = !m.classList.contains('show');
+  document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); });
+  m.classList.toggle('show', willShow);
+  if(willShow){ $('cloudFoot').textContent = '☁️ HTTPS 云同步已启用'; cloudRefresh(); }
+}
+var cloudCache = [];
+function cloudRefresh(){
+  var list = $('cloudList');
+  list.innerHTML = '<div class="cd-empty">同步中…</div>';
+  $('cloudHint').textContent = '';
+  cloudHttp('pull').then(function(j){
+    cloudCache = ((j && j.records) || []).filter(function(x){ return x && !x.del && x.data; });
+    if(!cloudCache.length){ list.innerHTML = '<div class="cd-empty">云端暂无计算书</div>'; return; }
+    var h = '';
+    for(var i=0;i<cloudCache.length;i++){
+      var rc = cloudCache[i];
+      var nm = (rc.data && rc.data.name) || rc.id;
+      var n = (rc.data && rc.data.rows) ? rc.data.rows.length : 0;
+      h += '<div class="cd-row" data-id="' + escH(rc.id) + '">' +
+           '<span class="cd-nm" title="' + escH(nm) + '">' + escH(nm) + '</span>' +
+           '<span class="cd-tm">' + n + '项</span><span class="cd-tm">' + cloudFmt(rc.v) + '</span>' +
+           '<button type="button" class="cd-btn" data-act="imp" data-id="' + escH(rc.id) + '">导入</button>' +
+           '<button type="button" class="cd-btn" data-act="ren" data-id="' + escH(rc.id) + '">重命名</button>' +
+           '<button type="button" class="cd-btn del" data-act="del" data-id="' + escH(rc.id) + '">删除</button>' +
+           '</div>';
+    }
+    list.innerHTML = h;
+    $('cloudHint').textContent = '(' + cloudCache.length + ' 份)';
+  }).catch(function(e){
+    list.innerHTML = '<div class="cd-empty">加载失败：' + escH(e.message || e) + '</div>';
+  });
+}
+function colCollect(){
+  return {
+    projName: $('projName').value, editor: $('editor').value, edate: $('edate').value,
+    voltage: $('voltage').value, k1: $('k1').value, k2: $('k2').value,
+    cosfi: $('cosfi').value, ambtemp: $('ambtemp').value,
+    cores: $('cores').value, material: $('material').value, insulation: $('insulation').value,
+    rows: rowsData(), name: ''
+  };
+}
+function colRestore(d){
+  $('projName').value = d.projName || '';
+  $('editor').value = d.editor || '';
+  $('edate').value = d.edate || '';
+  if(d.voltage) $('voltage').value = d.voltage;
+  if(d.k1 != null) $('k1').value = d.k1;
+  if(d.k2 != null) $('k2').value = d.k2;
+  if(d.cosfi != null) $('cosfi').value = d.cosfi;
+  if(d.ambtemp) $('ambtemp').value = d.ambtemp;
+  if(d.cores) $('cores').value = d.cores;
+  if(d.material) $('material').value = d.material;
+  if(d.insulation) $('insulation').value = d.insulation;
+  $('eqBody').innerHTML = '';
+  var rows = d.rows || [];
+  for(var i=0;i<rows.length;i++){ addRow(rows[i].name, rows[i].power, rows[i].qty, rows[i].type); }
+  sync();
+}
+function cloudSave(){
+  var inp = $('cloudName'), name = inp.value.trim();
+  if(!name){ toast('请先输入计算书名称'); inp.focus(); return; }
+  var data = colCollect(); data.name = name;
+  if(!data.rows.length){ toast('当前没有设备，无法保存'); return; }
+  cloudHttp('push', 'POST', { records:[{ id:name, v:Date.now(), data:data, del:false }] })
+    .then(function(){ inp.value=''; toast('已保存云端计算书「' + name + '」'); cloudRefresh(); })
+    .catch(function(e){ toast('保存失败：' + (e.message || e)); });
+}
+function cloudImport(id){
+  var rc = null;
+  for(var i=0;i<cloudCache.length;i++){ if(cloudCache[i].id === id){ rc = cloudCache[i]; break; } }
+  if(!rc) return;
+  try{
+    colRestore(rc.data);
+    $('cloudName').value = (rc.data && rc.data.name) || id;
+    $('cloudMenu').classList.remove('show');
+    toast('已导入云端计算书：' + ((rc.data && rc.data.name) || id));
+  }catch(e){ toast('导入失败：' + (e.message || e)); }
+}
+function cloudRename(id){
+  var rc = null;
+  for(var i=0;i<cloudCache.length;i++){ if(cloudCache[i].id === id){ rc = cloudCache[i]; break; } }
+  var oldName = (rc && rc.data && rc.data.name) || id;
+  var nn = prompt('重命名计算书：', oldName);
+  if(nn == null) return;
+  nn = nn.trim();
+  if(!nn || nn === oldName) return;
+  var data = JSON.parse(JSON.stringify((rc && rc.data) || {}));
+  data.name = nn;
+  var v = Date.now();
+  cloudHttp('push', 'POST', { records:[
+    { id:nn, v:v, data:data, del:false },
+    { id:id, v:v+1, data:null, del:true }
+  ]}).then(function(){ toast('已重命名为「' + nn + '」'); cloudRefresh(); })
+     .catch(function(e){ toast('重命名失败：' + (e.message || e)); });
+}
+function cloudDel(id){
+  var rc = null;
+  for(var i=0;i<cloudCache.length;i++){ if(cloudCache[i].id === id){ rc = cloudCache[i]; break; } }
+  var nm = (rc && rc.data && rc.data.name) || id;
+  if(!confirm('确认删除云端计算书「' + nm + '」？')) return;
+  cloudHttp('push', 'POST', { records:[{ id:id, v:Date.now(), data:null, del:true }] })
+    .then(function(){ toast('已删除「' + nm + '」'); cloudRefresh(); })
+    .catch(function(e){ toast('删除失败：' + (e.message || e)); });
+}
+
+/* ================= 本机存取 ================= */
+function saveLocal(){
+  try{ localStorage.setItem('cablecalc_v1', JSON.stringify(colCollect())); }catch(e){}
+}
+function loadLocal(){
+  try{
+    var s = localStorage.getItem('cablecalc_v1');
+    if(!s) return false;
+    var o = JSON.parse(s);
+    $('projName').value=o.projName||''; $('editor').value=o.editor||''; $('edate').value=o.edate||'';
+    if(o.voltage)$('voltage').value=o.voltage;
+    if(o.k1!=null)$('k1').value=o.k1; if(o.k2!=null)$('k2').value=o.k2;
+    if(o.cosfi!=null)$('cosfi').value=o.cosfi; if(o.ambtemp)$('ambtemp').value=o.ambtemp;
+    if(o.cores)$('cores').value=o.cores;
+    if(o.material)$('material').value=o.material;
+    if(o.insulation)$('insulation').value=o.insulation;
+    if(o.rows && o.rows.length){
+      $('eqBody').innerHTML='';
+      for(var i=0;i<o.rows.length;i++){ var r=o.rows[i]; addRow(r.name, r.power, r.qty, r.type); }
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function clearAll(){
+  if(!confirm('确定清空所有设备与参数？')) return;
+  $('eqBody').innerHTML='';
+  $('projName').value=''; $('editor').value='';
+  addRow('冲击成孔钻机', 45, 1, 'd'); addLightRow();
+  sync();
+}
+
+/* ================= 关于 ================= */
+function showAbout(){ $('aboutMask').classList.add('show'); }
+function hideAbout(){ $('aboutMask').classList.remove('show'); }
+
+/* ================= 全局事件 ================= */
+document.addEventListener('click', function(e){
+  var btn = e.target && e.target.closest ? e.target.closest('#cloudList button[data-act]') : null;
+  if(btn){
+    var id = btn.getAttribute('data-id'), act = btn.getAttribute('data-act');
+    if(act === 'imp') cloudImport(id);
+    else if(act === 'ren') cloudRename(id);
+    else if(act === 'del') cloudDel(id);
+    e.stopPropagation();
+    return;
+  }
+  if(e.target.closest && !e.target.closest('.dd')){
+    document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); });
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){ document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); }); hideAbout(); }
+});
+
+/* ================= 初始化 ================= */
+(function(){
+  buildPresetMenu();
+  if(!$('edate').value){
+    var t = new Date();
+    $('edate').value = t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);
+  }
+  if(!loadLocal()){
+    addRow('冲击成孔钻机', 45, 1, 'd');
+    addRow('钢筋切断机', 3, 1, 'd');
+    addRow('钢筋弯曲机', 3, 1, 'd');
+    addRow('钢筋调直切断机', 9, 1, 'd');
+    addRow('直螺纹套丝机', 4, 1, 'd');
+    addRow('交流弧焊电焊机', 11, 1, 'd');
+    addRow('空压机', 37, 1, 'd');
+    addRow('冲击电镐', 1.75, 1, 'd');
+    addRow('照明用电', 10, 1, 'l');
+  }
+  sync();
+})();
+</script>
+</body>
+</html>
