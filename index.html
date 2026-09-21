@@ -570,6 +570,19 @@
         <span class="chip" style="--cb:rgba(14,116,144,.4);--cc:#5eead4;--cbg:rgba(14,116,144,.14)">v1.0.2</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">基坑CAD</span>
       </div>
+    <a class="card" href="sgyd.html" style="--g1:#15803d;--g2:#16a34a;--gs:rgba(21,128,61,.5);--a1:#4ade80;--a2:#22c55e;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>施工用电负荷计算书</h3>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">施工现场临电负荷计算与总干线电缆选型：设备清单自由增删→需要系数法算 Pe/Pjs→视在负荷 Sjs→总计算电流 Ijs→按芯数/材质/绝缘/温度自动选配 YJV 电缆；标准计算书右栏实时生成，一键导出 Word，参数云端同步。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(21,128,61,.4);--cc:#86efac;--cbg:rgba(21,128,61,.12)">v1.0.3</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">临电计算</span>
+      </div>
     </a>
   </div>
   <footer>
@@ -1006,6 +1019,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-09-22', t:'新增：施工用电负荷计算书 v1.0.3（施工现场临电负荷与总干线电缆选型：设备清单增删→需要系数法算 Pe/Pjs→视在负荷 Sjs→总计算电流 Ijs→按芯数/导体材质/绝缘类型/环境温度自动选配 YJV 电缆；标准计算书右栏并列实时生成、数学符号下标规范、工程名称与编制人可留空自动隐藏，一键导出 Word 计算书，参数云端同步）'},
   {d:'2026-09-20', t:'修复：在线浏览全景照片 v1.1.4（手机窄屏最底部照片的「查看/分享」按钮排不显示：顶栏换行后高度自适应写死 57px 导致内容区底部被裁，改为 flex 自适应；安卓APP同步重发 v1.0.2，覆盖安装即可）'},
   {d:'2026-09-20', t:'修复：在线浏览全景照片 v1.1.3（安卓APP下载链接全面替换至 v1.0.1：页内「安卓APP」入口加缓存穿透参数，浏览器/CDN 不再卡旧下载页；悬停提示去掉过时版本号）'},
   {d:'2026-09-20', t:'升级：在线浏览全景照片 v1.1.2（☁看过即缓存：云端照片原图看一次存进手机/电脑本地，再打开免下载秒出，专治 APP 每次重下原图；超 256MB 自动淘汰最久没看的；删照片连带清缓存；安卓APP同步重发 v1.0.1）'},
@@ -1065,7 +1079,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
