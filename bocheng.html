@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="泊成家庭纪事">
-<title>泊成家庭纪事 · 家庭网页管理器 v1.0.1</title>
+<title>泊成家庭纪事 · 家庭网页管理器 v1.0.2</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2316a34a'/%3E%3Cstop offset='1' stop-color='%234ade80'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='PingFang SC,sans-serif' font-weight='700'%3E泊%3C/text%3E%3C/svg%3E">
 <meta name="description" content="泊成家庭纪事 · 家庭静态网页管理器：上传、重命名、删除、点击预览，云端多设备同步，安卓APP随身管理。">
 <style>
@@ -173,7 +173,7 @@
     </div>
     <div class="hacts">
       <a class="apk-chip" href="bocheng-app.html">📱 安卓APP</a>
-      <span class="ver" id="verChip">v1.0.1</span>
+      <span class="ver" id="verChip">v1.0.2</span>
     </div>
   </div>
 </header>
@@ -185,7 +185,7 @@
     <span class="dot off" id="cloudDot"></span>
     <div class="cb-main">
       <b id="cloudTitle">云端未同步</b>
-      <span id="cloudSub">点击配置同步与 GitHub 存储</span>
+      <span id="cloudSub">点击配置服务器同步</span>
     </div>
     <span style="color:var(--g1);font-size:13px;flex:0 0 auto;">管理 ›</span>
   </div>
@@ -209,29 +209,29 @@
   <div id="helpBox" style="display:none;">
     <div class="guide">
       <h4>☁️ 云端同步方案（与在线浏览全景照片同款）</h4>
-      <p>同步服务器 <span class="kbd">srv.wbc2023.top</span> 按记录级合并（谁后改谁生效，删除也同步）；网页文件本体存 GitHub 仓库 <span class="kbd">bocheng/</span> 目录，预览走 <span class="kbd">www.wbc2023.top/bocheng/</span>。</p>
+      <p>云端全走你自己的服务器 <span class="kbd">srv.wbc2023.top</span>：网页清单按记录级合并（谁后改谁生效，删除也同步）；网页文件本体上传到服务器图床 <span class="kbd">/img/</span>，上传完成即可打开，无需等待。</p>
       <h4>📱 安卓版</h4>
       <p>点上方绿色横幅下载 APK 安装；或手机浏览器打开本页 → 菜单「添加到主屏幕」。</p>
       <h4>👀 点击进入预览</h4>
-      <p>列表点「→」在线查看网页（上传后约 1 分钟生效）。</p>
+      <p>列表点「→」直接打开服务器图床地址，秒开。</p>
     </div>
   </div>
 
-  <footer>泊成家庭纪事 BoCheng Family Pages · v1.0.1 · 同步服务器 srv.wbc2023.top · 文件存储 GitHub</footer>
+  <footer>泊成家庭纪事 BoCheng Family Pages · v1.0.2 · 云端同步与文件存储均走 srv.wbc2023.top</footer>
 </main>
 
 <nav class="tabbar"><div class="t-row">
   <button class="tab on" onclick="refresh(true)"><span class="t-i">📖</span>我的网页</button>
   <button class="tab" onclick="pickUpload()"><span class="t-i">⬆️</span>上传</button>
   <button class="tab" onclick="openSheet('sync')"><span class="t-i">☁</span>同步</button>
-  <button class="tab" onclick="openSheet('settings')"><span class="t-i">⚙️</span>设置</button>
+  <button class="tab" onclick="openSheet('srv')"><span class="t-i">⚙️</span>设置</button>
 </div></nav>
 
 <!-- ===== 同步弹层（pano 同款交互） ===== -->
 <div class="mask" id="sheetSync">
   <div class="sheet">
     <h3>☁ 同步</h3>
-    <p class="s-sub">云端同步走同步服务器接口，多台设备自动互通；网页文件本体存 GitHub。</p>
+    <p class="s-sub">云端同步与文件存储全走你自己的服务器接口，多台设备自动互通。</p>
     <div style="display:flex;align-items:center;gap:12px;background:var(--fill);border-radius:14px;padding:13px 15px;margin-bottom:12px;">
       <span style="font-size:24px;">☁</span>
       <div style="flex:1;font-size:13px;">
@@ -241,43 +241,25 @@
     </div>
     <label class="checkline"><input type="checkbox" id="ckAuto" checked onchange="toggleAuto(this.checked)"><span>自动同步：打开时拉取云端，本地改动后自动上传</span></label>
     <div class="sheet-btns" style="margin-top:8px;">
-      <button class="btn btn--ghost" onclick="openSheet('settings')">存储设置</button>
       <button class="btn btn--ghost" onclick="srvModal2()">服务器设置</button>
       <button class="btn btn--primary" onclick="cloudSync(false)">立即同步</button>
     </div>
-    <div class="note" style="margin-top:12px;">同步内容 = 网页清单（名称 / 大小 / 时间），按「谁后改谁生效」与云端合并，删除也会同步；文件本体走 GitHub，不重复占服务器空间。</div>
+    <div class="note" style="margin-top:12px;">同步内容 = 网页清单（名称 / 大小 / 地址 / 时间），按「谁后改谁生效」与云端合并，删除也会同步；网页文件本体上传到服务器图床 /img/，与全景照片同款。</div>
     <div class="sheet-btns"><button class="btn btn--ghost" onclick="closeSheets()">关闭</button></div>
   </div>
 </div>
 
-<!-- ===== 同步服务器设置 ===== -->
+<!-- ===== 服务器设置（同步 + 图床一体） ===== -->
 <div class="mask" id="sheetSrv">
   <div class="sheet">
     <h3>服务器设置</h3>
-    <p class="s-sub">同步服务器接口与令牌（存本机 localStorage，与全景照片同款接口）</p>
+    <p class="s-sub">同步接口与令牌（存本机 localStorage，与全景照片同款接口；网页文件本体自动上传到同服务器图床）</p>
     <div class="field"><label>同步接口地址</label><input id="srvApi" type="text" placeholder="https://srv.wbc2023.top/sync"></div>
     <div class="field"><label>应用名（app）</label><input id="srvApp" type="text" placeholder="bocheng"></div>
     <div class="field"><label>同步令牌（token）</label><input id="srvToken" type="password" autocomplete="off"></div>
     <div class="sheet-btns">
-      <button class="btn btn--ghost" onclick="closeSheets()">取消</button>
+      <button class="btn btn--ghost" onclick="testSrv()">测试连接</button>
       <button class="btn btn--primary" onclick="saveSrv()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== GitHub 存储设置 ===== -->
-<div class="mask" id="sheetSettings">
-  <div class="sheet">
-    <h3>⚙️ 网页存储设置（GitHub）</h3>
-    <p class="s-sub">网页文件本体保存位置；配置一次，电脑 / 手机全同步</p>
-    <div class="field"><label>GitHub Token（需 repo 读写权限）</label><input id="cfgToken" type="password" placeholder="github_pat_…" autocomplete="off"><div class="f-note">仅存本机浏览器，不上传任何服务器</div></div>
-    <div class="field"><label>仓库（用户名/仓库名）</label><input id="cfgRepo" type="text" placeholder="wuwuwuwu-1990/vista-tool"></div>
-    <div class="field"><label>分支</label><input id="cfgBranch" type="text" placeholder="main"></div>
-    <div class="field"><label>存储目录</label><input id="cfgPath" type="text" placeholder="bocheng"></div>
-    <div class="field"><label>在线预览前缀</label><input id="cfgPrefix" type="text" placeholder="https://www.wbc2023.top/bocheng/"><div class="f-note">列表点「→」打开的地址 = 前缀 + 文件名</div></div>
-    <div class="sheet-btns">
-      <button class="btn btn--ghost" onclick="testConn()">测试连接</button>
-      <button class="btn btn--primary" onclick="saveCfg()">保存</button>
     </div>
     <div class="sheet-btns" style="margin-top:10px;"><button class="btn btn--ghost" style="flex:1;" onclick="closeSheets()">取消</button></div>
   </div>
@@ -287,7 +269,7 @@
 <div class="mask" id="sheetRename">
   <div class="sheet">
     <h3>✏️ 重命名网页</h3>
-    <p class="s-sub">云端同步改名（GitHub + 同步服务器一起更新）</p>
+    <p class="s-sub">图床换名 + 同步服务器改名一起完成</p>
     <div class="field"><label>新文件名（须以 .html 结尾）</label><input id="renameInput" type="text"></div>
     <div class="sheet-btns"><button class="btn btn--primary" onclick="doRename()">确认重命名</button></div>
     <div class="sheet-btns" style="margin-top:10px;"><button class="btn btn--ghost" style="flex:1;" onclick="closeSheets()">取消</button></div>
@@ -312,23 +294,20 @@
 
 <script>
 /* =========================================================================
-   泊成家庭纪事 · v1.0.1
+   泊成家庭纪事 · v1.0.2
    单文件 HTML：网页文件管理（上传/重命名/删除/预览）
    + 云端同步（srv.wbc2023.top/sync 记录级合并，与在线浏览全景照片同款协议）
-   + 文件本体存 GitHub Contents API（bocheng/ 目录）
-   主题：绿白 · 价值全景同款
+   + 文件本体也走自己服务器图床 /upload/{app} → /img/（v1.0.2 起弃用 GitHub）
+   主题：绿白 · 全景同款
    ========================================================================= */
-var APP_VER = '1.0.1';
+var APP_VER = '1.0.2';
 var APP_NAME = '泊成家庭纪事';
-var CFG_KEY = 'bocheng_cfg_v1';
 var SRV_KEY = 'bocheng_srv_v1';
 
-var GH_FALLBACK = { token:'', repo:'wuwuwuwu-1990/vista-tool', branch:'main', path:'bocheng', prefix:'https://www.wbc2023.top/bocheng/' };
 var SRV_FALLBACK = { api:'https://srv.wbc2023.top/sync', app:'bocheng', token:'af91def02e8a9a205fe630e970b1b39a', auto:true };
 
-var ghCfg = loadJson(CFG_KEY, GH_FALLBACK);
 var srvCfg = loadJson(SRV_KEY, SRV_FALLBACK);
-var pages = [];               // GitHub 文件列表 [{name,size,sha}]
+var pages = [];               // 网页列表（来自同步服务器记录）[{name,size,url,remoteName,upd}]
 var syncBusy = false;
 var lastSyncAt = 0;
 var renameTarget = null;
@@ -345,7 +324,6 @@ function loadJson(key, fb){
   return out;
 }
 function saveJson(key, obj){ try{ localStorage.setItem(key, JSON.stringify(obj)); }catch(e){} }
-function ghReady(){ return !!(ghCfg.token && ghCfg.repo); }
 function srvReady(){ return !!(srvCfg.api && srvCfg.app && srvCfg.token); }
 
 /* ---------------- UI 基础 ---------------- */
@@ -355,13 +333,6 @@ function toast(msg, ms){
   clearTimeout(t._tm); t._tm = setTimeout(function(){ t.classList.remove('show'); }, ms || 2400);
 }
 function openSheet(id){
-  if(id === 'settings'){
-    document.getElementById('cfgToken').value = ghCfg.token;
-    document.getElementById('cfgRepo').value = ghCfg.repo;
-    document.getElementById('cfgBranch').value = ghCfg.branch;
-    document.getElementById('cfgPath').value = ghCfg.path;
-    document.getElementById('cfgPrefix').value = ghCfg.prefix;
-  }
   if(id === 'srv'){
     document.getElementById('srvApi').value = srvCfg.api;
     document.getElementById('srvApp').value = srvCfg.app;
@@ -410,12 +381,12 @@ function srvHttp(act, method, body){
 }
 
 /* ---------------- 同步记录 ---------------- */
-/* 记录：{ id: 文件名, v: 版本时间戳, data:{name,size}, del:bool } —— 与云端记录级合并 */
+/* 记录：{ id: 文件名, v: 版本时间戳, data:{name,size,url,remoteName}, del:bool } —— 记录级合并 */
 function recordOf(f, del){
   return {
     id: f.name,
     v: del ? Date.now() : (f.upd || Date.now()),
-    data: del ? null : { name: f.name, size: f.size || 0 },
+    data: del ? null : { name: f.name, size: f.size || 0, url: f.url || '', remoteName: f.remoteName || '' },
     del: !!del
   };
 }
@@ -428,34 +399,26 @@ function pushRecords(records){
   }, Promise.resolve()).then(function(){ return records.length; });
 }
 
-/* 云端同步：以 GitHub 文件清单为准，与同步服务器记录做记录级合并 */
+/* 云端同步：拉取服务器记录（服务器即唯一事实源，改动即时 push） */
 function cloudSync(silent){
-  if(!srvReady() || !ghReady()){ if(!silent){ toast('请先完成「存储设置」与「服务器设置」'); } return Promise.resolve(false); }
+  if(!srvReady()){ if(!silent){ toast('请先到「同步 → 服务器设置」完成配置'); } return Promise.resolve(false); }
   if(syncBusy){ return Promise.resolve(false); }
   syncBusy = true;
   if(!silent){ toast('正在与云端同步…', 1600); }
-  return refreshFromGitHub().then(function(list){
-    return srvHttp('pull').then(function(j){
-      var remote = (j && j.records) || [];
-      var rmap = {};
-      remote.forEach(function(r){ rmap[r.id] = r; });
-      var names = {};
-      list.forEach(function(f){ names[f.name] = true; });
-      var up = [];
-      list.forEach(function(f){
-        var r = rmap[f.name];
-        if(!r || r.del){ up.push(recordOf(f, false)); }
+  return srvHttp('pull').then(function(j){
+    var remote = (j && j.records) || [];
+    pages = remote.filter(function(r){ return r && !r.del && r.data; })
+      .map(function(r){
+        return { name: r.id, size: (r.data && r.data.size) || 0, url: (r.data && r.data.url) || '', remoteName: (r.data && r.data.remoteName) || '', upd: r.v || 0 };
       });
-      remote.forEach(function(r){
-        if(!r.del && !names[r.id]){ up.push(recordOf({ name: r.id }, true)); }
-      });
-      return pushRecords(up);
-    });
+    pages.sort(function(a,b){ return a.name > b.name ? 1 : -1; });
+    renderList();
+    return pages.length;
   }).then(function(n){
     syncBusy = false;
     lastSyncAt = Date.now();
     renderCloudStatus();
-    if(!silent){ toast('云同步完成（' + (n || 0) + ' 条变更）', 3000); }
+    if(!silent){ toast('云同步完成（' + n + ' 个网页）', 3000); }
     return true;
   })['catch'](function(err){
     syncBusy = false;
@@ -479,10 +442,10 @@ function renderCloudStatus(){
   var t = document.getElementById('cloudTitle');
   var s = document.getElementById('cloudSub');
   var st = document.getElementById('syncStatText');
-  if(!srvReady() || !ghReady()){
+  if(!srvReady()){
     dot.className = 'dot off';
-    t.textContent = '云端未同步';
-    s.textContent = '点击配置同步与 GitHub 存储';
+    t.textContent = '云端未连接';
+    s.textContent = '点击配置服务器同步';
   }else{
     dot.className = 'dot ok';
     t.textContent = (srvCfg.auto ? '☁ 自动同步' : '☁ 手动同步') + ' · ' + pages.length + ' 个网页';
@@ -491,49 +454,59 @@ function renderCloudStatus(){
   if(st){ st.innerHTML = '当前：本机 <b>' + pages.length + '</b> 个网页 · 上次同步 <b>' + (lastSyncAt ? fmtTime(lastSyncAt) : '从未') + '</b>'; }
 }
 
-/* ---------------- GitHub API ---------------- */
-function apiBase(){ return 'https://api.github.com/repos/' + ghCfg.repo + '/contents/' + ghCfg.path; }
-function ghHeaders(extra){
-  var h = { 'Authorization': 'Bearer ' + ghCfg.token, 'Accept': 'application/vnd.github+json' };
-  if(extra) for(var k in extra) h[k] = extra[k];
-  return h;
+/* ---------------- 服务器图床（pano 同款：/upload 上传、/imgdel 删除） ---------------- */
+function imgBase(){
+  return String(srvCfg.api || '').replace(/\/[^/]*\/?$/, '') + '/img/';
 }
-function ghErrText(status, data){
-  if(status === 401) return 'GitHub Token 无效或过期（401）';
-  if(status === 403) return 'Token 权限不足或限流（403）';
-  if(status === 404) return '仓库或目录不存在（404）';
-  return (data && data.message) ? data.message : ('HTTP ' + status);
+/* 存储名：ASCII 安全 + 6 位随机后缀，避免服务器改写/碰撞 */
+function remoteNameFor(displayName){
+  var base = String(displayName || 'page').replace(/\.[^.]*$/, '').replace(/[^A-Za-z0-9._-]/g, '').replace(/^[._-]+/, '').slice(0, 30);
+  if(!base) base = 'page';
+  var rand = Math.random().toString(36).slice(2, 8);
+  return base + '-' + rand + '.html';
 }
-function bufToB64(buf){
-  var bytes = new Uint8Array(buf), bin = '', chunk = 0x8000;
-  for(var i = 0; i < bytes.length; i += chunk)
-    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-  return btoa(bin);
-}
-
-function refreshFromGitHub(){
-  if(!ghReady()) return Promise.resolve([]);
-  return fetch(apiBase() + '?ref=' + encodeURIComponent(ghCfg.branch), { headers: ghHeaders() })
-  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
-  .then(function(res){
-    if(res.status === 404){ return []; }
-    if(res.status >= 300){ throw new Error(ghErrText(res.status, res.data)); }
-    return (res.data || []).filter(function(f){ return f.type === 'file' && /\.(html?)$/i.test(f.name); })
-      .map(function(f){ return { name: f.name, size: f.size, sha: f.sha, upd: Date.now() }; });
+function uploadRaw(remoteName, blob){
+  return new Promise(function(resolve, reject){
+    if(!srvCfg.token){ reject(new Error('还没配置服务器令牌')); return; }
+    if(!blob){ reject(new Error('没有可上传的内容')); return; }
+    var url = String(srvCfg.api).replace(/\/+$/,'') + '/upload/' + encodeURIComponent(srvCfg.app) +
+      '?token=' + encodeURIComponent(srvCfg.token) +
+      '&name=' + encodeURIComponent(remoteName);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.timeout = 300000;
+    xhr.setRequestHeader('Content-Type', 'text/html; charset=utf-8');
+    xhr.onload = function(){
+      var j = {};
+      try{ j = JSON.parse(xhr.responseText || '{}'); }catch(e){}
+      if(xhr.status === 200 && j && j.url){ resolve(j); }
+      else{ reject(new Error((j && j.e) || ('HTTP ' + xhr.status))); }
+    };
+    xhr.onerror = function(){ reject(new Error('网络错误：服务器不可达或已被拦截')); };
+    xhr.ontimeout = function(){ reject(new Error('上传超时')); };
+    xhr.send(blob);
   });
+}
+function deleteRemote(remoteName){
+  if(!remoteName){ return Promise.resolve(false); }
+  return srvHttp('imgdel', 'POST', { name: remoteName }).then(function(){ return true; })['catch'](function(){ return false; });
 }
 
 function refresh(manual){
   renderCloudStatus();
   var box = document.getElementById('listBox');
-  if(!ghReady()){
-    box.innerHTML = emptyHtml('🔐', '先配置 GitHub 存储', '点顶部「云端未同步」卡片 →「存储设置」，填入 GitHub Token 即可开始。');
+  if(!srvReady()){
+    box.innerHTML = emptyHtml('🔐', '先配置服务器同步', '点顶部「云端未连接」卡片 →「服务器设置」，确认接口与令牌后保存即可（默认已预填）。');
     document.getElementById('helpBox').style.display = '';
-    setCount(0); return;
+    setCount(0); return Promise.resolve();
   }
   if(manual) box.innerHTML = '<div class="loading"><span class="spin"></span>正在同步云端列表…</div>';
-  refreshFromGitHub().then(function(list){
-    pages = list;
+  return srvHttp('pull').then(function(j){
+    var remote = (j && j.records) || [];
+    pages = remote.filter(function(r){ return r && !r.del && r.data; })
+      .map(function(r){
+        return { name: r.id, size: (r.data && r.data.size) || 0, url: (r.data && r.data.url) || '', remoteName: (r.data && r.data.remoteName) || '', upd: r.v || 0 };
+      });
     pages.sort(function(a,b){ return a.name > b.name ? 1 : -1; });
     renderList();
     if(manual){ toast('已刷新（' + pages.length + ' 个网页）'); }
@@ -599,7 +572,7 @@ document.getElementById('fileInput').addEventListener('change', function(e){
   });
 });
 function uploadFiles(files){
-  if(!ghReady()){ openSheet('settings'); toast('请先配置 GitHub 存储'); return; }
+  if(!srvReady()){ openSheet('srv'); toast('请先配置服务器同步'); return; }
   var i = 0;
   function next(){
     if(i >= files.length){
@@ -609,34 +582,42 @@ function uploadFiles(files){
     }
     var f = files[i++];
     if(!/\.html?$/i.test(f.name)){ toast('跳过非网页文件：' + f.name); return next(); }
-    var reader = new FileReader();
-    reader.onload = function(){
-      var b64 = bufToB64(reader.result);
-      fetch(apiBase() + '/' + encodeURIComponent(f.name), {
-        method: 'PUT',
-        headers: ghHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ message: '泊成家庭纪事：上传 ' + f.name + ' (v' + APP_VER + ')', content: b64, branch: ghCfg.branch })
-      }).then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
-      .then(function(res){
-        if(res.status >= 300){ toast('❌ ' + f.name + '：' + ghErrText(res.status, res.data)); }
-        else{ toast('✅ 已上传：' + f.name); }
-        next();
-      })
-      .catch(function(){ toast('❌ 网络错误：' + f.name); next(); });
-    };
-    reader.readAsArrayBuffer(f);
+    var rname = remoteNameFor(f.name);
+    uploadRaw(rname, f).then(function(res){
+      return pushRecords([recordOf({ name: f.name, size: res.size || f.size, url: res.url, remoteName: res.name || rname, upd: Date.now() }, false)])
+        .then(function(){ toast('✅ 已上传：' + f.name); });
+    })
+    .catch(function(e){ toast('❌ ' + f.name + '：' + (e && e.message ? e.message : e)); })
+    .then(next);
   }
   toast('正在上传（1/' + files.length + '）…');
   next();
 }
 
-/* ---------------- 预览 ---------------- */
+/* ---------------- 预览（图床为安全起见按附件下发，点击时拉取为 HTML 渲染） ---------------- */
+function findPage(name){
+  for(var i = 0; i < pages.length; i++){ if(pages[i].name === name) return pages[i]; }
+  return null;
+}
 function openPage(name){
-  if(!ghCfg.prefix){ toast('未配置预览地址前缀'); return; }
-  window.open(ghCfg.prefix + encodeURIComponent(name), '_blank');
+  var p = findPage(name);
+  if(!p || !p.url){ toast('该网页还没有服务器地址，请重新上传'); return; }
+  toast('正在打开…', 1500);
+  var w = window.open('', '_blank');   // 同步开窗，避免被弹窗拦截；内容就绪后再注入
+  fetch(p.url).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.blob();
+  }).then(function(b){
+    var u = URL.createObjectURL(new Blob([b], { type: 'text/html;charset=utf-8' }));
+    if(w){ w.location.href = u; } else { window.open(u, '_blank'); }
+  })['catch'](function(e){
+    if(w){ w.close(); }
+    toast('打开失败：' + (e && e.message ? e.message : e) + '，尝试直接打开', 2600);
+    setTimeout(function(){ window.open(p.url, '_blank'); }, 400);
+  });
 }
 
-/* ---------------- 重命名（GitHub 两步 + 同步记录） ---------------- */
+/* ---------------- 重命名（图床换名 + 同步记录改名） ---------------- */
 function askRename(name){
   renameTarget = name;
   document.getElementById('renameInput').value = name;
@@ -648,76 +629,43 @@ function doRename(){
   if(!/\.html?$/i.test(newName)){ toast('文件名需以 .html 结尾'); return; }
   if(newName === renameTarget){ closeSheets(); return; }
   var oldName = renameTarget;
+  var old = null;
+  for(var i = 0; i < pages.length; i++){ if(pages[i].name === oldName){ old = pages[i]; break; } }
   closeSheets();
+  if(!old || !old.url){ toast('找不到原网页的图床地址'); return; }
   toast('正在重命名…');
-  fetch(apiBase() + '/' + encodeURIComponent(oldName) + '?ref=' + encodeURIComponent(ghCfg.branch), { headers: ghHeaders() })
-  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+  var newRname = remoteNameFor(newName);
+  fetch(old.url).then(function(r){
+    if(!r.ok) throw new Error('取回原文件失败（HTTP ' + r.status + '）');
+    return r.blob();
+  })
+  .then(function(blob){ return uploadRaw(newRname, blob); })
   .then(function(res){
-    if(res.status >= 300) throw new Error(ghErrText(res.status, res.data));
-    var content = res.data.content.replace(/\n/g,'');
-    var oldSha = res.data.sha;
-    return fetch(apiBase() + '/' + encodeURIComponent(newName), {
-      method: 'PUT',
-      headers: ghHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ message: '泊成家庭纪事：重命名 ' + oldName + ' → ' + newName, content: content, branch: ghCfg.branch })
-    }).then(function(){ return { oldSha: oldSha }; });
-  })
-  .then(function(r){
-    return fetch(apiBase() + '/' + encodeURIComponent(oldName), {
-      method: 'DELETE',
-      headers: ghHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({
-        message: '泊成家庭纪事：删除旧名 ' + oldName,
-        sha: r.oldSha,
-        branch: ghCfg.branch
-      })
+    return deleteRemote(old.remoteName).then(function(){
+      return pushRecords([recordOf({ name: oldName }, true), recordOf({ name: newName, size: res.size || old.size, url: res.url, remoteName: res.name || newRname, upd: Date.now() }, false)]);
     });
-  })
-  .then(function(){
-    if(srvReady()){
-      return pushRecords([recordOf({ name: oldName }, true), recordOf({ name: newName, size: 0 }, false)]);
-    }
   })
   .then(function(){ toast('✅ 已重命名'); refresh(false).then(function(){ cloudTouch(); }); })
-  .catch(function(e){ toast('❌ 重命名失败：' + e.message); refresh(false); });
+  .catch(function(e){ toast('❌ 重命名失败：' + (e && e.message ? e.message : e)); refresh(false); });
 }
 
-/* ---------------- 删除 ---------------- */
+/* ---------------- 删除（图床 + 记录一起删） ---------------- */
 function askDelete(name){
-  confirmBox('删除网页？', '「' + displayName(name) + '」将从云端删除，手机与电脑同步消失，不可恢复。', function(){ doDelete(name); });
+  confirmBox('删除网页？', '「' + displayName(name) + '」将从服务器图床与云端记录中删除，手机与电脑同步消失，不可恢复。', function(){ doDelete(name); });
 }
 function doDelete(name){
+  var old = null;
+  for(var i = 0; i < pages.length; i++){ if(pages[i].name === name){ old = pages[i]; break; } }
   toast('正在删除…');
-  fetch(apiBase() + '/' + encodeURIComponent(name) + '?ref=' + encodeURIComponent(ghCfg.branch), { headers: ghHeaders() })
-  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
-  .then(function(res){
-    if(res.status >= 300) throw new Error(ghErrText(res.status, res.data));
-    return fetch(apiBase() + '/' + encodeURIComponent(name), {
-      method: 'DELETE',
-      headers: ghHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ message: '泊成家庭纪事：删除 ' + name, sha: res.data.sha, branch: ghCfg.branch })
-    });
-  })
+  deleteRemote(old && old.remoteName)
   .then(function(){
     if(srvReady()){ return pushRecords([recordOf({ name: name }, true)]); }
   })
   .then(function(){ toast('🗑️ 已删除'); refresh(false).then(function(){ cloudTouch(); }); })
-  .catch(function(e){ toast('❌ 删除失败：' + e.message); refresh(false); });
+  .catch(function(e){ toast('❌ 删除失败：' + (e && e.message ? e.message : e)); refresh(false); });
 }
 
 /* ---------------- 设置保存 / 测试 ---------------- */
-function saveCfg(){
-  ghCfg = {
-    token: document.getElementById('cfgToken').value.trim(),
-    repo: document.getElementById('cfgRepo').value.trim(),
-    branch: document.getElementById('cfgBranch').value.trim() || 'main',
-    path: document.getElementById('cfgPath').value.trim().replace(/^\/+|\/+$/g,''),
-    prefix: (document.getElementById('cfgPrefix').value.trim() || '').replace(/([^\/])$/,'$1/')
-  };
-  saveJson(CFG_KEY, ghCfg);
-  closeSheets(); renderCloudStatus(); refresh(true);
-  toast('✅ 存储设置已保存');
-}
 function saveSrv(){
   srvCfg = {
     api: document.getElementById('srvApi').value.trim(),
@@ -728,18 +676,20 @@ function saveSrv(){
   saveJson(SRV_KEY, srvCfg);
   closeSheets(); renderCloudStatus();
   toast('✅ 服务器设置已保存');
-  if(ghReady()) cloudSync(true);
+  if(srvReady()) cloudSync(true);
 }
-function testConn(){
-  var token = document.getElementById('cfgToken').value.trim();
-  var repo = document.getElementById('cfgRepo').value.trim();
-  if(!token || !repo){ toast('请先填写 Token 和仓库'); return; }
+function testSrv(){
+  var api = document.getElementById('srvApi').value.trim().replace(/\/+$/,'');
+  var app = document.getElementById('srvApp').value.trim();
+  var token = document.getElementById('srvToken').value.trim();
+  if(!api || !app || !token){ toast('请先填写接口地址、应用名与令牌'); return; }
   toast('正在测试连接…');
-  fetch('https://api.github.com/repos/' + repo, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } })
-  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+  fetch(api + '/pull/' + encodeURIComponent(app) + '?token=' + encodeURIComponent(token), { headers: { 'X-Token': token } })
+  .then(function(r){ return r.json()['catch'](function(){ return {}; }).then(function(d){ return { status: r.status, data: d }; }); })
   .then(function(res){
-    if(res.status === 200){ toast('✅ 连接成功：' + res.data.full_name + '（分支 ' + res.data.default_branch + '）'); }
-    else toast('❌ ' + ghErrText(res.status, res.data));
+    if(res.status === 200 && !res.data.e){ toast('✅ 连接成功：服务器返回 ' + ((res.data.records || []).length) + ' 条记录'); }
+    else if(res.status === 401){ toast('❌ 令牌无效（401）'); }
+    else{ toast('❌ ' + ((res.data && res.data.e) || ('HTTP ' + res.status))); }
   })
   .catch(function(){ toast('❌ 网络错误，请检查网络'); });
 }
@@ -748,7 +698,7 @@ function testConn(){
 document.getElementById('verChip').textContent = 'v' + APP_VER;
 renderCloudStatus();
 refresh(false);
-if(srvReady() && ghReady() && srvCfg.auto){ cloudSync(true); }
+if(srvReady() && srvCfg.auto){ cloudSync(true); }
 </script>
 </body>
 </html>
