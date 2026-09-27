@@ -39,6 +39,7 @@
   .nav-scroll::-webkit-scrollbar{display:none;}
   .nav a{flex:0 0 auto;text-decoration:none;color:var(--text);font-size:13px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:6px 15px;transition:.2s;}
   .nav a:active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .nav a.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(230,81,75,.35);}
 
   /* ===== 通用 ===== */
   section{margin-top:38px;scroll-margin-top:64px;}
@@ -539,6 +540,35 @@
 <script>
   var btn=document.getElementById('topBtn');
   window.addEventListener('scroll',function(){btn.classList.toggle('show',window.scrollY>500);},{passive:true});
+  /* 锚点导航：JS 拦截平滑滚动（禁用原生 href 跳转，避免 iframe/srcdoc 环境下导航到 base 地址出现破图空页） */
+  document.querySelectorAll('.nav a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var t=document.getElementById(a.getAttribute('href').slice(1));
+      if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+  /* 滚动跟随高亮：滑到哪个板块，导航按钮跟随点亮 */
+  var _secs=[].slice.call(document.querySelectorAll('section[id]'));
+  var _navLinks={};
+  document.querySelectorAll('.nav a[href^="#"]').forEach(function(a){_navLinks[a.getAttribute('href').slice(1)]=a;});
+  function _spy(){
+    var y=window.scrollY+100,cur=_secs[0];
+    for(var i=0;i<_secs.length;i++){if(_secs[i].offsetTop<=y)cur=_secs[i];}
+    /* 页面已滚到底时强制点亮最后一个板块（末尾板块过短滚不到顶部） */
+    if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-40)cur=_secs[_secs.length-1];
+    var _bar=document.querySelector('.nav-scroll');
+    for(var id in _navLinks){
+      _navLinks[id].classList.toggle('active',id===cur.id);
+      if(id===cur.id){
+        /* 只滚导航条自身横向容器（scrollIntoView 会打断页面平滑滚动动画） */
+        var a=_navLinks[id],target=a.offsetLeft-_bar.clientWidth/2+a.offsetWidth/2;
+        _bar.scrollTo({left:Math.max(0,target),behavior:'smooth'});
+      }
+    }
+  }
+  window.addEventListener('scroll',_spy,{passive:true});
+  _spy();
 </script>
 </body>
 </html>
