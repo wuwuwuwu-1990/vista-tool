@@ -1,10 +1,10 @@
 {
-  "version": "1.0.11",
+  "version": "1.0.12",
   "versionCode": 11,
-  "apk": "https://srv.wbc2023.top/bocheng-app-v1.0.11.apk",
-  "size": "662 KB",
+  "apk": "https://srv.wbc2023.top/bocheng-app-v1.0.12.apk",
+  "size": "661 KB",
   "date": "2026-09-28",
-  "note": "列表条目改版：去掉进入按钮，重命名/删除移到名称下方，不再显示文件名与大小",
+  "note": "界面自更新：点右上角版本号可强制刷新；从后台切回自动更新到最新版，手机上不再残留旧界面",
   "page": "https://srv.wbc2023.top/bocheng-app.html",
-  "webVersion": "1.0.11"
+  "webVersion": "1.0.12"
 }
