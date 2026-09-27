@@ -1,9 +1,10 @@
 {
-  "version": "1.0.9",
+  "version": "1.0.10",
   "versionCode": 11,
-  "apk": "https://srv.wbc2023.top/bocheng-app-v1.0.9.apk",
+  "apk": "https://srv.wbc2023.top/bocheng-app-v1.0.10.apk",
   "size": "662 KB",
   "date": "2026-09-28",
-  "note": "管理页在线加载免重装 · 壳层更新应用内一键升级",
-  "page": "https://srv.wbc2023.top/bocheng-app.html"
+  "note": "网页端已更新 v1.0.10（打开页面即自动生效）· 外壳无变化，无需重装",
+  "page": "https://srv.wbc2023.top/bocheng-app.html",
+  "webVersion": "1.0.10"
 }
