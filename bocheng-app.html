@@ -82,16 +82,16 @@
     <h1>泊成家庭纪事</h1>
     <p class="sub">安卓客户端 · 家庭静态网页随身管理<br>上传 · 重命名 · 删除 · 点击即看</p>
     <div class="meta">
-      <span>版本 v1.0.8</span>
-      <span>大小 642 KB</span>
+      <span id="metaVer">版本 v1.0.9</span>
+      <span id="metaSize">大小 662 KB</span>
       <span>Android 7.0 及以上</span>
-      <span>更新 2026-09-27</span>
+      <span id="metaDate">更新 2026-09-28</span>
     </div>
-    <a class="dlbtn" href="bocheng-app-v1.0.8.apk?v=1.0.8" download>
+    <a class="dlbtn" id="dlBtn" href="bocheng-app-v1.0.9.apk?v=1.0.9" download>
       <svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
       下载安卓安装包（APK）
     </a>
-    <p class="dlhint">v1.0.8 · bocheng-app-v1.0.8.apk · 上传网页改为添加网址 · 列表图标各端统一 · 覆盖安装数据保留</p>
+    <p class="dlhint" id="dlHint">v1.0.9 · bocheng-app-v1.0.9.apk · 管理页在线加载免重装 · 壳层更新应用内一键升级 · 覆盖安装数据保留</p>
 
     <div class="divider"></div>
 
@@ -99,17 +99,17 @@
       <h2>安装步骤</h2>
       <div class="step"><span class="n">1</span><p>点击上方按钮下载安装包到手机。</p></div>
       <div class="step"><span class="n">2</span><p>首次安装如提示「禁止安装未知来源应用」，请在系统弹窗中选择<b>允许 / 仍要安装</b>（不同品牌手机表述略有差异）。</p></div>
-      <div class="step"><span class="n">3</span><p>安装完成后打开 APP，首次使用到「⚙️ 设置」填入 GitHub Token、到「☁ 同步 → 服务器设置」核对同步令牌，即可与电脑网页版数据互通。</p></div>
+      <div class="step"><span class="n">3</span><p>安装完成后打开 APP 即可使用：管理页自动从 srv.wbc2023.top 在线加载，与电脑网页版数据实时互通，无需任何额外配置。</p></div>
     </div>
 
     <div class="feat">
       <h2>主要功能</h2>
       <ul>
-        <li>家庭静态网页上传管理：多选上传 / 拖拽上传（电脑端）</li>
-        <li>列表点击「→」在线预览：www.wbc2023.top/bocheng/ 直达</li>
+        <li>「添加网址」收录家庭网页，点击即内置浏览器全屏查看</li>
+        <li>管理页在线加载：改功能只需更新服务器，手机端免重装</li>
         <li>重命名 / 删除，云端与同步服务器一起更新，多设备一致</li>
         <li>☁ 云端同步：srv.wbc2023.top 记录级合并（谁后改谁生效），自动同步可开关</li>
-        <li>网页文件本体存 GitHub 仓库 bocheng/ 目录，可靠不丢</li>
+        <li>网页与图片存自有服务器 srv.wbc2023.top，GitHub 作同步备份</li>
         <li>苹果字体 + 绿白全景主题，手机/电脑自适应</li>
       </ul>
     </div>
@@ -117,5 +117,25 @@
     <a class="web-link" href="bocheng.html">电脑 / iPhone 用户请使用网页版 →</a>
   </div>
   <p class="foot">元枢工具箱 · tool.wbc2023.top<br>安装即代表同意仅用于个人家庭资料用途</p>
+<script>
+/* 版本自解析：页面即使被浏览器缓存，打开时也会拉取最新版本清单，下载链接自动指向最新 APK */
+(function(){
+  function q(id){return document.getElementById(id);}
+  fetch('bocheng-ver.json?t='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(v){
+      if(!v||!v.version) return;
+      if(v.version&&q('metaVer')) q('metaVer').textContent='版本 v'+v.version;
+      if(v.size&&q('metaSize')) q('metaSize').textContent='大小 '+v.size;
+      if(v.date&&q('metaDate')) q('metaDate').textContent='更新 '+v.date;
+      if(v.apk){
+        var name=v.apk.split('/').pop();
+        var a=q('dlBtn'); if(a) a.setAttribute('href', name+'?v='+v.version);
+        if(q('dlHint')) q('dlHint').textContent='v'+v.version+' · '+name+' · '+(v.note||'')+' · 覆盖安装数据保留';
+      }
+    })
+    .catch(function(){});
+})();
+</script>
 </body>
 </html>
