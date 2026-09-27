@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#e6514b">
-<title>2026国庆重庆亲子游 · 方案一（渝中经典线）· 3-4岁行程 2026.9.30-10.3</title>
+<title>2026国庆重庆亲子游 · 方案一（渝中经典版）· 3-4岁行程 2026.9.30-10.3</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐼</text></svg>">
 <style>
   :root{
@@ -153,31 +153,87 @@
 
   @media print{.nav,#topBtn{display:none;}.day,.card,.spot{break-inside:avoid;box-shadow:none;}}
 
-  /* ===== 方案切换条 ===== */
-  .plan-switch{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
-    padding:8px 10px;background:#26343a;color:#fff;font-size:12px;}
-  .plan-switch .cur{font-weight:bold;color:#ffd23e;}
-  .plan-switch .lbl{display:none;}
-  .plan-switch a{color:#fff;text-decoration:none;background:rgba(255,255,255,.16);
-    border:1px solid rgba(255,255,255,.45);border-radius:14px;padding:3px 10px;
-    transition:.2s;white-space:nowrap;}
+  /* ===== 方案切换条（5 方案 · 横向可滑） ===== */
+  .plan-switch{display:flex;align-items:center;gap:6px;overflow-x:auto;white-space:nowrap;
+    padding:8px 12px;background:#26343a;color:#fff;font-size:12.5px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .plan-switch::-webkit-scrollbar{display:none;}
+  .plan-switch .ps-lbl{flex:0 0 auto;font-size:11.5px;opacity:.6;margin-right:2px;}
+  .plan-switch .cur{flex:0 0 auto;font-weight:bold;color:#ffd23e;background:rgba(255,210,62,.14);
+    border:1px solid rgba(255,210,62,.55);border-radius:14px;padding:3px 11px;}
+  .plan-switch a{flex:0 0 auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.38);border-radius:14px;padding:3px 11px;transition:.2s;}
   .plan-switch a:active{background:#fff;color:#26343a;}
-  .cmp{width:100%;border-collapse:collapse;font-size:13px;background:#fff;}
-  .cmp th{background:#e8eef0;color:#2b4149;}
-  .cmp td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
-  .cmp td:first-child{white-space:nowrap;font-weight:bold;color:#2b4149;background:#f7fafb;}
-  @media print{.plan-switch{display:none;}}
+
+  /* ===== 五案对比表 ===== */
+  .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;
+    border:1px solid var(--line);border-radius:14px;background:#fff;}
+  .cmp-wrap::-webkit-scrollbar{height:6px;}
+  .cmp-wrap::-webkit-scrollbar-thumb{background:#d6cec2;border-radius:3px;}
+  .cmp{min-width:680px;width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;}
+  .cmp th{background:#eef1f2;color:#2b4149;padding:9px 8px;text-align:center;font-size:12px;
+    position:sticky;top:0;}
+  .cmp th:first-child{text-align:left;left:0;z-index:2;}
+  .cmp td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .cmp td:first-child{white-space:nowrap;font-weight:bold;color:#2b4149;background:#f7fafb;
+    position:sticky;left:0;}
+  .cmp tr:last-child td{border-bottom:none;}
+  .cmp .col-cur{background:rgba(244,168,37,.13);}
+  .cmp th.col-cur{background:#ffe9bb;color:#8a5a10;}
+  .cmp-hint{font-size:11.5px;color:var(--muted);margin-top:6px;text-align:center;}
+  @media print{.plan-switch{display:none;}.cmp-wrap{overflow:visible;}.cmp{min-width:0;}}
+
+  /* ===== 方案 ① · 渝中经典版 配色 ===== */
+  :root{--primary:#e6514b;--primary-dark:#c53d38;--accent:#c53d38;--gold:#f4a825;}
+  .hero-sky{background:linear-gradient(160deg,#e6514b 0%,#f0855a 48%,#f4a825 100%);}
+  .nav a.active{background:var(--primary);border-color:var(--primary);box-shadow:0 2px 8px rgba(230,81,75,.35);}
+  .nav a:active{background:var(--primary);border-color:var(--primary);}
+  .sec-head h2{color:var(--primary-dark);}
+  .sec-icon{color:#c53d38;}
+  .ov-date{background:linear-gradient(160deg,#e6514b,#f0855a)!important;}
+  .spot-illus .tag.hot{background:var(--primary);}
+  .spot-illus .price{color:var(--primary-dark);}
+  .spot-b .why b{color:var(--primary-dark);}
+  .b-item .v{color:var(--primary-dark);}
+  .b-item:nth-child(1)::after{background:#e6514b;}
+  .b-item:nth-child(2)::after{background:#f0855a;}
+  .b-item:nth-child(3)::after{background:#f4a825;}
+  .b-item:nth-child(4)::after{background:#c53d38;}
+  th{background:#fbe9e6;color:var(--primary-dark);}
+  .num{color:var(--primary-dark);}
+  .t-total td{background:#fdf6ec;}
+  .tl li::before{background:var(--primary);}
+  .tl .time{color:#c53d38;}
+  .tl .metro{background:#fbe9e6;color:#c53d38;}
+  .day-cost{background:#fdf6ec;color:#8a6a3a;}
+  .plan.reco{border-color:var(--primary);}
+  .plan.reco .plan-head{background:linear-gradient(90deg,#e6514b,#f0855a);}
+  .node{background:#fbe9e6;}
+  .tip{border-top-color:#f4a825;}
+  .tip.warn{border-top-color:var(--primary);}
+  .tip.info{border-top-color:#f0855a;}
+  .house{background:linear-gradient(135deg,#fff9ef,#fdf1e3);border-color:#f4a825;}
+  .house h3{color:#9a6b1f;}
+  .house p{color:#7a6a4a;}
+  #topBtn{background:var(--primary);box-shadow:0 4px 14px rgba(230,81,75,.4);}
+  .plan-switch{background:#3a2a28;}
+  .rail{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .rail span{background:#fbe9e6;color:#c53d38;border-radius:8px;padding:2px 10px;font-size:12px;}
+  .badge-x{display:inline-block;background:#fbe9e6;color:#c53d38;border-radius:10px;
+    padding:2px 10px;font-size:12px;margin:2px 6px 2px 0;}
+  
 </style>
 </head>
 <body>
-<div class="plan-switch"><span class="cur">① 方案一 · 渝中经典</span><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%8C.html">② 方案二 · 江北研学</a></div>
+<div class="plan-switch"><span class="ps-lbl">2026国庆亲子游</span><span class="cur">① 渝中经典</span><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%8C.html">② 江北研学</a><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%B8%89.html">③ 渝北野趣</a><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E5%9B%9B.html">④ 南岸看海</a><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%94.html">⑤ 沙磁慢游</a></div>
+<script>(function(){try{var b=document.querySelector(".plan-switch"),c=b&&b.querySelector(".cur");if(c&&c.offsetLeft>60)b.scrollLeft=c.offsetLeft-60;}catch(e){}})();</script>
 
 
 <!-- ============ HERO ============ -->
 <div class="hero">
   <div class="hero-sky">
     <h1>🐼 2026国庆重庆亲子游 · 方案一</h1>
-    <p class="sub">方案一 · <b>渝中经典线</b>｜3-4 岁专属 · 两大一小 · 火车 + 地铁全程公共交通</p>
+    <p class="sub">方案① · <b>渝中经典线</b>｜3-4 岁专属 · 两大一小 · 双线地铁全程公共交通</p>
     <div class="badge-row">
       <span class="badge">📅 2026.9.30 — 10.3</span>
       <span class="badge">🚄 酉阳 ⇄ 重庆</span>
@@ -226,7 +282,7 @@
 
 <!-- ============ 吸顶导航 ============ -->
 <nav class="nav"><div class="nav-scroll">
-  <a href="#overview">📋 行程总览</a><a href="#spots">🎠 景点推荐</a><a href="#traffic">🚄 交通方案</a><a href="#days">🗓️ 每日安排</a><a href="#budget">💰 花费预算</a><a href="#tips">🎒 遛娃贴士</a><a href="#house">🏠 看房衔接</a>
+  <a href="#overview">📋 行程总览</a><a href="#pick">🧭 五案对比</a><a href="#spots">🎠 景点推荐</a><a href="#traffic">🚄 交通方案</a><a href="#days">🗓️ 每日安排</a><a href="#budget">💰 花费预算</a><a href="#tips">🎒 遛娃贴士</a><a href="#house">🏠 看房衔接</a>
 </div></nav>
 
 <div class="wrap">
@@ -235,9 +291,11 @@
 <section id="overview">
   <div class="sec-head"><span class="sec-icon">📋</span><div><h2>行程总览</h2><p>4 天 4 晚 · 每天一主一辅 · 中午固定午休</p></div></div>
   <div class="card" style="border-left:5px solid var(--primary);">
-    <h3 style="font-size:15.5px;margin-bottom:6px;">🧭 方案一 · 渝中经典线（你正在看这页）</h3>
+    <h3 style="font-size:15.5px;margin-bottom:6px;">🧭 方案① · 渝中经典线（你正在看这页）</h3>
     <p style="font-size:13.5px;">大本营设在 <b>渝中解放碑</b>，4 晚不挪窝；主线是 <b>人文 + 动物 + 科技</b> 三条腿，把李子坝轻轨穿楼、洪崖洞、长江索道、三峡博物馆这些「山城名场面」一次看全。适合体力不错、想把经典地标都打卡的家庭。</p>
-    <p style="font-size:13px;color:var(--muted);margin-top:8px;">👉 想要更省钱、更少人挤、娃更买账的「研学版」？看 <a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%8C.html" style="color:var(--primary-dark);font-weight:bold;">方案二 · 江北研学版</a>。</p>
+    <div class="rail"><span>🚇 1/2 号线</span><span>🌉 千厮门大桥</span><span>🏛️ 三峡博物馆</span><span>🚡 长江索道</span></div>
+    <p style="font-size:13px;color:var(--muted);margin-top:10px;">👉 其他方案：<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%8C.html" style="color:var(--primary-dark);font-weight:bold;">② 江北研学</a>、<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%B8%89.html" style="color:var(--primary-dark);font-weight:bold;">③ 渝北野趣</a>、<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E5%9B%9B.html" style="color:var(--primary-dark);font-weight:bold;">④ 南岸看海</a>、<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%94.html" style="color:var(--primary-dark);font-weight:bold;">⑤ 沙磁慢游</a>。</p>
+    <p style="font-size:12.5px;color:var(--muted);margin-top:4px;">📊 五个方案逐项对比，见下方「🧭 五案对比」。</p>
   </div>
   <div class="card">
     <div class="ov" style="margin-bottom:10px;">
@@ -258,6 +316,32 @@
     </div>
     <p style="font-size:13px;color:var(--muted);margin-top:12px;">💡 全程住渝中解放碑一带不挪窝，轨道 1/2 号线覆盖全部景点；10/4 起无缝切换主城看房模式（见文末衔接方案）。</p>
   </div>
+</section>
+
+<section id="pick">
+  <div class="sec-head"><span class="sec-icon">🧭</span><div><h2>五个方案怎么选</h2><p>同一趟车、同一批假，只是玩法侧重不同</p></div></div>
+  <div class="cmp-wrap">
+    <table class="cmp">
+      <tr><th>维度</th><th class="col-cur">① 渝中经典</th><th class="">② 江北研学</th><th class="">③ 渝北野趣</th><th class="">④ 南岸看海</th><th class="">⑤ 沙磁慢游</th></tr>
+      <tr><td>一句话主题</td><td class="col-cur">人文 + 动物 + 科技</td><td class="">恐龙 + 科技研学</td><td class="">免费自然 · 草地撒欢</td><td class="">海洋馆 + 江景</td><td class="">古镇 + 绘本馆 + 亲子乐园</td></tr>
+      <tr><td>大本营</td><td class="col-cur">渝中 · 解放碑 / 较场口</td><td class="">江北 · 江北嘴 / 观音桥</td><td class="">渝北 · 中央公园片区</td><td class="">南岸 · 南坪 / 弹子石</td><td class="">沙坪坝 · 三峡广场</td></tr>
+      <tr><td>主轴地铁</td><td class="col-cur">1 / 2 号线</td><td class="">6 号线</td><td class="">3 / 5 / 10 号线</td><td class="">3 号线 / 环线</td><td class="">1 号线 / 环线</td></tr>
+      <tr><td>三天主菜</td><td class="col-cur">动物园 · 科技馆 · 三峡博物馆</td><td class="">科技馆 · 自然博物馆(恐龙) · 动物园</td><td class="">园博园 · 中央公园 · 照母山</td><td class="">汉海海洋公园 · 南山植物园 · 长江索道</td><td class="">磁器口(早场) · 图书馆儿童馆 · 融创渝乐小镇</td></tr>
+      <tr><td>门票合计</td><td class="col-cur">约 ¥430</td><td class="">约 ¥90</td><td class="">约 ¥80 — 100</td><td class="">约 ¥530</td><td class="">约 ¥350</td></tr>
+      <tr><td>住宿 4 晚</td><td class="col-cur">¥1,800 — 2,200</td><td class="">¥1,500 — 1,800</td><td class="">¥1,300 — 1,700</td><td class="">¥1,700 — 2,100</td><td class="">¥1,400 — 1,800</td></tr>
+      <tr><td>总预算</td><td class="col-cur">¥2,900 — 3,500</td><td class="">¥2,600 — 3,100</td><td class="">¥2,600 — 3,200</td><td class="">¥3,200 — 3,900</td><td class="">¥2,800 — 3,500</td></tr>
+      <tr><td>室内占比</td><td class="col-cur">约 1.5 天</td><td class="">约 2 天</td><td class="">约 0.5 天</td><td class="">约 1.5 天</td><td class="">约 1.5 天</td></tr>
+      <tr><td>推车友好</td><td class="col-cur">较好</td><td class="">很好</td><td class="">最好（大草坪 + 观光车）</td><td class="">一般（南山坡道较多）</td><td class="">一般（古镇石板路）</td></tr>
+      <tr><td>雨天可玩</td><td class="col-cur">一般</td><td class="">好</td><td class="">较差（需转室内备选）</td><td class="">一般</td><td class="">较好</td></tr>
+      <tr><td>国庆人流</td><td class="col-cur">最大（解放碑 / 洪崖洞）</td><td class="">较小</td><td class="">小</td><td class="">中等</td><td class="">中等（磁器口早场可控）</td></tr>
+      <tr><td>最适合</td><td class="col-cur">想一次打卡山城经典地标</td><td class="">想省钱省心、娃是恐龙控</td><td class="">预算最低、娃精力旺盛爱跑</td><td class="">娃爱海洋动物、大人想看江景</td><td class="">想慢节奏、爱市井烟火气</td></tr>
+      
+    </table>
+  </div>
+  <p class="cmp-hint">↔ 手机上可左右滑动查看全部 5 个方案</p>
+  <script>(function(){try{var w=document.querySelector('.cmp-wrap'),t=w&&w.querySelector('th.col-cur');
+  if(t&&t.offsetLeft>40)w.scrollLeft=t.offsetLeft-40;}catch(e){}})();</script>
+  <p style="font-size:13px;color:var(--muted);">💡 五个方案可以互相「混搭」：把喜欢的景点单独摘出来重排即可。要注意的是<b>地理位置</b>——北碚自然博物馆（北碚）、园博园（渝北）、海洋公园（南岸）、磁器口（沙坪坝）各在一方，住在那个片区才最省时间。</p>
 </section>
 
 <!-- ============ 景点推荐 ============ -->
