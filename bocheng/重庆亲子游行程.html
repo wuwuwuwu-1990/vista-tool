@@ -553,7 +553,8 @@
   var _navLinks={};
   document.querySelectorAll('.nav a[href^="#"]').forEach(function(a){_navLinks[a.getAttribute('href').slice(1)]=a;});
   function _spy(){
-    var y=window.scrollY+100,cur=_secs[0];
+    /* 激活线取视口 40% 高度：板块一进入阅读区即点亮，短板块（遛娃贴士）不再被跳过 */
+    var y=window.scrollY+window.innerHeight*0.4,cur=_secs[0];
     for(var i=0;i<_secs.length;i++){if(_secs[i].offsetTop<=y)cur=_secs[i];}
     /* 页面已滚到底时强制点亮最后一个板块（末尾板块过短滚不到顶部） */
     if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-40)cur=_secs[_secs.length-1];
