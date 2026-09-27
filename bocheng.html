@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#16a34a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="泊成家庭纪事">
+<title>泊成家庭纪事 · 家庭网页管理器 v1.0.1</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2316a34a'/%3E%3Cstop offset='1' stop-color='%234ade80'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='PingFang SC,sans-serif' font-weight='700'%3E泊%3C/text%3E%3C/svg%3E">
+<meta name="description" content="泊成家庭纪事 · 家庭静态网页管理器：上传、重命名、删除、点击预览，云端多设备同步，安卓APP随身管理。">
+<style>
+  /* ============ 苹果字体栈 + 全景绿白主题 ============ */
+  :root{
+    --g1:#16a34a; --g2:#4ade80; --gd:#15803d;
+    --red:#ef4444; --amber:#f59e0b; --blue:#0ea5e9;
+    --bg:#f0faf3; --card:#ffffff; --text:#1f2937; --sub:#6b7280;
+    --line:rgba(22,163,74,.12); --fill:#f3faf5;
+    --shadow:0 12px 40px rgba(22,163,74,.10), 0 2px 8px rgba(22,163,74,.05);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro SC","PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#f0faf3 0%,#ffffff 55%,#f2fbf6 100%);
+    color:var(--text);line-height:1.65;min-height:100vh;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  button,input{font-family:inherit;}
+
+  /* ============ 顶栏 ============ */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(240,250,243,.86);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--line);
+  }
+  .hwrap{max-width:820px;margin:0 auto;padding:13px 18px 11px;display:flex;align-items:center;gap:12px;}
+  .logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,var(--g1),var(--g2));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:700;box-shadow:0 8px 20px rgba(22,163,74,.30);flex:0 0 auto;}
+  .hinfo{flex:1;min-width:0;}
+  .hinfo h1{font-size:18.5px;font-weight:700;letter-spacing:.3px;color:#111827;}
+  .hinfo p{font-size:11.5px;color:var(--sub);}
+  .hacts{display:flex;gap:8px;align-items:center;flex:0 0 auto;}
+  .ver{font-size:11px;color:var(--gd);background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.18);border-radius:999px;padding:3px 10px;}
+  .apk-chip{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:999px;padding:5px 12px;box-shadow:0 4px 12px rgba(22,163,74,.28);}
+  .apk-chip:active{transform:scale(.95);}
+
+  /* ============ 主体 ============ */
+  main{max-width:820px;margin:0 auto;padding:16px 18px 90px;}
+  @media (max-width:600px){main{padding:14px 14px 96px;}}
+
+  /* 云端状态条（pano 风格） */
+  .cloud-bar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow);font-size:13.5px;cursor:pointer;}
+  .cloud-bar .cb-ic{font-size:18px;flex:0 0 auto;}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .dot.ok{background:var(--g1);box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+  .dot.off{background:#d1d5db;}
+  .dot.bad{background:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.15);}
+  .cb-main{flex:1;min-width:0;}
+  .cb-main b{font-weight:600;}
+  .cb-main span{display:block;font-size:11.5px;color:var(--sub);}
+
+  /* 工具条 */
+  .toolbar{display:flex;gap:10px;margin-bottom:16px;}
+  .btn{border:none;border-radius:14px;padding:12px 18px;font-size:14.5px;font-weight:600;cursor:pointer;transition:transform .1s,box-shadow .15s;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+  .btn:active{transform:scale(.96);}
+  .btn--primary{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 8px 22px rgba(22,163,74,.32);flex:1;}
+  .btn--ghost{background:var(--card);color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow);}
+  .btn--danger{background:rgba(239,68,68,.1);color:var(--red);}
+  .btn--sm{padding:8px 14px;font-size:13px;border-radius:11px;}
+  .btn[disabled]{opacity:.5;pointer-events:none;}
+
+  /* 列表 */
+  .sec-title{font-size:12.5px;color:var(--sub);margin:2px 4px 8px;display:flex;justify-content:space-between;align-items:center;}
+  .list{display:flex;flex-direction:column;gap:10px;}
+  .page{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:13px;box-shadow:var(--shadow);transition:transform .12s;}
+  .page:active{transform:scale(.985);}
+  .p-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;background:linear-gradient(145deg,#ecfdf3,#d9f7e4);}
+  .p-main{flex:1;min-width:0;}
+  .p-main .name{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .p-main .meta{font-size:11.5px;color:var(--sub);margin-top:1px;}
+  .p-acts{display:flex;gap:6px;flex:0 0 auto;}
+  .icon-btn{width:36px;height:36px;border-radius:11px;border:none;background:var(--fill);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;}
+  .icon-btn:active{transform:scale(.88);}
+  .icon-btn.open{background:rgba(22,163,74,.12);}
+  .icon-btn.del{background:rgba(239,68,68,.1);}
+  .empty{text-align:center;padding:52px 20px;color:var(--sub);}
+  .empty .e-icon{font-size:50px;margin-bottom:12px;}
+  .empty p{font-size:14px;max-width:330px;margin:0 auto;}
+  .empty .hint{font-size:12.5px;margin-top:10px;line-height:1.8;}
+
+  /* 安卓下载横幅 */
+  .apk-banner{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:18px;padding:15px 17px;margin-top:16px;color:#fff;text-decoration:none;box-shadow:0 10px 26px rgba(22,163,74,.3);}
+  .apk-banner:active{transform:scale(.98);}
+  .apk-banner .ab-ic{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;}
+  .apk-banner .ab-main{flex:1;min-width:0;}
+  .apk-banner .ab-main b{display:block;font-size:14.5px;}
+  .apk-banner .ab-main span{font-size:11.5px;opacity:.92;}
+  .apk-banner .ab-go{font-size:12.5px;background:rgba(255,255,255,.22);border-radius:999px;padding:4px 12px;flex:0 0 auto;}
+
+  /* ============ 弹层 ============ */
+  .mask{position:fixed;inset:0;background:rgba(15,40,25,.42);z-index:80;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);}
+  .mask.show{display:flex;}
+  .sheet{background:var(--card);width:100%;max-width:540px;border-radius:24px 24px 0 0;padding:20px 20px calc(22px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.32,.72,.35,1);max-height:86vh;overflow-y:auto;}
+  @media (min-width:601px){
+    .mask{align-items:center;padding:24px;}
+    .sheet{border-radius:24px;padding-bottom:22px;}
+  }
+  @keyframes up{from{transform:translateY(60%);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+  .sheet h3{font-size:17px;font-weight:700;margin-bottom:4px;color:#111827;}
+  .sheet .s-sub{font-size:12.5px;color:var(--sub);margin-bottom:14px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:5px;font-weight:500;}
+  .field input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:15px;background:var(--fill);outline:none;transition:border-color .15s;}
+  .field input:focus{border-color:var(--g1);background:#fff;}
+  .field .f-note{font-size:11.5px;color:var(--sub);margin-top:4px;}
+  .sheet-btns{display:flex;gap:10px;margin-top:16px;}
+  .sheet-btns .btn{flex:1;padding:13px;font-size:15px;border-radius:14px;}
+  .checkline{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;margin:10px 0;cursor:pointer;}
+  .checkline input{margin-top:3px;accent-color:var(--g1);}
+  .sheet .note{background:var(--fill);border-radius:12px;padding:10px 13px;font-size:12px;color:var(--sub);line-height:1.8;}
+
+  /* 确认弹窗 */
+  .alert-mask{position:fixed;inset:0;background:rgba(15,40,25,.42);z-index:90;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:24px;}
+  .alert-mask.show{display:flex;}
+  .alert{background:rgba(252,253,252,.98);border-radius:18px;max-width:300px;width:100%;overflow:hidden;text-align:center;animation:pop .22s cubic-bezier(.3,1.3,.6,1);}
+  @keyframes pop{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .alert .a-body{padding:22px 20px 16px;}
+  .alert .a-title{font-size:16px;font-weight:700;}
+  .alert .a-msg{font-size:13.5px;color:var(--sub);margin-top:6px;word-break:break-all;}
+  .alert .a-btns{display:flex;border-top:1px solid var(--line);}
+  .alert .a-btns button{flex:1;border:none;background:none;padding:13px;font-size:16px;cursor:pointer;}
+  .alert .a-btns button+button{border-left:1px solid var(--line);}
+  .a-cancel{color:var(--g1);font-weight:600;}
+  .a-ok{color:var(--g1);}
+  .a-ok.danger{color:var(--red);font-weight:600;}
+
+  /* Toast */
+  #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:rgba(20,50,32,.92);color:#fff;font-size:13.5px;padding:11px 20px;border-radius:22px;z-index:100;opacity:0;pointer-events:none;transition:.25s;max-width:84vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .loading{text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;}
+  .spin{display:inline-block;width:20px;height:20px;border:2.5px solid var(--line);border-top-color:var(--g1);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-5px;margin-right:8px;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  /* 底部标签栏（手机） */
+  .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:rgba(240,250,243,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-top:1px solid var(--line);padding:6px 0 env(safe-area-inset-bottom);}
+  .t-row{display:flex;}
+  .tab{flex:1;border:none;background:none;font-size:10.5px;color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;}
+  .tab .t-i{font-size:22px;line-height:1.2;}
+  .tab.on{color:var(--g1);}
+  @media (max-width:600px){.tabbar{display:block;}.pc-only{display:none!important;}}
+
+  .guide{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;font-size:13.5px;box-shadow:var(--shadow);margin-top:16px;}
+  .guide h4{font-size:14.5px;margin:12px 0 4px;color:#111827;}
+  .guide h4:first-child{margin-top:0;}
+  .guide p,.guide li{color:#4b5563;}
+  .guide ol{padding-left:20px;}
+  .kbd{background:var(--fill);border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:12px;font-family:"SF Mono",Menlo,monospace;}
+  footer{text-align:center;color:#9ca3af;font-size:11.5px;padding:10px 0 20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hwrap">
+    <div class="logo">泊</div>
+    <div class="hinfo">
+      <h1>泊成家庭纪事</h1>
+      <p>家庭静态网页管理器 · 云端同步 · 点击即看</p>
+    </div>
+    <div class="hacts">
+      <a class="apk-chip" href="bocheng-app.html">📱 安卓APP</a>
+      <span class="ver" id="verChip">v1.0.1</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 云端同步状态（pano 风格） -->
+  <div class="cloud-bar" onclick="openSheet('sync')">
+    <span class="cb-ic">☁</span>
+    <span class="dot off" id="cloudDot"></span>
+    <div class="cb-main">
+      <b id="cloudTitle">云端未同步</b>
+      <span id="cloudSub">点击配置同步与 GitHub 存储</span>
+    </div>
+    <span style="color:var(--g1);font-size:13px;flex:0 0 auto;">管理 ›</span>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn--primary" onclick="pickUpload()">⬆️ 上传网页</button>
+    <button class="btn btn--ghost pc-only" onclick="refresh(true)">🔄 刷新</button>
+  </div>
+  <input type="file" id="fileInput" accept=".html,.htm" multiple hidden>
+
+  <div class="sec-title"><span id="listTitle">我的网页</span><span id="listCount"></span></div>
+  <div id="listBox"><div class="loading"><span class="spin"></span>正在读取云端…</div></div>
+
+  <!-- 安卓 APP 下载横幅 -->
+  <a class="apk-banner" href="bocheng-app.html">
+    <span class="ab-ic">🤖</span>
+    <span class="ab-main"><b>安卓 APP 下载</b><span>泊成家庭纪事 Android 客户端 · 与网页版数据互通</span></span>
+    <span class="ab-go">下载 ›</span>
+  </a>
+
+  <div id="helpBox" style="display:none;">
+    <div class="guide">
+      <h4>☁️ 云端同步方案（与在线浏览全景照片同款）</h4>
+      <p>同步服务器 <span class="kbd">srv.wbc2023.top</span> 按记录级合并（谁后改谁生效，删除也同步）；网页文件本体存 GitHub 仓库 <span class="kbd">bocheng/</span> 目录，预览走 <span class="kbd">www.wbc2023.top/bocheng/</span>。</p>
+      <h4>📱 安卓版</h4>
+      <p>点上方绿色横幅下载 APK 安装；或手机浏览器打开本页 → 菜单「添加到主屏幕」。</p>
+      <h4>👀 点击进入预览</h4>
+      <p>列表点「→」在线查看网页（上传后约 1 分钟生效）。</p>
+    </div>
+  </div>
+
+  <footer>泊成家庭纪事 BoCheng Family Pages · v1.0.1 · 同步服务器 srv.wbc2023.top · 文件存储 GitHub</footer>
+</main>
+
+<nav class="tabbar"><div class="t-row">
+  <button class="tab on" onclick="refresh(true)"><span class="t-i">📖</span>我的网页</button>
+  <button class="tab" onclick="pickUpload()"><span class="t-i">⬆️</span>上传</button>
+  <button class="tab" onclick="openSheet('sync')"><span class="t-i">☁</span>同步</button>
+  <button class="tab" onclick="openSheet('settings')"><span class="t-i">⚙️</span>设置</button>
+</div></nav>
+
+<!-- ===== 同步弹层（pano 同款交互） ===== -->
+<div class="mask" id="sheetSync">
+  <div class="sheet">
+    <h3>☁ 同步</h3>
+    <p class="s-sub">云端同步走同步服务器接口，多台设备自动互通；网页文件本体存 GitHub。</p>
+    <div style="display:flex;align-items:center;gap:12px;background:var(--fill);border-radius:14px;padding:13px 15px;margin-bottom:12px;">
+      <span style="font-size:24px;">☁</span>
+      <div style="flex:1;font-size:13px;">
+        <b id="syncHostText">srv.wbc2023.top</b>
+        <div style="color:var(--sub);font-size:12px;" id="syncStatText">当前：本机 <b>0</b> 个网页 · 上次同步 <b>从未</b></div>
+      </div>
+    </div>
+    <label class="checkline"><input type="checkbox" id="ckAuto" checked onchange="toggleAuto(this.checked)"><span>自动同步：打开时拉取云端，本地改动后自动上传</span></label>
+    <div class="sheet-btns" style="margin-top:8px;">
+      <button class="btn btn--ghost" onclick="openSheet('settings')">存储设置</button>
+      <button class="btn btn--ghost" onclick="srvModal2()">服务器设置</button>
+      <button class="btn btn--primary" onclick="cloudSync(false)">立即同步</button>
+    </div>
+    <div class="note" style="margin-top:12px;">同步内容 = 网页清单（名称 / 大小 / 时间），按「谁后改谁生效」与云端合并，删除也会同步；文件本体走 GitHub，不重复占服务器空间。</div>
+    <div class="sheet-btns"><button class="btn btn--ghost" onclick="closeSheets()">关闭</button></div>
+  </div>
+</div>
+
+<!-- ===== 同步服务器设置 ===== -->
+<div class="mask" id="sheetSrv">
+  <div class="sheet">
+    <h3>服务器设置</h3>
+    <p class="s-sub">同步服务器接口与令牌（存本机 localStorage，与全景照片同款接口）</p>
+    <div class="field"><label>同步接口地址</label><input id="srvApi" type="text" placeholder="https://srv.wbc2023.top/sync"></div>
+    <div class="field"><label>应用名（app）</label><input id="srvApp" type="text" placeholder="bocheng"></div>
+    <div class="field"><label>同步令牌（token）</label><input id="srvToken" type="password" autocomplete="off"></div>
+    <div class="sheet-btns">
+      <button class="btn btn--ghost" onclick="closeSheets()">取消</button>
+      <button class="btn btn--primary" onclick="saveSrv()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GitHub 存储设置 ===== -->
+<div class="mask" id="sheetSettings">
+  <div class="sheet">
+    <h3>⚙️ 网页存储设置（GitHub）</h3>
+    <p class="s-sub">网页文件本体保存位置；配置一次，电脑 / 手机全同步</p>
+    <div class="field"><label>GitHub Token（需 repo 读写权限）</label><input id="cfgToken" type="password" placeholder="github_pat_…" autocomplete="off"><div class="f-note">仅存本机浏览器，不上传任何服务器</div></div>
+    <div class="field"><label>仓库（用户名/仓库名）</label><input id="cfgRepo" type="text" placeholder="wuwuwuwu-1990/vista-tool"></div>
+    <div class="field"><label>分支</label><input id="cfgBranch" type="text" placeholder="main"></div>
+    <div class="field"><label>存储目录</label><input id="cfgPath" type="text" placeholder="bocheng"></div>
+    <div class="field"><label>在线预览前缀</label><input id="cfgPrefix" type="text" placeholder="https://www.wbc2023.top/bocheng/"><div class="f-note">列表点「→」打开的地址 = 前缀 + 文件名</div></div>
+    <div class="sheet-btns">
+      <button class="btn btn--ghost" onclick="testConn()">测试连接</button>
+      <button class="btn btn--primary" onclick="saveCfg()">保存</button>
+    </div>
+    <div class="sheet-btns" style="margin-top:10px;"><button class="btn btn--ghost" style="flex:1;" onclick="closeSheets()">取消</button></div>
+  </div>
+</div>
+
+<!-- 重命名 -->
+<div class="mask" id="sheetRename">
+  <div class="sheet">
+    <h3>✏️ 重命名网页</h3>
+    <p class="s-sub">云端同步改名（GitHub + 同步服务器一起更新）</p>
+    <div class="field"><label>新文件名（须以 .html 结尾）</label><input id="renameInput" type="text"></div>
+    <div class="sheet-btns"><button class="btn btn--primary" onclick="doRename()">确认重命名</button></div>
+    <div class="sheet-btns" style="margin-top:10px;"><button class="btn btn--ghost" style="flex:1;" onclick="closeSheets()">取消</button></div>
+  </div>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="alert-mask" id="alertMask">
+  <div class="alert">
+    <div class="a-body">
+      <div class="a-title" id="alTitle">确认</div>
+      <div class="a-msg" id="alMsg"></div>
+    </div>
+    <div class="a-btns">
+      <button class="a-cancel" onclick="alertCancel()">取消</button>
+      <button class="a-ok" id="alOkBtn" onclick="alertOk()">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================================
+   泊成家庭纪事 · v1.0.1
+   单文件 HTML：网页文件管理（上传/重命名/删除/预览）
+   + 云端同步（srv.wbc2023.top/sync 记录级合并，与在线浏览全景照片同款协议）
+   + 文件本体存 GitHub Contents API（bocheng/ 目录）
+   主题：绿白 · 价值全景同款
+   ========================================================================= */
+var APP_VER = '1.0.1';
+var APP_NAME = '泊成家庭纪事';
+var CFG_KEY = 'bocheng_cfg_v1';
+var SRV_KEY = 'bocheng_srv_v1';
+
+var GH_FALLBACK = { token:'', repo:'wuwuwuwu-1990/vista-tool', branch:'main', path:'bocheng', prefix:'https://www.wbc2023.top/bocheng/' };
+var SRV_FALLBACK = { api:'https://srv.wbc2023.top/sync', app:'bocheng', token:'af91def02e8a9a205fe630e970b1b39a', auto:true };
+
+var ghCfg = loadJson(CFG_KEY, GH_FALLBACK);
+var srvCfg = loadJson(SRV_KEY, SRV_FALLBACK);
+var pages = [];               // GitHub 文件列表 [{name,size,sha}]
+var syncBusy = false;
+var lastSyncAt = 0;
+var renameTarget = null;
+var alertCb = null;
+
+function loadJson(key, fb){
+  var out = Object.assign({}, fb);
+  try{
+    var raw = localStorage.getItem(key);
+    if(raw){ var saved = JSON.parse(raw) || {};
+      for(var k in saved){ if(saved[k] !== undefined && saved[k] !== null) out[k] = saved[k]; }
+    }
+  }catch(e){}
+  return out;
+}
+function saveJson(key, obj){ try{ localStorage.setItem(key, JSON.stringify(obj)); }catch(e){} }
+function ghReady(){ return !!(ghCfg.token && ghCfg.repo); }
+function srvReady(){ return !!(srvCfg.api && srvCfg.app && srvCfg.token); }
+
+/* ---------------- UI 基础 ---------------- */
+function toast(msg, ms){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(function(){ t.classList.remove('show'); }, ms || 2400);
+}
+function openSheet(id){
+  if(id === 'settings'){
+    document.getElementById('cfgToken').value = ghCfg.token;
+    document.getElementById('cfgRepo').value = ghCfg.repo;
+    document.getElementById('cfgBranch').value = ghCfg.branch;
+    document.getElementById('cfgPath').value = ghCfg.path;
+    document.getElementById('cfgPrefix').value = ghCfg.prefix;
+  }
+  if(id === 'srv'){
+    document.getElementById('srvApi').value = srvCfg.api;
+    document.getElementById('srvApp').value = srvCfg.app;
+    document.getElementById('srvToken').value = srvCfg.token;
+  }
+  document.getElementById('sheet' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('show');
+}
+function srvModal2(){ closeSheets(); setTimeout(function(){ openSheet('srv'); }, 120); }
+function closeSheets(){ document.querySelectorAll('.mask').forEach(function(m){ m.classList.remove('show'); }); }
+document.querySelectorAll('.mask').forEach(function(m){
+  m.addEventListener('click', function(e){ if(e.target === m) closeSheets(); });
+});
+function confirmBox(title, msg, cb){
+  document.getElementById('alTitle').textContent = title;
+  document.getElementById('alMsg').textContent = msg;
+  document.getElementById('alOkBtn').classList.add('danger');
+  alertCb = cb;
+  document.getElementById('alertMask').classList.add('show');
+}
+function alertCancel(){ document.getElementById('alertMask').classList.remove('show'); alertCb = null; }
+function alertOk(){
+  document.getElementById('alertMask').classList.remove('show');
+  if(alertCb){ var f = alertCb; alertCb = null; f(); }
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function fmtSize(b){ if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(2)+' MB'; }
+function fmtTime(ts){
+  var d = new Date(ts);
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+/* ---------------- 同步服务器 HTTP（pano 同款协议） ---------------- */
+function srvHttp(act, method, body){
+  var base = String(srvCfg.api).replace(/\/+$/,'');
+  var url = base + '/' + act + '/' + encodeURIComponent(srvCfg.app) + '?token=' + encodeURIComponent(srvCfg.token);
+  var opt = { method: method || 'GET', headers: { 'X-Token': srvCfg.token } };
+  if(body){ opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
+  return fetch(url, opt).then(function(r){
+    if(r.status === 401){ throw new Error('同步令牌无效'); }
+    return r.json()['catch'](function(){ return {}; }).then(function(j){
+      if(!r.ok || (j && j.e)){ throw new Error((j && j.e) || ('HTTP ' + r.status)); }
+      return j;
+    });
+  });
+}
+
+/* ---------------- 同步记录 ---------------- */
+/* 记录：{ id: 文件名, v: 版本时间戳, data:{name,size}, del:bool } —— 与云端记录级合并 */
+function recordOf(f, del){
+  return {
+    id: f.name,
+    v: del ? Date.now() : (f.upd || Date.now()),
+    data: del ? null : { name: f.name, size: f.size || 0 },
+    del: !!del
+  };
+}
+function pushRecords(records){
+  if(!records || !records.length){ return Promise.resolve(0); }
+  var batches = [];
+  for(var i = 0; i < records.length; i += 12){ batches.push(records.slice(i, i + 12)); }
+  return batches.reduce(function(p, b){
+    return p.then(function(){ return srvHttp('push', 'POST', { records: b }); });
+  }, Promise.resolve()).then(function(){ return records.length; });
+}
+
+/* 云端同步：以 GitHub 文件清单为准，与同步服务器记录做记录级合并 */
+function cloudSync(silent){
+  if(!srvReady() || !ghReady()){ if(!silent){ toast('请先完成「存储设置」与「服务器设置」'); } return Promise.resolve(false); }
+  if(syncBusy){ return Promise.resolve(false); }
+  syncBusy = true;
+  if(!silent){ toast('正在与云端同步…', 1600); }
+  return refreshFromGitHub().then(function(list){
+    return srvHttp('pull').then(function(j){
+      var remote = (j && j.records) || [];
+      var rmap = {};
+      remote.forEach(function(r){ rmap[r.id] = r; });
+      var names = {};
+      list.forEach(function(f){ names[f.name] = true; });
+      var up = [];
+      list.forEach(function(f){
+        var r = rmap[f.name];
+        if(!r || r.del){ up.push(recordOf(f, false)); }
+      });
+      remote.forEach(function(r){
+        if(!r.del && !names[r.id]){ up.push(recordOf({ name: r.id }, true)); }
+      });
+      return pushRecords(up);
+    });
+  }).then(function(n){
+    syncBusy = false;
+    lastSyncAt = Date.now();
+    renderCloudStatus();
+    if(!silent){ toast('云同步完成（' + (n || 0) + ' 条变更）', 3000); }
+    return true;
+  })['catch'](function(err){
+    syncBusy = false;
+    renderCloudStatus();
+    if(!silent){ toast('云同步失败：' + (err && err.message ? err.message : err), 4400); }
+    return false;
+  });
+}
+var syncTimer = null;
+function cloudTouch(){
+  if(!srvCfg.auto || !srvReady()){ return; }
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){ cloudSync(true); }, 1500);
+}
+function toggleAuto(v){
+  srvCfg.auto = v; saveJson(SRV_KEY, srvCfg);
+  toast(v ? '已开启自动同步' : '已关闭自动同步');
+}
+function renderCloudStatus(){
+  var dot = document.getElementById('cloudDot');
+  var t = document.getElementById('cloudTitle');
+  var s = document.getElementById('cloudSub');
+  var st = document.getElementById('syncStatText');
+  if(!srvReady() || !ghReady()){
+    dot.className = 'dot off';
+    t.textContent = '云端未同步';
+    s.textContent = '点击配置同步与 GitHub 存储';
+  }else{
+    dot.className = 'dot ok';
+    t.textContent = (srvCfg.auto ? '☁ 自动同步' : '☁ 手动同步') + ' · ' + pages.length + ' 个网页';
+    s.textContent = srvCfg.app + '@' + (String(srvCfg.api).replace(/^https?:\/\//,'').replace(/\/+$/,'')) + ' · 上次同步 ' + (lastSyncAt ? fmtTime(lastSyncAt) : '从未');
+  }
+  if(st){ st.innerHTML = '当前：本机 <b>' + pages.length + '</b> 个网页 · 上次同步 <b>' + (lastSyncAt ? fmtTime(lastSyncAt) : '从未') + '</b>'; }
+}
+
+/* ---------------- GitHub API ---------------- */
+function apiBase(){ return 'https://api.github.com/repos/' + ghCfg.repo + '/contents/' + ghCfg.path; }
+function ghHeaders(extra){
+  var h = { 'Authorization': 'Bearer ' + ghCfg.token, 'Accept': 'application/vnd.github+json' };
+  if(extra) for(var k in extra) h[k] = extra[k];
+  return h;
+}
+function ghErrText(status, data){
+  if(status === 401) return 'GitHub Token 无效或过期（401）';
+  if(status === 403) return 'Token 权限不足或限流（403）';
+  if(status === 404) return '仓库或目录不存在（404）';
+  return (data && data.message) ? data.message : ('HTTP ' + status);
+}
+function bufToB64(buf){
+  var bytes = new Uint8Array(buf), bin = '', chunk = 0x8000;
+  for(var i = 0; i < bytes.length; i += chunk)
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  return btoa(bin);
+}
+
+function refreshFromGitHub(){
+  if(!ghReady()) return Promise.resolve([]);
+  return fetch(apiBase() + '?ref=' + encodeURIComponent(ghCfg.branch), { headers: ghHeaders() })
+  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+  .then(function(res){
+    if(res.status === 404){ return []; }
+    if(res.status >= 300){ throw new Error(ghErrText(res.status, res.data)); }
+    return (res.data || []).filter(function(f){ return f.type === 'file' && /\.(html?)$/i.test(f.name); })
+      .map(function(f){ return { name: f.name, size: f.size, sha: f.sha, upd: Date.now() }; });
+  });
+}
+
+function refresh(manual){
+  renderCloudStatus();
+  var box = document.getElementById('listBox');
+  if(!ghReady()){
+    box.innerHTML = emptyHtml('🔐', '先配置 GitHub 存储', '点顶部「云端未同步」卡片 →「存储设置」，填入 GitHub Token 即可开始。');
+    document.getElementById('helpBox').style.display = '';
+    setCount(0); return;
+  }
+  if(manual) box.innerHTML = '<div class="loading"><span class="spin"></span>正在同步云端列表…</div>';
+  refreshFromGitHub().then(function(list){
+    pages = list;
+    pages.sort(function(a,b){ return a.name > b.name ? 1 : -1; });
+    renderList();
+    if(manual){ toast('已刷新（' + pages.length + ' 个网页）'); }
+  })['catch'](function(e){
+    box.innerHTML = emptyHtml('⚠️', '云端读取失败', e.message + ' —— 请到「设置」检查配置或网络。');
+  });
+}
+function emptyHtml(icon, title, hint){
+  return '<div class="empty"><div class="e-icon">' + icon + '</div><p style="font-weight:600;color:var(--text);">' + title +
+         '</p><p class="hint">' + hint + '</p></div>';
+}
+function setCount(n){ document.getElementById('listCount').textContent = n ? ('共 ' + n + ' 个') : ''; }
+function pageIcon(name){
+  if(/行程|旅游|旅行|攻略/.test(name)) return '🧭';
+  if(/照片|相册|全景/.test(name)) return '📷';
+  if(/账|记账|花销/.test(name)) return '💰';
+  if(/日程|安排|计划|纪事|日记|记录/.test(name)) return '📅';
+  if(/报告|检测|体检/.test(name)) return '📋';
+  if(/菜|食谱/.test(name)) return '🍳';
+  return '📄';
+}
+function displayName(name){ return name.replace(/\.html?$/i,'').replace(/[_-]+/g,' '); }
+
+function renderList(){
+  var box = document.getElementById('listBox');
+  setCount(pages.length);
+  renderCloudStatus();
+  if(!pages.length){
+    box.innerHTML = emptyHtml('📖', '还没有网页', '点击「⬆️ 上传网页」把家庭静态网页（如：重庆亲子游行程.html）传上来，上传后电脑和手机都能看到、点击即可查看。');
+    document.getElementById('helpBox').style.display = '';
+    return;
+  }
+  document.getElementById('helpBox').style.display = 'none';
+  var html = '<div class="list">';
+  pages.forEach(function(f){
+    html += '<div class="page">' +
+      '<div class="p-icon">' + pageIcon(f.name) + '</div>' +
+      '<div class="p-main"><div class="name">' + esc(displayName(f.name)) + '</div>' +
+      '<div class="meta">' + esc(f.name) + ' · ' + fmtSize(f.size) + '</div></div>' +
+      '<div class="p-acts">' +
+        '<button class="icon-btn open" title="打开预览" onclick="openPage(\'' + escAttr(f.name) + '\')">→</button>' +
+        '<button class="icon-btn" title="重命名" onclick="askRename(\'' + escAttr(f.name) + '\')">✏️</button>' +
+        '<button class="icon-btn del" title="删除" onclick="askDelete(\'' + escAttr(f.name) + '\')">🗑️</button>' +
+      '</div></div>';
+  });
+  box.innerHTML = html + '</div>';
+}
+
+/* ---------------- 上传 ---------------- */
+function pickUpload(){ document.getElementById('fileInput').click(); }
+document.getElementById('fileInput').addEventListener('change', function(e){
+  var files = Array.prototype.slice.call(e.target.files);
+  e.target.value = '';
+  if(files.length) uploadFiles(files);
+});
+['dragover','drop'].forEach(function(ev){
+  document.addEventListener(ev, function(e){
+    e.preventDefault();
+    if(ev === 'drop' && e.dataTransfer.files.length){
+      var fs = Array.prototype.slice.call(e.dataTransfer.files).filter(function(f){ return /\.html?$/i.test(f.name); });
+      if(fs.length) uploadFiles(fs); else toast('只支持 .html 网页文件');
+    }
+  });
+});
+function uploadFiles(files){
+  if(!ghReady()){ openSheet('settings'); toast('请先配置 GitHub 存储'); return; }
+  var i = 0;
+  function next(){
+    if(i >= files.length){
+      toast('✅ 上传完成，正在同步…', 3000);
+      refresh(false).then(function(){ cloudTouch(); });
+      return;
+    }
+    var f = files[i++];
+    if(!/\.html?$/i.test(f.name)){ toast('跳过非网页文件：' + f.name); return next(); }
+    var reader = new FileReader();
+    reader.onload = function(){
+      var b64 = bufToB64(reader.result);
+      fetch(apiBase() + '/' + encodeURIComponent(f.name), {
+        method: 'PUT',
+        headers: ghHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ message: '泊成家庭纪事：上传 ' + f.name + ' (v' + APP_VER + ')', content: b64, branch: ghCfg.branch })
+      }).then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+      .then(function(res){
+        if(res.status >= 300){ toast('❌ ' + f.name + '：' + ghErrText(res.status, res.data)); }
+        else{ toast('✅ 已上传：' + f.name); }
+        next();
+      })
+      .catch(function(){ toast('❌ 网络错误：' + f.name); next(); });
+    };
+    reader.readAsArrayBuffer(f);
+  }
+  toast('正在上传（1/' + files.length + '）…');
+  next();
+}
+
+/* ---------------- 预览 ---------------- */
+function openPage(name){
+  if(!ghCfg.prefix){ toast('未配置预览地址前缀'); return; }
+  window.open(ghCfg.prefix + encodeURIComponent(name), '_blank');
+}
+
+/* ---------------- 重命名（GitHub 两步 + 同步记录） ---------------- */
+function askRename(name){
+  renameTarget = name;
+  document.getElementById('renameInput').value = name;
+  openSheet('rename');
+}
+function doRename(){
+  if(!renameTarget) return;
+  var newName = document.getElementById('renameInput').value.trim();
+  if(!/\.html?$/i.test(newName)){ toast('文件名需以 .html 结尾'); return; }
+  if(newName === renameTarget){ closeSheets(); return; }
+  var oldName = renameTarget;
+  closeSheets();
+  toast('正在重命名…');
+  fetch(apiBase() + '/' + encodeURIComponent(oldName) + '?ref=' + encodeURIComponent(ghCfg.branch), { headers: ghHeaders() })
+  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+  .then(function(res){
+    if(res.status >= 300) throw new Error(ghErrText(res.status, res.data));
+    var content = res.data.content.replace(/\n/g,'');
+    var oldSha = res.data.sha;
+    return fetch(apiBase() + '/' + encodeURIComponent(newName), {
+      method: 'PUT',
+      headers: ghHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ message: '泊成家庭纪事：重命名 ' + oldName + ' → ' + newName, content: content, branch: ghCfg.branch })
+    }).then(function(){ return { oldSha: oldSha }; });
+  })
+  .then(function(r){
+    return fetch(apiBase() + '/' + encodeURIComponent(oldName), {
+      method: 'DELETE',
+      headers: ghHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        message: '泊成家庭纪事：删除旧名 ' + oldName,
+        sha: r.oldSha,
+        branch: ghCfg.branch
+      })
+    });
+  })
+  .then(function(){
+    if(srvReady()){
+      return pushRecords([recordOf({ name: oldName }, true), recordOf({ name: newName, size: 0 }, false)]);
+    }
+  })
+  .then(function(){ toast('✅ 已重命名'); refresh(false).then(function(){ cloudTouch(); }); })
+  .catch(function(e){ toast('❌ 重命名失败：' + e.message); refresh(false); });
+}
+
+/* ---------------- 删除 ---------------- */
+function askDelete(name){
+  confirmBox('删除网页？', '「' + displayName(name) + '」将从云端删除，手机与电脑同步消失，不可恢复。', function(){ doDelete(name); });
+}
+function doDelete(name){
+  toast('正在删除…');
+  fetch(apiBase() + '/' + encodeURIComponent(name) + '?ref=' + encodeURIComponent(ghCfg.branch), { headers: ghHeaders() })
+  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+  .then(function(res){
+    if(res.status >= 300) throw new Error(ghErrText(res.status, res.data));
+    return fetch(apiBase() + '/' + encodeURIComponent(name), {
+      method: 'DELETE',
+      headers: ghHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ message: '泊成家庭纪事：删除 ' + name, sha: res.data.sha, branch: ghCfg.branch })
+    });
+  })
+  .then(function(){
+    if(srvReady()){ return pushRecords([recordOf({ name: name }, true)]); }
+  })
+  .then(function(){ toast('🗑️ 已删除'); refresh(false).then(function(){ cloudTouch(); }); })
+  .catch(function(e){ toast('❌ 删除失败：' + e.message); refresh(false); });
+}
+
+/* ---------------- 设置保存 / 测试 ---------------- */
+function saveCfg(){
+  ghCfg = {
+    token: document.getElementById('cfgToken').value.trim(),
+    repo: document.getElementById('cfgRepo').value.trim(),
+    branch: document.getElementById('cfgBranch').value.trim() || 'main',
+    path: document.getElementById('cfgPath').value.trim().replace(/^\/+|\/+$/g,''),
+    prefix: (document.getElementById('cfgPrefix').value.trim() || '').replace(/([^\/])$/,'$1/')
+  };
+  saveJson(CFG_KEY, ghCfg);
+  closeSheets(); renderCloudStatus(); refresh(true);
+  toast('✅ 存储设置已保存');
+}
+function saveSrv(){
+  srvCfg = {
+    api: document.getElementById('srvApi').value.trim(),
+    app: document.getElementById('srvApp').value.trim(),
+    token: document.getElementById('srvToken').value.trim(),
+    auto: srvCfg.auto
+  };
+  saveJson(SRV_KEY, srvCfg);
+  closeSheets(); renderCloudStatus();
+  toast('✅ 服务器设置已保存');
+  if(ghReady()) cloudSync(true);
+}
+function testConn(){
+  var token = document.getElementById('cfgToken').value.trim();
+  var repo = document.getElementById('cfgRepo').value.trim();
+  if(!token || !repo){ toast('请先填写 Token 和仓库'); return; }
+  toast('正在测试连接…');
+  fetch('https://api.github.com/repos/' + repo, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } })
+  .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+  .then(function(res){
+    if(res.status === 200){ toast('✅ 连接成功：' + res.data.full_name + '（分支 ' + res.data.default_branch + '）'); }
+    else toast('❌ ' + ghErrText(res.status, res.data));
+  })
+  .catch(function(){ toast('❌ 网络错误，请检查网络'); });
+}
+
+/* ---------------- 启动 ---------------- */
+document.getElementById('verChip').textContent = 'v' + APP_VER;
+renderCloudStatus();
+refresh(false);
+if(srvReady() && ghReady() && srvCfg.auto){ cloudSync(true); }
+</script>
+</body>
+</html>
