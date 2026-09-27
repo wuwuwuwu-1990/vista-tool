@@ -228,7 +228,7 @@
     </div>
   </div>
 
-  <footer>泊成家庭纪事 BoCheng Family Pages · v1.0.9 · 云端同步与文件存储均走 srv.wbc2023.top</footer>
+  <footer>泊成家庭纪事 BoCheng Family Pages · v1.0.10 · 云端同步与文件存储均走 srv.wbc2023.top</footer>
 </main>
 
 <!-- ===== 同步弹层（pano 同款交互） ===== -->
@@ -319,13 +319,13 @@
 
 <script>
 /* =========================================================================
-   泊成家庭纪事 · v1.0.9
+   泊成家庭纪事 · v1.0.10
    单文件 HTML：网页管理（添加网址/重命名/删除/预览）
    + 云端同步（srv.wbc2023.top/sync 记录级合并，与在线浏览全景照片同款协议）
    + 文件本体也走自己服务器图床 /upload/{app} → /img/（v1.0.2 起弃用 GitHub）
    主题：绿白 · 全景同款
    ========================================================================= */
-var APP_VER = '1.0.9';
+var APP_VER = '1.0.10';
 var APP_NAME = '泊成家庭纪事';
 var SRV_KEY = 'bocheng_srv_v1';
 
@@ -596,9 +596,20 @@ function findPage(name){
   for(var i = 0; i < pages.length; i++){ if(pages[i].name === name) return pages[i]; }
   return null;
 }
-function isInApp(){ return location.protocol === 'file:'; }
+/* 是否运行在「泊成家庭纪事」安卓壳内。
+   ⚠️ v1.0.9 起壳内页面改由服务器 https 直载（混合模式），location.protocol 不再是 file:，
+   若仍按 file: 判断会被误判成"普通浏览器"，点击网页即走 window.open → 被系统浏览器抢走。
+   故改为优先探测壳内注入的原生桥 AndroidBridge（浏览器里该对象不存在）。 */
+function isInApp(){
+  try{
+    if(location.protocol === 'file:') return true;
+    if(window.AndroidBridge && window.AndroidBridge.fetchPage) return true;
+  }catch(e){}
+  return false;
+}
 
 var viewerState = null;   /* { name, url, blobUrl } */
+var _vPushed = false;     /* v1.0.10：查看器是否已压入 history（供安卓返回键关闭） */
 
 function openPage(name){
   var p = findPage(name);
@@ -626,6 +637,8 @@ function openViewer(p){
   var v = document.getElementById('viewer');
   v.classList.add('show');
   toast('正在打开…', 1500);
+  /* v1.0.10：压一条历史，安卓物理返回键 / 手势返回可直接关掉查看器，不会再退出 App */
+  try{ history.pushState({ bochengViewer: 1 }, ''); _vPushed = true; }catch(e){}
   loadViewer();
 }
 function loadViewer(){
@@ -640,35 +653,44 @@ function loadViewer(){
     var out = /<base\s/i.test(html) ? html : html.replace(/<head([^>]*)>/i, function(m){ return m + '<base href="' + url + '">'; });
     frame.srcdoc = out;
   };
-  /* 降级1：JS 被拦时由 App 原生层代取全文 */
-  var viaBridge = function(){
-    try{
-      if(window.AndroidBridge && window.AndroidBridge.fetchPage){
-        var h = window.AndroidBridge.fetchPage(url);
-        if(h && h.length > 20){ render(h); return; }
-      }
-    }catch(e){}
-    /* 降级2：直接让 iframe 导航原地址（最兜底） */
+  /* 兜底：直接让 iframe 导航原地址（可能受目标站点 X-Frame 策略限制） */
+  var direct = function(){
     if(!viewerState || viewerState.url !== url) return;
     frame.removeAttribute('srcdoc');
     frame.src = url;
   };
+  /* v1.0.10：App 内优先走原生桥 —— 原生代取不受 CORS / 跨源限制，任意网址都能在软件内打开。
+     浏览器端没有该对象，继续走 fetch（同源直取）。 */
+  if(window.AndroidBridge && window.AndroidBridge.fetchPage){
+    var h = '';
+    try{ h = window.AndroidBridge.fetchPage(url) || ''; }catch(e){ h = ''; }
+    if(h.length > 20){ render(h); return; }
+    direct();
+    return;
+  }
   fetch(url).then(function(r){
     if(!r.ok) throw new Error('HTTP ' + r.status);
     return r.text();
   }).then(function(t){ render(t); })['catch'](function(e){
-    viaBridge();
+    direct();
   });
 }
 function viewerReload(){ loadViewer(); }
-function viewerClose(){
+/* goBack=true 表示由界面按钮触发，需要回退掉打开时压入的那条历史 */
+function closeViewer(goBack){
   var frame = document.getElementById('vframe');
   frame.removeAttribute('srcdoc');
   frame.src = 'about:blank';
   if(viewerState && viewerState.blobUrl){ try{ URL.revokeObjectURL(viewerState.blobUrl); }catch(e){} }
   viewerState = null;
   document.getElementById('viewer').classList.remove('show');
+  if(goBack && _vPushed){ _vPushed = false; try{ history.back(); }catch(e){} }
 }
+function viewerClose(){ closeViewer(true); }
+/* 安卓返回键 → WebView 后退 → popstate：关掉查看器，而不是退出 App */
+window.addEventListener('popstate', function(){
+  if(viewerState){ _vPushed = false; closeViewer(false); }
+});
 
 /* ---------------- 重命名（图床换名 + 同步记录改名） ---------------- */
 function askRename(name){
