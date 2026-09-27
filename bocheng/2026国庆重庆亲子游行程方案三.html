@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#e6514b">
+<title>2026国庆重庆亲子游 · 方案三（渝北野趣版）· 3-4岁行程 2026.9.30-10.3</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐼</text></svg>">
+<style>
+  :root{
+    --primary:#e6514b; --primary-dark:#c53d38; --accent:#2e8b8b;
+    --bg:#f7f3ec; --card:#ffffff; --text:#33302c; --muted:#807a72;
+    --line:#efe6da; --gold:#f4a825; --green:#3f9d6e; --blue:#3a7ca5;
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{font-family:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.75;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+    background:
+      radial-gradient(circle at 8% 4%, rgba(230,81,75,.07), transparent 34%),
+      radial-gradient(circle at 94% 12%, rgba(46,139,139,.08), transparent 30%),
+      radial-gradient(circle at 50% 100%, rgba(244,168,37,.08), transparent 36%);}
+  .wrap{max-width:860px;margin:0 auto;padding:0 14px 30px;}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;overflow:hidden;color:#fff;padding:0;}
+  .hero-sky{background:linear-gradient(160deg,#e6514b 0%,#ef7a54 45%,#f4a825 100%);padding:40px 18px 88px;text-align:center;position:relative;z-index:2;}
+  .hero-sky h1{font-size:27px;letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.15);}
+  .hero-sky .sub{margin-top:10px;font-size:14px;opacity:.95;}
+  .badge-row{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(4px);border-radius:20px;padding:5px 14px;font-size:12.5px;white-space:nowrap;}
+  .hero-city{position:relative;margin-top:-74px;z-index:3;}
+  .hero-city svg{display:block;width:100%;height:auto;}
+
+  /* ===== 吸顶导航 ===== */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(247,243,236,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .nav-scroll{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:860px;margin:0 auto;}
+  .nav-scroll::-webkit-scrollbar{display:none;}
+  .nav a{flex:0 0 auto;text-decoration:none;color:var(--text);font-size:13px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:6px 15px;transition:.2s;}
+  .nav a:active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .nav a.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(230,81,75,.35);}
+
+  /* ===== 通用 ===== */
+  section{margin-top:38px;scroll-margin-top:64px;}
+  .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .sec-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);flex:0 0 auto;}
+  .sec-head h2{font-size:19px;color:var(--primary-dark);}
+  .sec-head p{font-size:12px;color:var(--muted);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:0 3px 12px rgba(80,60,40,.05);}
+
+  /* ===== 行程总览（时间轴卡片）===== */
+  .ov{display:flex;gap:12px;align-items:stretch;}
+  .ov-date{flex:0 0 74px;text-align:center;background:linear-gradient(160deg,#e6514b,#f0855a);color:#fff;border-radius:12px;padding:10px 4px;display:flex;flex-direction:column;justify-content:center;}
+  .ov-date .d{font-size:17px;font-weight:bold;line-height:1.3;}
+  .ov-date .w{font-size:11px;opacity:.9;}
+  .ov-body{flex:1;min-width:0;}
+  .ov-body h3{font-size:15.5px;margin-bottom:2px;}
+  .ov-body p{font-size:13px;color:var(--muted);}
+
+  /* ===== 景点卡 ===== */
+  .spot-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:640px){.spot-grid{grid-template-columns:1fr;}}
+  .spot{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:0 3px 12px rgba(80,60,40,.05);}
+  .spot-illus{height:104px;display:flex;align-items:center;justify-content:center;position:relative;}
+  .spot-illus .emoji{font-size:52px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.15));}
+  .spot-illus .tag{position:absolute;top:10px;left:10px;font-size:11.5px;color:#fff;border-radius:10px;padding:2px 10px;background:rgba(0,0,0,.28);backdrop-filter:blur(3px);}
+  .spot-illus .tag.hot{background:var(--primary);}
+  .spot-illus .price{position:absolute;bottom:-12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:14px;font-size:12px;padding:2px 12px;color:var(--primary-dark);font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .spot-b{padding:16px 15px 15px;}
+  .spot-b h3{margin:0 0 4px;font-size:16px;}
+  .spot-b .meta{font-size:12.5px;color:var(--muted);margin:2px 0;}
+  .spot-b .why{font-size:13px;background:#fdf6ec;border-radius:10px;padding:9px 11px;margin-top:9px;}
+  .spot-b .why b{color:var(--primary-dark);}
+
+  /* ===== 交通方案 ===== */
+  .plan{border:2px solid transparent;border-radius:var(--radius);overflow:hidden;background:#fff;margin-bottom:14px;box-shadow:0 3px 12px rgba(80,60,40,.05);}
+  .plan.reco{border-color:var(--primary);}
+  .plan-head{display:flex;align-items:center;gap:8px;padding:12px 16px;color:#fff;font-weight:bold;font-size:15px;}
+  .plan.reco .plan-head{background:linear-gradient(90deg,#e6514b,#f0855a);}
+  .plan:not(.reco) .plan-head{background:linear-gradient(90deg,#7a8b96,#9aa8b2);}
+  .plan-head .rec{background:rgba(255,255,255,.25);font-size:11px;border-radius:8px;padding:1px 8px;font-weight:normal;}
+  .plan-body{padding:14px 16px;}
+  .route{display:flex;align-items:center;gap:0;font-size:13.5px;flex-wrap:wrap;margin:6px 0 10px;}
+  .node{background:#f6efe6;border-radius:10px;padding:5px 12px;font-weight:bold;}
+  .leg{flex:0 0 auto;min-width:64px;text-align:center;color:var(--accent);font-size:12px;padding:0 6px;position:relative;}
+  .leg::before{content:"";position:absolute;top:50%;left:4px;right:4px;border-top:2px dashed var(--accent);opacity:.4;}
+  .leg span{position:relative;background:var(--card);padding:0 4px;}
+  .tiny{font-size:12px;color:var(--muted);}
+  .warnbox{background:#fdeeee;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#a33b32;margin-top:8px;}
+
+  /* ===== 每日行程 ===== */
+  .day{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;box-shadow:0 3px 14px rgba(80,60,40,.06);}
+  .day-illus{height:110px;position:relative;display:flex;align-items:flex-end;overflow:hidden;}
+  .day-illus svg{position:absolute;inset:0;width:100%;height:100%;}
+  .day-head{position:relative;z-index:2;padding:14px 18px 12px;color:#fff;}
+  .day-emoji{font-size:34px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.2));}
+  .day-title{font-weight:bold;font-size:17px;text-shadow:0 1px 6px rgba(0,0,0,.25);}
+  .day-sub{font-size:12px;opacity:.92;}
+  .day:nth-of-type(1) .day-illus{background:linear-gradient(150deg,#5da3cc,#8fc6e6);}
+  .day:nth-of-type(2) .day-illus{background:linear-gradient(150deg,#3f9d6e,#7cc9a2);}
+  .day:nth-of-type(3) .day-illus{background:linear-gradient(150deg,#3a7ca5,#6db2d8);}
+  .day:nth-of-type(4) .day-illus{background:linear-gradient(150deg,#e6514b,#f0855a);}
+  .day-body{padding:16px 18px 14px;}
+  .tl{list-style:none;}
+  .tl li{position:relative;padding:0 0 15px 24px;}
+  .tl li::before{content:"";position:absolute;left:6px;top:8px;width:8px;height:8px;border-radius:50%;background:var(--primary);}
+  .tl li::after{content:"";position:absolute;left:9px;top:19px;bottom:-1px;width:2px;background:var(--line);}
+  .tl li:last-child{padding-bottom:4px;}
+  .tl li:last-child::after{display:none;}
+  .tl .time{font-weight:bold;color:var(--accent);font-size:13.5px;margin-right:6px;}
+  .tl .metro{display:inline-block;font-size:11.5px;background:#e7f3f3;color:var(--accent);border-radius:6px;padding:1px 8px;margin-left:4px;vertical-align:1px;}
+  .tl .note{display:block;font-size:13px;color:var(--muted);margin-top:3px;}
+  .day-cost{margin-top:12px;background:#fdf6ec;border-radius:10px;padding:8px 12px;font-size:12.5px;color:#8a6a3a;}
+
+  /* ===== 预算 ===== */
+  .budget-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px;}
+  @media (min-width:640px){.budget-grid{grid-template-columns:repeat(4,1fr);}}
+  .b-item{background:#fff;border:1px solid var(--line);border-radius:14px;text-align:center;padding:16px 8px;box-shadow:0 2px 8px rgba(80,60,40,.05);position:relative;overflow:hidden;}
+  .b-item::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;}
+  .b-item:nth-child(1)::after{background:#e6514b;}
+  .b-item:nth-child(2)::after{background:#3a7ca5;}
+  .b-item:nth-child(3)::after{background:#f4a825;}
+  .b-item:nth-child(4)::after{background:#3f9d6e;}
+  .b-item .v{font-size:21px;font-weight:bold;color:var(--primary-dark);}
+  .b-item .l{font-size:12px;color:var(--muted);margin-top:2px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;}
+  th{background:#fbe9e6;color:var(--primary-dark);padding:9px 10px;text-align:left;white-space:nowrap;}
+  td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .t-total td{background:#fdf6ec;font-weight:bold;font-size:15px;}
+  .num{white-space:nowrap;color:var(--primary-dark);font-weight:bold;}
+
+  /* ===== 贴士 ===== */
+  .tips{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media (min-width:640px){.tips{grid-template-columns:1fr 1fr;}}
+  .tip{background:#fff;border-radius:12px;padding:13px 15px;font-size:13.5px;box-shadow:0 2px 8px rgba(80,60,40,.05);border-top:4px solid var(--gold);display:flex;gap:10px;}
+  .tip .ti{font-size:24px;flex:0 0 auto;line-height:1.2;}
+  .tip b{display:block;margin-bottom:3px;}
+  .tip.warn{border-top-color:var(--primary);}
+  .tip.info{border-top-color:var(--blue);}
+
+  /* ===== 看房提示 ===== */
+  .house{background:linear-gradient(135deg,#fff9ef,#fdf1e3);border:1.5px dashed var(--gold);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+  .house h3{display:flex;align-items:center;gap:8px;font-size:16px;color:#9a6b1f;margin-bottom:6px;}
+  .house p{font-size:13.5px;color:#7a6a4a;}
+
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:30px 0 40px;}
+
+  /* ===== 返回顶部 ===== */
+  #topBtn{position:fixed;right:16px;bottom:22px;width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:20px;box-shadow:0 4px 14px rgba(230,81,75,.4);display:none;z-index:60;cursor:pointer;}
+  #topBtn.show{display:block;}
+
+  @media print{.nav,#topBtn{display:none;}.day,.card,.spot{break-inside:avoid;box-shadow:none;}}
+
+  /* ===== 方案切换条（5 方案 · 横向可滑） ===== */
+  .plan-switch{display:flex;align-items:center;gap:6px;overflow-x:auto;white-space:nowrap;
+    padding:8px 12px;background:#26343a;color:#fff;font-size:12.5px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .plan-switch::-webkit-scrollbar{display:none;}
+  .plan-switch .ps-lbl{flex:0 0 auto;font-size:11.5px;opacity:.6;margin-right:2px;}
+  .plan-switch .cur{flex:0 0 auto;font-weight:bold;color:#ffd23e;background:rgba(255,210,62,.14);
+    border:1px solid rgba(255,210,62,.55);border-radius:14px;padding:3px 11px;}
+  .plan-switch a{flex:0 0 auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.38);border-radius:14px;padding:3px 11px;transition:.2s;}
+  .plan-switch a:active{background:#fff;color:#26343a;}
+
+  /* ===== 五案对比表 ===== */
+  .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;
+    border:1px solid var(--line);border-radius:14px;background:#fff;}
+  .cmp-wrap::-webkit-scrollbar{height:6px;}
+  .cmp-wrap::-webkit-scrollbar-thumb{background:#d6cec2;border-radius:3px;}
+  .cmp{min-width:680px;width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;}
+  .cmp th{background:#eef1f2;color:#2b4149;padding:9px 8px;text-align:center;font-size:12px;
+    position:sticky;top:0;}
+  .cmp th:first-child{text-align:left;left:0;z-index:2;}
+  .cmp td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .cmp td:first-child{white-space:nowrap;font-weight:bold;color:#2b4149;background:#f7fafb;
+    position:sticky;left:0;}
+  .cmp tr:last-child td{border-bottom:none;}
+  .cmp .col-cur{background:rgba(244,168,37,.13);}
+  .cmp th.col-cur{background:#ffe9bb;color:#8a5a10;}
+  .cmp-hint{font-size:11.5px;color:var(--muted);margin-top:6px;text-align:center;}
+  @media print{.plan-switch{display:none;}.cmp-wrap{overflow:visible;}.cmp{min-width:0;}}
+
+  /* ===== 方案 ③ · 渝北野趣版 配色 ===== */
+  :root{--primary:#4f9d3f;--primary-dark:#35702a;--accent:#35702a;--gold:#f4a825;}
+  .hero-sky{background:linear-gradient(160deg,#4f9d3f 0%,#66b352 48%,#9ed08a 100%);}
+  .nav a.active{background:var(--primary);border-color:var(--primary);box-shadow:0 2px 8px rgba(79,157,63,.35);}
+  .nav a:active{background:var(--primary);border-color:var(--primary);}
+  .sec-head h2{color:var(--primary-dark);}
+  .sec-icon{color:#35702a;}
+  .ov-date{background:linear-gradient(160deg,#4f9d3f,#66b352)!important;}
+  .spot-illus .tag.hot{background:var(--primary);}
+  .spot-illus .price{color:var(--primary-dark);}
+  .spot-b .why b{color:var(--primary-dark);}
+  .b-item .v{color:var(--primary-dark);}
+  .b-item:nth-child(1)::after{background:#4f9d3f;}
+  .b-item:nth-child(2)::after{background:#66b352;}
+  .b-item:nth-child(3)::after{background:#f4a825;}
+  .b-item:nth-child(4)::after{background:#35702a;}
+  th{background:#e9f5e2;color:var(--primary-dark);}
+  .num{color:var(--primary-dark);}
+  .t-total td{background:#f1f8ec;}
+  .tl li::before{background:var(--primary);}
+  .tl .time{color:#35702a;}
+  .tl .metro{background:#e9f5e2;color:#35702a;}
+  .day-cost{background:#f1f8ec;color:#4a7a3a;}
+  .plan.reco{border-color:var(--primary);}
+  .plan.reco .plan-head{background:linear-gradient(90deg,#4f9d3f,#66b352);}
+  .node{background:#e9f5e2;}
+  .tip{border-top-color:#f4a825;}
+  .tip.warn{border-top-color:var(--primary);}
+  .tip.info{border-top-color:#66b352;}
+  .house{background:linear-gradient(135deg,#f4fbef,#e9f5e2);border-color:#9ed08a;}
+  .house h3{color:#35702a;}
+  .house p{color:#4a6a44;}
+  #topBtn{background:var(--primary);box-shadow:0 4px 14px rgba(79,157,63,.4);}
+  .plan-switch{background:#26401f;}
+  .rail{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .rail span{background:#e9f5e2;color:#35702a;border-radius:8px;padding:2px 10px;font-size:12px;}
+  .badge-x{display:inline-block;background:#e9f5e2;color:#35702a;border-radius:10px;
+    padding:2px 10px;font-size:12px;margin:2px 6px 2px 0;}
+  
+</style>
+</head>
+<body>
+<div class="plan-switch"><span class="ps-lbl">2026国庆亲子游</span><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%B8%80.html">① 渝中经典</a><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%8C.html">② 江北研学</a><span class="cur">③ 渝北野趣</span><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E5%9B%9B.html">④ 南岸看海</a><a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%94.html">⑤ 沙磁慢游</a></div>
+<script>(function(){try{var b=document.querySelector(".plan-switch"),c=b&&b.querySelector(".cur");if(c&&c.offsetLeft>60)b.scrollLeft=c.offsetLeft-60;}catch(e){}})();</script>
+<div class="hero">
+  <div class="hero-sky">
+    <h1>🌳 2026国庆重庆亲子游 · 方案三</h1>
+    <p class="sub">方案③ · <b>渝北野趣版</b>｜3-4 岁专属 · 两大一小 · 大本营在中央公园 · 全免费自然，草地撒欢跑</p>
+    <div class="badge-row">
+      <span class="badge">📅 2026.9.30 — 10.3</span>
+      <span class="badge">🚄 酉阳 ⇄ 重庆</span>
+      <span class="badge">🏙️ 住渝北 · 中央公园</span>
+      <span class="badge">💰 预算约 ¥2,600 — 3,200</span>
+      
+    </div>
+  </div>
+<div class="hero-city">
+    <svg viewBox="0 0 860 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,90 Q120,30 260,78 T520,70 T860,84 L860,130 L0,130 Z" fill="#7fc06a" opacity=".55"/>
+      <path d="M0,104 Q180,58 360,96 T700,92 T860,100 L860,130 L0,130 Z" fill="#5da34a" opacity=".7"/>
+      <g fill="#3a7530">
+        <rect x="60" y="52" width="26" height="78" rx="3"/><rect x="94" y="70" width="20" height="60" rx="3"/>
+        <rect x="330" y="40" width="30" height="90" rx="3"/><rect x="368" y="62" width="22" height="68" rx="3"/>
+        <rect x="560" y="48" width="28" height="82" rx="3"/><rect x="596" y="72" width="20" height="58" rx="3"/>
+        <rect x="770" y="58" width="26" height="72" rx="3"/>
+      </g>
+      <g fill="#f7d78a">
+        <rect x="150" y="84" width="40" height="46" rx="2"/><rect x="160" y="70" width="30" height="16" rx="2"/><rect x="168" y="58" width="20" height="14" rx="2"/>
+        <rect x="640" y="88" width="44" height="42" rx="2"/><rect x="650" y="74" width="32" height="16" rx="2"/>
+      </g>
+      <g fill="#fff3cf">
+        <rect x="156" y="92" width="7" height="9" rx="1.5"/><rect x="172" y="92" width="7" height="9" rx="1.5"/><rect x="156" y="108" width="7" height="9" rx="1.5"/><rect x="172" y="108" width="7" height="9" rx="1.5"/>
+        <rect x="648" y="96" width="7" height="9" rx="1.5"/><rect x="664" y="96" width="7" height="9" rx="1.5"/><rect x="664" y="112" width="7" height="9" rx="1.5"/>
+      </g>
+      <rect x="0" y="118" width="860" height="12" fill="#5b8a5e"/>
+      <rect x="470" y="70" width="60" height="26" rx="4" fill="#4c5c44"/>
+      <rect x="452" y="74" width="34" height="16" rx="8" fill="#ffd23e"/>
+      <rect x="456" y="77" width="9" height="8" rx="2" fill="#4a4a4a"/><rect x="470" y="77" width="9" height="8" rx="2" fill="#4a4a4a"/>
+      <path d="M230,44 L430,30" stroke="#fff" stroke-width="1.6" opacity=".8"/>
+      <rect x="316" y="32" width="16" height="12" rx="3" fill="#fff" opacity=".95"/>
+      <g transform="translate(700,66)">
+        <ellipse cx="14" cy="20" rx="15" ry="12" fill="#fff"/>
+        <circle cx="5" cy="7" r="5" fill="#fff"/><circle cx="23" cy="7" r="5" fill="#fff"/>
+        <circle cx="5" cy="7" r="2.6" fill="#333"/><circle cx="23" cy="7" r="2.6" fill="#333"/>
+        <ellipse cx="8" cy="16" rx="3.4" ry="4.6" fill="#333" transform="rotate(-20 8 16)"/>
+        <ellipse cx="20" cy="16" rx="3.4" ry="4.6" fill="#333" transform="rotate(20 20 16)"/>
+        <ellipse cx="14" cy="21" rx="2.2" ry="1.8" fill="#333"/>
+        <rect x="9" y="6" width="10" height="3.4" rx="1.7" fill="#7cb342" transform="rotate(-8 14 8)"/>
+      </g>
+      <g transform="translate(120,116)"><path d="M0,4 L26,4 L20,10 L6,10 Z" fill="#f7d78a"/><rect x="10" y="0" width="3" height="5" fill="#e0b25e"/></g>
+    </svg>
+  </div>
+</div>
+
+<nav class="nav"><div class="nav-scroll">
+  <a href="#overview">📋 行程总览</a><a href="#pick">🧭 五案对比</a><a href="#spots">🎠 景点推荐</a><a href="#traffic">🚄 交通方案</a><a href="#days">🗓 每日安排</a><a href="#budget">💰 花费预算</a><a href="#tips">🎒 遛娃贴士</a><a href="#house">🏠 看房衔接</a>
+</div></nav>
+
+<div class="wrap">
+
+<section id="overview">
+  <div class="sec-head"><span class="sec-icon">📋</span><div><h2>行程总览</h2><p>4 天 4 晚 · 大本营在渝北中央公园片区 · 全免费自然线</p></div></div>
+  <div class="card" style="border-left:5px solid var(--primary);">
+    <h3 style="font-size:15.5px;margin-bottom:6px;">🧭 方案③ · 渝北野趣版（你正在看这页）</h3>
+    <p style="font-size:13.5px;">大本营换到 <b>渝北 · 中央公园片区</b>：住宿最便宜、地铁最宽裕；主菜是 <b>重庆园博园</b>（免费、超大、有观光车和儿童乐园）、<b>中央公园大草坪</b>、<b>照母山森林公园</b>。几乎不要门票，适合娃精力旺盛、想彻底放养、预算最紧的家庭。</p>
+    <div class="rail"><span>🚇 3/5/10 号线</span><span>🌳 园博园免费</span><span>🅿️ 推车最友好</span><span>🌧️ 雨天需转室内备选</span></div>
+    <p style="font-size:13px;color:var(--muted);margin-top:10px;">👉 其他方案：<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%B8%80.html" style="color:var(--primary-dark);font-weight:bold;">① 渝中经典</a>、<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%8C.html" style="color:var(--primary-dark);font-weight:bold;">② 江北研学</a>、<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E5%9B%9B.html" style="color:var(--primary-dark);font-weight:bold;">④ 南岸看海</a>、<a href="https://srv.wbc2023.top/bocheng/2026%E5%9B%BD%E5%BA%86%E9%87%8D%E5%BA%86%E4%BA%B2%E5%AD%90%E6%B8%B8%E8%A1%8C%E7%A8%8B%E6%96%B9%E6%A1%88%E4%BA%94.html" style="color:var(--primary-dark);font-weight:bold;">⑤ 沙磁慢游</a>。</p>
+    <p style="font-size:12.5px;color:var(--muted);margin-top:4px;">📊 五个方案逐项对比，见下方「🧭 五案对比」。</p>
+  </div>
+  <div class="card">
+    <div class="ov" style="margin-bottom:10px;">
+      <div class="ov-date"><span class="d">9/30</span><span class="w">周三 · 出发</span></div>
+      <div class="ov-body"><h3>🚄 安顿 + 草坪放电</h3><p>酉阳出发 → 入住渝北中央公园 → 中央公园大草坪撒欢 → 商圈晚餐</p></div>
+    </div>
+    <div class="ov" style="margin-bottom:10px;">
+      <div class="ov-date"><span class="d">10/1</span><span class="w">周四 · 国庆</span></div>
+      <div class="ov-body"><h3>🌳 园博园全天</h3><p>重庆园博园（免费）→ 观光车环湖 → 园内儿童乐园 → 回酒店午休</p></div>
+    </div>
+    <div class="ov" style="margin-bottom:10px;">
+      <div class="ov-date"><span class="d">10/2</span><span class="w">周五</span></div>
+      <div class="ov-body"><h3>⛰️ 登高看城</h3><p>照母山森林公园半日 → 午休 → 两江幸福广场 / 光环购物公园室内儿童区</p></div>
+    </div>
+    <div class="ov">
+      <div class="ov-date"><span class="d">10/3</span><span class="w">周六</span></div>
+      <div class="ov-body"><h3>🐼 熊猫日</h3><p>清晨重庆动物园看熊猫 → 午休 → 观音桥商圈 → 告别火锅</p></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px;">💡 本方案的最大特点是「场所大、人相对少、几乎不要门票」；中央公园、园博园、照母山都在渝北一片，3 号线 / 5 号线 / 10 号线都能到，转场时间短。10/4 起无缝切换主城看房（见文末）。</p>
+  </div>
+</section>
+
+<section id="pick">
+  <div class="sec-head"><span class="sec-icon">🧭</span><div><h2>五个方案怎么选</h2><p>同一趟车、同一批假，只是玩法侧重不同</p></div></div>
+  <div class="cmp-wrap">
+    <table class="cmp">
+      <tr><th>维度</th><th class="">① 渝中经典</th><th class="">② 江北研学</th><th class="col-cur">③ 渝北野趣</th><th class="">④ 南岸看海</th><th class="">⑤ 沙磁慢游</th></tr>
+      <tr><td>一句话主题</td><td class="">人文 + 动物 + 科技</td><td class="">恐龙 + 科技研学</td><td class="col-cur">免费自然 · 草地撒欢</td><td class="">海洋馆 + 江景</td><td class="">古镇 + 绘本馆 + 亲子乐园</td></tr>
+      <tr><td>大本营</td><td class="">渝中 · 解放碑 / 较场口</td><td class="">江北 · 江北嘴 / 观音桥</td><td class="col-cur">渝北 · 中央公园片区</td><td class="">南岸 · 南坪 / 弹子石</td><td class="">沙坪坝 · 三峡广场</td></tr>
+      <tr><td>主轴地铁</td><td class="">1 / 2 号线</td><td class="">6 号线</td><td class="col-cur">3 / 5 / 10 号线</td><td class="">3 号线 / 环线</td><td class="">1 号线 / 环线</td></tr>
+      <tr><td>三天主菜</td><td class="">动物园 · 科技馆 · 三峡博物馆</td><td class="">科技馆 · 自然博物馆(恐龙) · 动物园</td><td class="col-cur">园博园 · 中央公园 · 照母山</td><td class="">汉海海洋公园 · 南山植物园 · 长江索道</td><td class="">磁器口(早场) · 图书馆儿童馆 · 融创渝乐小镇</td></tr>
+      <tr><td>门票合计</td><td class="">约 ¥430</td><td class="">约 ¥90</td><td class="col-cur">约 ¥80 — 100</td><td class="">约 ¥530</td><td class="">约 ¥350</td></tr>
+      <tr><td>住宿 4 晚</td><td class="">¥1,800 — 2,200</td><td class="">¥1,500 — 1,800</td><td class="col-cur">¥1,300 — 1,700</td><td class="">¥1,700 — 2,100</td><td class="">¥1,400 — 1,800</td></tr>
+      <tr><td>总预算</td><td class="">¥2,900 — 3,500</td><td class="">¥2,600 — 3,100</td><td class="col-cur">¥2,600 — 3,200</td><td class="">¥3,200 — 3,900</td><td class="">¥2,800 — 3,500</td></tr>
+      <tr><td>室内占比</td><td class="">约 1.5 天</td><td class="">约 2 天</td><td class="col-cur">约 0.5 天</td><td class="">约 1.5 天</td><td class="">约 1.5 天</td></tr>
+      <tr><td>推车友好</td><td class="">较好</td><td class="">很好</td><td class="col-cur">最好（大草坪 + 观光车）</td><td class="">一般（南山坡道较多）</td><td class="">一般（古镇石板路）</td></tr>
+      <tr><td>雨天可玩</td><td class="">一般</td><td class="">好</td><td class="col-cur">较差（需转室内备选）</td><td class="">一般</td><td class="">较好</td></tr>
+      <tr><td>国庆人流</td><td class="">最大（解放碑 / 洪崖洞）</td><td class="">较小</td><td class="col-cur">小</td><td class="">中等</td><td class="">中等（磁器口早场可控）</td></tr>
+      <tr><td>最适合</td><td class="">想一次打卡山城经典地标</td><td class="">想省钱省心、娃是恐龙控</td><td class="col-cur">预算最低、娃精力旺盛爱跑</td><td class="">娃爱海洋动物、大人想看江景</td><td class="">想慢节奏、爱市井烟火气</td></tr>
+      
+    </table>
+  </div>
+  <p class="cmp-hint">↔ 手机上可左右滑动查看全部 5 个方案</p>
+  <script>(function(){try{var w=document.querySelector('.cmp-wrap'),t=w&&w.querySelector('th.col-cur');
+  if(t&&t.offsetLeft>40)w.scrollLeft=t.offsetLeft-40;}catch(e){}})();</script>
+  <p style="font-size:13px;color:var(--muted);">💡 五个方案可以互相「混搭」：把喜欢的景点单独摘出来重排即可。要注意的是<b>地理位置</b>——北碚自然博物馆（北碚）、园博园（渝北）、海洋公园（南岸）、磁器口（沙坪坝）各在一方，住在那个片区才最省时间。</p>
+</section>
+
+<section id="spots">
+  <div class="sec-head"><span class="sec-icon">🎠</span><div><h2>为什么选这些地方</h2><p>3-4 岁自然清单 · 全部免费或低价 · 场地大、人相对少</p></div></div>
+  <div class="spot-grid">
+
+    <div class="spot">
+      <div class="spot-illus" style="background:linear-gradient(150deg,#bfe8b0,#e6f6df);">
+        <span class="emoji">🌳</span><span class="tag hot">首推</span><span class="price">免费</span>
+      </div>
+      <div class="spot-b">
+        <h3>重庆园博园（渝北）</h3>
+        <p class="meta">📍 轨道 3 号线「园博园」站下车步行 5 分钟</p>
+        <p class="why"><b>开拓看点：</b>全城性价比之王——<b>免费</b>、超大、有湖有黑天鹅有音乐喷泉，127 个园林展园足够逛两天；园内可租观光车，儿童游乐区免费。国庆人流密度远低于渝中半岛，推车走主环线毫无压力。</p>
+      </div>
+    </div>
+
+    <div class="spot">
+      <div class="spot-illus" style="background:linear-gradient(150deg,#cdecc1,#ecf8e6);">
+        <span class="emoji">🌳</span><span class="tag hot">首推</span><span class="price">免费</span>
+      </div>
+      <div class="spot-b">
+        <h3>重庆中央公园</h3>
+        <p class="meta">📍 轨道 5 号线「中央公园西」/ 10 号线「中央公园东」站</p>
+        <p class="why"><b>开拓看点：</b>主城最大城市草坪之一，娃可以尽情跑、放风筝、吹泡泡；旁有银杏大道和儿童沙池，推车无障碍。住宿就在旁边，早晚各来一趟都不费事。</p>
+      </div>
+    </div>
+
+    <div class="spot">
+      <div class="spot-illus" style="background:linear-gradient(150deg,#d6eecb,#f0f9eb);">
+        <span class="emoji">⛰️</span><span class="tag">推荐</span><span class="price">免费</span>
+      </div>
+      <div class="spot-b">
+        <h3>照母山森林公园</h3>
+        <p class="meta">📍 轨道 5 号线「人和」站 + 打车约 10 分钟</p>
+        <p class="why"><b>开拓看点：</b>不要门票的城市山体公园，主路平缓能推车，山顶「城市之巅」可俯瞰两江新区；樱花湖一带春天最美，秋天走林荫道也舒服。</p>
+      </div>
+    </div>
+
+    <div class="spot">
+      <div class="spot-illus" style="background:linear-gradient(150deg,#b7e0c4,#e4f4ea);">
+        <span class="emoji">🐼</span><span class="tag">推荐</span><span class="price">成人 ¥25 · 娃免费</span>
+      </div>
+      <div class="spot-b">
+        <h3>重庆动物园</h3>
+        <p class="meta">📍 轨道 2 号线「动物园」站下车即达</p>
+        <p class="why"><b>开拓看点：</b>20 多只大熊猫 + 长颈鹿、大象、金丝猴，园路平缓可推车，是全城性价比最高的付费景点。<b>务必清早去</b>。</p>
+      </div>
+    </div>
+
+    <div class="spot">
+      <div class="spot-illus" style="background:linear-gradient(150deg,#e6dcf7,#f4effc);">
+        <span class="emoji">🛍️</span><span class="tag">备选</span><span class="price">免费</span>
+      </div>
+      <div class="spot-b">
+        <h3>两江幸福广场 / 光环购物公园</h3>
+        <p class="meta">📍 轨道 10 号线「重光」/「中央公园东」站</p>
+        <p class="why"><b>开拓看点：</b>纯室内备选：儿童游乐层、母婴室、绘本区、餐饮齐全，下雨天把 Day 3 下午整段替换成这里即可，全程不淋雨。</p>
+      </div>
+    </div>
+
+    <div class="spot">
+      <div class="spot-illus" style="background:linear-gradient(150deg,#ffe6b8,#fff5da);">
+        <span class="emoji">🔔</span><span class="tag">备选</span><span class="price">免费</span>
+      </div>
+      <div class="spot-b">
+        <h3>金海湾滨江公园 / 重庆图书馆儿童馆</h3>
+        <p class="meta">📍 江北嘴滨江（轨道 6 号线大剧院站）/ 沙坪坝（1 号线）</p>
+        <p class="why"><b>开拓看点：</b>想看江就去金海湾滨江公园（江边步道平坦、骑行道好走）；想安静就去重庆图书馆儿童馆，免费绘本 + 亲子阅读区，是下雨天的保底方案。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="traffic">
+  <div class="sec-head"><span class="sec-icon">🚄</span><div><h2>酉阳 → 重庆 交通方案</h2><p>五个方案完全一致 · 儿童未满 6 周岁免票</p></div></div>
+
+  <div class="plan reco">
+    <div class="plan-head">🅰 黔江中转高铁 <span class="rec">推荐 · 最快 2.5 小时</span></div>
+    <div class="plan-body">
+      <div class="route">
+        <span class="node">🚉 酉阳</span><span class="leg">K804 约55分<span class="tiny">硬座约¥24</span></span><span class="node">🔁 黔江</span><span class="leg">高铁约1小时<span class="tiny">二等约¥100</span></span><span class="node">🏁 重庆东</span>
+      </div>
+      <table>
+        <tr><th>区间</th><th>参考车次</th><th>时刻</th><th>参考票价</th></tr>
+        <tr><td>酉阳 → 黔江</td><td>K804 等普速多班</td><td>09:08 → 10:03</td><td class="num">硬座约 ¥24</td></tr>
+        <tr><td>黔江 → 重庆东</td><td>G2428 / G2418 / G2434</td><td>10:37 → 11:45</td><td class="num">二等座约 ¥100</td></tr>
+      </table>
+      <div class="warnbox">⚠️ 国庆票紧俏：两段须分别购票（12306 提前 15 天开售即抢 + 设候补），中转预留 ≥30 分钟。</div>
+    </div>
+  </div>
+
+  <div class="plan">
+    <div class="plan-head">🅱 直达城际 <span class="rec">不换乘 · 约 3 小时 47 分</span></div>
+    <div class="plan-body">
+      <div class="route">
+        <span class="node">🚉 酉阳 07:30</span><span class="leg">C834 直达<span class="tiny">二等 ¥101</span></span><span class="node">🏁 重庆北 11:17</span>
+      </div>
+      <table>
+        <tr><th>车次</th><th>酉阳发车</th><th>到达重庆</th><th>参考票价（成人）</th></tr>
+        <tr><td>C834 城际</td><td>07:30</td><td>11:17 重庆北</td><td class="num">二等 ¥101 / 一等 ¥161</td></tr>
+        <tr><td>K804 快速</td><td>09:08</td><td>13:38 重庆东</td><td class="num">硬座 ¥51.5 / 硬卧 ¥97.5</td></tr>
+        <tr><td>K508 快速</td><td>14:56</td><td>19:30 重庆北</td><td class="num">硬座 ¥53.5</td></tr>
+      </table>
+      <p class="tiny" style="margin-top:8px;">💡 <b>本方案推荐这条</b>：C834 直达 <b>重庆北站</b>，出站换 10 号线可直达「中央公园东」站，入住渝北几乎不用绕路。在 12306 添加「免费乘车儿童」声明即可带娃同行。</p>
+    </div>
+  </div>
+</section>
+
+<section id="days">
+  <div class="sec-head"><span class="sec-icon">🗓</span><div><h2>每日详细安排</h2><p>每天 1 个主景点 + 1 个轻松项 · 13:00-15:00 固定午休</p></div></div>
+
+  <div class="day">
+    <div class="day-illus" style="background:linear-gradient(150deg,#4f9d3f,#9ed08a);">
+      <svg viewBox="0 0 860 110" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="rgba(255,255,255,.28)">
+          <rect x="46" y="30" width="42" height="80" rx="4"/><rect x="128" y="56" width="30" height="54" rx="4"/>
+          <rect x="672" y="42" width="38" height="68" rx="4"/><rect x="756" y="62" width="28" height="48" rx="4"/>
+        </g>
+        <path d="M0,88 C160,74 300,96 430,86 T860,90 L860,110 L0,110 Z" fill="rgba(255,255,255,.32)"/>
+        <rect x="330" y="40" width="96" height="36" rx="6" fill="rgba(255,255,255,.9)"/>
+        <rect x="434" y="34" width="84" height="32" rx="6" fill="rgba(255,255,255,.55)"/>
+        <rect x="314" y="48" width="26" height="17" rx="10" fill="#ffd23e"/><rect x="456" y="48" width="26" height="17" rx="10" fill="#ffd23e"/>
+        <g transform="translate(600,50)"><ellipse cx="20" cy="0" rx="20" ry="7" fill="rgba(255,255,255,.5)"/></g>
+      </svg>
+      <div class="day-head">
+        <div style="display:flex;align-items:center;gap:12px;"><span class="day-emoji">🚄</span>
+        <div><div class="day-title">Day 1 · 9/30 周三 · 安顿 + 草坪放电</div><div class="day-sub">酉阳出发 → 入住渝北 → 中央公园大草坪 → 商圈晚餐</div></div></div>
+      </div>
+    </div>
+    <div class="day-body">
+      <ul class="tl">
+        <li><span class="time">07:30</span>酉阳站乘 C834 直达<span class="note">首选 C834 07:30 → 11:17 <b>重庆北</b>，出站换 10 号线；备好零食、绘本、贴纸安抚娃</span></li>
+        <li><span class="time">12:30</span>入住渝北中央公园片区<span class="metro">10 号线</span><span class="note">订房优先「地铁站步行 500 米内 + 家庭房」；楼下小面 ¥10-15 解决午餐</span></li>
+        <li><span class="time">14:30</span>重庆中央公园大草坪<span class="note">主城最大的城市草坪之一，娃跑跳、放风筝、吹泡泡；推车全程无障碍，旁边有洗手间和便利店</span></li>
+        <li><span class="time">16:30</span>光环购物公园 / 两江幸福广场<span class="note">室内空调、儿童游乐层、母婴室齐全；大人顺便补给用品</span></li>
+        <li><span class="time">18:30</span>晚餐：家门口的江湖菜<span class="note">不吃辣就点蒸蛋、抄手、蛋炒饭；这边餐饮比解放碑便宜 20% 左右</span></li>
+      </ul>
+      <div class="day-cost">💰 当日约 <b>¥330</b>（火车 ¥250 + 轨道 ¥16 + 餐饮 ¥150，不含住宿）</div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-illus" style="background:linear-gradient(150deg,#66b352,#a8d78f);">
+      <svg viewBox="0 0 860 110" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M0,96 C140,66 250,92 380,72 T700,84 T860,74 L860,110 L0,110 Z" fill="rgba(255,255,255,.3)"/>
+        <g fill="rgba(255,255,255,.55)">
+          <g transform="translate(120,30)"><path d="M16,0 L32,34 L0,34 Z"/><path d="M16,14 L34,50 L-2,50 Z" opacity=".8"/><rect x="13" y="48" width="6" height="16"/></g>
+          <g transform="translate(300,44) scale(.8)"><path d="M16,0 L32,34 L0,34 Z"/><path d="M16,14 L34,50 L-2,50 Z" opacity=".8"/><rect x="13" y="48" width="6" height="16"/></g>
+          <g transform="translate(680,38) scale(.9)"><path d="M16,0 L32,34 L0,34 Z"/><path d="M16,14 L34,50 L-2,50 Z" opacity=".8"/><rect x="13" y="48" width="6" height="16"/></g>
+        </g>
+        <path d="M0,100 C200,86 380,104 560,94 T860,98 L860,110 L0,110 Z" fill="rgba(255,255,255,.4)"/>
+        <g transform="translate(470,52)"><circle cx="14" cy="12" r="10" fill="#ffd23e"/><path d="M14,22 v14 M14,26 l-9,6 M14,26 l9,6 M14,32 l-7,10 M14,32 l7,10" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>
+      </svg>
+      <div class="day-head">
+        <div style="display:flex;align-items:center;gap:12px;"><span class="day-emoji">🌳</span>
+        <div><div class="day-title">Day 2 · 10/1 周四 · 园博园全天</div><div class="day-sub">重庆园博园（免费）· 观光车环湖 · 园内儿童乐园</div></div></div>
+      </div>
+    </div>
+    <div class="day-body">
+      <ul class="tl">
+        <li><span class="time">08:30</span>出发去园博园<span class="metro">3 号线「园博园」站</span><span class="note">免费入园，建议 9:00 前到，停车位和入园口都不挤；园子极大，务必租观光车或坐游览车</span></li>
+        <li><span class="time">09:00-12:00</span>园博园主环线<span class="note"><b>免费</b>！127 个国内外园林展园 + 大湖 + 音乐喷泉；带推车走主环线，湖边喂鱼、看黑天鹅，娃能走上半天</span></li>
+        <li><span class="time">12:00</span>园内野餐 / 简餐 → 回酒店午休<span class="note">带野餐垫在草坪上吃最舒服；也可出园回酒店午休，下午再来（门票免费，可反复进出）</span></li>
+        <li><span class="time">15:00</span>园内儿童游乐区 + 湖边步道<span class="note">园博园里有儿童游乐场、沙池；不想久留就环湖慢走，国庆这里人流密度远低于洪崖洞</span></li>
+        <li><span class="time">18:00</span>晚餐 + 早回酒店<span class="note">本日步行最多，早点休息</span></li>
+      </ul>
+      <div class="day-cost">💰 当日约 <b>¥180</b>（门票 ¥0 + 观光车 ¥30 + 轨道 ¥12 + 餐饮 ¥140，本方案最省的一天）</div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-illus" style="background:linear-gradient(150deg,#3f8a35,#7cc06a);">
+      <svg viewBox="0 0 860 110" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M0,96 C140,66 250,92 380,72 T700,84 T860,74 L860,110 L0,110 Z" fill="rgba(255,255,255,.3)"/>
+        <g fill="rgba(255,255,255,.55)">
+          <g transform="translate(120,30)"><path d="M16,0 L32,34 L0,34 Z"/><path d="M16,14 L34,50 L-2,50 Z" opacity=".8"/><rect x="13" y="48" width="6" height="16"/></g>
+          <g transform="translate(300,44) scale(.8)"><path d="M16,0 L32,34 L0,34 Z"/><path d="M16,14 L34,50 L-2,50 Z" opacity=".8"/><rect x="13" y="48" width="6" height="16"/></g>
+          <g transform="translate(680,38) scale(.9)"><path d="M16,0 L32,34 L0,34 Z"/><path d="M16,14 L34,50 L-2,50 Z" opacity=".8"/><rect x="13" y="48" width="6" height="16"/></g>
+        </g>
+        <path d="M0,100 C200,86 380,104 560,94 T860,98 L860,110 L0,110 Z" fill="rgba(255,255,255,.4)"/>
+        <g transform="translate(470,52)"><circle cx="14" cy="12" r="10" fill="#ffd23e"/><path d="M14,22 v14 M14,26 l-9,6 M14,26 l9,6 M14,32 l-7,10 M14,32 l7,10" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>
+      </svg>
+      <div class="day-head">
+        <div style="display:flex;align-items:center;gap:12px;"><span class="day-emoji">⛰️</span>
+        <div><div class="day-title">Day 3 · 10/2 周五 · 登高看城</div><div class="day-sub">照母山森林公园 → 两江幸福广场室内儿童区</div></div></div>
+      </div>
+    </div>
+    <div class="day-body">
+      <ul class="tl">
+        <li><span class="time">08:30</span>出发去照母山森林公园<span class="note">轨道 5 号线「人和」站出站打车约 10 分钟；园区<b>免费</b>，园内有樱花湖、城市之巅观景台</span></li>
+        <li><span class="time">09:00-12:00</span>照母山慢爬 + 植物园<span class="note">主路坡度平缓可推车，看城市全景和轻轨远景；带足饮水，山顶风大给娃加件外套</span></li>
+        <li><span class="time">12:00</span>山下午餐 → 回酒店午休<span class="note">山脚有社区餐厅，价格实在</span></li>
+        <li><span class="time">15:30</span>两江幸福广场 / 光环购物公园<span class="note">室内儿童乐园、蹦床、绘本区，娃放电、大人喝咖啡；雨天可整段替换</span></li>
+        <li><span class="time">18:30</span>晚餐 + 回酒店<span class="note">想换口味可打车去观音桥商圈（约 ¥30）</span></li>
+      </ul>
+      <div class="day-cost">💰 当日约 <b>¥240</b>（门票 ¥0 + 打车 ¥60 + 餐饮 ¥180）</div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-illus" style="background:linear-gradient(150deg,#35702a,#6fae57);">
+      <svg viewBox="0 0 860 110" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M60,22 L600,44" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
+        <g transform="translate(320,18)"><rect x="0" y="0" width="26" height="18" rx="4" fill="#fff"/><rect x="4" y="4" width="18" height="10" rx="2" fill="#2f7d8c" opacity=".55"/></g>
+        <g transform="translate(620,26) scale(1.4)">
+          <ellipse cx="14" cy="20" rx="15" ry="12" fill="#fff"/>
+          <circle cx="5" cy="7" r="5" fill="#fff"/><circle cx="23" cy="7" r="5" fill="#fff"/>
+          <circle cx="5" cy="7" r="2.6" fill="#333"/><circle cx="23" cy="7" r="2.6" fill="#333"/>
+          <ellipse cx="8" cy="16" rx="3.4" ry="4.6" fill="#333" transform="rotate(-20 8 16)"/>
+          <ellipse cx="20" cy="16" rx="3.4" ry="4.6" fill="#333" transform="rotate(20 20 16)"/>
+        </g>
+        <path d="M0,92 C150,84 300,98 430,90 T860,92 L860,110 L0,110 Z" fill="rgba(255,255,255,.3)"/>
+        <g fill="rgba(255,255,255,.28)"><rect x="90" y="54" width="36" height="56" rx="4"/><rect x="700" y="48" width="38" height="62" rx="4"/></g>
+      </svg>
+      <div class="day-head">
+        <div style="display:flex;align-items:center;gap:12px;"><span class="day-emoji">🐼</span>
+        <div><div class="day-title">Day 4 · 10/3 周六 · 熊猫日</div><div class="day-sub">清晨动物园看熊猫 → 观音桥商圈 → 告别火锅</div></div></div>
+      </div>
+    </div>
+    <div class="day-body">
+      <ul class="tl">
+        <li><span class="time">07:00</span>早起赶 8 点开园<span class="metro">3→2 号线，约 50 分</span><span class="note">⏰ 关键：早晨熊猫最活跃，能看吃饭、爬树、打架；越晚动物越懒</span></li>
+        <li><span class="time">08:00-12:00</span>重庆动物园慢慢逛<span class="note">重点熊猫馆（20 多只），再看长颈鹿、大象、猴山；园路平缓可推车，成人 ¥25、娃免费</span></li>
+        <li><span class="time">12:30</span>附近午餐 → 回酒店午休<span class="note">3-4 岁娃务必午休 1.5-2 小时</span></li>
+        <li><span class="time">15:30</span>观音桥商圈遛娃<span class="note">室内儿童乐园 + 书店；顺路买火锅底料、陈麻花当手信</span></li>
+        <li><span class="time">18:30</span>告别晚餐：老火锅<span class="note">给娃点番茄鸳鸯锅、蛋炒饭，大人吃地道麻辣</span></li>
+      </ul>
+      <div class="day-cost">💰 当日约 <b>¥290</b>（动物园 ¥50 + 轨道 ¥30 + 餐饮 ¥210）</div>
+    </div>
+  </div>
+</section>
+
+<section id="budget">
+  <div class="sec-head"><span class="sec-icon">💰</span><div><h2>食宿花费预算（2大1小 · 不含返程）</h2><p>全免费自然线 · 门票支出最省的一版</p></div></div>
+  <div class="budget-grid">
+    <div class="b-item"><div class="v">¥200-405</div><div class="l">🚄 火车单程（2成人）</div></div>
+    <div class="b-item"><div class="v">¥1,300-1,700</div><div class="l">🏨 住宿 4 晚（渝北）</div></div>
+    <div class="b-item"><div class="v">¥780-950</div><div class="l">🍜 餐饮 4 天半</div></div>
+    <div class="b-item"><div class="v">¥100</div><div class="l">🎫 门票 + 市内轨道</div></div>
+  </div>
+  <div class="card">
+    <table>
+      <tr><th>项目</th><th>明细</th><th>金额</th></tr>
+      <tr><td>🚄 火车单程</td><td>C834 直达 ¥202 或黔江中转约 ¥250（2 成人，儿童免票不占座）；<b>返程未计入</b></td><td class="num">约 ¥200 — 405</td></tr>
+      <tr><td>🏨 住宿 4 晚</td><td>渝北中央公园 / 照母山一带舒适型连锁，国庆约 ¥330-420/晚，是全城最便宜的住宿片区之一</td><td class="num">约 ¥1,300 — 1,700</td></tr>
+      <tr><td>🍜 餐饮 4.5 天</td><td>渝北社区餐饮比商圈便宜，人均约 ¥55-65/天 ×3 人</td><td class="num">约 ¥780 — 950</td></tr>
+      <tr><td>🎫 门票</td><td>动物园 ¥50 + 园博园观光车 ¥30；园博园、中央公园、照母山<b>全部免费</b></td><td class="num">约 ¥80 — 100</td></tr>
+      <tr><td>🚇 市内轨道</td><td>4.5 天 2 大人（儿童免票）+ 少量打车</td><td class="num">约 ¥70 — 150</td></tr>
+      <tr><td>🛒 其他</td><td>野餐垫、零食玩具、手信、机动备用</td><td class="num">约 ¥150 — 250</td></tr>
+      <tr class="t-total"><td colspan="2">合计（9/30 — 10/3，2大1小）</td><td class="num">约 ¥2,300 — 2,800</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--muted);margin-top:10px;">💰 省钱点：<b>园博园 + 中央公园 + 照母山三个主菜全免费</b>，只有动物园要门票（¥25）。把钱花在住得宽敞、吃得舒服上，是五套方案里总花销最低的一版。</p>
+  </div>
+</section>
+
+<section id="tips">
+  <div class="sec-head"><span class="sec-icon">🎒</span><div><h2>带娃出行贴士</h2><p>提前办好这几件事，路上省一半心</p></div></div>
+  <div class="tips">
+    <div class="tip warn"><span class="ti">⚠️</span><div><b>预约类提前办</b>重庆科技馆（公众号提前 1-3 天实名预约）、重庆自然博物馆（周一闭馆）、重庆图书馆儿童馆、火车票（12306 开售即买 + 候补）。凡是「免费」的场馆，国庆几乎都要预约。</div></div>
+    <div class="tip"><span class="ti">🎒</span><div><b>装备清单</b>轻便推车、腰凳背带（老街台阶用）、防晒帽、驱蚊液、常用药、备用衣物、保温杯。户外为主的方案再加一块野餐垫和防潮垫。</div></div>
+    <div class="tip"><span class="ti">🍜</span><div><b>吃辣建议</b>火锅点鸳鸯锅微辣，配冰粉 / 凉虾 / 红糖糍粑；小面说「微辣」或「免辣」；娃的蒸蛋、抄手、蛋炒饭随处可买。</div></div>
+    <div class="tip info"><span class="ti">⏰</span><div><b>节奏把控</b>每天 1 个主景点 + 1 个轻松项；13:00-15:00 固定午休；20:00 前回酒店，不排夜场。</div></div>
+    <div class="tip info"><span class="ti">👥</span><div><b>国庆人流</b>动物园、恐龙馆、海洋馆、磁器口务必赶早场（8:00-9:00 前）；洪崖洞 19:00-21:00 最挤，尽量在对岸远观。</div></div>
+    <div class="tip info"><span class="ti">🚇</span><div><b>山城地形</b>站厅通道长但有直梯，推车走无障碍电梯；导航步行路线可能全是台阶，优先沿江边大路或公园主路走。</div></div>
+    <div class="tip warn"><span class="ti">🌧️</span><div><b>唯一的软肋：雨天</b>本方案户外占比最高。下雨就把 Day 2 改成「光环购物公园 + 两江幸福广场」，Day 3 改成「重庆图书馆儿童馆」，室内保底完全够用。</div></div>
+    <div class="tip"><span class="ti">🧺</span><div><b>野餐装备</b>野餐垫、湿巾、垃圾袋、遮阳帽、驱蚊液、泡泡机、小足球/风筝——园博园和中央公园都能用上，娃的快乐成本极低。</div></div>
+  </div>
+</section>
+
+<section id="house">
+  <div class="sec-head"><span class="sec-icon">🏠</span><div><h2>10/4 — 10/6 主城看房衔接</h2><p>游玩结束无缝切换</p></div></div>
+  <div class="house">
+    <h3>🏡 看房行程建议</h3>
+    <p>① <b>住宿衔接</b>：渝北酒店可续住；若看房重点在 <b>渝北 / 两江新区 / 江北</b>，住中央公园片区就是最优位置，出门就是目的地。</p>
+    <p style="margin-top:6px;">② <b>顺路踩点</b>：4 天里已经深度体验了渝北（园博园、照母山、中央公园），对「新区绿化、商业配套、通勤时间」会有非常直观的判断，正好和江北嘴、九龙坡做对比。</p>
+    <p style="margin-top:6px;">③ <b>交通</b>：全程轨道 + 网约车即可；渝北片区路网宽、打车便宜，看房效率最高。</p>
+  </div>
+</section>
+
+<footer>
+  车次时刻与票价为 2026 年 9 月查询参考值，出行前请以 12306 及景区官方公告为准<br>方案三 · 渝北野趣版 ｜ 祝一家三口国庆玩得开心，看房顺利 🎉
+</footer>
+
+</div>
+
+<button id="topBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="返回顶部">↑</button>
+<script>
+  var btn=document.getElementById('topBtn');
+  window.addEventListener('scroll',function(){btn.classList.toggle('show',window.scrollY>500);},{passive:true});
+  /* 锚点导航：JS 拦截平滑滚动（禁用原生 href 跳转，避免 iframe/srcdoc 环境下导航到 base 地址出现破图空页） */
+  document.querySelectorAll('.nav a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var t=document.getElementById(a.getAttribute('href').slice(1));
+      if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+  /* 滚动跟随高亮：滑到哪个板块，导航按钮跟随点亮 */
+  var _secs=[].slice.call(document.querySelectorAll('section[id]'));
+  var _navLinks={};
+  document.querySelectorAll('.nav a[href^="#"]').forEach(function(a){_navLinks[a.getAttribute('href').slice(1)]=a;});
+  function _spy(){
+    /* 激活线取视口 40% 高度：板块一进入阅读区即点亮，短板块（遛娃贴士）不再被跳过 */
+    var y=window.scrollY+window.innerHeight*0.4,cur=_secs[0];
+    for(var i=0;i<_secs.length;i++){if(_secs[i].offsetTop<=y)cur=_secs[i];}
+    /* 页面已滚到底时强制点亮最后一个板块（末尾板块过短滚不到顶部） */
+    if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-40)cur=_secs[_secs.length-1];
+    var _bar=document.querySelector('.nav-scroll');
+    for(var id in _navLinks){
+      _navLinks[id].classList.toggle('active',id===cur.id);
+      if(id===cur.id){
+        /* 只滚导航条自身横向容器（scrollIntoView 会打断页面平滑滚动动画） */
+        var a=_navLinks[id],target=a.offsetLeft-_bar.clientWidth/2+a.offsetWidth/2;
+        _bar.scrollTo({left:Math.max(0,target),behavior:'smooth'});
+      }
+    }
+  }
+  window.addEventListener('scroll',_spy,{passive:true});
+  _spy();
+</script>
+</body>
+</html>
