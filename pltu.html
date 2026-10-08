@@ -62,6 +62,21 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .chk input{accent-color:var(--acc);width:14px;height:14px;cursor:pointer}
 .rng{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink2);font-weight:600}
 .rng input[type=range]{width:80px;accent-color:var(--acc);cursor:pointer}
+.rng input[type=range].wide{width:96px}
+
+/* ===== 连线右键菜单 ===== */
+.ctx{position:fixed;z-index:9000;min-width:178px;padding:5px;border-radius:12px;display:none;
+  background:rgba(255,255,255,.97);border:1px solid var(--line);backdrop-filter:blur(10px);
+  box-shadow:0 18px 44px rgba(24,44,90,.22)}
+.ctx.show{display:block;animation:ctxin .12s ease}
+@keyframes ctxin{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:none}}
+.ctx-h{font-size:11px;font-weight:700;color:var(--ink3);padding:5px 10px 6px;letter-spacing:.4px}
+.ctx>button{display:block;width:100%;text-align:left;border:none;background:none;padding:7px 10px;border-radius:8px;
+  font-size:12.5px;font-weight:600;color:#31456b;line-height:1.3}
+.ctx>button:hover{background:rgba(47,111,237,.1);color:var(--accd);border-color:transparent}
+.ctx>button.dg{color:#b8474a;border-color:transparent}
+.ctx>button.dg:hover{background:rgba(214,69,69,.1);color:#b03a3d}
+.ctx-sep{height:1px;background:var(--line);margin:4px 7px}
 
 /* ===== stage ===== */
 main{flex:1;position:relative;overflow:hidden}
@@ -74,8 +89,9 @@ main{flex:1;position:relative;overflow:hidden}
 #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 #edges{position:absolute;left:-8000px;top:-8000px;width:16000px;height:16000px;overflow:visible;pointer-events:none}
 #edges .edge{fill:none;stroke:var(--edge);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-#edges .edge.sel{stroke:var(--acc);stroke-width:2.7}
-#edges .ehit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}
+#edges .edge.sel{stroke:var(--acc);stroke-width:2.7;filter:drop-shadow(0 1px 3px rgba(47,111,237,.35))}
+#edges .ehit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:move}
+#stage.moving-edge,#stage.moving-edge #edges .ehit{cursor:grabbing}
 #edges .etemp{fill:none;stroke:var(--acc);stroke-width:2;stroke-dasharray:6 5;pointer-events:none}
 #edges .elab{font-size:11px;fill:#5b7ba8;font-family:var(--ff);pointer-events:none;text-anchor:middle;dominant-baseline:middle}
 
@@ -220,7 +236,7 @@ main{flex:1;position:relative;overflow:hidden}
     <span class="pfix">工程名称：</span><input type="text" id="projName" class="nm-input" placeholder="可留空">
     <span class="pfix">｜图名：</span><input type="text" id="chartTitle" class="nm-input" value="流程链路拓扑图" placeholder="图名">
   </div>
-  <span class="ver" id="verTag">v1.0.1</span>
+  <span class="ver" id="verTag">v1.0.2</span>
 </header>
 
 <div class="bar">
@@ -231,6 +247,14 @@ main{flex:1;position:relative;overflow:hidden}
     <button onclick="toggleSide()" title="把选中节点标记为「旁支节点」（非主流程工序，不占主链序号）/ 再点取消"><span class="ic">◇</span>旁支</button>
     <button onclick="autoConnect()" title="按当前顺序自动用单向箭头串联所有主干节点"><span class="ic">🔗</span>串联</button>
     <button class="dg" onclick="delSel()" title="Delete 键同效"><span class="ic">🗑</span>删除</button>
+  </div>
+  <div class="seg">
+    <span class="lb">连线</span>
+    <button id="dirH" onclick="setDir('h')" title="箭头固定为水平出入（左/右）。先点选某条连线 → 只改这一条；未选中 → 改全部箭头">⇔ 水平</button>
+    <button id="dirV" onclick="setDir('v')" title="箭头固定为垂直出入（上/下）。先点选某条连线 → 只改这一条；未选中 → 改全部箭头">⇕ 垂直</button>
+    <button id="dirAuto" onclick="setDir('auto')" title="箭头方向随节点相对位置自动选择">⟲ 自动</button>
+    <label class="rng" title="整体调整主干箭头的线段长度（即节点间距）：往右拖箭头变长、往左拖变短，会自动按当前布局重排">箭头长度<input type="range" id="gapRange" class="wide" min="-30" max="180" step="2" value="0" oninput="onGap(this.value)" onchange="onGapEnd()"><span id="gapVal">0</span></label>
+    <button onclick="resetEdges()" title="还原连线的手动位置与方向：选中单条连线时只还原这一条，否则还原全部">↺ 复位</button>
   </div>
   <div class="seg">
     <span class="lb">布局</span>
@@ -267,7 +291,7 @@ main{flex:1;position:relative;overflow:hidden}
     <div id="drop">松开鼠标即可导入 .docx / .json</div>
     <div id="hint">
       <b>双击空白</b>新建节点 ｜ <b>双击节点</b>编辑文字（Enter 确认 / Shift+Enter 换行）｜ <b>拖动节点</b>移动 ｜ <b>选中节点</b>点「◇旁支」= 非主流程（虚线、不占主链序号）
-      <br><b>悬停节点</b>出现四个圆点，从圆点拖到另一节点 → 建立单向箭头 ｜ <b>点连线</b>选中后可删除或插入节点 ｜ 滚轮缩放 / 空白处拖动平移
+      <br><b>悬停节点</b>出现四个圆点，从圆点拖到另一节点 → 建立单向箭头 ｜ <b>拖动连线</b>可移动箭头位置（主干/旁支都能拖）｜ <b>右键连线</b>：删除 / 复位 / 固定水平垂直 ｜ 滚轮缩放 / 空白处拖动平移
     </div>
     <div id="zoomBox">
       <button onclick="zoomStep(-1)" title="缩小">−</button>
@@ -356,6 +380,17 @@ main{flex:1;position:relative;overflow:hidden}
   </div>
 </div>
 
+<!-- 连线右键菜单 -->
+<div class="ctx" id="ctxMenu">
+  <div class="ctx-h" id="ctxHead">连线</div>
+  <button type="button" data-a="h">⇔ 固定水平出入</button>
+  <button type="button" data-a="v">⇕ 固定垂直出入</button>
+  <button type="button" data-a="auto">⟲ 方向恢复自动</button>
+  <div class="ctx-sep"></div>
+  <button type="button" data-a="reset">↺ 复位位置</button>
+  <button type="button" data-a="del" class="dg">🗑 删除连线</button>
+</div>
+
 <input type="file" id="fileDocx" accept=".docx" style="display:none">
 <input type="file" id="fileJSON" accept=".json" style="display:none">
 
@@ -365,15 +400,17 @@ main{flex:1;position:relative;overflow:hidden}
    流程链路拓扑图 · 单文件离线版
    文本线框节点 + 单向箭头链路，可任意位置插入编辑
    ========================================================= */
-var APP_VERSION = 'v1.0.1';
+var APP_VERSION = 'v1.0.2';
 var NODE_FS = 13.5, NODE_LH = 20, NODE_PADX = 12, NODE_PADY = 11, NODE_MINH = 52;
 /* 旁支节点（非主流程）配色 */
 var SIDE_BD = '#d8a63c', SIDE_BG = '#fffbf0', SIDE_BADGE = '#c8912f';
 var COL_GAP = 78, ROW_GAP = 46, ORIGIN_X = 80, ORIGIN_Y = 70;
+var STUB_DEF = 30;                                 /* 折线伸出段（斜向连线用，内部默认） */
+var GAP_MIN = -30, GAP_MAX = 180;                  /* 箭头长度 = 节点间距的整体增减量 */
 var DRAFT_KEY = 'pltu_draft_v1';
 var CLOUD = { api:'https://srv.wbc2023.top/sync', app:'pltu', token:'af91def02e8a9a205fe630e970b1b39a' };
 
-var state = { proj:'', title:'流程链路拓扑图', nodes:[], edges:[], seq:0, width:168 };
+var state = { proj:'', title:'流程链路拓扑图', nodes:[], edges:[], seq:0, width:168, stub:STUB_DEF, dir:'auto', gap:0, layMode:'v' };
 var view = { x:120, y:40, z:1 };
 var sel = { type:null, id:null };
 var undoStack = [], redoStack = [];
@@ -408,28 +445,49 @@ function byId(id){ for(var i=0;i<state.nodes.length;i++){ if(String(state.nodes[
 function edgeById(id){ for(var i=0;i<state.edges.length;i++){ if(String(state.edges[i].id)===String(id)) return state.edges[i]; } return null; }
 function nextId(){ return ++state.seq; }
 function syncSeq(){ var m=0; state.nodes.forEach(function(n){ m=Math.max(m,Number(n.id)||0); }); state.edges.forEach(function(e){ m=Math.max(m,Number(e.id)||0); }); state.seq=m; }
-function snap(){ return JSON.stringify({proj:state.proj,title:state.title,nodes:state.nodes,edges:state.edges,seq:state.seq,width:state.width}); }
+function snap(){ return JSON.stringify({proj:state.proj,title:state.title,nodes:state.nodes,edges:state.edges,seq:state.seq,width:state.width,stub:state.stub,dir:state.dir,gap:state.gap,layMode:state.layMode}); }
 function pushUndo(){ undoStack.push(snap()); if(undoStack.length>80) undoStack.shift(); redoStack.length=0; }
 function applySnap(s){ var d=JSON.parse(s); state.proj=d.proj||''; state.title=d.title||'流程链路拓扑图';
   state.nodes=d.nodes||[]; state.edges=d.edges||[]; state.seq=d.seq||0; state.width=d.width||168;
-  $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); renderAll(); }
+  state.stub=d.stub||STUB_DEF; state.dir=d.dir||'auto';
+  state.gap=Number(d.gap)||0; state.layMode=d.layMode||'v';
+  $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); syncGapUI(); syncDirUI(); renderAll(); }
 function undo(){ if(!undoStack.length){ toast('没有可撤销的操作'); return; } redoStack.push(snap()); applySnap(undoStack.pop()); }
 function redo(){ if(!redoStack.length){ toast('没有可重做的操作'); return; } undoStack.push(snap()); applySnap(redoStack.pop()); }
 
 /* ---------------- geometry ---------------- */
-function anchor(n, side){
-  if(side==='l') return {x:n.x, y:n.y+n.h/2, dx:-1, dy:0};
-  if(side==='r') return {x:n.x+n.w, y:n.y+n.h/2, dx:1, dy:0};
-  if(side==='t') return {x:n.x+n.w/2, y:n.y, dx:0, dy:-1};
-  return {x:n.x+n.w/2, y:n.y+n.h, dx:0, dy:1};
+/* 锚点：off 让锚点沿节点边框滑动（水平出入的锚点沿竖边滑 → 用 off.y；垂直出入的锚点沿横边滑 → 用 off.x）
+   这样「拖动连线」后线条依然正交、且两端仍贴在节点上 */
+function anchor(n, side, off){
+  var ox = off ? (Number(off.x)||0) : 0, oy = off ? (Number(off.y)||0) : 0;
+  var mw = Math.max(0, n.w/2 - 8), mh = Math.max(0, n.h/2 - 8);
+  ox = Math.max(-mw, Math.min(mw, ox));
+  oy = Math.max(-mh, Math.min(mh, oy));
+  if(side==='l') return {x:n.x, y:n.y+n.h/2+oy, dx:-1, dy:0};
+  if(side==='r') return {x:n.x+n.w, y:n.y+n.h/2+oy, dx:1, dy:0};
+  if(side==='t') return {x:n.x+n.w/2+ox, y:n.y, dx:0, dy:-1};
+  return {x:n.x+n.w/2+ox, y:n.y+n.h, dx:0, dy:1};
 }
 function autoSide(from, to){
   var dx=(to.x+to.w/2)-(from.x+from.w/2), dy=(to.y+to.h/2)-(from.y+from.h/2);
   if(Math.abs(dx) >= Math.abs(dy)*1.12) return dx>0?'r':'l';
   return dy>0?'b':'t';
 }
-function routePts(p1, p2, d1, d2, stub){
-  stub = stub==null?30:stub;
+/* dir='h' 强制水平出入（左右），dir='v' 强制垂直出入（上下） */
+function axisSide(dir, from, to){
+  if(dir==='h') return ((to.x+to.w/2) >= (from.x+from.w/2)) ? 'r' : 'l';
+  if(dir==='v') return ((to.y+to.h/2) >= (from.y+from.h/2)) ? 'b' : 't';
+  return autoSide(from, to);
+}
+/* 一根连线的出入方向：单条锁定 > 全局方向 > 导入时记录的 s1/s2 > 自动 */
+function edgeSides(e, a, b){
+  var lock = (e.lock && e.lock!=='auto') ? e.lock : ((state.dir && state.dir!=='auto') ? state.dir : null);
+  if(lock) return [axisSide(lock, a, b), axisSide(lock, b, a)];
+  return [e.s1 || autoSide(a, b), e.s2 || autoSide(b, a)];
+}
+function routePts(p1, p2, d1, d2, stub, off){
+  stub = stub==null?(state.stub||30):stub;
+  var ox = off ? (Number(off.x)||0) : 0, oy = off ? (Number(off.y)||0) : 0;
   var h1 = d1.x!==0, h2 = d2.x!==0, s1=stub, s2=stub;
   /* 节点距离很近时收缩折线伸出段，避免线条折返打结 */
   if(h1 && h2){
@@ -441,8 +499,17 @@ function routePts(p1, p2, d1, d2, stub){
   }
   var a={x:p1.x+d1.x*s1, y:p1.y+d1.y*s1}, b={x:p2.x+d2.x*s2, y:p2.y+d2.y*s2};
   var pts=[p1,a];
-  if(h1 && h2){ var mx=(a.x+b.x)/2; pts.push({x:mx,y:a.y},{x:mx,y:b.y}); }
-  else if(!h1 && !h2){ var my=(a.y+b.y)/2; pts.push({x:a.x,y:my},{x:b.x,y:my}); }
+  if(h1 && h2){
+    /* 两段都是横伸出 → 中间那段竖线可左右平移；夹紧在两端之间，避免出现折返（先右再左） */
+    var lo1=Math.min(a.x,b.x), hi1=Math.max(a.x,b.x);
+    var mx = (hi1-lo1 > 6) ? Math.min(hi1, Math.max(lo1, (a.x+b.x)/2 + ox)) : (a.x+b.x)/2;
+    pts.push({x:mx,y:a.y},{x:mx,y:b.y});
+  } else if(!h1 && !h2){
+    /* 两段都是竖伸出 → 中间那段横线可上下平移；同样夹紧防折返 */
+    var lo2=Math.min(a.y,b.y), hi2=Math.max(a.y,b.y);
+    var my = (hi2-lo2 > 6) ? Math.min(hi2, Math.max(lo2, (a.y+b.y)/2 + oy)) : (a.y+b.y)/2;
+    pts.push({x:a.x,y:my},{x:b.x,y:my});
+  }
   else if(h1 && !h2){ pts.push({x:b.x,y:a.y}); }
   else { pts.push({x:a.x,y:b.y}); }
   pts.push(b,p2);
@@ -455,7 +522,18 @@ function dedupe(pts){
     if(Math.abs(p.x-q.x)>0.5 || Math.abs(p.y-q.y)>0.5) out.push(p);
   }
   if(out.length<2) out=[pts[0], pts[pts.length-1]];
-  return out;
+  /* 再去掉共线的中间点：正交折线里很常见，合并后 SVG/Word 的图形数量大幅减少 */
+  if(out.length<3) return out;
+  var res=[out[0]];
+  for(var j=1;j<out.length-1;j++){
+    var a=res[res.length-1], b=out[j], c=out[j+1];
+    var dx=c.x-a.x, dy=c.y-a.y, len=Math.hypot(dx,dy);
+    var cross=(b.x-a.x)*dy-(b.y-a.y)*dx;
+    var dist = len>0.01 ? Math.abs(cross)/len : 0;
+    if(dist > 0.5) res.push(b);
+  }
+  res.push(out[out.length-1]);
+  return res;
 }
 function fmt(v){ return Math.round(v*100)/100; }
 function roundPath(pts, r){
@@ -477,9 +555,11 @@ function roundPath(pts, r){
 function edgeGeom(e){
   var a=byId(e.from), b=byId(e.to);
   if(!a||!b||a===b) return null;
-  var s1 = e.s1 || autoSide(a,b), s2 = e.s2 || autoSide(b,a);
-  var p1=anchor(a,s1), p2=anchor(b,s2);
-  return { pts: routePts(p1,p2,{x:p1.dx,y:p1.dy},{x:p2.dx,y:p2.dy}), p1:p1, p2:p2 };
+  var sd = edgeSides(e, a, b), s1=sd[0], s2=sd[1];
+  var off = e.off || null;
+  var p1=anchor(a,s1,off), p2=anchor(b,s2,off);
+  var stub = e.stub!=null ? e.stub : (state.stub||30);
+  return { pts: routePts(p1,p2,{x:p1.dx,y:p1.dy},{x:p2.dx,y:p2.dy},stub,off), p1:p1, p2:p2, s1:s1, s2:s2, off:off };
 }
 
 /* ---------------- render ---------------- */
@@ -514,6 +594,7 @@ function renderEdges(){
   });
   if(linkState && linkState.pts) parts.push('<path class="etemp" d="'+roundPath(linkState.pts,10)+'"/>');
   svg.innerHTML = parts.join('');
+  syncDirUI();   /* 方向按钮高亮跟随当前选中连线 / 全局设置 */
 }
 /* ---------- 主干 / 旁支 节点 ---------- */
 function isSide(n){ return !!n && n.kind==='side'; }
@@ -746,18 +827,22 @@ function clearAll(){
 function short(t){ t=String(t||''); return t.length>8?t.slice(0,8)+'…':t; }
 
 /* ---------------- layout ---------------- */
-function layout(mode, silent){
+/* mode 布局方向；silent 不入撤销栈、不提示；keepView 保持当前缩放（调箭头长度时用） */
+function layout(mode, silent, keepView){
   if(!state.nodes.length){ toast('画布还没有节点'); return; }
   if(!silent) pushUndo();
+  if(mode) state.layMode = mode;
   measureAll();
   /* 按链路顺序排布（而非创建顺序），插入节点后重新布局会落在正确位置 */
   var seq = topoMain();
   if(!seq.length) seq = mainNodes();
   var sides = sideNodes();
   var maxH = 0; state.nodes.forEach(function(n){ maxH=Math.max(maxH,n.h); });
-  var pitchY = maxH + ROW_GAP, pitchX = state.width + COL_GAP;
+  var G = Number(state.gap)||0;                 /* 箭头长度整体增减量 */
+  var pitchY = Math.max(maxH + 12, maxH + ROW_GAP + G);
+  var pitchX = Math.max(state.width + 16, state.width + COL_GAP + G);
   var sideW = 0; sides.forEach(function(n){ sideW = Math.max(sideW, n.w); });
-  var SIDE_COL = sides.length ? (sideW + COL_GAP) : 0;
+  var SIDE_COL = sides.length ? (sideW + Math.max(24, COL_GAP + G)) : 0;
   if(mode==='v'){
     seq.forEach(function(n,i){ n.x = ORIGIN_X + SIDE_COL; n.y = ORIGIN_Y + i*pitchY + (maxH-n.h)/2; });
     /* 旁支节点：排到主干左侧，纵向对齐其挂靠的主干节点，重叠则向下错开 */
@@ -798,8 +883,10 @@ function layout(mode, silent){
     seq.forEach(function(n){ bottom = Math.max(bottom, n.y+n.h); });
     sides.forEach(function(n,i){ n.x = ORIGIN_X + i*(sideW+COL_GAP); n.y = bottom + ROW_GAP*1.5; });
   }
-  renderAll(); fitView(); saveDraft();
-  toast('布局：'+(mode==='v'?'纵向链':mode==='h'?'横向链':'蛇形分栏')
+  renderAll();
+  if(!keepView) fitView();
+  saveDraft();
+  if(!silent) toast('布局：'+(mode==='v'?'纵向链':mode==='h'?'横向链':'蛇形分栏')
     + (sides.length ? '（旁支 '+sides.length+' 个已排在主干侧边）' : ''));
 }
 function onWidth(v){
@@ -808,8 +895,62 @@ function onWidth(v){
 }
 function syncWidthUI(){ $('nwRange').value = state.width; $('nwVal').textContent = state.width; }
 
+/* ---------------- 连线：方向锁定 / 箭头长度（节点间距）/ 复位 ---------------- */
+var gapGesture = false;
+function syncGapUI(){
+  var r=$('gapRange'); if(r) r.value = (state.gap||0);
+  var s=$('gapVal');  if(s) s.textContent = (state.gap||0);
+}
+/* 箭头长度 = 节点间距，整体调整后即时按当前布局重排 */
+function onGap(v){
+  var nv = Math.max(GAP_MIN, Math.min(GAP_MAX, Number(v)||0));
+  if(!gapGesture){ pushUndo(); gapGesture = true; }   /* 一次拖动只记一步撤销 */
+  state.gap = nv; $('gapVal').textContent = nv;
+  if(state.nodes.length) layout(state.layMode||'v', true, true);
+  else renderEdges();
+  saveDraft();
+}
+function onGapEnd(){ gapGesture = false; }
+/* 按钮高亮：选中某条连线时显示该条的方向，否则显示全局方向 */
+function syncDirUI(){
+  var cur = state.dir || 'auto';
+  if(sel.type==='edge'){ var e=edgeById(sel.id); if(e && e.lock && e.lock!=='auto') cur = e.lock; }
+  var map = { auto:$('dirAuto'), h:$('dirH'), v:$('dirV') };
+  for(var k in map){ if(map[k]) map[k].classList.toggle('on', k===cur); }
+}
+/* 选中单条连线 → 只改这条；未选中 → 改全部箭头 */
+function setDir(d){
+  pushUndo();
+  if(sel.type==='edge'){
+    var e = edgeById(sel.id);
+    if(e){ if(d==='auto') delete e.lock; else e.lock = d; }
+    toast(d==='h' ? '这条连线已固定为水平出入（左右）'
+        : d==='v' ? '这条连线已固定为垂直出入（上下）'
+                  : '这条连线的方向已恢复自动');
+  } else {
+    state.dir = d;
+    toast(d==='h' ? '全部箭头已固定为水平出入（左右）'
+        : d==='v' ? '全部箭头已固定为垂直出入（上下）'
+                  : '全部箭头方向已恢复自动');
+  }
+  syncDirUI(); renderEdges(); saveDraft();
+}
+function resetEdges(){
+  pushUndo();
+  if(sel.type==='edge'){
+    var e = edgeById(sel.id);
+    if(e){ delete e.lock; delete e.off; }
+    toast('已复位这条连线的位置与方向');
+  } else {
+    state.dir = 'auto';
+    state.edges.forEach(function(e){ delete e.lock; delete e.off; });
+    toast('已复位全部连线的手动位置与方向（线段长度保留）');
+  }
+  syncDirUI(); renderEdges(); saveDraft();
+}
+
 /* ---------------- interaction ---------------- */
-var drag = null, linkState = null, pan = null;
+var drag = null, linkState = null, pan = null, edgeDrag = null;
 function nodeAt(target){ var el = target && target.closest ? target.closest('.node') : null; return el ? el : null; }
 
 stage.addEventListener('mousedown', function(ev){
@@ -834,11 +975,17 @@ stage.addEventListener('mousedown', function(ev){
     drag = { id:n.id, dx: wp.x-n.x, dy: wp.y-n.y, moved:false, el:nodeEl };
     return;
   }
-  // empty area → pan + deselect
+  // 连线：点选 + 可拖动（主干与旁支通用）
   var hitEdge = ev.target.classList && ev.target.classList.contains('ehit');
   if(hitEdge){
-    sel = {type:'edge', id:ev.target.getAttribute('data-id')};
-    updateNodeSel(); renderEdges(); return;
+    ev.preventDefault();
+    var eid = ev.target.getAttribute('data-id');
+    sel = {type:'edge', id:eid};
+    var ee = edgeById(eid);
+    edgeDrag = { id:eid, sx:ev.clientX, sy:ev.clientY,
+                 ox:(ee&&ee.off?Number(ee.off.x)||0:0), oy:(ee&&ee.off?Number(ee.off.y)||0:0), moved:false };
+    updateNodeSel(); renderEdges();
+    return;
   }
   pan = { sx:ev.clientX, sy:ev.clientY, vx:view.x, vy:view.y, moved:false };
   stage.classList.add('panning');
@@ -850,9 +997,9 @@ window.addEventListener('mousemove', function(ev){
     var a = byId(linkState.from); if(!a) return;
     var p1 = anchor(a, linkState.side);
     var tp = { x: wp.x, y: wp.y, w:0, h:0 };
-    var s2 = autoSide(tp, a);
+    var s2 = (state.dir && state.dir!=='auto') ? axisSide(state.dir, tp, a) : autoSide(tp, a);
     var p2 = anchor(tp, s2);
-    linkState.pts = routePts(p1,p2,{x:p1.dx,y:p1.dy},{x:p2.dx,y:p2.dy});
+    linkState.pts = routePts(p1,p2,{x:p1.dx,y:p1.dy},{x:p2.dx,y:p2.dy}, state.stub||STUB_DEF);
     renderEdges();
     var over = nodeAt(document.elementFromPoint(ev.clientX, ev.clientY));
     Array.prototype.slice.call(world.querySelectorAll('.node')).forEach(function(el){
@@ -871,6 +1018,18 @@ window.addEventListener('mousemove', function(ev){
     }
     n.x = Math.round(wp2.x-drag.dx); n.y = Math.round(wp2.y-drag.dy);
     if(drag.el){ drag.el.style.left = n.x+'px'; drag.el.style.top = n.y+'px'; }
+    renderEdges();
+    return;
+  }
+  if(edgeDrag){
+    if(!edgeDrag.moved){
+      /* 小于 3px 视为点击（只选中），避免手抖把点选变成拖动 */
+      if(Math.hypot(ev.clientX-edgeDrag.sx, ev.clientY-edgeDrag.sy) < 3) return;
+      edgeDrag.moved = true; pushUndo(); stage.classList.add('moving-edge');
+    }
+    var ed = edgeById(edgeDrag.id); if(!ed) return;
+    var ddx2 = (ev.clientX-edgeDrag.sx)/view.z, ddy2 = (ev.clientY-edgeDrag.sy)/view.z;
+    ed.off = { x: Math.round(edgeDrag.ox+ddx2), y: Math.round(edgeDrag.oy+ddy2) };
     renderEdges();
     return;
   }
@@ -897,6 +1056,14 @@ window.addEventListener('mouseup', function(ev){
     else { updateNodeSel(); renderEdges(); }
     return;
   }
+  if(edgeDrag){
+    var m2 = edgeDrag.moved; edgeDrag = null; stage.classList.remove('moving-edge');
+    if(m2){
+      renderEdges(); saveDraft();
+      toast('已移动连线位置（右键可「复位位置」还原）');
+    } else { updateNodeSel(); renderEdges(); }
+    return;
+  }
   if(pan){
     var moved2 = pan.moved; pan = null; stage.classList.remove('panning');
     if(!moved2){ sel = {type:null,id:null}; updateNodeSel(); renderEdges(); }
@@ -918,9 +1085,42 @@ stage.addEventListener('wheel', function(ev){
   zoomAt(ev.clientX-r.left, ev.clientY-r.top, ev.deltaY<0?1.11:1/1.11);
 }, {passive:false});
 
-stage.addEventListener('contextmenu', function(ev){
-  if(nodeAt(ev.target) || (ev.target.classList && ev.target.classList.contains('ehit'))) ev.preventDefault();
+/* ---- 连线右键菜单（删除 / 复位 / 固定水平垂直） ---- */
+var ctxEdgeId = null;
+function openEdgeCtx(ev, id){
+  var e = edgeById(id); if(!e) return;
+  ctxEdgeId = id;
+  sel = {type:'edge', id:id};
+  var sideish = isSide(byId(e.from)) || isSide(byId(e.to));
+  $('ctxHead').textContent = (sideish ? '旁支连线' : '主干连线') + ' · ' + short((byId(e.from)||{}).text) + ' → ' + short((byId(e.to)||{}).text);
+  var m = $('ctxMenu');
+  m.classList.add('show');
+  var w = m.offsetWidth || 178, h = m.offsetHeight || 210;
+  m.style.left = Math.max(6, Math.min(ev.clientX, window.innerWidth - w - 8)) + 'px';
+  m.style.top  = Math.max(6, Math.min(ev.clientY, window.innerHeight - h - 8)) + 'px';
+  updateNodeSel(); renderEdges();
+}
+function closeCtx(){ var m=$('ctxMenu'); if(m) m.classList.remove('show'); ctxEdgeId = null; }
+function ctxDo(a){
+  var id = ctxEdgeId; closeCtx();
+  if(id==null) return;
+  sel = {type:'edge', id:id};
+  if(a==='del'){ delSel(); return; }
+  if(a==='reset'){ resetEdges(); return; }
+  setDir(a);
+}
+Array.prototype.slice.call(document.querySelectorAll('#ctxMenu button')).forEach(function(b){
+  b.addEventListener('click', function(){ ctxDo(b.getAttribute('data-a')); });
 });
+stage.addEventListener('contextmenu', function(ev){
+  var hit = ev.target.classList && ev.target.classList.contains('ehit');
+  if(hit){ ev.preventDefault(); openEdgeCtx(ev, ev.target.getAttribute('data-id')); return; }
+  if(nodeAt(ev.target)) ev.preventDefault();
+});
+document.addEventListener('mousedown', function(ev){
+  if(ev.target.closest && ev.target.closest('#ctxMenu')) return;
+  closeCtx();
+}, true);
 
 window.addEventListener('keydown', function(ev){
   var editing = document.activeElement && document.activeElement.isContentEditable;
@@ -929,7 +1129,7 @@ window.addEventListener('keydown', function(ev){
   if((ev.ctrlKey||ev.metaKey) && ev.key.toLowerCase()==='z' && !ev.shiftKey){ ev.preventDefault(); undo(); return; }
   if((ev.ctrlKey||ev.metaKey) && (ev.key.toLowerCase()==='y' || (ev.shiftKey&&ev.key.toLowerCase()==='z'))){ ev.preventDefault(); redo(); return; }
   if((ev.ctrlKey||ev.metaKey) && ev.key.toLowerCase()==='s'){ ev.preventDefault(); if(!ev.altKey){ saveDraft(true); } return; }
-  if(ev.key==='Escape'){ sel={type:null,id:null}; renderAll(); }
+  if(ev.key==='Escape'){ closeCtx(); sel={type:null,id:null}; renderAll(); }
 });
 
 /* inline edit */
@@ -1319,6 +1519,7 @@ function impGenerate(){
   if(!rows.length){ toast('至少保留一个节点', true); return; }
   pushUndo();
   state.nodes=[]; state.edges=[]; state.seq=0; sel={type:null,id:null};
+  state.dir='auto';   /* 导入新文档时方向回归自动，避免沿用上一张图的锁定 */
   var made = rows.map(function(it){ return makeNode(it.text, 0, 0, it.kind); });
   var nE=0;
   if(impHasGraph && impEdges.length){
@@ -1331,6 +1532,7 @@ function impGenerate(){
   }
   if(!nE){ for(var i=1;i<made.length;i++){ state.edges.push({id:nextId(), from:made[i-1].id, to:made[i].id}); nE++; } }
   $('impMask').classList.remove('show');
+  syncDirUI();
   layout(impLayoutHint || 'v', true);
   var nSide = rows.filter(function(r){ return r.kind==='side'; }).length;
   toast('已生成 '+rows.length+' 个节点、'+nE+' 条单向箭头'+(nSide? ('（含 '+nSide+' 个旁支节点）') : ''));
@@ -1699,25 +1901,44 @@ $('fileJSON').addEventListener('change', function(){
    ========================================================= */
 function payload(){
   return { app:'pltu', ver:APP_VERSION, proj:state.proj, title:state.title, width:state.width,
+    stub:state.stub, dir:state.dir, gap:state.gap, layMode:state.layMode,
     nodes:state.nodes.map(function(n){ return {id:n.id,text:n.text,x:n.x,y:n.y,kind:(isSide(n)?'side':'main')}; }),
-    edges:state.edges.map(function(e){ return {from:e.from,to:e.to}; }),
+    edges:state.edges.map(function(e){
+      var o = {from:e.from, to:e.to};
+      if(e.s1) o.s1=e.s1;
+      if(e.s2) o.s2=e.s2;
+      if(e.lock) o.lock=e.lock;
+      if(e.off) o.off={x:Math.round(e.off.x||0), y:Math.round(e.off.y||0)};
+      return o;
+    }),
     savedAt:new Date().toISOString() };
+}
+/* 连线还原（保留方向锁定与手动位置偏移） */
+function mapEdges(arr, idmap){
+  return (arr||[]).map(function(e){
+    var f = (idmap[e.from]!=null?idmap[e.from]:e.from), t2 = (idmap[e.to]!=null?idmap[e.to]:e.to);
+    var o = { id:nextId(), from:f, to:t2 };
+    if(e.s1) o.s1=e.s1;
+    if(e.s2) o.s2=e.s2;
+    if(e.lock) o.lock=e.lock;
+    if(e.off && isFinite(e.off.x) && isFinite(e.off.y)) o.off={x:Number(e.off.x), y:Number(e.off.y)};
+    return o;
+  }).filter(function(e){ return byId(e.from) && byId(e.to); });
 }
 function restore(d){
   if(!d||!d.nodes) throw new Error('数据格式不正确');
   pushUndo();
   state.proj=d.proj||''; state.title=d.title||'流程链路拓扑图'; state.width=Number(d.width)||168;
-  $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI();
+  state.stub=Number(d.stub)||STUB_DEF; state.dir=(d.dir==='h'||d.dir==='v')?d.dir:'auto';
+  state.gap=Number(d.gap)||0; state.layMode=d.layMode||'v';
+  $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); syncGapUI(); syncDirUI();
   var idmap={};
   state.nodes = d.nodes.map(function(t){
     var n={ id:nextId(), text:String(t.text==null?'':t.text), x:Number(t.x)||0, y:Number(t.y)||0, w:state.width, h:0, kind:(t.kind==='side'?'side':'main') };
     if(t.id!=null) idmap[t.id]=n.id;
     n.h=nodeHeight(n.text); return n;
   });
-  state.edges = (d.edges||[]).map(function(e){
-    var f=idmap[e.from]!=null?idmap[e.from]:e.from, t2=idmap[e.to]!=null?idmap[e.to]:e.to;
-    return { id:nextId(), from:f, to:t2 };
-  }).filter(function(e){ return byId(e.from)&&byId(e.to); });
+  state.edges = mapEdges(d.edges, idmap);
   syncSeq();
   sel={type:null,id:null};
   renderAll(); fitView(); saveDraft();
@@ -1734,15 +1955,15 @@ function loadDraft(){
     var d=JSON.parse(raw);
     if(!d||!d.nodes||!d.nodes.length) return false;
     state.proj=d.proj||''; state.title=d.title||'流程链路拓扑图'; state.width=Number(d.width)||168;
-    $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI();
+    state.stub=Number(d.stub)||STUB_DEF; state.dir=(d.dir==='h'||d.dir==='v')?d.dir:'auto';
+    state.gap=Number(d.gap)||0; state.layMode=d.layMode||'v';
+    $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); syncGapUI(); syncDirUI();
     var idmap={};
     state.nodes=d.nodes.map(function(t){
       var n={ id:nextId(), text:String(t.text==null?'':t.text), x:Number(t.x)||0, y:Number(t.y)||0, w:state.width, h:0, kind:(t.kind==='side'?'side':'main') };
       if(t.id!=null) idmap[t.id]=n.id; n.h=nodeHeight(n.text); return n;
     });
-    state.edges=(d.edges||[]).map(function(e){
-      return { id:nextId(), from:(idmap[e.from]!=null?idmap[e.from]:e.from), to:(idmap[e.to]!=null?idmap[e.to]:e.to) };
-    }).filter(function(e){ return byId(e.from)&&byId(e.to); });
+    state.edges=mapEdges(d.edges, idmap);
     syncSeq(); return true;
   }catch(e){ return false; }
 }
@@ -1759,6 +1980,7 @@ function loadSample(){
   state.proj=''; $('projName').value='';
   state.title='桥梁工程施工流程链路'; $('chartTitle').value=state.title;
   state.nodes=[]; state.edges=[]; state.seq=0; sel={type:null,id:null};
+  state.dir='auto'; syncDirUI();
   steps.forEach(function(t){ makeNode(t,0,0); });
   state.nodes.forEach(function(n,i){ if(i>0) state.edges.push({id:nextId(), from:state.nodes[i-1].id, to:n.id}); });
   /* 桩基检测验收：非主要流程，作为旁支节点挂在「桩基施工」之后的主干上 */
@@ -1924,7 +2146,7 @@ $('impMask').addEventListener('click', function(e){ if(e.target===this) impClose
 
 function boot(){
   $('verTag').textContent = APP_VERSION;
-  syncWidthUI();
+  syncWidthUI(); syncGapUI(); syncDirUI();
   var ok = loadDraft();
   renderAll();
   if(ok){ fitView(); toast('已恢复上次编辑的内容'); }
