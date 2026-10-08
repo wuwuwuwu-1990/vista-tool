@@ -383,6 +383,20 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">施工进度</span>
       </div>
     </a>
+    <a class="card" href="pltu.html" style="--g1:#4f46e5;--g2:#06b6d4;--gs:rgba(79,70,229,.5);--a1:#6366f1;--a2:#22d3ee;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5.6" y="2.4" width="12.8" height="4.6" rx="1.4" fill="#fff"/><rect x="5.6" y="17" width="12.8" height="4.6" rx="1.4" fill="#fff" opacity=".6"/><rect x="1.4" y="9.7" width="6" height="4.6" rx="1.4" fill="#fff" opacity=".38"/><path d="M12 7v2.9M12 14.1V17" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M10.1 9.3 12 11.2l1.9-1.9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.4 12h4.1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>流程链路拓扑图</h3>
+      <div class="desc">文本线框＋单向箭头的流程图／链路拓扑：双击空白插入节点、拖圆点连箭头、选中连线中间劈开插节点；可导入 Word 自动解析原图文本框与旁支关系，导出真·文本框＋箭头的矢量 Word（A4 一页）；☁️ 云端方案跨设备复用。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v1.0.1</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">流程 / 拓扑</span>
+      </div>
+    </a>
     <a class="card" href="murus_old.html" style="--g1:#b03a2e;--g2:#e0763f;--gs:rgba(176,58,46,.5);--a1:#c0483a;--a2:#e0763f;">
       <div class="top">
         <div class="icon">
@@ -1027,7 +1041,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
-  {d:'2026-09-28', t:'升级：泊成家庭纪事 v1.0.12（界面自更新：点右上角版本号即可强制刷新到最新版；从后台切回自动检测并更新，手机上不再残留旧界面；网页名称改为两行显示，括号里的线路名看全了）'},
+  {d:'2026-10-08', t:'新增：流程链路拓扑图 v1.0.1（文本线框＋单向箭头的流程图/链路拓扑工具：双击空白插入节点、悬停拖圆点连箭头、点连线中间劈开插入节点，节点可自由拖动；纵向链/横向链/蛇形分栏一键自动布局，序号按流程顺序自动编号；导入 Word 自动解析原图文本框与箭头、并识别旁支节点（虚线框不占主链序号）；导出真·文本框＋三角箭头的矢量 Word（A4 自动适配一页／原始尺寸两种），另可导出 PNG/JSON；☁️ 云端方案跨设备复用）'},
   {d:'2026-09-28', t:'新增：2026国庆重庆亲子游行程方案三/四/五（现共五套、可互切对比）：方案三渝北野趣线、方案四南岸看海线、方案五沙磁慢游线；每个方案页顶部一键切换并附五案对比表'},
   {d:'2026-09-28', t:'升级：泊成家庭纪事 v1.0.11（列表条目改版：卡片整张可点即打开，去掉「进入网页」按钮；重命名/删除移到网页名称下方；不再显示「文件名·大小」那行）'},
   {d:'2026-09-28', t:'修复：泊成家庭纪事 v1.0.10（点网页不再被系统浏览器抢走：混合模式下识别壳内原生桥，所有网址都在软件内打开；安卓返回键可直接关闭查看器；本次为网页端修复，无需重装 App）'},
@@ -1100,7 +1114,7 @@ function renderLog(){
 
 // ===== ⑨ 卡片元信息 + 新标签页 =====
 var CARD_META = {
-  'sgjht.html': '2026-08-17', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
+  'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
   'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22'
 };
