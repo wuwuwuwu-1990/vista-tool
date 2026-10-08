@@ -236,7 +236,7 @@ main{flex:1;position:relative;overflow:hidden}
     <span class="pfix">工程名称：</span><input type="text" id="projName" class="nm-input" placeholder="可留空">
     <span class="pfix">｜图名：</span><input type="text" id="chartTitle" class="nm-input" value="流程链路拓扑图" placeholder="图名">
   </div>
-  <span class="ver" id="verTag">v1.0.2</span>
+  <span class="ver" id="verTag">v1.0.3</span>
 </header>
 
 <div class="bar">
@@ -253,7 +253,7 @@ main{flex:1;position:relative;overflow:hidden}
     <button id="dirH" onclick="setDir('h')" title="箭头固定为水平出入（左/右）。先点选某条连线 → 只改这一条；未选中 → 改全部箭头">⇔ 水平</button>
     <button id="dirV" onclick="setDir('v')" title="箭头固定为垂直出入（上/下）。先点选某条连线 → 只改这一条；未选中 → 改全部箭头">⇕ 垂直</button>
     <button id="dirAuto" onclick="setDir('auto')" title="箭头方向随节点相对位置自动选择">⟲ 自动</button>
-    <label class="rng" title="整体调整主干箭头的线段长度（即节点间距）：往右拖箭头变长、往左拖变短，会自动按当前布局重排">箭头长度<input type="range" id="gapRange" class="wide" min="-30" max="180" step="2" value="0" oninput="onGap(this.value)" onchange="onGapEnd()"><span id="gapVal">0</span></label>
+    <label class="rng" title="整体调整主干箭头的线段长度（即节点间距）：往右拖箭头变长、往左拖变短，会自动按当前布局重排。默认 -20">箭头长度<input type="range" id="gapRange" class="wide" min="-30" max="180" step="2" value="-20" oninput="onGap(this.value)" onchange="onGapEnd()"><span id="gapVal">-20</span></label>
     <button onclick="resetEdges()" title="还原连线的手动位置与方向：选中单条连线时只还原这一条，否则还原全部">↺ 复位</button>
   </div>
   <div class="seg">
@@ -290,7 +290,7 @@ main{flex:1;position:relative;overflow:hidden}
     </div>
     <div id="drop">松开鼠标即可导入 .docx / .json</div>
     <div id="hint">
-      <b>双击空白</b>新建节点 ｜ <b>双击节点</b>编辑文字（Enter 确认 / Shift+Enter 换行）｜ <b>拖动节点</b>移动 ｜ <b>选中节点</b>点「◇旁支」= 非主流程（虚线、不占主链序号）
+      <b>双击空白</b>新建节点 ｜ <b>双击节点</b>编辑文字（Enter 确认 / Shift+Enter 换行）｜ <b>拖动节点</b>移动 ｜ <b>选中节点</b>点「◇旁支」= 非主流程（编辑器内虚线、导出为实线框，不占主链序号）
       <br><b>悬停节点</b>出现四个圆点，从圆点拖到另一节点 → 建立单向箭头 ｜ <b>拖动连线</b>可移动箭头位置（主干/旁支都能拖）｜ <b>右键连线</b>：删除 / 复位 / 固定水平垂直 ｜ 滚轮缩放 / 空白处拖动平移
     </div>
     <div id="zoomBox">
@@ -400,17 +400,18 @@ main{flex:1;position:relative;overflow:hidden}
    流程链路拓扑图 · 单文件离线版
    文本线框节点 + 单向箭头链路，可任意位置插入编辑
    ========================================================= */
-var APP_VERSION = 'v1.0.2';
+var APP_VERSION = 'v1.0.3';
 var NODE_FS = 13.5, NODE_LH = 20, NODE_PADX = 12, NODE_PADY = 11, NODE_MINH = 52;
 /* 旁支节点（非主流程）配色 */
 var SIDE_BD = '#d8a63c', SIDE_BG = '#fffbf0', SIDE_BADGE = '#c8912f';
 var COL_GAP = 78, ROW_GAP = 46, ORIGIN_X = 80, ORIGIN_Y = 70;
 var STUB_DEF = 30;                                 /* 折线伸出段（斜向连线用，内部默认） */
 var GAP_MIN = -30, GAP_MAX = 180;                  /* 箭头长度 = 节点间距的整体增减量 */
+var GAP_DEF = -20;                                 /* 箭头长度默认值（-20：线更紧凑、链更短） */
 var DRAFT_KEY = 'pltu_draft_v1';
 var CLOUD = { api:'https://srv.wbc2023.top/sync', app:'pltu', token:'af91def02e8a9a205fe630e970b1b39a' };
 
-var state = { proj:'', title:'流程链路拓扑图', nodes:[], edges:[], seq:0, width:168, stub:STUB_DEF, dir:'auto', gap:0, layMode:'v' };
+var state = { proj:'', title:'流程链路拓扑图', nodes:[], edges:[], seq:0, width:168, stub:STUB_DEF, dir:'auto', gap:GAP_DEF, layMode:'v' };
 var view = { x:120, y:40, z:1 };
 var sel = { type:null, id:null };
 var undoStack = [], redoStack = [];
@@ -450,7 +451,7 @@ function pushUndo(){ undoStack.push(snap()); if(undoStack.length>80) undoStack.s
 function applySnap(s){ var d=JSON.parse(s); state.proj=d.proj||''; state.title=d.title||'流程链路拓扑图';
   state.nodes=d.nodes||[]; state.edges=d.edges||[]; state.seq=d.seq||0; state.width=d.width||168;
   state.stub=d.stub||STUB_DEF; state.dir=d.dir||'auto';
-  state.gap=Number(d.gap)||0; state.layMode=d.layMode||'v';
+  state.gap=(d.gap==null||d.gap==='')?GAP_DEF:(Number(d.gap)||0); state.layMode=d.layMode||'v';
   $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); syncGapUI(); syncDirUI(); renderAll(); }
 function undo(){ if(!undoStack.length){ toast('没有可撤销的操作'); return; } redoStack.push(snap()); applySnap(undoStack.pop()); }
 function redo(){ if(!redoStack.length){ toast('没有可重做的操作'); return; } undoStack.push(snap()); applySnap(redoStack.pop()); }
@@ -552,11 +553,66 @@ function roundPath(pts, r){
   d+='L'+fmt(e.x)+','+fmt(e.y);
   return d;
 }
+/* ---------------- 重线重合：同一节点同一条边上的多根连线 ----------------
+   导入 Word 或手动拖动之后，同一节点同一条边上常常留下几像素的位置差，
+   画出来就是「双线 / 毛刺」，也永远对不齐。这里把差值 ≤ MERGE_TOL 的连线
+   聚成一束，取最贴近自然位置（0）的那个值 —— 起点与走廊线完全重合，
+   于是多处连线自动并成一条「干线 + 分支」；差值更大的视为有意拖开，保持不动。 */
+var MERGE_TOL = 12;
+var normCache = null;
+function rawOff(e, k){ return (e.off && isFinite(e.off[k])) ? Number(e.off[k]) : 0; }
+function ensureNorm(){
+  normCache = {};
+  var groups = {}, i;
+  state.edges.forEach(function(e){
+    var a=byId(e.from), b=byId(e.to); if(!a||!b||a===b) return;
+    var sd = edgeSides(e, a, b);
+    var k1 = a.id+'|'+sd[0], k2 = b.id+'|'+sd[1];
+    (groups[k1] = groups[k1] || []).push({ e:e, s:sd[0] });
+    (groups[k2] = groups[k2] || []).push({ e:e, s:sd[1] });
+  });
+  var claimed = {};
+  Object.keys(groups).forEach(function(key){
+    var arr = groups[key]; if(arr.length < 2) return;
+    var sd = arr[0].s, horiz = (sd==='l' || sd==='r');
+    /* 水平出入：off.y 是沿边框滑动（决定起点），off.x 是走廊平移（决定干线位置）
+       垂直出入：两者互换 */
+    [ horiz?'y':'x', horiz?'x':'y' ].forEach(function(comp){
+      var items = [];
+      arr.forEach(function(it){
+        if(claimed[it.e.id+'|'+comp]) return;
+        items.push({ e:it.e, v:rawOff(it.e, comp) });
+      });
+      if(items.length < 2) return;
+      items.sort(function(p,q){ return p.v - q.v; });
+      for(i=0; i<items.length; ){
+        var j = i;
+        while(j+1 < items.length && items[j+1].v - items[i].v <= MERGE_TOL) j++;
+        if(j > i){
+          var base = items[i].v, t;
+          for(t=i; t<=j; t++) if(Math.abs(items[t].v) < Math.abs(base)) base = items[t].v;
+          for(t=i; t<=j; t++){
+            claimed[items[t].e.id+'|'+comp] = 1;
+            var c = normCache[items[t].e.id] || (normCache[items[t].e.id] = {});
+            c[comp] = base;
+          }
+        }
+        i = j+1;
+      }
+    });
+  });
+}
+/* 连线的「有效偏移」：被归并过的取归并值，其余分量沿用原始手动值 */
+function normOf(e){
+  var c = normCache ? normCache[e.id] : null;
+  if(!c) return e.off || null;
+  return { x:(c.x!=null ? c.x : rawOff(e,'x')), y:(c.y!=null ? c.y : rawOff(e,'y')) };
+}
 function edgeGeom(e){
   var a=byId(e.from), b=byId(e.to);
   if(!a||!b||a===b) return null;
   var sd = edgeSides(e, a, b), s1=sd[0], s2=sd[1];
-  var off = e.off || null;
+  var off = normOf(e);
   var p1=anchor(a,s1,off), p2=anchor(b,s2,off);
   var stub = e.stub!=null ? e.stub : (state.stub||30);
   return { pts: routePts(p1,p2,{x:p1.dx,y:p1.dy},{x:p2.dx,y:p2.dy},stub,off), p1:p1, p2:p2, s1:s1, s2:s2, off:off };
@@ -579,6 +635,7 @@ function syncSvgBox(){
   svg.setAttribute('viewBox', x1+' '+y1+' '+(x2-x1)+' '+(y2-y1));
 }
 function renderEdges(){
+  ensureNorm();
   syncSvgBox();
   var parts = ['<defs>'
     +'<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
@@ -981,9 +1038,9 @@ stage.addEventListener('mousedown', function(ev){
     ev.preventDefault();
     var eid = ev.target.getAttribute('data-id');
     sel = {type:'edge', id:eid};
-    var ee = edgeById(eid);
+    var ee = edgeById(eid), eo = ee ? (normOf(ee) || {x:0,y:0}) : {x:0,y:0};
     edgeDrag = { id:eid, sx:ev.clientX, sy:ev.clientY,
-                 ox:(ee&&ee.off?Number(ee.off.x)||0:0), oy:(ee&&ee.off?Number(ee.off.y)||0:0), moved:false };
+                 ox:(Number(eo.x)||0), oy:(Number(eo.y)||0), moved:false };
     updateNodeSel(); renderEdges();
     return;
   }
@@ -1424,7 +1481,7 @@ async function importDocxFile(file){
       impList = g.nodes.map(function(n,i){ return { text:n.text, kind:(g.side[i]?'side':'main') }; });
       var nSide = g.side.filter(function(s){ return s; }).length;
       $('impSrc').textContent = '来源文件：'+file.name+' ｜ 图形流程图：识别到 '+g.nodes.length+' 个文本框、'
-        + g.edges.length+' 条箭头连线' + (nSide? ('；其中 '+nSide+' 个判定为「非主流程」的旁支节点（虚线框）') : '')
+        + g.edges.length+' 条箭头连线' + (nSide? ('；其中 '+nSide+' 个判定为「非主流程」的旁支节点（编辑器内虚线、导出为实线框）') : '')
         + ' ｜ 可在右侧下拉里改「主干 / 旁支」';
       impRender(); $('impMask').classList.add('show');
       return;
@@ -1472,7 +1529,7 @@ function impRender(){
     return '<div class="imp-it'+(isS?' side-it':'')+'">'
       + '<span class="no">'+(isS?'◇':(i+1))+'</span>'
       + '<input type="text" value="'+xmlEsc(it.text)+'" data-i="'+i+'">'
-      + '<select data-k="'+i+'" class="'+(isS?'k-side':'')+'" title="主干 = 主流程；旁支 = 非主要流程（虚线框、不占主链序号）">'
+      + '<select data-k="'+i+'" class="'+(isS?'k-side':'')+'" title="主干 = 主流程；旁支 = 非主要流程（编辑器内虚线、导出为实线框，不占主链序号）">'
       +   '<option value="main"'+(isS?'':' selected')+'>主干</option>'
       +   '<option value="side"'+(isS?' selected':'')+'>旁支</option>'
       + '</select>'
@@ -1558,10 +1615,12 @@ function docxTxbxParas(text, h){
   }).join('');
 }
 /* 文本框图形（Choice: DrawingML / Fallback: VML），坐标为 EMU（相对页面） */
+/* 旁支节点在编辑器里保持虚线（便于区分主干/旁支），导出到文档一律用实线框：
+   打印稿更正式，且旁支仍由 ◇ 与不参与编号来标识 */
 function docxShapeTextBox(uid, X, Y, W, H, text, kind, h){
   var paras=docxTxbxParas(text,h);
-  var dash=(kind==='side')?'<a:prstDash val="dash"/>':'<a:prstDash val="solid"/>';
-  var vdash=(kind==='side')?' dashstyle="dash"':'';
+  var dash='<a:prstDash val="solid"/>';
+  var vdash='';
   var xpt=(X/DOC_EMU_PT).toFixed(2), ypt=(Y/DOC_EMU_PT).toFixed(2);
   var wpt=(W/DOC_EMU_PT).toFixed(2), hpt=(H/DOC_EMU_PT).toFixed(2);
   return '<w:r><w:rPr><w:sz w:val="'+h+'"/></w:rPr><mc:AlternateContent><mc:Choice Requires="wps"><w:drawing>'
@@ -1631,6 +1690,7 @@ var DOC_NSDECL = ' xmlns:wpc="http://schemas.microsoft.com/office/word/2010/word
   + ' mc:Ignorable="w14 w15 wp14"';
 /* 生成矢量流程图 docx；fitMode='raw' 表示不缩放（按图形实际尺寸给纸） */
 function doExportFlowDocx(fitMode){
+  ensureNorm();
   var b = bbox();
   if(!b || !state.nodes.length){ toast('画布还没有节点', true); return; }
   var A4W=11906, A4H=16838, mTw=1134;              /* A4 twips / 2cm 页边距 */
@@ -1656,7 +1716,7 @@ function doExportFlowDocx(fitMode){
   var offX=Math.round(mTw*DOC_EMU_TW), offY=Math.round((mTw+titleTw)*DOC_EMU_TW);
   var PX=function(v){ return Math.round(v*s*DOC_EMU_PX); };
   var fH=Math.max(11, Math.round(24*s));           /* 字号（半磅）：小四=24 */
-  var uid=10, shapes=[];
+  var uid=10, shapes=[], segMap={}, segList=[];
   /* 先画连线（在底层），再画文本框 */
   state.edges.forEach(function(e){
     var gm=edgeGeom(e); if(!gm || !gm.pts || gm.pts.length<2) return;
@@ -1667,12 +1727,17 @@ function doExportFlowDocx(fitMode){
       segs.push([p1,p2]);
     }
     segs.forEach(function(sg,k){
-      shapes.push(docxShapeLine(uid++,
-        offX+PX(sg[0].x-b.x1), offY+PX(sg[0].y-b.y1),
-        offX+PX(sg[1].x-b.x1), offY+PX(sg[1].y-b.y1),
-        k===segs.length-1));
+      var x1=offX+PX(sg[0].x-b.x1), y1=offY+PX(sg[0].y-b.y1);
+      var x2=offX+PX(sg[1].x-b.x1), y2=offY+PX(sg[1].y-b.y1);
+      /* 多根连线重合出来的同一段线只画一条（方向与坐标完全一致才合并，箭头单独保留）：
+         画面与逐条绘制完全等价，但形状数明显减少，Word 里更好选好改 */
+      var key=x1+','+y1+','+x2+','+y2+','+((k===segs.length-1)?1:0);
+      if(segMap[key]!==undefined) return;
+      segMap[key]=segList.length;
+      segList.push({ a:[x1,y1], b:[x2,y2], arrow:(k===segs.length-1) });
     });
   });
+  segList.forEach(function(sg){ shapes.push(docxShapeLine(uid++, sg.a[0], sg.a[1], sg.b[0], sg.b[1], sg.arrow)); });
   var nLine=uid-10;
   state.nodes.forEach(function(n){
     shapes.push(docxShapeTextBox(uid++, offX+PX(n.x-b.x1), offY+PX(n.y-b.y1),
@@ -1721,8 +1786,8 @@ function doExportFlowDocx(fitMode){
   ]);
   download(baseName()+'.docx', blob);
   var nSide=state.nodes.filter(isSide).length;
-  toast('已导出矢量流程图：'+state.nodes.length+' 个文本框、'+nLine+' 条箭头线段'
-    + (nSide? ('（含 '+nSide+' 个旁支虚线框）') : '')
+  toast('已导出矢量流程图：'+state.nodes.length+' 个文本框、'+nLine+' 条线段'
+    + (nSide? ('（含 '+nSide+' 个旁支节点 · 实线框）') : '')
     + (fitMode==='fit' ? ('，缩放 '+Math.round(s*100)+'% 适配单页') : '，原始尺寸'));
 }
 /* =========================================================
@@ -1736,7 +1801,7 @@ function exportDocxMenu(){
   if(!state.nodes.length){ toast('画布还没有节点', true); return; }
   openPick('📤 导出 docx', [
     {t:'矢量流程图（文本框 ＋ 单向箭头）· A4 自动适配（推荐）',
-     d:'同「文字文稿1.docx」：每道工序一个文本框、工序间单向箭头，虚线框＝旁支节点；自动缩放排进一页 A4，可直接打印',
+     d:'每道工序一个文本框、工序间单向箭头；旁支节点同为主干样式（实线框，仅以 ◇ 和「不编号」区分）；自动缩放排进一页 A4，可直接打印',
      fn:function(){ doExportFlowDocx('fit'); }},
     {t:'矢量流程图（文本框 ＋ 单向箭头）· 原始尺寸',
      d:'不缩放，页面按图形实际尺寸自动加长（超出 Word 单页上限 22in 时等比缩小）',
@@ -1827,6 +1892,7 @@ function download(name, blob){
 }
 function exportPNG(){
   if(!state.nodes.length){ toast('画布还没有节点', true); return; }
+  ensureNorm();
   var b=bbox(), pad=48, scale=2;
   var W=Math.ceil((b.w+pad*2)*scale), H=Math.ceil((b.h+pad*2)*scale);
   if(W>9000||H>9000){ scale=1; W=Math.ceil((b.w+pad*2)); H=Math.ceil((b.h+pad*2)); }
@@ -1855,9 +1921,8 @@ function exportPNG(){
     var side = isSide(n), label = side ? '◇' : String(noMap[n.id]||'');
     rrect(g, n.x, n.y, n.w, n.h, 10);
     g.fillStyle = side ? SIDE_BG : '#ffffff'; g.fill();
-    if(side){ g.save(); g.setLineDash([6,4]); }
+    /* 导出（含 PNG）统一实线框，与 docx 保持一致 */
     g.strokeStyle = side ? SIDE_BD : '#9db3d8'; g.lineWidth=1.5; g.stroke();
-    if(side) g.restore();
     var lines=wrapText(n.text, n.w-NODE_PADX*2), total=lines.length*NODE_LH;
     g.fillStyle='#1b2740'; setFont(g,NODE_FS,'500'); g.textAlign='center'; g.textBaseline='middle';
     var cy=n.y+n.h/2-total/2+NODE_LH/2;
@@ -1930,7 +1995,7 @@ function restore(d){
   pushUndo();
   state.proj=d.proj||''; state.title=d.title||'流程链路拓扑图'; state.width=Number(d.width)||168;
   state.stub=Number(d.stub)||STUB_DEF; state.dir=(d.dir==='h'||d.dir==='v')?d.dir:'auto';
-  state.gap=Number(d.gap)||0; state.layMode=d.layMode||'v';
+  state.gap=(d.gap==null||d.gap==='')?GAP_DEF:(Number(d.gap)||0); state.layMode=d.layMode||'v';
   $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); syncGapUI(); syncDirUI();
   var idmap={};
   state.nodes = d.nodes.map(function(t){
@@ -1956,7 +2021,7 @@ function loadDraft(){
     if(!d||!d.nodes||!d.nodes.length) return false;
     state.proj=d.proj||''; state.title=d.title||'流程链路拓扑图'; state.width=Number(d.width)||168;
     state.stub=Number(d.stub)||STUB_DEF; state.dir=(d.dir==='h'||d.dir==='v')?d.dir:'auto';
-    state.gap=Number(d.gap)||0; state.layMode=d.layMode||'v';
+    state.gap=(d.gap==null||d.gap==='')?GAP_DEF:(Number(d.gap)||0); state.layMode=d.layMode||'v';
     $('projName').value=state.proj; $('chartTitle').value=state.title; syncWidthUI(); syncGapUI(); syncDirUI();
     var idmap={};
     state.nodes=d.nodes.map(function(t){
