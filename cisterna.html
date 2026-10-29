@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.17</title>
+<style>
+/* ============ 设计令牌（Murus 体系） ============ */
+:root{
+  --bg:#eef1f6; --surface:#fff; --surface-2:#f7f9fc;
+  --line:#e2e8f2; --line-2:#eef2f8;
+  --ink:#16202e; --ink-2:#4a5a70; --ink-3:#8695ab;
+  --brand:#0d3f6e; --brand-2:#1c6fd0; --brand-soft:#e8f1fd;
+  --gold:#d9922b; --gold-soft:#fdf3e2;
+  --ok:#1a8a5a; --ok-soft:#e6f6ee;
+  --warn:#b8730a; --warn-soft:#fdf2df;
+  --err:#c53b3b; --err-soft:#fdecec;
+  --r:10px; --sh:0 1px 2px rgba(16,32,56,.05),0 6px 18px rgba(16,32,56,.06);
+  --sh-lg:0 12px 40px rgba(13,34,63,.18); --fs:13px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:var(--fs);color:var(--ink);background:var(--bg);overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#c9d3e2;border-radius:9px;border:2px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#aab8cc;background-clip:content-box}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ============ 顶栏 ============ */
+.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line);position:relative;z-index:20}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:36px;height:36px;display:block;border-radius:9px;box-shadow:0 3px 10px rgba(13,63,110,.28)}
+.brand h1{font-size:15.5px;font-weight:700;letter-spacing:.3px;line-height:1.2}
+.brand h1 em{font-style:normal;color:var(--gold);font-weight:800;letter-spacing:1px}
+.brand p{font-size:11px;color:var(--ink-3);margin-top:2px;letter-spacing:.2px}
+.top-actions{display:flex;align-items:center;gap:7px}
+.divider{width:1px;height:22px;background:var(--line);margin:0 3px}
+.vbadge{display:inline-block;background:linear-gradient(135deg,#1565a8,#0d3f6e);color:#fff;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:700;margin-left:9px;vertical-align:middle;letter-spacing:.4px}
+.btn{height:31px;padding:0 13px;border:1px solid var(--line);background:var(--surface);border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);transition:.14s;white-space:nowrap;font-weight:500}
+.btn:hover{border-color:#c2d3ea;background:var(--surface-2);color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(180deg,#1c6fd0,#12559f);border-color:#12559f;color:#fff;box-shadow:0 2px 6px rgba(18,85,159,.28)}
+.btn.primary:hover{background:linear-gradient(180deg,#2a7cdb,#1660ad);color:#fff}
+.btn.gold{background:linear-gradient(180deg,#e8a33d,#d1861d);border-color:#c47c17;color:#fff}
+.btn.gold:hover{color:#fff;background:linear-gradient(180deg,#f0ae4d,#d98f22)}
+.btn.ghost{background:transparent}
+.btn.block{width:100%;justify-content:center}
+.btn.icon{width:31px;padding:0;justify-content:center;font-weight:700}
+.btn svg{width:14px;height:14px;flex:none}
+
+/* ============ 布局 ============ */
+.workspace{height:calc(100% - 58px);display:grid;grid-template-columns:var(--wL,308px) 6px 1fr 6px var(--wR,332px);gap:0}
+.panel{background:var(--surface);overflow-y:auto;overflow-x:hidden;min-width:0}
+.panel.left{border-right:1px solid var(--line)}
+.panel.right{border-left:1px solid var(--line)}
+.rsz{background:var(--line-2);position:relative;cursor:col-resize;display:flex;align-items:center;justify-content:center}
+.rsz .grip{width:3px;height:34px;border-radius:3px;background:
+  linear-gradient(#1c6fd0,#1c6fd0) 0 0/3px 5px no-repeat,
+  linear-gradient(#1c6fd0,#1c6fd0) 0 10px/3px 5px no-repeat,
+  linear-gradient(#1c6fd0,#1c6fd0) 0 20px/3px 5px no-repeat;opacity:.45}
+.rsz:hover .grip{opacity:.9}
+body.resizing{cursor:col-resize;user-select:none}
+body.resizing .rsz{background:rgba(28,111,208,.30)}
+
+/* ============ 分区 ============ */
+.sec{border-bottom:1px solid var(--line-2);padding:13px 14px 15px}
+.sec:last-child{border-bottom:none;padding-bottom:26px}
+.sec-h{display:flex;align-items:center;gap:7px;margin-bottom:11px}
+.sec-h .bar{width:3px;height:13px;border-radius:2px;background:var(--brand-2)}
+.sec-h .bar.g{background:var(--gold)}
+.sec-h .bar.o{background:var(--ok)}
+.sec-h h2{font-size:12.5px;font-weight:700;letter-spacing:.4px;color:var(--ink)}
+.sec-h .tag{margin-left:auto;font-size:10.5px;color:var(--ink-3);font-weight:500}
+
+/* 表单 */
+.field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.field label{width:104px;flex:none;font-size:12px;color:var(--ink-2)}
+.field label b{color:var(--brand-2);font-weight:700;font-family:"Times New Roman",serif;font-size:13px;font-style:italic}
+.ctl{flex:1;display:flex;align-items:center;height:29px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);transition:.14s;overflow:hidden}
+.ctl:focus-within{border-color:var(--brand-2);background:#fff;box-shadow:0 0 0 3px rgba(28,111,208,.11)}
+.ctl .pre{padding:0 0 0 9px;font-size:11.5px;color:var(--ink-3);font-family:"Times New Roman",serif}
+.ctl input{flex:1;min-width:0;border:none;background:transparent;outline:none;padding:0 8px;height:100%;font-variant-numeric:tabular-nums}
+.ctl.dis{background:#eef1f5;border-style:dashed}
+.ctl.dis input{color:var(--ink-3);cursor:not-allowed}
+.ctl .unit{padding:0 9px 0 0;font-size:11px;color:var(--ink-3)}
+select.ctl{padding:0 8px;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238695ab' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center}
+
+/* 校核 */
+.verdict{border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.6;display:flex;gap:7px;align-items:flex-start}
+.verdict .dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:none}
+.verdict.ok{background:var(--ok-soft);color:#10653f}.verdict.ok .dot{background:var(--ok)}
+.verdict.warn{background:var(--warn-soft);color:#8a5606}.verdict.warn .dot{background:var(--warn)}
+.verdict.err{background:var(--err-soft);color:#a02b2b}.verdict.err .dot{background:var(--err)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.kpi .k{font-size:10.5px;color:var(--ink-3);margin-bottom:2px}
+.kpi .v{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.kpi .v small{font-size:10px;font-weight:500;color:var(--ink-3);margin-left:2px}
+
+/* 开关 */
+.switches{display:grid;grid-template-columns:1fr 1fr;gap:5px 8px}
+.sw{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11.5px;color:var(--ink-2);padding:3px 0;user-select:none}
+.sw input{display:none}
+.sw i{width:28px;height:16px;border-radius:9px;background:#d3dbe7;position:relative;transition:.18s;flex:none}
+.sw i::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw input:checked + i{background:var(--brand-2)}
+.sw input:checked + i::after{left:14px}
+.hint{font-size:11px;color:var(--ink-3);line-height:1.65;margin-top:8px}
+.hint code{background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:10.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* 画布 */
+.stage{display:flex;flex-direction:column;min-width:0;background:var(--surface-2)}
+.canvas-wrap{flex:1;position:relative;min-height:0;overflow:hidden}
+#cv{width:100%;height:100%;display:block;cursor:grab}
+#cv.drag{cursor:grabbing}
+.cv-toolbar{position:absolute;top:12px;left:12px;display:flex;gap:4px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:9px;padding:4px;box-shadow:var(--sh);backdrop-filter:blur(6px)}
+.cv-toolbar button{width:29px;height:29px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-2);transition:.13s}
+.cv-toolbar button:hover{background:var(--brand-soft);color:var(--brand-2)}
+.cv-toolbar button.on{background:var(--brand-2);color:#fff}
+.cv-toolbar .sp{width:1px;background:var(--line);margin:4px 2px}
+.cv-toolbar svg{width:16px;height:16px}
+.cv-badge{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:9px;padding:7px 12px;box-shadow:var(--sh);text-align:right;backdrop-filter:blur(6px)}
+.cv-badge .t{font-size:12.5px;font-weight:700;letter-spacing:.3px}
+.cv-badge .s{font-size:10.5px;color:var(--ink-3);margin-top:2px;font-variant-numeric:tabular-nums}
+.statusbar{height:27px;border-top:1px solid var(--line);background:var(--surface);display:flex;align-items:center;padding:0 13px;gap:16px;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.statusbar b{color:var(--ink-2);font-weight:600}
+.statusbar .right{margin-left:auto;display:flex;gap:14px}
+
+/* 右栏表格 */
+table.rec{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums}
+table.rec th{background:var(--surface-2);color:var(--ink-3);font-weight:600;font-size:10.5px;text-align:right;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.rec th:first-child{text-align:left}
+table.rec td{padding:5px;border-bottom:1px solid var(--line-2);text-align:right;color:var(--ink-2)}
+table.rec td:first-child{text-align:left;color:var(--ink);font-weight:600;white-space:nowrap}
+table.rec td.expr{text-align:left;color:var(--ink-3);font-size:10.5px;font-family:ui-monospace,Consolas,monospace}
+table.rec tr:last-child td{border-bottom:none}
+table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn)}
+.rec-wrap{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+
+/* 弹层 */
+.mask{position:fixed;inset:0;background:rgba(14,26,44,.42);display:none;align-items:center;justify-content:center;z-index:60;backdrop-filter:blur(3px)}
+.mask.show{display:flex}
+.modal{background:var(--surface);border-radius:14px;box-shadow:var(--sh-lg);width:520px;max-width:92vw;overflow:hidden;animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal-h{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.modal-h h3{font-size:14px;font-weight:700}
+.modal-h .x{margin-left:auto;cursor:pointer;color:var(--ink-3);font-size:19px;line-height:1;padding:2px 6px;border-radius:5px}
+.modal-h .x:hover{background:var(--surface-2);color:var(--ink)}
+.modal-b{padding:18px;font-size:12.5px;line-height:1.85;color:var(--ink-2);max-height:64vh;overflow-y:auto}
+.modal-f{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:var(--surface-2)}
+.about-hero{display:flex;gap:14px;align-items:center;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line-2)}
+.about-hero .big{width:66px;height:66px;border-radius:15px;flex:none;box-shadow:0 6px 18px rgba(13,63,110,.25)}
+.about-hero h4{font-size:16px;color:var(--ink);font-weight:700}
+.about-hero p{font-size:11.5px;color:var(--ink-3);margin-top:3px}
+.ver{display:inline-block;background:var(--brand-soft);color:var(--brand-2);border-radius:20px;padding:1px 9px;font-size:10.5px;font-weight:700;margin-top:6px}
+.chlog{margin:6px 0 2px;max-height:180px;overflow:auto;list-style:none}
+.chlog li{margin:6px 0;font-size:11.5px;color:var(--ink-2);line-height:1.55}
+.chlog b{color:var(--brand-2);margin-right:4px}
+
+/* Toast */
+#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:rgba(20,32,48,.95);color:#fff;padding:9px 17px;border-radius:9px;font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .25s;display:flex;align-items:center;gap:8px;max-width:82vw}
+.toast.ok{background:rgba(16,101,63,.96)}
+.toast.warn{background:rgba(150,94,8,.96)}
+.toast.err{background:rgba(163,45,45,.96)}
+@keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
+    <div>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.17</span></h1>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="btn ghost" id="btnDxf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h9l7 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M13 4v7h7"/></svg>导出 CAD
+    </button>
+    <button class="btn primary" id="btnPng">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>导出 PNG
+    </button>
+    <span class="divider"></span>
+    <button class="btn icon" id="btnAbout" title="关于 Cisterna">?</button>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <!-- ============ 左：参数 ============ -->
+  <aside class="panel left" id="panelL">
+    <div class="sec">
+      <div class="sec-h"><span class="bar"></span><h2>蓄水池参数</h2><span class="tag">单位 m</span></div>
+      <div class="field"><label>蓄水池名称</label>
+        <div class="ctl"><input id="f_name" type="text" value="XXX取水口" maxlength="20" placeholder="XXX取水口" spellcheck="false"></div>
+      </div>
+      <div class="field"><label>蓄水池形式</label>
+        <select class="ctl" id="f_type"><option value="4">四面闭合</option><option value="3">三面开口</option></select>
+      </div>
+      <div class="field"><label>内净长 <b>L</b></label><div class="ctl"><input id="f_L" type="number" value="4.0" step="0.1" min="0.5"><span class="unit">m</span></div></div>
+      <div class="field" id="rowW"><label>内净宽 <b>W</b></label><div class="ctl"><input id="f_W" type="number" value="3.0" step="0.1" min="0.5"><span class="unit">m</span></div></div>
+      <div class="field"><label>池墙高度 <b>H</b></label><div class="ctl"><input id="f_H" type="number" value="2.5" step="0.1" min="0.3"><span class="unit">m</span></div></div>
+      <div class="field"><label>池墙厚度 <b>t</b></label><div class="ctl"><input id="f_t" type="number" value="0.25" step="0.05" min="0.1"><span class="unit">m</span></div></div>
+      <div class="field"><label>底板厚度 <b>T</b></label><div class="ctl"><input id="f_T" type="number" value="0.30" step="0.05" min="0.1"><span class="unit">m</span></div></div>
+      <div class="field"><label>放大脚加宽 <b>B</b></label><div class="ctl"><input id="f_B" type="number" value="0.50" step="0.05" min="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>埋置方式</label>
+        <select class="ctl" id="f_bury"><option value="full" selected>全埋（池顶齐地坪）</option><option value="half">半埋（按埋深 D）</option></select>
+      </div>
+      <div class="field" id="rowHc" style="display:none"><label>覆土厚度 <b>hc</b></label><div class="ctl"><input id="f_hc" type="number" value="0" step="0.1" min="0"><span class="unit">m</span></div></div>
+      <div class="field"><label>埋置深度 <b>D</b></label><div class="ctl" id="ctlD"><input id="f_D" type="number" value="2.80" step="0.1" min="0"><span class="unit">m</span></div></div>
+      <div class="hint" id="rowDh">全埋时 D = 墙高 H + 底板厚 T，自动计算（池顶与室外地坪齐平）。</div>
+      <div class="field"><label>顶盖</label>
+        <select class="ctl" id="f_cover"><option value="0">不设盖板（敞口）</option><option value="1" selected>设置混凝土盖板</option></select>
+      </div>
+      <div class="field" id="rowTc"><label>盖板厚度 <b>Tc</b></label><div class="ctl"><input id="f_Tc" type="number" value="0.12" step="0.02" min="0.05"><span class="unit">m</span></div></div>
+      <div class="field" id="rowTe"><label>盖板搭接 <b>e</b></label><div class="ctl"><input id="f_e" type="number" value="0.25" step="0.05" min="0"><span class="unit">m</span></div></div>
+    </div>
+
+    <div class="sec" id="sec3">
+      <div class="sec-h"><span class="bar o"></span><h2>三面墙参数</h2><span class="tag">开口侧自定义</span></div>
+      <div class="field"><label>左墙夹角 <b>αL</b></label><div class="ctl"><input id="f_aL" type="number" value="90" step="1" min="15" max="165"><span class="unit">°</span></div></div>
+      <div class="field"><label>左墙轴线长 <b>ℓL</b></label><div class="ctl"><input id="f_lL" type="number" value="3.0" step="0.1" min="0.5"><span class="unit">m</span></div></div>
+      <div class="field"><label>右墙夹角 <b>αR</b></label><div class="ctl"><input id="f_aR" type="number" value="90" step="1" min="15" max="165"><span class="unit">°</span></div></div>
+      <div class="field"><label>右墙轴线长 <b>ℓR</b></label><div class="ctl"><input id="f_lR" type="number" value="3.0" step="0.1" min="0.5"><span class="unit">m</span></div></div>
+      <div class="hint">α 为侧墙轴线与后墙轴线的<b>池内夹角</b>（90° 为直角）；ℓ 为自后墙轴线交点起算的<b>轴线长度</b>。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="bar g"></span><h2>几何校核与计算</h2></div>
+      <div id="verdict" class="verdict ok"><span class="dot"></span><span class="txt"></span></div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">内空容积 V</div><div class="v" id="k_V">–<small>m³</small></div></div>
+        <div class="kpi"><div class="k">混凝土合计</div><div class="v" id="k_C">–<small>m³</small></div></div>
+        <div class="kpi"><div class="k">底板平面面积</div><div class="v" id="k_A">–<small>m²</small></div></div>
+        <div class="kpi"><div class="k">开挖土方</div><div class="v" id="k_E">–<small>m³</small></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="bar"></span><h2>成图设置</h2></div>
+      <div class="field"><label>出图比例</label>
+        <select class="ctl" id="f_scale">
+          <option value="auto" selected>自动匹配</option>
+          <option value="25">1 : 25</option><option value="50">1 : 50</option>
+          <option value="75">1 : 75</option><option value="100">1 : 100</option>
+          <option value="150">1 : 150</option><option value="200">1 : 200</option>
+        </select>
+      </div>
+      <div class="field"><label>墙身材料</label>
+        <select class="ctl" id="f_mat">
+          <option value="C20混凝土">C20混凝土</option>
+          <option value="C20钢筋混凝土">C20钢筋混凝土</option>
+          <option value="C25混凝土" selected>C25混凝土</option>
+          <option value="C25钢筋混凝土">C25钢筋混凝土</option>
+        </select>
+      </div>
+      <div class="field"><label>平面图剖切示意</label>
+        <label class="sw" style="margin-left:auto"><input type="checkbox" id="o_cut"><i></i></label>
+      </div>
+      <div class="switches" style="margin-top:8px">
+        <label class="sw"><input type="checkbox" id="o_dim" checked><i></i>尺寸标注</label>
+        <label class="sw"><input type="checkbox" id="o_note" checked><i></i>说明文字</label>
+        <label class="sw"><input type="checkbox" id="o_soil" checked><i></i>素土夯实</label>
+        <label class="sw"><input type="checkbox" id="o_grid" checked><i></i>绘图网格</label>
+        <label class="sw"><input type="checkbox" id="o_hatch" checked><i></i>混凝土填充</label>
+      </div>
+      <div class="hint">滚轮缩放 · 拖拽平移 · 双击适应窗口 · <code>F</code> 键适应。所有图元按 1:比例 生成，导出 CAD 与屏幕所见一致。</div>
+    </div>
+  </aside>
+
+  <div class="rsz" id="rszL"><span class="grip"></span></div>
+
+  <!-- ============ 中：画布 ============ -->
+  <main class="stage">
+    <div class="canvas-wrap" id="wrap">
+      <canvas id="cv"></canvas>
+      <div class="cv-toolbar">
+        <button id="tbFit" title="适应窗口 (F)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4"/></svg></button>
+        <button id="tbIn" title="放大"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4"/></svg></button>
+        <button id="tbOut" title="缩小"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M6.8 9h4.4"/></svg></button>
+        <span class="sp"></span>
+        <button id="tbGrid" class="on" title="显示网格"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14"/></svg></button>
+      </div>
+      <div class="cv-badge">
+        <div class="t" id="bgName">—</div>
+        <div class="s" id="bgSub">—</div>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span>坐标 <b id="stXY">0.000, 0.000</b> m</span>
+      <span>视图缩放 <b id="stZoom">100%</b></span>
+      <span>出图比例 <b id="stScale">1:50</b></span>
+      <div class="right"><span>滚轮缩放 · 拖拽平移 · 双击适应窗口</span><span id="stMode">四面闭合</span></div>
+    </div>
+  </main>
+
+  <div class="rsz" id="rszR"><span class="grip"></span></div>
+
+  <!-- ============ 右：工程量与导出 ============ -->
+  <aside class="panel right" id="panelR">
+    <div class="sec">
+      <div class="sec-h"><span class="bar g"></span><h2>工程量清单</h2><span class="tag">单位 m³ / ㎡</span></div>
+      <div class="rec-wrap">
+        <table class="rec">
+          <thead><tr><th>项目</th><th style="text-align:left">计算式</th><th>结果</th></tr></thead>
+          <tbody id="qtyBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="bar"></span><h2>图形导出</h2></div>
+      <div class="field"><label>输出分辨率</label>
+        <select class="ctl" id="e_res">
+          <option value="1">标准 · 约 2000 px</option>
+          <option value="2" selected>高清 · 约 3200 px</option>
+          <option value="3">超清 · 约 4800 px</option>
+        </select>
+      </div>
+      <div class="field"><label>背景</label>
+        <select class="ctl" id="e_bg">
+          <option value="white" selected>白色背景 PNG</option>
+          <option value="transparent">透明背景 PNG</option>
+        </select>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn block" id="e_png">导出 PNG</button>
+        <button class="btn gold block" id="e_dxf">导出 DXF</button>
+      </div>
+      <div class="hint">DXF 为标准 <b>AC1015（R2000）</b>格式，单位 mm，图层分离：<code>WALL/SLAB/SOIL/DIM/TEXT/HATCH/COVER</code>，含完整 HEADER·TABLES·BLOCKS·OBJECTS 骨架与句柄表，可在 <b>AutoCAD 2026</b>、浩辰、中望、CAXA 中直接打开编辑。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="bar o"></span><h2>计算与出图说明</h2></div>
+      <div class="hint" id="calcNote"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
+      <ul class="chlog">
+        <li><b>v1.0.17</b><b>导出 DXF 的尺寸标注与文字样式全面复刻固维挡墙断面CAD自动成图系统</b>：① 标注改为<b>真正的转角标注实体</b>（DIMENSION，类型 70=32），标注样式 <code>_TCH_ARCH</code>——建筑斜线箭头、文字置顶、界线偏移 3.0 / 超出 2.5、字高 3.5，标注全局比例 = 出图比例分母（1:50 → 50）；② 标注<b>颜色改为绿色</b>（色号 3，与固维 PUB_DIM 一致），DIM 图层同步改绿、屏幕标注同步改绿；③ 文字样式改为 <code>Standard</code>：SHX 字体 <code>Tssdeng.shx</code>、大字体 <code>HZTXT.SHX</code>、宽度因子 0.7，并新增 <code>_TCH_DIM</code> 专供标注文字。</li>
+        <li><b>v1.0.16</b>全埋<b>埋置深度计算规则改为 D = 墙高 H + 底板厚 T</b>（不再叠加覆土 hc），池顶与室外地坪齐平，剖面不再绘制池顶以上覆土带；「覆土厚度 hc」参数随之隐藏，半埋方式不受影响。</li>
+        <li><b>v1.0.15</b><b>修复导出 DXF 无法打开</b>：v1.0.14 新增的实体线宽写入了 <code>22</code>/<code>36</code>（1/100 mm），而 AutoCAD 只接受法定线宽值（0/5/9/13/15/18/20/25/30/35/40/50/…），非法值会直接判定「DXF 输入无效」拒绝打开；现导出时统一<b>吸附到最接近的合法线宽</b>（22→25、36→35），画布显示不变。</li>
+        <li><b>v1.0.14</b>新增<b>埋置方式</b>（默认<b>全埋</b>）：全埋时 D = 墙高 H + 底板厚 T + 覆土 hc 自动计算并灰显，池顶以上按覆土填充、地坪线实线连通，顶部尺寸线自动抬到地坪线以上；切半埋可直接输入 D。<b>尺寸标注样式复刻固维挡墙断面CAD自动成图系统</b>：整体改<b>蓝色</b>（#0f5aa8）、尺寸数字 3.5 mm 置于线上方、45° 斜起止符跨越尺寸线、界线自构件轮廓留 1.6 mm 引出并超出 2.2 mm、尺寸线两端各出 1.5 mm，线宽按 0.18/0.22/0.36 mm 分级；<b>文字样式同步</b>：画布改仿宋，DXF 文字宽度因子 0.7（图名下划线按 0.7 字宽重算）。</li>
+        <li><b>v1.0.13</b>图名字高<b>改回按图纸尺寸取值</b>（5 mm 图纸，1:50 时 CAD 字高 250），撤销 v1.0.12 的「2×比例分母」规则；其余改动保留。</li>
+        <li><b>v1.0.12</b>（图名字高规则已于 v1.0.13 撤销）<b>墙厚等窄尺寸的数字不再缩小字高</b>，一律与全图统一字高、居中落在两条尺寸界线之间（仅极窄到放不下时才外移）；<b>平面总尺寸改为「墙厚＋净空」</b>——横向 4500（250+4000+250，原为含放大脚的 5500），与竖向 3500（250+3000+250）对称。</li>
+        <li><b>v1.0.11</b><b>平面图四面墙厚全部标注</b>——竖向也做成 t|W|t 尺寸链（250|3000|250），与横向 250|4000|250 对应；<b>尺寸数字一律落在两条尺寸界线之间</b>，窄尺寸（如 250）自动缩字高到底 2 mm 而不甩到线外；<b>「素土夯实」文字中线与内空文字中线对齐</b>；<b>内空文字按名称自动命名</b>——取蓄水池名称中「XXX」之后的词，默认即「取水口（内空）」，名称留空时回退「水池（内空）」。</li>
+        <li><b>v1.0.10</b><b>底板正下方补上素土夯实填充</b>（原先只有两侧 L 形），「素土夯实」文字移入该填充带内；<b>室外地坪</b>文字紧贴地坪线之上（全埋时置于线下方）；<b>平面图新增墙厚尺寸链</b> 250|4000|250，与剖面对应；<b>导出 DXF 的竖排尺寸文字旋转角修正</b>——原先符号取反，文字在 CAD 里翻 180° 落到尺寸线另一侧；<b>图名下划线按宋体字宽逐字计算</b>（全角 1.0h、半角 0.5h），长度与 CAD 中文字严格贴合。</li>
+        <li><b>v1.0.9</b>导出文件命名改为<b>「蓄水池名称 + CAD平面及剖面图」</b>（默认 <code>XXX取水口CAD平面及剖面图.dxf</code>），DXF 与 PNG 同步；名称中的 <code>\ / : * ? " &lt; &gt; |</code> 自动替换为下划线，名称留空时回退为「混凝土蓄水池CAD平面及剖面图」。</li>
+        <li><b>v1.0.8</b>蓄水池参数新增<b>蓄水池名称</b>（默认「XXX取水口」），<b>图名随之更新</b>——平面图为「名称+平面图」、剖面图为「名称+1-1 剖面图」，下划线宽度自动适应文字长度；清空名称时回退为纯「平面图 / 1-1 剖面图」。</li>
+        <li><b>v1.0.7</b>尺寸界线与构件轮廓的<b>间隙加大到 8 mm</b>；平面尺寸线（9/18u）、剖面尺寸线（12u）、三面池斜向尺寸（14u）同步外移，保证间隙后界线仍有足够长度。</li>
+        <li><b>v1.0.6</b>尺寸界线与构件轮廓的<b>间隙加大到 4 mm</b>（原 2 mm）；共享文件夹按<b>最新 5 版</b>滚动保留。</li>
+        <li><b>v1.0.5</b><b>尺寸界线</b>改为自被标注构件轮廓线引出（留间隙）并末端超出尺寸线 3 mm，构件侧不再空白；剖面容许尺寸链的<b>竖向标注移入该侧素土夯实填充带内</b>（墙高/板厚靠构件、埋深靠外缘），并加白底保证读数清晰。</li>
+        <li><b>v1.0.4</b>删除左栏参数下的断面示意图；剖面<b>竖向尺寸移到另一侧</b>（与素土地坪文字分处图形两侧）；<b>图名与下划线中线</b>对齐上方尺寸链文字中线；<b>尺寸界线缩短</b>至 3 mm、起止符改 45° 中粗斜短线；<b>重写 DXF 为 AC1015（R2000）骨架</b>——采用 ezdxf 生成的标准骨架（HEADER+CLASSES+TABLES+BLOCKS+OBJECTS、完整句柄表与 $HANDSEED），实体改为 LWPOLYLINE/LINE/CIRCLE/ARC/TEXT，可在 AutoCAD 2026 直接打开。</li>
+        <li><b>v1.0.3</b>1-1 剖面改切<b>净空较长一侧</b>（四面池切 4 m 净空向），剖切符号随之改为竖向；材料引线只写材料名；<b>室外地坪</b>文字移到地坪线之上、<b>素土夯实</b>文字落入填充区内并留白底；素土填充<b>延伸至池壁外表面</b>；墙高/板厚/埋深标注移到土体之外，窄尺寸数字外移不压起止符；平面底板填充只保留<b>放大脚一环</b>；图名加<b>双下划线</b>；重写 <b>DXF 输出</b>（补 BLOCKS 段与 VPORT/APPID/DIMSTYLE 表、宋体字型、末行换行），可在 AutoCAD 2026 正常打开。</li>
+        <li><b>v1.0.2</b>取消图框标题栏与出图比例文字；新增<b>墙身材料引线标注</b>（C20/C25 素混凝土·钢筋混凝土，默认 C25混凝土）；素土夯实改为<b>天正式线图案</b>（成行短斜划）；混凝土骨料圆点<b>内缩避让</b>，不再压线；同侧尺寸标注合并到同一条尺寸线；底板尺寸不再压底板轮廓；三面池开口朝上；剖面按另一侧方向出图；盖板搭接默认取墙厚。</li>
+        <li><b>v1.0.1</b>画布改为<b>上下两个独立视口</b>（平面 / 剖面各一套相机，可分别缩放平移，分隔条可拖动）；新增<b>混凝土顶盖（盖板）</b>：可设盖板厚度 Tc 与四周搭接 e，平面图以虚线绘制隐蔽轮廓、剖面图按搁置于池墙顶部绘制并计入工程量（盖板混凝土、底模+侧模）。仿 Murus 重构界面：三栏可拖拽布局 + 浮动工具条 + 状态栏 + 关于弹层；支持滚轮缩放/拖拽平移/双击适应；新增<b>导出 CAD（DXF R12）</b>，图层分离、mm 单位；墙体与底板改为<b>混凝土图案填充</b>（45° 细斜线 + 骨料点）；素土夯实填充简化为稀疏斜虚线，<b>地面以上不再填充</b>；尺寸/文字按出图比例生成，与 CAD 导出完全一致。</li>
+        <li><b>v1.0.0</b>首版：四面闭合 / 三面开口蓄水池参数化成图（平面图 + 1-1 剖面图），池墙/底板混凝土、模板、土方工程量自动计算。</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<div class="mask" id="mAbout">
+  <div class="modal">
+    <div class="modal-h"><h3>关于 Cisterna</h3><span class="x" data-close>&times;</span></div>
+    <div class="modal-b">
+      <div class="about-hero">
+        <svg class="big" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
+        <div>
+          <h4>混凝土蓄水池CAD自动成图系统</h4>
+          <p>Cisterna · Concrete Water Tank Drawing Generator</p>
+          <span class="ver">v1.0.17</span>
+        </div>
+      </div>
+      <b style="color:var(--ink)">功能</b>
+      <ul style="padding-left:18px;margin:6px 0 12px">
+        <li>四面闭合 / 三面开口蓄水池参数化成图（平面图 + 1-1 剖面图）</li>
+        <li>可调池墙高/厚、底板厚、放大脚加宽、埋置深度；三面可自定义侧墙夹角与轴线长度</li>
+        <li>工程量：池墙/底板混凝土、模板接触面、底板侧模、土方开挖（概算）</li>
+        <li>导出 PNG（3 档分辨率 / 可透明底）与导出 CAD（DXF AC1015，mm 单位）</li>
+      </ul>
+      <b style="color:var(--ink)">约定</b>
+      <p style="margin-top:4px">埋置深度 D 为室外地坪至底板底面的距离；放大脚加宽 B 为底板每侧挑出池墙外表面的宽度；池墙工程量按轴线长度×墙厚×墙高计（转角不扣减）；标注单位 mm。</p>
+    </div>
+    <div class="modal-f"><button class="btn primary" data-close>完成</button></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const DEG = Math.PI/180;
+
+/* ================= 状态 ================= */
+const state = {
+  view: { plan:{cam:{scale:60,cx:0,cy:0}, fit:60, cmds:null},
+          sec :{cam:{scale:60,cx:0,cy:0}, fit:60, cmds:null} },
+  active:'plan', vpRatio:0.5,
+  denom:50, sheet:null, g:null, grid:true
+};
+const DEF = {type:'4', L:4.0, W:3.0, H:2.5, t:0.25, T:0.30, B:0.50, D:1.50, aL:90, lL:3.0, aR:90, lR:3.0};
+
+function toast(msg, kind){
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' ' + kind : '');
+  el.textContent = msg;
+  $('toasts').appendChild(el);
+  setTimeout(()=>{ el.style.opacity = '0'; el.style.transition='.25s'; setTimeout(()=>el.remove(), 260); }, 2400);
+}
+const numv = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : NaN; };
+const fmt = (v,d=2) => (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);
+const mm = v => String(Math.round(v*1000));
+
+/* ================= 几何工具 ================= */
+function isect(p1,d1,p2,d2){
+  const den = d1.x*d2.y - d1.y*d2.x;
+  if(Math.abs(den) < 1e-9) return null;
+  const t = ((p2.x-p1.x)*d2.y - (p2.y-p1.y)*d2.x)/den;
+  return {x:p1.x+d1.x*t, y:p1.y+d1.y*t};
+}
+function offsetPoly(pts, closed, off){
+  const n = pts.length, m = closed ? n : n-1, segs = [];
+  for(let i=0;i<m;i++){
+    const a = pts[i], b = pts[(i+1)%n];
+    let dx = b.x-a.x, dy = b.y-a.y;
+    const len = Math.hypot(dx,dy) || 1e-9;
+    const ux = dx/len, uy = dy/len;
+    segs.push({p:{x:a.x-uy*off, y:a.y+ux*off}, d:{x:ux,y:uy}, len});
+  }
+  const res = [];
+  for(let i=0;i<n;i++){
+    const prev = closed ? segs[(i-1+n)%n] : segs[i-1];
+    const next = segs[i];
+    if(!prev){ res.push({x:next.p.x, y:next.p.y}); continue; }
+    if(!next){ const s = segs[m-1]; res.push({x:s.p.x+s.d.x*s.len, y:s.p.y+s.d.y*s.len}); continue; }
+    const ip = isect(prev.p, prev.d, next.p, next.d);
+    res.push(ip || {x:next.p.x, y:next.p.y});
+  }
+  return res;
+}
+function polyArea(p){ let s=0; for(let i=0;i<p.length;i++){ const a=p[i], b=p[(i+1)%p.length]; s += a.x*b.y-b.x*a.y; } return s/2; }
+function polyPerim(p){ let s=0; for(let i=0;i<p.length;i++){ const a=p[i], b=p[(i+1)%p.length]; s += Math.hypot(b.x-a.x,b.y-a.y); } return s; }
+function bboxOf(polys){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  polys.filter(Boolean).forEach(poly=>poly.forEach(p=>{
+    if(p.x<x0)x0=p.x; if(p.y<y0)y0=p.y; if(p.x>x1)x1=p.x; if(p.y>y1)y1=p.y;
+  }));
+  return {x0,y0,x1,y1,w:x1-x0,h:y1-y0};
+}
+/* 多边形内斜线填充（世界坐标，even-odd 扫描线），返回线段数组 */
+function hatchSegs(poly, angDeg, spacing, dash){
+  const a = angDeg*DEG, dx = Math.cos(a), dy = Math.sin(a);
+  const nx = -dy, ny = dx;
+  let lo = 1e9, hi = -1e9;
+  poly.forEach(p=>{ const t = p.x*nx + p.y*ny; if(t<lo)lo=t; if(t>hi)hi=t; });
+  const segs = [];
+  const start = Math.ceil(lo/spacing)*spacing;
+  for(let c=start; c<=hi; c+=spacing){
+    const bx = c*nx, by = c*ny;
+    const ts = [];
+    for(let i=0;i<poly.length;i++){
+      const p = poly[i], q = poly[(i+1)%poly.length];
+      const dp = p.x*nx+p.y*ny-c, dq = q.x*nx+q.y*ny-c;
+      if((dp>1e-9&&dq>1e-9)||(dp<-1e-9&&dq<-1e-9)) continue;
+      if(Math.abs(dp-dq)<1e-12) continue;
+      const t = dp/(dp-dq);
+      const px = p.x+(q.x-p.x)*t, py = p.y+(q.y-p.y)*t;
+      ts.push((px-bx)*dx + (py-by)*dy);
+    }
+    if(ts.length < 2) continue;
+    ts.sort((m,n)=>m-n);
+    for(let k=0;k+1<ts.length;k+=2){
+      const s0 = ts[k], s1 = ts[k+1];
+      if(s1-s0 < 1e-6) continue;
+      if(!dash){ segs.push([[bx+dx*s0, by+dy*s0],[bx+dx*s1, by+dy*s1]]); continue; }
+      const [on,off] = dash;
+      for(let s=s0; s<s1; s+=on+off){
+        const e = Math.min(s+on, s1);
+        segs.push([[bx+dx*s, by+dy*s],[bx+dx*e, by+dy*e]]);
+      }
+    }
+  }
+  return segs;
+}
+/* 骨料点（混凝土图案）：inset = 离轮廓线的最小净距，保证圆点完全落在框线内 */
+function distPtSeg(p, a, b){
+  const dx = b.x-a.x, dy = b.y-a.y, L2 = dx*dx+dy*dy;
+  let t = L2 > 1e-12 ? ((p.x-a.x)*dx + (p.y-a.y)*dy)/L2 : 0;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x-(a.x+dx*t), p.y-(a.y+dy*t));
+}
+function distToPoly(p, poly){
+  let d = 1e9;
+  for(let i=0;i<poly.length;i++){
+    const dd = distPtSeg(p, poly[i], poly[(i+1)%poly.length]);
+    if(dd < d) d = dd;
+  }
+  return d;
+}
+function clearOf(p, bounds, inset){
+  if(!bounds) return true;
+  for(const bp of bounds){ if(bp && distToPoly(p, bp) < inset) return false; }
+  return true;
+}
+function dotsInPoly(poly, spacing, inset, bounds){
+  const bb = bboxOf([poly]);
+  const pts = [];
+  let row = 0;
+  for(let y=bb.y0; y<=bb.y1; y+=spacing*0.9){
+    const shift = (row++ % 2) ? spacing*0.5 : 0;
+    for(let x=bb.x0+shift; x<=bb.x1; x+=spacing){
+      const p = {x,y};
+      if(!pointInPoly(p, poly)) continue;
+      if(inset && distToPoly(p, poly) < inset) continue;
+      if(!clearOf(p, bounds, inset)) continue;
+      pts.push(p);
+    }
+  }
+  return pts;
+}
+function pointInPoly(p, poly){
+  let inside = false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const a=poly[i], b=poly[j];
+    if(((a.y>p.y)!==(b.y>p.y)) && (p.x < (b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)) inside = !inside;
+  }
+  return inside;
+}
+
+
+/* 线段按边界多边形集合切分，保留中点满足 keepFn 的子段 */
+function clipSeg(a, b, polys, keepFn){
+  const dx = b.x-a.x, dy = b.y-a.y;
+  const ts = [0,1];
+  polys.forEach(poly=>{
+    for(let i=0;i<poly.length;i++){
+      const p = poly[i], q = poly[(i+1)%poly.length];
+      const ex = q.x-p.x, ey = q.y-p.y;
+      const den = dx*ey - dy*ex;
+      if(Math.abs(den) < 1e-12) continue;
+      const t = ((p.x-a.x)*ey - (p.y-a.y)*ex)/den;
+      const u = ((p.x-a.x)*dy - (p.y-a.y)*dx)/den;
+      if(t>-1e-9 && t<1+1e-9 && u>-1e-9 && u<1+1e-9) ts.push(Math.min(1,Math.max(0,t)));
+    }
+  });
+  ts.sort((m,n)=>m-n);
+  const uniq = [];
+  ts.forEach(t=>{ if(!uniq.length || t-uniq[uniq.length-1] > 1e-7) uniq.push(t); });
+  const out = [];
+  for(let i=0;i+1<uniq.length;i++){
+    const t0 = uniq[i], t1 = uniq[i+1];
+    if(t1-t0 < 1e-6) continue;
+    const mid = {x:a.x+dx*(t0+t1)/2, y:a.y+dy*(t0+t1)/2};
+    if(keepFn(mid)) out.push([{x:a.x+dx*t0, y:a.y+dy*t0},{x:a.x+dx*t1, y:a.y+dy*t1}]);
+  }
+  return out;
+}
+/* 在墙带区域（外轮廓内、内轮廓外）生成混凝土填充线 */
+function hatchWallBand(list, outer, inner, u, layer){
+  const segs = hatchSegs(outer, 45, 3.4*u, null);
+  segs.forEach(sg=>{
+    const a = {x:sg[0][0], y:sg[0][1]}, b = {x:sg[1][0], y:sg[1][1]};
+    const parts = clipSeg(a, b, inner ? [outer, inner] : [outer],
+      pt=> pointInPoly(pt, outer) && !(inner && pointInPoly(pt, inner)));
+    parts.forEach(pr=> list.push({t:'line', p1:pr[0], p2:pr[1], layer}));
+  });
+  const dots = dotsInPoly(outer, 8*u).filter(pt=> !(inner && pointInPoly(pt, inner)));
+  dots.forEach(pt=> list.push({t:'dot', x:pt.x, y:pt.y, r:0.55*u, layer}));
+}
+
+
+/* 墙体按段拆成四边形（斜接拼接，无缝隙），末边 wrap 闭合 */
+function wallQuads(path, closed, t){
+  const LP = offsetPoly(path, closed, t/2), RP = offsetPoly(path, closed, -t/2);
+  const n = path.length, m = closed ? n : n-1, quads = [];
+  for(let i=0;i<m;i++){
+    const j = (i+1)%n;
+    quads.push([LP[i], LP[j], RP[j], RP[i]]);
+  }
+  return quads;
+}
+
+
+/* 逐四边形生成混凝土填充（含骨料点）；bounds 为实际绘出的轮廓线，用于把圆点挡在线内 */
+function hatchQuads(list, quads, hs, ds, dr, inset, layer, bounds){
+  quads.forEach(q=>{
+    hatchSegs(q, 45, hs, null).forEach(sg=>
+      list.push({t:'line', p1:{x:sg[0][0], y:sg[0][1]}, p2:{x:sg[1][0], y:sg[1][1]}, layer}));
+  });
+  if(!quads.length) return;
+  const bb = bboxOf(quads);
+  const pts = [];
+  let row = 0;
+  for(let y=bb.y0; y<=bb.y1; y+=ds*0.78){
+    const shift = (row++ % 2) ? ds*0.5 : 0;
+    for(let x=bb.x0+shift; x<=bb.x1; x+=ds){
+      const p = {x,y};
+      if(!quads.some(q=>pointInPoly(p,q))) continue;
+      if(!clearOf(p, bounds, inset)) continue;
+      pts.push(p);
+    }
+  }
+  pts.forEach(pt=> list.push({t:'dot', x:pt.x, y:pt.y, r:dr, layer}));
+}
+
+/* 素土夯实线图案（仿天正建筑）：成行的短斜划，隔行错位 */
+function soilPattern(poly, u){
+  const bb = bboxOf([poly]);
+  const rowH = 4.0*u, step = 3.8*u, len = 3.0*u, k = 0.7071;
+  const out = [];
+  let row = 0;
+  for(let y = bb.y0 + rowH*0.55; y <= bb.y1; y += rowH, row++){
+    const off = (row % 2) ? step*0.5 : 0;
+    for(let x = bb.x0 + off - step; x <= bb.x1 + step; x += step){
+      const a = {x, y}, b = {x: x + len*k, y: y - len*k};
+      clipSeg(a, b, [poly], pt=>pointInPoly(pt, poly)).forEach(pr=>
+        out.push([[pr[0].x, pr[0].y], [pr[1].x, pr[1].y]]));
+    }
+  }
+  return out;
+}
+
+/* 命令集合的包围盒（文字按字宽估算外框，避免镜像后越界被裁） */
+function strWidth(s, h){
+  let w = 0;
+  Array.from(s || '').forEach(ch=>{
+    w += /[\u2e80-\u9fff\uff00-\uffef\u3000-\u303f]/.test(ch) ? h*1.02 : h*0.56;
+  });
+  return w;
+}
+function textBox(c){
+  const w = strWidth(c.s, c.h), h = c.h;
+  const a = c.align || 'left';
+  const back = a==='center' ? w/2 : (a==='right' ? w : 0);
+  if(c.rot){                       // 旋转文字沿 y 展开
+    return [{x:c.x - h*0.45, y:c.y - back - h*0.25},
+            {x:c.x + h*0.85, y:c.y - back + w + h*0.25}];
+  }
+  return [{x:c.x - back, y:c.y - h*1.15}, {x:c.x - back + w, y:c.y + h*0.35}];
+}
+function bboxCmds(list){
+  return bboxOf(list.filter(c=>c.t==='poly').map(c=>c.pts)
+    .concat(list.filter(c=>c.t==='line').map(c=>[c.p1,c.p2]))
+    .concat(list.filter(c=>c.t==='dot').map(c=>[{x:c.x,y:c.y}]))
+    .concat(list.filter(c=>c.t==='text').map(c=>textBox(c)))
+    .concat(list.filter(c=>c.t==='arc').map(c=>[{x:c.c.x-c.r,y:c.c.y-c.r},{x:c.c.x+c.r,y:c.c.y+c.r}])));
+}
+/* 剖面镜像：x → −x（文字保持正读，左右对齐互换） */
+function mirrorX(list){
+  return list.map(c=>{
+    if(c.t==='poly') return {...c, pts:c.pts.map(p=>({x:-p.x, y:p.y}))};
+    if(c.t==='line') return {...c, p1:{x:-c.p1.x, y:c.p1.y}, p2:{x:-c.p2.x, y:c.p2.y}};
+    if(c.t==='text') return {...c, x:-c.x,
+      align: c.align==='left' ? 'right' : (c.align==='right' ? 'left' : c.align)};
+    if(c.t==='dot') return {...c, x:-c.x};
+    if(c.t==='dim') return {...c, p1:{x:-c.p1.x, y:c.p1.y}, p2:{x:-c.p2.x, y:c.p2.y},
+                                dp:{x:-c.dp.x, y:c.dp.y}};
+    if(c.t==='arc') return {...c, c:{x:-c.c.x, y:c.c.y}, a1:180-c.a2, a2:180-c.a1};
+    return c;
+  });
+}
+
+/* ================= 几何建模 ================= */
+function buildGeom(){
+  const type = $('f_type').value;
+  const L = numv('f_L'), W = numv('f_W'), H = numv('f_H'), t = numv('f_t'),
+        T = numv('f_T'), B = numv('f_B');
+  /* 埋置方式：全埋（默认）→ D = 墙高 H + 底板厚 T（池顶与室外地坪齐平）；半埋 → 用输入的 D */
+  const buryFull = $('f_bury').value !== 'half';
+  const hc = 0;                                        // v1.0.16：全埋不再计入覆土，池顶齐地坪
+  const D = buryFull ? (H + T) : numv('f_D');
+  if(!(L>0)||!(H>0)||!(t>0)||!(T>0)) throw '长 / 墙高 / 墙厚 / 底板厚 必须为正数';
+  if(type==='4' && !(W>0)) throw '内净宽必须为正数';
+  if(!(B>=0)||!(D>=0)) throw '加宽与埋深不能为负数';
+  if(type==='4' && 2*t >= Math.min(L,W)) throw '池墙厚度过大，内净尺寸不成立';
+  const hasCover = $('f_cover').value === '1';
+  const Tc = numv('f_Tc'), ecv = numv('f_e');
+  if(hasCover){
+    if(!(Tc>0)) throw '盖板厚度必须为正数';
+    if(Tc >= H*0.8) throw '盖板厚度过大（应小于池墙高度）';
+    if(!(ecv>=0)) throw '盖板搭接宽度不能为负数';
+  }
+  const g = {type,L,W,H,t,T,B,D,buryFull,hc:buryFull?hc:0,hasCover,Tc:hasCover?Tc:0,e:hasCover?ecv:0};
+
+  if(type==='4'){
+    const a = L/2 + t/2, b = W/2 + t/2;
+    const path = [{x:-a,y:-b},{x:a,y:-b},{x:a,y:b},{x:-a,y:b}];
+    const o1 = offsetPoly(path,true,t/2), o2 = offsetPoly(path,true,-t/2);
+    g.path = path;
+    g.closedPath = true;
+    g.outer = Math.abs(polyArea(o1)) >= Math.abs(polyArea(o2)) ? o1 : o2;
+    g.inner = g.outer===o1 ? o2 : o1;
+    g.footprint = g.outer;
+    g.axisLen = 2*(L+t) + 2*(W+t);
+    /* 1-1 剖面切在长向（净空 L），即俯视图中 4m 净空这一侧 */
+    g.netW = L;
+    g.secWalls = [[-(L/2+t), -L/2],[L/2, L/2+t]];
+    g.innerArea = L*W;
+    g.innerPlan = g.inner;
+    g.planSize = [L, W];
+    g.ycut = 0;
+  }else{
+    const aL = numv('f_aL'), lL = numv('f_lL'), aR = numv('f_aR'), lR = numv('f_lR');
+    if(!(aL>=15&&aL<=165)) throw '左墙夹角需在 15° ~ 165° 之间';
+    if(!(aR>=15&&aR<=165)) throw '右墙夹角需在 15° ~ 165° 之间';
+    if(!(lL>0)||!(lR>0)) throw '侧墙轴线长度必须为正数';
+    g.aL=aL; g.lL=lL; g.aR=aR; g.lR=lR;
+    const cL = {x:-L/2,y:0}, cR = {x:L/2,y:0};
+    /* 后墙横置于下方（y=0），两侧墙向上（−y）伸出，开口朝上 */
+    const eL = {x:cL.x + lL*Math.cos(aL*DEG), y:cL.y - lL*Math.sin(aL*DEG)};
+    const eR = {x:cR.x - lR*Math.cos(aR*DEG), y:cR.y - lR*Math.sin(aR*DEG)};
+    g.cL=cL; g.cR=cR; g.eL=eL; g.eR=eR;
+    const path = [eL, cL, cR, eR];
+    g.path = path;
+    g.closedPath = false;
+    const o1 = offsetPoly(path,false,t/2), o2 = offsetPoly(path,false,-t/2);
+    const wA = o1.concat(o2.slice().reverse());
+    const wB = o2.concat(o1.slice().reverse());
+    g.wallPoly = Math.abs(polyArea(wA)) >= Math.abs(polyArea(wB)) ? wA : wB;
+    /* 外半侧（离池心更远的一侧）闭合即池体外轮廓 footprint */
+    const ctr = {x:(cL.x+cR.x+eL.x+eR.x)/4, y:(cL.y+cR.y+eL.y+eR.y)/4};
+    g.ctr = ctr;
+    const dist = pts => pts.reduce((a,q)=>a+Math.hypot(q.x-ctr.x, q.y-ctr.y),0)/pts.length;
+    g.footprint = dist(o1) >= dist(o2) ? o1 : o2;
+    g.innerPlan = dist(o1) >= dist(o2) ? o2 : o1;
+    g.outer = g.wallPoly;
+    g.axisLen = L + lL + lR;
+    g.innerArea = Math.abs(polyArea([cL, cR, eR, eL]));
+    g.reachL = lL*Math.sin(aL*DEG); g.reachR = lR*Math.sin(aR*DEG);
+    g.ycut = Math.max(0.45, 0.72*Math.min(g.reachL, g.reachR));
+    const sl = g.ycut/Math.sin(aL*DEG), sr = g.ycut/Math.sin(aR*DEG);
+    const xaL = cL.x + sl*Math.cos(aL*DEG), xaR = cR.x - sr*Math.cos(aR*DEG);
+    const xiL = xaL + (t/2)*Math.sin(aL*DEG), xoL = xaL - (t/2)*Math.sin(aL*DEG);
+    const xiR = xaR - (t/2)*Math.sin(aR*DEG), xoR = xaR + (t/2)*Math.sin(aR*DEG);
+    g.secWalls = [[Math.min(xoL,xiL), Math.max(xoL,xiL)],[Math.min(xoR,xiR), Math.max(xoR,xiR)]];
+    g.netW = Math.abs(xiR - xiL);
+    g.planSize = [L + lL*Math.cos(aL*DEG)*0 + 0, 0];
+  }
+
+  const s1 = offsetPoly(g.footprint,true,B), s2 = offsetPoly(g.footprint,true,-B);
+  g.slab = Math.abs(polyArea(s1)) >= Math.abs(polyArea(s2)) ? s1 : s2;
+  g.slabArea = Math.abs(polyArea(g.slab));
+  g.slabPerim = polyPerim(g.slab);
+
+  /* 盖板：内轮廓外放搭接 e */
+  if(g.hasCover){
+    const v1 = offsetPoly(g.innerPlan, true, g.e), v2 = offsetPoly(g.innerPlan, true, -g.e);
+    g.cover = Math.abs(polyArea(v1)) >= Math.abs(polyArea(v2)) ? v1 : v2;
+    g.coverArea = Math.abs(polyArea(g.cover));
+    g.coverPerim = polyPerim(g.cover);
+  }
+
+  g.q = {
+    axisLen: g.axisLen,
+    Vwall: g.axisLen*g.t*g.H,
+    Vslab: g.slabArea*g.T,
+    Swall: 2*g.axisLen*g.H,
+    Sslab: g.slabPerim*g.T,
+    Vdig: g.slabArea*g.D,
+    Vinner: g.innerArea*g.H,
+    Vcover: g.hasCover ? g.coverArea*g.Tc : 0,
+    Scover: g.hasCover ? g.coverArea + g.coverPerim*g.Tc : 0
+  };
+  g.q.Vtotal = g.q.Vwall + g.q.Vslab + g.q.Vcover;
+  return g;
+}
+
+/* ================= 场景构建（cmds，世界坐标，单位 m，y 向下） ================= */
+/* cmd: {t:'poly',pts,closed,layer} {t:'line',p1,p2,layer} {t:'text',x,y,s,h,rot,align,layer}
+        {t:'arc',c,r,a1,a2,layer} {t:'dot',x,y,r,layer} */
+function buildCmds(g, o){
+  const u = o.u;                       // 每图纸毫米对应世界米
+  PU = u;                              // 供标注函数换算图纸毫米
+  const C = {
+    WALL:'墙体', SLAB:'底板', GROUND:'素土', DIM:'尺寸标注', TXT:'文字标注',
+    HATCH:'混凝土填充', SOIL:'素土', COVER:'盖板'
+  };
+  const L = g.L, Wd = g.W, H = g.H, t = g.t, T = g.T, B = g.B, D = g.D;
+  const T3 = 3.2*u, T35 = 3.4*u, T4 = 4.2*u;
+  const TDIM = 3.5*u;                 // 尺寸数字字高（固维样式：3.5 图纸 mm）
+  const T5 = 5.0*u;                    // 图名字高（图纸 5 mm，随比例放大）
+  /* 混凝土图案随墙厚自适应：保证圆点在框线内且密度适中 */
+  const bandMm = t/u;                                         // 图上墙厚（图纸毫米）
+  const hMm = Math.max(1.4, Math.min(3.4, bandMm/2.5));        // 斜线间距
+  const dMm = Math.max(0.8, Math.min(2.1, bandMm/1.4));        // 骨料点间距
+  const rMm = Math.min(0.34, hMm*0.20);                        // 骨料点半径
+  const HS = hMm*u, DS = dMm*u;
+  const DR = rMm*u, INS = DR*1.7;                              // INS：圆点离轮廓线净距
+
+  /* ---------- 平面图 ---------- */
+  const plan = [];
+  const slabBB = bboxOf([g.slab]);
+  const wallBB = bboxOf([g.outer, g.inner]);
+
+  plan.push({t:'poly', pts:g.slab, closed:true, layer:C.SLAB});
+  if(o.hatch){
+    /* 平面图上底板只填“放大脚”一环：墙身带与池内（被池壁/盖板遮挡）都不填 */
+    const outerP = g.type==='4' ? g.outer : g.wallPoly;
+    const innerP = g.type==='4' ? g.inner : g.innerPlan;
+    const keep = pt => !pointInPoly(pt, outerP) && !pointInPoly(pt, innerP);
+    hatchSegs(g.slab, 45, HS*2.4, null).forEach(sg=>{
+      clipSeg({x:sg[0][0],y:sg[0][1]}, {x:sg[1][0],y:sg[1][1]},
+        [g.slab, outerP], keep).forEach(pr=>
+        plan.push({t:'line', p1:pr[0], p2:pr[1], layer:C.HATCH}));
+    });
+  }
+  if(g.type==='4'){
+    plan.push({t:'poly', pts:g.outer, closed:true, layer:C.WALL});
+    plan.push({t:'poly', pts:g.inner, closed:true, layer:C.WALL});
+    if(o.hatch) hatchQuads(plan, wallQuads(g.path, true, t), HS, DS, DR, INS, C.HATCH, [g.outer, g.inner]);
+  }else{
+    plan.push({t:'poly', pts:g.wallPoly, closed:true, layer:C.WALL});
+    if(o.hatch) hatchQuads(plan, wallQuads(g.path, false, t), HS, DS, DR, INS, C.HATCH, [g.wallPoly]);
+  }
+
+  /* 盖板：平面以虚线示隐蔽轮廓 */
+  if(g.hasCover) plan.push({t:'poly', pts:g.cover, closed:true, layer:C.COVER, dash:true});
+
+  /* 平面尺寸：同侧同类标注排在同一条尺寸线上，且一律落在底板轮廓之外 */
+  if(o.dim){
+    if(g.type==='4'){
+      /* 墙厚 + 净空连成一条尺寸链：t | L | t（与剖面上方 250|4000|250 对应） */
+      dimH(plan, -L/2, L/2, slabBB.y1 + 13*u, mm(L), TDIM, C.DIM, slabBB.y1);
+      dimH(plan, -L/2 - t, -L/2, slabBB.y1 + 13*u, mm(t), TDIM, C.DIM, slabBB.y1, 'L');
+      dimH(plan, L/2, L/2 + t, slabBB.y1 + 13*u, mm(t), TDIM, C.DIM, slabBB.y1, 'R');
+      /* 总尺寸取"墙厚 + 净空"（墙外表面），与竖向 3500=250+3000+250 对称 */
+      dimH(plan, wallBB.x0, wallBB.x1, slabBB.y1 + 21*u, mm(wallBB.w), TDIM, C.DIM, slabBB.y1);
+      /* 竖向同样连成 t | W | t 的尺寸链，四面墙厚都标到 */
+      dimV(plan, -Wd/2, Wd/2, slabBB.x0 - 13*u, mm(Wd), TDIM, C.DIM, 0.5, slabBB.x0);
+      dimV(plan, wallBB.y0, -Wd/2, slabBB.x0 - 13*u, mm(t), TDIM, C.DIM, 0.5, slabBB.x0);
+      dimV(plan, Wd/2, wallBB.y1, slabBB.x0 - 13*u, mm(t), TDIM, C.DIM, 0.5, slabBB.x0);
+      dimV(plan, wallBB.y0, wallBB.y1, slabBB.x0 - 21*u, mm(wallBB.h), TDIM, C.DIM, 0.5, slabBB.x0);
+    }else{
+      const fb = bboxOf([g.footprint, g.slab]);
+      dimH(plan, g.cL.x, g.cR.x, fb.y1 + 10*u, mm(L), TDIM, C.DIM, fb.y1);
+      dimAlong(plan, g.cL, g.eL, mm(g.lL), TDIM, C.DIM, u, -1, g.ctr);
+      dimAlong(plan, g.cR, g.eR, mm(g.lR), TDIM, C.DIM, u, 1, g.ctr);
+      angleArc(plan, g.cL, -g.aL, 0, 8.5*u, 'αL='+g.aL+'\u00b0', TDIM, C.DIM);
+      angleArc(plan, g.cR, 180, 180+g.aR, 8.5*u, 'αR='+g.aR+'\u00b0', TDIM, C.DIM);
+      if(B > 1e-6) dimV(plan, t/2, t/2+B, 0, mm(B), TDIM, C.DIM, 0.5);
+    }
+    /* 剖切符号 1-1（三面按实际剖切位置，开口朝上后剖切线在池内上方） */
+    if(o.cut){
+      if(g.type==='4'){
+        /* 剖面切长向（净空 L），剖切线竖向 */
+        plan.push({t:'line', p1:{x:0, y:slabBB.y0-8*u}, p2:{x:0, y:slabBB.y1+8*u}, layer:C.DIM, dash:true});
+        cutMarkV(plan, 0, slabBB.y0-9*u, -1, u, T4, C.DIM);
+        cutMarkV(plan, 0, slabBB.y1+9*u, 1, u, T4, C.DIM);
+      }else{
+        const y = -g.ycut;
+        plan.push({t:'line', p1:{x:slabBB.x0-8*u, y}, p2:{x:slabBB.x1+8*u, y}, layer:C.DIM, dash:true});
+        cutMark(plan, slabBB.x0-9*u, y, -1, u, T4, C.DIM);
+        cutMark(plan, slabBB.x1+9*u, y, 1, u, T4, C.DIM);
+      }
+    }
+  }
+  /* 图名：排在全部内容之下 */
+  const pb = bboxCmds(plan);
+  /* 图名中线对齐上方尺寸链文字中线：平面尺寸链跨 cL..cR（四面池跨 -L/2..L/2），中点为 0 */
+  const planTitleX = g.type==='4' ? 0 : (g.cL.x + g.cR.x)/2;
+  const tankName = (o.name || '').trim();                // 蓄水池名称（图名前缀）
+  figTitle(plan, planTitleX, pb.y1 + 13*u, tankName ? tankName + '平面图' : '平面图', T5, C.TXT);
+
+  /* ---------- 剖面图 1-1 ---------- */
+  const sec = [];
+  const w0 = g.secWalls[0], w1 = g.secWalls[1];
+  const xL0 = w0[0], xL1 = w0[1], xR1 = w1[0], xR0 = w1[1];
+  const slabL = xL0 - B, slabR = xR0 + B;
+  const yTop = 0, ySlabTop = H, ySlabBot = H + T;
+  const yGround = H + T - D;
+  const isBuried = !!g.buryFull || (yTop - yGround) > 1e-6;   // 全埋（池顶齐地坪）或地坪高于池顶
+
+  const slabShape = [{x:slabL,y:ySlabTop},{x:slabR,y:ySlabTop},{x:slabR,y:ySlabBot},{x:slabL,y:ySlabBot}];
+  const wallL = [{x:xL0,y:yTop},{x:xL1,y:yTop},{x:xL1,y:ySlabTop},{x:xL0,y:ySlabTop}];
+  const wallR = [{x:xR1,y:yTop},{x:xR0,y:yTop},{x:xR0,y:ySlabTop},{x:xR1,y:ySlabTop}];
+
+  /* 素土夯实：线图案（成行短斜划，隔行错位），仅地坪以下、池壁之外 */
+  const sL = slabL - 26*u, sR = slabR + 26*u, sBot = ySlabBot + 12*u;
+  if(o.soil){
+    /* 土体填充一直铺到池壁外表面：地坪以下、墙面与底板外缘之间为 L 形区域 */
+    const regL = [{x:xL0,y:yGround},{x:xL0,y:ySlabTop},{x:slabL,y:ySlabTop},
+                  {x:slabL,y:sBot},{x:sL,y:sBot},{x:sL,y:yGround}];
+    const regR = [{x:xR0,y:yGround},{x:xR0,y:ySlabTop},{x:slabR,y:ySlabTop},
+                  {x:slabR,y:sBot},{x:sR,y:sBot},{x:sR,y:yGround}];
+    /* 底板正下方同样填素土（原先只有两侧 L 形，底板底面以下空着） */
+    const regB = [{x:slabL,y:ySlabBot},{x:slabR,y:ySlabBot},
+                  {x:slabR,y:sBot},{x:slabL,y:sBot}];
+    /* 全埋时池顶以上是覆土：把地坪线与池顶之间的区域也填上，形成完整覆土带
+       （敞口不设盖板时不填，否则土会盖住开口） */
+    const regT = (isBuried && g.hasCover && (yTop - yGround) > 1e-6) ? [{x:xL0,y:yGround},{x:xR0,y:yGround},
+                           {x:xR0,y:yTop},{x:xL0,y:yTop}] : [];
+    [regL, regR, regB, regT].forEach(reg=> soilPattern(reg, u).forEach(s=>
+      sec.push({t:'line', p1:{x:s[0][0],y:s[0][1]}, p2:{x:s[1][0],y:s[1][1]}, layer:C.SOIL})));
+    /* 室外地坪线：两侧各一段，与池壁外表面相接；全埋时池顶以上为覆土顶面，实线连通 */
+    sec.push({t:'line', p1:{x:sL,y:yGround}, p2:{x:xL0,y:yGround}, layer:C.GROUND, bold:true});
+    sec.push({t:'line', p1:{x:xR0,y:yGround}, p2:{x:sR,y:yGround}, layer:C.GROUND, bold:true});
+    if(isBuried && g.hasCover)
+      sec.push({t:'line', p1:{x:xL0,y:yGround}, p2:{x:xR0,y:yGround}, layer:C.GROUND, bold:true});
+    else if(isBuried)
+      sec.push({t:'line', p1:{x:xL0,y:yGround}, p2:{x:xR0,y:yGround}, layer:C.GROUND, dash:true});
+    sec.push({t:'line', p1:{x:sL,y:yGround}, p2:{x:sL,y:sBot}, layer:C.GROUND});
+    sec.push({t:'line', p1:{x:sR,y:yGround}, p2:{x:sR,y:sBot}, layer:C.GROUND});
+  }
+
+  /* 盖板：搁置于池墙顶，顶面与池顶齐平 */
+  if(g.hasCover){
+    const covPoly = [{x:xL1-g.e,y:yTop},{x:xR1+g.e,y:yTop},
+                     {x:xR1+g.e,y:yTop+g.Tc},{x:xL1-g.e,y:yTop+g.Tc}];
+    sec.push({t:'poly', pts:covPoly, closed:true, layer:C.COVER});
+    if(o.hatch){
+      hatchSegs(covPoly, 45, HS, null).forEach(sg=>
+        sec.push({t:'line', p1:{x:sg[0][0], y:sg[0][1]}, p2:{x:sg[1][0], y:sg[1][1]}, layer:C.HATCH}));
+      dotsInPoly(covPoly, DS, INS).forEach(pt=> sec.push({t:'dot', x:pt.x, y:pt.y, r:DR, layer:C.HATCH}));
+    }
+    if(o.note) sec.push({t:'text', x:(xL1+xR1)/2,
+                y: isBuried ? yTop + g.Tc + T3*1.15 : yTop - 4.5*u,
+                s:'盖板 h='+mm(g.Tc), h:T3, align:'center', layer:C.TXT, bg:isBuried});
+  }
+
+  [slabShape, wallL, wallR].forEach(poly=>{
+    sec.push({t:'poly', pts:poly, closed:true, layer:C.WALL});
+    if(o.hatch){
+      hatchSegs(poly, 45, HS, null).forEach(s=>
+        sec.push({t:'line', p1:{x:s[0][0],y:s[0][1]}, p2:{x:s[1][0],y:s[1][1]}, layer:C.HATCH}));
+      dotsInPoly(poly, DS, INS).forEach(p=> sec.push({t:'dot', x:p.x, y:p.y, r:DR, layer:C.HATCH}));
+    }
+  });
+
+  if(o.note){
+    sec.push({t:'text', x:(xL1+xR1)/2, y:H*0.74, s:tankNoun(o.name) + '（内空）', h:T35, align:'center', layer:C.TXT});
+    if(o.soil){
+      /* 室外地坪：紧贴地坪线之上；全埋（地坪线在池顶之上）时改放线下方，避免撞顶部尺寸链 */
+      const gBelow = yGround < yTop - 6*u;
+      sec.push({t:'text', x:slabR + 3*u,
+                y: gBelow ? yGround + T3*1.25 : yGround - 0.9*u,
+                s:'室外地坪', h:T3, align:'left', layer:C.TXT, bg:gBelow});
+      /* 素土夯实：落在底板正下方的素土填充带内，文字中线与内空文字中线对齐 */
+      sec.push({t:'text', x:(xL1+xR1)/2, y:(ySlabBot + sBot)/2 + T3*0.38,
+                s:'素土夯实', h:T3, align:'center', layer:C.TXT, bg:true});
+    }
+  }
+
+  /* 墙身材料引线标注 */
+  if(o.mat){
+    const ax = xL0 + t*0.55, ay = yTop + H*0.30;      // 引线起点落在左墙墙身
+    const bx = xL1 + 6*u,    by = ay - 4*u;           // 折入池内空白区
+    const tw = strWidth(o.mat, T3) + 2*u;
+    sec.push({t:'dot', x:ax, y:ay, r:0.55*u, layer:C.DIM});
+    sec.push({t:'line', p1:{x:ax,y:ay}, p2:{x:bx,y:by}, layer:C.DIM});
+    sec.push({t:'line', p1:{x:bx,y:by}, p2:{x:bx + tw,y:by}, layer:C.DIM});
+    sec.push({t:'text', x:bx + 1*u, y:by - 1.5*u, s:o.mat, h:T3, align:'left', layer:C.TXT});
+  }
+
+  /* 剖面尺寸：同侧标注排在同一条尺寸线上 */
+  if(o.dim){
+    /* 上：墙厚 + 净宽，同一条尺寸线（全埋且有土线时，尺寸线抬到地坪线以上，避免压住覆土） */
+    const yDimTop = (o.soil && isBuried ? yGround : yTop) - 13*u;
+    dimH(sec, xL1, xR1, yDimTop, mm(g.netW), TDIM, C.DIM, yTop);
+    dimH(sec, xL0, xL1, yDimTop, mm(t), TDIM, C.DIM, yTop, 'L');
+    dimH(sec, xR0, xR1, yDimTop, mm(t), TDIM, C.DIM, yTop, 'R');
+    /* 下：放大脚 + 墙外廓，同一条尺寸线 */
+    if(B > 1e-6){
+      dimH(sec, slabL, xL0, ySlabBot + 17*u, mm(B), TDIM, C.DIM, ySlabBot, 'L');
+      dimH(sec, xR0, slabR, ySlabBot + 17*u, mm(B), TDIM, C.DIM, ySlabBot, 'R');
+    }
+    dimH(sec, xL0, xR0, ySlabBot + 17*u, mm(xR0-xL0), TDIM, C.DIM, ySlabBot);
+    /* 侧：墙高 + 底板厚 连成一条链，埋深单独一档 */
+    /* 素土夯实文字在右侧（镜像后在左），故竖向尺寸排在左侧（镜像后在右），并置于该侧素土填充带内 */
+    const dIn  = slabL - 11*u;      // 主链（墙高 / 底板厚），填充带内靠构件一侧
+    const dOut = slabL - 20*u;      // 埋深单独一档，填充带内靠外缘一侧
+    dimV(sec, yTop, ySlabTop, dIn, mm(H), TDIM, C.DIM, 0.3, xL0, true);
+    dimV(sec, ySlabTop, ySlabBot, dIn, mm(T), TDIM, C.DIM, 0.5, xL0, true);
+    if(D > 1e-6) dimV(sec, yGround, ySlabBot, dOut, mm(D), TDIM, C.DIM, 0.5, xL0, true);
+  }
+
+  /* 剖面按另一侧方向出图：整体镜像 x，图名在内容之下 */
+  const secM = mirrorX(sec);
+  const sb = bboxCmds(secM);
+  /* 图名中线对齐上方尺寸链（250|净宽|250）文字中线；镜像后取反向 */
+  figTitle(secM, -(xL0 + xR0)/2, sb.y1 + 13*u, tankName ? tankName + ' 1-1 剖面图' : '1-1 剖面图', T5, C.TXT);
+
+  /* ---------- 交付：平面 / 剖面各自独立坐标系（局部坐标），由两个视口分别显示 ---------- */
+  const offset = (list, dx, dy) => list.map(c=>{
+    if(c.t==='poly') return {...c, pts:c.pts.map(p=>({x:p.x+dx, y:p.y+dy}))};
+    if(c.t==='line') return {...c, p1:{x:c.p1.x+dx,y:c.p1.y+dy}, p2:{x:c.p2.x+dx,y:c.p2.y+dy}};
+    if(c.t==='text'||c.t==='dot') return {...c, x:c.x+dx, y:c.y+dy};
+    if(c.t==='arc') return {...c, c:{x:c.c.x+dx, y:c.c.y+dy}};
+    if(c.t==='dim') return {...c, p1:{x:c.p1.x+dx,y:c.p1.y+dy}, p2:{x:c.p2.x+dx,y:c.p2.y+dy},
+                                dp:{x:c.dp.x+dx,y:c.dp.y+dy}};
+    return c;
+  });
+  return { plan, sec:secM, offset };
+}
+
+/* 图名文字宽度：DXF 字型是 simsun.ttc（宋体）——
+   全角（汉字/全角标点）宽 = 1.00 × 字高，半角（字母/数字/连字符/空格）宽 = 0.50 × 字高。
+   下划线长度按此逐字累加，才能与 CAD 里实际显示的文字宽度严格对齐 */
+function titleWidth(s, h){
+  let w = 0;
+  Array.from(s || '').forEach(ch=>{
+    const c = ch.charCodeAt(0);
+    w += (c < 0x2e80) ? h*0.5 : h*1.0;        // ASCII / 半角 → 0.5h；中日韩全角 → 1.0h
+  });
+  return w;
+}
+/* 图名文字宽度（CAD 版）：DXF 实体宽度因子 0.7 ⇒ 全角 0.70h、半角 0.35h
+   （画布不压缩宽度，故画布仍用 titleWidth 的 1.0/0.5） */
+function titleWidthDC(s, h){
+  let w = 0;
+  Array.from(s || '').forEach(ch=>{
+    const c = ch.charCodeAt(0);
+    w += (c < 0x2e80) ? h*0.35 : h*0.70;
+  });
+  return w;
+}
+/* 图名：文字 + 双下划线（粗线 + 细线，仿剖筑挡墙的图名标注），线长随文字自动伸缩。
+   下划线带 tf 标记，导出 DXF 时按宽度因子 0.7 的实际字宽重新计算长度。 */
+function figTitle(list, cx, y, s, h, layer){
+  list.push({t:'text', x:cx, y, s, h, align:'center', layer});
+  const hw = titleWidth(s, h)/2 + h*0.14;
+  list.push({t:'line', p1:{x:cx-hw, y:y + h*0.42}, p2:{x:cx+hw, y:y + h*0.42}, layer, bold:true, tf:{s, h, cx}});
+  list.push({t:'line', p1:{x:cx-hw, y:y + h*0.64}, p2:{x:cx+hw, y:y + h*0.64}, layer, tf:{s, h, cx}});
+}
+
+/* 构筑物称谓：取蓄水池名称中"XXX"之后的文字（默认 XXX取水口 → 取水口），
+   名称里没有 XXX 时直接用全名；留空回退为"水池" */
+function tankNoun(name){
+  const nm = (name || '').trim();
+  if(!nm) return '水池';
+  const i = nm.toUpperCase().indexOf('XXX');
+  const s = (i >= 0 ? nm.slice(i + 3) : nm).replace(/^[\s\-—_·:：]+/, '').trim();
+  return s || '水池';
+}
+
+/* ---- 标注构造（样式复刻固维挡墙断面CAD自动成图系统）----
+   颜色 #0f5aa8；尺寸界线自构件轮廓留 1.6 mm 引出、末端超出尺寸线 2.2 mm；
+   尺寸线两端各出 1.5 mm；起止符为 45° 斜短线（半长 1.35 mm、线宽 0.36）；
+   尺寸数字 3.5 mm：水平标注置于尺寸线上方 1.3 mm，竖向标注置于线外侧 2.4 mm、自下往上读。 */
+let PU = 1;                                   // 1 图纸 mm 对应的世界长度（buildCmds 内赋值）
+const DIM_GAP = 1.6, DIM_OVR = 2.2, DIM_OV = 1.5, DIM_TK = 1.35, DIM_TXV = 2.4;
+const DIM_TXT = 2.0;      // 固维为 1.3；此处抬到 2.0，避免窄尺寸（如 250）数字压住 45° 起止符
+
+/* y0 = 被标注体的边线位置，给定则绘制尺寸界线 */
+function dimH(list, x1, x2, y, text, h, layer, y0, out, bg){
+  if(Math.abs(x2-x1) < 1e-6) return;                  // 零长度不标注（如放大脚 B=0）
+  const start = list.length;
+  const s = (y0 !== undefined && y < y0) ? -1 : 1;     // 远离被标注体的方向
+  const GAP = DIM_GAP*PU, OVR = DIM_OVR*PU, OV = DIM_OV*PU, TK = DIM_TK*PU;
+  /* 尺寸线：两端各超出尺寸界线 1.5 mm */
+  list.push({t:'line', p1:{x:x1-OV, y}, p2:{x:x2+OV, y}, layer, lw:22});
+  /* 尺寸界线：自构件轮廓外 1.6 mm 一直引到尺寸线外 2.2 mm */
+  const ye = y + s*OVR;
+  let yb = y;
+  if(y0 !== undefined){
+    const c = y0 + s*GAP;
+    yb = ((ye - c)*s > 0) ? c : y;                   // 构件离尺寸线过近时退化为仅画超出段
+  }
+  list.push({t:'line', p1:{x:x1, y:yb}, p2:{x:x1, y:ye}, layer, lw:18});
+  list.push({t:'line', p1:{x:x2, y:yb}, p2:{x:x2, y:ye}, layer, lw:18});
+  /* 起止符：45° 斜短线，跨越尺寸线（半长 1.35 mm） */
+  list.push({t:'line', p1:{x:x1-TK, y:y+TK}, p2:{x:x1+TK, y:y-TK}, layer, bold:true, lw:36});
+  list.push({t:'line', p1:{x:x2-TK, y:y+TK}, p2:{x:x2+TK, y:y-TK}, layer, bold:true, lw:36});
+  /* 数字居中落在两条界线之间，字高不缩；窄到字宽 1.6 倍都放不下才按 out 外移 */
+  const seg = Math.abs(x2-x1), tw = strWidth(text, h), ty = y - DIM_TXT*PU;
+  if(out && tw > seg*1.6){
+    const tx = out==='L' ? x1 - h*0.5 : x2 + h*0.5;
+    list.push({t:'text', x:tx, y:ty, s:text, h, align:(out==='L'?'right':'left'), layer, bg:!!bg});
+  }else{
+    list.push({t:'text', x:(x1+x2)/2, y:ty, s:text, h, align:'center', layer, bg:!!bg});
+  }
+  /* 手绘图元只服务画布；DXF 改由真正的 DIMENSION 实体（标注样式 _TCH_ARCH）绘制 */
+  for(let i=start;i<list.length;i++) list[i].nd = 1;
+  const yM = (y0 !== undefined) ? y0 : y;
+  list.push({t:'dim', p1:{x:x1,y:yM}, p2:{x:x2,y:yM}, dp:{x:(x1+x2)/2, y}, s:text, layer});
+}
+
+function dimV(list, y1, y2, x, text, h, layer, ty, x0, bg){
+  if(Math.abs(y2-y1) < 1e-6) return;                  // 零长度不标注（如埋深 D=0）
+  const start = list.length;
+  const s = (x0 !== undefined && x < x0) ? -1 : 1;
+  const GAP = DIM_GAP*PU, OVR = DIM_OVR*PU, OV = DIM_OV*PU, TK = DIM_TK*PU;
+  list.push({t:'line', p1:{x, y:y1-OV}, p2:{x, y:y2+OV}, layer, lw:22});
+  const xe = x + s*OVR;
+  let xb = x;
+  if(x0 !== undefined){
+    const c = x0 + s*GAP;
+    xb = ((xe - c)*s > 0) ? c : x;
+  }
+  list.push({t:'line', p1:{x:xb, y:y1}, p2:{x:xe, y:y1}, layer, lw:18});
+  list.push({t:'line', p1:{x:xb, y:y2}, p2:{x:xe, y:y2}, layer, lw:18});
+  list.push({t:'line', p1:{x:x-TK, y:y1+TK}, p2:{x:x+TK, y:y1-TK}, layer, bold:true, lw:36});
+  list.push({t:'line', p1:{x:x-TK, y:y2+TK}, p2:{x:x+TK, y:y2-TK}, layer, bold:true, lw:36});
+  /* 数字置于尺寸线靠构件一侧 2.4 mm，自下往上读 */
+  const k = (ty===undefined) ? 0.5 : ty;
+  const px = (s > 0) ? x - DIM_TXV*PU : x + DIM_TXV*PU + h;
+  list.push({t:'text', x:px, y:y1 + (y2-y1)*k, s:text, h, rot:-90, align:'center', layer, bg:!!bg});
+  for(let i=start;i<list.length;i++) list[i].nd = 1;
+  const xM = (x0 !== undefined) ? x0 : x;
+  list.push({t:'dim', p1:{x:xM,y:y1}, p2:{x:xM,y:y2}, dp:{x, y:y1+(y2-y1)*k}, s:text, layer, vert:true});
+}
+
+function dimAlong(list, a, b, text, h, layer, u, side, ctr){
+  const dx=b.x-a.x, dy=b.y-a.y, len=Math.hypot(dx,dy)||1e-9;
+  if(len < 1e-6) return;
+  const start = list.length;
+  const ux=dx/len, uy=dy/len;
+  let nx=-uy*16*u, ny=ux*16*u;
+  if(ctr){                                   // 自动取背离池心的一侧，标注永远落在墙外
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    if((mx+nx-ctr.x)*nx + (my+ny-ctr.y)*ny < 0){ nx=-nx; ny=-ny; }
+  }else{ nx*=side; ny*=side; }
+  const A={x:a.x+nx,y:a.y+ny}, B={x:b.x+nx,y:b.y+ny};
+  const nl = Math.hypot(nx,ny)||1e-9, ox = nx/nl, oy = ny/nl;   // 指向墙外的单位法向
+  const GAP = DIM_GAP*PU, OVR = DIM_OVR*PU, OV = DIM_OV*PU, TK = DIM_TK*PU, k2 = 0.7071;
+  list.push({t:'line', p1:{x:A.x-ux*OV, y:A.y-uy*OV}, p2:{x:B.x+ux*OV, y:B.y+uy*OV}, layer, lw:22});
+  /* 尺寸界线：自墙面轮廓（沿法向留 1.6 mm）引到尺寸线外 2.2 mm */
+  const A0 = {x:a.x + ox*GAP, y:a.y + oy*GAP}, B0 = {x:b.x + ox*GAP, y:b.y + oy*GAP};
+  list.push({t:'line', p1:A0, p2:{x:A.x + ox*OVR, y:A.y + oy*OVR}, layer, lw:18});
+  list.push({t:'line', p1:B0, p2:{x:B.x + ox*OVR, y:B.y + oy*OVR}, layer, lw:18});
+  /* 45° 斜起止符（跨越尺寸线） */
+  const d1 = {x:(ux+ox)*k2, y:(uy+oy)*k2};
+  list.push({t:'line', p1:{x:A.x - d1.x*TK, y:A.y - d1.y*TK}, p2:{x:A.x + d1.x*TK, y:A.y + d1.y*TK}, layer, bold:true, lw:36});
+  list.push({t:'line', p1:{x:B.x - d1.x*TK, y:B.y - d1.y*TK}, p2:{x:B.x + d1.x*TK, y:B.y + d1.y*TK}, layer, bold:true, lw:36});
+  let ang = Math.atan2(dy,dx)/DEG;
+  if(ang>90||ang<-90) ang += 180;
+  /* 文字落在尺寸线靠墙一侧 2.4 mm */
+  list.push({t:'text', x:(A.x+B.x)/2 - ox*DIM_TXV*PU, y:(A.y+B.y)/2 - oy*DIM_TXV*PU,
+             s:text, h, rot:ang, align:'center', layer});
+  for(let i=start;i<list.length;i++) list[i].nd = 1;
+  list.push({t:'dim', p1:{x:a.x,y:a.y}, p2:{x:b.x,y:b.y},
+             dp:{x:(A.x+B.x)/2, y:(A.y+B.y)/2}, s:text, layer});
+}
+
+function angleArc(list, p, a1, a2, r, text, h, layer){
+  list.push({t:'arc', c:p, r, a1, a2, layer});
+  const mid = (a1 + (a2-a1)/2)*DEG;
+  list.push({t:'text', x:p.x + Math.cos(mid)*r*2.2, y:p.y + Math.sin(mid)*r*2.2, s:text, h, align:'center', layer});
+}
+function cutMark(list, x, y, dir, u, h, layer){
+  list.push({t:'line', p1:{x, y:y-9*u}, p2:{x, y:y+9*u}, layer, bold:true});
+  list.push({t:'line', p1:{x, y}, p2:{x:x+dir*7*u, y:y-9*u}, layer, bold:true});
+  list.push({t:'text', x:x+dir*6*u, y:y-12*u, s:'1', h:h*1.05, align:'center', layer});
+}
+/* 竖向剖切线的剖切符号 */
+function cutMarkV(list, x, y, dir, u, h, layer){
+  list.push({t:'line', p1:{x:x-9*u, y}, p2:{x:x+9*u, y}, layer, bold:true});
+  list.push({t:'line', p1:{x, y}, p2:{x:x-9*u, y:y+dir*7*u}, layer, bold:true});
+  list.push({t:'text', x:x+11*u, y:y+dir*7*u + h*0.5, s:'1', h:h*1.05, align:'center', layer});
+}
+
+/* ================= 场景总装 ================= */
+function buildScene(g){
+  const auto = $('f_scale').value === 'auto';
+  let denom = auto ? 50 : parseInt($('f_scale').value,10);
+  const opt = {
+    dim: $('o_dim').checked, note: $('o_note').checked, soil: $('o_soil').checked,
+    hatch: $('o_hatch').checked, cut: $('o_cut').checked, mat: $('f_mat').value,
+    name: ($('f_name').value || '').trim()      // 蓄水池名称：用于图名（空则图名只写"平面图"）
+  };
+  const make = (d) => {
+    opt.denom = d; opt.u = d/1000;
+    const s = buildCmds(g, opt);                 // { plan, sec, offset }
+    s.planCmds = s.plan;
+    s.secCmds  = s.sec;
+    s.planBB = bboxCmds(s.planCmds);
+    s.secBB  = bboxCmds(s.secCmds);
+    /* 导出（PNG / DXF）：两图上下拼合成一张 */
+    const gap = 18*opt.u;
+    const dy = s.planBB.y1 + gap - s.secBB.y0;
+    s.allCmds = s.planCmds.concat(s.offset(s.secCmds, 0, dy));
+    s.sheetBB = bboxCmds(s.allCmds);
+    s.gapDy = dy;
+    return s;
+  };
+  let scene = make(denom);
+  if(auto){
+    /* 自动比例：由小到大逐档试排，取第一个“宽度≤210mm 且 高度≤320mm”的档位 */
+    const cand = [25,50,75,100,150,200];
+    for(const d of cand){
+      const s = make(d);
+      const pw = s.sheetBB.w*1000/d, ph = s.sheetBB.h*1000/d;
+      scene = s; denom = d;
+      if(pw <= 210 && ph <= 320) break;
+    }
+  }
+  scene.denom = denom;
+  scene.name  = opt.name;          // 供导出文件命名使用
+  return scene;
+}
+
+/* ================= 画布渲染 ================= */
+const cv = $('cv'), ctx = cv.getContext('2d');
+const COL = {
+  '墙体':'#2b3a4f', '底板':'#4a5a70', '素土':'#9d8a58', '尺寸标注':'#12a33a',
+  '文字标注':'#16202e', '混凝土填充':'#8b98aa', '图框':'#243447',
+  '盖板':'#6b5b95'
+};
+let W = 0, H = 0;
+function resizeCanvas(){
+  const wrap = $('wrap');
+  const dpr = window.devicePixelRatio || 1;
+  W = wrap.clientWidth; H = wrap.clientHeight;
+  cv.width = Math.max(1, Math.floor(W*dpr));
+  cv.height = Math.max(1, Math.floor(H*dpr));
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function drawGridIn(rc, cam){
+  const step = 0.5, s = cam.scale;
+  if(s*step < 8) return;
+  const cx = rc.w/2, cy = rc.h/2;
+  const X = x => cx + (x - cam.cx)*s;
+  const Y = y => cy + (y - cam.cy)*s;
+  const x0 = cam.cx - cx/s, x1 = cam.cx + cx/s;
+  const y0 = cam.cy - cy/s, y1 = cam.cy + cy/s;
+  ctx.save();
+  ctx.lineWidth = 1; ctx.strokeStyle = '#e7edf6';
+  ctx.beginPath();
+  for(let x = Math.ceil(x0/step)*step; x <= x1; x += step){ const px = Math.round(X(x))+0.5; ctx.moveTo(px, 0); ctx.lineTo(px, rc.h); }
+  for(let y = Math.ceil(y0/step)*step; y <= y1; y += step){ const py = Math.round(Y(y))+0.5; ctx.moveTo(0, py); ctx.lineTo(rc.w, py); }
+  ctx.stroke();
+  ctx.strokeStyle = '#dbe4f0';
+  ctx.beginPath();
+  for(let x = Math.ceil(x0); x <= x1; x += 5){ const px = Math.round(X(x))+0.5; ctx.moveTo(px, 0); ctx.lineTo(px, rc.h); }
+  for(let y = Math.ceil(y0); y <= y1; y += 5){ const py = Math.round(Y(y))+0.5; ctx.moveTo(0, py); ctx.lineTo(rc.w, py); }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawCmds(list, c2d, w, h, cam, scaleRef){
+  const X = x => w/2 + (x - cam.cx)*cam.scale;
+  const Y = y => h/2 + (y - cam.cy)*cam.scale;
+  const hatched = new Set(['混凝土填充','素土']);
+  list.forEach(c=>{
+    const col = COL[c.layer] || '#16202e';
+    if(c.t==='poly'){
+      c2d.beginPath();
+      c.pts.forEach((p,i)=> i ? c2d.lineTo(X(p.x), Y(p.y)) : c2d.moveTo(X(p.x), Y(p.y)));
+      if(c.closed) c2d.closePath();
+      c2d.setLineDash(c.dash ? [7,4] : []);
+      c2d.strokeStyle = col; c2d.lineWidth = c.bold ? 1.5 : (c.layer==='墙体'||c.layer==='盖板'?1.4:1.0);
+      c2d.stroke();
+      c2d.setLineDash([]);
+      if(c.layer==='墙体' && c.closed){ c2d.fillStyle='rgba(255,255,255,0)'; }
+    }else if(c.t==='line'){
+      c2d.beginPath();
+      c2d.setLineDash(c.dash ? [6,4] : []);
+      c2d.strokeStyle = col; c2d.lineWidth = c.lw ? Math.max(0.7, c.lw*0.05) : (c.bold ? 1.4 : (c.layer==='素土' ? 0.85 : (hatched.has(c.layer) ? 0.7 : 1.0)));
+      c2d.moveTo(X(c.p1.x), Y(c.p1.y)); c2d.lineTo(X(c.p2.x), Y(c.p2.y)); c2d.stroke();
+      c2d.setLineDash([]);
+    }else if(c.t==='dot'){
+      const r = Math.max(0.7, c.r*cam.scale);
+      c2d.beginPath(); c2d.arc(X(c.x), Y(c.y), r, 0, Math.PI*2);
+      c2d.fillStyle = col; c2d.globalAlpha = .75; c2d.fill(); c2d.globalAlpha = 1;
+    }else if(c.t==='arc'){
+      c2d.beginPath();
+      c2d.arc(X(c.c.x), Y(c.c.y), c.r*cam.scale, c.a1*DEG, c.a2*DEG, c.a2<c.a1);
+      c2d.strokeStyle = col; c2d.lineWidth = 1; c2d.stroke();
+    }else if(c.t==='text'){
+      const fs = c.h*cam.scale;
+      if(fs < 4) return;
+      c2d.save();
+      c2d.translate(X(c.x), Y(c.y));
+      if(c.rot) c2d.rotate(c.rot*DEG);
+      c2d.font = `${c.layer==='尺寸标注'?400:500} ${fs}px "仿宋","FangSong","STFangsong","SimSun","Songti SC",serif`;
+      c2d.textAlign = c.align==='right' ? 'right' : (c.align==='center' ? 'center' : 'left');
+      c2d.textBaseline = 'alphabetic';
+      if(c.bg){
+        const tw2 = c2d.measureText(c.s).width, pad = fs*0.18;
+        const ox = c.align==='right' ? -tw2 : (c.align==='center' ? -tw2/2 : 0);
+        c2d.fillStyle = '#fff';
+        c2d.fillRect(ox - pad, -fs*0.92, tw2 + pad*2, fs*1.18);
+      }
+      c2d.fillStyle = col;
+      c2d.fillText(c.s, 0, 0);
+      c2d.restore();
+    }
+  });
+}
+
+/* ---- 上下两个视口 ---- */
+const VGUT = 20;                                  // 两视口之间的分隔带
+const VKEYS = ['plan','sec'];
+const VNAME = { plan:'平面图', sec:'1-1 剖面图' };
+const VMIN = 130;                                 // 单个视口最小高度
+
+function viewRect(key){
+  const r = Math.min(0.8, Math.max(0.2, state.vpRatio));
+  let h1 = Math.round((H - VGUT) * r);
+  h1 = Math.max(VMIN, Math.min(H - VGUT - VMIN, h1));
+  const h2 = H - VGUT - h1;
+  return key === 'plan' ? {x:0, y:0, w:W, h:h1} : {x:0, y:h1+VGUT, w:W, h:h2};
+}
+function paneAt(my){
+  return my < viewRect('plan').h + VGUT/2 ? 'plan' : 'sec';
+}
+function drawChip(rc, key){
+  const v = state.view[key], z = Math.round(v.cam.scale/(v.fit||v.cam.scale)*100);
+  const txt = VNAME[key] + '  ' + z + '%';
+  ctx.save();
+  ctx.font = '500 11px "PingFang SC","Microsoft YaHei",sans-serif';
+  const w = ctx.measureText(txt).width + 16, h = 20;
+  const x = rc.x + 10, y = rc.y + rc.h - 30;
+  ctx.beginPath();
+  const rad = 6;
+  ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
+  ctx.lineTo(x+w,y+h-rad); ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
+  ctx.lineTo(x+rad,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-rad);
+  ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y);
+  ctx.closePath();
+  ctx.fillStyle = state.active===key ? 'rgba(28,111,208,.10)' : 'rgba(246,249,253,.92)';
+  ctx.fill();
+  ctx.strokeStyle = state.active===key ? 'rgba(28,111,208,.45)' : '#d7e1ee';
+  ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = state.active===key ? '#1c6fd0' : '#5b6b80';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText(txt, x+8, y+h/2+0.5);
+  ctx.restore();
+}
+function render(){
+  const g = state.g, scene = state.scene;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#eef1f6'; ctx.fillRect(0,0,W,H);
+  VKEYS.forEach(key=>{
+    const rc = viewRect(key), v = state.view[key];
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x, rc.y, rc.w, rc.h); ctx.clip();
+    ctx.fillStyle = '#fff'; ctx.fillRect(rc.x, rc.y, rc.w, rc.h);
+    ctx.translate(rc.x, rc.y);
+    if(state.grid) drawGridIn(rc, v.cam);
+    if(g && scene && v.cmds && v.cmds.length) drawCmds(v.cmds, ctx, rc.w, rc.h, v.cam);
+    ctx.restore();
+    ctx.strokeStyle = state.active===key ? '#9cb8d8' : '#ccd8e6';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(rc.x+0.5, rc.y+0.5, rc.w-1, rc.h-1);
+    drawChip(rc, key);
+  });
+  /* 分隔带 + 拖拽手柄 */
+  const a = viewRect('plan');
+  const gy = a.y + a.h;
+  ctx.fillStyle = '#e4eaf2'; ctx.fillRect(0, gy, W, VGUT);
+  ctx.strokeStyle = '#cdd8e6'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, gy+0.5); ctx.lineTo(W, gy+0.5);
+  ctx.moveTo(0, gy+VGUT-0.5); ctx.lineTo(W, gy+VGUT-0.5); ctx.stroke();
+  const hx = W/2, hy = gy + VGUT/2;
+  ctx.fillStyle = '#b9c7da';
+  for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.arc(hx + i*7, hy, 1.6, 0, Math.PI*2); ctx.fill(); }
+  /* 状态栏 */
+  if(scene){
+    const v = state.view[state.active];
+    $('stZoom').textContent = Math.round(v.cam.scale/(v.fit||v.cam.scale)*100) + '%';
+    $('stScale').textContent = '1:' + scene.denom;
+  }
+}
+
+function fitView(){
+  if(!state.scene) return;
+  VKEYS.forEach(key=>{
+    const rc = viewRect(key);
+    const bb = key==='plan' ? state.scene.planBB : state.scene.secBB;
+    if(!bb) return;
+    const pad = 30;
+    const s = Math.min((rc.w-pad*2)/Math.max(bb.w,1e-6), (rc.h-pad*2)/Math.max(bb.h,1e-6));
+    state.view[key].cam = { scale:s, cx:(bb.x0+bb.x1)/2, cy:(bb.y0+bb.y1)/2 };
+    state.view[key].fit = s;
+  });
+  render();
+}
+
+/* ================= 工程量 / 状态 ================= */
+function updateSide(g, scene){
+  const q = g.q, tbody = $('qtyBody');
+  const rows = [
+    ['池墙轴线总长', g.type==='4' ? '2(L+t)+2(W+t)' : 'L+ℓL+ℓR', fmt(q.axisLen)+' m'],
+    ['池墙混凝土', fmt(q.axisLen)+'×'+g.t+'×'+g.H, fmt(q.Vwall,3)+' m³'],
+    ['底板混凝土', fmt(g.slabArea)+'㎡×'+g.T, fmt(q.Vslab,3)+' m³'],
+    ...(g.hasCover ? [['盖板混凝土', fmt(g.coverArea)+'㎡×'+g.Tc, fmt(q.Vcover,3)+' m³']] : []),
+    ['混凝土合计', '墙＋板', fmt(q.Vtotal,3)+' m³', true],
+    ['池墙模板(双面)', '2×'+fmt(q.axisLen)+'×'+g.H, fmt(q.Swall)+' ㎡'],
+    ['底板侧模', fmt(g.slabPerim)+'×'+g.T, fmt(q.Sslab)+' ㎡'],
+    ...(g.hasCover ? [['盖板模板(底模+侧模)', fmt(g.coverArea)+'+'+fmt(g.coverPerim)+'×'+g.Tc, fmt(q.Scover)+' ㎡']] : []),
+    ['土方开挖(概算)', fmt(g.slabArea)+'㎡×'+g.D, fmt(q.Vdig)+' m³']
+  ];
+  tbody.innerHTML = rows.map(r=>
+    `<tr class="${r[3]?'tot':''}"><td>${r[0]}</td><td class="expr">${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+
+  $('k_V').innerHTML = fmt(q.Vinner,2)+'<small>m³</small>';
+  $('k_C').innerHTML = fmt(q.Vtotal,2)+'<small>m³</small>';
+  $('k_A').innerHTML = fmt(g.slabArea,2)+'<small>m²</small>';
+  $('k_E').innerHTML = fmt(q.Vdig,2)+'<small>m³</small>';
+
+  const above = g.H + g.T - g.D;
+  const v = $('verdict');
+  let msg, cls='ok';
+  if(g.buryFull && Math.abs(above) <= 0.01){ msg = `全埋式：D = 墙高 H ${fmt(g.H,2)} + 底板厚 T ${fmt(g.T,2)} = ${fmt(g.D,2)} m，池顶与室外地坪齐平。`; }
+  else if(g.buryFull){ msg = `全埋式：室外地坪高出池顶 ${fmt(Math.abs(above),2)} m（覆土 ${fmt(Math.abs(above),2)} m），剖面已按覆土绘制。`; }
+  else if(above > 0.01){ msg = `池顶露出室外地坪 ${fmt(above,2)} m（半埋式），池壁外露部分不做土体填充。`; }
+  else if(Math.abs(above) <= 0.01){ msg = '池顶与室外地坪齐平，按全埋校验通过。'; }
+  else { msg = `全埋式：室外地坪高出池顶 ${fmt(-above,2)} m，剖面已按覆土绘制。`; }
+  if(g.B === 0) msg += ' 未设放大脚（B=0），底板与池墙外皮平齐。';
+  v.className = 'verdict ' + cls;
+  v.querySelector('.txt').textContent = msg;
+
+  $('bgName').textContent = g.type==='4' ? '四面闭合蓄水池' : '三面开口蓄水池';
+  $('bgSub').textContent = g.type==='4'
+    ? `${fmt(g.L,2)} × ${fmt(g.W,2)} × H${fmt(g.H,2)} m`
+    : `${fmt(g.L,2)} m｜αL ${g.aL}° ℓL ${fmt(g.lL,2)}｜αR ${g.aR}° ℓR ${fmt(g.lR,2)}`;
+  $('stMode').textContent = g.type==='4' ? '四面闭合' : '三面开口';
+
+  const typeName = g.type==='4' ? '四面闭合' : `三面开口（αL=${g.aL}° ℓL=${g.lL}m｜αR=${g.aR}° ℓR=${g.lR}m）`;
+  $('calcNote').innerHTML =
+    `<b>形式：</b>${typeName}；底板面积 ${fmt(g.slabArea)} ㎡，底板外轮廓周长 ${fmt(g.slabPerim)} m。<br>` +
+    `<b>材料：</b>池墙、底板与盖板均按 <b>${$('f_mat').value}</b> 计。<br>` +
+    `<b>约定：</b>池墙工程量按<b>轴线长度×墙厚×墙高</b>计（转角不扣减）；底板按墙外轮廓外放 B 后的面积×板厚计，三面池随斜墙斜接外放；模板按接触面净面积计；土方按底板外轮廓×埋深直壁概算，未计工作面与放坡。<br>` +
+    (g.hasCover ? `盖板按内轮廓外放搭接 e=${fmt(g.e)} m 计，顶面与池顶齐平，净空高度 = H−Tc = ${fmt(g.H-g.Tc,2)} m。` : '敞口不设盖板。') +
+    `<br><b>出图：</b>标注单位 mm；导出 DXF 为 mm 单位、按图层分离。`;
+}
+
+/* ================= 主流程 ================= */
+function refresh(keepView){
+  const g = (()=>{ try { return buildGeom(); } catch(e){ toast(String(e), 'err'); return null; } })();
+  if(!g) return;
+  state.g = g;
+  state.scene = buildScene(g);
+  state.view.plan.cmds = state.scene.planCmds;
+  state.view.sec.cmds  = state.scene.secCmds;
+  updateSide(g, state.scene);
+  if(!keepView) fitView(); else render();
+}
+
+function escDxf(s){
+  return String(s).replace(/[^\x00-\x7F]/g, ch=>{
+    const code = ch.charCodeAt(0);
+    return '\\U+' + code.toString(16).toUpperCase().padStart(4,'0');
+  });
+}
+/* ===== DXF 骨架（ezdxf 生成的 AC1015 / R2000 标准骨架，含 HEADER·CLASSES·TABLES·BLOCKS·OBJECTS） ===== */
+const DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$ACADMAINTVER\n 70\n6\n  9\n$DWGCODEPAGE\n  3\nANSI_1252\n  9\n$INSBASE\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$EXTMIN\n 10\n__EMX__\n 20\n__EMY__\n 30\n__EMZ__\n  9\n$EXTMAX\n 10\n__EXX__\n 20\n__EXY__\n 30\n__EXZ__\n  9\n$LIMMIN\n 10\n__LMX__\n 20\n__LMY__\n  9\n$LIMMAX\n 10\n__LXX__\n 20\n__LXY__\n  9\n$ORTHOMODE\n 70\n0\n  9\n$REGENMODE\n 70\n1\n  9\n$FILLMODE\n 70\n1\n  9\n$QTEXTMODE\n 70\n0\n  9\n$MIRRTEXT\n 70\n1\n  9\n$LTSCALE\n 40\n1.0\n  9\n$ATTMODE\n 70\n1\n  9\n$TEXTSIZE\n 40\n2.5\n  9\n$TRACEWID\n 40\n1.0\n  9\n$TEXTSTYLE\n  7\nStandard\n  9\n$CLAYER\n  8\n0\n  9\n$CELTYPE\n  6\nByLayer\n  9\n$CECOLOR\n 62\n256\n  9\n$CELTSCALE\n 40\n1.0\n  9\n$DISPSILH\n 70\n0\n  9\n$DIMSCALE\n 40\n__DSCALE__\n  9\n$DIMASZ\n 40\n1.0\n  9\n$DIMEXO\n 40\n3.0\n  9\n$DIMDLI\n 40\n3.75\n  9\n$DIMRND\n 40\n0.0\n  9\n$DIMDLE\n 40\n0.0\n  9\n$DIMEXE\n 40\n2.5\n  9\n$DIMTP\n 40\n0.0\n  9\n$DIMTM\n 40\n0.0\n  9\n$DIMTXT\n 40\n3.5\n  9\n$DIMCEN\n 40\n2.5\n  9\n$DIMTSZ\n 40\n0.0\n  9\n$DIMTOL\n 70\n0\n  9\n$DIMLIM\n 70\n0\n  9\n$DIMTIH\n 70\n0\n  9\n$DIMTOH\n 70\n0\n  9\n$DIMSE1\n 70\n0\n  9\n$DIMSE2\n 70\n0\n  9\n$DIMTAD\n 70\n1\n  9\n$DIMZIN\n 70\n8\n  9\n$DIMBLK\n  1\n\n  9\n$DIMASO\n 70\n1\n  9\n$DIMSHO\n 70\n1\n  9\n$DIMPOST\n  1\n\n  9\n$DIMAPOST\n  1\n\n  9\n$DIMALT\n 70\n0\n  9\n$DIMALTD\n 70\n3\n  9\n$DIMALTF\n 40\n0.03937007874\n  9\n$DIMLFAC\n 40\n1.0\n  9\n$DIMTOFL\n 70\n1\n  9\n$DIMTVP\n 40\n0.0\n  9\n$DIMTIX\n 70\n0\n  9\n$DIMSOXD\n 70\n0\n  9\n$DIMSAH\n 70\n0\n  9\n$DIMBLK1\n  1\n\n  9\n$DIMBLK2\n  1\n\n  9\n$DIMSTYLE\n  2\n_TCH_ARCH\n  9\n$DIMCLRD\n 70\n0\n  9\n$DIMCLRE\n 70\n0\n  9\n$DIMCLRT\n 70\n0\n  9\n$DIMTFAC\n 40\n0.5\n  9\n$DIMGAP\n 40\n1.0\n  9\n$DIMJUST\n 70\n0\n  9\n$DIMSD1\n 70\n0\n  9\n$DIMSD2\n 70\n0\n  9\n$DIMTOLJ\n 70\n0\n  9\n$DIMTZIN\n 70\n8\n  9\n$DIMALTZ\n 70\n0\n  9\n$DIMALTTZ\n 70\n0\n  9\n$DIMUPT\n 70\n1\n  9\n$DIMDEC\n 70\n0\n  9\n$DIMTDEC\n 70\n2\n  9\n$DIMALTU\n 70\n2\n  9\n$DIMALTTD\n 70\n3\n  9\n$DIMTXSTY\n  7\n_TCH_DIM\n  9\n$DIMAUNIT\n 70\n0\n  9\n$DIMADEC\n 70\n2\n  9\n$DIMALTRND\n 40\n0.0\n  9\n$DIMAZIN\n 70\n3\n  9\n$DIMDSEP\n 70\n46\n  9\n$DIMATFIT\n 70\n3\n  9\n$DIMFRAC\n 70\n0\n  9\n$DIMLDRBLK\n  1\n\n  9\n$DIMLUNIT\n 70\n2\n  9\n$DIMLWD\n 70\n-2\n  9\n$DIMLWE\n 70\n-2\n  9\n$DIMTMOVE\n 70\n2\n  9\n$LUNITS\n 70\n2\n  9\n$LUPREC\n 70\n4\n  9\n$SKETCHINC\n 40\n1.0\n  9\n$FILLETRAD\n 40\n10.0\n  9\n$AUNITS\n 70\n0\n  9\n$AUPREC\n 70\n2\n  9\n$MENU\n  1\n.\n  9\n$ELEVATION\n 40\n0.0\n  9\n$PELEVATION\n 40\n0.0\n  9\n$THICKNESS\n 40\n0.0\n  9\n$LIMCHECK\n 70\n0\n  9\n$CHAMFERA\n 40\n0.0\n  9\n$CHAMFERB\n 40\n0.0\n  9\n$CHAMFERC\n 40\n0.0\n  9\n$CHAMFERD\n 40\n0.0\n  9\n$SKPOLY\n 70\n0\n  9\n$TDCREATE\n 40\n2461343.928761574\n  9\n$TDUCREATE\n 40\n2458532.153996898\n  9\n$TDUPDATE\n 40\n2461343.928761574\n  9\n$TDUUPDATE\n 40\n2458532.1544311\n  9\n$TDINDWG\n 40\n0.0\n  9\n$TDUSRTIMER\n 40\n0.0\n  9\n$USRTIMER\n 70\n1\n  9\n$ANGBASE\n 50\n0.0\n  9\n$ANGDIR\n 70\n0\n  9\n$PDMODE\n 70\n0\n  9\n$PDSIZE\n 40\n0.0\n  9\n$PLINEWID\n 40\n0.0\n  9\n$SPLFRAME\n 70\n0\n  9\n$SPLINETYPE\n 70\n6\n  9\n$SPLINESEGS\n 70\n8\n  9\n$HANDSEED\n  5\n__HS__\n  9\n$SURFTAB1\n 70\n6\n  9\n$SURFTAB2\n 70\n6\n  9\n$SURFTYPE\n 70\n6\n  9\n$SURFU\n 70\n6\n  9\n$SURFV\n 70\n6\n  9\n$UCSBASE\n  2\n\n  9\n$UCSNAME\n  2\n\n  9\n$UCSORG\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSXDIR\n 10\n1.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSYDIR\n 10\n0.0\n 20\n1.0\n 30\n0.0\n  9\n$UCSORTHOREF\n  2\n\n  9\n$UCSORTHOVIEW\n 70\n0\n  9\n$UCSORGTOP\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGBOTTOM\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGLEFT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGRIGHT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGFRONT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$UCSORGBACK\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSBASE\n  2\n\n  9\n$PUCSNAME\n  2\n\n  9\n$PUCSORG\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSXDIR\n 10\n1.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSYDIR\n 10\n0.0\n 20\n1.0\n 30\n0.0\n  9\n$PUCSORTHOREF\n  2\n\n  9\n$PUCSORTHOVIEW\n 70\n0\n  9\n$PUCSORGTOP\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGBOTTOM\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGLEFT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGRIGHT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGFRONT\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PUCSORGBACK\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$USERI1\n 70\n0\n  9\n$USERI2\n 70\n0\n  9\n$USERI3\n 70\n0\n  9\n$USERI4\n 70\n0\n  9\n$USERI5\n 70\n0\n  9\n$USERR1\n 40\n0.0\n  9\n$USERR2\n 40\n0.0\n  9\n$USERR3\n 40\n0.0\n  9\n$USERR4\n 40\n0.0\n  9\n$USERR5\n 40\n0.0\n  9\n$WORLDVIEW\n 70\n1\n  9\n$SHADEDGE\n 70\n3\n  9\n$SHADEDIF\n 70\n70\n  9\n$TILEMODE\n 70\n1\n  9\n$MAXACTVP\n 70\n64\n  9\n$PINSBASE\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  9\n$PLIMCHECK\n 70\n0\n  9\n$PEXTMIN\n 10\n1e+20\n 20\n1e+20\n 30\n1e+20\n  9\n$PEXTMAX\n 10\n-1e+20\n 20\n-1e+20\n 30\n-1e+20\n  9\n$PLIMMIN\n 10\n0.0\n 20\n0.0\n  9\n$PLIMMAX\n 10\n420.0\n 20\n297.0\n  9\n$UNITMODE\n 70\n0\n  9\n$VISRETAIN\n 70\n1\n  9\n$PLINEGEN\n 70\n0\n  9\n$PSLTSCALE\n 70\n1\n  9\n$TREEDEPTH\n 70\n3020\n  9\n$CMLSTYLE\n  2\nStandard\n  9\n$CMLJUST\n 70\n0\n  9\n$CMLSCALE\n 40\n20.0\n  9\n$PROXYGRAPHICS\n 70\n1\n  9\n$MEASUREMENT\n 70\n1\n  9\n$CELWEIGHT\n370\n-1\n  9\n$ENDCAPS\n280\n0\n  9\n$JOINSTYLE\n280\n0\n  9\n$LWDISPLAY\n290\n0\n  9\n$INSUNITS\n 70\n6\n  9\n$HYPERLINKBASE\n  1\n\n  9\n$STYLESHEET\n  1\n\n  9\n$XEDIT\n290\n1\n  9\n$CEPSNTYPE\n380\n0\n  9\n$PSTYLEMODE\n290\n1\n  9\n$FINGERPRINTGUID\n  2\n{AAAA25E2-EB8B-42D5-955D-786FC100EEE4}\n  9\n$VERSIONGUID\n  2\n{147D0E8A-E8E2-48CC-9472-AD28DDE92531}\n  9\n$EXTNAMES\n290\n1\n  9\n$PSVPSCALE\n 40\n0.0\n  9\n$OLESTARTUP\n290\n0\n  0\nENDSEC\n  0\nSECTION\n  2\nCLASSES\n  0\nCLASS\n  1\nACDBDICTIONARYWDFLT\n  2\nAcDbDictionaryWithDefault\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nSUN\n  2\nAcDbSun\n  3\nSCENEOE\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nVISUALSTYLE\n  2\nAcDbVisualStyle\n  3\nObjectDBX Classes\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nMATERIAL\n  2\nAcDbMaterial\n  3\nObjectDBX Classes\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nSCALE\n  2\nAcDbScale\n  3\nObjectDBX Classes\n 90\n1153\n280\n0\n281\n0\n  0\nCLASS\n  1\nTABLESTYLE\n  2\nAcDbTableStyle\n  3\nObjectDBX Classes\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nMLEADERSTYLE\n  2\nAcDbMLeaderStyle\n  3\nACDB_MLEADERSTYLE_CLASS\n 90\n4095\n280\n0\n281\n0\n  0\nCLASS\n  1\nDICTIONARYVAR\n  2\nAcDbDictionaryVar\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nCELLSTYLEMAP\n  2\nAcDbCellStyleMap\n  3\nObjectDBX Classes\n 90\n1152\n280\n0\n281\n0\n  0\nCLASS\n  1\nMENTALRAYRENDERSETTINGS\n  2\nAcDbMentalRayRenderSettings\n  3\nSCENEOE\n 90\n1024\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBDETAILVIEWSTYLE\n  2\nAcDbDetailViewStyle\n  3\nObjectDBX Classes\n 90\n1025\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBSECTIONVIEWSTYLE\n  2\nAcDbSectionViewStyle\n  3\nObjectDBX Classes\n 90\n1025\n280\n0\n281\n0\n  0\nCLASS\n  1\nRASTERVARIABLES\n  2\nAcDbRasterVariables\n  3\nISM\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nACDBPLACEHOLDER\n  2\nAcDbPlaceHolder\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nCLASS\n  1\nLAYOUT\n  2\nAcDbLayout\n  3\nObjectDBX Classes\n 90\n0\n280\n0\n281\n0\n  0\nENDSEC\n  0\nSECTION\n  2\nTABLES\n  0\nTABLE\n  2\nVPORT\n  5\n8\n330\n0\n100\nAcDbSymbolTable\n 70\n1\n  0\nVPORT\n  5\n23\n330\n8\n100\nAcDbSymbolTableRecord\n100\nAcDbViewportTableRecord\n  2\n*Active\n 70\n0\n 10\n0.0\n 20\n0.0\n 11\n1.0\n 21\n1.0\n 12\n0.0\n 22\n0.0\n 13\n0.0\n 23\n0.0\n 14\n0.5\n 24\n0.5\n 15\n0.5\n 25\n0.5\n 16\n0.0\n 26\n0.0\n 36\n1.0\n 17\n0.0\n 27\n0.0\n 37\n0.0\n 40\n1000.0\n 41\n1.34\n 42\n50.0\n 43\n0.0\n 44\n0.0\n 50\n0.0\n 51\n0.0\n 71\n0\n 72\n1000\n 73\n1\n 74\n3\n 75\n0\n 76\n0\n 77\n0\n 78\n0\n281\n0\n 65\n0\n146\n0.0\n  0\nENDTAB\n  0\nTABLE\n  2\nLTYPE\n  5\n2\n330\n0\n100\nAcDbSymbolTable\n 70\n21\n  0\nLTYPE\n  5\n24\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nByBlock\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n25\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nByLayer\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n26\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nContinuous\n 70\n0\n  3\n\n 72\n65\n 73\n0\n 40\n0.0\n  0\nLTYPE\n  5\n2F\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTER\n 70\n0\n  3\nCenter ____ _ ____ _ ____ _ ____ _ ____ _ ____\n 72\n65\n 73\n4\n 40\n5.08\n 49\n3.175\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n30\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTERX2\n 70\n0\n  3\nCenter (2x) ________  __  ________  __  ________\n 72\n65\n 73\n4\n 40\n8.89\n 49\n6.35\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n31\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nCENTER2\n 70\n0\n  3\nCenter (.5x) ____ _ ____ _ ____ _ ____ _ ____\n 72\n65\n 73\n4\n 40\n2.54\n 49\n1.587\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n  0\nLTYPE\n  5\n32\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHED\n 70\n0\n  3\nDashed __ __ __ __ __ __ __ __ __ __ __ __ __ _\n 72\n65\n 73\n2\n 40\n1.524\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n33\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHEDX2\n 70\n0\n  3\nDashed (2x) ____  ____  ____  ____  ____  ____\n 72\n65\n 73\n2\n 40\n3.048\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n34\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHED2\n 70\n0\n  3\nDashed (.5x) _ _ _ _ _ _ _ _ _ _ _ _ _ _\n 72\n65\n 73\n2\n 40\n0.762\n 49\n0.635\n 74\n0\n 49\n-0.127\n 74\n0\n  0\nLTYPE\n  5\n35\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOM\n 70\n0\n  3\nPhantom ______  __  __  ______  __  __  ______\n 72\n65\n 73\n6\n 40\n6.35\n 49\n3.175\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n0.635\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n36\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOMX2\n 70\n0\n  3\nPhantom (2x)____________    ____    ____    ____________\n 72\n65\n 73\n6\n 40\n10.795\n 49\n6.35\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n 49\n1.27\n 74\n0\n 49\n-0.635\n 74\n0\n  0\nLTYPE\n  5\n37\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nPHANTOM2\n 70\n0\n  3\nPhantom (.5x) ___ _ _ ___ _ _ ___ _ _ ___ _ _ ___\n 72\n65\n 73\n6\n 40\n3.175\n 49\n1.587\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n 49\n0.318\n 74\n0\n 49\n-0.318\n 74\n0\n  0\nLTYPE\n  5\n38\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOT\n 70\n0\n  3\nDash dot __ . __ . __ . __ . __ . __ . __ . __\n 72\n65\n 73\n4\n 40\n3.556\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n39\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOTX2\n 70\n0\n  3\nDash dot (2x) ____  .  ____  .  ____  .  ____\n 72\n65\n 73\n4\n 40\n6.096\n 49\n5.08\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3A\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDASHDOT2\n 70\n0\n  3\nDash dot (.5x) _ . _ . _ . _ . _ . _ . _ . _\n 72\n65\n 73\n4\n 40\n1.778\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n3B\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOT\n 70\n0\n  3\nDot .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .\n 72\n65\n 73\n2\n 40\n0.508\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3C\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOTX2\n 70\n0\n  3\nDot (2x) .    .    .    .    .    .    .    . \n 72\n65\n 73\n2\n 40\n1.016\n 49\n0.0\n 74\n0\n 49\n-1.016\n 74\n0\n  0\nLTYPE\n  5\n3D\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDOT2\n 70\n0\n  3\nDot (.5) . . . . . . . . . . . . . . . . . . . \n 72\n65\n 73\n2\n 40\n0.254\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nLTYPE\n  5\n3E\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDE\n 70\n0\n  3\nDivide __ . . __ . . __ . . __ . . __ . . __\n 72\n65\n 73\n6\n 40\n4.064\n 49\n2.54\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n3F\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDEX2\n 70\n0\n  3\nDivide (2x) ____  . .  ____  . .  ____  . .  ____\n 72\n65\n 73\n6\n 40\n6.604\n 49\n5.08\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.508\n 74\n0\n  0\nLTYPE\n  5\n40\n330\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n  2\nDIVIDE2\n 70\n0\n  3\nDivide(.5x) _ . _ . _ . _ . _ . _ . _ . _\n 72\n65\n 73\n6\n 40\n2.032\n 49\n1.27\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n 49\n0.0\n 74\n0\n 49\n-0.254\n 74\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nLAYER\n  5\n1\n330\n0\n100\nAcDbSymbolTable\n 70\n9\n  0\nLAYER\n  5\n27\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\n0\n 70\n0\n 62\n7\n  6\nContinuous\n370\n-3\n390\n13\n  0\nLAYER\n  5\n28\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nDefpoints\n 70\n0\n 62\n7\n  6\nContinuous\n290\n0\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8A\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nWALL\n 70\n0\n 62\n7\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8B\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nSLAB\n 70\n0\n 62\n7\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8C\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nSOIL\n 70\n0\n 62\n4\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8D\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nDIM\n 70\n0\n 62\n3\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8E\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nTEXT\n 70\n0\n 62\n3\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n8F\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nHATCH\n 70\n0\n 62\n8\n  6\nCONTINUOUS\n370\n-3\n390\n13\n  0\nLAYER\n  5\n90\n330\n1\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\nCOVER\n 70\n0\n 62\n6\n  6\nDASHED\n370\n-3\n390\n13\n  0\nENDTAB\n  0\nTABLE\n  2\nSTYLE\n  5\n5\n330\n0\n100\nAcDbSymbolTable\n 70\n2\n  0\nSTYLE\n  5\n29\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\nStandard\n 70\n0\n 40\n0.0\n 41\n0.7\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nTssdeng.shx\n  4\nHZTXT.SHX\n  0\nSTYLE\n  5\n41\n330\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n  2\n_TCH_DIM\n 70\n0\n 40\n0.0\n 41\n0.7\n 50\n0.0\n 71\n0\n 42\n2.5\n  3\nTssdeng.shx\n  4\nHZTXT.SHX\n  0\nENDTAB\n  0\nTABLE\n  2\nVIEW\n  5\n7\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nUCS\n  5\n6\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nAPPID\n  5\n3\n330\n0\n100\nAcDbSymbolTable\n 70\n3\n  0\nAPPID\n  5\n2A\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nACAD\n 70\n0\n  0\nAPPID\n  5\n91\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nHATCHBACKGROUNDCOLOR\n 70\n0\n  0\nAPPID\n  5\n92\n330\n3\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n  2\nEZDXF\n 70\n0\n  0\nENDTAB\n  0\nTABLE\n  2\nDIMSTYLE\n  5\n4\n330\n0\n100\nAcDbSymbolTable\n 70\n2\n100\nAcDbDimStyleTable\n  0\nDIMSTYLE\n105\n2B\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\nStandard\n 70\n0\n  3\n\n  4\n\n 40\n1.0\n 41\n2.5\n 42\n0.625\n 43\n3.75\n 44\n1.25\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n2.5\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n1.0\n145\n0.0\n146\n1.0\n147\n0.625\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n8\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n0\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n2\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n44\n279\n0\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n0\n289\n3\n371\n-2\n372\n-2\n  0\nDIMSTYLE\n105\n73\n330\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbDimStyleTableRecord\n  2\n_TCH_ARCH\n 70\n0\n  3\n\n  4\n\n 40\n__DSCALE__\n 41\n1.0\n 42\n3.0\n 43\n3.75\n 44\n2.5\n 45\n0.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n140\n3.5\n141\n2.5\n142\n0.0\n143\n0.03937007874\n144\n1.0\n145\n0.0\n146\n1.0\n147\n1.0\n148\n0.0\n 71\n0\n 72\n0\n 73\n0\n 74\n0\n 75\n0\n 76\n0\n 77\n1\n 78\n8\n 79\n3\n170\n0\n171\n3\n172\n1\n173\n0\n174\n1\n175\n0\n176\n0\n177\n0\n178\n0\n179\n2\n271\n0\n272\n2\n273\n2\n274\n3\n275\n0\n276\n0\n277\n2\n278\n44\n279\n0\n280\n0\n281\n0\n282\n0\n283\n0\n284\n8\n285\n0\n286\n0\n288\n0\n289\n3\n340\n41\n342\n74\n371\n-2\n372\n-2\n  0\nENDTAB\n  0\nTABLE\n  2\nBLOCK_RECORD\n  5\n9\n330\n0\n100\nAcDbSymbolTable\n 70\n5\n  0\nBLOCK_RECORD\n  5\n17\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n*Model_Space\n340\n1A\n  0\nBLOCK_RECORD\n  5\n1B\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n*Paper_Space\n340\n1E\n  0\nBLOCK_RECORD\n  5\n74\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_ARCHTICK\n340\n0\n  0\nBLOCK_RECORD\n  5\n78\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_CLOSEDFILLED\n340\n0\n  0\nBLOCK_RECORD\n  5\n84\n330\n9\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n  2\n_CLOSEDBLANK\n340\n0\n  0\nENDTAB\n  0\nENDSEC\n  0\nSECTION\n  2\nBLOCKS\n  0\nBLOCK\n  5\n18\n330\n17\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n*Model_Space\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n*Model_Space\n  1\n\n  0\nENDBLK\n  5\n19\n330\n17\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n1C\n330\n1B\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n*Paper_Space\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n*Paper_Space\n  1\n\n  0\nENDBLK\n  5\n1D\n330\n1B\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n75\n330\n74\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_ARCHTICK\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_ARCHTICK\n  1\n\n  0\nLWPOLYLINE\n  5\n77\n330\n74\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbPolyline\n 90\n2\n 70\n0\n 43\n0.15\n 10\n-0.5\n 20\n-0.5\n 10\n0.5\n 20\n0.5\n  0\nENDBLK\n  5\n76\n330\n74\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n79\n330\n78\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_CLOSEDFILLED\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_CLOSEDFILLED\n  1\n\n  0\nSOLID\n  5\n7B\n330\n78\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbTrace\n 10\n-1.0\n 20\n0.16439898372402537\n 30\n0.0\n 11\n0.0\n 21\n0.0\n 31\n0.0\n 12\n-1.0\n 22\n-0.16439898372402537\n 32\n0.0\n 13\n-1.0\n 23\n-0.16439898372402537\n 33\n0.0\n  0\nENDBLK\n  5\n7A\n330\n78\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nBLOCK\n  5\n85\n330\n84\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockBegin\n  2\n_CLOSEDBLANK\n 70\n0\n 10\n0.0\n 20\n0.0\n 30\n0.0\n  3\n_CLOSEDBLANK\n  1\n\n  0\nLWPOLYLINE\n  5\n87\n330\n84\n100\nAcDbEntity\n  8\n0\n  6\nBYBLOCK\n 62\n0\n100\nAcDbPolyline\n 90\n3\n 70\n1\n 10\n-1.0\n 20\n0.16439898372402537\n 10\n0.0\n 20\n0.0\n 10\n-1.0\n 20\n-0.16439898372402537\n  0\nENDBLK\n  5\n86\n330\n84\n100\nAcDbEntity\n  8\n0\n100\nAcDbBlockEnd\n  0\nENDSEC\n  0\nSECTION\n  2\nENTITIES\n__ENT__\n  0\nENDSEC\n  0\nSECTION\n  2\nOBJECTS\n  0\nDICTIONARY\n  5\nA\n330\n0\n100\nAcDbDictionary\n281\n1\n  3\nACAD_COLOR\n350\nB\n  3\nACAD_GROUP\n350\nC\n  3\nACAD_LAYOUT\n350\nD\n  3\nACAD_MATERIAL\n350\nE\n  3\nACAD_MLEADERSTYLE\n350\nF\n  3\nACAD_MLINESTYLE\n350\n10\n  3\nACAD_PLOTSETTINGS\n350\n11\n  3\nACAD_PLOTSTYLENAME\n350\n12\n  3\nACAD_SCALELIST\n350\n14\n  3\nACAD_TABLESTYLE\n350\n15\n  3\nACAD_VISUALSTYLE\n350\n16\n  3\nEZDXF_META\n350\n2D\n  0\nDICTIONARY\n  5\nB\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\nC\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\nD\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nModel\n350\n1A\n  3\nLayout1\n350\n1E\n  0\nDICTIONARY\n  5\nE\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nByBlock\n350\n1F\n  3\nByLayer\n350\n20\n  3\nGlobal\n350\n21\n  0\nDICTIONARY\n  5\nF\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nStandard\n350\n2C\n  0\nDICTIONARY\n  5\n10\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nStandard\n350\n22\n  0\nDICTIONARY\n  5\n11\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nACDBDICTIONARYWDFLT\n  5\n12\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\nNormal\n350\n13\n100\nAcDbDictionaryWithDefault\n340\n13\n  0\nACDBPLACEHOLDER\n  5\n13\n330\n12\n  0\nDICTIONARY\n  5\n14\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\n15\n330\nA\n100\nAcDbDictionary\n281\n1\n  0\nDICTIONARY\n  5\n16\n330\nA\n100\nAcDbDictionary\n281\n1\n  3\n2dWireframe\n350\n5A\n  3\nBasic\n350\n5B\n  3\nBrighten\n350\n5C\n  3\nColorChange\n350\n5D\n  3\nConceptual\n350\n5E\n  3\nDim\n350\n5F\n  3\nEdgeColorOff\n350\n60\n  3\nFacepattern\n350\n61\n  3\nFlat\n350\n62\n  3\nFlatWithEdges\n350\n63\n  3\nGouraud\n350\n64\n  3\nGouraudWithEdges\n350\n65\n  3\nHidden\n350\n66\n  3\nJitterOff\n350\n67\n  3\nLinepattern\n350\n68\n  3\nModeling\n350\n69\n  3\nOverhangOff\n350\n6A\n  3\nRealistic\n350\n6B\n  3\nShaded\n350\n6C\n  3\nShaded with edges\n350\n6D\n  3\nShades of Gray\n350\n6E\n  3\nSketchy\n350\n6F\n  3\nThicken\n350\n70\n  3\nWireframe\n350\n71\n  3\nX-Ray\n350\n72\n  0\nLAYOUT\n  5\n1A\n330\nD\n100\nAcDbPlotSettings\n  1\n\n  4\nA3\n  6\n\n 40\n7.5\n 41\n20.0\n 42\n7.5\n 43\n20.0\n 44\n420.0\n 45\n297.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n 49\n0.0\n140\n0.0\n141\n0.0\n142\n1.0\n143\n1.0\n 70\n1024\n 72\n1\n 73\n0\n 74\n5\n  7\n\n 75\n16\n 76\n0\n 77\n2\n 78\n300\n147\n1.0\n148\n0.0\n149\n0.0\n100\nAcDbLayout\n  1\nModel\n 70\n1\n 71\n0\n 10\n0.0\n 20\n0.0\n 11\n420.0\n 21\n297.0\n 12\n0.0\n 22\n0.0\n 32\n0.0\n 14\n1e+20\n 24\n1e+20\n 34\n1e+20\n 15\n-1e+20\n 25\n-1e+20\n 35\n-1e+20\n146\n0.0\n 13\n0.0\n 23\n0.0\n 33\n0.0\n 16\n1.0\n 26\n0.0\n 36\n0.0\n 17\n0.0\n 27\n1.0\n 37\n0.0\n 76\n1\n330\n17\n  0\nLAYOUT\n  5\n1E\n330\nD\n100\nAcDbPlotSettings\n  1\n\n  4\nA3\n  6\n\n 40\n7.5\n 41\n20.0\n 42\n7.5\n 43\n20.0\n 44\n420.0\n 45\n297.0\n 46\n0.0\n 47\n0.0\n 48\n0.0\n 49\n0.0\n140\n0.0\n141\n0.0\n142\n1.0\n143\n1.0\n 70\n0\n 72\n1\n 73\n0\n 74\n5\n  7\n\n 75\n16\n 76\n0\n 77\n2\n 78\n300\n147\n1.0\n148\n0.0\n149\n0.0\n100\nAcDbLayout\n  1\nLayout1\n 70\n1\n 71\n1\n 10\n0.0\n 20\n0.0\n 11\n420.0\n 21\n297.0\n 12\n0.0\n 22\n0.0\n 32\n0.0\n 14\n1e+20\n 24\n1e+20\n 34\n1e+20\n 15\n-1e+20\n 25\n-1e+20\n 35\n-1e+20\n146\n0.0\n 13\n0.0\n 23\n0.0\n 33\n0.0\n 16\n1.0\n 26\n0.0\n 36\n0.0\n 17\n0.0\n 27\n1.0\n 37\n0.0\n 76\n1\n330\n1B\n  0\nMATERIAL\n  5\n1F\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nByBlock\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMATERIAL\n  5\n20\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nByLayer\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMATERIAL\n  5\n21\n102\n{ACAD_REACTORS\n330\nE\n102\n}\n330\nE\n100\nAcDbMaterial\n  1\nGlobal\n  2\n\n 70\n0\n 40\n1.0\n 71\n1\n 41\n1.0\n 91\n-1023410177\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 44\n0.5\n 73\n0\n 45\n1.0\n 46\n1.0\n 77\n1\n  4\n\n 78\n1\n 79\n1\n170\n1\n 48\n1.0\n171\n1\n  6\n\n172\n1\n173\n1\n174\n1\n140\n1.0\n141\n1.0\n175\n1\n  7\n\n176\n1\n177\n1\n178\n1\n143\n1.0\n179\n1\n  8\n\n270\n1\n271\n1\n272\n1\n145\n1.0\n146\n1.0\n273\n1\n  9\n\n274\n1\n275\n1\n276\n1\n 42\n1.0\n 72\n1\n  3\n\n 73\n1\n 74\n1\n 75\n1\n 94\n63\n  0\nMLINESTYLE\n  5\n22\n102\n{ACAD_REACTORS\n330\n10\n102\n}\n330\n10\n100\nAcDbMlineStyle\n  2\nStandard\n 70\n0\n  3\n\n 62\n256\n 51\n90.0\n 52\n90.0\n 71\n2\n 49\n0.5\n 62\n256\n  6\nBYLAYER\n 49\n-0.5\n 62\n256\n  6\nBYLAYER\n  0\nMLEADERSTYLE\n  5\n2C\n102\n{ACAD_REACTORS\n330\nF\n102\n}\n330\nF\n100\nAcDbMLeaderStyle\n179\n2\n170\n2\n171\n1\n172\n0\n 90\n2\n 40\n0.0\n 41\n0.0\n173\n1\n 91\n-1056964608\n 92\n-2\n290\n1\n 42\n2.0\n291\n1\n 43\n8.0\n  3\nStandard\n 44\n4.0\n300\n\n342\n29\n174\n1\n175\n1\n176\n0\n178\n1\n 93\n-1056964608\n 45\n4.0\n292\n0\n297\n0\n 46\n4.0\n 94\n-1056964608\n 47\n1.0\n 49\n1.0\n140\n1.0\n294\n1\n141\n0.0\n177\n0\n142\n1.0\n295\n0\n296\n0\n143\n3.75\n271\n0\n272\n9\n273\n9\n  0\nDICTIONARY\n  5\n2D\n330\nA\n100\nAcDbDictionary\n280\n1\n281\n1\n  3\nCREATED_BY_EZDXF\n350\n2E\n  3\nWRITTEN_BY_EZDXF\n350\n93\n  0\nDICTIONARYVAR\n  5\n2E\n330\n2D\n100\nDictionaryVariables\n280\n0\n  1\n1.4.5 @ 2026-10-29T14:17:25.071394+00:00\n  0\nVISUALSTYLE\n  5\n5A\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\n2dWireframe\n 70\n4\n 90\n0\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n5B\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nBasic\n 70\n7\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5C\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nBrighten\n 70\n12\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5D\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nColorChange\n 70\n16\n 90\n2\n 40\n0.6\n 62\n8\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n5E\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nConceptual\n 70\n9\n 90\n3\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n5F\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nDim\n 70\n11\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n60\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nEdgeColorOff\n 70\n22\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n61\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFacepattern\n 70\n15\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n62\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFlat\n 70\n0\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n63\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nFlatWithEdges\n 70\n1\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n64\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nGouraud\n 70\n2\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n65\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nGouraudWithEdges\n 70\n3\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n66\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nHidden\n 70\n6\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n67\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nJitterOff\n 70\n20\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n68\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nLinepattern\n 70\n14\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n69\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nModeling\n 70\n10\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6A\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nOverhangOff\n 70\n21\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n6B\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nRealistic\n 70\n8\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6C\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShaded\n 70\n27\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6D\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShaded with edges\n 70\n26\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6E\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nShades of Gray\n 70\n23\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n6F\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nSketchy\n 70\n24\n 90\n1\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n70\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nThicken\n 70\n13\n 90\n2\n 40\n0.6\n 62\n7\n290\n0\n291\n1\n  0\nVISUALSTYLE\n  5\n71\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nWireframe\n 70\n5\n 90\n0\n 40\n0.6\n 62\n7\n290\n0\n291\n0\n  0\nVISUALSTYLE\n  5\n72\n102\n{ACAD_REACTORS\n330\n16\n102\n}\n330\n16\n100\nAcDbVisualStyle\n  2\nX-Ray\n 70\n25\n 90\n2\n 40\n0.5\n 62\n7\n290\n0\n291\n0\n  0\nDICTIONARYVAR\n  5\n93\n330\n2D\n100\nDictionaryVariables\n280\n0\n  1\n1.4.5 @ 2026-10-29T14:17:25.088349+00:00\n  0\nENDSEC\n  0\nEOF\n";
+const DXF_H0 = 0x101;          // 动态实体起始句柄（骨架最大句柄 0x100 之后）
+const DXF_MS = '17';           // *Model_Space 的 BLOCK_RECORD 句柄
+
+function dxfFromCmds(cmds, denom){
+  const MX = 1000;                                     // m → mm
+  const DSC = String(denom || 50);                      // 标注全局比例 = 出图比例分母
+  const NUM = v => (Math.round(v*1000)/1000).toFixed(3);
+  /* AutoCAD 只接受法定线宽值（组码 370，单位 1/100 mm），写入非法值会判定
+     “DXF 输入无效”而拒绝打开。这里把画布线宽吸附到最接近的合法值。 */
+  const LW_OK = [0,5,9,13,15,18,20,25,30,35,40,50,53,60,70,80,90,100,106,120,140,158,200,211];
+  const lwSnap = v => {
+    if(!v) return 0;
+    let b = LW_OK[0];
+    for(const t of LW_OK) if(Math.abs(t-v) < Math.abs(b-v)) b = t;
+    return b;
+  };
+  const toP = p => ({x: p.x*MX, y: -p.y*MX});           // y 翻转，CAD 向上为正
+  const LY = {'墙体':'WALL','底板':'SLAB','素土':'SOIL','尺寸标注':'DIM',
+              '文字标注':'TEXT','混凝土填充':'HATCH','图框':'FRAME','盖板':'COVER'};
+  const ln = l => LY[l] || '0';
+  /* 中文 → \U+XXXX 转义：文件保持 100% ASCII，绕开 GBK/UTF-8 编码歧义 */
+  const U = str => {
+    let o = '';
+    for(const ch of String(str)){
+      const c = ch.charCodeAt(0);
+      o += (c < 0x80) ? ch : '\\U+' + ('0000' + c.toString(16).toUpperCase()).slice(-4);
+    }
+    return o;
+  };
+
+  let hd = DXF_H0;
+  const nh = () => (hd++).toString(16).toUpperCase();
+  const E = [];
+  const e = (c, v) => E.push(String(c), String(v));
+  let bx0=1e9, by0=1e9, bx1=-1e9, by1=-1e9;
+  const tk = (x, y) => { if(x<bx0)bx0=x; if(y<by0)by0=y; if(x>bx1)bx1=x; if(y>by1)by1=y; };
+
+  cmds.forEach(c=>{
+    if(c.nd) return;                                 // 手绘标注图元只服务画布，不进 DXF
+    const lay = ln(c.layer || '0');
+    if(c.t === 'dim'){
+      /* 转角标注（固维挡墙断面CAD自动成图系统同款）：标准 DIMENSION 实体
+         + 天正标注样式 _TCH_ARCH（建筑斜线箭头、文字置顶），颜色绿色（色号 3）。
+         子类结构铁律：AcDbDimension(3/10/11/70/71/1) → AcDbAlignedDimension(13/14/50)
+         → AcDbRotatedDimension(空子类)，顺序错位 AutoCAD 会拒开。 */
+      const a = toP(c.p1), b = toP(c.p2), d = toP(c.dp);
+      tk(a.x,a.y); tk(b.x,b.y); tk(d.x,d.y);
+      let ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+      if(ang < 0) ang += 180;                          // 方向取 0~180，尺寸线平行即可
+      if(Math.abs(ang) < 0.02 || Math.abs(ang - 180) < 0.02) ang = 0;
+      else if(Math.abs(ang - 90) < 0.02) ang = 90;
+      e(0,'DIMENSION'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity');
+      e(8,lay); e(62,'3');                             // 绿色
+      e(100,'AcDbDimension');
+      e(3,'_TCH_ARCH');                                // 标注样式
+      e(10,NUM(d.x)); e(20,NUM(d.y)); e(30,'0.0');     // 尺寸线通过点
+      e(11,NUM(d.x)); e(21,NUM(d.y)); e(31,'0.0');     // 文字中点（dimtad=1 自动置顶）
+      e(70,'32');                                      // 转角标注
+      e(71,'5');                                       // 文字中中对齐
+      e(1, U(c.s));                                    // 写死文字，与图面完全一致
+      e(100,'AcDbAlignedDimension');
+      e(13,NUM(a.x)); e(23,NUM(a.y)); e(33,'0.0');     // 第一尺寸界线原点
+      e(14,NUM(b.x)); e(24,NUM(b.y)); e(34,'0.0');     // 第二尺寸界线原点
+      e(50,NUM(ang));                                  // 尺寸线转角（0 水平 / 90 竖直 / 斜向）
+      e(100,'AcDbRotatedDimension');
+      return;
+    }
+    if(c.t === 'poly'){
+      const pts = c.pts.map(toP);
+      pts.forEach(p=>tk(p.x, p.y));
+      e(0,'LWPOLYLINE'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity'); e(8,lay);
+      if(c.dash) e(6,'DASHED');
+      e(100,'AcDbPolyline'); e(90, pts.length); e(70, c.closed ? 1 : 0); e(43,'0.0');
+      pts.forEach(p=>{ e(10, NUM(p.x)); e(20, NUM(p.y)); });
+    }else if(c.t === 'line'){
+      let sx1 = c.p1.x, sy1 = c.p1.y, sx2 = c.p2.x, sy2 = c.p2.y;
+      if(c.tf){                                   // 图名下划线：按 DXF 实际字宽（宽度因子 0.7）重算长度
+        const hw2 = titleWidthDC(c.tf.s, c.tf.h)/2 + c.tf.h*0.14;
+        sx1 = c.tf.cx - hw2; sx2 = c.tf.cx + hw2;
+      }
+      const a = toP({x:sx1, y:sy1}), b = toP({x:sx2, y:sy2});
+      tk(a.x,a.y); tk(b.x,b.y);
+      e(0,'LINE'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity'); e(8,lay);
+      if(c.dash) e(6,'DASHED');
+      if(c.lw) e(370, lwSnap(c.lw));             // 线宽（1/100 mm，已吸附合法值）：界线18 / 尺寸线22→25 / 起止符36→35
+      e(100,'AcDbLine');
+      e(10,NUM(a.x)); e(20,NUM(a.y)); e(30,'0.0');
+      e(11,NUM(b.x)); e(21,NUM(b.y)); e(31,'0.0');
+    }else if(c.t === 'dot'){
+      const p = toP(c); tk(p.x, p.y); tk(p.x - c.r*MX, p.y - c.r*MX); tk(p.x + c.r*MX, p.y + c.r*MX);
+      e(0,'CIRCLE'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity'); e(8,lay);
+      e(100,'AcDbCircle');
+      e(10,NUM(p.x)); e(20,NUM(p.y)); e(30,'0.0'); e(40, NUM(Math.max(c.r*MX, 0.5)));
+      e(210,'0.0'); e(220,'0.0'); e(230,'1.0');
+    }else if(c.t === 'arc'){
+      const p = toP(c.c), rr = c.r*MX;
+      tk(p.x-rr, p.y-rr); tk(p.x+rr, p.y+rr);
+      e(0,'ARC'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity'); e(8,lay);
+      e(100,'AcDbCircle');
+      e(10,NUM(p.x)); e(20,NUM(p.y)); e(30,'0.0'); e(40,NUM(rr));
+      e(210,'0.0'); e(220,'0.0'); e(230,'1.0');
+      e(100,'AcDbArc'); e(50,NUM(-c.a2)); e(51,NUM(-c.a1));
+    }else if(c.t === 'text'){
+      const p = toP(c), hgt = c.h*MX;
+      tk(p.x, p.y); tk(p.x, p.y + hgt);
+      e(0,'TEXT'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity'); e(8,lay);
+      e(100,'AcDbText');
+      e(10,NUM(p.x)); e(20,NUM(p.y)); e(30,'0.0');
+      e(40,NUM(hgt));
+      e(1, U(c.s));
+      e(50, NUM(-(c.rot || 0)));        // cmds 的 y 轴向下，CAD 向上 ⇒ 角度取反，否则竖排文字翻 180°
+      e(41,'0.7'); e(51,'0.0');           // 宽度因子 0.7（与固维 Standard 样式一致）
+      e(7,'Standard');
+      const al = c.align || 'left';
+      e(71,'0'); e(72, al==='center' ? 1 : (al==='right' ? 2 : 0));
+      e(11,NUM(p.x)); e(21,NUM(p.y)); e(31,'0.0');
+      e(100,'AcDbText');
+    }
+  });
+
+  const ok = bx0 < 1e9;
+  const ex0 = ok ? bx0 : 0, ey0 = ok ? by0 : 0, ex1 = ok ? bx1 : 1000, ey1 = ok ? by1 : 1000;
+  return DXF_SKEL
+    .replace('__ENT__', E.join('\n'))
+    .replace('__HS__',  hd.toString(16).toUpperCase())
+    .replace(/__DSCALE__/g, DSC)                       // 标注全局比例 = 出图比例分母
+    .replace('__EMX__', NUM(ex0)).replace('__EMY__', NUM(ey0)).replace('__EMZ__', '0.0')
+    .replace('__EXX__', NUM(ex1)).replace('__EXY__', NUM(ey1)).replace('__EXZ__', '0.0')
+    .replace('__LMX__', NUM(ex0)).replace('__LMY__', NUM(ey0))
+    .replace('__LXX__', NUM(ex1)).replace('__LXY__', NUM(ey1))
+    .replace(/\n/g, '\r\n');
+}
+
+/* 导出文件名：以「蓄水池名称」为前缀 —— XXX取水口CAD平面及剖面图
+   名称中的 Windows 非法字符替换为下划线；名称为空时回退为通用名 */
+function exportBase(){
+  let nm = ((state.scene && state.scene.name) || '').trim();
+  nm = nm.replace(/[\\/:*?"<>|\r\n\t]/g, '_').replace(/[.\s]+$/, '');
+  return (nm || '混凝土蓄水池') + 'CAD平面及剖面图';
+}
+
+function exportDXF(){
+  if(!state.scene){ toast('暂无可导出的图形', 'warn'); return; }
+  try{
+    const txt = dxfFromCmds(state.scene.allCmds, state.scene.denom);
+    const blob = new Blob([txt], {type:'application/dxf'});
+    const a = document.createElement('a');
+    const fn = exportBase() + '.dxf';
+    a.href = URL.createObjectURL(blob);
+    a.download = fn;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    toast('DXF 已导出：' + fn, 'ok');
+  }catch(e){ toast('DXF 导出失败：' + e.message, 'err'); }
+}
+
+/* ================= PNG 导出 ================= */
+function exportPNG(){
+  if(!state.scene){ toast('暂无可导出的图形', 'warn'); return; }
+  const sel = parseInt($('e_res').value,10);
+  const targetW = sel===1 ? 2000 : sel===2 ? 3200 : 4800;
+  const bb = state.scene.sheetBB;
+  const aspect = bb.h / bb.w;
+  const cw = targetW, chh = Math.round(targetW*aspect);
+  const c = document.createElement('canvas');
+  c.width = cw; c.height = chh;
+  const c2 = c.getContext('2d');
+  if($('e_bg').value === 'white'){ c2.fillStyle = '#fff'; c2.fillRect(0,0,cw,chh); }
+  const cam = { scale: Math.min(cw*0.96/bb.w, chh*0.96/bb.h), cx:(bb.x0+bb.x1)/2, cy:(bb.y0+bb.y1)/2 };
+  drawCmds(state.scene.allCmds, c2, cw, chh, cam);
+  c.toBlob(b=>{
+    const a = document.createElement('a');
+    const fn = exportBase() + '.png';
+    a.href = URL.createObjectURL(b);
+    a.download = fn;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    toast('PNG 已导出：' + fn, 'ok');
+  }, 'image/png');
+}
+
+/* ================= 交互 ================= */
+function bindUI(){
+  const ids = ['f_name','f_type','f_L','f_W','f_H','f_t','f_T','f_B','f_bury','f_hc','f_D','f_cover','f_Tc','f_e','f_aL','f_lL','f_aR','f_lR','f_scale','f_mat',
+               'o_dim','o_note','o_soil','o_hatch','o_cut'];
+  ids.forEach(id=>{
+    const el = $(id);
+    el.addEventListener('input', ()=>{ syncMode(); refresh(false); });
+    el.addEventListener('change', ()=>{ syncMode(); refresh(false); });
+  });
+  /* 盖板搭接默认跟随墙厚：用户手动改过 e 之后不再自动同步（在 syncMode 内处理） */
+  $('f_e').addEventListener('input', ()=>{ $('f_e').dataset.manual = '1'; });
+  $('btnPng').onclick = exportPNG;
+  $('e_png').onclick = exportPNG;
+  $('btnDxf').onclick = exportDXF;
+  $('e_dxf').onclick = exportDXF;
+
+  /* 画布：滚轮缩放 / 拖拽平移（作用于光标所在视口） */
+  let dragging = false, lastX = 0, lastY = 0, moved = false;
+  let splitDrag = false;
+  $('wrap').addEventListener('wheel', e=>{
+    e.preventDefault();
+    const r = cv.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const key = paneAt(my), rc = viewRect(key), v = state.view[key];
+    state.active = key;
+    const lx = mx - rc.x, ly = my - rc.y;
+    const wx = v.cam.cx + (lx - rc.w/2)/v.cam.scale;
+    const wy = v.cam.cy + (ly - rc.h/2)/v.cam.scale;
+    const k = e.deltaY < 0 ? 1.12 : 1/1.12;
+    const ns = Math.max(v.fit*0.15, Math.min(v.fit*40, v.cam.scale*k));
+    v.cam.scale = ns;
+    v.cam.cx = wx - (lx - rc.w/2)/ns;
+    v.cam.cy = wy - (ly - rc.h/2)/ns;
+    render();
+  }, {passive:false});
+
+  cv.addEventListener('mousedown', e=>{
+    const r = cv.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const gy = viewRect('plan').y + viewRect('plan').h;
+    if(my >= gy-3 && my <= gy+VGUT+3){ splitDrag = true; document.body.style.cursor='row-resize'; return; }
+    state.active = paneAt(my);
+    dragging = true; moved = false; lastX = e.clientX; lastY = e.clientY;
+    cv.classList.add('drag');
+    render();
+  });
+  window.addEventListener('mousemove', e=>{
+    if(splitDrag){
+      const r = cv.getBoundingClientRect();
+      const my = Math.max(0, Math.min(H, e.clientY - r.top));
+      state.vpRatio = Math.min(0.8, Math.max(0.2, (my - VGUT/2) / Math.max(1,(H - VGUT))));
+      fitView();
+      return;
+    }
+    if(dragging){
+      const dx = e.clientX-lastX, dy = e.clientY-lastY;
+      if(Math.abs(dx)+Math.abs(dy) > 1) moved = true;
+      const v = state.view[state.active];
+      v.cam.cx -= dx/v.cam.scale;
+      v.cam.cy -= dy/v.cam.scale;
+      lastX = e.clientX; lastY = e.clientY;
+      render();
+      return;
+    }
+    const r = cv.getBoundingClientRect();
+    if(e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom){
+      const key = paneAt(e.clientY - r.top), rc = viewRect(key), v = state.view[key];
+      const wx = v.cam.cx + (e.clientX-r.left - rc.x - rc.w/2)/v.cam.scale;
+      const wy = v.cam.cy + (e.clientY-r.top - rc.y - rc.h/2)/v.cam.scale;
+      $('stXY').textContent = fmt(wx,3) + ', ' + fmt(wy,3);
+      const gy = viewRect('plan').y + viewRect('plan').h;
+      const my = e.clientY - r.top;
+      cv.style.cursor = (my >= gy-3 && my <= gy+VGUT+3) ? 'row-resize' : 'default';
+    }
+  });
+  window.addEventListener('mouseup', ()=>{ dragging = false; splitDrag = false; document.body.style.cursor=''; cv.classList.remove('drag'); });
+  cv.addEventListener('dblclick', e=>{
+    const r = cv.getBoundingClientRect();
+    state.active = paneAt(e.clientY - r.top);
+    fitView();
+  });
+  window.addEventListener('keydown', e=>{
+    if((e.key==='f'||e.key==='F') && document.activeElement.tagName!=='INPUT') fitView();
+  });
+  $('tbFit').onclick = fitView;
+  $('tbIn').onclick = ()=>{ zoomAt(1.25); };
+  $('tbOut').onclick = ()=>{ zoomAt(1/1.25); };
+  $('tbGrid').onclick = ()=>{ state.grid = !state.grid; $('tbGrid').classList.toggle('on', state.grid); render(); };
+
+  /* 关于 */
+  $('btnAbout').onclick = ()=> $('mAbout').classList.add('show');
+  document.querySelectorAll('[data-close]').forEach(el=> el.onclick = ()=> $('mAbout').classList.remove('show'));
+  $('mAbout').onclick = e=>{ if(e.target === $('mAbout')) $('mAbout').classList.remove('show'); };
+
+  /* 面板拖拽 */
+  attachResizer($('rszL'), '--wL', 240, 460, 1);
+  attachResizer($('rszR'), '--wR', 260, 520, -1);
+  window.addEventListener('resize', ()=>{ resizeCanvas(); fitView(); });
+}
+function zoomAt(k){
+  const v = state.view[state.active];
+  v.cam.scale = Math.max(v.fit*0.15, Math.min(v.fit*40, v.cam.scale*k));
+  render();
+}
+function attachResizer(el, prop, min, max, dir){
+  el.addEventListener('mousedown', e=>{
+    e.preventDefault();
+    document.body.classList.add('resizing');
+    const startX = e.clientX;
+    const startW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 300;
+    const move = ev=>{
+      let w = startW + (ev.clientX - startX)*dir;
+      w = Math.max(min, Math.min(max, w));
+      document.documentElement.style.setProperty(prop, w+'px');
+      resizeCanvas(); fitView();
+    };
+    const up = ()=>{ document.body.classList.remove('resizing'); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+  });
+}
+
+function syncMode(){
+  const is3 = $('f_type').value === '3';
+  $('sec3').style.display = is3 ? '' : 'none';
+  $('rowW').style.display = is3 ? 'none' : '';
+  const cov = $('f_cover').value === '1';
+  $('rowTc').style.display = cov ? '' : 'none';
+  $('rowTe').style.display = cov ? '' : 'none';
+  /* 盖板搭接默认与墙厚相同（未手动修改时随墙厚联动） */
+  if(!$('f_e').dataset.manual) $('f_e').value = $('f_t').value;
+  syncBury();
+}
+
+/* 埋置方式联动：全埋时 D 自动 = H+T 并灰显；半埋时 D 可改 */
+function syncBury(){
+  const full = $('f_bury').value !== 'half';
+  $('rowHc').style.display = 'none';                 // v1.0.16：全埋不再有覆土厚度参数
+  $('rowDh').style.display = full ? '' : 'none';
+  const dEl = $('f_D');
+  dEl.disabled = full;
+  $('ctlD').classList.toggle('dis', full);
+  if(full){
+    const H = numv('f_H'), T = numv('f_T');
+    dEl.value = (H + T).toFixed(2);
+  }
+}
+
+/* ================= 启动 ================= */
+resizeCanvas();
+syncMode();
+bindUI();
+refresh(false);
+setTimeout(()=>{ resizeCanvas(); fitView(); }, 60);
+</script>
+</body>
+</html>
