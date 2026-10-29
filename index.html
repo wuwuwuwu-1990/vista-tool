@@ -584,6 +584,23 @@
         <span class="chip" style="--cb:rgba(14,116,144,.4);--cc:#5eead4;--cbg:rgba(14,116,144,.14)">v1.0.2</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">基坑CAD</span>
       </div>
+    </a>
+
+    <a class="card" href="cisterna.html" style="--g1:#0369a1;--g2:#0ea5e9;--gs:rgba(3,105,161,.5);--a1:#38bdf8;--a2:#7dd3fc;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 10h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.5 13.4c1-.8 2-.8 3 0s2 .8 3 0 2-.8 3 0 2 .8 2 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".85"/><path d="M6.5 16.6c1-.8 2-.8 3 0s2 .8 3 0 2-.8 3 0 2 .8 2 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>混凝土蓄水池CAD自动成图系统 Cisterna</h3>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">输入水池尺寸一键生成平面图＋1-1剖面图：四面墙厚/底板放大脚/素土夯实填充自动成图，墙厚净空总尺寸链齐全；埋置方式全埋或半埋，全埋埋深=墙高+底板厚；导出 PNG/DXF，DXF 采用天正 _TCH_ARCH 转角标注与 Tssdeng+HZTXT 字型。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(3,105,161,.45);--cc:#7dd3fc;--cbg:rgba(3,105,161,.14)">v1.0.17</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">蓄水池CAD</span>
+      </div>
+    </a>
+
     <a class="card" href="sgyd.html" style="--g1:#15803d;--g2:#16a34a;--gs:rgba(21,128,61,.5);--a1:#4ade80;--a2:#22c55e;">
       <div class="top">
         <div class="icon">
@@ -1041,6 +1058,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-10-30', t:'新增：混凝土蓄水池CAD自动成图系统 v1.0.17（输入尺寸一键出平面图＋1-1剖面图：四面墙厚、底板放大脚、素土夯实填充、墙厚＋净空尺寸链与总尺寸自动生成；埋置方式全埋／半埋，全埋埋深＝墙高＋底板厚；蓄水池名称可改，图名、内空文字与导出文件名三处联动；可导出 PNG/PDF/DXF，DXF 复刻天正 _TCH_ARCH 转角标注（绿色、建筑斜线箭头）与 Tssdeng+HZTXT 字型）'},
   {d:'2026-10-08', t:'升级：流程链路拓扑图 v1.0.3（① 多处连线自动重合——同一个节点同一条边上位置几乎相同的多根箭头会自动并成一束，成为「一条干线＋分支」，不再出现双线/毛刺；几像素的内偏差自动抹平，被手动拖开的仍保持独立；② 导出到 Word／PNG 的旁支节点文本框一律改为实线框，打印稿更正式（编辑器内仍保留虚线，便于区分主干与旁支）；③ 「箭头长度」默认值改为 -20，新图打开即更紧凑；④ 导出的 Word 里重合线段自动并成一条，图形数进一步减少）'},
   {d:'2026-10-08', t:'升级：流程链路拓扑图 v1.0.2（箭头连线可自由操控：① 拖动箭头即可整体移动位置，两端仍自动吸附节点、始终保持横平竖直，主干与旁支都支持；② 右键箭头弹出菜单，可一键删除连线；③ 新增「固定水平/垂直」——选中某条箭头即可锁定为左右或上下出入，不选中则一次性设置全部箭头，另有「自动方向」与「复位」；④ 新增「箭头长度」整体滑块，一次调整所有箭头线段长短（即节点间距）并即时重排；⑤ 箭头的位置与方向随本机保存 / 导出JSON / 云端方案一起持久化，重开或换电脑原样还原；顺带合并共线中间点，导出的矢量 Word 图形数由 65 个降到 27 个、体积减约 27%）'},
   {d:'2026-10-08', t:'新增：流程链路拓扑图 v1.0.1（文本线框＋单向箭头的流程图/链路拓扑工具：双击空白插入节点、悬停拖圆点连箭头、点连线中间劈开插入节点，节点可自由拖动；纵向链/横向链/蛇形分栏一键自动布局，序号按流程顺序自动编号；导入 Word 自动解析原图文本框与箭头、并识别旁支节点（虚线框不占主链序号）；导出真·文本框＋三角箭头的矢量 Word（A4 自动适配一页／原始尺寸两种），另可导出 PNG/JSON；☁️ 云端方案跨设备复用）'},
@@ -1118,7 +1136,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
