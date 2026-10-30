@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.21</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.22</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -181,7 +181,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.21</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.22</span></h1>
     </div>
   </div>
   <div class="top-actions">
@@ -339,7 +339,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <button class="btn block" id="e_png">导出 PNG</button>
         <button class="btn gold block" id="e_dxf">导出 DXF</button>
       </div>
-      <div class="hint">DXF 为标准 <b>AC1015（R2000）</b>格式，单位 mm，<b>图层分离为 16 个中文层</b>：池壁 / 底板 / 盖板 / 混凝土填充（AR-CONC）/ 素土填充（EARTH 45°）/ 地坪线 / 尺寸标注 / 剖切符号 / 材料引线 / 地坪文字 / 素土文字 / 内空文字 / 盖板文字 / 图名 / 图名下划线 / 图框（<code>$DWGCODEPAGE=ANSI_936</code>，CAD 图层面板直接显示中文），实体线宽 <b>ByLayer</b>，含完整 HEADER·TABLES·BLOCKS·OBJECTS 骨架与句柄表，可在 <b>AutoCAD 2026</b>、浩辰、中望、CAXA 中直接打开编辑。</div>
+      <div class="hint">DXF 为标准 <b>AC1015（R2000）</b>格式，单位 mm，<b>图层分离为 16 个中文层</b>：池壁 / 底板 / 盖板 / 混凝土填充（AR-CONC）/ 素土填充（EARTH 45°·比例 50）/ 地坪线 / 尺寸标注 / 剖切符号 / 材料引线 / 地坪文字 / 素土文字 / 内空文字 / 盖板文字 / 图名 / 图名下划线 / 图框（<code>$DWGCODEPAGE=ANSI_936</code>，CAD 图层面板直接显示中文），实体线宽 <b>ByLayer</b>，含完整 HEADER·TABLES·BLOCKS·OBJECTS 骨架与句柄表，可在 <b>AutoCAD 2026</b>、浩辰、中望、CAXA 中直接打开编辑。</div>
     </div>
 
     <div class="sec">
@@ -350,6 +350,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.22</b><b>素土填充图案 <code>EARTH</code> 的比例固定为 50</b>（HATCH 组码 <code>41 = 50</code>，等同于在 CAD 特性面板里把「比例」直接填 50）：一个图案周期 = 6.35 mm × 50 = <b>317.5 mm</b>，线条净距 2.38125 × 50 ≈ <b>119 mm</b>，与手工填充 EARTH / 比例 50 的观感逐点一致。至此素土比例与出图比例脱钩（不再随 1:50、1:100 缩放），出图比例变化时土纹间距按 CAD 常规行为等比变化。屏幕端同步按该固定周期绘制，45°/135° 斜向短划与 DXF 图案严格对位。</li>
         <li><b>v1.0.21</b>两处调整：① <b>平面图取消底板外露环带的混凝土填充</b>——底板在俯视图中被池壁遮挡、看不到混凝土体，原先填在墙外那一圈（放大脚环）容易误读，现改为只填<b>墙身带</b>，底板轮廓单独成框；② <b>素土夯实改用真正的填充图案 <code>EARTH</code></b>（AutoCAD acad.pat 内置「土」图案，0°/90° 两组短划、6 条线），并按 acad.pat <b>原样内联定义</b>；<b>图案角度 45°</b> ⇒ 呈 45°/135° 斜向土纹，与制图习惯一致；<b>41 图案缩放按图案基准周期分别计算</b>（素土 = 图纸 10.5 mm 一周期、线条净距约 3.9 mm），换比例出图间距不变。屏幕端同步为 45°/135° 斜向短划网格，与 DXF 图案同参数、跨区域连续对齐。</li>
         <li><b>v1.0.20</b>混凝土填充改为<b>真正的图案填充实体</b>：导出 DXF 不再用「斜线＋圆点」拼凑，而写 <b>HATCH 实体</b>，图案名 <code>AR-CONC</code>（AutoCAD 内置「混凝土 / 骨料 Aggregate」图案，13 条线分三向错落）；同时按 acad.pat <b>原样内联图案定义</b>（13 条线、各自的基点和短划序列），目标机即使没有同名 .pat 也能照定义绘制。<b>41 图案缩放 = 出图比例分母 / 127</b> ⇒ 图纸上恒为 1.8 mm 骨料周期（1:50 时即 90 mm 骨料），与在 CAD 里对该尺寸构件手动填充 AR-CONC 的观感一致。平面图的<b>放大脚环</b>与<b>墙身带</b>、剖面图的<b>池壁 / 底板 / 盖板</b>各成独立 HATCH，填充单元一律取凸四边形，不设岛边界——避免奇偶填充规则把池内重新填回；轮廓线仍单独绘制，纹理不压结构线。屏幕端同步为该图案的骨料纹理（三向骨料短划、跨墙段连续对齐）。</li>
         <li><b>v1.0.19</b>导出 DXF 的<b>图层体系重构为 16 个纯中文图层</b>，一图一开关：<b>几何 6 层</b>池壁/底板/盖板/混凝土填充/素土填充/地坪线；<b>标注符号 3 层</b>尺寸标注（绿）/剖切符号（红）/材料引线（黄）；<b>说明文字拆 4 层</b>地坪文字/素土文字/内空文字/盖板文字（均跟随标注用绿色）；<b>图名拆 2 层</b>图名 + 图名下划线；另预留图框层。层名以 GBK 字节写入并置 <code>$DWGCODEPAGE=ANSI_936</code>，CAD 图层面板直接显示中文；实体线宽改为 <b>ByLayer</b>，由图层统一控制（0.35 / 0.25 / 0.18 / 0.13 / 0.09）。</li>
@@ -386,7 +387,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.21</span>
+          <span class="ver">v1.0.22</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -917,11 +918,13 @@ function buildCmds(g, o){
   const wallL = [{x:xL0,y:yTop},{x:xL1,y:yTop},{x:xL1,y:ySlabTop},{x:xL0,y:ySlabTop}];
   const wallR = [{x:xR1,y:yTop},{x:xR0,y:yTop},{x:xR0,y:ySlabTop},{x:xR1,y:ySlabTop}];
 
-  /* 素土夯实（v1.0.21）：改用真正的填充图案 EARTH（AutoCAD acad.pat 内置「土」图案，
-     0°/90° 两组短划网格），整体旋转 45° ⇒ 呈 45°/135° 斜向土纹，与成图习惯一致。
-     soilSp = 一个图案周期（图纸 10.5 mm，内含 3 条线 ⇒ 线条净距约 3.9 mm 图纸）。 */
+  /* 素土夯实：真正的填充图案 EARTH（AutoCAD acad.pat 内置「土」图案，0°/90° 两组短划网格），
+     图案角度 45° ⇒ 呈 45°/135° 斜向土纹，与成图习惯一致。
+     图案比例固定为 50（即 HATCH 组码 41 = 50，与在 CAD 特性面板里把「比例」填 50 完全相同），
+     一个图案周期 = 6.35 mm × 50 = 317.5 mm（模型）⇒ 世界 0.3175 m；线条净距 2.38125×50 ≈ 119 mm。
+     固定比例即与出图比例脱钩，与手工填充 EARTH/50 的观感逐点一致。 */
   const sL = slabL - 26*u, sR = slabR + 26*u, sBot = ySlabBot + 12*u;
-  const soilSp = 10.5*u;
+  const soilSp = 0.3175;                 // 世界米：EARTH 比例 50 ⇒ 6.35×50 = 317.5 mm
   if(o.soil){
     /* 土体填充一直铺到池壁外表面：地坪以下、墙面与底板外缘之间为 L 形区域 */
     const regL = [{x:xL0,y:yGround},{x:xL0,y:ySlabTop},{x:slabL,y:ySlabTop},
@@ -1290,7 +1293,7 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
     if(c.t==='hatch'){
       /* 图案填充（v1.0.20 起）：屏幕纹理与 DXF 图案一一对应 ——
          AR-CONC 混凝土：50°/355°/100° 三向错落骨料短划（图纸周期 1.8 mm）；
-         EARTH  素土   ：45°/135° 斜向短划网格（图案角度 45°，图纸周期 10.5 mm）。
+         EARTH  素土   ：45°/135° 斜向短划网格（图案角度 45°，比例固定 50 ⇒ 周期 317.5 mm）。
          sp = 一个图案周期（世界米）× 当前缩放 = 屏幕像素；图案以屏幕原点对齐，
          故相邻区域（左右土体、底板下土体）的纹理连续、不接缝。 */
       const sp = (c.sp || 0.09)*cam.scale;
@@ -1577,7 +1580,7 @@ const PAT_ARCONC = [
 ];
 const PAT_PERIOD = 228.6;      // scale=1 时一个骨料周期的基准长度（mm）
 
-/* ===== 素土图案（v1.0.21）：acad.pat 内置 EARTH（土）原样定义 =====
+/* ===== 素土图案：acad.pat 内置 EARTH（土）原样定义 =====
    0° 三条 + 90° 三条，offset 6.35 ⇒ scale=1 时网格 6.35×6.35 mm、线条净距 2.38125 mm；
    配合 52 图案角度 45° 旋转后即为 45°/135° 斜向土纹（制图常用取向）。 */
 const PAT_EARTH = [
@@ -1589,7 +1592,8 @@ const PAT_EARTH = [
   [90, 5.55625, 5.55625, -6.35, 6.35, [6.35, -6.35]]
 ];
 
-/* 图案登记表：[基准周期 mm, 定义线] —— 41 图案缩放 = (目标图纸周期 u换算后的模型 mm) / 基准周期 */
+/* 图案登记表：[基准周期 mm, 定义线] —— 41 图案缩放 = 目标模型周期(mm) / 基准周期(mm)；
+   混凝土按出图比例分母换算（图面间距恒定），素土按固定比例 50 换算（= 317.5 / 6.35） */
 const PATPAT = {
   'AR-CONC': { base: PAT_PERIOD, lines: PAT_ARCONC },
   'EARTH':   { base: 6.35,       lines: PAT_EARTH  }
