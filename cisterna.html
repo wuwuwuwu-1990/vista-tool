@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.23</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.24</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -181,7 +181,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.23</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.24</span></h1>
     </div>
   </div>
   <div class="top-actions">
@@ -350,6 +350,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.24</b><b>不设盖板（敞口）时取消敞口处的那条线</b>：原先全埋且敞口时，会沿池顶在左右池壁之间补一段<b>虚线的室外地坪线</b>，视觉上像把开口封住了；现改为<b>两侧地坪线终止于池壁外表面、中间留空</b>，敞口一目了然。有盖板时地坪线仍整条实线连通（盖板确实把敞口封住，池顶以上是覆土顶面），不影响覆土带填充与上方尺寸链。</li>
         <li><b>v1.0.23</b><b>导出 DXF 增加填充提示文字</b>（复刻固维挡墙断面CAD自动成图系统同款做法）：AutoCAD / 天正对「预定义图案 + 内联图案定义」的 HATCH，首次打开时常常不主动计算填充（图形看着像空白），需在特性面板把<b>「比例」改一次再改回</b>，触发一次重算才显示 —— 这是 CAD 的惰性计算行为，不是文件错误。故在整张图<b>最上方、水平居中</b>（平面图之上 15 mm 图纸处）写一行黄色提示：<b>「提示：CAD 未自动计算填充，若填充显示不正确请修改比例再改回」</b>；新增中文图层<b>「提示文字」</b>（黄色 2 号，可单独开关或删除），字高按图纸 4 mm 换算、超图宽 92% 时自动收小，随 1:25～1:200 各档出图均不溢出且清晰可读。</li>
         <li><b>v1.0.22</b><b>素土填充图案 <code>EARTH</code> 的比例固定为 50</b>（HATCH 组码 <code>41 = 50</code>，等同于在 CAD 特性面板里把「比例」直接填 50）：一个图案周期 = 6.35 mm × 50 = <b>317.5 mm</b>，线条净距 2.38125 × 50 ≈ <b>119 mm</b>，与手工填充 EARTH / 比例 50 的观感逐点一致。至此素土比例与出图比例脱钩（不再随 1:50、1:100 缩放），出图比例变化时土纹间距按 CAD 常规行为等比变化。屏幕端同步按该固定周期绘制，45°/135° 斜向短划与 DXF 图案严格对位。</li>
         <li><b>v1.0.21</b>两处调整：① <b>平面图取消底板外露环带的混凝土填充</b>——底板在俯视图中被池壁遮挡、看不到混凝土体，原先填在墙外那一圈（放大脚环）容易误读，现改为只填<b>墙身带</b>，底板轮廓单独成框；② <b>素土夯实改用真正的填充图案 <code>EARTH</code></b>（AutoCAD acad.pat 内置「土」图案，0°/90° 两组短划、6 条线），并按 acad.pat <b>原样内联定义</b>；<b>图案角度 45°</b> ⇒ 呈 45°/135° 斜向土纹，与制图习惯一致；<b>41 图案缩放按图案基准周期分别计算</b>（素土 = 图纸 10.5 mm 一周期、线条净距约 3.9 mm），换比例出图间距不变。屏幕端同步为 45°/135° 斜向短划网格，与 DXF 图案同参数、跨区域连续对齐。</li>
@@ -388,7 +389,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.23</span>
+          <span class="ver">v1.0.24</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -943,13 +944,14 @@ function buildCmds(g, o){
       if(!reg || reg.length < 3 || Math.abs(polyArea(reg)) < 1e-9) return;
       sec.push({t:'hatch', pts:reg, sp:soilSp, layer:C.SOIL, pat:'EARTH', patAng:45});
     });
-    /* 室外地坪线：两侧各一段，与池壁外表面相接；全埋时池顶以上为覆土顶面，实线连通 */
+    /* 室外地坪线：两侧各一段，与池壁外表面相接。
+       有盖板且全埋时，池顶以上为覆土顶面，地坪线整条实线连通（盖板把敞口封住了）；
+       不设盖板（敞口）时，敞口处不再画线（v1.0.24）—— 两侧地坪线终止于池壁外表面，
+       中间留空即为"敞口"，画一条跨敞口的线会被读成盖着板或被土封住。 */
     sec.push({t:'line', p1:{x:sL,y:yGround}, p2:{x:xL0,y:yGround}, layer:C.GLINE, bold:true});
     sec.push({t:'line', p1:{x:xR0,y:yGround}, p2:{x:sR,y:yGround}, layer:C.GLINE, bold:true});
     if(isBuried && g.hasCover)
       sec.push({t:'line', p1:{x:xL0,y:yGround}, p2:{x:xR0,y:yGround}, layer:C.GLINE, bold:true});
-    else if(isBuried)
-      sec.push({t:'line', p1:{x:xL0,y:yGround}, p2:{x:xR0,y:yGround}, layer:C.GLINE, dash:true});
     sec.push({t:'line', p1:{x:sL,y:yGround}, p2:{x:sL,y:sBot}, layer:C.SOIL});
     sec.push({t:'line', p1:{x:sR,y:yGround}, p2:{x:sR,y:sBot}, layer:C.SOIL});
   }
