@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.22</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.23</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -181,7 +181,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.22</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.23</span></h1>
     </div>
   </div>
   <div class="top-actions">
@@ -339,7 +339,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <button class="btn block" id="e_png">导出 PNG</button>
         <button class="btn gold block" id="e_dxf">导出 DXF</button>
       </div>
-      <div class="hint">DXF 为标准 <b>AC1015（R2000）</b>格式，单位 mm，<b>图层分离为 16 个中文层</b>：池壁 / 底板 / 盖板 / 混凝土填充（AR-CONC）/ 素土填充（EARTH 45°·比例 50）/ 地坪线 / 尺寸标注 / 剖切符号 / 材料引线 / 地坪文字 / 素土文字 / 内空文字 / 盖板文字 / 图名 / 图名下划线 / 图框（<code>$DWGCODEPAGE=ANSI_936</code>，CAD 图层面板直接显示中文），实体线宽 <b>ByLayer</b>，含完整 HEADER·TABLES·BLOCKS·OBJECTS 骨架与句柄表，可在 <b>AutoCAD 2026</b>、浩辰、中望、CAXA 中直接打开编辑。</div>
+      <div class="hint">DXF 为标准 <b>AC1015（R2000）</b>格式，单位 mm，<b>图层分离为 17 个中文层</b>：池壁 / 底板 / 盖板 / 混凝土填充（AR-CONC）/ 素土填充（EARTH 45°·比例 50）/ 地坪线 / 尺寸标注 / 剖切符号 / 材料引线 / 地坪文字 / 素土文字 / 内空文字 / 盖板文字 / 图名 / 图名下划线 / 图框 / 提示文字（黄）（<code>$DWGCODEPAGE=ANSI_936</code>，CAD 图层面板直接显示中文），实体线宽 <b>ByLayer</b>；<b>图面最上方附加一行黄色提示文字</b>「CAD 未自动计算填充，若填充显示不正确请修改比例再改回」，含完整 HEADER·TABLES·BLOCKS·OBJECTS 骨架与句柄表，可在 <b>AutoCAD 2026</b>、浩辰、中望、CAXA 中直接打开编辑。</div>
     </div>
 
     <div class="sec">
@@ -350,6 +350,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.23</b><b>导出 DXF 增加填充提示文字</b>（复刻固维挡墙断面CAD自动成图系统同款做法）：AutoCAD / 天正对「预定义图案 + 内联图案定义」的 HATCH，首次打开时常常不主动计算填充（图形看着像空白），需在特性面板把<b>「比例」改一次再改回</b>，触发一次重算才显示 —— 这是 CAD 的惰性计算行为，不是文件错误。故在整张图<b>最上方、水平居中</b>（平面图之上 15 mm 图纸处）写一行黄色提示：<b>「提示：CAD 未自动计算填充，若填充显示不正确请修改比例再改回」</b>；新增中文图层<b>「提示文字」</b>（黄色 2 号，可单独开关或删除），字高按图纸 4 mm 换算、超图宽 92% 时自动收小，随 1:25～1:200 各档出图均不溢出且清晰可读。</li>
         <li><b>v1.0.22</b><b>素土填充图案 <code>EARTH</code> 的比例固定为 50</b>（HATCH 组码 <code>41 = 50</code>，等同于在 CAD 特性面板里把「比例」直接填 50）：一个图案周期 = 6.35 mm × 50 = <b>317.5 mm</b>，线条净距 2.38125 × 50 ≈ <b>119 mm</b>，与手工填充 EARTH / 比例 50 的观感逐点一致。至此素土比例与出图比例脱钩（不再随 1:50、1:100 缩放），出图比例变化时土纹间距按 CAD 常规行为等比变化。屏幕端同步按该固定周期绘制，45°/135° 斜向短划与 DXF 图案严格对位。</li>
         <li><b>v1.0.21</b>两处调整：① <b>平面图取消底板外露环带的混凝土填充</b>——底板在俯视图中被池壁遮挡、看不到混凝土体，原先填在墙外那一圈（放大脚环）容易误读，现改为只填<b>墙身带</b>，底板轮廓单独成框；② <b>素土夯实改用真正的填充图案 <code>EARTH</code></b>（AutoCAD acad.pat 内置「土」图案，0°/90° 两组短划、6 条线），并按 acad.pat <b>原样内联定义</b>；<b>图案角度 45°</b> ⇒ 呈 45°/135° 斜向土纹，与制图习惯一致；<b>41 图案缩放按图案基准周期分别计算</b>（素土 = 图纸 10.5 mm 一周期、线条净距约 3.9 mm），换比例出图间距不变。屏幕端同步为 45°/135° 斜向短划网格，与 DXF 图案同参数、跨区域连续对齐。</li>
         <li><b>v1.0.20</b>混凝土填充改为<b>真正的图案填充实体</b>：导出 DXF 不再用「斜线＋圆点」拼凑，而写 <b>HATCH 实体</b>，图案名 <code>AR-CONC</code>（AutoCAD 内置「混凝土 / 骨料 Aggregate」图案，13 条线分三向错落）；同时按 acad.pat <b>原样内联图案定义</b>（13 条线、各自的基点和短划序列），目标机即使没有同名 .pat 也能照定义绘制。<b>41 图案缩放 = 出图比例分母 / 127</b> ⇒ 图纸上恒为 1.8 mm 骨料周期（1:50 时即 90 mm 骨料），与在 CAD 里对该尺寸构件手动填充 AR-CONC 的观感一致。平面图的<b>放大脚环</b>与<b>墙身带</b>、剖面图的<b>池壁 / 底板 / 盖板</b>各成独立 HATCH，填充单元一律取凸四边形，不设岛边界——避免奇偶填充规则把池内重新填回；轮廓线仍单独绘制，纹理不压结构线。屏幕端同步为该图案的骨料纹理（三向骨料短划、跨墙段连续对齐）。</li>
@@ -387,7 +388,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.22</span>
+          <span class="ver">v1.0.23</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -1621,7 +1622,8 @@ const LAYERS = [
   ['盖板文字',   'B8C7B0E5CEC4D7D6',     3, 'Continuous', 18],  // 盖板 h=
   ['图名',      'CDBCC3FB',             3, 'Continuous', 35],  // 图名文字
   ['图名下划线', 'CDBCC3FBCFC2BBAECFDF', 3, 'Continuous', 35],  // 图名双下划线
-  ['图框',      'CDBCBFF2',             7, 'Continuous', -3]   // 预留
+  ['图框',      'CDBCBFF2',             7, 'Continuous', -3],  // 预留
+  ['提示文字',   'CCE1CABECEC4D7D6',     2, 'Continuous', 25]   // 导出提示（黄色，CAD 未自动计算填充）
 ];
 /* hex 串 → Latin-1 字符串（每个字符即一个字节，最终按字节写入 DXF） */
 const gbkStr = h => h.match(/../g).map(x => String.fromCharCode(parseInt(x, 16))).join('');
@@ -1799,9 +1801,37 @@ function dxfFromCmds(cmds, denom){
     }
   });
 
+  /* 导出提示文字（v1.0.23，固维挡墙断面CAD自动成图系统同款）：
+     AutoCAD / 天正对「预定义图案 + 内联图案定义」的 HATCH，首次打开时往往不主动
+     计算填充（图形看似空白），必须在特性面板把「比例」改一次再改回，触发一次重算
+     才会显示。这不是文件错误，是 CAD 的惰性计算行为，故在整张图最上方（平面图之上
+     15 mm 图纸处、水平居中）写一行黄色提示，提醒使用者手动触发。
+     字高按图纸 4 mm 换算，超出图宽 92% 时按比例收小，保证不同出图比例下都不溢出。 */
+  {
+    const NOTE = '提示：CAD 未自动计算填充，若填充显示不正确请修改比例再改回';
+    const sheetW = (bx1 - bx0) || 1000;
+    const dn = Number(DSC);
+    let hmm = 4.0 * dn;                                  // 字高：图纸 4 mm
+    const est = NOTE.length * hmm * 0.75;                // 中文按「字高×0.75」估宽，保守
+    if(est > sheetW*0.92) hmm = Math.max(20, Math.floor(sheetW*0.92/(NOTE.length*0.75)));
+    const cx = (bx0 + bx1) / 2;
+    const ty = ((by1 > -1e8 ? by1 : 0) + 15*dn);         // 图顶之上 15 mm 图纸（DXF 向上为正）
+    tk(cx, ty); tk(cx, ty + hmm);
+    e(0,'TEXT'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity');
+    e(8, ln('提示文字')); e(62,'2');                      // 图层「提示文字」，黄色（色号 2）
+    e(100,'AcDbText');
+    e(10,NUM(cx)); e(20,NUM(ty)); e(30,'0.0');            // 基线插入点
+    e(40,NUM(hmm));                                      // 字高
+    e(1, U(NOTE));                                       // 内容（中文走 \U+XXXX 转义）
+    e(50,'0.0'); e(41,'0.7'); e(51,'0.0'); e(7,'Standard');
+    e(71,'0'); e(72,'1');                                // 水平居中
+    e(11,NUM(cx)); e(21,NUM(ty)); e(31,'0.0');
+    e(100,'AcDbText');
+  }
+
   const ok = bx0 < 1e9;
   const ex0 = ok ? bx0 : 0, ey0 = ok ? by0 : 0, ex1 = ok ? bx1 : 1000, ey1 = ok ? by1 : 1000;
-  /* 图层表记录：0 层与 Defpoints 沿用骨架原句柄 27 / 28，其余 16 个中文层从 A0 顺延
+  /* 图层表记录：0 层与 Defpoints 沿用骨架原句柄 27 / 28，其余 17 个中文层从 A0 顺延
      （骨架原最大句柄 93，动态实体从 0x101 起，三者互不冲突） */
   const layerRec = (h, name, col, lt, lw, extra) => [
     '  0','LAYER',
