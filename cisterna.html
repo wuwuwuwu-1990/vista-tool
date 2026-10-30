@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.19</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.20</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -181,7 +181,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.19</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.20</span></h1>
     </div>
   </div>
   <div class="top-actions">
@@ -350,6 +350,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.20</b>混凝土填充改为<b>真正的图案填充实体</b>：导出 DXF 不再用「斜线＋圆点」拼凑，而写 <b>HATCH 实体</b>，图案名 <code>AR-CONC</code>（AutoCAD 内置「混凝土 / 骨料 Aggregate」图案，13 条线分三向错落）；同时按 acad.pat <b>原样内联图案定义</b>（13 条线、各自的基点和短划序列），目标机即使没有同名 .pat 也能照定义绘制。<b>41 图案缩放 = 出图比例分母 / 127</b> ⇒ 图纸上恒为 1.8 mm 骨料周期（1:50 时即 90 mm 骨料），与在 CAD 里对该尺寸构件手动填充 AR-CONC 的观感一致。平面图的<b>放大脚环</b>与<b>墙身带</b>、剖面图的<b>池壁 / 底板 / 盖板</b>各成独立 HATCH，填充单元一律取凸四边形，不设岛边界——避免奇偶填充规则把池内重新填回；轮廓线仍单独绘制，纹理不压结构线。屏幕端同步为该图案的骨料纹理（三向骨料短划、跨墙段连续对齐）。</li>
         <li><b>v1.0.19</b>导出 DXF 的<b>图层体系重构为 16 个纯中文图层</b>，一图一开关：<b>几何 6 层</b>池壁/底板/盖板/混凝土填充/素土填充/地坪线；<b>标注符号 3 层</b>尺寸标注（绿）/剖切符号（红）/材料引线（黄）；<b>说明文字拆 4 层</b>地坪文字/素土文字/内空文字/盖板文字（均跟随标注用绿色）；<b>图名拆 2 层</b>图名 + 图名下划线；另预留图框层。层名以 GBK 字节写入并置 <code>$DWGCODEPAGE=ANSI_936</code>，CAD 图层面板直接显示中文；实体线宽改为 <b>ByLayer</b>，由图层统一控制（0.35 / 0.25 / 0.18 / 0.13 / 0.09）。</li>
         <li><b>v1.0.18</b>剖面图<b>「（内空）」文字改为取名称末尾的构筑物名</b>（不再只看 XXX 之后的字）：鱼水村罗家土取水口 → 取水口（内空）、鱼水村罗家土蓄水池 → 蓄水池（内空）、鱼水村罗家土水池 → 水池（内空），以此类推；末尾识别不出时兜底为剥掉 XXX 后的文字，仍为空则回退「水池」。</li>
         <li><b>v1.0.17</b><b>导出 DXF 的尺寸标注与文字样式全面复刻固维挡墙断面CAD自动成图系统</b>：① 标注改为<b>真正的转角标注实体</b>（DIMENSION，类型 70=32），标注样式 <code>_TCH_ARCH</code>——建筑斜线箭头、文字置顶、界线偏移 3.0 / 超出 2.5、字高 3.5，标注全局比例 = 出图比例分母（1:50 → 50）；② 标注<b>颜色改为绿色</b>（色号 3，与固维 PUB_DIM 一致），DIM 图层同步改绿、屏幕标注同步改绿；③ 文字样式改为 <code>Standard</code>：SHX 字体 <code>Tssdeng.shx</code>、大字体 <code>HZTXT.SHX</code>、宽度因子 0.7，并新增 <code>_TCH_DIM</code> 专供标注文字。</li>
@@ -384,7 +385,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.19</span>
+          <span class="ver">v1.0.20</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -598,6 +599,17 @@ function wallQuads(path, closed, t){
 }
 
 
+/* 两圈顶点一一对应的轮廓之间，按段组成环带四边形（放大脚环、墙体带的混凝土填充单元）。
+   offsetPoly 保序，故 slab / footprint、内外偏移线的第 i 个顶点天然对应，逐段成凸四边形。 */
+function bandQuads(outer, inner){
+  const qs = [], n = Math.min(outer.length, inner.length);
+  for(let i=0;i<n;i++){
+    const j = (i+1)%n;
+    qs.push([outer[i], outer[j], inner[j], inner[i]]);
+  }
+  return qs;
+}
+
 /* 逐四边形生成混凝土填充（含骨料点）；bounds 为实际绘出的轮廓线，用于把圆点挡在线内 */
 function hatchQuads(list, quads, hs, ds, dr, inset, layer, bounds){
   quads.forEach(q=>{
@@ -657,6 +669,7 @@ function textBox(c){
 }
 function bboxCmds(list){
   return bboxOf(list.filter(c=>c.t==='poly').map(c=>c.pts)
+    .concat(list.filter(c=>c.t==='hatch').map(c=>c.pts))
     .concat(list.filter(c=>c.t==='line').map(c=>[c.p1,c.p2]))
     .concat(list.filter(c=>c.t==='dot').map(c=>[{x:c.x,y:c.y}]))
     .concat(list.filter(c=>c.t==='text').map(c=>textBox(c)))
@@ -666,6 +679,7 @@ function bboxCmds(list){
 function mirrorX(list){
   return list.map(c=>{
     if(c.t==='poly') return {...c, pts:c.pts.map(p=>({x:-p.x, y:p.y}))};
+    if(c.t==='hatch') return {...c, pts:c.pts.map(p=>({x:-p.x, y:p.y}))};
     if(c.t==='line') return {...c, p1:{x:-c.p1.x, y:c.p1.y}, p2:{x:-c.p2.x, y:c.p2.y}};
     if(c.t==='text') return {...c, x:-c.x,
       align: c.align==='left' ? 'right' : (c.align==='right' ? 'left' : c.align)};
@@ -812,38 +826,36 @@ function buildCmds(g, o){
   const T3 = 3.2*u, T35 = 3.4*u, T4 = 4.2*u;
   const TDIM = 3.5*u;                 // 尺寸数字字高（固维样式：3.5 图纸 mm）
   const T5 = 5.0*u;                    // 图名字高（图纸 5 mm，随比例放大）
-  /* 混凝土图案随墙厚自适应：保证圆点在框线内且密度适中 */
-  const bandMm = t/u;                                         // 图上墙厚（图纸毫米）
-  const hMm = Math.max(1.4, Math.min(3.4, bandMm/2.5));        // 斜线间距
-  const dMm = Math.max(0.8, Math.min(2.1, bandMm/1.4));        // 骨料点间距
-  const rMm = Math.min(0.34, hMm*0.20);                        // 骨料点半径
-  const HS = hMm*u, DS = dMm*u;
-  const DR = rMm*u, INS = DR*1.7;                              // INS：圆点离轮廓线净距
+  /* 混凝土填充图案（v1.0.20）：改用 CAD 预定义图案 AR-CONC（混凝土 / 骨料），
+     间距由图面比例统一决定——图纸上恒为 1.5 mm 一个骨料周期，不再随墙厚自适应；
+     墙薄时自然只容下一两行骨料，与 CAD 里手动填充的效果一致。 */
 
   /* ---------- 平面图 ---------- */
   const plan = [];
   const slabBB = bboxOf([g.slab]);
   const wallBB = bboxOf([g.outer, g.inner]);
+  const hsp = 1.8*u;                  // 混凝土图案（AR-CONC）一个骨料周期 = 图纸 1.8 mm
 
-  plan.push({t:'poly', pts:g.slab, closed:true, layer:C.SLAB});
+  /* 混凝土填充统一改为真正的 HATCH 图案实体（v1.0.20）：先出填充、后出轮廓，纹理不压轮廓线。
+     填充单元一律取凸四边形（墙段四边形 / 环带四边形），CAD 端逐块写 HATCH ——
+     无岛边界，不会被奇偶填充规则把池内重新填回。 */
   if(o.hatch){
     /* 平面图上底板只填“放大脚”一环：墙身带与池内（被池壁/盖板遮挡）都不填 */
-    const outerP = g.type==='4' ? g.outer : g.wallPoly;
-    const innerP = g.type==='4' ? g.inner : g.innerPlan;
-    const keep = pt => !pointInPoly(pt, outerP) && !pointInPoly(pt, innerP);
-    hatchSegs(g.slab, 45, HS*2.4, null).forEach(sg=>{
-      clipSeg({x:sg[0][0],y:sg[0][1]}, {x:sg[1][0],y:sg[1][1]},
-        [g.slab, outerP], keep).forEach(pr=>
-        plan.push({t:'line', p1:pr[0], p2:pr[1], layer:C.HATCH}));
+    bandQuads(g.slab, g.footprint).forEach(q=>{
+      if(Math.abs(polyArea(q)) < 1e-9) return;
+      plan.push({t:'hatch', pts:q, sp:hsp, layer:C.HATCH});
+    });
+    wallQuads(g.path, g.type==='4', t).forEach(q=>{
+      if(Math.abs(polyArea(q)) < 1e-9) return;
+      plan.push({t:'hatch', pts:q, sp:hsp, layer:C.HATCH});
     });
   }
+  plan.push({t:'poly', pts:g.slab, closed:true, layer:C.SLAB});
   if(g.type==='4'){
     plan.push({t:'poly', pts:g.outer, closed:true, layer:C.WALL});
     plan.push({t:'poly', pts:g.inner, closed:true, layer:C.WALL});
-    if(o.hatch) hatchQuads(plan, wallQuads(g.path, true, t), HS, DS, DR, INS, C.HATCH, [g.outer, g.inner]);
   }else{
     plan.push({t:'poly', pts:g.wallPoly, closed:true, layer:C.WALL});
-    if(o.hatch) hatchQuads(plan, wallQuads(g.path, false, t), HS, DS, DR, INS, C.HATCH, [g.wallPoly]);
   }
 
   /* 盖板：平面以虚线示隐蔽轮廓 */
@@ -939,24 +951,16 @@ function buildCmds(g, o){
   if(g.hasCover){
     const covPoly = [{x:xL1-g.e,y:yTop},{x:xR1+g.e,y:yTop},
                      {x:xR1+g.e,y:yTop+g.Tc},{x:xL1-g.e,y:yTop+g.Tc}];
+    if(o.hatch) sec.push({t:'hatch', pts:covPoly, sp:hsp, layer:C.HATCH});
     sec.push({t:'poly', pts:covPoly, closed:true, layer:C.COVER});
-    if(o.hatch){
-      hatchSegs(covPoly, 45, HS, null).forEach(sg=>
-        sec.push({t:'line', p1:{x:sg[0][0], y:sg[0][1]}, p2:{x:sg[1][0], y:sg[1][1]}, layer:C.HATCH}));
-      dotsInPoly(covPoly, DS, INS).forEach(pt=> sec.push({t:'dot', x:pt.x, y:pt.y, r:DR, layer:C.HATCH}));
-    }
     if(o.note) sec.push({t:'text', x:(xL1+xR1)/2,
                 y: isBuried ? yTop + g.Tc + T3*1.15 : yTop - 4.5*u,
                 s:'盖板 h='+mm(g.Tc), h:T3, align:'center', layer:C.TXCOV, bg:isBuried});
   }
 
   [slabShape, wallL, wallR].forEach(poly=>{
+    if(o.hatch) sec.push({t:'hatch', pts:poly, sp:hsp, layer:C.HATCH});
     sec.push({t:'poly', pts:poly, closed:true, layer:C.WALL});
-    if(o.hatch){
-      hatchSegs(poly, 45, HS, null).forEach(s=>
-        sec.push({t:'line', p1:{x:s[0][0],y:s[0][1]}, p2:{x:s[1][0],y:s[1][1]}, layer:C.HATCH}));
-      dotsInPoly(poly, DS, INS).forEach(p=> sec.push({t:'dot', x:p.x, y:p.y, r:DR, layer:C.HATCH}));
-    }
   });
 
   if(o.note){
@@ -1015,6 +1019,7 @@ function buildCmds(g, o){
   /* ---------- 交付：平面 / 剖面各自独立坐标系（局部坐标），由两个视口分别显示 ---------- */
   const offset = (list, dx, dy) => list.map(c=>{
     if(c.t==='poly') return {...c, pts:c.pts.map(p=>({x:p.x+dx, y:p.y+dy}))};
+    if(c.t==='hatch') return {...c, pts:c.pts.map(p=>({x:p.x+dx, y:p.y+dy}))};
     if(c.t==='line') return {...c, p1:{x:c.p1.x+dx,y:c.p1.y+dy}, p2:{x:c.p2.x+dx,y:c.p2.y+dy}};
     if(c.t==='text'||c.t==='dot') return {...c, x:c.x+dx, y:c.y+dy};
     if(c.t==='arc') return {...c, c:{x:c.c.x+dx, y:c.c.y+dy}};
@@ -1237,7 +1242,7 @@ const cv = $('cv'), ctx = cv.getContext('2d');
    剖切符号红、材料引线黄；土建轮廓仍用深灰蓝系，保证打印层次。 */
 const COL = {
   '池壁':'#2b3a4f', '底板':'#4a5a70', '地坪线':'#1f2a38',
-  '混凝土填充':'#8b98aa', '素土填充':'#9d8a58', '盖板':'#6b5b95',
+  '混凝土填充':'#77879b', '素土填充':'#9d8a58', '盖板':'#6b5b95',
   '尺寸标注':'#12a33a', '剖切符号':'#d0342c', '材料引线':'#b8730f',
   '地坪文字':'#12a33a', '素土文字':'#12a33a', '内空文字':'#12a33a', '盖板文字':'#12a33a',
   '图名':'#16202e', '图名下划线':'#16202e', '图框':'#243447'
@@ -1279,6 +1284,44 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
   const hatched = new Set(['混凝土填充','素土填充']);
   list.forEach(c=>{
     const col = COL[c.layer] || '#16202e';
+    if(c.t==='hatch'){
+      /* 混凝土图案填充（v1.0.20）：与 CAD 端 AR-CONC 同一套图案——三向错落的骨料短划。
+         sp = 一个骨料周期（世界米）= 图纸 1.8 mm，与 DXF 里 41=比例分母/127 严格对齐。
+         图案以屏幕原点为基准对齐，故相邻墙段/环带之间的纹理连续、不接缝。
+         屏幕上的短划比例（22%）比 .pat 定义（8%）略长，纯为像素下可辨，方向仍取
+         AR-CONC 的三条主方向 50° / 355° / 100°。 */
+      const sp = (c.sp || 0.09)*cam.scale;
+      if(sp < 2.0) return;                        // 缩得太小，纹理已不可辨，直接不画（省渲染）
+      const pts = c.pts.map(p=>({x:X(p.x), y:Y(p.y)}));
+      let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+      pts.forEach(p=>{ if(p.x<x0)x0=p.x; if(p.y<y0)y0=p.y; if(p.x>x1)x1=p.x; if(p.y>y1)y1=p.y; });
+      const diag = Math.hypot(x1-x0, y1-y0) + sp;
+      c2d.save();
+      c2d.beginPath();
+      pts.forEach((p,i)=> i ? c2d.lineTo(p.x,p.y) : c2d.moveTo(p.x,p.y));
+      c2d.closePath();
+      c2d.clip();
+      c2d.strokeStyle = col;
+      c2d.globalAlpha = .95;
+      c2d.lineWidth = Math.max(0.75, sp*0.075);
+      c2d.setLineDash([sp*0.22, sp*0.78]);
+      [50, 355, 100].forEach((deg, k)=>{
+        const a = deg*DEG, dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx;
+        let lo = 1e9, hi = -1e9;
+        pts.forEach(p=>{ const t = p.x*nx + p.y*ny; if(t<lo)lo=t; if(t>hi)hi=t; });
+        c2d.lineDashOffset = -k*sp*0.37;         // 三组错相位，模拟骨料随机散布
+        c2d.beginPath();
+        for(let t = Math.ceil(lo/sp)*sp; t <= hi; t += sp){
+          const bx = t*nx, by = t*ny;
+          c2d.moveTo(bx - dx*diag, by - dy*diag);
+          c2d.lineTo(bx + dx*diag, by + dy*diag);
+        }
+        c2d.stroke();
+      });
+      c2d.setLineDash([]); c2d.globalAlpha = 1;
+      c2d.restore();
+      return;
+    }
     if(c.t==='poly'){
       c2d.beginPath();
       c.pts.forEach((p,i)=> i ? c2d.lineTo(X(p.x), Y(p.y)) : c2d.moveTo(X(p.x), Y(p.y)));
@@ -1485,6 +1528,27 @@ const DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$A
 const DXF_H0 = 0x101;          // 动态实体起始句柄（骨架最大句柄 0x100 之后）
 const DXF_MS = '17';           // *Model_Space 的 BLOCK_RECORD 句柄
 
+/* ===== 混凝土图案（v1.0.20）：acad.pat 内置 AR-CONC（Aggregate，骨料）原样定义 =====
+   一行 = [角度°, 基点X, 基点Y, 偏移X, 偏移Y, [短划长度...]]，基准单位 mm（scale = 1）。
+   13 条线分三向错落，构成「混凝土」骨料颗粒；数值与 AutoCAD 的 acad.pat 完全一致，
+   故无论 CAD 读内联定义还是读本机 .pat，填充观感相同。 */
+const PAT_ARCONC = [
+  [50,         0,        0,       182.184669,  -15.939086, [19.05, -209.55]],
+  [355,        0,        0,       -35.243421,  191.056845, [15.24, -167.64058417]],
+  [100.451445, 15.182007, -1.328254, 146.941247, 175.117752, [16.1900088, -178.0902446]],
+  [46.1842,    0,        50.8,    271.079041,  -42.042328, [28.575, -314.325]],
+  [96.635558,  22.5899,  47.2965, 237.404134,  247.426125, [24.28502314, -267.13560816]],
+  [351.184151, 0,        50.8,    237.404134,  247.426125, [22.85996707, -251.45973192]],
+  [21,         25.4,     38.1,    151.614391,  -102.265198, [19.05, -209.55]],
+  [326,        25.4,     38.1,    61.802028,   184.187966, [15.24, -167.64]],
+  [71.451445,  38.034533, 29.5779, 213.416419, 81.922769, [16.1900088, -178.0899376]],
+  [37.5,       0,        0,       3.088603,    84.555039, [0, -165.608, 0, -170.18, 0, -168.275]],
+  [7.5,        0,        0,       66.819663,   100.180575, [0, -97.028, 0, -161.798, 0, -64.135]],
+  [-32.5,      -56.642,  0,       135.590595,  -5.728744, [0, -63.5, 0, -198.12, 0, -262.89]],
+  [-42.5,      -82.042,  0,       148.129181,  25.426491, [0, -82.55, 0, -131.572, 0, -186.69]]
+];
+const PAT_PERIOD = 228.6;      // scale=1 时一个骨料周期的基准长度（mm）
+
 /* ===== 图层表（v1.0.19）=====
    纯中文层名 + 骨架 $DWGCODEPAGE=ANSI_936：AC1015 的 DXF 按代码页解码非 ASCII 字节，
    而浏览器没有 GBK 编码器（TextEncoder 仅支持 UTF-8），故把每个层名的 GBK 字节硬编码为十六进制。
@@ -1519,6 +1583,8 @@ const ln = l => LN_GBK[l] || '0';
 function dxfFromCmds(cmds, denom){
   const MX = 1000;                                     // m → mm
   const DSC = String(denom || 50);                      // 标注全局比例 = 出图比例分母
+  /* 混凝土图案缩放：图面骨料周期固定 1.8 mm ⇒ scale = 1.8 × 比例分母 / PAT_PERIOD ≈ 分母 / 127 */
+  const SC = (Number(DSC)/127).toFixed(4);
   const NUM = v => (Math.round(v*1000)/1000).toFixed(3);
   /* AutoCAD 只接受法定线宽值（组码 370，单位 1/100 mm），写入非法值会判定
      “DXF 输入无效”而拒绝打开。这里把画布线宽吸附到最接近的合法值。 */
@@ -1576,6 +1642,54 @@ function dxfFromCmds(cmds, denom){
       e(14,NUM(b.x)); e(24,NUM(b.y)); e(34,'0.0');     // 第二尺寸界线原点
       e(50,NUM(ang));                                  // 尺寸线转角（0 水平 / 90 竖直 / 斜向）
       e(100,'AcDbRotatedDimension');
+      return;
+    }
+    if(c.t === 'hatch'){
+      /* 混凝土图案填充（v1.0.20）：写真正的 HATCH 实体，图案 AR-CONC —— AutoCAD
+         acad.pat 内置的「混凝土 / 骨料（Aggregate）」图案，13 条线三向错落铺满骨料颗粒。
+         图案定义按 acad.pat 原样内联（78=13），目标机即使没有同名 .pat 也能照定义绘制。
+         41 图案缩放 = 出图比例分母 / 127 ⇒ 图纸上恒为 1.8 mm 骨料周期（1:50 时 ≈ 90 mm），
+         与门洞/蓄水池这类小构件在 CAD 里手动填充 AR-CONC 的观感一致。
+         边界用「多段线编码」：92=3（外部边界 + 多段线）、72=0、73=1 闭合、93=顶点数，
+         缺 bit 2 时 CAD 会按边定义解析而读错顶点，导致填充整块丢失。
+         子类顺序 AcDbEntity → AcDbHatch 不可颠倒，否则 AutoCAD 判定「DXF 输入无效」。 */
+      let pts = c.pts.map(toP);
+      /* 边界统一为逆时针：剖面整体镜像后顶点顺序会翻转，AutoCAD 对顺时针外边界的
+         填充方向判定不一致（个别版本会填到边界外），这里按 signed area 归一化。 */
+      let sArea = 0;
+      for(let i=0;i<pts.length;i++){
+        const a = pts[i], b = pts[(i+1)%pts.length];
+        sArea += a.x*b.y - b.x*a.y;
+      }
+      if(sArea < 0) pts = pts.slice().reverse();
+      pts.forEach(p=>tk(p.x, p.y));
+      e(0,'HATCH'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity'); e(8,lay);
+      e(100,'AcDbHatch');
+      e(10,'0.0'); e(20,'0.0'); e(30,'0.0');          // 填充平面原点（俯视 Z=0）
+      e(210,'0.0'); e(220,'0.0'); e(230,'1.0');       // 拉伸方向
+      e(2,'AR-CONC');                                 // 图案名：混凝土（骨料）
+      e(70,'0');                                      // 0 = 图案填充（非实心）
+      e(71,'0');                                      // 非关联
+      e(91,'1');                                      // 边界路径数
+      e(92,'3');                                      // 路径类型：外部边界 + 多段线
+      e(72,'0');                                      // 顶点不带凸度
+      e(73,'1');                                      // 闭合
+      e(93,String(pts.length));                       // 顶点数
+      pts.forEach(p=>{ e(10,NUM(p.x)); e(20,NUM(p.y)); });
+      e(97,'0');                                      // 无源边界对象
+      e(75,'0');                                      // 填充样式：普通
+      e(76,'1');                                      // 图案类型：预定义
+      e(52,'0.0');                                    // 图案角度
+      e(41,SC);                                       // 图案缩放（随出图比例，图面间距恒定）
+      e(77,'0');                                      // 非双向
+      e(78,String(PAT_ARCONC.length));                // 图案定义线数
+      PAT_ARCONC.forEach(l=>{
+        e(53,NUM(l[0])); e(43,NUM(l[1])); e(44,NUM(l[2]));
+        e(45,NUM(l[3])); e(46,NUM(l[4]));
+        e(79,String(l[5].length));
+        l[5].forEach(d=> e(49,NUM(d)));
+      });
+      e(98,'0');                                      // 无种子点
       return;
     }
     if(c.t === 'poly'){
