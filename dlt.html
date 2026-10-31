@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大乐透选号器 v1.0.1</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d8231f'/%3E%3Ccircle cx='23' cy='32' r='9' fill='%23fff'/%3E%3Ccircle cx='43' cy='32' r='9' fill='%23ffffff' opacity='.55'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f2f2f7;
+  --bg2:#ffffff;
+  --ink:#1d1d1f;
+  --ink2:#6e6e73;
+  --ink3:#a1a1a6;
+  --line:rgba(0,0,0,.075);
+  --line2:rgba(0,0,0,.14);
+  --accent:#d8231f;
+  --accent-soft:#fdeceb;
+  --blue:#2f6fed;
+  --radius:16px;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 26px rgba(0,0,0,.05);
+  --shadow-s:0 1px 2px rgba(0,0,0,.05),0 3px 10px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;background:
+    radial-gradient(1100px 520px at 8% -8%, #ffffff 0%, rgba(255,255,255,0) 58%),
+    radial-gradient(900px 480px at 100% 0%, #f7f2ef 0%, rgba(255,255,255,0) 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Text","SF Pro Display","PingFang SC","Noto Sans SC","Helvetica Neue","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5;min-height:100vh;
+}
+::selection{background:rgba(216,35,31,.15)}
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:12px;
+  padding:0 22px;height:60px;background:rgba(255,255,255,.8);
+  backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:32px;height:32px;border-radius:9px;flex:none;background:linear-gradient(150deg,#ef4b41,#c31a16);display:grid;place-items:center;box-shadow:0 4px 12px rgba(216,35,31,.26)}
+.logo i{width:12px;height:12px;border-radius:50%;background:#fff;display:block;box-shadow:14px 0 0 -.5px rgba(255,255,255,.6)}
+.brand h1{font-size:15px;font-weight:650;letter-spacing:.2px;margin:0;white-space:nowrap}
+.brand .ver{font-size:11px;color:var(--ink3);font-weight:500;margin-left:2px}
+.topbar .spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;height:29px;padding:0 11px;border-radius:8px;background:rgba(120,120,128,.09);color:var(--ink2);font-size:11.5px;font-weight:520;white-space:nowrap}
+.pill b{color:var(--ink);font-weight:620}
+.dot{width:6px;height:6px;border-radius:50%;background:#34c759;box-shadow:0 0 0 3px rgba(52,199,89,.16)}
+.dot.off{background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.16)}
+/* ---------- 三列布局 ---------- */
+.layout{
+  width:100%;max-width:none;margin:0;padding:16px 18px 44px;
+  display:grid;grid-template-columns:340px minmax(0,1fr) 392px;
+  gap:16px;align-items:start;
+}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.col-left{position:sticky;top:76px;max-height:calc(100vh - 92px);overflow-y:auto;overflow-x:hidden;padding-right:2px}
+.col-left::-webkit-scrollbar{width:8px}
+.col-left::-webkit-scrollbar-thumb{background:rgba(120,120,128,.25);border-radius:4px;border:2px solid transparent;background-clip:content-box}
+.col-left::-webkit-scrollbar-thumb:hover{background:rgba(120,120,128,.45);background-clip:content-box}
+.card{background:var(--bg2);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.7);overflow:hidden}
+.card-h{display:flex;align-items:center;gap:7px;padding:13px 16px 8px;font-size:12.5px;font-weight:650;letter-spacing:.2px}
+.card-h .ico{width:17px;height:17px;opacity:.85;flex:none}
+.card-h .right{margin-left:auto;font-weight:400;font-size:11px;color:var(--ink3);white-space:nowrap}
+.card-b{padding:2px 16px 15px}
+/* ---------- 通用行 ---------- */
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0}
+.row + .row{border-top:1px solid rgba(0,0,0,.045)}
+.row .lab{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px;flex:none}
+.row .lab b{color:var(--ink);font-weight:600}
+.hint{font-size:10.5px;color:var(--ink3);padding:2px 0 0;line-height:1.5}
+/* 步进器 */
+.step{display:flex;align-items:center;background:rgba(120,120,128,.08);border-radius:8px;padding:2px;flex:none}
+.step button{width:25px;height:25px;border:0;border-radius:6px;background:transparent;color:var(--ink2);font-size:14px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:.15s;font-family:inherit}
+.step button:hover{background:#fff;color:var(--ink);box-shadow:var(--shadow-s)}
+.step button:active{transform:scale(.94)}
+.step .v{min-width:32px;text-align:center;font-size:12.5px;font-weight:620;font-variant-numeric:tabular-nums}
+/* 滑块 */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:rgba(120,120,128,.2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 4px rgba(0,0,0,.22);margin-top:-6.5px}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:rgba(120,120,128,.2)}
+input[type=range]::-moz-range-thumb{width:17px;height:17px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.dual{display:grid;grid-template-columns:24px 1fr;align-items:center;column-gap:6px;margin:1px 0}
+.dlab{font-size:10px;color:var(--ink3);text-align:right}
+/* 分段 */
+.seg{display:flex;gap:2px;background:rgba(120,120,128,.09);border-radius:9px;padding:3px;flex-wrap:wrap}
+.seg button{flex:1;min-width:0;border:0;background:transparent;border-radius:7px;padding:6px 4px;font-size:11.5px;font-weight:560;color:var(--ink2);cursor:pointer;font-family:inherit;transition:.18s;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:640}
+.seg.red button.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(216,35,31,.3)}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:5px 9px;font-size:11px;color:var(--ink2);cursor:pointer;font-family:inherit;transition:.16s;font-weight:520;white-space:nowrap}
+.chip:hover{border-color:rgba(0,0,0,.28);color:var(--ink)}
+.chip.on{background:var(--accent-soft);border-color:rgba(216,35,31,.35);color:var(--accent);font-weight:620}
+/* 开关 */
+.sw{position:relative;width:40px;height:24px;border-radius:12px;background:rgba(120,120,128,.24);cursor:pointer;transition:.22s;flex:none;border:0;padding:0}
+.sw::after{content:"";position:absolute;top:2.5px;left:2.5px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.22s}
+.sw.on{background:#34c759}
+.sw.on::after{transform:translateX(16px)}
+/* 按钮 */
+.btn{border:0;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:620;cursor:pointer;font-family:inherit;transition:.16s;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.btn:active{transform:scale(.985)}
+.btn-primary{width:100%;background:linear-gradient(180deg,#ef4b41,#cf1f1a);color:#fff;box-shadow:0 6px 18px rgba(207,31,26,.26);padding:13px;font-size:14px;letter-spacing:.4px}
+.btn-primary:hover{filter:brightness(1.05)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:rgba(120,120,128,.1);color:var(--ink)}
+.btn-ghost:hover{background:rgba(120,120,128,.16)}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(47,111,237,.26)}
+.btn-blue:hover{filter:brightness(1.06)}
+.btn-sm{padding:6px 10px;font-size:11.5px;border-radius:8px}
+/* 冷热配比 */
+.mix-row{padding:8px 0}
+.mix-row + .mix-row{border-top:1px solid rgba(0,0,0,.045)}
+.mix-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:12px;color:var(--ink2)}
+.mix-head .lab{display:flex;align-items:center;gap:5px}
+.inline-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.mix-sum{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.mix-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mix-item{display:flex;flex-direction:column;gap:3px}
+.mix-item .step{justify-content:space-between;margin:0 auto;width:auto;padding:2px 3px}
+.mix-item .step button{width:21px;height:23px;font-size:13px}
+.mix-item .step .v{min-width:23px;font-size:12px}
+.mix-lab{font-size:10px;color:var(--ink3);text-align:center;letter-spacing:.3px}
+.mix-lab.hot{color:#c8252c}
+.mix-lab.cold{color:#2f6fed}
+/* 金额条 */
+.amount{display:flex;align-items:baseline;gap:8px;padding:11px 13px;border-radius:11px;background:linear-gradient(180deg,#fff8f7,#fff2f0);border:1px solid rgba(216,35,31,.12);margin-top:10px}
+.amount .n{font-size:23px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.amount .n small{font-size:11.5px;font-weight:600;margin-left:2px}
+.amount .meta{margin-left:auto;text-align:right;font-size:11px;color:var(--ink2);line-height:1.45}
+.amount .meta b{color:var(--ink);font-weight:620;font-variant-numeric:tabular-nums}
+.warn{font-size:10.5px;color:#c47f00;margin-top:6px;display:none}
+.warn.show{display:block}
+/* 数据洞察 */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
+.stat{background:rgba(120,120,128,.055);border-radius:11px;padding:10px 11px}
+.stat .k{font-size:10.5px;color:var(--ink3)}
+.stat .v{font-size:18px;font-weight:680;letter-spacing:-.4px;font-variant-numeric:tabular-nums;margin-top:1px}
+.stat .v small{font-size:10.5px;font-weight:520;color:var(--ink2);margin-left:2px}
+.heat-title{display:flex;align-items:center;gap:10px;margin:12px 0 7px;font-size:11.5px;font-weight:600}
+.heat-title .legend{margin-left:auto;display:flex;align-items:center;gap:9px;font-weight:400;font-size:10.5px;color:var(--ink3)}
+.lg{display:inline-flex;align-items:center;gap:4px}
+.lg i{width:8px;height:8px;border-radius:2px;display:block}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.heat.back{grid-template-columns:repeat(6,1fr)}
+.cell{position:relative;border-radius:9px;padding:5px 0 4px;text-align:center;border:1px solid rgba(0,0,0,.045);transition:.15s}
+.cell:hover{transform:translateY(-1px);box-shadow:var(--shadow-s)}
+.cell .n{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+.cell .c{font-size:9.5px;font-weight:560;opacity:.62;font-variant-numeric:tabular-nums;margin-top:-1px}
+.cell .m{position:absolute;top:1px;right:3px;font-size:8px;opacity:.42}
+.rank-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.rank{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink2)}
+.rank .t{width:54px;flex:none;display:flex;align-items:center;gap:5px}
+.rank .t i{width:6px;height:6px;border-radius:2px;display:block}
+.rank .nums{display:flex;flex-wrap:wrap;gap:3px}
+.rank .nums span{min-width:22px;height:20px;padding:0 3px;border-radius:5px;display:grid;place-items:center;font-size:10.5px;font-weight:620;font-variant-numeric:tabular-nums;background:rgba(120,120,128,.1);color:var(--ink)}
+.rank.hot .nums span{background:rgba(216,35,31,.1);color:#b81c18}
+.rank.cold .nums span{background:rgba(47,111,237,.1);color:#1c53c9}
+/* 结果 */
+.res-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:9px;margin-top:10px}
+.gcard{border:1px solid var(--line);border-radius:12px;padding:10px 11px;background:#fff;display:flex;flex-direction:column;gap:7px;transition:.16s}
+.gcard:hover{box-shadow:var(--shadow-s);border-color:rgba(0,0,0,.12)}
+.gcard .top{display:flex;align-items:center;gap:5px}
+.gcard .idx{font-size:10.5px;font-weight:700;color:var(--ink3);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.gcard .tag{font-size:9.5px;font-weight:620;color:var(--ink2);background:rgba(120,120,128,.1);padding:1px 5px;border-radius:4px;white-space:nowrap}
+.gcard .tag.ap{background:rgba(184,134,11,.12);color:#8b6508}
+.gcard .acts{margin-left:auto;display:flex;gap:4px;opacity:0;transition:.15s}
+.gcard:hover .acts{opacity:1}
+.iconbtn{width:22px;height:22px;border-radius:6px;border:0;background:rgba(120,120,128,.09);color:var(--ink2);cursor:pointer;display:grid;place-items:center;padding:0;transition:.15s}
+.iconbtn:hover{background:rgba(120,120,128,.18);color:var(--ink)}
+.ballrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ball{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.3px;flex:none}
+.ball.r{background:linear-gradient(165deg,#f8615a 0%,#dc2a25 55%,#bd1a16 100%);box-shadow:0 2px 6px rgba(200,30,25,.26),inset 0 1px 0 rgba(255,255,255,.32)}
+.ball.b{background:linear-gradient(165deg,#5b95f8 0%,#2a63e0 55%,#1a4ac0 100%);box-shadow:0 2px 6px rgba(35,80,200,.26),inset 0 1px 0 rgba(255,255,255,.3)}
+.plus{color:var(--ink3);font-weight:600;font-size:13px;margin:0 1px}
+.gcard .foot{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--ink3);border-top:1px dashed rgba(0,0,0,.07);padding-top:5px}
+.gcard .foot b{color:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
+.empty{padding:40px 18px;text-align:center;color:var(--ink3);font-size:12.5px;border:1.5px dashed rgba(0,0,0,.1);border-radius:12px;margin-top:10px}
+.empty b{display:block;color:var(--ink2);font-size:13.5px;margin-bottom:4px;font-weight:600}
+/* 票面 */
+.ticket-wrap{display:flex;justify-content:center;padding:2px 0}
+.ticket-box{width:100%;max-width:360px;filter:drop-shadow(0 12px 30px rgba(0,0,0,.14))}
+.ticket-box svg{display:block;width:100%;height:auto;border-radius:3px}
+.ticket-tools{display:flex;gap:7px;margin-top:12px}
+.ticket-tools .btn{flex:1}
+.mini-field{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
+.mini-field input{width:76px;border:1px solid var(--line2);border-radius:6px;padding:4px 6px;font-size:11px;font-family:inherit;color:var(--ink);background:#fff;outline:none}
+.mini-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(216,35,31,.1)}
+details.fold{border-top:1px solid var(--line);margin-top:8px;padding-top:4px}
+details.fold summary{list-style:none;cursor:pointer;font-size:11.5px;color:var(--ink2);padding:6px 0;display:flex;align-items:center;gap:5px;font-weight:520}
+details.fold summary::-webkit-details-marker{display:none}
+details.fold summary::before{content:"›";display:inline-block;transition:.2s;font-size:14px;color:var(--ink3);line-height:1}
+details.fold[open] summary::before{transform:rotate(90deg)}
+.toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,20px);background:rgba(29,29,31,.92);color:#fff;font-size:12.5px;font-weight:520;padding:9px 17px;border-radius:10px;opacity:0;pointer-events:none;transition:.26s;z-index:999;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:76vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:rgba(120,120,128,.26);border-radius:5px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(120,120,128,.42);background-clip:content-box}
+@media (max-width:1440px){
+  .layout{grid-template-columns:320px minmax(0,1fr) 366px;gap:14px;padding:14px}
+}
+@media (max-width:1240px){
+  .layout{grid-template-columns:300px minmax(0,1fr);gap:14px}
+  .col-right{grid-column:1 / -1;display:grid;grid-template-columns:340px minmax(0,1fr);align-items:start}
+  .col-left{position:static;max-height:none;overflow:visible;padding-right:0}
+}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:12px}
+  .col-right{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo"><i></i></div>
+    <h1>大乐透选号器<span class="ver">v1.0.4</span></h1>
+  </div>
+  <div class="spacer"></div>
+  <div class="pill" title="统计范围 / 数据截止"><span class="dot" id="dataDot"></span>近 <b id="pillRange">500</b> 期 · 截止 <b id="pillLatest">—</b></div>
+  <button class="btn btn-ghost btn-sm" id="btnRefresh">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+    <span id="btnRefreshTxt">获取最新数据</span>
+  </button>
+  <button class="btn btn-ghost btn-sm" id="btnShotTop">保存票面</button>
+</header>
+
+<main class="layout">
+
+  <!-- ============ 左列：选号参数 ============ -->
+  <aside class="col col-left">
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 17V9m5 8V5m5 12v-6m5 6V7"/></svg>
+        数据范围
+        <span class="right" id="dataRange">—</span>
+      </div>
+      <div class="card-b">
+        <div class="row" style="padding-top:0">
+          <span class="lab">统计期数</span>
+          <span class="lab"><b id="nLabel">500</b> 期</span>
+        </div>
+        <input type="range" id="rangeN" min="50" max="500" step="10" value="500">
+        <div class="hint" id="dataHint">内置官方开奖数据 · 截止第 26123 期</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-blue btn-sm" id="btnRefresh2" style="flex:1.25">获取最新数据</button>
+          <button class="btn btn-ghost btn-sm" id="btnImport" style="flex:1">导入文件</button>
+          <input type="file" id="fileData" accept=".txt,.csv,.asc" style="display:none">
+        </div>
+
+        <div class="row">
+          <span class="lab">分层方式</span>
+        </div>
+        <div class="seg" id="segLayer">
+          <button class="on" data-v="auto">自动分层</button>
+          <button data-v="custom">自定义阈值</button>
+        </div>
+        <div id="thresholdBox" style="display:none;margin-top:9px">
+          <div class="row" style="padding:5px 0">
+            <span class="lab">前区 热≥ / 冷≤</span>
+            <span class="lab">
+              <input class="mini-in" id="thF" type="text" value="80/63" style="width:62px;border:1px solid var(--line2);border-radius:6px;padding:4px 5px;font-size:11px;text-align:center;font-family:inherit">
+              <span style="margin:0 2px;color:var(--ink3)">次</span>
+            </span>
+          </div>
+          <div class="row" style="padding:5px 0">
+            <span class="lab">后区 热≥ / 冷≤</span>
+            <span class="lab">
+              <input class="mini-in" id="thB" type="text" value="93/72" style="width:62px;border:1px solid var(--line2);border-radius:6px;padding:4px 5px;font-size:11px;text-align:center;font-family:inherit">
+              <span style="margin:0 2px;color:var(--ink3)">次</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.5 3.5 4 5 4 8a4 4 0 0 1-8 0c0-1.6.7-2.6 1.5-3.6C10 9 12 7 12 3z"/><path d="M5 21h14"/></svg>
+        冷热配比
+        <span class="right">每注取号结构</span>
+      </div>
+      <div class="card-b">
+        <div class="chips" id="presets" style="margin-bottom:8px">
+          <button class="chip" data-p="3,1,1|1,1,0">热号型</button>
+          <button class="chip on" data-p="2,2,1|1,1,0">均衡</button>
+          <button class="chip" data-p="1,2,2|0,1,1">冷号型</button>
+          <button class="chip" data-p="5,0,0|2,0,0">全热</button>
+          <button class="chip" data-p="0,0,5|0,0,2">全冷</button>
+        </div>
+        <div class="mix-row">
+          <div class="mix-head"><span class="lab"><i class="inline-dot" style="background:#d8231f"></i>前区 5 码</span><span class="mix-sum" id="sumF">热 2 · 温 2 · 冷 1</span></div>
+          <div class="mix-grid">
+            <div class="mix-item"><span class="mix-lab hot">热号</span><div class="step" data-k="fh"><button data-d="-1">−</button><div class="v" id="vFh">2</div><button data-d="1">+</button></div></div>
+            <div class="mix-item"><span class="mix-lab">温号</span><div class="step" data-k="fw"><button data-d="-1">−</button><div class="v" id="vFw">2</div><button data-d="1">+</button></div></div>
+            <div class="mix-item"><span class="mix-lab cold">冷号</span><div class="step" data-k="fc"><button data-d="-1">−</button><div class="v" id="vFc">1</div><button data-d="1">+</button></div></div>
+          </div>
+        </div>
+        <div class="mix-row">
+          <div class="mix-head"><span class="lab"><i class="inline-dot" style="background:#2f6fed"></i>后区 2 码</span><span class="mix-sum" id="sumB">热 1 · 温 1 · 冷 0</span></div>
+          <div class="mix-grid">
+            <div class="mix-item"><span class="mix-lab hot">热号</span><div class="step" data-k="bh"><button data-d="-1">−</button><div class="v" id="vBh">1</div><button data-d="1">+</button></div></div>
+            <div class="mix-item"><span class="mix-lab">温号</span><div class="step" data-k="bw"><button data-d="-1">−</button><div class="v" id="vBw">1</div><button data-d="1">+</button></div></div>
+            <div class="mix-item"><span class="mix-lab cold">冷号</span><div class="step" data-k="bc"><button data-d="-1">−</button><div class="v" id="vBc">0</div><button data-d="1">+</button></div></div>
+          </div>
+        </div>
+        <div class="hint" id="poolHint" style="margin-top:6px">—</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        过滤条件
+        <span class="right">不满足则重抽</span>
+      </div>
+      <div class="card-b">
+        <div class="row" style="padding-top:0">
+          <span class="lab">前区和值</span>
+          <span class="lab"><b id="sumLabel">60 – 120</b></span>
+        </div>
+        <div class="dual">
+          <span class="dlab">最小</span><input type="range" id="sumMin" min="15" max="165" step="5" value="60">
+          <span class="dlab">最大</span><input type="range" id="sumMax" min="15" max="165" step="5" value="120">
+        </div>
+        <div class="row">
+          <span class="lab">奇数个数</span>
+          <span class="lab"><b id="oddLabel">1 – 4</b></span>
+        </div>
+        <div class="dual">
+          <span class="dlab">最少</span><input type="range" id="oddMin" min="0" max="5" step="1" value="1">
+          <span class="dlab">最多</span><input type="range" id="oddMax" min="0" max="5" step="1" value="4">
+        </div>
+        <div class="row">
+          <span class="lab">大号个数 <span style="color:var(--ink3);font-size:10px">18–35</span></span>
+          <span class="lab"><b id="bigLabel">1 – 4</b></span>
+        </div>
+        <div class="dual">
+          <span class="dlab">最少</span><input type="range" id="bigMin" min="0" max="5" step="1" value="1">
+          <span class="dlab">最多</span><input type="range" id="bigMax" min="0" max="5" step="1" value="4">
+        </div>
+        <div class="row">
+          <span class="lab">与上期重号上限</span>
+          <div class="step" data-k="repeat"><button data-d="-1">−</button><div class="v" id="vRepeat">1</div><button data-d="1">+</button></div>
+        </div>
+        <div class="row">
+          <span class="lab">最多连号个数</span>
+          <div class="step" data-k="chain"><button data-d="-1">−</button><div class="v" id="vChain">2</div><button data-d="1">+</button></div>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <!-- ============ 中列：数据 + 结果 ============ -->
+  <section class="col col-mid">
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke-linecap="round"/></svg>
+        一等奖数据洞察
+        <span class="right" id="insightRange">—</span>
+      </div>
+      <div class="card-b">
+        <div class="stat-row">
+          <div class="stat"><div class="k">一等奖总注数</div><div class="v" id="stNotes">—<small>注</small></div></div>
+          <div class="stat"><div class="k">单注最高奖金</div><div class="v" id="stMax">—<small>万</small></div></div>
+          <div class="stat"><div class="k">平均每期头奖</div><div class="v" id="stAvg">—<small>注</small></div></div>
+          <div class="stat"><div class="k">平均单注奖金</div><div class="v" id="stAvgAmt">—<small>万</small></div></div>
+        </div>
+        <div class="heat-title">
+          前区 01–35 出号热力
+          <span class="legend">
+            <span class="lg"><i style="background:#e8625c"></i>热号</span>
+            <span class="lg"><i style="background:#d8d8dd"></i>温号</span>
+            <span class="lg"><i style="background:#6f9df5"></i>冷号</span>
+          </span>
+        </div>
+        <div class="heat" id="heatFront"></div>
+        <div class="heat-title" style="margin-top:12px">后区 01–12 出号热力</div>
+        <div class="heat back" id="heatBack"></div>
+        <div class="rank-list" id="rankList"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="4.2"/><circle cx="16" cy="8" r="4.2"/><circle cx="12" cy="16" r="4.2"/></svg>
+        选号结果
+        <span class="right" id="resMeta">等待选号</span>
+      </div>
+      <div class="card-b">
+        <div class="res-head">
+          <div class="seg" style="flex:1;max-width:240px" id="segModeView">
+            <button class="on" data-v="ball">号码视图</button>
+            <button data-v="text">号码文本</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btnCopyAll">复制全部</button>
+        </div>
+        <div id="resArea">
+          <div class="empty"><b>还没有号码</b>设置好左侧参数后，点「开始选号」</div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============ 右列：出票 ============ -->
+  <aside class="col col-right">
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 7h16a1 1 0 0 1 1 1v2.5a2 2 0 0 0 0 3.9V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2.6a2 2 0 0 0 0-3.9V8a1 1 0 0 1 1-1z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg>
+        玩法 / 出票
+        <span class="right" id="modeTag">单式</span>
+      </div>
+      <div class="card-b">
+        <div class="seg red" id="segMode" style="margin-bottom:9px">
+          <button class="on" data-v="single">单式</button>
+          <button data-v="compound">复式</button>
+          <button data-v="dantuo">胆拖</button>
+          <button data-v="package">套餐票</button>
+        </div>
+
+        <div id="boxCompound" style="display:none">
+          <div class="row" style="padding-top:0">
+            <span class="lab">前区个数</span>
+            <div class="step" data-k="fm"><button data-d="-1">−</button><div class="v" id="vFm">6</div><button data-d="1">+</button></div>
+          </div>
+          <div class="row">
+            <span class="lab">后区个数</span>
+            <div class="step" data-k="bm"><button data-d="-1">−</button><div class="v" id="vBm">2</div><button data-d="1">+</button></div>
+          </div>
+          <div class="hint" id="hintCompound">—</div>
+        </div>
+
+        <div id="boxDantuo" style="display:none">
+          <div class="row" style="padding-top:0">
+            <span class="lab">前区 胆</span>
+            <div class="step" data-k="df"><button data-d="-1">−</button><div class="v" id="vDf">2</div><button data-d="1">+</button></div>
+          </div>
+          <div class="row">
+            <span class="lab">前区 拖</span>
+            <div class="step" data-k="tf"><button data-d="-1">−</button><div class="v" id="vTf">4</div><button data-d="1">+</button></div>
+          </div>
+          <div class="row">
+            <span class="lab">后区 胆 / 拖</span>
+            <div style="display:flex;gap:5px">
+              <div class="step" data-k="db"><button data-d="-1">−</button><div class="v" id="vDb">1</div><button data-d="1">+</button></div>
+              <div class="step" data-k="tb"><button data-d="-1">−</button><div class="v" id="vTb">2</div><button data-d="1">+</button></div>
+            </div>
+          </div>
+          <div class="hint" id="hintDantuo">—</div>
+        </div>
+
+        <div id="boxPackage" style="display:none">
+          <div class="chips" id="pkChips">
+            <button class="chip" data-pk="18">18元</button>
+            <button class="chip" data-pk="28">28元</button>
+            <button class="chip" data-pk="36">36元</button>
+            <button class="chip" data-pk="58">58元</button>
+            <button class="chip" data-pk="66">66元</button>
+            <button class="chip on" data-pk="88">88元</button>
+          </div>
+          <div class="hint" id="hintPackage" style="margin-top:7px">—</div>
+        </div>
+
+        <div class="row" style="margin-top:6px;border-top:1px solid rgba(0,0,0,.045)">
+          <span class="lab">追加投注 <span style="color:var(--ink3);font-size:10px">+1元/注</span></span>
+          <button class="sw on" id="swAppend"></button>
+        </div>
+        <div class="row">
+          <span class="lab">投注倍数</span>
+          <div class="step" data-k="times"><button data-d="-1">−</button><div class="v" id="vTimes">1</div><button data-d="1">+</button></div>
+        </div>
+        <div class="row">
+          <span class="lab">生成组数</span>
+          <div class="step" data-k="groups"><button data-d="-1">−</button><div class="v" id="vGroups">5</div><button data-d="1">+</button></div>
+        </div>
+
+        <div class="amount">
+          <div class="n" id="amtValue">0<small>元</small></div>
+          <div class="meta">共 <b id="amtNotes">0</b> 注 · <b id="amtLines">0</b> 行<br><span id="amtAppend">含追加</span></div>
+        </div>
+        <div class="warn" id="amtWarn">单张彩票金额超出规则上限（基本 20000 元 / 含追加 30000 元）</div>
+        <button class="btn btn-primary" id="btnGen" style="margin-top:10px">开始选号</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round"/></svg>
+        出票预览
+        <span class="right">仅供娱乐参考</span>
+      </div>
+      <div class="card-b">
+        <div class="ticket-wrap"><div class="ticket-box" id="ticketBox"></div></div>
+        <div class="ticket-tools">
+          <button class="btn btn-blue btn-sm" id="btnShot">保存票面截图</button>
+          <button class="btn btn-ghost btn-sm" id="btnCopyTicket">复制票面文字</button>
+        </div>
+        <details class="fold">
+          <summary>票面信息自定义</summary>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;padding:6px 0 2px">
+            <label class="mini-field">期号 <input id="inIssue" value=""></label>
+            <label class="mini-field">开奖日 <input id="inDrawDate" value=""></label>
+          </div>
+          <div class="seg" style="max-width:210px;margin:6px 0 4px" id="segTicketStyle">
+            <button class="on" data-v="mono">热敏黑白</button>
+            <button data-v="color">彩色号码</button>
+          </div>
+        </details>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   大乐透选号器 v1.0.1
+   数据：中国体彩网官方历史开奖（内置最新 500 期，可联网刷新）
+   [期号, 开奖日, 前区5码, 后区2码, 一等奖注数, 一等奖单注奖金]
+   ============================================================ */
+const RAW = [["26123","2026-10-28",[13,18,19,20,28],[9,11],11,5750462],["26122","2026-10-26",[2,14,21,22,24],[2,12],7,7995227],["26121","2026-10-24",[6,8,19,24,25],[1,8],6,7741823],["26120","2026-10-21",[1,6,10,15,32],[3,4],3,10000000],["26119","2026-10-19",[3,6,20,24,32],[4,7],3,9909522],["26118","2026-10-17",[2,9,21,26,32],[6,12],2,10000000],["26117","2026-10-14",[4,13,19,29,31],[2,12],10,5834813],["26116","2026-10-12",[9,18,22,25,35],[1,10],2,10000000],["26115","2026-10-10",[12,20,32,33,35],[6,7],10,6339312],["26114","2026-10-07",[8,12,15,29,30],[9,12],5,7702634],["26113","2026-10-05",[2,4,6,10,11],[1,10],37,2392344],["26112","2026-09-30",[1,3,5,10,22],[3,9],6,8047843],["26111","2026-09-28",[10,11,17,26,29],[1,3],7,6978221],["26110","2026-09-26",[3,24,25,26,35],[7,9],6,7901705],["26109","2026-09-23",[12,14,16,27,34],[4,8],1,10000000],["26108","2026-09-21",[1,5,7,21,35],[1,4],3,10000000],["26107","2026-09-19",[2,5,7,14,22],[4,10],3,10000000],["26106","2026-09-16",[14,17,21,25,28],[4,6],3,10000000],["26105","2026-09-14",[10,14,30,33,34],[9,12],3,9415460],["26104","2026-09-12",[1,6,14,15,26],[8,9],7,6952434],["26103","2026-09-09",[3,16,17,32,35],[2,12],3,10000000],["26102","2026-09-07",[1,3,7,27,28],[6,7],1,10000000],["26101","2026-09-05",[9,11,18,26,33],[9,11],10,5927001],["26100","2026-09-02",[2,6,11,15,31],[7,8],6,6733541],["26099","2026-08-31",[2,17,20,29,33],[8,9],4,8305500],["26098","2026-08-29",[7,9,18,19,21],[2,9],15,5050505],["26097","2026-08-26",[3,10,12,20,25],[1,9],7,6840926],["26096","2026-08-24",[8,9,10,11,25],[4,12],9,6561952],["26095","2026-08-22",[4,6,8,10,14],[4,5],6,7103866],["26094","2026-08-19",[5,14,15,17,33],[1,7],3,8380751],["26093","2026-08-17",[8,10,22,26,29],[3,10],10,5848781],["26092","2026-08-15",[12,16,19,29,33],[7,9],4,9601645],["26091","2026-08-12",[3,4,7,12,32],[1,2],3,10000000],["26090","2026-08-10",[9,14,17,19,24],[2,9],2,10000000],["26089","2026-08-08",[3,7,12,14,26],[5,11],3,9058951],["26088","2026-08-05",[3,9,11,24,27],[5,11],2,9662603],["26087","2026-08-03",[5,10,16,24,27],[4,10],9,6547013],["26086","2026-08-01",[10,11,18,22,35],[6,12],2,10000000],["26085","2026-07-29",[3,4,14,28,31],[5,7],2,10000000],["26084","2026-07-27",[13,25,30,32,33],[4,5],8,6621689],["26083","2026-07-25",[14,15,16,23,26],[7,9],8,7215569],["26082","2026-07-22",[16,26,27,28,34],[2,6],5,8286251],["26081","2026-07-20",[8,16,18,24,34],[9,12],5,8031396],["26080","2026-07-18",[5,10,15,21,23],[7,8],10,6006451],["26079","2026-07-15",[6,8,23,26,27],[5,12],5,6673829],["26078","2026-07-13",[2,13,20,25,32],[8,11],5,8216073],["26077","2026-07-11",[4,14,19,24,27],[6,7],2,9470883],["26076","2026-07-08",[15,20,27,28,35],[2,11],4,10000000],["26075","2026-07-06",[1,6,16,18,26],[4,10],3,10000000],["26074","2026-07-04",[1,4,10,23,25],[1,12],6,7752365],["26073","2026-07-01",[4,10,22,23,33],[2,12],6,8427733],["26072","2026-06-29",[1,13,26,29,30],[9,11],5,8484040],["26071","2026-06-27",[5,13,22,26,32],[2,3],1,10000000],["26070","2026-06-24",[4,5,15,21,32],[2,11],1,10000000],["26069","2026-06-22",[12,19,21,24,29],[3,10],8,7110906],["26068","2026-06-20",[3,11,12,21,22],[6,10],5,7366555],["26067","2026-06-17",[6,16,18,19,28],[7,11],6,7300268],["26066","2026-06-15",[10,13,19,21,30],[4,5],2,10000000],["26065","2026-06-13",[4,11,12,13,25],[4,8],6,7598219],["26064","2026-06-10",[3,13,15,17,21],[2,7],4,8286328],["26063","2026-06-08",[3,15,20,29,31],[1,12],5,7715951],["26062","2026-06-06",[7,15,20,24,29],[4,10],15,5747126],["26061","2026-06-03",[10,12,26,31,35],[2,12],4,10000000],["26060","2026-06-01",[22,28,30,31,34],[1,5],37,2645502],["26059","2026-05-30",[6,13,17,19,26],[7,8],3,10000000],["26058","2026-05-27",[7,12,13,18,34],[1,5],5,9961936],["26057","2026-05-25",[23,25,26,27,34],[4,10],4,9617059],["26056","2026-05-23",[6,7,18,21,30],[1,5],6,7155614],["26055","2026-05-20",[9,10,20,33,35],[4,11],4,10000000],["26054","2026-05-18",[2,6,14,22,24],[8,11],13,6280305],["26053","2026-05-16",[2,9,14,20,31],[5,9],14,4901960],["26052","2026-05-13",[2,3,20,28,33],[2,12],9,6295115],["26051","2026-05-11",[13,18,28,32,33],[2,11],4,9612284],["26050","2026-05-09",[6,10,14,23,33],[8,10],6,8052622],["26049","2026-05-06",[1,6,14,15,17],[2,3],6,7126897],["26048","2026-05-04",[11,17,20,23,35],[1,10],7,6806380],["26047","2026-05-02",[9,20,21,23,28],[6,11],5,7415209],["26046","2026-04-29",[1,13,18,27,33],[4,7],6,6930508],["26045","2026-04-27",[1,15,21,26,33],[4,7],7,6675078],["26044","2026-04-25",[3,8,22,26,29],[7,10],8,6329954],["26043","2026-04-22",[8,12,14,19,22],[11,12],1,10000000],["26042","2026-04-20",[2,7,13,19,24],[3,8],5,7688311],["26041","2026-04-18",[24,25,27,29,34],[2,6],6,8170700],["26040","2026-04-15",[6,12,13,21,34],[8,9],6,7492423],["26039","2026-04-13",[9,11,20,26,27],[6,9],11,5717710],["26038","2026-04-11",[8,17,21,33,35],[6,7],2,10000000],["26037","2026-04-08",[7,12,13,28,32],[6,8],5,8402519],["26036","2026-04-06",[4,7,16,26,32],[5,8],9,6291520],["26035","2026-04-04",[2,22,30,33,34],[8,12],11,6715340],["26034","2026-04-01",[11,12,25,26,27],[8,11],6,6785341],["26033","2026-03-30",[3,5,7,9,18],[2,10],12,5620374],["26032","2026-03-28",[3,4,19,26,32],[1,12],6,8149825],["26031","2026-03-25",[6,8,22,29,34],[5,7],9,7576500],["26030","2026-03-23",[2,13,22,28,34],[5,12],8,7605701],["26029","2026-03-21",[3,5,17,33,35],[5,7],6,7877022],["26028","2026-03-18",[15,27,29,30,34],[1,10],1,10000000],["26027","2026-03-16",[9,10,11,12,16],[1,11],7,6985349],["26026","2026-03-14",[10,11,22,26,32],[1,8],3,9638333],["26025","2026-03-11",[3,15,24,28,29],[3,7],10,5872341],["26024","2026-03-09",[2,4,8,10,21],[9,12],3,9889639],["26023","2026-03-07",[9,25,26,27,28],[1,8],6,7177297],["26022","2026-03-04",[5,9,10,18,26],[5,6],10,5746008],["26021","2026-03-02",[5,8,12,14,17],[4,5],7,6463717],["26020","2026-02-28",[1,10,21,23,29],[10,12],3,10000000],["26019","2026-02-25",[12,13,14,16,31],[4,12],8,7528120],["26018","2026-02-11",[9,11,19,30,35],[1,12],7,6692203],["26017","2026-02-09",[4,5,10,23,31],[7,12],6,7044236],["26016","2026-02-07",[8,9,12,19,24],[1,6],13,5925957],["26015","2026-02-04",[1,4,10,13,17],[3,11],4,9339920],["26014","2026-02-02",[16,18,23,34,35],[1,6],2,10000000],["26013","2026-01-31",[3,5,6,23,26],[1,4],10,6149358],["26012","2026-01-28",[1,2,9,22,25],[1,6],5,6986204],["26011","2026-01-26",[14,21,23,29,33],[2,10],3,10000000],["26010","2026-01-24",[2,3,13,18,26],[2,9],4,7802471],["26009","2026-01-21",[5,12,13,14,33],[5,8],5,7330817],["26008","2026-01-19",[3,6,17,21,33],[5,11],4,7691274],["26007","2026-01-17",[1,3,13,20,26],[3,10],18,5482790],["26006","2026-01-14",[5,12,18,23,35],[6,12],8,6674129],["26005","2026-01-12",[2,4,16,23,35],[6,11],8,7117857],["26004","2026-01-10",[5,18,23,25,32],[5,9],11,7203146],["26003","2026-01-07",[2,9,11,15,16],[2,4],7,8930618],["26002","2026-01-05",[4,8,15,20,31],[7,8],6,9775062],["26001","2026-01-03",[7,9,23,27,32],[2,8],13,6570234],["25150","2025-12-31",[13,14,15,28,31],[1,5],4,10000000],["25149","2025-12-29",[24,26,30,31,32],[5,12],1,10000000],["25148","2025-12-27",[3,4,14,30,32],[8,12],2,10000000],["25147","2025-12-24",[6,16,21,25,33],[7,8],1,10000000],["25146","2025-12-22",[6,11,13,16,22],[2,3],4,8749278],["25145","2025-12-20",[5,7,20,22,25],[4,5],12,6856186],["25144","2025-12-17",[2,5,13,15,28],[5,8],15,6101535],["25143","2025-12-15",[3,4,18,24,29],[7,12],2,10000000],["25142","2025-12-13",[9,10,14,27,29],[2,9],3,10000000],["25141","2025-12-10",[4,9,24,28,29],[2,10],6,9722298],["25140","2025-12-08",[4,5,13,18,34],[2,8],3,10000000],["25139","2025-12-06",[8,18,22,30,35],[1,4],4,9709642],["25138","2025-12-03",[1,3,19,21,23],[7,11],6,7222472],["25137","2025-12-01",[7,8,9,11,22],[5,11],7,6774667],["25136","2025-11-29",[7,11,15,16,23],[9,11],11,9163843],["25135","2025-11-26",[2,10,16,28,32],[1,7],5,7889103],["25134","2025-11-24",[7,12,18,27,33],[9,10],8,8817317],["25133","2025-11-22",[4,11,23,27,35],[7,11],9,9025594],["25132","2025-11-19",[1,9,10,12,19],[6,7],8,8610168],["25131","2025-11-17",[3,8,25,29,32],[9,12],3,10000000],["25130","2025-11-15",[1,13,16,27,29],[2,11],5,10000000],["25129","2025-11-12",[3,9,14,28,35],[2,4],3,10000000],["25128","2025-11-10",[3,6,26,30,33],[11,12],9,9682656],["25127","2025-11-08",[4,5,19,28,29],[5,8],36,5427642],["25126","2025-11-05",[1,8,18,27,30],[6,7],8,8218910],["25125","2025-11-03",[10,11,13,19,35],[4,11],4,10000000],["25124","2025-11-01",[6,9,14,26,27],[8,9],18,6587901],["25123","2025-10-29",[8,13,24,25,31],[4,10],9,10000000],["25122","2025-10-27",[2,3,6,16,17],[4,5],9,8046946],["25121","2025-10-25",[2,3,8,13,21],[7,12],10,9198484],["25120","2025-10-22",[11,13,22,26,35],[2,8],8,9990487],["25119","2025-10-20",[8,15,27,29,31],[1,7],3,10000000],["25118","2025-10-18",[2,8,9,12,21],[4,5],4,10000000],["25117","2025-10-15",[5,10,18,21,29],[5,7],12,7523798],["25116","2025-10-13",[2,6,16,22,29],[8,12],0,-1],["25115","2025-10-11",[3,12,14,21,35],[1,5],3,10000000],["25114","2025-10-08",[3,8,9,12,16],[1,5],8,8266633],["25113","2025-10-06",[1,14,18,28,35],[2,3],14,8165613],["25112","2025-09-29",[3,4,21,23,24],[9,12],7,10000000],["25111","2025-09-27",[2,9,14,21,26],[2,12],5,10000000],["25110","2025-09-24",[1,15,22,30,31],[2,8],6,10000000],["25109","2025-09-22",[4,8,10,13,26],[9,10],3,10000000],["25108","2025-09-20",[14,18,21,24,29],[3,6],6,10000000],["25107","2025-09-17",[5,7,8,15,33],[6,10],7,10000000],["25106","2025-09-15",[5,6,11,26,29],[5,10],12,7501830],["25105","2025-09-13",[15,16,25,28,34],[10,12],3,10000000],["25104","2025-09-10",[2,6,9,22,34],[2,8],4,10000000],["25103","2025-09-08",[5,8,19,32,34],[4,5],4,10000000],["25102","2025-09-06",[9,10,13,26,28],[2,4],1,10000000],["25101","2025-09-03",[5,7,19,26,32],[8,9],9,8239676],["25100","2025-09-01",[26,28,32,34,35],[2,7],2,10000000],["25099","2025-08-30",[6,12,20,26,31],[2,4],12,7989550],["25098","2025-08-27",[1,7,9,10,23],[10,12],1,10000000],["25097","2025-08-25",[5,24,25,32,34],[1,9],3,10000000],["25096","2025-08-23",[2,11,17,22,24],[7,9],12,7695748],["25095","2025-08-20",[7,13,14,19,27],[6,10],8,8079377],["25094","2025-08-18",[4,9,17,30,33],[5,9],13,8274828],["25093","2025-08-16",[1,7,9,16,30],[2,5],6,10000000],["25092","2025-08-13",[4,10,17,25,32],[5,7],14,6332890],["25091","2025-08-11",[1,19,22,25,27],[3,10],2,10000000],["25090","2025-08-09",[6,14,19,22,27],[1,4],7,9645715],["25089","2025-08-06",[2,11,12,32,34],[3,10],68,5572232],["25088","2025-08-04",[8,9,10,11,35],[5,11],9,7817069],["25087","2025-08-02",[5,13,14,16,20],[3,8],14,6980988],["25086","2025-07-30",[2,6,23,24,33],[1,10],2,10000000],["25085","2025-07-28",[2,5,9,14,33],[4,9],25,5907764],["25084","2025-07-26",[9,11,13,18,29],[4,11],3,10000000],["25083","2025-07-23",[12,17,18,20,34],[2,5],3,10000000],["25082","2025-07-21",[2,3,4,12,26],[1,8],4,10000000],["25081","2025-07-19",[1,4,6,15,18],[2,3],5,10000000],["25080","2025-07-16",[9,10,18,22,24],[3,12],2,10000000],["25079","2025-07-14",[2,14,32,34,35],[5,11],3,10000000],["25078","2025-07-12",[7,10,15,21,24],[5,6],5,10000000],["25077","2025-07-09",[12,14,16,19,28],[1,4],2,10000000],["25076","2025-07-07",[11,18,22,25,29],[4,12],7,10000000],["25075","2025-07-05",[8,12,16,19,35],[6,9],9,8126105],["25074","2025-07-02",[2,11,15,18,21],[5,10],10,8367964],["25073","2025-06-30",[1,4,17,33,34],[3,9],11,7635760],["25072","2025-06-28",[4,7,15,24,29],[1,4],6,10000000],["25071","2025-06-25",[1,8,25,31,33],[5,11],3,10000000],["25070","2025-06-23",[8,9,15,20,22],[4,12],2,10000000],["25069","2025-06-21",[4,6,7,33,34],[9,10],3,10000000],["25068","2025-06-18",[1,4,17,20,22],[4,10],2,10000000],["25067","2025-06-16",[6,10,12,21,22],[1,6],5,10000000],["25066","2025-06-14",[15,18,27,28,34],[3,6],3,10000000],["25065","2025-06-11",[7,25,32,33,35],[4,9],4,10000000],["25064","2025-06-09",[5,10,18,20,34],[1,8],2,10000000],["25063","2025-06-07",[5,18,26,29,32],[7,10],11,7822918],["25062","2025-06-04",[14,20,27,28,29],[6,10],3,10000000],["25061","2025-06-02",[2,11,16,23,28],[5,10],10,8139831],["25060","2025-05-31",[12,14,19,33,34],[1,7],2,10000000],["25059","2025-05-28",[3,9,10,11,26],[1,2],4,10000000],["25058","2025-05-26",[6,11,15,21,23],[1,7],3,10000000],["25057","2025-05-24",[9,10,11,12,29],[1,10],4,10000000],["25056","2025-05-21",[12,15,28,29,32],[8,11],2,10000000],["25055","2025-05-19",[8,10,25,29,30],[1,2],6,10000000],["25054","2025-05-17",[3,12,16,21,29],[1,2],6,10000000],["25053","2025-05-14",[14,23,29,30,33],[6,12],7,10000000],["25052","2025-05-12",[2,4,11,29,30],[2,8],3,10000000],["25051","2025-05-10",[2,4,13,29,31],[5,12],5,10000000],["25050","2025-05-07",[15,18,20,21,34],[4,10],7,10000000],["25049","2025-05-05",[9,20,22,29,34],[3,8],10,9368639],["25048","2025-05-03",[2,6,17,23,35],[6,11],2,10000000],["25047","2025-04-30",[3,10,11,12,21],[2,3],9,10000000],["25046","2025-04-28",[4,10,15,20,34],[4,7],4,10000000],["25045","2025-04-26",[8,11,21,23,27],[3,8],10,9199763],["25044","2025-04-23",[15,17,21,22,26],[2,8],4,10000000],["25043","2025-04-21",[3,16,20,21,27],[9,11],2,10000000],["25042","2025-04-19",[6,8,11,18,20],[5,11],2,10000000],["25041","2025-04-16",[3,4,21,22,27],[5,11],8,8448564],["25040","2025-04-14",[2,8,16,31,32],[4,12],4,10000000],["25039","2025-04-12",[3,7,14,15,19],[6,10],4,10000000],["25038","2025-04-09",[7,8,20,26,34],[8,9],4,10000000],["25037","2025-04-07",[5,20,23,27,31],[4,6],3,10000000],["25036","2025-04-05",[4,7,13,27,30],[2,6],4,10000000],["25035","2025-04-02",[22,25,28,29,30],[4,8],6,10000000],["25034","2025-03-31",[4,15,22,28,33],[6,8],12,6578028],["25033","2025-03-29",[1,2,8,10,33],[10,12],3,10000000],["25032","2025-03-26",[12,22,25,27,28],[1,2],0,-1],["25031","2025-03-24",[14,18,20,25,35],[1,7],4,10000000],["25030","2025-03-22",[3,9,14,24,28],[6,7],9,7699188],["25029","2025-03-19",[5,9,26,31,33],[3,10],2,10000000],["25028","2025-03-17",[6,8,20,25,29],[3,7],7,8904156],["25027","2025-03-15",[3,6,11,13,20],[1,11],8,10000000],["25026","2025-03-12",[2,3,7,17,30],[1,9],1,10000000],["25025","2025-03-10",[3,6,8,10,25],[3,7],7,7559158],["25024","2025-03-08",[6,12,13,16,23],[5,8],14,6364847],["25023","2025-03-05",[10,20,22,24,25],[9,12],4,10000000],["25022","2025-03-03",[1,11,13,27,29],[4,10],7,9280845],["25021","2025-03-01",[10,18,25,30,35],[3,12],7,10000000],["25020","2025-02-26",[1,9,12,22,29],[5,9],8,8494966],["25019","2025-02-24",[7,8,11,18,23],[3,11],7,8207321],["25018","2025-02-22",[1,7,9,20,28],[1,4],16,7273028],["25017","2025-02-19",[10,12,26,28,31],[3,10],1,10000000],["25016","2025-02-17",[5,7,12,20,29],[8,12],12,6900770],["25015","2025-02-15",[7,10,24,31,35],[1,8],4,10000000],["25014","2025-02-12",[5,19,22,29,35],[2,10],4,10000000],["25013","2025-02-10",[14,16,18,20,35],[2,5],5,10000000],["25012","2025-02-08",[2,18,19,21,25],[2,11],2,10000000],["25011","2025-01-25",[3,6,7,11,27],[2,8],5,9667253],["25010","2025-01-22",[5,21,28,30,32],[7,12],6,10000000],["25009","2025-01-20",[3,19,21,30,32],[6,9],5,10000000],["25008","2025-01-18",[1,5,7,13,35],[5,12],7,10000000],["25007","2025-01-15",[15,22,23,25,31],[1,9],1,10000000],["25006","2025-01-13",[3,4,13,19,35],[3,10],4,10000000],["25005","2025-01-11",[5,6,8,31,32],[9,11],4,9839697],["25004","2025-01-08",[2,5,9,13,33],[1,7],3,10000000],["25003","2025-01-06",[10,25,30,32,34],[4,10],1,10000000],["25002","2025-01-04",[19,21,22,28,32],[6,9],7,8977032],["25001","2025-01-01",[5,8,16,17,27],[4,7],12,7654708],["24152","2024-12-30",[1,2,7,8,31],[2,10],3,10000000],["24151","2024-12-28",[5,12,17,19,35],[10,11],5,10000000],["24150","2024-12-25",[4,11,23,25,34],[5,7],2,10000000],["24149","2024-12-23",[2,5,16,18,22],[7,9],3,10000000],["24148","2024-12-21",[6,9,20,32,35],[8,11],2,10000000],["24147","2024-12-18",[12,18,21,22,31],[1,7],0,-1],["24146","2024-12-16",[5,20,21,22,32],[3,4],6,9555674],["24145","2024-12-14",[1,6,9,22,24],[1,3],4,10000000],["24144","2024-12-11",[6,7,8,21,30],[1,5],4,10000000],["24143","2024-12-09",[16,20,22,24,31],[4,5],6,9370240],["24142","2024-12-07",[8,21,24,33,34],[3,10],13,6849783],["24141","2024-12-04",[2,6,7,16,20],[2,11],7,8545200],["24140","2024-12-02",[3,6,15,23,31],[1,12],4,10000000],["24139","2024-11-30",[5,12,20,23,24],[5,7],9,8236640],["24138","2024-11-27",[5,17,20,28,34],[4,9],3,10000000],["24137","2024-11-25",[8,15,16,17,21],[2,5],3,10000000],["24136","2024-11-23",[1,17,20,29,34],[7,8],1,10000000],["24135","2024-11-20",[6,8,22,24,30],[3,8],11,7341497],["24134","2024-11-18",[1,4,7,13,33],[5,6],4,10000000],["24133","2024-11-16",[8,10,14,22,29],[4,6],6,10000000],["24132","2024-11-13",[5,6,10,16,31],[6,9],6,9953712],["24131","2024-11-11",[2,3,4,21,26],[2,3],10,8892360],["24130","2024-11-09",[11,21,25,31,32],[4,10],6,10000000],["24129","2024-11-06",[7,19,30,31,34],[5,7],3,10000000],["24128","2024-11-04",[3,7,10,29,31],[1,3],2,10000000],["24127","2024-11-02",[2,3,10,16,28],[7,10],4,10000000],["24126","2024-10-30",[2,10,17,28,34],[7,8],5,10000000],["24125","2024-10-28",[10,14,19,24,26],[1,10],3,10000000],["24124","2024-10-26",[2,3,7,10,25],[1,11],5,10000000],["24123","2024-10-23",[3,9,16,30,31],[8,9],7,9140228],["24122","2024-10-21",[5,6,9,15,17],[3,10],2,10000000],["24121","2024-10-19",[7,15,18,24,33],[4,5],12,7033857],["24120","2024-10-16",[4,12,17,23,27],[2,8],7,9594830],["24119","2024-10-14",[6,12,28,30,33],[2,7],7,9881541],["24118","2024-10-12",[1,3,9,16,19],[5,11],15,6673506],["24117","2024-10-09",[2,10,22,26,28],[2,4],4,9706493],["24116","2024-10-07",[1,3,6,16,25],[1,11],1,10000000],["24115","2024-10-05",[3,4,12,19,24],[8,12],8,7465766],["24114","2024-09-30",[12,27,30,34,35],[5,11],3,10000000],["24113","2024-09-28",[16,18,25,26,33],[4,8],5,10000000],["24112","2024-09-25",[5,15,24,31,34],[3,10],1,10000000],["24111","2024-09-23",[3,9,19,27,30],[7,11],15,6071953],["24110","2024-09-21",[1,7,8,18,28],[4,12],2,10000000],["24109","2024-09-18",[12,23,26,27,28],[3,11],3,10000000],["24108","2024-09-16",[16,17,21,31,34],[3,8],7,9949930],["24107","2024-09-14",[6,14,16,18,34],[3,10],4,10000000],["24106","2024-09-11",[5,11,19,22,29],[2,12],9,7381712],["24105","2024-09-09",[14,20,21,28,32],[9,11],2,10000000],["24104","2024-09-07",[1,4,9,13,17],[6,9],3,10000000],["24103","2024-09-04",[19,21,29,32,33],[6,8],5,10000000],["24102","2024-09-02",[1,5,9,14,20],[5,11],2,10000000],["24101","2024-08-31",[16,19,22,27,35],[6,10],0,-1],["24100","2024-08-28",[2,12,19,22,32],[5,11],6,9951022],["24099","2024-08-26",[4,10,24,31,35],[5,8],4,10000000],["24098","2024-08-24",[3,10,15,19,29],[9,10],6,9380836],["24097","2024-08-21",[7,11,12,14,19],[2,8],5,10000000],["24096","2024-08-19",[2,3,23,27,31],[1,10],5,10000000],["24095","2024-08-17",[1,7,19,26,27],[3,5],3,10000000],["24094","2024-08-14",[12,13,24,29,31],[2,8],6,10000000],["24093","2024-08-12",[16,24,26,28,29],[8,12],2,10000000],["24092","2024-08-10",[2,4,25,26,31],[1,6],2,10000000],["24091","2024-08-07",[1,8,11,17,21],[1,2],7,9748244],["24090","2024-08-05",[2,3,6,28,33],[7,11],6,10000000],["24089","2024-08-03",[5,6,29,30,34],[7,8],9,7163757],["24088","2024-07-31",[1,2,23,28,32],[3,5],1,10000000],["24087","2024-07-29",[7,10,20,28,34],[5,10],5,9672418],["24086","2024-07-27",[11,12,14,22,28],[7,11],4,10000000],["24085","2024-07-24",[2,9,16,29,35],[1,6],2,10000000],["24084","2024-07-22",[4,11,16,17,23],[5,10],7,9606887],["24083","2024-07-20",[9,11,12,13,30],[7,9],30,5386805],["24082","2024-07-17",[8,21,23,24,26],[4,5],3,10000000],["24081","2024-07-15",[14,15,25,27,34],[1,10],3,10000000],["24080","2024-07-13",[3,5,24,27,28],[9,11],3,10000000],["24079","2024-07-10",[3,8,17,18,23],[6,11],6,9403336],["24078","2024-07-08",[5,7,10,14,15],[4,7],6,8221379],["24077","2024-07-06",[1,3,25,26,29],[6,12],3,10000000],["24076","2024-07-03",[1,6,22,27,35],[7,12],5,10000000],["24075","2024-07-01",[8,17,26,28,32],[1,10],2,10000000],["24074","2024-06-29",[2,10,11,21,27],[9,11],5,10000000],["24073","2024-06-26",[7,9,12,21,23],[5,9],5,10000000],["24072","2024-06-24",[4,17,21,23,32],[1,6],0,-1],["24071","2024-06-22",[6,10,15,34,35],[2,10],1,10000000],["24070","2024-06-19",[4,20,21,32,34],[2,9],5,10000000],["24069","2024-06-17",[7,9,16,20,24],[3,7],4,10000000],["24068","2024-06-15",[15,20,31,32,33],[5,10],8,8633190],["24067","2024-06-12",[3,11,14,20,22],[6,9],6,8434472],["24066","2024-06-10",[13,19,20,24,25],[6,7],5,10000000],["24065","2024-06-08",[5,10,18,26,27],[3,6],11,8094947],["24064","2024-06-05",[5,12,21,32,33],[8,9],6,10000000],["24063","2024-06-03",[7,12,16,33,34],[1,3],10,7845807],["24062","2024-06-01",[5,14,15,16,33],[3,5],4,10000000],["24061","2024-05-29",[1,12,19,31,33],[5,8],2,10000000],["24060","2024-05-27",[3,21,25,28,30],[1,12],2,10000000],["24059","2024-05-25",[17,18,20,25,31],[3,12],2,10000000],["24058","2024-05-22",[6,10,13,20,32],[1,2],0,-1],["24057","2024-05-20",[9,25,30,33,34],[3,9],13,8286191],["24056","2024-05-18",[16,17,18,27,35],[6,12],6,9728340],["24055","2024-05-15",[7,17,22,30,34],[5,7],3,10000000],["24054","2024-05-13",[5,6,9,11,22],[1,3],5,10000000],["24053","2024-05-11",[1,7,19,20,35],[3,9],14,7105231],["24052","2024-05-08",[2,3,13,22,34],[4,8],3,10000000],["24051","2024-05-06",[5,21,22,23,29],[1,2],2,10000000],["24050","2024-05-04",[3,4,14,18,26],[7,9],5,7763994],["24049","2024-05-01",[4,6,9,10,22],[1,8],4,7782365],["24048","2024-04-29",[12,18,21,26,28],[8,9],6,6699387],["24047","2024-04-27",[11,19,21,26,35],[10,11],1,10000000],["24046","2024-04-24",[6,12,17,29,30],[7,11],21,6357343],["24045","2024-04-22",[9,10,14,31,32],[3,8],11,7959250],["24044","2024-04-20",[3,13,15,17,22],[6,10],7,10000000],["24043","2024-04-17",[3,4,8,14,27],[5,7],5,10000000],["24042","2024-04-15",[1,8,15,23,35],[5,12],3,10000000],["24041","2024-04-13",[6,8,14,16,28],[3,5],10,9149915],["24040","2024-04-10",[5,12,16,29,30],[3,6],7,9689751],["24039","2024-04-08",[3,10,11,20,22],[6,10],5,10000000],["24038","2024-04-06",[15,22,24,25,29],[1,5],7,10000000],["24037","2024-04-03",[17,19,20,29,35],[7,11],5,10000000],["24036","2024-04-01",[2,5,11,32,34],[6,10],5,10000000],["24035","2024-03-30",[5,13,17,29,33],[5,12],5,10000000],["24034","2024-03-27",[23,26,27,29,33],[5,8],5,10000000],["24033","2024-03-25",[4,8,10,11,15],[7,9],3,10000000],["24032","2024-03-23",[5,15,26,33,35],[1,9],4,10000000],["24031","2024-03-20",[9,12,15,30,34],[5,6],2,10000000],["24030","2024-03-18",[8,9,11,19,30],[6,12],5,10000000],["24029","2024-03-16",[4,19,24,28,34],[4,5],3,8132033],["24028","2024-03-13",[13,18,20,26,28],[4,8],7,6557970],["24027","2024-03-11",[8,9,16,22,23],[7,9],11,6990402],["24026","2024-03-09",[1,18,21,26,33],[2,12],2,10000000],["24025","2024-03-06",[1,2,8,18,27],[4,8],1,10000000],["24024","2024-03-04",[3,5,12,17,26],[1,12],3,8798252],["24023","2024-03-02",[8,10,12,14,22],[5,9],6,7312943],["24022","2024-02-28",[7,9,11,31,32],[4,8],5,7000760],["24021","2024-02-26",[1,12,16,20,28],[7,9],21,5982202],["24020","2024-02-24",[2,4,8,19,26],[2,6],4,10000000],["24019","2024-02-21",[19,20,26,29,30],[3,4],6,8217484],["24018","2024-02-19",[4,12,19,25,27],[1,9],6,10000000],["24017","2024-02-07",[3,7,25,27,35],[1,4],0,-1],["24016","2024-02-05",[15,18,25,27,29],[6,11],4,10000000],["24015","2024-02-03",[8,11,14,24,31],[5,6],15,6784841],["24014","2024-01-31",[4,5,16,21,31],[9,11],3,10000000],["24013","2024-01-29",[5,22,25,28,30],[3,12],10,7927899],["24012","2024-01-27",[21,22,25,26,34],[1,9],0,-1],["24011","2024-01-24",[1,3,27,32,34],[1,7],4,10000000],["24010","2024-01-22",[2,8,10,15,27],[2,8],8,7815815],["24009","2024-01-20",[15,18,19,24,26],[5,9],2,10000000],["24008","2024-01-17",[4,6,11,20,30],[3,5],6,9547905],["24007","2024-01-15",[4,5,28,34,35],[4,11],12,7361176],["24006","2024-01-13",[8,13,16,17,33],[2,10],6,10000000],["24005","2024-01-10",[3,5,7,9,12],[5,8],15,6259584],["24004","2024-01-08",[2,6,18,19,27],[8,9],10,6632781],["24003","2024-01-06",[7,9,12,23,29],[1,2],9,7766564],["24002","2024-01-03",[1,6,8,27,32],[3,4],7,8971726],["24001","2024-01-01",[3,9,17,26,35],[2,7],7,8913873],["23150","2023-12-30",[5,6,17,18,33],[11,12],4,10000000],["23149","2023-12-27",[1,16,17,21,29],[1,6],6,9555249],["23148","2023-12-25",[11,12,20,21,27],[2,12],6,10000000],["23147","2023-12-23",[6,7,19,33,34],[3,8],5,10000000],["23146","2023-12-20",[14,18,19,26,31],[2,7],5,10000000],["23145","2023-12-18",[6,10,12,32,33],[6,7],3,10000000],["23144","2023-12-16",[5,14,18,25,35],[1,10],5,10000000],["23143","2023-12-13",[9,20,23,29,33],[2,10],1,10000000],["23142","2023-12-11",[4,13,15,17,32],[10,12],5,10000000],["23141","2023-12-09",[4,22,25,30,31],[4,5],5,10000000],["23140","2023-12-06",[1,2,9,19,30],[1,2],6,10000000],["23139","2023-12-04",[15,16,25,31,34],[5,9],5,10000000],["23138","2023-12-02",[7,12,20,28,31],[9,10],2,10000000],["23137","2023-11-29",[4,19,21,30,31],[6,12],5,10000000],["23136","2023-11-27",[13,23,27,30,34],[6,9],4,10000000],["23135","2023-11-25",[5,18,22,28,29],[9,12],15,6929543],["23134","2023-11-22",[10,15,22,27,33],[1,12],5,10000000],["23133","2023-11-20",[10,18,25,28,33],[5,11],6,8695944],["23132","2023-11-18",[3,4,12,15,23],[2,6],4,10000000],["23131","2023-11-15",[3,7,21,22,24],[6,7],2,10000000],["23130","2023-11-13",[13,20,27,29,30],[1,7],3,10000000],["23129","2023-11-11",[9,23,25,27,33],[6,12],2,10000000],["23128","2023-11-08",[1,5,7,12,13],[2,6],4,10000000],["23127","2023-11-06",[4,7,8,18,19],[2,6],3,10000000],["23126","2023-11-04",[7,12,17,26,34],[2,6],13,8662429],["23125","2023-11-01",[7,25,26,29,32],[2,8],1,10000000],["23124","2023-10-30",[6,18,23,27,32],[6,10],2,10000000],["23123","2023-10-28",[2,14,16,28,30],[2,7],4,10000000],["23122","2023-10-25",[1,7,9,25,29],[10,12],3,10000000],["23121","2023-10-23",[5,11,15,23,33],[1,9],12,8513200],["23120","2023-10-21",[2,8,16,31,34],[1,10],2,10000000],["23119","2023-10-18",[4,8,10,14,21],[4,10],4,10000000],["23118","2023-10-16",[6,7,13,25,33],[5,8],8,7792198],["23117","2023-10-14",[5,7,15,18,20],[3,4],5,10000000],["23116","2023-10-11",[1,3,9,18,29],[4,9],7,8003202],["23115","2023-10-09",[7,10,23,31,34],[2,10],9,7616663],["23114","2023-10-07",[2,25,27,30,35],[1,10],3,10000000],["23113","2023-09-30",[6,8,30,32,33],[3,10],6,9413555],["23112","2023-09-27",[1,11,17,22,27],[2,9],4,10000000],["23111","2023-09-25",[3,12,15,28,35],[2,12],3,9178567],["23110","2023-09-23",[4,9,11,13,17],[7,8],3,10000000],["23109","2023-09-20",[1,12,21,22,31],[2,9],2,9999751],["23108","2023-09-18",[5,6,17,30,32],[2,8],5,7050476],["23107","2023-09-16",[1,12,15,16,18],[3,10],1,10000000],["23106","2023-09-13",[16,24,26,28,31],[1,6],0,-1],["23105","2023-09-11",[7,8,19,20,25],[2,11],26,5322339],["23104","2023-09-09",[6,15,16,32,33],[8,10],22,6310674],["23103","2023-09-06",[8,11,19,31,32],[8,11],6,8485103],["23102","2023-09-04",[2,4,7,16,33],[7,11],2,10000000],["23101","2023-09-02",[6,14,16,17,28],[7,10],4,10000000],["23100","2023-08-30",[4,6,13,19,35],[9,11],1,10000000],["23099","2023-08-28",[9,11,13,22,23],[6,7],17,6065668],["23098","2023-08-26",[2,7,15,30,34],[5,9],6,9391734],["23097","2023-08-23",[6,7,18,20,22],[3,9],6,10000000],["23096","2023-08-21",[6,7,14,21,31],[3,10],1,10000000],["23095","2023-08-19",[8,19,28,32,34],[3,7],1,10000000],["23094","2023-08-16",[12,19,22,28,32],[8,12],1,10000000],["23093","2023-08-14",[11,14,17,19,21],[1,5],4,7978094],["23092","2023-08-12",[3,16,21,26,32],[3,12],3,10000000],["23091","2023-08-09",[6,16,18,28,29],[7,11],7,6453360],["23090","2023-08-07",[8,11,12,19,35],[11,12],28,5993406],["23089","2023-08-05",[3,12,20,26,35],[2,12],4,10000000],["23088","2023-08-02",[8,14,16,22,24],[9,12],7,9324634],["23087","2023-07-31",[3,4,16,19,24],[4,5],2,10000000],["23086","2023-07-29",[3,11,15,20,35],[7,11],6,10000000],["23085","2023-07-26",[11,12,26,31,35],[5,7],0,-1],["23084","2023-07-24",[3,5,8,24,32],[7,8],3,8187716],["23083","2023-07-22",[13,15,21,25,32],[9,10],8,8765209],["23082","2023-07-19",[2,8,9,15,20],[3,9],5,9527865],["23081","2023-07-17",[5,6,23,28,35],[7,10],13,7201205],["23080","2023-07-15",[1,2,9,16,30],[1,11],2,10000000],["23079","2023-07-12",[6,8,26,29,34],[5,8],5,10000000],["23078","2023-07-10",[2,3,6,26,27],[7,8],8,8140301],["23077","2023-07-08",[5,16,18,26,35],[3,6],13,7106555],["23076","2023-07-05",[8,9,11,26,34],[2,7],3,10000000]];
+
+let DATA = RAW.map(r => ({
+  issue: r[0], date: r[1], front: r[2], back: r[3], n1: r[4], amt1: r[5]
+}));
+
+const CFG = {
+  windowN: 500,
+  layer: 'auto',
+  thF: [80, 63], thB: [93, 72],
+  mix: { fh: 2, fw: 2, fc: 1, bh: 1, bw: 1, bc: 0 },
+  sumMin: 60, sumMax: 120,
+  oddMin: 1, oddMax: 4,
+  bigMin: 1, bigMax: 4,
+  repeat: 1, chain: 2,
+  mode: 'single',
+  fm: 6, bm: 2,
+  df: 2, tf: 4, db: 1, tb: 2,
+  pack: 18,
+  append: false,
+  times: 1,
+  groups: 5,
+  view: 'ball',
+  tstyle: 'mono'
+};
+
+const PACKAGES = {
+  18: { base: 18, parts: [{ k: 'c', f: 5, b: 3 }, { k: 's', n: 6 }], desc: '5+3复式 + 单式 6 注', notes: 9 },
+  28: { base: 28, parts: [{ k: 'c', f: 6, b: 2 }, { k: 's', n: 8 }], desc: '6+2复式 + 单式 8 注', notes: 14 },
+  36: { base: 36, parts: [{ k: 'c', f: 5, b: 5 }, { k: 's', n: 8 }], desc: '5+5复式 + 单式 8 注', notes: 18 },
+  58: { base: 58, parts: [{ k: 'c', f: 7, b: 2 }, { k: 's', n: 8 }], desc: '7+2复式 + 单式 8 注', notes: 29 },
+  66: { base: 66, parts: [{ k: 'c', f: 6, b: 3 }, { k: 'c', f: 5, b: 5 }, { k: 's', n: 5 }], desc: '6+3复式 + 5+5复式 + 单式 5 注', notes: 33 },
+  88: { base: 88, parts: [{ k: 'c', f: 7, b: 2 }, { k: 'c', f: 6, b: 3 }, { k: 's', n: 5 }], desc: '7+2复式 + 6+3复式 + 单式 5 注', notes: 44 }
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const pad2 = n => String(n).padStart(2, '0');
+const fmt = n => n.toLocaleString('zh-CN');
+
+function C(n, k) {
+  if (k < 0 || k > n) return 0;
+  k = Math.min(k, n - k);
+  let r = 1;
+  for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+  return Math.round(r);
+}
+
+/* ---------------- 统计 ---------------- */
+function computeStats(n) {
+  const rows = DATA.slice(0, n);
+  const fc = new Array(36).fill(0), bc = new Array(13).fill(0);
+  const fmiss = new Array(36).fill(n), bmiss = new Array(13).fill(n);
+  rows.forEach((r, i) => {
+    r.front.forEach(k => { fc[k]++; if (fmiss[k] === n) fmiss[k] = i; });
+    r.back.forEach(k => { bc[k]++; if (bmiss[k] === n) bmiss[k] = i; });
+  });
+  let notes = 0, maxAmt = 0, sumAmt = 0, cnt = 0;
+  rows.forEach(r => { notes += r.n1; if (r.amt1 > maxAmt) maxAmt = r.amt1; if (r.amt1 > 0) { sumAmt += r.amt1; cnt++; } });
+  return {
+    rows, fc, bc, fmiss, bmiss,
+    fset: layerSplit(fc, 35), bset: layerSplit(bc, 12),
+    notes, maxAmt, avgNotes: notes / rows.length, avgAmt: cnt ? sumAmt / cnt : 0
+  };
+}
+
+function layerSplit(cnt, pool) {
+  const idx = Array.from({ length: pool }, (_, i) => i + 1);
+  const sorted = idx.slice().sort((a, b) => (cnt[b] - cnt[a]) || (a - b));
+  let hot, warm, cold;
+  if (CFG.layer === 'custom') {
+    const t = pool === 35 ? CFG.thF : CFG.thB;
+    hot = idx.filter(k => cnt[k] >= t[0]);
+    cold = idx.filter(k => cnt[k] <= t[1]).sort((a, b) => cnt[a] - cnt[b]);
+    const hs = new Set(hot), cs = new Set(cold);
+    warm = idx.filter(k => !hs.has(k) && !cs.has(k));
+    if (!hot.length) hot = sorted.slice(0, 3);
+    if (!cold.length) cold = sorted.slice(pool - 3).reverse();
+  } else {
+    const hN = Math.round(pool * 0.3), cN = Math.round(pool * 0.3);
+    hot = sorted.slice(0, hN);
+    cold = sorted.slice(pool - cN).reverse();
+    warm = sorted.slice(hN, pool - cN);
+  }
+  return { hot, warm, cold, sorted };
+}
+
+/* ---------------- 抽样 ---------------- */
+function weightedPick(list, k, wfn) {
+  const pool = list.slice(), out = [];
+  k = Math.min(k, pool.length);
+  while (out.length < k && pool.length) {
+    let total = 0;
+    const ws = pool.map(x => { const w = Math.max(0.001, wfn(x)); total += w; return w; });
+    let r = Math.random() * total, pick = 0;
+    for (let i = 0; i < pool.length; i++) { r -= ws[i]; if (r <= 0) { pick = i; break; } }
+    out.push(pool[pick]); pool.splice(pick, 1);
+  }
+  return out;
+}
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [b[i], b[j]] = [b[j], b[i]]; } return b; };
+
+let STATS = null, LAST = null, RESULT = null, TICKET = null;
+
+function mixPlan(total, h, w, c, caps) {
+  const sum = h + w + c || 1;
+  let a = Math.round(total * h / sum), b = Math.round(total * w / sum), d = total - a - b;
+  const cap = [caps.hot, caps.warm, caps.cold];
+  a = Math.max(0, Math.min(cap[0], a)); b = Math.max(0, Math.min(cap[1], b)); d = Math.max(0, Math.min(cap[2], d));
+  let diff = total - (a + b + d), guard = 0;
+  while (diff !== 0 && guard++ < 60) {
+    let moved = false;
+    for (const i of [1, 0, 2]) {
+      const arr = [a, b, d];
+      if (diff > 0 && arr[i] < cap[i]) { arr[i]++; diff--; moved = true; }
+      else if (diff < 0 && arr[i] > 0) { arr[i]--; diff++; moved = true; }
+      a = arr[0]; b = arr[1]; d = arr[2];
+      if (diff === 0) break;
+    }
+    if (!moved) break;
+  }
+  return [a, b, d];
+}
+
+function genFront(count, st) {
+  const [nh, nw, nc] = mixPlan(count, CFG.mix.fh, CFG.mix.fw, CFG.mix.fc,
+    { hot: st.fset.hot.length, warm: st.fset.warm.length, cold: st.fset.cold.length });
+  const out = [];
+  out.push(...weightedPick(st.fset.hot, nh, k => Math.pow(st.fc[k], 1.6)));
+  out.push(...shuffle(st.fset.warm).slice(0, nw));
+  out.push(...weightedPick(st.fset.cold, nc, k => Math.pow(st.fmiss[k] + 1, 1.2)));
+  if (out.length < count) {
+    const used = new Set(out);
+    const rest = shuffle(Array.from({ length: 35 }, (_, i) => i + 1).filter(k => !used.has(k)));
+    while (out.length < count && rest.length) out.push(rest.pop());
+  }
+  return out.sort((a, b) => a - b);
+}
+
+function genBack(count, st) {
+  const [nh, nw, nc] = mixPlan(count, CFG.mix.bh, CFG.mix.bw, CFG.mix.bc,
+    { hot: st.bset.hot.length, warm: st.bset.warm.length, cold: st.bset.cold.length });
+  const out = [];
+  out.push(...weightedPick(st.bset.hot, nh, k => Math.pow(st.bc[k], 1.6)));
+  out.push(...shuffle(st.bset.warm).slice(0, nw));
+  out.push(...weightedPick(st.bset.cold, nc, k => Math.pow(st.bmiss[k] + 1, 1.2)));
+  if (out.length < count) {
+    const used = new Set(out);
+    const rest = shuffle(Array.from({ length: 12 }, (_, i) => i + 1).filter(k => !used.has(k)));
+    while (out.length < count && rest.length) out.push(rest.pop());
+  }
+  return out.sort((a, b) => a - b);
+}
+
+function passFilter(front) {
+  const sum = front.reduce((a, b) => a + b, 0);
+  if (sum < CFG.sumMin || sum > CFG.sumMax) return false;
+  const odd = front.filter(n => n % 2).length;
+  if (odd < CFG.oddMin || odd > CFG.oddMax) return false;
+  const big = front.filter(n => n >= 18).length;
+  if (big < CFG.bigMin || big > CFG.bigMax) return false;
+  if (LAST) {
+    const rep = front.filter(n => LAST.front.includes(n)).length;
+    if (rep > CFG.repeat) return false;
+  }
+  let run = 1, maxRun = 1;
+  for (let i = 1; i < front.length; i++) {
+    if (front[i] === front[i - 1] + 1) { run++; maxRun = Math.max(maxRun, run); } else run = 1;
+  }
+  return maxRun <= CFG.chain;
+}
+
+function genSingle(st) {
+  for (let i = 0; i < 400; i++) {
+    const f = genFront(5, st), b = genBack(2, st);
+    if (passFilter(f)) return { front: f, back: b };
+  }
+  return { front: genFront(5, st), back: genBack(2, st) };
+}
+
+function frontLabel(f, b) { return f + '+' + b + '复式'; }
+
+function generate() {
+  const st = STATS;
+  const res = { lines: [], mode: CFG.mode, append: CFG.append, times: CFG.times };
+
+  if (CFG.mode === 'single') {
+    const seen = new Set(); let guard = 0;
+    while (res.lines.length < CFG.groups && guard++ < CFG.groups * 60) {
+      const g = genSingle(st);
+      const key = g.front.join(',') + '|' + g.back.join(',');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      res.lines.push({ type: '单式', front: g.front, back: g.back, notes: 1, kind: 'single' });
+    }
+  } else if (CFG.mode === 'compound') {
+    for (let i = 0; i < CFG.groups; i++) {
+      const f = genFront(CFG.fm, st), b = genBack(CFG.bm, st);
+      res.lines.push({ type: frontLabel(CFG.fm, CFG.bm), front: f, back: b, notes: C(CFG.fm, 5) * C(CFG.bm, 2), kind: 'compound' });
+    }
+  } else if (CFG.mode === 'dantuo') {
+    for (let i = 0; i < CFG.groups; i++) {
+      const allF = genFront(CFG.df + CFG.tf, st);
+      const df = allF.slice(0, CFG.df).sort((a, b) => a - b);
+      const tf = allF.slice(CFG.df).sort((a, b) => a - b);
+      const allB = genBack(CFG.db + CFG.tb, st);
+      const db = allB.slice(0, CFG.db).sort((a, b) => a - b);
+      const tb = allB.slice(CFG.db).sort((a, b) => a - b);
+      const notes = C(tf.length, 5 - df.length) * C(tb.length, 2 - db.length);
+      res.lines.push({
+        type: CFG.db ? '双区胆拖' : '前区胆拖',
+        danF: df, tuoF: tf, danB: db, tuoB: tb,
+        front: allF.slice().sort((a, b) => a - b), back: allB.slice().sort((a, b) => a - b),
+        notes: Math.max(notes, 0), kind: 'dantuo'
+      });
+    }
+  } else {
+    const pk = PACKAGES[CFG.pack];
+    /* 复式行排在票面最后：先出全部单式，再出复式（原 parts 顺序里复式在前） */
+    const ordered = pk.parts.slice().sort((a, b) => (a.k === 'c' ? 1 : 0) - (b.k === 'c' ? 1 : 0));
+    ordered.forEach(p => {
+      if (p.k === 'c') {
+        const f = genFront(p.f, st), b = genBack(p.b, st);
+        res.lines.push({ type: frontLabel(p.f, p.b), front: f, back: b, notes: C(p.f, 5) * C(p.b, 2), kind: 'compound' });
+      } else {
+        for (let i = 0; i < p.n; i++) {
+          const g = genSingle(st);
+          res.lines.push({ type: '单式', front: g.front, back: g.back, notes: 1, kind: 'single' });
+        }
+      }
+    });
+  }
+  res.notes = res.lines.reduce((a, l) => a + l.notes, 0);
+  res.amount = res.notes * 2 * res.times + (res.append ? res.notes * 1 * res.times : 0);
+  return res;
+}
+
+/* ---------------- 期号 ---------------- */
+function nextIssue() {
+  const last = DATA[0];
+  const num = String(Number(last.issue) + 1);
+  const d = new Date(last.date.replace(/-/g, '/'));
+  d.setDate(d.getDate() + 3);
+  return { issue: num, date: d };
+}
+let NEXT = nextIssue();
+const dateStr = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+
+function ticketModel(res) {
+  const pk = CFG.mode === 'package' ? PACKAGES[CFG.pack] : null;
+  const typeLabel = CFG.mode === 'package' ? (pk.base + ' 元套餐票')
+    : CFG.mode === 'single' ? '单式' : CFG.mode === 'compound' ? '复式' : '胆拖';
+  return {
+    res, pk, typeLabel,
+    issue: $('#inIssue').value || NEXT.issue,
+    drawDate: $('#inDrawDate').value || dateStr(NEXT.date)
+  };
+}
+
+/* ---------------- 票面（精简版） ---------------- */
+const MONO = "'SF Mono','Menlo','Consolas','Courier New',monospace";
+const SANS = "'PingFang SC','-apple-system','SF Pro Text','Noto Sans SC','Helvetica Neue','Microsoft YaHei',sans-serif";
+const CIRCLED = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function estTextWidth(str, size) {
+  size = size || 9.5;
+  let w = 0;
+  for (const ch of String(str)) {
+    if (/[\u4e00-\u9fa5]/.test(ch)) w += 1;
+    else if (/[0-9A-Za-z]/.test(ch)) w += 0.56;
+    else if (ch === ' ') w += 0.28;
+    else w += 0.42;
+  }
+  return w * size;
+}
+
+function renderTicket() {
+  if (!TICKET) return;
+  const t = TICKET, res = t.res, isPkg = CFG.mode === 'package';
+  const W = 412, PAD = 28;
+  const parts = [];
+  let y = 0;
+
+  const t_ = (x, yy, str, o = {}) => {
+    const a = [
+      'x="' + x + '"', 'y="' + yy + '"',
+      'font-size="' + (o.size || 13) + '"',
+      'fill="' + (o.fill || '#1c1c1e') + '"',
+      'font-family="' + (o.mono ? MONO : SANS) + '"',
+      o.weight ? 'font-weight="' + o.weight + '"' : '',
+      o.anchor ? 'text-anchor="' + o.anchor + '"' : '',
+      o.ls !== undefined ? 'letter-spacing="' + o.ls + '"' : '',
+      o.op ? 'opacity="' + o.op + '"' : ''
+    ].filter(Boolean).join(' ');
+    parts.push('<text ' + a + '>' + esc(str) + '</text>');
+  };
+  const line = (yy, o = {}) => {
+    parts.push('<line x1="' + PAD + '" y1="' + yy + '" x2="' + (W - PAD) + '" y2="' + yy + '" stroke="' + (o.color || '#d4d0c6') + '" stroke-width="' + (o.w || 1) + '"' + (o.dash ? ' stroke-dasharray="' + o.dash + '"' : '') + '/>');
+  };
+
+  /* 纸头 */
+  parts.push('<rect x="0" y="0" width="' + W + '" height="12" fill="#f5f2ec"/>');
+  for (let x = 5; x < W; x += 13) parts.push('<circle cx="' + x + '" cy="0" r="3.6" fill="#f2f2f7"/>');
+
+  y = 56;
+  t_(W / 2, y, '中国体育彩票', { size: 25, weight: 700, fill: '#c8252c', anchor: 'middle', ls: 7 });
+  y += 17;
+  t_(W / 2, y, 'CHINA  SPORTS  LOTTERY', { size: 9, fill: '#adadb2', anchor: 'middle', ls: 3 });
+
+  y += 30;
+  t_(PAD, y, '超级大乐透', { size: 20, weight: 700, ls: 1.2 });
+  if (isPkg) t_(W - PAD, y, '套餐票', { size: 10.5, fill: '#c8252c', anchor: 'end', weight: 600, ls: 1 });
+  y += 21;
+  if (isPkg) {
+    t_(PAD, y, '幸运套餐 · 单式与复式组合出票', { size: 8.5, fill: '#c8252c', ls: .4 });
+  } else {
+    t_(PAD, y, 'SUPER  LOTTO', { size: 8.5, fill: '#adadb2', ls: 2 });
+  }
+
+  y += 13; line(y); y += 20;
+
+  /* 关键信息 */
+  const rows = [
+    ['票型', t.typeLabel],
+    ['投注倍数', res.times + ' 倍'],
+    ['追加投注', res.append ? '已追加' : '未追加']
+  ];
+  rows.forEach(([k, v]) => {
+    t_(PAD, y, k, { size: 11, fill: '#8e8e93', ls: .5 });
+    t_(PAD + 66, y, v, { size: 11.5, weight: 600 });
+    y += 18;
+  });
+
+  y += 2; line(y, { dash: '3 3' }); y += 19;
+
+  /* 号码 */
+  const mono = CFG.tstyle === 'mono';
+  const startX = PAD + 24, rightLimit = W - PAD - 62;
+
+  res.lines.forEach((l, i) => {
+    const num = i < 20 ? CIRCLED[i] : pad2(i + 1);
+    t_(PAD, y, num, { size: 11, fill: '#b0b0b5', mono: i >= 20 });
+
+    let units, labelPx = 0;
+    if (l.kind === 'dantuo') {
+      units = l.danF.length + l.tuoF.length + l.danB.length + l.tuoB.length + 1.4;
+      labelPx = 4 * 15;
+    } else {
+      units = l.front.length + l.back.length + 1.4;
+    }
+    let fs = (rightLimit - startX - labelPx) / (units * (mono ? 1.58 : 1.64));
+    fs = Math.max(8, Math.min(l.kind === 'dantuo' ? 12 : 13.5, fs));
+
+    let x = startX;
+    const drawNums = (arr, color, isDan) => {
+      arr.forEach(n => {
+        if (mono) {
+          t_(x, y, pad2(n), { size: fs, mono: true, weight: isDan ? 700 : 500, fill: '#1c1c1e' });
+          x += fs * 1.58;
+        } else {
+          const r = fs * 0.62, cy = y - fs * 0.30;
+          parts.push('<circle cx="' + (x + r).toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + color + '"/>');
+          t_(x + r, cy + fs * 0.21, pad2(n), { size: fs * 0.6, mono: true, weight: 700, fill: '#fff', anchor: 'middle' });
+          x += fs * 1.64;
+        }
+      });
+    };
+    const drawTag = txt => { t_(x, y, txt, { size: 9.5, fill: '#97979c' }); x += 15; };
+    const drawPlus = () => { x += 2; t_(x, y, '+', { size: fs, fill: '#9a9a9f', mono: true, weight: 600 }); x += 12; };
+
+    if (l.kind === 'dantuo') {
+      drawTag('胆'); drawNums(l.danF, '#c8252c', true); x += 6;
+      drawTag('拖'); drawNums(l.tuoF, '#c8252c', false);
+      drawPlus();
+      drawTag('胆'); drawNums(l.danB, '#1a4ac0', true); x += 6;
+      drawTag('拖'); drawNums(l.tuoB, '#1a4ac0', false);
+    } else {
+      drawNums(l.front, '#c8252c', false);
+      drawPlus();
+      drawNums(l.back, '#1a4ac0', false);
+    }
+    /* 右侧只标注数；套餐票玩法统一放到票面最后 */
+    t_(W - PAD, y, l.notes + ' 注', { size: 9.5, anchor: 'end', fill: '#8e8e93', mono: true });
+    y += 23;
+  });
+
+  y -= 4; line(y, { dash: '3 3' }); y += 22;
+
+  /* 金额 */
+  const baseAmt = res.notes * 2 * res.times, apAmt = res.append ? res.notes * 1 * res.times : 0;
+  t_(PAD, y, '合计注数', { size: 11, fill: '#8e8e93' });
+  t_(PAD + 66, y, res.notes + ' 注', { size: 11.5, mono: true, weight: 600 });
+  y += 19;
+  t_(PAD, y, '基本金额', { size: 11, fill: '#8e8e93' });
+  t_(W - PAD, y, baseAmt.toFixed(2) + ' 元', { size: 12, anchor: 'end', mono: true });
+  y += 19;
+  if (res.append) {
+    t_(PAD, y, '追加金额', { size: 11, fill: '#8e8e93' });
+    t_(W - PAD, y, apAmt.toFixed(2) + ' 元', { size: 12, anchor: 'end', mono: true });
+    y += 19;
+  }
+  y += 3; line(y, { dash: '3 3' }); y += 18;
+
+  /* 玩法构成（复式票标注统一放到票面最后） */
+  if (isPkg) {
+    const cnt = {};
+    res.lines.forEach(l => { cnt[l.type] = (cnt[l.type] || 0) + 1; });
+    const segs = Object.keys(cnt).map(k => k + ' ×' + cnt[k]);
+    const maxW = W - PAD * 2 - 6;
+    const wrapped = [];
+    let cur = '';
+    segs.forEach(sg => {
+      const cand = cur ? cur + '  ·  ' + sg : sg;
+      if (cur && estTextWidth(cand, 9.5) > maxW) { wrapped.push(cur); cur = sg; }
+      else cur = cand;
+    });
+    if (cur) wrapped.push(cur);
+    wrapped.forEach(lnStr => {
+      t_(W / 2, y, lnStr, { size: 9.5, fill: '#8e8e93', anchor: 'middle', ls: .3 });
+      y += 14;
+    });
+    y += 3;
+  }
+
+  t_(W / 2, y, '未满 18 周岁不得购买彩票 · 理性购彩 快乐生活', { size: 9.5, fill: '#a8a8ad', anchor: 'middle' });
+  y += 15;
+  t_(W / 2, y, '模拟票面 · 仅供选号预览，不具备兑奖效力', { size: 8.5, fill: '#cbc6bb', anchor: 'middle' });
+  y += 20;
+
+  const H = y;
+  parts.unshift('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#fffdf7"/>');
+  parts.push('<rect x="0.75" y="12" width="' + (W - 1.5) + '" height="' + (H - 12) + '" fill="none" stroke="#eee9dd" stroke-width="1.5"/>');
+
+  $('#ticketBox').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" font-family="' + SANS + '">' + parts.join('') + '</svg>';
+}
+
+/* ---------------- 洞察渲染 ---------------- */
+function renderInsight() {
+  const st = STATS;
+  $('#stNotes').innerHTML = fmt(st.notes) + '<small>注</small>';
+  $('#stMax').innerHTML = (st.maxAmt / 10000).toFixed(0) + '<small>万</small>';
+  $('#stAvg').innerHTML = st.avgNotes.toFixed(1) + '<small>注</small>';
+  $('#stAvgAmt').innerHTML = (st.avgAmt / 10000).toFixed(0) + '<small>万</small>';
+  $('#insightRange').textContent = '第 ' + st.rows[st.rows.length - 1].issue + '–' + st.rows[0].issue + ' 期';
+  $('#dataRange').textContent = st.rows[st.rows.length - 1].date + ' ~ ' + st.rows[0].date;
+  $('#pillRange').textContent = CFG.windowN;
+  $('#pillLatest').textContent = st.rows[0].issue;
+
+  const build = (el, cnt, miss, set, pool) => {
+    const vals = cnt.slice(1);
+    const max = Math.max(...vals), min = Math.min(...vals);
+    const span = Math.max(1, max - min);
+    let html = '';
+    for (let k = 1; k <= pool; k++) {
+      const v = cnt[k], t = (v - min) / span;
+      const isHot = set.hot.includes(k), isCold = set.cold.includes(k);
+      let bg, col;
+      if (isHot) { bg = 'rgba(216,35,31,' + (0.10 + t * 0.52).toFixed(2) + ')'; col = t > 0.55 ? '#8f1512' : '#b81c18'; }
+      else if (isCold) { bg = 'rgba(47,111,237,' + (0.09 + (1 - t) * 0.42).toFixed(2) + ')'; col = '#1c53c9'; }
+      else { bg = 'rgba(120,120,128,' + (0.07 + t * 0.12).toFixed(2) + ')'; col = '#3a3a3c'; }
+      html += '<div class="cell" style="background:' + bg + '" title="出现 ' + v + ' 次 · 遗漏 ' + miss[k] + ' 期">'
+        + '<div class="m">' + miss[k] + '</div>'
+        + '<div class="n" style="color:' + col + '">' + pad2(k) + '</div>'
+        + '<div class="c" style="color:' + col + '">' + v + '</div></div>';
+    }
+    el.innerHTML = html;
+  };
+  build($('#heatFront'), st.fc, st.fmiss, st.fset, 35);
+  build($('#heatBack'), st.bc, st.bmiss, st.bset, 12);
+
+  const list = (cls, name, arr, color) => arr.length
+    ? '<div class="rank ' + cls + '"><div class="t"><i style="background:' + color + '"></i>' + name + '</div><div class="nums">'
+      + arr.map(k => '<span>' + pad2(k) + '</span>').join('') + '</div></div>' : '';
+  $('#rankList').innerHTML =
+    list('hot', '前区热号', st.fset.hot.slice(0, 10), '#d8231f') +
+    list('cold', '前区冷号', st.fset.cold.slice(0, 10), '#2f6fed') +
+    list('hot', '后区热号', st.bset.hot, '#d8231f') +
+    list('cold', '后区冷号', st.bset.cold, '#2f6fed');
+
+  $('#poolHint').textContent = '池容量 前区 ' + st.fset.hot.length + '/' + st.fset.warm.length + '/' + st.fset.cold.length
+    + ' · 后区 ' + st.bset.hot.length + '/' + st.bset.warm.length + '/' + st.bset.cold.length;
+}
+
+/* ---------------- 结果渲染 ---------------- */
+function renderResult() {
+  const area = $('#resArea');
+  if (!RESULT) { area.innerHTML = '<div class="empty"><b>还没有号码</b>设置好参数后，点「开始选号」</div>'; return; }
+  const res = RESULT;
+  $('#resMeta').textContent = res.lines.length + ' 行 / ' + res.notes + ' 注 · ' + res.amount.toFixed(2) + ' 元';
+
+  if (CFG.view === 'text') {
+    const txt = res.lines.map((l, i) => (i + 1) + '. ' + lineText(l) + '   ' + l.notes + '注').join('\n');
+    area.innerHTML = '<pre style="margin:10px 0 0;padding:13px 15px;background:rgba(120,120,128,.06);border-radius:11px;font-family:' + MONO + ';font-size:12.5px;line-height:1.9;color:#1d1d1f;overflow:auto">' + esc(txt) + '</pre>';
+    return;
+  }
+
+  let html = '<div class="res-grid">';
+  res.lines.forEach((l, i) => {
+    const ap = res.append ? '<span class="tag ap">追加</span>' : '';
+    const balls = (arr, cls) => arr.map(n => '<div class="ball ' + cls + '">' + pad2(n) + '</div>').join('');
+    let body;
+    if (l.kind === 'dantuo') {
+      body = balls(l.danF, 'r') + '<span class="tag" style="margin:0 1px">胆</span>' + balls(l.tuoF, 'r')
+        + '<span class="plus">+</span>' + balls(l.danB, 'b') + '<span class="tag" style="margin:0 1px">胆</span>' + balls(l.tuoB, 'b');
+    } else {
+      body = balls(l.front, 'r') + '<span class="plus">+</span>' + balls(l.back, 'b');
+    }
+    html += '<div class="gcard"><div class="top">'
+      + '<span class="idx">' + pad2(i + 1) + '</span><span class="tag">' + l.type + '</span>' + ap
+      + '<div class="acts"><button class="iconbtn" data-copy="' + i + '" title="复制">'
+      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>'
+      + '</button></div></div>'
+      + '<div class="ballrow">' + body + '</div>'
+      + '<div class="foot"><span>' + l.notes + ' 注</span><span>·</span><b>' + (l.notes * 2 * res.times + (res.append ? l.notes * res.times : 0)).toFixed(0) + ' 元</b>'
+      + '<span style="margin-left:auto">' + res.times + ' 倍</span></div></div>';
+  });
+  html += '</div>';
+  area.innerHTML = html;
+  area.querySelectorAll('[data-copy]').forEach(b => {
+    b.onclick = () => { const l = res.lines[+b.dataset.copy]; copy(lineText(l) + '  ' + l.notes + '注'); };
+  });
+}
+
+function lineText(l) {
+  if (l.kind === 'dantuo') {
+    return '胆' + l.danF.map(pad2).join(' ') + ' 拖' + l.tuoF.map(pad2).join(' ') + ' + 胆' + l.danB.map(pad2).join(' ') + ' 拖' + l.tuoB.map(pad2).join(' ');
+  }
+  return l.front.map(pad2).join(' ') + ' + ' + l.back.map(pad2).join(' ');
+}
+
+/* ---------------- 金额 ---------------- */
+function calcAmount() {
+  let notes = 0, lines = 0;
+  if (CFG.mode === 'single') { notes = CFG.groups; lines = CFG.groups; }
+  else if (CFG.mode === 'compound') { notes = C(CFG.fm, 5) * C(CFG.bm, 2) * CFG.groups; lines = CFG.groups; }
+  else if (CFG.mode === 'dantuo') { notes = C(CFG.tf, 5 - CFG.df) * C(CFG.tb, 2 - CFG.db) * CFG.groups; lines = CFG.groups; }
+  else { notes = PACKAGES[CFG.pack].notes; lines = PACKAGES[CFG.pack].parts.reduce((a, p) => a + (p.k === 'c' ? 1 : p.n), 0); }
+
+  const amount = notes * 2 * CFG.times + (CFG.append ? notes * 1 * CFG.times : 0);
+  $('#amtValue').innerHTML = amount.toFixed(0) + '<small>元</small>';
+  $('#amtNotes').textContent = notes;
+  $('#amtLines').textContent = lines;
+  $('#amtAppend').textContent = CFG.append ? ('含追加 ' + (notes * CFG.times) + ' 注 · ' + (notes * CFG.times) + ' 元') : '仅基本投注';
+  const over = amount > (CFG.append ? 30000 : 20000);
+  $('#amtWarn').classList.toggle('show', over);
+  $('#btnGen').disabled = over;
+  return { notes, lines, amount, over };
+}
+
+/* ---------------- 控件同步 ---------------- */
+function syncMix() {
+  const m = CFG.mix;
+  $('#vFh').textContent = m.fh; $('#vFw').textContent = m.fw; $('#vFc').textContent = m.fc;
+  $('#vBh').textContent = m.bh; $('#vBw').textContent = m.bw; $('#vBc').textContent = m.bc;
+  $('#sumF').textContent = '热 ' + m.fh + ' · 温 ' + m.fw + ' · 冷 ' + m.fc;
+  $('#sumB').textContent = '热 ' + m.bh + ' · 温 ' + m.bw + ' · 冷 ' + m.bc;
+  $$('#presets .chip').forEach(c => {
+    const p = c.dataset.p.split('|');
+    const a = p[0].split(',').map(Number), b = p[1].split(',').map(Number);
+    c.classList.toggle('on', a[0] === m.fh && a[1] === m.fw && a[2] === m.fc && b[0] === m.bh && b[1] === m.bw && b[2] === m.bc);
+  });
+}
+
+function adjustMix(key, delta) {
+  const m = CFG.mix, isF = key[0] === 'f', need = isF ? 5 : 2;
+  const keys = isF ? ['fh', 'fw', 'fc'] : ['bh', 'bw', 'bc'];
+  const cur = m[key] + delta;
+  if (cur < 0 || cur > need) return;
+  m[key] = cur;
+  const others = keys.filter(k => k !== key);
+  let diff = need - keys.reduce((a, k) => a + m[k], 0), guard = 0;
+  while (diff !== 0 && guard++ < 30) {
+    let done = false;
+    for (const k of others.slice().reverse()) {
+      if (diff > 0) { m[k]++; diff--; done = true; }
+      else if (diff < 0 && m[k] > 0) { m[k]--; diff++; done = true; }
+      if (diff === 0) break;
+    }
+    if (!done) break;
+  }
+  syncMix();
+}
+
+function syncUI() {
+  syncMix();
+  $('#nLabel').textContent = CFG.windowN;
+  $('#rangeN').value = CFG.windowN;
+  $('#sumLabel').textContent = CFG.sumMin + ' – ' + CFG.sumMax;
+  $('#oddLabel').textContent = CFG.oddMin + ' – ' + CFG.oddMax;
+  $('#bigLabel').textContent = CFG.bigMin + ' – ' + CFG.bigMax;
+  $('#vRepeat').textContent = CFG.repeat;
+  $('#vChain').textContent = CFG.chain;
+  $('#vFm').textContent = CFG.fm; $('#vBm').textContent = CFG.bm;
+  $('#vDf').textContent = CFG.df; $('#vTf').textContent = CFG.tf;
+  $('#vDb').textContent = CFG.db; $('#vTb').textContent = CFG.tb;
+  $('#vTimes').textContent = CFG.times;
+  $('#vGroups').textContent = CFG.mode === 'package' ? '1' : CFG.groups;
+  $('#swAppend').classList.toggle('on', CFG.append);
+
+  $$('#segLayer button').forEach(b => b.classList.toggle('on', b.dataset.v === CFG.layer));
+  $('#thresholdBox').style.display = CFG.layer === 'custom' ? 'block' : 'none';
+  $$('#segMode button').forEach(b => b.classList.toggle('on', b.dataset.v === CFG.mode));
+  $$('#segModeView button').forEach(b => b.classList.toggle('on', b.dataset.v === CFG.view));
+  $$('#segTicketStyle button').forEach(b => b.classList.toggle('on', b.dataset.v === CFG.tstyle));
+  $$('#pkChips .chip').forEach(c => c.classList.toggle('on', +c.dataset.pk === CFG.pack));
+
+  $('#modeTag').textContent = { single: '单式', compound: '复式', dantuo: '胆拖', package: '套餐票' }[CFG.mode];
+  $('#boxCompound').style.display = CFG.mode === 'compound' ? 'block' : 'none';
+  $('#boxDantuo').style.display = CFG.mode === 'dantuo' ? 'block' : 'none';
+  $('#boxPackage').style.display = CFG.mode === 'package' ? 'block' : 'none';
+
+  const cn = C(CFG.fm, 5) * C(CFG.bm, 2);
+  $('#hintCompound').textContent = CFG.fm + '+' + CFG.bm + ' 复式 = ' + cn + ' 注 / ' + (cn * 2) + ' 元' + (CFG.append ? '（追加 ' + (cn * 3) + ' 元）' : '');
+  const dn = C(CFG.tf, 5 - CFG.df) * C(CFG.tb, 2 - CFG.db);
+  $('#hintDantuo').textContent = '单行 ' + dn + ' 注 / ' + (dn * 2) + ' 元' + (CFG.append ? '（追加 ' + (dn * 3) + ' 元）' : '');
+  const pk = PACKAGES[CFG.pack];
+  $('#hintPackage').textContent = pk.desc + ' · 共 ' + pk.notes + ' 注 · 基本 ' + pk.base + ' 元 / 追加 ' + (pk.base * 1.5) + ' 元';
+
+  calcAmount();
+  renderInsight();
+  if (RESULT) { TICKET = ticketModel(RESULT); renderTicket(); }
+}
+
+/* ---------------- 交互 ---------------- */
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('on'), 2200);
+}
+
+function copy(text) {
+  const done = () => toast('已复制');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fb());
+  } else fb();
+  function fb() {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败'); }
+    document.body.removeChild(ta);
+  }
+}
+
+const BOUNDS = {
+  fh: [0, 5], fw: [0, 5], fc: [0, 5], bh: [0, 2], bw: [0, 2], bc: [0, 2],
+  repeat: [0, 5], chain: [1, 5], fm: [5, 12], bm: [2, 5],
+  df: [1, 4], tf: [2, 10], db: [0, 1], tb: [2, 6], times: [1, 99], groups: [1, 30]
+};
+$$('.step').forEach(step => {
+  step.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      const k = step.dataset.k, d = +btn.dataset.d;
+      if (k in CFG.mix) { adjustMix(k, d); calcAmount(); return; }
+      const [lo, hi] = BOUNDS[k];
+      let v = Math.max(lo, Math.min(hi, CFG[k] + d));
+      if (k === 'df' && v + CFG.tf < 6) CFG.tf = Math.max(2, 6 - v);
+      if (k === 'tf' && CFG.df + v < 6) v = 6 - CFG.df;
+      if (k === 'db' && v + CFG.tb < 3) CFG.tb = Math.max(2, 3 - v);
+      if (k === 'tb' && CFG.db + v < 3) v = 3 - CFG.db;
+      if (k === 'fm' && v < 6) v = 6;
+      CFG[k] = v;
+      syncUI();
+    };
+  });
+});
+
+$('#segLayer').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  CFG.layer = b.dataset.v;
+  if (CFG.layer === 'custom') {
+    const st = STATS;
+    const fAvg = st.fc.slice(1).reduce((a, b) => a + b, 0) / 35;
+    const bAvg = st.bc.slice(1).reduce((a, b) => a + b, 0) / 12;
+    CFG.thF = [Math.round(fAvg * 1.12), Math.round(fAvg * 0.88)];
+    CFG.thB = [Math.round(bAvg * 1.12), Math.round(bAvg * 0.88)];
+    $('#thF').value = CFG.thF[0] + '/' + CFG.thF[1];
+    $('#thB').value = CFG.thB[0] + '/' + CFG.thB[1];
+  }
+  refreshStats();
+};
+$('#thF').onchange = () => { const p = $('#thF').value.split('/').map(Number); if (p.length === 2 && !isNaN(p[0]) && !isNaN(p[1])) { CFG.thF = p; refreshStats(); } };
+$('#thB').onchange = () => { const p = $('#thB').value.split('/').map(Number); if (p.length === 2 && !isNaN(p[0]) && !isNaN(p[1])) { CFG.thB = p; refreshStats(); } };
+$('#segMode').onclick = e => { const b = e.target.closest('button'); if (!b) return; CFG.mode = b.dataset.v; syncUI(); };
+$('#segModeView').onclick = e => { const b = e.target.closest('button'); if (!b) return; CFG.view = b.dataset.v; $$('#segModeView button').forEach(x => x.classList.toggle('on', x === b)); renderResult(); };
+$('#segTicketStyle').onclick = e => { const b = e.target.closest('button'); if (!b) return; CFG.tstyle = b.dataset.v; $$('#segTicketStyle button').forEach(x => x.classList.toggle('on', x === b)); renderTicket(); };
+$('#presets').onclick = e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const [a, b] = c.dataset.p.split('|');
+  const [fh, fw, fc] = a.split(',').map(Number), [bh, bw, bc] = b.split(',').map(Number);
+  Object.assign(CFG.mix, { fh, fw, fc, bh, bw, bc });
+  syncMix(); calcAmount();
+};
+$('#pkChips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; CFG.pack = +c.dataset.pk; syncUI(); };
+$('#swAppend').onclick = () => { CFG.append = !CFG.append; syncUI(); };
+$('#rangeN').oninput = e => { CFG.windowN = +e.target.value; $('#nLabel').textContent = CFG.windowN; refreshStats(); };
+
+function bindRange(id, key, isMin, other) {
+  $(id).oninput = e => {
+    let v = +e.target.value;
+    const gap = other.indexOf('sum') === 0 ? 5 : 1;
+    if (isMin) { if (v > CFG[other] - gap) v = CFG[other] - gap; }
+    else { if (v < CFG[other] + gap) v = CFG[other] + gap; }
+    CFG[key] = v; e.target.value = v; syncUI();
+  };
+}
+bindRange('#sumMin', 'sumMin', true, 'sumMax');
+bindRange('#sumMax', 'sumMax', false, 'sumMin');
+bindRange('#oddMin', 'oddMin', true, 'oddMax');
+bindRange('#oddMax', 'oddMax', false, 'oddMin');
+bindRange('#bigMin', 'bigMin', true, 'bigMax');
+bindRange('#bigMax', 'bigMax', false, 'bigMin');
+
+['#inIssue', '#inDrawDate'].forEach(id => {
+  $(id).oninput = () => { if (RESULT) { TICKET = ticketModel(RESULT); renderTicket(); } };
+});
+
+$('#btnGen').onclick = () => {
+  if (!STATS) return;
+  LAST = DATA[0];
+  RESULT = generate();
+  TICKET = ticketModel(RESULT);
+  renderResult(); renderTicket();
+  $('#resMeta').textContent = RESULT.lines.length + ' 行 / ' + RESULT.notes + ' 注 · ' + RESULT.amount.toFixed(2) + ' 元';
+  toast('已生成 ' + RESULT.notes + ' 注号码');
+};
+
+$('#btnCopyAll').onclick = () => {
+  if (!RESULT) return toast('先选号');
+  copy(RESULT.lines.map((l, i) => (i + 1) + '. ' + lineText(l)).join('\n'));
+};
+
+$('#btnCopyTicket').onclick = () => {
+  if (!TICKET) return toast('先选号');
+  const t = TICKET, res = t.res;
+  const isPkg = CFG.mode === 'package';
+  const cnt = {};
+  res.lines.forEach(l => { cnt[l.type] = (cnt[l.type] || 0) + 1; });
+  const comp = Object.keys(cnt).map(k => k + ' ×' + cnt[k]).join('  ·  ');
+  const txt = [
+    '中国体育彩票 · 超级大乐透',
+    '票型 ' + t.typeLabel + '   ' + res.times + ' 倍   ' + (res.append ? '已追加' : '未追加'),
+    '',
+    ...res.lines.map((l, i) => (i + 1) + '  ' + lineText(l) + '   ' + l.notes + ' 注'),
+    '',
+    '合计 ' + res.notes + ' 注',
+    isPkg ? comp : ''
+  ].filter((x, i) => !(x === '' && i === 3)).join('\n');
+  copy(txt);
+};
+
+/* ---------------- 截图 ---------------- */
+function saveShot() {
+  if (!TICKET) return toast('先选号');
+  const svgEl = $('#ticketBox').querySelector('svg');
+  if (!svgEl) return;
+  const vb = svgEl.getAttribute('viewBox').split(' ').map(Number);
+  const W = vb[2], H = vb[3], scale = 3;
+  const xml = new XMLSerializer().serializeToString(svgEl);
+  const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>' + xml], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(url);
+    cv.toBlob(b => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = '大乐透_第' + TICKET.issue + '期_票面.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast('票面截图已保存');
+    }, 'image/png');
+  };
+  img.onerror = () => { toast('截图失败，请重试'); URL.revokeObjectURL(url); };
+  img.src = url;
+}
+$('#btnShot').onclick = saveShot;
+$('#btnShotTop').onclick = saveShot;
+
+/* ---------------- 数据源：官方接口 + 云端快照 + 本地文件 ---------------- */
+const API = 'https://webapi.sporttery.cn/gateway/lottery/getHistoryPageListV1.qry?gameNo=85&provinceId=0&pageSize=100&isVerify=1&pageNo=';
+/* 云端快照（每日自动更新，三条并行可用，均带 Access-Control-Allow-Origin） */
+const SNAP_URLS = [
+  'https://cdn.jsdelivr.net/gh/wuwuwuwu-1990/vista-tool@main/data/dlt500.json',
+  'https://raw.githubusercontent.com/wuwuwuwu-1990/vista-tool/main/data/dlt500.json',
+  'https://tool.wbc2023.top/data/dlt500.json'
+];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function jget(url, timeout) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeout || 8000);
+  try {
+    const r = await fetch(url, { signal: ctl.signal, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } finally { clearTimeout(timer); }
+}
+
+/* 解析乐彩网 17500 的 *_asc.txt（空格分隔）或通用文本/CSV */
+function parseDataText(text) {
+  const out = [];
+  text.split(/\r?\n/).forEach(line => {
+    const raw = line.trim();
+    if (!raw || raw.startsWith('#')) return;
+    const f = raw.split(/[\s,;\t]+/);
+    if (f.length < 9) return;
+    if (!/^\d{5,7}$/.test(f[0])) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(f[1])) return;
+    const nums = f.slice(2, 9).map(Number);
+    if (nums.length !== 7 || nums.some(isNaN)) return;
+    if (nums.slice(0, 5).some(n => n < 1 || n > 35) || nums.slice(5).some(n => n < 1 || n > 12)) return;
+    out.push({
+      issue: f[0], date: f[1],
+      front: nums.slice(0, 5), back: nums.slice(5),
+      n1: parseInt(f[11], 10) || 0, amt1: parseInt(f[12], 10) || 0
+    });
+  });
+  const seen = new Set();
+  return out.filter(r => !seen.has(r.issue) && seen.add(r.issue))
+    .sort((a, b) => b.issue.localeCompare(a.issue));
+}
+
+function applyData(list, label) {
+  if (!list || list.length < 50) return false;
+  DATA.splice(0, DATA.length, ...list.slice(0, 500));
+  NEXT = nextIssue();
+  $('#inIssue').value = NEXT.issue;
+  $('#inDrawDate').value = dateStr(NEXT.date);
+  $('#dataDot').classList.remove('off');
+  $('#dataHint').textContent = label + ' · ' + DATA.length + ' 期 · 截止第 ' + DATA[0].issue + ' 期';
+  refreshStats();
+  if (RESULT) { TICKET = ticketModel(RESULT); renderTicket(); }
+  return true;
+}
+
+/* 通道 1：官方实时接口 */
+async function fromOfficial() {
+  const probe = await jget(API + 1, 4500);
+  if (!probe || !probe.value || !Array.isArray(probe.value.list)) throw new Error('接口格式异常');
+  const pages = [probe];
+  const rest = await Promise.allSettled([2, 3, 4, 5].map(p => jget(API + p, 8000)));
+  rest.forEach(r => { if (r.status === 'fulfilled') pages.push(r.value); });
+  const seen = new Set(), list = [];
+  pages.forEach(j => {
+    ((j && j.value && j.value.list) || []).forEach(r => {
+      if (seen.has(r.lotteryDrawNum)) return;
+      const n = String(r.lotteryDrawResult || '').trim().split(/\s+/).map(Number);
+      if (n.length !== 7 || n.some(isNaN)) return;
+      seen.add(r.lotteryDrawNum);
+      const f = (r.prizeLevelList || []).find(p => p.prizeLevel === '一等奖');
+      list.push({
+        issue: r.lotteryDrawNum, date: r.lotteryDrawTime,
+        front: n.slice(0, 5), back: n.slice(5),
+        n1: f ? +f.stakeCount : 0, amt1: f ? +f.stakeAmountFormat : 0
+      });
+    });
+  });
+  if (list.length < 50) throw new Error('官方数据不足');
+  list.sort((a, b) => b.issue.localeCompare(a.issue));
+  return { list, label: '官方实时', updated: '' };
+}
+
+/* 通道 2：云端快照 */
+async function fromSnapshot() {
+  for (const url of SNAP_URLS) {
+    try {
+      const j = await jget(url, 6000);
+      const arr = (j && j.d) || (Array.isArray(j) ? j : null);
+      if (!arr || !arr.length) continue;
+      const list = arr.map(r => ({
+        issue: String(r[0]), date: r[1],
+        front: r[2], back: r[3], n1: +r[4] || 0, amt1: +r[5] || 0
+      }));
+      if (list.length < 50) continue;
+      return { list, label: '在线数据', updated: j.updated || '' };
+    } catch (e) { /* 换下一条 */ }
+  }
+  throw new Error('快照不可用');
+}
+
+async function loadLatest(silent) {
+  const btn = $('#btnRefresh'), txt = $('#btnRefreshTxt'), btn2 = $('#btnRefresh2');
+  const setBtn = t => { if (!silent) { txt.textContent = t; if (btn2) btn2.textContent = t; } };
+  if (!silent) { btn.disabled = true; if (btn2) btn2.disabled = true; setBtn('获取中…'); }
+  const restore = () => {
+    btn.disabled = false; txt.textContent = '获取最新数据';
+    if (btn2) { btn2.disabled = false; btn2.textContent = '获取最新数据'; }
+  };
+  let ok = false, msg = '';
+  const prevIssue = DATA[0].issue;
+  const done = () => (DATA[0].issue === prevIssue
+    ? '已是最新 · 第 ' + DATA[0].issue + ' 期'
+    : '已更新至第 ' + DATA[0].issue + ' 期');
+  // 1) 官方实时
+  try {
+    setBtn('连接官方…');
+    const r = await fromOfficial();
+    ok = applyData(r.list, r.label);
+    if (ok) msg = done();
+  } catch (e) { ok = false; }
+  // 2) 云端快照
+  if (!ok) {
+    try {
+      setBtn('读取云端…');
+      const r = await fromSnapshot();
+      ok = applyData(r.list, r.label);
+      if (ok) msg = done() + (r.updated ? '（' + r.updated + '）' : '');
+    } catch (e) { ok = false; }
+  }
+  if (ok) {
+    if (!silent) { toast(msg); restore(); }
+    return true;
+  }
+  if (!silent) {
+    $('#dataDot').classList.add('off');
+    $('#dataHint').textContent = '内置数据 · 截止第 ' + DATA[0].issue + ' 期 · 更新失败';
+    toast('自动获取失败，请检查网络或点「导入数据文件」');
+  }
+  restore();
+  return false;
+}
+
+$('#btnRefresh').onclick = () => loadLatest(false);
+if ($('#btnRefresh2')) $('#btnRefresh2').onclick = () => loadLatest(false);
+
+$('#btnImport').onclick = () => $('#fileData').click();
+$('#fileData').onchange = e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const list = parseDataText(String(fr.result || ''));
+    if (applyData(list, '本地文件')) {
+      toast('已导入 ' + DATA.length + ' 期，截止第 ' + DATA[0].issue + ' 期');
+    } else {
+      toast('文件格式无法识别（需 期号 日期 前区5 后区2 …）');
+    }
+    e.target.value = '';
+  };
+  fr.onerror = () => toast('读取文件失败');
+  fr.readAsText(file, 'utf-8');
+};
+
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+
+/* ---------------- 统计刷新 ---------------- */
+function refreshStats() {
+  STATS = computeStats(CFG.windowN);
+  renderInsight();
+  if (RESULT) { TICKET = ticketModel(RESULT); renderTicket(); }
+}
+
+/* ---------------- 初始化 ---------------- */
+(function init() {
+  $('#inIssue').value = NEXT.issue;
+  $('#inDrawDate').value = dateStr(NEXT.date);
+  LAST = DATA[0];
+  STATS = computeStats(CFG.windowN);
+  syncUI();
+  RESULT = generate();
+  TICKET = ticketModel(RESULT);
+  renderResult(); renderTicket();
+  $('#resMeta').textContent = RESULT.lines.length + ' 行 / ' + RESULT.notes + ' 注 · ' + RESULT.amount.toFixed(2) + ' 元';
+  $('#dataHint').textContent = '内置官方数据 ' + DATA.length + ' 期 · 截止第 ' + DATA[0].issue + ' 期';
+
+  /* 打开页面即按当前日期比对，数据超过 3 天未更新则自动联网拉取最新 500 期 */
+  const lastDate = new Date(DATA[0].date.replace(/-/g, '/'));
+  const lag = daysBetween(lastDate, new Date());
+  if (lag > 2) setTimeout(() => loadLatest(true), 500);
+})();
+</script>
+</body>
+</html>
