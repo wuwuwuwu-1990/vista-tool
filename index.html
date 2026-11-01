@@ -579,9 +579,9 @@
         <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
       <h3>深基坑快绘坡面CAD系统</h3>
-      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">导入基坑轮廓DXF一键生成向内/向外放坡：上=平面图（天正长短示坡线、A-A/B-B剖切线）、下=A-A/B-B剖面（三角标高符号+45°尺寸标注）；凹形/多基坑轮廓自动切分为 A-A(1)(2)… 多剖面；可导出 PNG/DXF 及平剖三图合并DXF。</div>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">导入基坑轮廓DXF一键生成向内/向外放坡：平面图标天正长短示坡线、剖切符号四式可选（默认天正粗线式不贯穿）；剖面沿开挖轮廓带状素土填充，左右两侧均注马道宽与马道标高，坑底尺寸延展单侧放坡宽；凹形/多基坑自动切分 A-A(1)(2)… 多剖面；导出 PNG/DXF 及平剖三图合并DXF（真 DIMENSION、真 HATCH、标高倒三角为闭合多段线）。</div>
       <div class="foot">
-        <span class="chip" style="--cb:rgba(14,116,144,.4);--cc:#5eead4;--cbg:rgba(14,116,144,.14)">v1.0.2</span>
+        <span class="chip" style="--cb:rgba(14,116,144,.4);--cc:#5eead4;--cbg:rgba(14,116,144,.14)">v1.0.7</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">基坑CAD</span>
       </div>
     </a>
@@ -1074,6 +1074,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-02', t:'升级：深基坑快绘坡面CAD系统 v1.0.7（平面新增「剖切符号」选择框，四种天正做法可选、默认天正粗线式不贯穿图面，符号位置线不再伸入坑口线并留 1.5mm 净距；剖面左右两侧均标注马道宽度与马道标高；坑口标高尖端精确落在上口端点与最外侧地坪端点中间；删除平面放坡范围填充；导出 DXF 的标高倒三角合并为单一闭合多段线，剖面素土为真 HATCH）'},
   {d:'2026-10-31', t:'新增：大乐透选号器 v1.0.4（私密工具）——近 500 期官方开奖数据选号：冷热配比热/温/冷三档自由拆分，和值、奇偶、大小、重号、连号五项过滤，支持单式／复式／胆拖与 18·28·36·58·66·88 元六款套餐票；一键生成模拟真实热敏彩票票面并导出高清截图；「获取最新数据」点击即自动联网更新（官方接口优先，限流时自动读云端快照），云端快照每日 22:10 自动刷新'},
   {d:'2026-10-31', t:'新增：私密工具区新增 1 项（名称与说明见「我的私密」，需密码进入）'},
   {d:'2026-10-30', t:'升级：混凝土蓄水池CAD自动成图系统 v1.0.25（新增水管与闸阀——只在平面图标示、剖面图不画，管路固定布置在右侧（无尺寸标注一侧），全段实线（墙体内也为实线）、两端管口封线封闭；闸阀为给排水标准蝴蝶结符号、俯视不画阀杆、不标注管径文字；导出 DXF 时水管＋闸阀整体打包成一个块（BLOCK＋INSERT），块名「水管闸阀」、INSERT 用单独图层「水管闸阀」（青 4）区分，块内图元放 0 层继承块图层颜色，选中即整体、可整块开关；参数可调 DN100~DN300、墙外管长 Lo、伸入池内 Li、闸阀距墙 Lv）'},
@@ -1162,7 +1163,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-09-06', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
