@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>测绘数据三维可视化系统</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f14'/%3E%3Cpath d='M9 46 L23 22 L36 35 L55 15' stroke='%2322d3ee' stroke-width='4.5' fill='none' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  background:#080b10;color:#dbe4ee;font-size:13px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Text","PingFang SC","Hiragino Sans GB","Helvetica Neue","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+#wrap{position:fixed;inset:0}
+#cv{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+#cv.grabbing{cursor:grabbing}
+
+/* ---------- 顶栏 ---------- */
+#top{
+  position:absolute;top:0;left:0;right:0;height:52px;z-index:12;
+  display:flex;align-items:center;gap:12px;padding:0 16px;
+  background:linear-gradient(180deg,rgba(8,11,16,.97),rgba(8,11,16,.55));
+  border-bottom:1px solid rgba(255,255,255,.06);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.brand{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;letter-spacing:.3px}
+.brand svg{width:22px;height:22px;display:block}
+.brand small{
+  font-size:10.5px;font-weight:400;color:#22d3ee;background:rgba(34,211,238,.12);
+  border:1px solid rgba(34,211,238,.25);padding:1px 6px;border-radius:20px;letter-spacing:.5px;
+}
+.spacer{flex:1}
+
+/* 顶栏数据信息条 */
+#topInfo{
+  flex:1 1 auto;display:flex;align-items:center;gap:13px;min-width:0;
+  overflow:hidden;white-space:nowrap;font-size:11.5px;
+  padding-left:6px;
+}
+#topInfo .ti{display:inline-flex;align-items:baseline;gap:5px;flex:0 0 auto}
+#topInfo .ti i{font-style:normal;color:#5a6a7d;font-size:11px;letter-spacing:.3px}
+#topInfo .ti b{
+  color:#d5ecf4;font-weight:600;font-variant-numeric:tabular-nums;font-size:12px;letter-spacing:.2px;
+}
+#topInfo .ti.file b{color:#7dd3e8;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+#topInfo .dv{width:1px;height:13px;background:rgba(255,255,255,.1);flex:0 0 1px}
+@media (max-width:1180px){ #topInfo .ti.opt{display:none} #topInfo .dv.opt{display:none} }
+@media (max-width:900px){ #topInfo{display:none} }
+.tbtn{
+  display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 11px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:7px;color:#c8d4e2;font-size:12.5px;font-family:inherit;cursor:pointer;
+  transition:.16s;white-space:nowrap;
+}
+.tbtn:hover{background:rgba(34,211,238,.14);border-color:rgba(34,211,238,.45);color:#e6f7fb}
+.tbtn:active{transform:translateY(1px)}
+.tbtn.primary{background:linear-gradient(135deg,#0e7490,#0891b2);border-color:transparent;color:#fff;font-weight:500}
+.tbtn.primary:hover{filter:brightness(1.15)}
+.tbtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ---------- 侧栏 ---------- */
+#side{
+  position:absolute;top:58px;left:14px;width:252px;z-index:11;
+  max-height:calc(100% - 74px);overflow-y:auto;overscroll-behavior:contain;
+  background:rgba(16,22,30,.9);border:1px solid rgba(255,255,255,.09);
+  border-radius:12px;padding:6px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+  transition:opacity .2s;
+}
+#side::-webkit-scrollbar{width:7px}
+#side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:4px}
+#side::-webkit-scrollbar-track{background:transparent}
+.sec{padding:7px 8px 9px;border-bottom:1px solid rgba(255,255,255,.055)}
+.sec:last-child{border-bottom:none}
+.sec-h{
+  font-size:10.5px;font-weight:600;color:#6b7a8d;letter-spacing:1.4px;
+  text-transform:uppercase;margin-bottom:6px;
+}
+.meta{font-size:11.5px;color:#8fa0b4;line-height:1.75;word-break:break-all}
+.sec.collapse>.sec-h{cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.sec.collapse>.sec-h:hover{color:#8fa0b4}
+.sec-h .cv{font-style:normal;font-size:9px;color:#5d6e82;transition:transform .18s;transform:rotate(0deg)}
+.sec.collapse.closed>.sec-h .cv{transform:rotate(-90deg)}
+.sec.collapse.closed>.sec-body{display:none}
+.sec.collapse.closed>.sec-h{margin-bottom:0}
+.meta b{color:#22d3ee;font-weight:600}
+.meta .k{color:#64748b}
+label.fld{display:block;margin-bottom:7px}
+label.fld>span{display:block;font-size:11.5px;color:#8fa0b4;margin-bottom:3px}
+.fld-i{display:flex;align-items:center;gap:7px;margin-bottom:6px;cursor:pointer}
+.fld-i>span{flex:0 0 60px;font-size:11.5px;color:#8fa0b4}
+.fld-i select,.fld-i input{flex:1;min-width:0}
+select,button.act{
+  width:100%;height:28px;border-radius:6px;font-family:inherit;font-size:12px;
+  color:#dbe4ee;background:#1a222c;border:1px solid rgba(255,255,255,.1);
+  padding:0 7px;cursor:pointer;outline:none;transition:.15s;
+}
+select:hover,button.act:hover{border-color:rgba(34,211,238,.42)}
+select:focus{outline:1px solid rgba(34,211,238,.5)}
+button.act{display:flex;align-items:center;justify-content:center;gap:5px}
+button.act+.act{margin-top:6px}
+button.act.primary{background:linear-gradient(135deg,#0e7490,#0891b2);border-color:transparent;color:#fff}
+button.act.primary:hover{filter:brightness(1.15)}
+button.act:disabled{opacity:.35;cursor:not-allowed;filter:none}
+
+.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#c3d0de;cursor:pointer;padding:3px 0;user-select:none}
+.chk input{
+  appearance:none;-webkit-appearance:none;width:15px;height:15px;flex:0 0 15px;
+  border:1.5px solid #3b4a5c;border-radius:4px;background:#141c25;cursor:pointer;
+  position:relative;transition:.15s;
+}
+.chk input:checked{background:#0891b2;border-color:#0891b2}
+.chk input:checked::after{
+  content:'';position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg);
+}
+.chk:hover input{border-color:#22d3ee}
+
+.rng{margin-bottom:7px}
+.rng .rh{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#8fa0b4;margin-bottom:3px}
+.rng .rh b{color:#7dd3e8;font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:3px;
+  background:linear-gradient(90deg,#0891b2,#164e63);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:#e6f7fb;border:2px solid #0891b2;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+input[type=number]{
+  width:100%;height:28px;border-radius:6px;font-family:inherit;font-size:12px;
+  color:#dbe4ee;background:#1a222c;border:1px solid rgba(255,255,255,.1);
+  padding:0 8px;outline:none;transition:.15s;
+  font-variant-numeric:tabular-nums;
+}
+input[type=number]:hover{border-color:rgba(34,211,238,.42)}
+input[type=number]:focus{border-color:#22d3ee;outline:1px solid rgba(34,211,238,.5)}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.row2{display:flex;gap:6px;align-items:center}
+.row2 button.act{width:58px;flex:0 0 58px;padding:0}
+.cntinfo{font-size:11.5px;color:#8fa0b4;margin-top:7px;line-height:1.6}
+.cntinfo b{color:#22d3ee;font-weight:600;font-variant-numeric:tabular-nums}
+.bstats{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:7px;font-size:11px;color:#8fa0b4}
+.bstats span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bstats b{color:#22d3ee;font-weight:600;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.grid2 button,.grid4 button{
+  height:28px;border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;
+  background:#1a222c;color:#c3d0de;border:1px solid rgba(255,255,255,.1);transition:.15s;
+}
+.grid4 button{font-size:11.5px;padding:0}
+.grid2 button:hover,.grid4 button:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.42);color:#e6f7fb}
+.grid2 button.on{background:rgba(34,211,238,.18);border-color:#22d3ee;color:#a5f3fc}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.chkrow{display:flex;gap:14px;align-items:center}
+.grid3 button{
+  height:25px;border-radius:6px;font-size:11.5px;font-family:inherit;cursor:pointer;
+  background:#1a222c;color:#a9b8c8;border:1px solid rgba(255,255,255,.09);transition:.15s;padding:0;
+}
+.grid3 button:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.42);color:#e6f7fb}
+
+/* ---------- 空状态 ---------- */
+#empty{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;z-index:5;
+  pointer-events:none;transition:opacity .3s;
+}
+#empty.hide{opacity:0;pointer-events:none}
+#empty .eic{font-size:42px;color:#1e4b5c;line-height:1;margin-bottom:4px}
+#empty h2{font-size:17px;font-weight:500;color:#7c8ea3;letter-spacing:.5px}
+#empty p{font-size:12.5px;color:#526275}
+#empty .eg{
+  margin-top:14px;font-size:11.5px;color:#465568;font-family:Consolas,Monaco,monospace;
+  background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.09);
+  padding:8px 16px;border-radius:8px;line-height:1.9;text-align:center;
+}
+
+/* ---------- 拖拽遮罩 ---------- */
+#dragover{
+  position:absolute;inset:0;z-index:30;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(5,20,28,.82);border:2px dashed #22d3ee;border-radius:0;
+  backdrop-filter:blur(3px);
+}
+#dragover.show{display:flex}
+#dragover div{font-size:16px;color:#a5f3fc;letter-spacing:1px}
+
+/* ---------- 提示 ---------- */
+#toast{
+  position:absolute;left:50%;bottom:34px;transform:translate(-50%,14px);
+  background:rgba(16,22,30,.96);border:1px solid rgba(34,211,238,.4);
+  color:#c8f0f8;padding:9px 18px;border-radius:9px;font-size:12.5px;z-index:40;
+  opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 28px rgba(0,0,0,.6);
+  max-width:70vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- 右下角操作提示 ---------- */
+#help{
+  position:absolute;right:14px;bottom:14px;z-index:10;
+  font-size:11px;color:#5d6e82;text-align:right;line-height:1.9;
+  pointer-events:none;user-select:none;
+  background:rgba(11,16,23,.45);padding:7px 11px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.05);
+}
+#help b{color:#8fa0b4;font-weight:600}
+
+/* ---------- 加载 ---------- */
+#loading{
+  position:absolute;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:rgba(6,9,13,.7);backdrop-filter:blur(2px);
+}
+#loading.show{display:flex}
+#loading .box{display:flex;flex-direction:column;align-items:center;gap:12px}
+#loading .sp{
+  width:30px;height:30px;border:2.5px solid rgba(34,211,238,.2);
+  border-top-color:#22d3ee;border-radius:50%;animation:sp .8s linear infinite;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading span{font-size:12.5px;color:#7dd3e8;letter-spacing:.5px}
+
+@media (max-width:820px){
+  #side{width:210px;transform:scale(.96);transform-origin:top left}
+  #help{display:none}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+
+  <div id="top">
+    <div class="brand">
+      <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
+      测绘数据三维可视化系统 <small>V1.0.3</small>
+    </div>
+    <div id="topInfo">
+      <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
+      <span class="dv"></span>
+      <span class="ti"><i>点数</i><b id="tiN">—</b></span>
+      <span class="dv"></span>
+      <span class="ti"><i>范围</i><b id="tiRange">—</b></span>
+      <span class="dv opt"></span>
+      <span class="ti opt"><i>高程</i><b id="tiH">—</b></span>
+      <span class="dv"></span>
+      <span class="ti"><i>高差</i><b id="tiDh">—</b></span>
+    </div>
+    <div class="spacer" style="flex:0 0 4px"></div>
+    <button class="tbtn primary" id="btnOpen">导入 DAT</button>
+    <button class="tbtn" id="btnDemo">示例数据</button>
+    <button class="tbtn" id="btnShot" disabled>导出图片</button>
+    <button class="tbtn" id="btnReset" disabled>复位视角</button>
+  </div>
+
+  <div id="side">
+    <div class="sec collapse closed" id="secMap">
+      <div class="sec-h" id="hdrMap">坐标列映射<i class="cv">▼</i></div>
+      <div class="sec-body">
+        <label class="fld-i"><span>东 / 横</span><select id="selA"></select></label>
+        <label class="fld-i"><span>北 / 纵</span><select id="selB"></select></label>
+        <label class="fld-i"><span>高程 Z</span><select id="selC"></select></label>
+        <button class="act" id="btnSwap" style="margin-top:2px">⇄ 交换坐标 1 / 2</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">显示设置</div>
+      <div class="chkrow">
+        <label class="chk"><input type="checkbox" id="chkCloud"> 点云</label>
+        <label class="chk"><input type="checkbox" id="chkSurf" checked> 地形曲面</label>
+      </div>
+      <div class="rng" style="margin-top:5px"><div class="rh"><span>点大小</span><b id="vPt">1.8</b></div><input type="range" id="rngPt" min="1" max="5" step="0.2" value="1.8"></div>
+      <div class="rng"><div class="rh"><span>曲面精度</span><b id="vRes">100</b></div><input type="range" id="rngRes" min="40" max="200" step="10" value="100"></div>
+      <div class="rng"><div class="rh"><span>垂直夸张</span><b id="vZ">1.0×</b></div><input type="range" id="rngZ" min="1" max="20" step="0.5" value="1"></div>
+      <label class="fld" style="margin-bottom:0"><span>高程配色</span>
+        <select id="selPal">
+          <option value="terrain">地形色（推荐）</option>
+          <option value="satellite">卫星影像（模拟谷歌地球）</option>
+          <option value="geology">真实地质（岩层色）</option>
+          <option value="rainbow">彩虹色</option>
+          <option value="viridis">Viridis</option>
+          <option value="blue">冷蓝</option>
+          <option value="gray">灰度</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">等高线</div>
+      <label class="chk"><input type="checkbox" id="chkCnt"> 显示等高线</label>
+      <div class="row2" style="margin-top:5px">
+        <input type="number" id="numCnt" min="0.01" step="0.5" value="0.5" title="等高距（米）">
+        <button class="act" id="btnCntAuto" title="按高差自动计算等高距">自动</button>
+      </div>
+      <div class="cntinfo" id="cntInfo">等高距 —</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">视角</div>
+      <div class="grid4">
+        <button data-view="iso">等轴</button>
+        <button data-view="top">俯视</button>
+        <button data-view="front">正视</button>
+        <button data-view="side">侧视</button>
+      </div>
+      <div style="height:5px"></div>
+      <label class="chk"><input type="checkbox" id="chkSpin"> 自动旋转</label>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">基准面</div>
+      <label class="chk"><input type="checkbox" id="chkBase"> 显示基准面</label>
+      <label class="chk" style="margin-top:3px"><input type="checkbox" id="chkSkirt"> 侧面填充</label>
+      <div style="margin-top:5px">
+        <input type="number" id="numBase" step="0.5" placeholder="基准高程 m" title="基准面高程（米）" disabled>
+      </div>
+      <div style="height:5px"></div>
+      <div class="grid3">
+        <button id="btnBaseMin" disabled>最低点</button>
+        <button id="btnBaseAvg" disabled>平均</button>
+        <button id="btnBaseMax" disabled>最高点</button>
+      </div>
+      <div class="bstats" id="baseInfo"><span>载入数据后显示挖填方量</span></div>
+    </div>
+  </div>
+
+  <div id="empty">
+    <div class="eic">◈</div>
+    <h2>拖拽测绘数据文件到窗口</h2>
+    <p>支持 .dat / .txt / .csv，自动识别坐标列</p>
+    <div class="eg">
+      <div>1,500000.123,3200000.456,251.330</div>
+      <div>2,500012.884,3200008.017,252.104</div>
+    </div>
+  </div>
+
+  <div id="dragover"><div>松开鼠标即可载入数据</div></div>
+
+  <div id="help">
+    <b>左键拖拽</b> 旋转视角<br>
+    <b>滚轮</b> 缩放 · <b>右键 / Shift+左键</b> 平移<br>
+    <b>双击</b> 复位视角 · <b>拖文件</b> 换数据
+  </div>
+
+  <div id="loading"><div class="box"><div class="sp"></div><span id="loadTxt">正在生成地形曲面…</span></div></div>
+  <div id="toast"></div>
+  <input type="file" id="fileInput" accept=".dat,.txt,.csv,.xyz,.pts,.asc" style="display:none">
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   1. 基础工具
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => v<a?a:(v>b?b:v);
+const clampInt = (v,a,b) => v<a?a:(v>b?b:v);
+
+function toNum(s){
+  if(typeof s !== 'string') return NaN;
+  s = s.trim();
+  if(!s) return NaN;
+  if(s[0]==='"' || s[0]==="'") s = s.replace(/^["']+|["']+$/g,'');
+  const v = Number(s);
+  return Number.isFinite(v) ? v : NaN;
+}
+
+function hex2rgb(h){
+  h = h.replace('#','');
+  if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+}
+function mixRgb(a,b,t){
+  return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+}
+
+let toastTimer = 0;
+function toast(msg, ms){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), ms || 2200);
+}
+
+/* ============================================================
+   2. 全局状态
+   ============================================================ */
+const S = {
+  n: 0,
+  rows: [],          // 每行数值（NaN 占位）
+  numCols: [],       // 数值列索引
+  map: {a:-1, b:-1, c:-1},
+  wx: null, wy: null, wz: null, ci: null,  // 东 / 北 / 高程（居中）+ 色索引
+  box: {x0:0,x1:1,y0:0,y1:1,z0:0,z1:1},    // 居中后的包围盒（x=东 y=北 z=高）
+  hspan: 1, diag: 1,
+  showCloud: false, showSurface: true,
+  showContour: false, cntInterval: 0.5, cntIv: 0.5, cntLevels: [],
+  showBase: false, showSkirt: false, baseElev: 0, zCenter: 0,
+  pointSize: 1.8, surfaceRes: 100, zExag: 1,
+  palette: 'terrain', spin: false, dragging: false,
+  surf: null, drawIdx: null, drawN: 0,
+  palBase: null, palShaded: null,
+  fileName: '', loaded: false
+};
+
+const cam = {
+  azim: Math.PI - 0.52,
+  elev: 0.60,
+  dist: 10,
+  target: {x:0,y:0,z:0},
+  fov: 42*Math.PI/180
+};
+
+const V = {
+  eye:{x:0,y:0,z:0},
+  rx:0,ry:0,rz:0,
+  ux:0,uy:0,uz:0,
+  fx:0,fy:0,fz:0,
+  focal:1, w:0, h:0, cx:0, cy:0
+};
+
+/* ============================================================
+   3. 调色板
+   ============================================================ */
+const PALETTES = {
+  /* 陆地测高配色：低地绿→草原黄→坡地褐→峰顶浅白（不出现假水体） */
+  terrain: [[0.00,'#14514a'],[0.10,'#1d6b52'],[0.22,'#3d8a5c'],[0.35,'#6ba368'],
+            [0.47,'#9db96a'],[0.58,'#c7c464'],[0.68,'#dcc25e'],[0.78,'#d2a35a'],
+            [0.87,'#bb8b60'],[0.93,'#c3a07c'],[0.97,'#cfb99d'],[1.00,'#ded4c0']],
+  /* 模拟谷歌地球卫星影像：林地→草地→旱地→裸土→岩体→雪线（仅极低处带一点水体色） */
+  satellite: [[0.00,'#173a2a'],[0.09,'#1c4529'],[0.20,'#24522d'],[0.32,'#2f6131'],
+              [0.44,'#427139'],[0.55,'#5c8142'],[0.65,'#7d8f48'],[0.74,'#9d9a4e'],
+              [0.81,'#ab9257'],[0.87,'#a1866a'],[0.93,'#a8a297'],[0.97,'#c4beb2'],[1.00,'#dcd8cc']],
+  /* 模拟三维地质体：深灰岩→紫褐→砖红→赭石→土黄→灰绿→浅灰 */
+  geology:   [[0.00,'#4b4b54'],[0.10,'#5e4a48'],[0.20,'#77514a'],[0.31,'#8c5c47'],
+              [0.42,'#9c6f4d'],[0.53,'#a88559'],[0.64,'#a8976c'],[0.75,'#909579'],
+              [0.86,'#9a958b'],[1.00,'#c2bbad']],
+  rainbow: [[0.00,'#3b4cc0'],[0.22,'#5fa8e8'],[0.42,'#4ec36b'],[0.62,'#e8d84b'],
+            [0.82,'#ef7d3d'],[1.00,'#c0392b']],
+  viridis: [[0.00,'#440154'],[0.25,'#3b528b'],[0.50,'#21918c'],[0.75,'#5ec962'],[1.00,'#fde725']],
+  blue:    [[0.00,'#08243f'],[0.50,'#1d7fb8'],[1.00,'#b6ecff']],
+  gray:    [[0.00,'#20252c'],[1.00,'#f0f4f8']]
+};
+
+const PAL_N = 64, SHADE_N = 16;
+
+function buildPalette(name){
+  const stops = PALETTES[name] || PALETTES.terrain;
+  const base = new Array(PAL_N);
+  const rgbArr = new Array(PAL_N);
+  for(let i=0;i<PAL_N;i++){
+    const t = i/(PAL_N-1);
+    let k = 0;
+    while(k < stops.length-2 && t > stops[k+1][0]) k++;
+    const [t0,c0] = stops[k];
+    const [t1,c1] = stops[k+1];
+    const u = t1 > t0 ? clamp((t-t0)/(t1-t0),0,1) : 0;
+    const rgb = mixRgb(hex2rgb(c0), hex2rgb(c1), u);
+    rgbArr[i] = rgb;
+    base[i] = 'rgb('+(rgb[0]|0)+','+(rgb[1]|0)+','+(rgb[2]|0)+')';
+  }
+  // 预生成明暗表
+  const shaded = new Array(PAL_N);
+  for(let i=0;i<PAL_N;i++){
+    const r0 = rgbArr[i][0], g0 = rgbArr[i][1], b0 = rgbArr[i][2];
+    const row = new Array(SHADE_N);
+    for(let s=0;s<SHADE_N;s++){
+      const k = 0.55 + (s/(SHADE_N-1))*0.67;   // 0.55 ~ 1.22（上限收一点，避免亮色过曝成纯白）
+      row[s] = 'rgb('+clampInt(r0*k,0,255)+','+clampInt(g0*k,0,255)+','+clampInt(b0*k,0,255)+')';
+    }
+    shaded[i] = row;
+  }
+  S.palBase = base;
+  S.palShaded = shaded;
+}
+
+/* ============================================================
+   4. 画布 / 相机
+   ============================================================ */
+const wrap = $('wrap');
+const cv = $('cv');
+const ctx = cv.getContext('2d', {alpha:false});
+
+function resize(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = wrap.clientWidth || window.innerWidth;
+  const h = wrap.clientHeight || window.innerHeight;
+  cv.width = Math.round(w*dpr);
+  cv.height = Math.round(h*dpr);
+  cv.style.width = w+'px';
+  cv.style.height = h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  V.w = w; V.h = h; V.cx = w/2; V.cy = h/2;
+  V.focal = (h/2) / Math.tan(cam.fov/2);
+  requestRender();
+}
+
+function updateCamera(){
+  // Z-up 坐标系：x = 东，y = 北，z = 高程
+  const ce = Math.cos(cam.elev), se = Math.sin(cam.elev);
+  const ca = Math.cos(cam.azim), sa = Math.sin(cam.azim);
+  const r = cam.dist;
+  V.eye.x = cam.target.x + r*ce*sa;
+  V.eye.y = cam.target.y + r*ce*ca;
+  V.eye.z = cam.target.z + r*se;
+
+  let fx = cam.target.x - V.eye.x;
+  let fy = cam.target.y - V.eye.y;
+  let fz = cam.target.z - V.eye.z;
+  const L = Math.hypot(fx,fy,fz) || 1;
+  fx /= L; fy /= L; fz /= L;
+  V.fx = fx; V.fy = fy; V.fz = fz;
+
+  // right = forward × up_world(0,0,1)
+  let rx = fy, ry = -fx, rz = 0;
+  const rl = Math.hypot(rx,ry,rz) || 1;
+  rx /= rl; ry /= rl; rz /= rl;
+  V.rx = rx; V.ry = ry; V.rz = rz;
+
+  // up = right × forward
+  V.ux = ry*fz - rz*fy;
+  V.uy = rz*fx - rx*fz;
+  V.uz = rx*fy - ry*fx;
+
+  V.focal = (V.h/2) / Math.tan(cam.fov/2);
+}
+
+let pendingFrame = false;
+function requestRender(){
+  if(pendingFrame) return;
+  pendingFrame = true;
+  requestAnimationFrame(()=>{ pendingFrame = false; render(); });
+}
+
+/* ============================================================
+   5. 解析 DAT
+   ============================================================ */
+const MAX_ROWS = 400000;
+
+function ingest(text, name){
+  const t0 = performance.now();
+  const lines = text.split(/\r\n|\r|\n/);
+  const rows = [];
+  const colNum = [];
+  const colTot = [];
+  let linesUsed = 0;
+
+  for(let li=0; li<lines.length && rows.length < MAX_ROWS; li++){
+    let ln = lines[li];
+    if(!ln) continue;
+    ln = ln.trim();
+    if(!ln) continue;
+    if(ln.charCodeAt(0) === 35 || (ln[0]==='/' && ln[1]==='/')) continue; // # //
+    // 逗号/分号分隔时保留空字段，避免 "点号,,东,北,高" 这类空列导致列错位
+    const sep = (ln.indexOf(',') >= 0 || ln.indexOf(';') >= 0) ? /[,;\t]/ : /\s+/;
+    const toks = ln.split(sep);
+    const arr = [];
+    let any = false;
+    for(let j=0;j<toks.length;j++){
+      const s = toks[j].trim();
+      if(!s){ arr.push(NaN); continue; }
+      colTot[j] = (colTot[j]||0)+1;
+      const v = toNum(s);
+      if(Number.isFinite(v)){ colNum[j] = (colNum[j]||0)+1; arr.push(v); any = true; }
+      else arr.push(NaN);
+    }
+    if(!any || arr.length < 2) continue;
+    rows.push(arr);
+    linesUsed++;
+  }
+
+  if(rows.length === 0){ toast('文件中没有解析到数值数据'); return; }
+
+  // 找出数值列
+  const numCols = [];
+  const nc = colTot.length;
+  for(let j=0;j<nc;j++){
+    const tot = colTot[j] || 1;
+    if((colNum[j]||0)/tot > 0.75 && tot >= rows.length*0.75) numCols.push(j);
+  }
+  if(numCols.length < 3){
+    toast('识别到的数值列不足 3 列，无法构成三维坐标');
+    return;
+  }
+
+  S.rows = rows;
+  S.numCols = numCols;
+  S.fileName = name || '未命名';
+  S.baseTouched = false;    // 新数据重新取最低点作基准
+
+  // 默认：最后三列 → 东 / 北 / 高程（兼容 点号,Y,X,H 与 Y,X,H 等常见格式）
+  const m = numCols.length;
+  S.map.a = numCols[m-3];
+  S.map.b = numCols[m-2];
+  S.map.c = numCols[m-1];
+
+  refreshMapUI();
+  buildFromMap(true);
+  showLoading(false);
+  const dt = Math.round(performance.now()-t0);
+  console.log('[解析] 行数='+rows.length+' 列数='+nc+' 数值列='+numCols.length+' 用时='+dt+'ms');
+}
+
+/* ============================================================
+   6. 由列映射构建点集
+   ============================================================ */
+/* 估算平均点距（最近邻距离）：抽样计算，大数据用面积密度近似 */
+function estimateSpacing(){
+  const n = S.n, wx = S.wx, wy = S.wy;
+  if(n < 3) return 1;
+  if(n <= 4000){
+    const step = Math.max(1, Math.floor(n/300));
+    let sum = 0, cnt = 0;
+    for(let t=0;t<n;t+=step){
+      let best = Infinity;
+      for(let q=0;q<n;q++){
+        if(q === t) continue;
+        const ddx = wx[q]-wx[t], ddy = wy[q]-wy[t];
+        const d2 = ddx*ddx + ddy*ddy;
+        if(d2 < best) best = d2;
+      }
+      if(best < Infinity){ sum += Math.sqrt(best); cnt++; }
+    }
+    if(cnt) return Math.max(1e-6, sum/cnt);
+  }
+  const b = S.box;
+  return Math.max(1e-6, Math.sqrt(Math.abs((b.x1-b.x0)*(b.y1-b.y0))/n));
+}
+
+function buildFromMap(autoScale){
+  const a = S.map.a, b = S.map.b, c = S.map.c;
+  if(a < 0 || b < 0 || c < 0) return;
+
+  const rows = S.rows;
+  const total = rows.length;
+  let wx = new Float32Array(total);   // 东
+  let wy = new Float32Array(total);   // 北
+  let wz = new Float32Array(total);   // 高程
+
+  let e0=Infinity,e1=-Infinity,n0=Infinity,n1=-Infinity,h0=Infinity,h1=-Infinity;
+  let cnt = 0;
+  for(let i=0;i<total;i++){
+    const r = rows[i];
+    const A = r[a], B = r[b], C = r[c];
+    if(!Number.isFinite(A) || !Number.isFinite(B) || !Number.isFinite(C)) continue;
+    wx[cnt] = A;
+    wy[cnt] = B;
+    wz[cnt] = C;
+    if(A<e0) e0=A; if(A>e1) e1=A;
+    if(B<n0) n0=B; if(B>n1) n1=B;
+    if(C<h0) h0=C; if(C>h1) h1=C;
+    cnt++;
+  }
+
+  if(cnt < 3){ toast('有效坐标点不足（' + cnt + ' 个）'); return; }
+  if(cnt !== total){
+    wx = wx.subarray(0,cnt); wy = wy.subarray(0,cnt); wz = wz.subarray(0,cnt);
+  }
+
+  const ce = (e0+e1)/2, cn = (n0+n1)/2, ch = (h0+h1)/2;
+  const hspan = (h1-h0) || 1;
+  const ci = new Uint8Array(cnt);
+
+  for(let i=0;i<cnt;i++){
+    ci[i] = clampInt(Math.round((wz[i] - h0)/hspan*(PAL_N-1)), 0, PAL_N-1);
+    wx[i] -= ce;
+    wy[i] -= cn;
+    wz[i] -= ch;
+  }
+
+  S.n = cnt;
+  S.wx = wx; S.wy = wy; S.wz = wz; S.ci = ci;
+  S.box = {x0:e0-ce, x1:e1-ce, y0:n0-cn, y1:n1-cn, z0:h0-ch, z1:h1-ch};
+  S.hspan = hspan;
+  S.zCenter = ch;
+  S.rawBox = {e0:e0, e1:e1, n0:n0, n1:n1, h0:h0, h1:h1};
+
+  const dE = e1-e0, dN = n1-n0;
+  S.diag = Math.max(Math.hypot(dE, dN), hspan) || 1;
+
+  // 抽稀绘制索引
+  const stride = Math.max(1, Math.ceil(cnt / 90000));
+  S.drawN = 0;
+  const idx = new Int32Array(Math.ceil(cnt/stride));
+  for(let i=0;i<cnt;i+=stride) idx[S.drawN++] = i;
+  S.drawIdx = idx;
+
+  // 垂直夸张：让高差占视图约 22%
+  if(autoScale){
+    const xySpan = Math.max(dE, dN) || 1;
+    let zx = (xySpan*0.22)/hspan;
+    zx = Math.min(12, Math.max(1, zx));
+    S.zExag = Math.round(zx*2)/2;
+    $('rngZ').value = S.zExag;
+    $('vZ').textContent = S.zExag.toFixed(1)+'×';
+
+    // 曲面精度：按实际点距自适应。网格步长取约 0.7 倍点距，
+    // 测区边界与空洞边界就不会被切成大台阶；上限再按点数控制，避免大数据卡顿。
+    const sp = estimateSpacing();
+    const span = Math.max(dE, dN) || 1;
+    let ar = Math.round(span/(sp*0.7));
+    const cap = clampInt(Math.round(6.0*Math.sqrt(cnt)), 80, 160);
+    ar = clampInt(ar, 60, Math.max(60, cap));
+    S.surfaceRes = ar;
+    $('rngRes').value = ar;
+    $('vRes').textContent = ar;
+  }
+
+  S.loaded = true;
+  $('empty').classList.add('hide');
+  setTimeout(() => { $('empty').style.display = 'none'; }, 340);
+  $('btnShot').disabled = false;
+  $('btnReset').disabled = false;
+
+  // 基准面：无历史设置时落到最低点，取到 0.5 m 整数倍
+  if(!S.baseTouched){
+    S.baseElev = Math.ceil(h0*2)/2;   // 向上取到 0.5 m，避免基准面压到最低点以下
+    $('numBase').value = S.baseElev.toFixed(2);
+  }
+  $('numBase').disabled = false;
+  $('btnBaseMin').disabled = false;
+  $('btnBaseAvg').disabled = false;
+  $('btnBaseMax').disabled = false;
+
+  updateInfo();
+  buildSurface();
+  buildContours();
+  updateBaseInfo();
+  fitView();
+  requestRender();
+}
+
+function updateInfo(){
+  const b = S.rawBox;
+  if(!b){ return; }
+  const fmt = v => (Math.abs(v) >= 1000 ? v.toFixed(2) : v.toFixed(3));
+  const w = (b.e1-b.e0), d = (b.n1-b.n0), hh = (b.h1-b.h0);
+  const nm = S.fileName || '未命名';
+  $('tiFile').textContent = nm.length > 20 ? nm.slice(0,18)+'…' : nm;
+  $('tiFile').title = nm;
+  $('tiN').textContent = S.n.toLocaleString();
+  $('tiRange').textContent = w.toFixed(1) + ' × ' + d.toFixed(1) + ' m';
+  $('tiH').textContent = fmt(b.h0) + ' ~ ' + fmt(b.h1) + ' m';
+  $('tiDh').textContent = hh.toFixed(2) + ' m';
+}
+
+function fitView(){
+  cam.target = {x:0,y:0,z:0};
+  cam.dist = S.diag * 1.5;
+  cam.azim = Math.PI - 0.52;   // 东南方向俯视
+  cam.elev = 0.60;
+}
+
+/* ============================================================
+   7. 生成地表曲面（IDW 插值 + 规则三角网）
+   ============================================================ */
+function buildSurface(){
+  const n = S.n;
+  if(n < 6){ S.surf = null; return; }
+
+  const res = S.surfaceRes;
+  const nx = res+1, ny = res+1;
+  const wx = S.wx, wy = S.wy, wz = S.wz;   // 东 / 北 / 高
+  const x0 = S.box.x0, x1 = S.box.x1, y0 = S.box.y0, y1 = S.box.y1;
+  const spanX = (x1-x0) || 1, spanY = (y1-y0) || 1;
+  const dx = spanX/res, dy = spanY/res;
+
+  // 空间哈希（按东-北平面）
+  const ng = Math.max(8, Math.min(160, Math.round(Math.sqrt(n))));
+  const buckets = new Array(ng*ng);
+  const cellX = spanX/ng, cellY = spanY/ng;
+  for(let i=0;i<n;i++){
+    let gx = Math.floor((wx[i]-x0)/cellX); if(gx<0)gx=0; if(gx>=ng)gx=ng-1;
+    let gy = Math.floor((wy[i]-y0)/cellY); if(gy<0)gy=0; if(gy>=ng)gy=ng-1;
+    const k = gy*ng+gx;
+    let arr = buckets[k];
+    if(!arr){ arr = []; buckets[k] = arr; }
+    arr.push(i);
+  }
+
+  // ---- 估算典型点距（最近邻距离中位数）：用于判定"没有测量数据的空白区" ----
+  let spacing = Math.sqrt((spanX*spanY)/Math.max(1,n));
+  {
+    const stepI = Math.max(1, Math.floor(n/400));
+    const ds = [];
+    for(let t=0;t<n;t+=stepI){
+      const px = wx[t], py = wy[t];
+      let gx = Math.floor((px-x0)/cellX); if(gx<0)gx=0; if(gx>=ng)gx=ng-1;
+      let gy = Math.floor((py-y0)/cellY); if(gy<0)gy=0; if(gy>=ng)gy=ng-1;
+      let best = Infinity;
+      const rcMin = Math.min(cellX, cellY);
+      for(let r=1; r<=ng; r++){
+        const ax0 = gx-r < 0 ? 0 : gx-r, ax1 = gx+r >= ng ? ng-1 : gx+r;
+        const ay0 = gy-r < 0 ? 0 : gy-r, ay1 = gy+r >= ng ? ng-1 : gy+r;
+        for(let yy=ay0; yy<=ay1; yy++){
+          const rowK = yy*ng;
+          for(let xx=ax0; xx<=ax1; xx++){
+            const arr = buckets[rowK+xx];
+            if(!arr) continue;
+            for(let k=0;k<arr.length;k++){
+              const q = arr[k];
+              if(q === t) continue;
+              const ddx = wx[q]-px, ddy = wy[q]-py;
+              const d2 = ddx*ddx + ddy*ddy;
+              if(d2 < best) best = d2;
+            }
+          }
+        }
+        if(best < Infinity && best <= (r*rcMin)*(r*rcMin)) break;  // 已确认不可能更近
+      }
+      if(best < Infinity) ds.push(Math.sqrt(best));
+    }
+    if(ds.length >= 8){
+      ds.sort((a,b) => a-b);
+      spacing = ds[ds.length >> 1];
+    }
+  }
+
+  // 有效插值半径：超出该距离说明周围根本没有测点，整块留空不绘制。
+  // 这样多个测区之间的空白地带、以及测区外的空地都不会被插出假地形。
+  const maxR = Math.max(spacing*5, Math.max(dx,dy)*1.5);
+  S.maxR = maxR;
+
+  // 自适应搜索半径：正常按局部点距取，但不越过 maxR
+  const meanSpacing = Math.sqrt((spanX*spanY)/Math.max(1,n));
+  const R = Math.min(Math.max(Math.max(dx,dy)*1.7, meanSpacing*1.25), maxR);
+  const KMIN = 6;
+  const nbuf = new Int32Array(4096);
+  let _hc = 0, _he = -1;
+
+  function collect(px, py, gx, gy, rGX, rGY, rc2){
+    _hc = 0; _he = -1;
+    const ax0 = gx-rGX < 0 ? 0 : gx-rGX;
+    const ax1 = gx+rGX >= ng ? ng-1 : gx+rGX;
+    const ay0 = gy-rGY < 0 ? 0 : gy-rGY;
+    const ay1 = gy+rGY >= ng ? ng-1 : gy+rGY;
+    for(let yy=ay0; yy<=ay1; yy++){
+      const rowK = yy*ng;
+      for(let xx=ax0; xx<=ax1; xx++){
+        const arr = buckets[rowK+xx];
+        if(!arr) continue;
+        for(let k=0;k<arr.length;k++){
+          const pi = arr[k];
+          const ddx = wx[pi]-px, ddy = wy[pi]-py;
+          const d2 = ddx*ddx + ddy*ddy;
+          if(d2 > rc2) continue;
+          if(d2 < 1e-10){ _he = pi; return; }
+          if(_hc < nbuf.length) nbuf[_hc++] = pi;
+        }
+      }
+    }
+  }
+
+  const vx = new Float32Array(nx*ny);
+  const vy = new Float32Array(nx*ny);
+  const vz = new Float32Array(nx*ny);
+  const valid = new Uint8Array(nx*ny);
+  const ci = new Uint8Array(nx*ny);
+  const sx = new Float32Array(nx*ny);
+  const sy = new Float32Array(nx*ny);
+  const vis = new Uint8Array(nx*ny);
+
+  const halfH = S.hspan/2;
+
+  for(let j=0;j<ny;j++){
+    const py = y0 + j*dy;
+    let gy = Math.floor((py-y0)/cellY); if(gy<0)gy=0; if(gy>=ng)gy=ng-1;
+    for(let i=0;i<nx;i++){
+      const px = x0 + i*dx;
+      let gx = Math.floor((px-x0)/cellX); if(gx<0)gx=0; if(gx>=ng)gx=ng-1;
+
+      // 逐级扩大邻域取源点，但半径不超过 maxR：超出即视为无数据区，留空
+      let rc = R;
+      collect(px, py, gx, gy, Math.max(1,Math.ceil(rc/cellX)), Math.max(1,Math.ceil(rc/cellY)), rc*rc);
+      let guard = 0;
+      while(_he < 0 && _hc < KMIN && rc < maxR && guard++ < 12){
+        rc = Math.min(rc*1.9, maxR);
+        collect(px, py, gx, gy, Math.max(1,Math.ceil(rc/cellX)), Math.max(1,Math.ceil(rc/cellY)), rc*rc);
+      }
+
+      const id = j*nx + i;
+      vx[id] = px;
+      vy[id] = py;
+      if(_he >= 0){
+        vz[id] = wz[_he];
+        valid[id] = 1;
+      } else if(_hc > 0){
+        let sw = 0, sh = 0;
+        for(let k=0;k<_hc;k++){
+          const pi = nbuf[k];
+          const ddx = wx[pi]-px, ddy = wy[pi]-py;
+          const d2 = ddx*ddx + ddy*ddy;
+          const w = 1/(d2*Math.sqrt(d2));   // power = 3
+          sw += w; sh += w*wz[pi];
+        }
+        vz[id] = sw > 0 ? sh/sw : wz[nbuf[0]];
+        valid[id] = 1;
+      } else {
+        vz[id] = 0;
+        valid[id] = 0;
+      }
+      if(valid[id]){
+        ci[id] = clampInt(Math.round((vz[id]+halfH)/S.hspan*(PAL_N-1)), 0, PAL_N-1);
+      }
+    }
+  }
+
+  // 清理孤立小碎块：面积过小的有效区域多为零星散点插出来的孤岛，一并留空
+  {
+    const total = nx*ny;
+    const seen = new Uint8Array(total);
+    const queue = new Int32Array(total);
+    const minCells = Math.max(6, Math.round(res*res*0.0016));
+    for(let start=0; start<total; start++){
+      if(!valid[start] || seen[start]) continue;
+      let head = 0, tail = 0;
+      queue[tail++] = start; seen[start] = 1;
+      while(head < tail){
+        const cur = queue[head++];
+        const cxi = cur % nx, cyi = (cur - cxi)/nx;
+        if(cxi > 0){ const nb = cur-1; if(valid[nb] && !seen[nb]){ seen[nb]=1; queue[tail++]=nb; } }
+        if(cxi < nx-1){ const nb = cur+1; if(valid[nb] && !seen[nb]){ seen[nb]=1; queue[tail++]=nb; } }
+        if(cyi > 0){ const nb = cur-nx; if(valid[nb] && !seen[nb]){ seen[nb]=1; queue[tail++]=nb; } }
+        if(cyi < ny-1){ const nb = cur+nx; if(valid[nb] && !seen[nb]){ seen[nb]=1; queue[tail++]=nb; } }
+      }
+      if(tail < minCells){
+        for(let m=0;m<tail;m++) valid[queue[m]] = 0;
+      }
+    }
+  }
+
+  S.surf = {
+    res: res, nx: nx, ny: ny,
+    vx: vx, vy: vy, vz: vz, valid: valid, ci: ci,
+    sx: sx, sy: sy, vis: vis,
+    cOff: null, cSeg: null, cIdx: null
+  };
+}
+
+/* ============================================================
+   7b. 等高线（Marching Squares，单元格四分割）
+   ============================================================ */
+function niceInterval(raw){
+  const seq = [0.05,0.1,0.2,0.25,0.5,1,2,2.5,5,10,20,25,50,100,200,500,1000];
+  for(let i=0;i<seq.length;i++) if(seq[i] >= raw - 1e-9) return seq[i];
+  return 1000;
+}
+
+function buildContours(){
+  const s = S.surf;
+  S.cntLevels = [];
+  if(!s) return;
+
+  const res = s.res, nx = s.nx;
+  const z0 = S.box.z0, z1 = S.box.z1;
+  const span = (z1 - z0) || 1;
+
+  let iv = S.cntInterval > 0 ? S.cntInterval : niceInterval(span/20);
+  if(!(iv > 0)) iv = niceInterval(span/20);
+  if(span/iv > 300) iv = niceInterval(span/300);   // 防止线过密拖慢渲染
+
+  const levels = [];
+  const start = Math.ceil(z0/iv - 1e-9)*iv;
+  for(let L = start; L <= z1 + 1e-9; L += iv) levels.push(L);
+  if(levels.length === 0) levels.push((z0+z1)*0.5);
+
+  const cells = res*res;
+  const off = new Int32Array(cells+1);
+  const seg = [];
+  const sfl = [];
+
+  function triSeg(x1,y1,h1, x2,y2,h2, x3,y3,h3, L, isIdx){
+    let ax=0, ay=0, bx=0, by=0, nn=0;
+    if((h1-L)*(h2-L) < 0){ const t=(L-h1)/(h2-h1); ax=x1+(x2-x1)*t; ay=y1+(y2-y1)*t; nn=1; }
+    if((h2-L)*(h3-L) < 0 && nn<2){
+      const t=(L-h2)/(h3-h2);
+      if(nn===0){ ax=x2+(x3-x2)*t; ay=y2+(y3-y2)*t; nn=1; }
+      else { bx=x2+(x3-x2)*t; by=y2+(y3-y2)*t; nn=2; }
+    }
+    if((h3-L)*(h1-L) < 0 && nn<2){
+      const t=(L-h3)/(h1-h3);
+      if(nn===0){ ax=x3+(x1-x3)*t; ay=y3+(y1-y3)*t; nn=1; }
+      else { bx=x3+(x1-x3)*t; by=y3+(y1-y3)*t; nn=2; }
+    }
+    if(nn===2){ seg.push(ax, ay, L, bx, by, L); sfl.push(isIdx?1:0); }
+  }
+
+  for(let j=0;j<res;j++){
+    for(let i=0;i<res;i++){
+      const cell = j*res + i;
+      off[cell] = seg.length/6;
+      const a = j*nx + i, b = a+1, c = a+nx+1, d = a+nx;
+      if(!s.valid[a] || !s.valid[b] || !s.valid[c] || !s.valid[d]) continue;
+
+      const ha = s.vz[a], hb = s.vz[b], hc = s.vz[c], hd = s.vz[d];
+      let mn = ha, mx = ha;
+      if(hb<mn)mn=hb; if(hb>mx)mx=hb;
+      if(hc<mn)mn=hc; if(hc>mx)mx=hc;
+      if(hd<mn)mn=hd; if(hd>mx)mx=hd;
+      if(mx - mn < 1e-12) continue;
+
+      // 二分定位落到本格内的高程线，避免逐条遍历
+      let lo = 0, hi = levels.length-1, st = -1;
+      while(lo <= hi){
+        const md = (lo+hi)>>1;
+        if(levels[md] <= mn) lo = md+1; else { st = md; hi = md-1; }
+      }
+      if(st < 0) continue;
+
+      const xa = s.vx[a], ya = s.vy[a];
+      const xb = s.vx[b], yb = s.vy[b];
+      const xc = s.vx[c], yc = s.vy[c];
+      const xd = s.vx[d], yd = s.vy[d];
+      const xm = (xa+xc)*0.5, ym = (ya+yc)*0.5, hm = (ha+hb+hc+hd)*0.25;
+
+      for(let li=st; li<levels.length; li++){
+        const L = levels[li];
+        if(L >= mx) break;
+        const isIdx = (li % 5 === 0);
+        triSeg(xa,ya,ha, xb,yb,hb, xm,ym,hm, L, isIdx);
+        triSeg(xb,yb,hb, xc,yc,hc, xm,ym,hm, L, isIdx);
+        triSeg(xc,yc,hc, xd,yd,hd, xm,ym,hm, L, isIdx);
+        triSeg(xd,yd,hd, xa,ya,ha, xm,ym,hm, L, isIdx);
+      }
+    }
+  }
+  off[cells] = seg.length/6;
+
+  s.cOff = off;
+  s.cSeg = new Float32Array(seg);
+  s.cIdx = new Uint8Array(sfl);
+  S.cntLevels = levels;
+  S.cntIv = iv;
+  updateCntInfo();
+}
+
+function updateCntInfo(){
+  const el = $('cntInfo');
+  if(!el) return;
+  const num = $('numCnt');
+  if(!S.surf || !S.cntLevels || !S.cntLevels.length){
+    el.textContent = '等高距 —';
+    return;
+  }
+  if(num && document.activeElement !== num) num.value = S.cntIv;
+  const ivTxt = S.cntIv >= 1 ? String(Math.round(S.cntIv*100)/100) : String(Math.round(S.cntIv*1000)/1000);
+  el.innerHTML = '等高距 <b>' + ivTxt + '</b> m · 共 <b>' + S.cntLevels.length + '</b> 条';
+}
+
+/* ============================================================
+   8. 渲染
+   ============================================================ */
+function projectPoint(px, py, pz){
+  const ddx = px-V.eye.x, ddy = py-V.eye.y, ddz = pz-V.eye.z;
+  const zc = ddx*V.fx + ddy*V.fy + ddz*V.fz;
+  if(zc < 0.5) return null;
+  const inv = V.focal/zc;
+  return [V.cx + (ddx*V.rx + ddy*V.ry + ddz*V.rz)*inv,
+          V.cy - (ddx*V.ux + ddy*V.uy + ddz*V.uz)*inv];
+}
+
+/* ---- 基准面（水平参考面 + 挖填方统计） ---- */
+function drawBasePlane(){
+  if(!S.loaded || !S.rawBox) return;
+  const b = S.box;
+  const pz = (S.baseElev - S.zCenter) * S.zExag;
+  const pad = S.diag * 0.015;
+  const x0 = b.x0 - pad, x1 = b.x1 + pad;
+  const y0 = b.y0 - pad, y1 = b.y1 + pad;
+
+  const c00 = projectPoint(x0, y0, pz), c10 = projectPoint(x1, y0, pz);
+  const c11 = projectPoint(x1, y1, pz), c01 = projectPoint(x0, y1, pz);
+  if(!c00 || !c10 || !c11 || !c01) return;
+
+  const g = ctx;
+  const above = S.baseElev > (S.rawBox.h0 + S.rawBox.h1) * 0.5;
+
+  g.save();
+  g.beginPath();
+  g.moveTo(c00[0], c00[1]); g.lineTo(c10[0], c10[1]);
+  g.lineTo(c11[0], c11[1]); g.lineTo(c01[0], c01[1]);
+  g.closePath();
+  g.fillStyle = above ? 'rgba(56,189,248,.038)' : 'rgba(56,189,248,.15)';
+  g.fill();
+
+  // 面内参考网格
+  g.strokeStyle = above ? 'rgba(125,211,232,.30)' : 'rgba(125,211,232,.22)';
+  g.lineWidth = 1;
+  const ND = 6;
+  for(let k=1;k<ND;k++){
+    const t = k/ND;
+    const ax = x0 + (x1-x0)*t;
+    const p1 = projectPoint(ax, y0, pz), p2 = projectPoint(ax, y1, pz);
+    if(p1 && p2){ g.beginPath(); g.moveTo(p1[0],p1[1]); g.lineTo(p2[0],p2[1]); g.stroke(); }
+    const ay = y0 + (y1-y0)*t;
+    const p3 = projectPoint(x0, ay, pz), p4 = projectPoint(x1, ay, pz);
+    if(p3 && p4){ g.beginPath(); g.moveTo(p3[0],p3[1]); g.lineTo(p4[0],p4[1]); g.stroke(); }
+  }
+
+  // 外轮廓
+  g.beginPath();
+  g.moveTo(c00[0], c00[1]); g.lineTo(c10[0], c10[1]);
+  g.lineTo(c11[0], c11[1]); g.lineTo(c01[0], c01[1]);
+  g.closePath();
+  g.strokeStyle = above ? 'rgba(125,211,232,.42)' : 'rgba(125,211,232,.62)';
+  g.lineWidth = 1.4;
+  g.stroke();
+
+  // 高程标注：贴在最靠近观察者的角上
+  const cs = [c00, c10, c11, c01];
+  let ci = 0, my = -1e9;
+  for(let i=0;i<4;i++){ if(cs[i][1] > my){ my = cs[i][1]; ci = i; } }
+  const txt = '基准面 ' + S.baseElev.toFixed(2) + ' m';
+  g.font = '600 11px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+  g.textAlign = 'left';
+  g.textBaseline = 'middle';
+  const tw = g.measureText(txt).width;
+  let bx = cs[ci][0] - tw/2 - 6;
+  let by = cs[ci][1] + 9;
+  const sideL = V.w > 700 ? 276 : 6;          // 让开左侧面板
+  bx = clamp(bx, sideL, Math.max(sideL, V.w - tw - 18));
+  by = clamp(by, 58, V.h - 12);
+  g.fillStyle = 'rgba(8,11,16,.78)';
+  g.fillRect(bx, by, tw + 12, 18);
+  g.strokeStyle = 'rgba(125,211,232,.3)';
+  g.lineWidth = 1;
+  g.strokeRect(bx + 0.5, by + 0.5, tw + 11, 17);
+  g.fillStyle = '#7dd3e8';
+  g.fillText(txt, bx + 6, by + 9.5);
+  g.restore();
+}
+
+/* ---- 侧面填充：地形面与基准面之间的垂直侧壁（沿场地四周外轮廓封口） ---- */
+function drawSkirt(){
+  const s = S.surf;
+  if(!S.loaded || !s || !S.rawBox) return;
+  const nx = s.nx, ny = s.ny;
+  const vx = s.vx, vy = s.vy, vz = s.vz, valid = s.valid;
+  const zs = S.zExag;
+  const baseZ = (S.baseElev - S.zCenter) * zs;
+
+  const ex = V.eye.x, ey = V.eye.y, ez = V.eye.z;
+  const fx = V.fx, fy = V.fy, fz = V.fz;
+  const rx = V.rx, ry = V.ry, rz = V.rz;
+  const ux = V.ux, uy = V.uy, uz = V.uz;
+  const focal = V.focal, ccx = V.cx, ccy = V.cy;
+
+  const pa = [0,0,0], pb = [0,0,0], pc = [0,0,0], pd = [0,0,0];
+  function proj(px, py, pz, out){
+    const ddx = px-ex, ddy = py-ey, ddz = pz-ez;
+    const zc = ddx*fx + ddy*fy + ddz*fz;
+    if(zc < 0.5) return false;
+    const inv = focal/zc;
+    out[0] = ccx + (ddx*rx + ddy*ry + ddz*rz)*inv;
+    out[1] = ccy - (ddx*ux + ddy*uy + ddz*uz)*inv;
+    out[2] = zc;
+    return true;
+  }
+
+  const quads = [];
+  function edge(i1, i2, nxv, nyv){
+    if(!valid[i1] || !valid[i2]) return;
+    const x1 = vx[i1], y1 = vy[i1], z1 = vz[i1]*zs;
+    const x2 = vx[i2], y2 = vy[i2], z2 = vz[i2]*zs;
+    const d1 = z1 - baseZ, d2 = z2 - baseZ;
+    // 两端都几乎贴合基准面（<2cm 当量）时无需成壁
+    if(Math.abs(d1) < 1e-4 && Math.abs(d2) < 1e-4) return;
+    if(!proj(x1, y1, z1, pa)) return;
+    if(!proj(x2, y2, z2, pb)) return;
+    if(!proj(x2, y2, baseZ, pc)) return;
+    if(!proj(x1, y1, baseZ, pd)) return;
+    quads.push({
+      x1:pa[0], y1:pa[1], x2:pb[0], y2:pb[1],
+      x3:pc[0], y3:pc[1], x4:pd[0], y4:pd[1],
+      z:(pa[2]+pb[2])*0.5, cut:(d1+d2) > 0, nxv:nxv, nyv:nyv
+    });
+  }
+
+  // 沿"有效格网区域"的边界成壁：多块测区会各自封闭，中间空白处自然断开
+  const qnx = nx-1, qny = s.ny-1;
+  const qv = new Uint8Array(qnx*qny);
+  for(let j=0;j<qny;j++){
+    const row = j*nx;
+    for(let i=0;i<qnx;i++){
+      const a = row + i;
+      if(valid[a] && valid[a+1] && valid[a+nx] && valid[a+nx+1]) qv[j*qnx+i] = 1;
+    }
+  }
+  for(let j=0;j<qny;j++){
+    for(let i=0;i<qnx;i++){
+      if(!qv[j*qnx+i]) continue;
+      const a = j*nx + i;          // 左下
+      const b = a + 1;             // 右下
+      const d = a + nx;            // 左上
+      const c = d + 1;             // 右上
+      if(j === 0 || !qv[(j-1)*qnx+i]) edge(a, b, 0, -1);        // 南边
+      if(j === qny-1 || !qv[(j+1)*qnx+i]) edge(b, c, 0, 1);     // 北边
+      if(i === 0 || !qv[j*qnx+i-1]) edge(a, d, -1, 0);          // 西边
+      if(i === qnx-1 || !qv[j*qnx+i+1]) edge(d, c, 1, 0);       // 东边
+    }
+  }
+
+  if(!quads.length) return;
+  // 从远到近绘制，保证前后遮挡关系
+  quads.sort((p, q) => q.z - p.z);
+
+  const g = ctx;
+  const LX = 0.42, LY = -0.36;
+  // 挖方（地形高于基准面）用暖褐土色，填方（地形低于基准面）用冷灰蓝色
+  const CUT_C = [142, 108, 74];
+  const FIL_C = [72, 104, 124];
+
+  g.save();
+  g.lineWidth = 1;
+  g.lineJoin = 'round';
+  for(let k=0;k<quads.length;k++){
+    const q = quads[k];
+    const c = q.cut ? CUT_C : FIL_C;
+    let f = 0.74 + (q.nxv*LX + q.nyv*LY)*0.55;
+    if(f < 0.34) f = 0.34; else if(f > 1.12) f = 1.12;
+    const col = 'rgb(' + clampInt(c[0]*f,0,255) + ',' + clampInt(c[1]*f,0,255) + ',' + clampInt(c[2]*f,0,255) + ')';
+    g.fillStyle = col;
+    g.strokeStyle = col;
+    g.beginPath();
+    g.moveTo(q.x1, q.y1);
+    g.lineTo(q.x2, q.y2);
+    g.lineTo(q.x3, q.y3);
+    g.lineTo(q.x4, q.y4);
+    g.closePath();
+    g.fill();
+    g.stroke();
+  }
+  g.restore();
+}
+
+function fmtVol(v){
+  if(v >= 100000) return Math.round(v).toLocaleString();
+  if(v >= 1000) return (v/1000).toFixed(1) + 'k';
+  return v.toFixed(1);
+}
+
+function updateBaseInfo(){
+  const el = $('baseInfo');
+  if(!el) return;
+  if(!S.loaded || !S.surf || !S.rawBox){ el.innerHTML = '<span>载入数据后显示挖填方量</span>'; return; }
+  const s = S.surf, res = s.res, nx = s.nx;
+  const dx = (S.box.x1 - S.box.x0)/res, dy = (S.box.y1 - S.box.y0)/res;
+  const A = dx*dy;
+  const base = S.baseElev;
+  let cut = 0, fill = 0, nAbove = 0, nCells = 0;
+  for(let j=0;j<res;j++){
+    const row = j*nx;
+    for(let i=0;i<res;i++){
+      const a = row + i, bb = a+1, cc = a+nx+1, dd = a+nx;
+      if(!s.valid[a] || !s.valid[bb] || !s.valid[cc] || !s.valid[dd]) continue;
+      const h = (s.vz[a] + s.vz[bb] + s.vz[cc] + s.vz[dd])*0.25 + S.zCenter;
+      nCells++;
+      if(h > base){ cut += (h - base)*A; nAbove++; }
+      else fill += (base - h)*A;
+    }
+  }
+  const pct = nCells ? nAbove/nCells*100 : 0;
+  el.innerHTML =
+    '<span>挖方 <b>' + fmtVol(cut) + '</b> m³</span>' +
+    '<span>填方 <b>' + fmtVol(fill) + '</b> m³</span>' +
+    '<span>高于基准面 <b>' + pct.toFixed(0) + '</b>%</span>' +
+    '<span>净' + (cut >= fill ? '挖 ' : '填 ') + '<b>' + fmtVol(Math.abs(cut - fill)) + '</b> m³</span>';
+}
+
+function render(){
+  updateCamera();
+
+  ctx.fillStyle = '#080b10';
+  ctx.fillRect(0, 0, V.w, V.h);
+
+  if(!S.loaded){
+    drawGizmo();
+    return;
+  }
+
+  // 基准面与地形的遮挡：基准面在地形之下时先画（被地形自然覆盖），
+  // 高于地形平均高程时后画（半透明覆盖，近似正确遮挡）。侧壁跟随同组顺序。
+  const planeAbove = S.showBase && S.baseElev > (S.rawBox.h0 + S.rawBox.h1) * 0.5;
+  const skirt = S.showBase && S.showSkirt;
+  if(skirt && !planeAbove) drawSkirt();
+  if(S.showBase && !planeAbove) drawBasePlane();
+  if((S.showSurface || S.showContour) && S.surf) drawSurface();
+  if(S.showCloud) drawCloud();
+  if(skirt && planeAbove) drawSkirt();
+  if(S.showBase && planeAbove) drawBasePlane();
+  drawGizmo();
+}
+
+/* ---- 点云 ---- */
+function drawCloud(){
+  const ex = V.eye.x, ey = V.eye.y, ez = V.eye.z;
+  const fx = V.fx, fy = V.fy, fz = V.fz;
+  const rx = V.rx, ry = V.ry, rz = V.rz;
+  const ux = V.ux, uy = V.uy, uz = V.uz;
+  const focal = V.focal, ccx = V.cx, ccy = V.cy;
+  const W = V.w, H = V.h;
+
+  const wx = S.wx, wy = S.wy, wz = S.wz, ci = S.ci;
+  const pal = S.palBase;
+  const idx = S.drawIdx, dn = S.drawN;
+  const zs = S.zExag;
+  const sz = S.pointSize;
+  const half = sz/2;
+  const lift = (S.showSurface && S.surf) ? S.diag*0.0012 : 0;
+  // 拖拽旋转时进一步抽稀，保证流畅
+  const stride = S.dragging ? Math.max(1, Math.ceil(dn/30000)) : 1;
+  // 点云很密时降低不透明度，避免盖住曲面色彩变成噪点
+  const dense = dn > 15000;
+  if(dense) ctx.globalAlpha = 0.5;
+
+  for(let k=0;k<dn;k+=stride){
+    const i = idx[k];
+    const px = wx[i];
+    const py = wy[i];
+    const pz = wz[i]*zs + lift;
+    const ddx = px-ex, ddy = py-ey, ddz = pz-ez;
+    const zc = ddx*fx + ddy*fy + ddz*fz;
+    if(zc < 0.5) continue;
+    const inv = focal/zc;
+    const sxx = ccx + (ddx*rx + ddy*ry + ddz*rz)*inv;
+    if(sxx < -8 || sxx > W+8) continue;
+    const syy = ccy - (ddx*ux + ddy*uy + ddz*uz)*inv;
+    if(syy < -8 || syy > H+8) continue;
+    ctx.fillStyle = pal[ci[i]];
+    ctx.fillRect(sxx-half, syy-half, sz, sz);
+  }
+  if(dense) ctx.globalAlpha = 1;
+}
+
+/* ---- 曲面 + 等高线（同一遍历顺序绘制，保证遮挡关系正确） ---- */
+function drawSurface(){
+  const s = S.surf;
+  if(!s) return;
+  const res = s.res, nx = s.nx;
+  const zs = S.zExag;
+
+  const ex = V.eye.x, ey = V.eye.y, ez = V.eye.z;
+  const fx = V.fx, fy = V.fy, fz = V.fz;
+  const rx = V.rx, ry = V.ry, rz = V.rz;
+  const ux = V.ux, uy = V.uy, uz = V.uz;
+  const focal = V.focal, ccx = V.cx, ccy = V.cy;
+
+  const vx = s.vx, vy = s.vy, vz = s.vz;
+  const valid = s.valid, vis = s.vis;
+  const sx = s.sx, sy = s.sy;
+  const ci = s.ci;
+  const total = nx*s.ny;
+
+  // 顶点投影
+  for(let k=0;k<total;k++){
+    if(!valid[k]){ vis[k] = 0; continue; }
+    const px = vx[k], py = vy[k], pz = vz[k]*zs;
+    const ddx = px-ex, ddy = py-ey, ddz = pz-ez;
+    const zc = ddx*fx + ddy*fy + ddz*fz;
+    if(zc < 1){ vis[k] = 0; continue; }
+    vis[k] = 1;
+    const inv = focal/zc;
+    sx[k] = ccx + (ddx*rx + ddy*ry + ddz*rz)*inv;
+    sy[k] = ccy - (ddx*ux + ddy*uy + ddz*uz)*inv;
+  }
+
+  const pal = S.palShaded;
+  const g = ctx;
+  const doTri = S.showSurface;
+  const cOff = s.cOff, cSeg = s.cSeg, cIdx = s.cIdx;
+  const showC = S.showContour && !!cOff;
+
+  // 抽稀策略：粗绘时三角形会覆盖邻格的等高线，故此时不画等高线（松手即恢复）
+  const lowQ = S.dragging || S.spin;
+  let step = (lowQ || res > 150) ? 2 : 1;
+  const drawCnt = showC && (!doTri || !lowQ);
+  if(drawCnt && doTri) step = 1;
+
+  const dirX = ex > 0 ? 1 : -1;
+  const dirY = ey > 0 ? 1 : -1;
+  const LX = 0.42, LY = -0.36, LZ = 0.83;
+
+  function tri(i1, i2, i3, colIdx){
+    const x1 = vx[i1], y1 = vy[i1], z1 = vz[i1]*zs;
+    const x2 = vx[i2], y2 = vy[i2], z2 = vz[i2]*zs;
+    const x3 = vx[i3], y3 = vy[i3], z3 = vz[i3]*zs;
+    const ax = x2-x1, ay = y2-y1, az = z2-z1;
+    const bx = x3-x1, by = y3-y1, bz = z3-z1;
+    let nvx = ay*bz - az*by;
+    let nvy = az*bx - ax*bz;
+    let nvz = ax*by - ay*bx;
+    const len = Math.hypot(nvx, nvy, nvz) || 1;
+    let dot = (nvx*LX + nvy*LY + nvz*LZ)/len;
+    let sh = Math.round((dot*0.5 + 0.5)*(SHADE_N-1));
+    if(sh < 0) sh = 0; else if(sh > SHADE_N-1) sh = SHADE_N-1;
+    g.fillStyle = pal[colIdx][sh];
+    g.strokeStyle = pal[colIdx][sh];
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(sx[i1], sy[i1]);
+    g.lineTo(sx[i2], sy[i2]);
+    g.lineTo(sx[i3], sy[i3]);
+    g.closePath();
+    g.fill();
+    g.stroke();   // 描边填缝：消除相邻三角形的发丝接缝
+  }
+
+  let _ax = 0, _ay = 0, _bx = 0, _by = 0;
+  function seg2d(k){
+    const b = k*6;
+    const dx1 = cSeg[b]-ex, dy1 = cSeg[b+1]-ey, dz1 = cSeg[b+2]*zs-ez;
+    const c1 = dx1*fx + dy1*fy + dz1*fz;
+    if(c1 < 1) return false;
+    const k1 = focal/c1;
+    _ax = ccx + (dx1*rx + dy1*ry + dz1*rz)*k1;
+    _ay = ccy - (dx1*ux + dy1*uy + dz1*uz)*k1;
+
+    const dx2 = cSeg[b+3]-ex, dy2 = cSeg[b+4]-ey, dz2 = cSeg[b+5]*zs-ez;
+    const c2 = dx2*fx + dy2*fy + dz2*fz;
+    if(c2 < 1) return false;
+    const k2 = focal/c2;
+    _bx = ccx + (dx2*rx + dy2*ry + dz2*rz)*k2;
+    _by = ccy - (dx2*ux + dy2*uy + dz2*uz)*k2;
+    return true;
+  }
+
+  function cellLines(j, i){
+    const cell = j*res + i;
+    const o0 = cOff[cell], o1 = cOff[cell+1];
+    if(o1 <= o0) return;
+
+    // 首曲线
+    let has = false;
+    for(let k=o0;k<o1;k++){
+      if(cIdx[k]) continue;
+      if(!seg2d(k)) continue;
+      if(!has){ g.beginPath(); has = true; }
+      g.moveTo(_ax, _ay); g.lineTo(_bx, _by);
+    }
+    if(has){
+      g.strokeStyle = 'rgba(255,255,255,.50)';
+      g.lineWidth = 1;
+      g.stroke();
+    }
+    // 计曲线（每 5 条加粗提亮）
+    has = false;
+    for(let k=o0;k<o1;k++){
+      if(!cIdx[k]) continue;
+      if(!seg2d(k)) continue;
+      if(!has){ g.beginPath(); has = true; }
+      g.moveTo(_ax, _ay); g.lineTo(_bx, _by);
+    }
+    if(has){
+      g.strokeStyle = 'rgba(255,255,255,.92)';
+      g.lineWidth = 1.7;
+      g.stroke();
+    }
+  }
+
+  // 遍历顺序：远 → 近。曲面按 step 抽稀（仍完整覆盖），等高线逐格绘制
+  for(let jj=0;jj<res;jj++){
+    const j = dirY > 0 ? jj : (res-1-jj);
+    const rowA = j*nx;
+    const js = (j % step === 0) && (j <= res-step);
+    for(let ii=0;ii<res;ii++){
+      const i = dirX > 0 ? ii : (res-1-ii);
+      if(doTri && js && (i % step === 0) && (i <= res-step)){
+        const a = rowA + i;
+        const b = a + step;
+        const c = a + step*nx;
+        const d = c + step;
+        if(vis[a] && vis[b] && vis[c] && vis[d]){
+          tri(a, b, d, ci[a]);
+          tri(a, d, c, ci[a]);
+        }
+      }
+      if(drawCnt) cellLines(j, i);
+    }
+  }
+}
+
+/* ---- 坐标轴指示器 ---- */
+function drawGizmo(){
+  const ox = V.w - 78, oy = 112, R = 30;
+  ctx.save();
+
+  // 背板
+  ctx.beginPath();
+  ctx.arc(ox, oy, R + 22, 0, 6.2832);
+  ctx.fillStyle = 'rgba(11,16,23,.62)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.07)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.lineCap = 'round';
+  ctx.font = '700 11px -apple-system,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const axes = [
+    {x:1,y:0,z:0,c:'#ff7b72',t:'E',n:'东'},
+    {x:0,y:1,z:0,c:'#6ab8ff',t:'N',n:'北'},
+    {x:0,y:0,z:1,c:'#5ee08a',t:'H',n:'高'}
+  ];
+  for(const a of axes){
+    const px = a.x*V.rx + a.y*V.ry + a.z*V.rz;
+    const py = a.x*V.ux + a.y*V.uy + a.z*V.uz;
+    const exx = ox + px*R, eyy = oy - py*R;
+    ctx.strokeStyle = a.c;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(exx, eyy); ctx.stroke();
+    ctx.fillStyle = a.c;
+    ctx.beginPath(); ctx.arc(exx, eyy, 3.2, 0, 6.2832); ctx.fill();
+    ctx.fillText(a.t, exx + px*13, eyy - py*13);
+  }
+  ctx.beginPath();
+  ctx.arc(ox, oy, 2.2, 0, 6.2832);
+  ctx.fillStyle = 'rgba(255,255,255,.55)';
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ============================================================
+   9. 交互
+   ============================================================ */
+let drag = null;
+
+cv.addEventListener('contextmenu', e => e.preventDefault());
+
+cv.addEventListener('pointerdown', e => {
+  if(!S.loaded) return;
+  cv.setPointerCapture(e.pointerId);
+  drag = {
+    x: e.clientX, y: e.clientY,
+    pan: (e.button === 2 || e.button === 1 || e.shiftKey)
+  };
+  S.dragging = true;
+  cv.classList.add('grabbing');
+});
+
+cv.addEventListener('pointermove', e => {
+  if(!drag) return;
+  const dx = e.clientX - drag.x;
+  const dy = e.clientY - drag.y;
+  drag.x = e.clientX; drag.y = e.clientY;
+
+  if(drag.pan){
+    const k = cam.dist * 0.0016;
+    cam.target.x += (-dx*V.rx + dy*V.ux)*k;
+    cam.target.y += (-dx*V.ry + dy*V.uy)*k;
+    cam.target.z += (-dx*V.rz + dy*V.uz)*k;
+  } else {
+    cam.azim -= dx*0.0072;
+    cam.elev = clamp(cam.elev + dy*0.0062, -1.54, 1.54);
+  }
+  requestRender();
+});
+
+function endDrag(e){
+  if(!drag) return;
+  drag = null;
+  S.dragging = false;
+  cv.classList.remove('grabbing');
+  requestRender();
+}
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+
+cv.addEventListener('wheel', e => {
+  if(!S.loaded) return;
+  e.preventDefault();
+  const f = Math.exp(clamp(e.deltaY,-160,160)*0.0016);
+  cam.dist = clamp(cam.dist*f, S.diag*0.02, S.diag*12);
+  requestRender();
+}, {passive:false});
+
+cv.addEventListener('dblclick', () => {
+  if(!S.loaded) return;
+  fitView();
+  requestRender();
+  toast('视角已复位');
+});
+
+/* ---- 视图预设 ---- */
+document.querySelectorAll('[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(!S.loaded) return;
+    const v = btn.dataset.view;
+    if(v === 'iso'){ cam.azim = Math.PI - 0.52; cam.elev = 0.60; }
+    else if(v === 'top'){ cam.azim = Math.PI; cam.elev = 1.5533; }
+    else if(v === 'front'){ cam.azim = Math.PI; cam.elev = 0.02; }
+    else if(v === 'side'){ cam.azim = Math.PI/2; cam.elev = 0.02; }
+    cam.dist = S.diag*1.35;
+    requestRender();
+  });
+});
+
+/* ---- 侧栏控件 ---- */
+const selA = $('selA'), selB = $('selB'), selC = $('selC');
+
+function sampleOf(colIdx){
+  const rows = S.rows;
+  const lim = Math.min(rows.length, 40);
+  for(let i=0;i<lim;i++){
+    const v = rows[i][colIdx];
+    if(Number.isFinite(v)) return String(v);
+  }
+  return '—';
+}
+
+function refreshMapUI(){
+  const sels = [selA, selB, selC];
+  const keys = ['a','b','c'];
+  const options = S.numCols.map(j => {
+    const s = sampleOf(j);
+    const v = s.length > 12 ? s.slice(0,11)+'…' : s;
+    return '<option value="'+j+'">第 '+(j+1)+' 列 · '+v+'</option>';
+  }).join('');
+  sels.forEach((sel, i) => {
+    sel.innerHTML = options;
+    sel.value = String(S.map[keys[i]]);
+  });
+}
+
+[selA, selB, selC].forEach((sel, i) => {
+  sel.addEventListener('change', () => {
+    const key = ['a','b','c'][i];
+    S.map[key] = parseInt(sel.value, 10);
+    buildFromMap(false);
+  });
+});
+
+$('hdrMap').addEventListener('click', () => {
+  $('secMap').classList.toggle('closed');
+});
+
+$('btnSwap').addEventListener('click', () => {
+  const t = S.map.a; S.map.a = S.map.b; S.map.b = t;
+  selA.value = String(S.map.a);
+  selB.value = String(S.map.b);
+  S.baseTouched = false;   // 高程列可能随之改变，基准面重新取最低点
+  buildFromMap(false);
+  toast('已交换坐标 1 / 2');
+});
+
+$('chkCloud').addEventListener('change', e => { S.showCloud = e.target.checked; requestRender(); });
+$('chkSurf').addEventListener('change', e => { S.showSurface = e.target.checked; requestRender(); });
+$('chkSpin').addEventListener('change', e => { S.spin = e.target.checked; });
+
+$('rngPt').addEventListener('input', e => {
+  S.pointSize = parseFloat(e.target.value);
+  $('vPt').textContent = S.pointSize.toFixed(1);
+  requestRender();
+});
+
+let resTimer = 0;
+$('rngRes').addEventListener('input', e => {
+  S.surfaceRes = parseInt(e.target.value, 10);
+  $('vRes').textContent = S.surfaceRes;
+  clearTimeout(resTimer);
+  resTimer = setTimeout(() => {
+    if(!S.loaded) return;
+    buildSurface();
+    buildContours();
+    updateBaseInfo();
+    requestRender();
+  }, 160);
+});
+
+/* ---- 等高线 ---- */
+$('chkCnt').addEventListener('change', e => {
+  S.showContour = e.target.checked;
+  if(S.showContour && S.surf && !S.surf.cOff) buildContours();
+  requestRender();
+});
+
+let cntTimer = 0;
+function applyCntInterval(v){
+  if(!(v > 0)) return;
+  S.cntInterval = v;
+  if(!S.loaded) return;
+  clearTimeout(cntTimer);
+  cntTimer = setTimeout(() => {
+    buildContours();
+    requestRender();
+  }, 120);
+}
+$('numCnt').addEventListener('input', e => applyCntInterval(parseFloat(e.target.value)));
+$('numCnt').addEventListener('change', e => applyCntInterval(parseFloat(e.target.value)));
+$('btnCntAuto').addEventListener('click', () => {
+  S.cntInterval = 0;
+  if(!S.loaded) return;
+  buildContours();
+  requestRender();
+  toast('等高距已按高差自动计算');
+});
+
+/* ---- 基准面 ---- */
+function applyBase(v, mark){
+  if(!Number.isFinite(v)) return;
+  S.baseElev = v;
+  if(mark !== false) S.baseTouched = true;
+  const num = $('numBase');
+  if(num && document.activeElement !== num) num.value = v.toFixed(2);
+  updateBaseInfo();
+  requestRender();
+}
+$('chkBase').addEventListener('change', e => {
+  S.showBase = e.target.checked;
+  if(S.showBase && S.loaded) updateBaseInfo();
+  requestRender();
+});
+$('chkSkirt').addEventListener('change', e => {
+  S.showSkirt = e.target.checked;
+  // 侧壁依附于基准面，勾选时若基准面未开则一并打开
+  if(S.showSkirt && !S.showBase){
+    $('chkBase').checked = true;
+    S.showBase = true;
+    if(S.loaded) updateBaseInfo();
+  }
+  requestRender();
+});
+$('numBase').addEventListener('input', e => applyBase(parseFloat(e.target.value)));
+$('numBase').addEventListener('change', e => applyBase(parseFloat(e.target.value)));
+$('btnBaseMin').addEventListener('click', () => {
+  if(!S.rawBox) return;
+  if(!$('chkBase').checked){ $('chkBase').checked = true; S.showBase = true; }
+  applyBase(S.rawBox.h0);
+});
+$('btnBaseAvg').addEventListener('click', () => {
+  if(!S.rawBox) return;
+  if(!$('chkBase').checked){ $('chkBase').checked = true; S.showBase = true; }
+  applyBase(Math.round((S.rawBox.h0 + S.rawBox.h1)*50)/100);
+});
+$('btnBaseMax').addEventListener('click', () => {
+  if(!S.rawBox) return;
+  if(!$('chkBase').checked){ $('chkBase').checked = true; S.showBase = true; }
+  applyBase(S.rawBox.h1);
+});
+
+$('rngZ').addEventListener('input', e => {
+  S.zExag = parseFloat(e.target.value);
+  $('vZ').textContent = S.zExag.toFixed(1)+'×';
+  requestRender();
+});
+
+$('selPal').addEventListener('change', e => {
+  S.palette = e.target.value;
+  buildPalette(S.palette);
+  requestRender();
+});
+
+/* ---- 自动旋转 ---- */
+function tick(){
+  if(S.spin && S.loaded && !S.dragging){
+    cam.azim += 0.0042;
+    render();
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ============================================================
+   10. 文件读写
+   ============================================================ */
+function showLoading(on, txt){
+  $('loadTxt').textContent = txt || '正在生成地形曲面…';
+  $('loading').classList.toggle('show', !!on);
+}
+
+async function loadFile(file){
+  if(!file) return;
+  const low = file.name.toLowerCase();
+  if(!/\.(dat|txt|csv|xyz|pts|asc)$/i.test(low)){
+    toast('请选择 .dat / .txt / .csv 等文本格式文件');
+    return;
+  }
+  showLoading(true, '正在读取文件…');
+  try{
+    const buf = await file.arrayBuffer();
+    let text = new TextDecoder('utf-8', {fatal:false}).decode(buf);
+    if(text.indexOf('\uFFFD') >= 0){
+      try{ text = new TextDecoder('gbk').decode(buf); }catch(err){}
+    }
+    showLoading(true, '正在解析并生成地形…');
+    await new Promise(r => setTimeout(r, 30));
+    ingest(text, file.name);
+    showLoading(false);
+    if(S.loaded) toast('已载入 ' + S.n.toLocaleString() + ' 个点');
+  }catch(err){
+    showLoading(false);
+    console.error(err);
+    toast('文件读取失败：' + err.message);
+  }
+}
+
+$('btnOpen').addEventListener('click', () => $('fileInput').click());
+$('fileInput').addEventListener('change', e => {
+  if(e.target.files && e.target.files[0]) loadFile(e.target.files[0]);
+  e.target.value = '';
+});
+
+/* ---- 拖拽 ---- */
+const dragMask = $('dragover');
+let dragDepth = 0;
+window.addEventListener('dragenter', e => {
+  e.preventDefault();
+  dragDepth++;
+  if(dragDepth > 0) dragMask.classList.add('show');
+});
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('dragleave', e => {
+  dragDepth--;
+  if(dragDepth <= 0){ dragDepth = 0; dragMask.classList.remove('show'); }
+});
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dragDepth = 0;
+  dragMask.classList.remove('show');
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f) loadFile(f);
+});
+
+/* ---- 导出 PNG ---- */
+$('btnShot').addEventListener('click', () => {
+  if(!S.loaded) return;
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  const stamp = d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds());
+  try{
+    const url = cv.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '测绘数据三维_'+stamp+'.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('图片已导出');
+  }catch(err){
+    toast('导出失败：' + err.message);
+  }
+});
+
+$('btnReset').addEventListener('click', () => {
+  if(!S.loaded) return;
+  fitView();
+  requestRender();
+});
+
+/* ============================================================
+   11. 示例数据
+   ============================================================ */
+/* 内置示例数据：真实进场复测数据.dat（223 个复测点，格式 点号,,东,北,高） */
+const DEMO_DAT = `1,,573913.418,3191978.247,670.854
+2,,573914.701,3191980.565,670.757
+3,,573906.059,3191986.705,669.890
+4,,573898.932,3191981.643,669.912
+5,,573907.112,3191975.619,671.857
+6,,573911.341,3191971.626,671.782
+7,,573914.726,3191976.317,672.542
+8,,573917.179,3191974.974,672.951
+9,,573915.255,3191970.061,672.429
+10,,573910.932,3191969.524,672.684
+11,,573911.950,3191964.500,673.972
+12,,573906.911,3191966.189,674.591
+13,,573904.457,3191968.963,674.807
+14,,573902.280,3191964.602,675.598
+15,,573903.225,3191962.879,675.601
+16,,573906.764,3191961.550,676.334
+17,,573907.766,3191958.988,676.381
+18,,573909.535,3191957.238,676.694
+19,,573906.999,3191951.773,677.514
+20,,573901.941,3191952.987,677.873
+21,,573898.807,3191957.376,678.510
+22,,573896.580,3191953.862,679.801
+23,,573899.200,3191949.988,679.785
+24,,573904.727,3191946.854,681.625
+25,,573898.008,3191949.055,678.383
+26,,573895.502,3191949.579,678.110
+27,,573891.799,3191945.905,678.759
+28,,573896.649,3191943.267,679.534
+29,,573897.748,3191941.344,679.466
+30,,573892.851,3191938.446,680.492
+31,,573895.199,3191938.016,681.789
+32,,573898.028,3191935.650,682.633
+33,,573902.223,3191939.227,682.436
+34,,573897.817,3191931.087,683.387
+35,,573891.046,3191931.887,683.920
+36,,573883.847,3191933.895,686.010
+37,,573884.665,3191928.857,687.857
+38,,573889.705,3191927.496,687.685
+39,,573892.635,3191926.870,688.445
+40,,573894.072,3191924.324,690.897
+41,,573891.919,3191922.252,691.560
+42,,573890.815,3191925.381,689.607
+43,,573884.229,3191928.758,685.468
+44,,573881.324,3191927.559,686.342
+45,,573882.956,3191924.006,686.798
+46,,573879.924,3191925.997,686.955
+47,,573873.945,3191928.870,686.225
+48,,573870.805,3191929.013,690.348
+49,,573876.876,3191930.513,685.278
+50,,573875.737,3191932.979,682.993
+51,,573873.311,3191931.832,683.875
+52,,573870.959,3191937.596,684.642
+53,,573863.694,3191941.547,683.652
+54,,573857.483,3191940.409,682.689
+55,,573856.919,3191937.508,682.637
+56,,573877.215,3191941.705,680.930
+57,,573881.452,3191943.851,681.145
+58,,573884.416,3191945.453,679.617
+59,,573886.007,3191943.330,679.779
+60,,573888.444,3191946.547,678.914
+61,,573883.174,3191949.264,678.660
+62,,573880.559,3191946.819,678.384
+63,,573876.974,3191944.424,679.123
+64,,573879.357,3191948.032,679.764
+65,,573870.763,3191939.569,679.369
+66,,573872.752,3191942.008,681.501
+67,,573871.196,3191942.847,681.702
+68,,573870.432,3191944.706,682.370
+69,,573867.806,3191944.759,681.843
+70,,573875.360,3191945.485,678.226
+71,,573873.951,3191949.009,677.979
+72,,573878.501,3191949.134,677.946
+73,,573869.803,3191950.706,678.018
+74,,573866.432,3191947.455,678.162
+75,,573862.766,3191945.194,677.447
+76,,573856.117,3191945.405,679.815
+77,,573861.696,3191953.626,678.588
+78,,573864.648,3191952.208,677.972
+79,,573864.876,3191957.445,676.742
+80,,573871.520,3191956.963,675.925
+81,,573870.768,3191965.460,675.768
+82,,573877.079,3191970.792,675.289
+83,,573883.082,3191965.251,674.786
+84,,573883.903,3191977.229,674.570
+85,,573887.910,3191971.110,673.311
+86,,573885.973,3191964.284,672.842
+87,,573890.212,3191960.896,672.922
+88,,573894.093,3191958.130,673.543
+89,,573889.287,3191955.564,672.992
+90,,573886.192,3191956.854,675.572
+91,,573891.849,3191953.705,674.610
+92,,573898.717,3191972.379,672.991
+93,,573892.377,3191962.972,672.056
+94,,573896.562,3191962.319,671.040
+95,,573889.828,3191971.348,670.927
+96,,573894.167,3191975.849,670.894
+97,,573897.954,3191979.073,670.556
+98,,573902.287,3191974.846,670.035
+99,,573921.598,3191969.298,669.122
+100,,573920.186,3191958.748,668.997
+101,,573909.892,3191940.187,678.947
+102,,573910.739,3191937.221,679.115
+103,,573962.176,3191924.570,668.779
+104,,573917.977,3191932.435,669.821
+105,,573923.053,3191936.988,670.193
+106,,573932.444,3191931.313,669.966
+107,,573927.112,3191925.119,670.302
+108,,573934.591,3191917.976,670.160
+109,,573939.203,3191926.183,669.526
+110,,573945.465,3191924.176,669.363
+111,,573942.176,3191914.348,669.983
+112,,573944.808,3191915.265,668.570
+113,,573946.056,3191909.899,668.889
+114,,573950.535,3191914.864,668.768
+115,,573945.345,3191920.216,668.944
+116,,573947.727,3191923.022,668.729
+117,,573954.708,3191918.900,668.987
+118,,573962.800,3191914.589,668.580
+119,,573961.295,3191909.418,668.577
+120,,573958.635,3191903.301,668.574
+121,,573964.635,3191901.925,668.744
+122,,573965.992,3191912.016,668.542
+123,,573971.231,3191908.315,668.413
+124,,573970.554,3191903.084,668.735
+125,,573914.266,3191942.476,669.640
+126,,573919.414,3191946.921,669.213
+127,,573929.539,3191951.023,668.990
+128,,573933.222,3191958.102,668.437
+129,,573937.454,3191962.898,669.103
+130,,573937.933,3191967.431,668.831
+131,,573939.685,3191972.335,668.869
+132,,573948.320,3191969.129,668.652
+133,,573946.197,3191962.764,668.470
+134,,573942.533,3191954.227,668.569
+135,,573942.914,3191950.909,669.453
+136,,573940.890,3191946.439,668.976
+137,,573937.353,3191940.896,668.877
+138,,573933.649,3191933.101,668.998
+139,,573938.657,3191929.950,668.799
+140,,573941.465,3191936.724,668.556
+141,,573944.747,3191942.568,668.220
+142,,573946.574,3191948.051,668.606
+143,,573949.672,3191953.883,668.748
+144,,573952.120,3191959.174,668.324
+145,,573955.976,3191966.860,668.338
+146,,573961.822,3191964.531,668.286
+147,,573959.737,3191956.683,668.186
+148,,573955.732,3191949.927,668.250
+149,,573954.328,3191947.599,669.112
+150,,573952.181,3191943.138,668.347
+151,,573950.326,3191937.096,668.481
+152,,573948.279,3191931.746,668.547
+153,,573945.784,3191926.960,668.535
+154,,573952.239,3191923.871,667.785
+155,,573955.011,3191927.890,667.851
+156,,573957.061,3191934.146,667.766
+157,,573959.775,3191940.246,667.444
+158,,573962.136,3191944.544,667.381
+159,,573967.014,3191961.371,668.153
+160,,573975.913,3191958.311,667.657
+161,,573984.056,3191954.730,667.676
+162,,573984.723,3191945.122,667.696
+163,,573998.843,3191949.504,667.466
+164,,574006.863,3191945.290,667.390
+165,,574014.434,3191940.142,667.669
+166,,574007.529,3191933.121,667.219
+167,,574007.975,3191920.461,667.301
+168,,574009.106,3191910.482,667.962
+170,,573986.099,3191910.281,668.039
+171,,573985.798,3191923.692,667.953
+172,,573975.589,3191915.403,668.277
+173,,574014.242,3191918.109,667.430
+174,,574029.098,3191918.154,667.088
+175,,574036.959,3191917.264,667.146
+176,,574045.016,3191915.068,667.085
+177,,574049.252,3191916.037,667.026
+178,,574047.555,3191926.846,666.912
+179,,574032.187,3191933.568,666.891
+180,,574023.458,3191935.535,666.591
+181,,574045.409,3191906.512,672.497
+182,,574042.224,3191907.602,672.970
+183,,574043.638,3191908.621,671.275
+184,,574045.010,3191909.824,671.135
+185,,574041.268,3191911.291,671.174
+186,,574037.023,3191914.058,671.539
+187,,574039.733,3191914.321,671.039
+188,,574040.651,3191906.934,673.882
+189,,574036.377,3191909.227,674.123
+190,,574032.171,3191912.600,674.002
+191,,574025.425,3191913.993,673.978
+192,,574019.814,3191914.440,674.042
+193,,574015.138,3191914.509,673.937
+194,,574014.491,3191906.996,673.854
+195,,574022.131,3191908.413,673.831
+196,,574026.490,3191906.099,674.671
+197,,574033.754,3191904.805,674.718
+198,,574038.538,3191903.530,674.765
+199,,574037.028,3191899.346,675.440
+200,,574030.895,3191899.543,675.444
+201,,574024.575,3191900.112,675.244
+202,,574017.475,3191899.606,675.370
+203,,574013.467,3191900.940,675.579
+204,,574013.110,3191896.337,675.991
+205,,574019.836,3191894.600,676.088
+206,,574028.800,3191892.206,676.380
+207,,574028.151,3191889.258,676.921
+208,,574025.027,3191887.981,679.665
+209,,574019.185,3191889.119,680.554
+210,,574013.754,3191889.882,680.599
+211,,574016.242,3191886.967,681.187
+212,,574022.280,3191885.058,681.157
+213,,574027.227,3191883.614,681.153
+214,,574028.086,3191878.442,681.490
+215,,574026.144,3191875.608,684.594
+216,,574021.884,3191877.722,684.972
+217,,574016.953,3191879.156,685.329
+218,,574012.221,3191880.852,686.295
+219,,574009.349,3191881.025,686.412
+220,,574009.097,3191877.403,688.135
+221,,574018.107,3191872.136,687.818
+222,,574023.740,3191869.163,687.624
+223,,574025.543,3191873.191,685.495
+
+前223个点为施工单位测量。`;
+function demoText(){ return DEMO_DAT; }
+
+$('btnDemo').addEventListener('click', () => {
+  showLoading(true, '正在载入示例数据…');
+  setTimeout(() => {
+    ingest(demoText(), '进场复测数据.dat');
+    showLoading(false);
+    if(S.loaded) toast('示例数据（进场复测）已载入，可拖拽旋转查看');
+  }, 40);
+});
+
+/* ============================================================
+   12. 启动
+   ============================================================ */
+buildPalette('terrain');
+resize();
+window.addEventListener('resize', resize);
+tick();
+
+// 启动即载入示例数据（?empty=1 可跳过，便于查看空状态）
+if(!/[?&]empty=1/.test(location.search)){
+  setTimeout(() => $('btnDemo').click(), 120);
+}
+
+})();
+</script>
+</body>
+</html>
