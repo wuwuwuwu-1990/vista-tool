@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.26</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.27</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -201,7 +201,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.26</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.27</span></h1>
     </div>
   </div>
   <!-- 顶栏实时显示几何校核与计算结果（v1.0.26）：悬停校核徽标看完整说明 -->
@@ -383,6 +383,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.27</b><b>修复剖面图右侧素土填充在屏幕上看不见（需放大数倍才出现）</b>：土纹每条斜线原本以「离画布原点的最近点」为基准、向两侧各画一个包围盒对角线那么长；填充区域越靠画布右侧/下方，基准点离区域越远，线段根本够不到 ⇒ 右侧土体整条空白，放大后线段变长才勉强露头。<b>现改为沿斜线方向取覆盖整块画布的全局基准区间</b>，任何位置、任何缩放都完整铺满；且区间端点与区域无关，<b>左右土体与底板下土体的纹理相位严格一致、接缝处不错行</b>。混凝土（AR-CONC）骨料短划同一处隐患一并修正。</li>
         <li><b>v1.0.26</b><b>默认不显示网格 · 闸阀默认落在底板边线之外 · 结果上顶栏 · 说明文字改鼠标悬停</b>：① <b>绘图网格默认关闭</b>（工具栏网格按钮与「绘图网格」复选框双向同步，原先复选框未接事件、点了无效，已修复）；② <b>闸阀默认位置改到放大脚底板边线之外并留 60 mm 间隙</b>，公式 Lv = B + 1.1×DN + 0.06（默认 B=0.50、DN150 ⇒ Lv=0.73 m），改放大脚或管径时自动提升，几何校核新增「闸阀压到底板边线」拦截；③ <b>几何校核与计算结果移到顶栏实时显示</b>（校核徽标 + 内空 V / 混凝土 / 底板面积 / 开挖土方），<b>鼠标悬停校核徽标</b>看完整校核说明（如「全埋式：D = 墙高 H 2.50 + 底板厚 T 0.30 = 2.80 m，池顶与室外地坪齐平」），窄屏（<1220px）自动隐藏；④ 左栏冗长说明改为<b>鼠标悬停的 ⓘ 气泡</b>：蓄水池名称（内空命名规则）、埋置深度 D（全埋 D=H+T 计算规则）、水管与闸阀（平面标示与成块说明），左栏更紧凑。</li>
         <li><b>v1.0.25</b><b>新增水管与闸阀（仅平面图标示，DXF 成块）</b>：在<b>平面图（俯视）</b>中绘制穿墙管路 + 闸阀，<b>剖面图不画</b>。管路固定布置在<b>右侧</b>（无尺寸标注一侧），管轴沿池壁法向穿墙，<b>全段实线（墙体内也为实线）</b>、两端管口封线封闭；闸阀为给排水标准<b>蝴蝶结</b>符号（两等腰三角共顶点），俯视不画阀杆；<b>不标注管径文字</b>。<b>导出 DXF 时水管+闸阀整体打包成一个块（BLOCK+INSERT）</b>，块名「水管闸阀」，INSERT 用单独图层<b>「水管闸阀」（青 4）</b>区分，块内图元放 0 层继承块图层颜色，选中即整体、可整块开关。参数可调：公称管径 DN100~DN300、墙外管长 Lo、伸入池内 Li、闸阀距墙 Lv；三面开口池暂不支持。</li>
         <li><b>v1.0.24</b><b>不设盖板（敞口）时取消敞口处的那条线</b>：原先全埋且敞口时，会沿池顶在左右池壁之间补一段<b>虚线的室外地坪线</b>，视觉上像把开口封住了；现改为<b>两侧地坪线终止于池壁外表面、中间留空</b>，敞口一目了然。有盖板时地坪线仍整条实线连通（盖板确实把敞口封住，池顶以上是覆土顶面），不影响覆土带填充与上方尺寸链。</li>
@@ -424,7 +425,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.26</span>
+          <span class="ver">v1.0.27</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -1386,7 +1387,14 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
          AR-CONC 混凝土：50°/355°/100° 三向错落骨料短划（图纸周期 1.8 mm）；
          EARTH  素土   ：45°/135° 斜向短划网格（图案角度 45°，比例固定 50 ⇒ 周期 317.5 mm）。
          sp = 一个图案周期（世界米）× 当前缩放 = 屏幕像素；图案以屏幕原点对齐，
-         故相邻区域（左右土体、底板下土体）的纹理连续、不接缝。 */
+         故相邻区域（左右土体、底板下土体）的纹理连续、不接缝。
+
+         ⚠️ 线段长度（v1.0.27 修正）：每条斜线是直线 {P | P·n = t}，参数化 P = t·n + u·d，
+         基准点 t·n 是「该直线离画布原点最近的点」——它可能离本填充区域很远（区域越靠
+         画布右侧/下方越远）。旧版只以基准点为中心向两侧各画 diag（约 1 个包围盒对角线）
+         那么长，右侧土体整条落在笔画之外 ⇒ 屏幕上完全看不到纹理，必须放大数倍（diag 随
+         缩放变大）才勉强露头。现改为沿 d 取全局固定参数区间 [-U, +U]（U = 画布对角线），
+         任何落在画布内的点都被覆盖；区间端点与区域无关，跨区域纹理相位严格一致、无缝。 */
       const sp = (c.sp || 0.09)*cam.scale;
       if(sp < 2.0) return;                        // 缩得太小，纹理已不可辨，直接不画（省渲染）
       const isEarth = c.pat === 'EARTH';
@@ -1394,6 +1402,7 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
       let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
       pts.forEach(p=>{ if(p.x<x0)x0=p.x; if(p.y<y0)y0=p.y; if(p.x>x1)x1=p.x; if(p.y>y1)y1=p.y; });
       const diag = Math.hypot(x1-x0, y1-y0) + sp;
+      const UD = Math.hypot(w, h) + sp;           // 沿 d 方向的全局参数半长（覆盖整块画布）
       c2d.save();
       c2d.beginPath();
       pts.forEach((p,i)=> i ? c2d.lineTo(p.x,p.y) : c2d.moveTo(p.x,p.y));
@@ -1417,8 +1426,8 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
             const bx = t*nx, by = t*ny;
             c2d.lineDashOffset = (idx%2) ? -sp*0.5 : 0;
             c2d.beginPath();
-            c2d.moveTo(bx - dx*diag, by - dy*diag);
-            c2d.lineTo(bx + dx*diag, by + dy*diag);
+            c2d.moveTo(bx - dx*UD, by - dy*UD);
+            c2d.lineTo(bx + dx*UD, by + dy*UD);
             c2d.stroke();
           }
         });
@@ -1434,8 +1443,8 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
           c2d.beginPath();
           for(let t = Math.ceil(lo/sp)*sp; t <= hi; t += sp){
             const bx = t*nx, by = t*ny;
-            c2d.moveTo(bx - dx*diag, by - dy*diag);
-            c2d.lineTo(bx + dx*diag, by + dy*diag);
+            c2d.moveTo(bx - dx*UD, by - dy*UD);
+            c2d.lineTo(bx + dx*UD, by + dy*UD);
           }
           c2d.stroke();
         });
