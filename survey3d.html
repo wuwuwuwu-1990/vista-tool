@@ -164,6 +164,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   background:#1a222c;color:#a9b8c8;border:1px solid rgba(255,255,255,.09);transition:.15s;padding:0;
 }
 .grid3 button:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.42);color:#e6f7fb}
+button.mini{height:26px;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;background:#1a222c;color:#a9b8c8;border:1px solid rgba(255,255,255,.09);padding:0 7px;transition:.15s;flex:0 0 auto;white-space:nowrap}
+button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.42);color:#e6f7fb}
 
 /* ---------- 空状态 ---------- */
 #empty{
@@ -238,7 +240,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.6</small>
+      测绘数据三维可视化系统 <small>V1.0.7</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -279,12 +281,18 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
           </select>
         </label>
         <div id="tinBox">
+          <div class="row2" style="margin-bottom:5px">
+            <label class="fld-i" style="flex:1;margin-bottom:0">
+              <span style="flex:0 0 56px;font-size:11px">连接距离</span>
+              <input type="number" id="numMaxEdge" min="0" step="5" placeholder="自动" title="三角网最大连接边长（米）。相隔超过该距离的两点不建立三角形；留空或填 0 = 按实测点距自动取值。">
+            </label>
+            <button class="mini" id="btnMaxAuto" title="按实测点距自动取值">自动</button>
+          </div>
           <div class="row2">
             <label class="fld-i"><span>最小内角 °</span><input type="number" id="numAngle" min="0" max="45" step="1" value="10"></label>
             <label class="fld-i"><span>长宽比 ≤</span><input type="number" id="numEdge" min="1" max="60" step="1" value="6"></label>
           </div>
           <div class="cntinfo" id="tinInfo">三角网 —</div>
-          <div class="cntinfo" style="opacity:.66;line-height:1.5">碎洞自动补平，真空白区才留空</div>
           <label class="chk" style="margin-top:4px" title="显示三角网线框，可直接看出有没有空洞"><input type="checkbox" id="chkWire"> 三角网线框</label>
         </div>
       </div>
@@ -432,6 +440,7 @@ const S = {
   showBase: true, showSkirt: true, showHole: false, baseElev: 0, zCenter: 0,
   mode: 'tin',                       // 'tin' = 三角网 DTM（CASS 规则）；'grid' = 规则格网 IDW
   tinMinAngle: 10, tinEdgeK: 6, tin: null, tinSpacing: 0,   // 最小内角(°) / 超长边倍数阈值
+  tinMaxEdge: 0,                     // 最大连接边长(m)：相隔超过此距离的两点不建三角网；0 = 按点距自动
   pointSize: 1.8, surfaceRes: 100, zExag: 1,
   palette: 'terrain', spin: false, dragging: false,
   surf: null, drawIdx: null, drawN: 0,
@@ -1056,6 +1065,7 @@ function delaunayTIN(px, py, n){
 /* 显示用点数上限：三角面在屏幕上若只有 1~2 像素，除了拖慢渲染
    只会把曲面糊成噪点（子像素走样）。超过上限时按网格保留高程极值点抽稀，
    山脊、沟谷这些特征点不会丢。 */
+const AUTO_EDGE_K = 15;            // 自动连接距离 = 实测点距 × 该倍数
 const MAX_TIN_PTS = 25000;
 
 function decimateIdx(wx, wy, wz, n, target){
@@ -1151,6 +1161,15 @@ function buildTIN(){
   }
   const edgeK = Math.max(1, S.tinEdgeK || 6);
   const edgeK2 = edgeK * edgeK;
+
+  // ---- 最大连接边长（V1.0.7）----
+  // 形状判据只看"长边/短边"的比值，对一块形状匀称、但整块都跨在大空白上的
+  // 大三角形无能为力 —— 两块测区之间就会残留一根几十上百米的尖刺。
+  // 这里再按"绝对距离"切一刀：任意一边超过 maxEdge 的三角形不建。
+  // 用户可在侧栏直接填米数；留空/填 0 时按实测点距自动取值。
+  const autoMaxEdge = spacing > 0 ? Math.round(spacing*AUTO_EDGE_K*10)/10 : 0;
+  const maxEdge = (S.tinMaxEdge > 0) ? S.tinMaxEdge : autoMaxEdge;
+  const maxE2 = (maxEdge > 0) ? maxEdge*maxEdge : Infinity;
 
   const angDeg = Math.max(0, Math.min(45, S.tinMinAngle));
   const cosMin = Math.cos(angDeg * Math.PI / 180);
@@ -1261,6 +1280,23 @@ function buildTIN(){
       }
     }
   }
+  /* ---- 第二阶段：最大连接边长过滤（V1.0.7）--------------------------
+     形状判据只看比值，对"形状匀称但整块跨在大空白上"的长三角形无能为力，
+     两块测区之间就会残留一根几十上百米的尖刺。这里按绝对距离再切一刀。
+     注意**不回填**：超过连接距离的两点之间本来就不该生成地形。        */
+  let cutLong = 0;
+  if(maxE2 < Infinity){
+    for(let t=0;t<nt0;t++){
+      if(!keep[t]) continue;
+      const a = tris0[3*t], b = tris0[3*t+1], c = tris0[3*t+2];
+      const ax = wx[a], ay = wy[a], bx = wx[b], by = wy[b], cx = wx[c], cy = wy[c];
+      const d1 = (bx-ax)*(bx-ax) + (by-ay)*(by-ay);
+      const d2 = (cx-ax)*(cx-ax) + (cy-ay)*(cy-ay);
+      const d3 = (cx-bx)*(cx-bx) + (cy-by)*(cy-by);
+      const mx3 = d1 > d2 ? (d1 > d3 ? d1 : d3) : (d2 > d3 ? d2 : d3);
+      if(mx3 > maxE2){ keep[t] = 0; nKeep--; cutLong++; }
+    }
+  }
   if(nKeep < 2) return;
 
   const tris = new Int32Array(nKeep*3);
@@ -1322,7 +1358,8 @@ function buildTIN(){
     fci: fci, fnx: fnx, fny: fny, fsh: null, fshZ: -1,
     edgeSegs: segArr.length ? new Float32Array(segArr) : null,
     sx: new Float32Array(nv), sy: new Float32Array(nv), cz: new Float32Array(nv), vis: new Uint8Array(nv),
-    tri0: nt0, cutEdge: cutEdge, cutAngle: cutAngle, spacing: spacing,
+    tri0: nt0, cutEdge: cutEdge, cutAngle: cutAngle, cutLong: cutLong, spacing: spacing,
+    maxEdge: maxEdge, autoMaxEdge: autoMaxEdge,
     holeCount: holeCount, refillHole: refillHole, refillTri: refillTri,
     np: np, decimated: decimated,
     lod: null, lodKind: 0,
@@ -1360,12 +1397,20 @@ function updateTinInfo(){
   if(!s){ el.textContent = '三角网 —'; return; }
   const cut = s.tri0 - s.ntri;
   const vac = (s.holeCount || 0) - (s.refillHole || 0);
+  const me = (s.maxEdge > 0) ? s.maxEdge : 0;
   el.innerHTML = '三角网 <b>' + s.ntri.toLocaleString() + '</b> 面'
     + (cut > 0 ? ' · 剔除 <b>' + cut.toLocaleString() + '</b> 面' : '')
     + (s.refillTri > 0 ? ' · 补洞 <b>' + s.refillTri.toLocaleString() + '</b> 面' : '')
     + (vac > 0 ? ' · 空白区 <b>' + vac + '</b> 处' : '')
-    + ' · 点距 <b>' + (s.spacing >= 1 ? s.spacing.toFixed(1) : s.spacing.toFixed(2)) + '</b> m'
-    + (s.decimated ? ' · 显示抽稀至 <b>' + s.np.toLocaleString() + '</b> 点' : '');
+    + '<br>点距 <b>' + (s.spacing >= 1 ? s.spacing.toFixed(1) : s.spacing.toFixed(2)) + '</b> m'
+    + ' · 间隔 <b>' + (me >= 1 ? me.toFixed(0) : me.toFixed(1)) + '</b> m'
+    + ((s.cutLong || 0) > 0 ? '（超距切 <b>' + s.cutLong.toLocaleString() + '</b> 面）' : '')
+    + (s.decimated ? '<br>显示抽稀至 <b>' + s.np.toLocaleString() + '</b> 点' : '');
+  // 自动模式下把算出来的当前值提示在输入框里
+  const inp = $('numMaxEdge');
+  if(inp && !(S.tinMaxEdge > 0)){
+    inp.placeholder = (s.autoMaxEdge > 0) ? ('自动 ' + Math.round(s.autoMaxEdge)) : '自动';
+  }
 }
 
 function buildSurface(){
@@ -2913,13 +2958,23 @@ let tinTimer = null;
 function onTinParam(){
   const a = parseFloat($('numAngle').value);
   const k = parseFloat($('numEdge').value);
+  const me = parseFloat($('numMaxEdge').value);
   S.tinMinAngle = isFinite(a) ? clamp(a, 0, 45) : 10;
   S.tinEdgeK = isFinite(k) ? clamp(k, 1, 60) : 6;
+  S.tinMaxEdge = (isFinite(me) && me > 0) ? clamp(me, 0.5, 100000) : 0;   // 0 = 自动
   clearTimeout(tinTimer);
   tinTimer = setTimeout(() => { if(S.mode === 'tin') rebuildScene(); }, 340);
 }
 $('numAngle').addEventListener('input', onTinParam);
 $('numEdge').addEventListener('input', onTinParam);
+$('numMaxEdge').addEventListener('input', onTinParam);
+$('numMaxEdge').addEventListener('change', onTinParam);
+$('btnMaxAuto').addEventListener('click', () => {
+  $('numMaxEdge').value = '';
+  S.tinMaxEdge = 0;
+  clearTimeout(tinTimer);
+  if(S.mode === 'tin') rebuildScene();
+});
 
 applyModeUI();
 
