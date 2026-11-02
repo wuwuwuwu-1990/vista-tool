@@ -238,7 +238,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.4</small>
+      测绘数据三维可视化系统 <small>V1.0.5</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -266,6 +266,26 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         <label class="fld-i"><span>北 / 纵</span><select id="selB"></select></label>
         <label class="fld-i"><span>高程 Z</span><select id="selC"></select></label>
         <button class="act" id="btnSwap" style="margin-top:2px">⇄ 交换坐标 1 / 2</button>
+      </div>
+    </div>
+
+    <div class="sec collapse">
+      <div class="sec-h">成图规则<i class="cv">▼</i></div>
+      <div class="sec-body">
+        <label class="fld" style="margin-bottom:6px"><span>算法</span>
+          <select id="selMode">
+            <option value="tin">三角网 DTM（南方 CASS）</option>
+            <option value="grid">规则格网 IDW</option>
+          </select>
+        </label>
+        <div id="tinBox">
+          <div class="row2">
+            <label class="fld-i"><span>最小内角 °</span><input type="number" id="numAngle" min="0" max="45" step="1" value="10"></label>
+            <label class="fld-i"><span>长宽比 ≤</span><input type="number" id="numEdge" min="1" max="60" step="1" value="6"></label>
+          </div>
+          <div class="cntinfo" id="tinInfo">三角网 —</div>
+          <div class="cntinfo" style="opacity:.66;line-height:1.5">三角网只覆盖实测点范围，网外不插值，所以不会插出假地形</div>
+        </div>
       </div>
     </div>
 
@@ -406,6 +426,8 @@ const S = {
   showCloud: false, showSurface: true,
   showContour: false, cntInterval: 0.5, cntIv: 0.5, cntLevels: [],
   showBase: false, showSkirt: false, showHole: false, baseElev: 0, zCenter: 0,
+  mode: 'tin',                       // 'tin' = 三角网 DTM（CASS 规则）；'grid' = 规则格网 IDW
+  tinMinAngle: 10, tinEdgeK: 6, tin: null, tinSpacing: 0,   // 最小内角(°) / 超长边倍数阈值
   pointSize: 1.8, surfaceRes: 100, zExag: 1,
   palette: 'terrain', spin: false, dragging: false,
   surf: null, drawIdx: null, drawN: 0,
@@ -733,14 +755,14 @@ function buildFromMap(autoScale){
   $('btnBaseMax').disabled = false;
 
   updateInfo();
-  buildSurface();
+  buildScene();
   buildContours();
   updateBaseInfo();
   fitView();
   requestRender();
 
   // 周围无测点的区域占比很大时，提示可以只显示实测范围（多测区分离）
-  if(!S.showHole && S.invalidRatio > 0.32){
+  if(S.mode === 'grid' && !S.showHole && S.invalidRatio > 0.32){
     setTimeout(() => toast('周围无测点区域较大：勾选左侧「无数据区留空」可只绘制实测范围', 3600), 1500);
   }
 }
@@ -767,8 +789,505 @@ function fitView(){
 }
 
 /* ============================================================
+   6b. 三角网 DTM（南方 CASS 成图规则）的数学内核
+   —— Delaunay 三角剖分：三角网顶点就是实测高程点，网外不插值，
+      所以成图范围天然等于三角网覆盖范围，无数据区不会插出假地形。
+   ============================================================ */
+/* ============================================================
+   Delaunay 三角剖分（增量插入 + walk 定位 + BFS 空腔重连）
+   与南方 CASS「建立 DTM」等价的核心算法：三角网顶点为实测点，
+   三角网外不插值，因此天然形成「无数据区不出图」的成图范围。
+   输入：px, py（东/北坐标）、n 点数
+   输出：{ tris: Int32Array（逆时针顶点索引×3）, ntri }
+   ============================================================ */
+function delaunayTIN(px, py, n){
+  if(n < 3) return null;
+
+  // ---- 1. 归一化到 [0,1]（大坐标直接用双精度算外接圆会丢精度）----
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for(let i=0;i<n;i++){
+    const a = px[i], b = py[i];
+    if(a < x0) x0 = a; if(a > x1) x1 = a;
+    if(b < y0) y0 = b; if(b > y1) y1 = b;
+  }
+  const span = Math.max(x1-x0, y1-y0) || 1;
+  const sc = 1/span;
+
+  // ---- 2. 去重（网格桶，避免重合点破坏拓扑）----
+  const keep = new Int32Array(n);
+  let m = 0;
+  {
+    const g = Math.max(4, Math.min(512, Math.round(Math.sqrt(n))));
+    const buckets = new Int32Array(g*g).fill(-1);
+    const nextIdx = new Int32Array(n).fill(-1);
+    const cellX = (x1-x0 || 1)/g, cellY = (y1-y0 || 1)/g;
+    const tol = span*1e-7, tol2 = tol*tol;
+    for(let i=0;i<n;i++){
+      let gx = Math.floor((px[i]-x0)/cellX); if(gx<0)gx=0; if(gx>=g)gx=g-1;
+      let gy = Math.floor((py[i]-y0)/cellY); if(gy<0)gy=0; if(gy>=g)gy=g-1;
+      let dup = false;
+      for(let oy=-1; oy<=1 && !dup; oy++){
+        const yy = gy+oy; if(yy<0||yy>=g) continue;
+        for(let ox=-1; ox<=1 && !dup; ox++){
+          const xx = gx+ox; if(xx<0||xx>=g) continue;
+          let q = buckets[yy*g+xx];
+          while(q >= 0){
+            const dx = px[i]-px[q], dy = py[i]-py[q];
+            if(dx*dx+dy*dy <= tol2){ dup = true; break; }
+            q = nextIdx[q];
+          }
+        }
+      }
+      if(dup) continue;
+      const k = gy*g+gx;
+      nextIdx[i] = buckets[k];
+      buckets[k] = i;
+      keep[m++] = i;
+    }
+  }
+  if(m < 3) return null;
+
+  // ---- 3. 归一化坐标 + Morton 序插入（提高 walk 的局部性）----
+  const ux = new Float64Array(m+3);
+  const uy = new Float64Array(m+3);
+  for(let k=0;k<m;k++){
+    const p = keep[k];
+    ux[k] = (px[p]-x0)*sc;
+    uy[k] = (py[p]-y0)*sc;
+  }
+  // 超级三角形（包住 [0,1]²）
+  ux[m] = -64;  uy[m] = -64;
+  ux[m+1] = 64; uy[m+1] = -64;
+  ux[m+2] = 0;  uy[m+2] = 64;
+
+  const order = new Int32Array(m);
+  {
+    // Morton（Z 序）10 bit：沿空间相邻的顺序插入，walk 命中率高
+    const qq = 1023;
+    const key = new Float64Array(m);
+    const idx = new Array(m);
+    for(let k=0;k<m;k++){
+      let ix = Math.floor(ux[k]*qq); if(ix<0)ix=0; if(ix>qq)ix=qq;
+      let iy = Math.floor(uy[k]*qq); if(iy<0)iy=0; if(iy>qq)iy=qq;
+      let kk = 0;
+      for(let b=0;b<10;b++){
+        kk |= ((ix>>b)&1) * Math.pow(2, 2*b);
+        kk |= ((iy>>b)&1) * Math.pow(2, 2*b+1);
+      }
+      key[k] = kk;
+      idx[k] = k;
+    }
+    idx.sort((a,b) => key[a]-key[b]);
+    for(let k=0;k<m;k++) order[k] = idx[k];
+  }
+
+  // ---- 4. 增量插入 ----
+  const maxT = m*3 + 64;      // 存活三角形约 2n，留余量
+  const tv = new Int32Array(maxT*3);
+  const he = new Int32Array(maxT*3).fill(-1);
+  const dead = new Uint8Array(maxT);
+  const stamp = new Int32Array(maxT);
+  const freeT = new Int32Array(maxT);   // 空腔腾出的槽位复用，避免无限增长
+  let freeN = 0;
+  let stampId = 0;
+  let nt = 1;
+  tv[0] = m; tv[1] = m+1; tv[2] = m+2;
+
+  const ori = (ax,ay,bx,by,cx,cy) => (bx-ax)*(cy-ay) - (by-ay)*(cx-ax);
+
+  function inCircle(ax,ay,bx,by,cx,cy,pxx,pyy){
+    const dx = ax-pxx, dy = ay-pyy;
+    const ex = bx-pxx, ey = by-pyy;
+    const fx = cx-pxx, fy = cy-pyy;
+    return (dx*dx+dy*dy)*(ex*fy-fx*ey)
+         - (ex*ex+ey*ey)*(dx*fy-fx*dy)
+         + (fx*fx+fy*fy)*(dx*ey-ex*dy);
+  }
+
+  let last = 0;
+  let maxDeg = 0;
+  const stack = new Int32Array(Math.max(64, m*2));
+  const cavity = new Int32Array(Math.max(64, m*2));
+  const mapNew = new Int32Array(m+3).fill(-1);
+  let mapStamp = new Int32Array(m+3);
+  let mapId = 0;
+
+  for(let oi=0; oi<m; oi++){
+    const p = order[oi];
+    const pxx = ux[p], pyy = uy[p];
+
+    // --- walk 定位包含 p 的三角形 ---
+    let t = last;
+    let guard = 0;
+    const lim = 8*m + 256;
+    while(true){
+      const i0 = tv[3*t], i1 = tv[3*t+1], i2 = tv[3*t+2];
+      const o0 = ori(ux[i0],uy[i0], ux[i1],uy[i1], pxx,pyy);
+      const o1 = ori(ux[i1],uy[i1], ux[i2],uy[i2], pxx,pyy);
+      const o2 = ori(ux[i2],uy[i2], ux[i0],uy[i0], pxx,pyy);
+      if(o0 >= 0 && o1 >= 0 && o2 >= 0) break;
+      let nt2 = -1;
+      if(o0 < 0) nt2 = he[3*t];
+      else if(o1 < 0) nt2 = he[3*t+1];
+      else nt2 = he[3*t+2];
+      if(nt2 < 0 || dead[(nt2/3)|0] || ++guard > lim) break;   // 兜底：就地重定位
+      t = (nt2/3)|0;
+    }
+    // 极端兜底：暴力找（极少数退化触发）
+    {
+      const i0 = tv[3*t], i1 = tv[3*t+1], i2 = tv[3*t+2];
+      const ok = ori(ux[i0],uy[i0], ux[i1],uy[i1], pxx,pyy) >= -1e-12 &&
+                 ori(ux[i1],uy[i1], ux[i2],uy[i2], pxx,pyy) >= -1e-12 &&
+                 ori(ux[i2],uy[i2], ux[i0],uy[i0], pxx,pyy) >= -1e-12;
+      if(!ok){
+        for(let q=0;q<nt;q++){
+          if(dead[q]) continue;
+          const j0 = tv[3*q], j1 = tv[3*q+1], j2 = tv[3*q+2];
+          if(ori(ux[j0],uy[j0], ux[j1],uy[j1], pxx,pyy) >= -1e-12 &&
+             ori(ux[j1],uy[j1], ux[j2],uy[j2], pxx,pyy) >= -1e-12 &&
+             ori(ux[j2],uy[j2], ux[j0],uy[j0], pxx,pyy) >= -1e-12){ t = q; break; }
+        }
+      }
+    }
+
+    // --- BFS 收集"外接圆含 p"的空腔 ---
+    stampId++;
+    let sp = 0, nc = 0;
+    stamp[t] = stampId; stack[sp++] = t;
+    while(sp > 0){
+      const ct = stack[--sp];
+      cavity[nc++] = ct;
+      for(let e=0;e<3;e++){
+        const h = he[3*ct+e];
+        if(h < 0) continue;
+        const ht = (h/3)|0;
+        if(dead[ht] || stamp[ht] === stampId) continue;
+        const a0 = tv[3*ht], a1 = tv[3*ht+1], a2 = tv[3*ht+2];
+        const det = inCircle(ux[a0],uy[a0], ux[a1],uy[a1], ux[a2],uy[a2], pxx,pyy);
+        if(det > 0){
+          stamp[ht] = stampId;
+          if(sp >= stack.length){ break; }
+          stack[sp++] = ht;
+        }
+      }
+    }
+    if(nc > maxDeg) maxDeg = nc;
+
+
+    // --- 标记空腔（槽位回收）---
+    for(let k=0;k<nc;k++){
+      const c = cavity[k];
+      dead[c] = 1;
+      if(freeN < maxT) freeT[freeN++] = c;
+    }
+
+    mapId++;
+    let lastNew = -1;
+    let nb = 0;
+
+    // 第一遍：只读收集空腔的边界面（此时绝不能写 tv/he —— 新三角形会复用空腔槽位）
+    const bnd = [];
+    for(let k=0;k<nc;k++){
+      const ct = cavity[k];
+      for(let e=0;e<3;e++){
+        const h = he[3*ct+e];
+        if(h >= 0 && stamp[(h/3)|0] === stampId) continue;   // 空腔内部边
+        const a = tv[3*ct+e], b = tv[3*ct+(e+1)%3];
+        if(a === b) continue;
+        bnd.push(a, b, h);
+      }
+    }
+    nb = bnd.length/3;
+    const newTri = new Int32Array(nb);
+
+    // 第二遍：分配槽位（优先复用刚回收的）并建 (a,b,p)
+    for(let k=0, j=0; k<bnd.length; k+=3, j++){
+      const a = bnd[k], b = bnd[k+1], hh = bnd[k+2];
+      let ni;
+      if(freeN > 0) ni = freeT[--freeN];
+      else if(nt < maxT) ni = nt++;
+      else break;
+      tv[3*ni] = a; tv[3*ni+1] = b; tv[3*ni+2] = p;
+      he[3*ni] = hh; he[3*ni+1] = -1; he[3*ni+2] = -1;
+      dead[ni] = 0;
+      if(hh >= 0) he[hh] = 3*ni;
+      mapNew[a] = ni; mapStamp[a] = mapId;
+      newTri[j] = ni;
+      lastNew = ni;
+    }
+
+    // 第三遍：环上相邻新三角形互链 —— (a,b,p) 的 b→p ↔ (b,c,p) 的 p→b
+    for(let k=0, j=0; k<bnd.length; k+=3, j++){
+      const b = bnd[k+1], ni = newTri[j];
+      if(mapStamp[b] === mapId && ni >= 0){
+        const nj = mapNew[b];
+        he[3*ni+1] = 3*nj+2;
+        he[3*nj+2] = 3*ni+1;
+      }
+    }
+
+    if(nb > 0) last = lastNew;
+  }
+
+  // ---- 5. 丢弃含超级顶点的三角形，压缩输出 ----
+  let outN = 0;
+  for(let t=0;t<nt;t++){
+    if(dead[t]) continue;
+    if(tv[3*t] >= m || tv[3*t+1] >= m || tv[3*t+2] >= m) continue;
+    outN++;
+  }
+  const out = new Int32Array(outN*3);
+  let w = 0;
+  for(let t=0;t<nt;t++){
+    if(dead[t]) continue;
+    if(tv[3*t] >= m || tv[3*t+1] >= m || tv[3*t+2] >= m) continue;
+    out[w++] = keep[tv[3*t]];
+    out[w++] = keep[tv[3*t+1]];
+    out[w++] = keep[tv[3*t+2]];
+  }
+  return { tris: out, ntri: outN, used: m, maxDeg: maxDeg };
+}
+
+
+/* 显示用点数上限：三角面在屏幕上若只有 1~2 像素，除了拖慢渲染
+   只会把曲面糊成噪点（子像素走样）。超过上限时按网格保留高程极值点抽稀，
+   山脊、沟谷这些特征点不会丢。 */
+const MAX_TIN_PTS = 25000;
+
+function decimateIdx(wx, wy, wz, n, target){
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for(let i=0;i<n;i++){
+    const a = wx[i], b = wy[i];
+    if(a < x0) x0 = a; if(a > x1) x1 = a;
+    if(b < y0) y0 = b; if(b > y1) y1 = b;
+  }
+  const g = Math.max(2, Math.round(Math.sqrt(target/2)));
+  const cellX = (x1-x0 || 1)/g, cellY = (y1-y0 || 1)/g;
+  const lo = new Int32Array(g*g).fill(-1);
+  const hi = new Int32Array(g*g).fill(-1);
+  for(let i=0;i<n;i++){
+    let gx = Math.floor((wx[i]-x0)/cellX); if(gx < 0) gx = 0; if(gx >= g) gx = g-1;
+    let gy = Math.floor((wy[i]-y0)/cellY); if(gy < 0) gy = 0; if(gy >= g) gy = g-1;
+    const k = gy*g + gx;
+    const a = lo[k];
+    if(a < 0 || wz[i] < wz[a]) lo[k] = i;
+    const b = hi[k];
+    if(b < 0 || wz[i] > wz[b]) hi[k] = i;
+  }
+  const out = [];
+  for(let k=0;k<g*g;k++){
+    const a = lo[k];
+    if(a < 0) continue;
+    out.push(a);
+    const b = hi[k];
+    if(b >= 0 && b !== a) out.push(b);
+  }
+  return out;
+}
+
+/* ============================================================
+   7a. 按南方 CASS 规则建立 DTM
+   ① Delaunay 构网（三角网全部顶点为实测点）
+   ② 过滤三角形：最小内角（默认 10°，CASS 默认值）+ 最大边长
+      （跨越无数据区的狭长三角形会被剔除 → 多测区自然分离）
+   ③ 逐面算坡度（供光照）与分层设色索引
+   ④ 提取三角网边界边（供侧面填充与范围勾边）
+   ============================================================ */
+function buildTIN(){
+  S.tin = null;
+  S.surf = null;
+  const n = S.n;
+  if(n < 6) return;
+
+  const t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+  let wx = S.wx, wy = S.wy, wz = S.wz, np = n, decimated = false;
+  if(n > MAX_TIN_PTS){
+    let pick = decimateIdx(S.wx, S.wy, S.wz, n, MAX_TIN_PTS);
+    // 数据只占包围盒一部分时格网会大量落空，点数远低于目标：放大格网补一次
+    if(pick.length > 0 && pick.length < MAX_TIN_PTS*0.7){
+      const boost = Math.min(4, Math.sqrt(MAX_TIN_PTS/Math.max(1, pick.length)));
+      pick = decimateIdx(S.wx, S.wy, S.wz, n, MAX_TIN_PTS*boost*boost);
+    }
+    if(pick.length >= 6 && pick.length < n){
+      np = pick.length;
+      wx = new Float64Array(np);
+      wy = new Float64Array(np);
+      wz = new Float64Array(np);
+      for(let i=0;i<np;i++){
+        const q = pick[i];
+        wx[i] = S.wx[q]; wy[i] = S.wy[q]; wz[i] = S.wz[q];
+      }
+      decimated = true;
+    }
+  }
+
+  const r = delaunayTIN(wx, wy, np);
+  if(!r || r.ntri < 2) return;
+
+  const tris0 = r.tris, nt0 = r.ntri;
+
+  // ---- CASS 过滤参数 ----
+  // 超长边阈值按 CASS 的规矩取"最小边长 × 倍数"：先用抽样估全网点距
+  // （取各三角形最短边的中位数），再乘倍数。跨越无数据区的长边会被剔除，
+  // 多个测区之间就不会被几条细长三角形连成假地形。
+  let spacing = 0;
+  {
+    const step = Math.max(1, Math.floor(nt0/6000));
+    const samp = [];
+    for(let t=0;t<nt0;t+=step){
+      const a = tris0[3*t], b = tris0[3*t+1], c = tris0[3*t+2];
+      const ax = wx[a], ay = wy[a], bx = wx[b], by = wy[b], cx = wx[c], cy = wy[c];
+      const lab = (bx-ax)*(bx-ax) + (by-ay)*(by-ay);
+      const lac = (cx-ax)*(cx-ax) + (cy-ay)*(cy-ay);
+      const lbc = (cx-bx)*(cx-bx) + (cy-by)*(cy-by);
+      samp.push(Math.sqrt(lab < lac ? (lab < lbc ? lab : lbc) : (lac < lbc ? lac : lbc)));
+    }
+    if(samp.length){ samp.sort((p, q) => p - q); spacing = samp[samp.length >> 1]; }
+  }
+  const edgeK = Math.max(1, S.tinEdgeK || 6);
+  const edgeK2 = edgeK * edgeK;
+
+  const angDeg = Math.max(0, Math.min(45, S.tinMinAngle));
+  const cosMin = Math.cos(angDeg * Math.PI / 180);
+  const cosMin2 = cosMin * cosMin;
+
+  const keep = new Uint8Array(nt0);
+  let nKeep = 0, cutEdge = 0, cutAngle = 0;
+  for(let t=0;t<nt0;t++){
+    const a = tris0[3*t], b = tris0[3*t+1], c = tris0[3*t+2];
+    const ax = wx[a], ay = wy[a];
+    const bx = wx[b], by = wy[b];
+    const cx = wx[c], cy = wy[c];
+    const abx = bx-ax, aby = by-ay;
+    const acx = cx-ax, acy = cy-ay;
+    const bcx = cx-bx, bcy = cy-by;
+    const lab = abx*abx + aby*aby;
+    const lac = acx*acx + acy*acy;
+    const lbc = bcx*bcx + bcy*bcy;
+    // CASS「过滤三角形」：同一三角形内 最长边 / 最短边 超过倍数即剔除。
+    // 用局部比值而不是绝对边长，稀疏区的大三角形只要形状规整就保留，
+    // 只剔除跨越无数据区的细长"假桥"。
+    {
+      const mnb = lab < lac ? (lab < lbc ? lab : lbc) : (lac < lbc ? lac : lbc);
+      const mxb = lab > lac ? (lab > lbc ? lab : lbc) : (lac > lbc ? lac : lbc);
+      if(mnb > 1e-12 && mxb > mnb*edgeK2){ cutEdge++; continue; }
+    }
+    if(cosMin2 > 0){
+      // 余弦判据（免开方）：夹角余弦 > cosMin ⇔ 整数平方比较
+      const dA = abx*acx + aby*acy;              // ∠A 夹 ab、ac
+      if(dA > 0 && dA*dA > cosMin2*lab*lac){ cutAngle++; continue; }
+      const dB = -abx*bcx - aby*bcy;             // ∠B 夹 ba、bc
+      if(dB > 0 && dB*dB > cosMin2*lab*lbc){ cutAngle++; continue; }
+      const dC = -acx*bcx - acy*bcy;             // ∠C 夹 ca、cb
+      if(dC > 0 && dC*dC > cosMin2*lac*lbc){ cutAngle++; continue; }
+    }
+    keep[t] = 1;
+    nKeep++;
+  }
+  if(nKeep < 2) return;
+
+  const tris = new Int32Array(nKeep*3);
+  {
+    let w = 0;
+    for(let t=0;t<nt0;t++){
+      if(!keep[t]) continue;
+      tris[w++] = tris0[3*t];
+      tris[w++] = tris0[3*t+1];
+      tris[w++] = tris0[3*t+2];
+    }
+  }
+
+  const halfH = S.hspan/2;
+  const invH = (S.hspan > 0) ? (PAL_N-1)/S.hspan : 0;
+  const ntri = nKeep;
+  const fci = new Uint8Array(ntri);
+  const fnx = new Float32Array(ntri);
+  const fny = new Float32Array(ntri);
+
+  for(let t=0;t<ntri;t++){
+    const a = tris[3*t], b = tris[3*t+1], c = tris[3*t+2];
+    const ax = wx[a], ay = wy[a], az = wz[a];
+    const bx = wx[b], by = wy[b], bz = wz[b];
+    const cx = wx[c], cy = wy[c], cz = wz[c];
+    // 平面梯度：法线 n = (b-a) × (c-a)，nz>0（逆时针）；dz/dx = -nx/nz
+    const ux1 = bx-ax, uy1 = by-ay, uz1 = bz-az;
+    const ux2 = cx-ax, uy2 = cy-ay, uz2 = cz-az;
+    const nX = uy1*uz2 - uz1*uy2;
+    const nY = uz1*ux2 - ux1*uz2;
+    const nZ = ux1*uy2 - uy1*ux2;
+    if(nZ > 1e-12){ fnx[t] = -nX/nZ; fny[t] = -nY/nZ; }
+    else { fnx[t] = 0; fny[t] = 0; }
+    const ha = (az + bz + cz) / 3;
+    fci[t] = clampInt(Math.round((ha + halfH) * invH), 0, PAL_N-1);
+  }
+
+  // ---- 边界边（只被一个三角形使用的边）：供侧壁封口与范围勾边 ----
+  const nv = np;
+  const em = new Map();
+  for(let t=0;t<ntri;t++){
+    for(let k=0;k<3;k++){
+      const a = tris[3*t+k], b = tris[3*t+((k+1)%3)];
+      const key = a < b ? (a*(nv+1) + b) : (b*(nv+1) + a);
+      em.set(key, (em.get(key) || 0) + 1);
+    }
+  }
+  const segArr = [];
+  em.forEach((cnt, key) => {
+    if(cnt !== 1) return;
+    const a = Math.floor(key/(nv+1)), b = key % (nv+1);
+    segArr.push(wx[a], wy[a], wz[a], wx[b], wy[b], wz[b]);
+  });
+
+  S.tin = {
+    kind: 'tin',
+    px: wx, py: wy, pz: wz, nv: nv,
+    tris: tris, ntri: ntri,
+    fci: fci, fnx: fnx, fny: fny, fsh: null, fshZ: -1,
+    edgeSegs: segArr.length ? new Float32Array(segArr) : null,
+    sx: new Float32Array(nv), sy: new Float32Array(nv), cz: new Float32Array(nv), vis: new Uint8Array(nv),
+    tri0: nt0, cutEdge: cutEdge, cutAngle: cutAngle, spacing: spacing,
+    np: np, decimated: decimated,
+    lod: null, lodKind: 0,
+    ms: ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - t0
+  };
+  S.surf = S.tin;
+  S.invalidRatio = 0;
+}
+
+/* ============================================================
    7. 生成地表曲面（IDW 插值 + 规则三角网）
    ============================================================ */
+/* 按当前成图规则构建场景 */
+function buildScene(){
+  S.tin = null;
+  if(S.mode === 'tin'){
+    buildTIN();
+    if(S.tin) S.surf = S.tin;
+    else S.surf = null;
+  } else {
+    S.surf = null;
+    buildSurface();
+  }
+  updateTinInfo();
+}
+
+function updateTinInfo(){
+  const el = $('tinInfo');
+  if(!el) return;
+  if(S.mode !== 'tin'){
+    el.textContent = '规则格网 IDW（插值成图，整片铺满）';
+    return;
+  }
+  const s = S.tin;
+  if(!s){ el.textContent = '三角网 —'; return; }
+  const cut = s.tri0 - s.ntri;
+  el.innerHTML = '三角网 <b>' + s.ntri.toLocaleString() + '</b> 面'
+    + (cut > 0 ? ' · 剔除 <b>' + cut.toLocaleString() + '</b> 面' : '')
+    + ' · 点距 <b>' + (s.spacing >= 1 ? s.spacing.toFixed(1) : s.spacing.toFixed(2)) + '</b> m'
+    + (s.decimated ? ' · 显示抽稀至 <b>' + s.np.toLocaleString() + '</b> 点' : '');
+}
+
 function buildSurface(){
   const n = S.n;
   if(n < 6){ S.surf = null; return; }
@@ -1115,6 +1634,7 @@ function buildSurface(){
   }
 
   S.surf = {
+    kind: 'grid',
     res: res, nx: nx, ny: ny,
     vx: vx, vy: vy, vz: vz, valid: valid, ci: ci,
     edgeSegs: edgeSegs,
@@ -1132,23 +1652,36 @@ function niceInterval(raw){
   return 1000;
 }
 
+function computeLevels(){
+  const z0 = S.box.z0, z1 = S.box.z1;
+  const span = (z1 - z0) || 1;
+  let iv = S.cntInterval > 0 ? S.cntInterval : niceInterval(span/20);
+  if(!(iv > 0)) iv = niceInterval(span/20);
+  if(span/iv > 300) iv = niceInterval(span/300);   // 防止线过密拖慢渲染
+  const levels = [];
+  const start = Math.ceil(z0/iv - 1e-9)*iv;
+  for(let L = start; L <= z1 + 1e-9; L += iv) levels.push(L);
+  if(levels.length === 0) levels.push((z0+z1)*0.5);
+  return { levels: levels, iv: iv };
+}
+
 function buildContours(){
   const s = S.surf;
   S.cntLevels = [];
   if(!s) return;
 
+  const lv = computeLevels();
+  const levels = lv.levels, iv = lv.iv;
+
+  // 三角网模式下等高线在渲染时逐面内插，这里只确定等高距与高程线
+  if(s.kind === 'tin'){
+    S.cntLevels = levels;
+    S.cntIv = iv;
+    updateCntInfo();
+    return;
+  }
+
   const res = s.res, nx = s.nx;
-  const z0 = S.box.z0, z1 = S.box.z1;
-  const span = (z1 - z0) || 1;
-
-  let iv = S.cntInterval > 0 ? S.cntInterval : niceInterval(span/20);
-  if(!(iv > 0)) iv = niceInterval(span/20);
-  if(span/iv > 300) iv = niceInterval(span/300);   // 防止线过密拖慢渲染
-
-  const levels = [];
-  const start = Math.ceil(z0/iv - 1e-9)*iv;
-  for(let L = start; L <= z1 + 1e-9; L += iv) levels.push(L);
-  if(levels.length === 0) levels.push((z0+z1)*0.5);
 
   const cells = res*res;
   const off = new Int32Array(cells+1);
@@ -1452,7 +1985,30 @@ function updateBaseInfo(){
   const el = $('baseInfo');
   if(!el) return;
   if(!S.loaded || !S.surf || !S.rawBox){ el.innerHTML = '<span>载入数据后显示挖填方量</span>'; return; }
-  const s = S.surf, res = s.res, nx = s.nx;
+  const s = S.surf;
+
+  // 三角网 DTM 法：逐三角柱积分（CASS「DTM 法土方计算」的算法）
+  if(s.kind === 'tin'){
+    const tris = s.tris, ntri = s.ntri, px = s.px, py = s.py, pz = s.pz;
+    const base = S.baseElev + S.zCenter;
+    let cut = 0, fill = 0, nAbove = 0;
+    for(let t=0;t<ntri;t++){
+      const a = tris[3*t], b = tris[3*t+1], c = tris[3*t+2];
+      const area = Math.abs((px[b]-px[a])*(py[c]-py[a]) - (py[b]-py[a])*(px[c]-px[a]))*0.5;
+      const hh = (pz[a] + pz[b] + pz[c])/3;
+      if(hh > base){ cut += (hh - base)*area; nAbove++; }
+      else fill += (base - hh)*area;
+    }
+    const pct = ntri ? nAbove/ntri*100 : 0;
+    el.innerHTML =
+      '<span>挖方 <b>' + fmtVol(cut) + '</b> m³</span>' +
+      '<span>填方 <b>' + fmtVol(fill) + '</b> m³</span>' +
+      '<span>高于基准面 <b>' + pct.toFixed(0) + '</b>%</span>' +
+      '<span>净' + (cut >= fill ? '挖 ' : '填 ') + '<b>' + fmtVol(Math.abs(cut - fill)) + '</b> m³</span>';
+    return;
+  }
+
+  const res = s.res, nx = s.nx;
   const dx = (S.box.x1 - S.box.x0)/res, dy = (S.box.y1 - S.box.y0)/res;
   const A = dx*dy;
   const base = S.baseElev;
@@ -1542,9 +2098,249 @@ function drawCloud(){
 }
 
 /* ---- 曲面 + 等高线（同一遍历顺序绘制，保证遮挡关系正确） ---- */
+/* ---- 三角网 DTM 渲染：深度分桶 + 同色合并批绘 ----
+   三角网面数可达数十万，逐面 fill/stroke 会拖垮帧率。
+   按面重心深度分桶（远→近），桶内再按"色带×明暗"合并成一条路径一次填充，
+   canvas 调用次数从上百万降到几千，同时保住前后遮挡关系。 */
+function drawTIN(){
+  const s = S.surf;
+  if(!s || s.kind !== 'tin') return;
+  const zs = S.zExag;
+  const px = s.px, py = s.py, pz = s.pz, nv = s.nv;
+  const tris = s.tris, ntri = s.ntri;
+  const fci = s.fci, fnx = s.fnx, fny = s.fny;
+  const sx = s.sx, sy = s.sy, cz = s.cz, vis = s.vis;
+
+  const ex = V.eye.x, ey = V.eye.y, ez = V.eye.z;
+  const fx = V.fx, fy = V.fy, fz = V.fz;
+  const rx = V.rx, ry = V.ry, rz = V.rz;
+  const ux = V.ux, uy = V.uy, uz = V.uz;
+  const focal = V.focal, ccx = V.cx, ccy = V.cy;
+
+  for(let k=0;k<nv;k++){
+    const dx = px[k]-ex, dy = py[k]-ey, dz = pz[k]*zs - ez;
+    const d = dx*fx + dy*fy + dz*fz;
+    cz[k] = d;
+    if(d < 0.5){ vis[k] = 0; continue; }
+    vis[k] = 1;
+    const inv = focal/d;
+    sx[k] = ccx + (dx*rx + dy*ry + dz*rz)*inv;
+    sy[k] = ccy - (dx*ux + dy*uy + dz*uz)*inv;
+  }
+
+  // 光照：坡度随垂直夸张变化，zs 改了才重算
+  if(!s.fsh || s.fshZ !== zs){
+    const fsh = new Uint8Array(ntri);
+    const LX = 0.42, LY = -0.36, LZ = 0.83;
+    for(let t=0;t<ntri;t++){
+      const ax = fnx[t]*zs, ay = fny[t]*zs;
+      const len = Math.sqrt(ax*ax + ay*ay + 1) || 1;
+      const dot = (ax*LX + ay*LY + LZ)/len;
+      let sh = Math.round((dot*0.5 + 0.5)*(SHADE_N-1));
+      if(sh < 0) sh = 0; else if(sh > SHADE_N-1) sh = SHADE_N-1;
+      fsh[t] = sh;
+    }
+    s.fsh = fsh; s.fshZ = zs;
+  }
+  const fsh = s.fsh;
+  const pal = S.palShaded;
+  const g = ctx;
+
+  // ---- 面重心深度 ----
+  if(!s.rt || s.rt.n !== ntri){
+    s.rt = {
+      n: ntri,
+      fz: new Float32Array(ntri),
+      bucket: new Int32Array(ntri),
+      order: new Int32Array(ntri),
+      ck: new Int32Array(ntri),
+      corder: new Int32Array(ntri),
+      cstart: new Int32Array(PAL_N*SHADE_N),
+      ccur: new Int32Array(PAL_N*SHADE_N),
+      cnt: null, off: null, nb: 0
+    };
+  }
+  const rt = s.rt;
+  const fzA = rt.fz;
+  let zmin = Infinity, zmax = -Infinity;
+  for(let t=0;t<ntri;t++){
+    const i3 = 3*t;
+    const a = tris[i3], b = tris[i3+1], c = tris[i3+2];
+    if(!vis[a] || !vis[b] || !vis[c]){ fzA[t] = -1; continue; }
+    const z = (cz[a] + cz[b] + cz[c]) * 0.3333333;
+    fzA[t] = z;
+    if(z < zmin) zmin = z;
+    if(z > zmax) zmax = z;
+  }
+  if(!(zmax > zmin)) return;
+
+  const lowQ = S.dragging || S.spin;
+  const NB = lowQ ? 32 : (ntri > 60000 ? 160 : (ntri > 20000 ? 96 : 48));
+  if(rt.nb !== NB){ rt.cnt = new Int32Array(NB+1); rt.off = new Int32Array(NB+1); rt.nb = NB; }
+  const cnt = rt.cnt, off = rt.off;
+  cnt.fill(0);
+
+  const invR = (NB - 1)/(zmax - zmin);
+  for(let t=0;t<ntri;t++){
+    const z = fzA[t];
+    if(z < 0) continue;
+    let b = ((zmax - z)*invR)|0;      // 桶 0 = 最远
+    if(b < 0) b = 0; else if(b >= NB) b = NB-1;
+    rt.bucket[t] = b;
+    cnt[b+1]++;
+  }
+  let acc = 0;
+  for(let b=0;b<NB;b++){ off[b] = acc; acc += cnt[b+1]; }
+  off[NB] = acc;
+  // 填充（off 复用为游标）
+  const cur = rt.ccur;   // 借用（后面会重置）
+  for(let b=0;b<NB;b++) cur[b] = off[b];
+  for(let t=0;t<ntri;t++){
+    if(fzA[t] < 0) continue;
+    const b = rt.bucket[t];
+    rt.order[cur[b]++] = t;
+  }
+
+  // ---- 逐桶绘制，桶内按颜色合并 ----
+  const CK = PAL_N*SHADE_N;
+  const ck = rt.ck, corder = rt.corder, cstart = rt.cstart, ccur = rt.ccur;
+  const doTri = S.showSurface;
+
+  for(let b=0;b<NB;b++){
+    const st = off[b], en = off[b+1];
+    if(st >= en) continue;
+    if(!doTri) break;
+
+    ccur.fill(0, 0, CK+1);
+    for(let i=st;i<en;i++){
+      const t = rt.order[i];
+      const k = fci[t]*SHADE_N + fsh[t];
+      ck[i] = k;
+      ccur[k+1]++;
+    }
+    for(let k=0;k<CK;k++) ccur[k+1] += ccur[k];
+    cstart.set(ccur.subarray(0, CK));
+    for(let i=st;i<en;i++){
+      const k = ck[i];
+      corder[ccur[k]++] = rt.order[i];
+    }
+    for(let k=0;k<CK;k++){
+      const e0 = cstart[k], e1 = ccur[k];
+      if(e1 <= e0) continue;
+      g.beginPath();
+      for(let i=e0;i<e1;i++){
+        const i3 = 3*rt.corder[i];
+        const a = tris[i3], bb = tris[i3+1], cc = tris[i3+2];
+        g.moveTo(sx[a], sy[a]);
+        g.lineTo(sx[bb], sy[bb]);
+        g.lineTo(sx[cc], sy[cc]);
+        g.closePath();
+      }
+      const col = pal[(k/SHADE_N)|0][k % SHADE_N];
+      g.fillStyle = col;
+      g.strokeStyle = col;
+      g.lineWidth = 1;
+      g.lineJoin = 'bevel';   // 默认 miter 会让细长三角形的尖角飞出去变成白刺
+      g.miterLimit = 1.4;
+      g.fill();
+      if(!lowQ) g.stroke();   // 描边填缝；拖拽时省略以保帧率
+    }
+  }
+
+  // ---- 三角网边界勾边（成图范围轮廓） ----
+  const segs = s.edgeSegs;
+  if(segs && segs.length && doTri){
+    g.beginPath();
+    let has = false;
+    for(let i=0;i<segs.length;i+=6){
+      const x1 = segs[i], y1 = segs[i+1], z1 = segs[i+2]*zs;
+      const x2 = segs[i+3], y2 = segs[i+4], z2 = segs[i+5]*zs;
+      const dx1 = x1-ex, dy1 = y1-ey, dz1 = z1-ez;
+      const c1 = dx1*fx + dy1*fy + dz1*fz;
+      if(c1 < 0.5) continue;
+      const dx2 = x2-ex, dy2 = y2-ey, dz2 = z2-ez;
+      const c2 = dx2*fx + dy2*fy + dz2*fz;
+      if(c2 < 0.5) continue;
+      const k1 = focal/c1, k2 = focal/c2;
+      g.moveTo(ccx + (dx1*rx + dy1*ry + dz1*rz)*k1, ccy - (dx1*ux + dy1*uy + dz1*uz)*k1);
+      g.lineTo(ccx + (dx2*rx + dy2*ry + dz2*rz)*k2, ccy - (dx2*ux + dy2*uy + dz2*uz)*k2);
+      has = true;
+    }
+    if(has){
+      g.strokeStyle = 'rgba(226,240,255,.34)';
+      g.lineWidth = 1;
+      g.stroke();
+    }
+  }
+
+  // ---- 等高线：直接在三角面上线性内插（CASS 的"DGM 内插等高线"） ----
+  if(S.showContour && S.cntLevels && S.cntLevels.length) drawContourTIN(s, sx, sy, vis, zs);
+}
+
+/* ---- 三角网等高线：逐面在三条边上按高程线性内插 ---- */
+function drawContourTIN(s, sx, sy, vis, zs){
+  const tris = s.tris, ntri = s.ntri, pz = s.pz;
+  const levels = S.cntLevels;
+  const nlev = levels.length;
+  const g = ctx;
+  const p1 = new Path2D(), p2 = new Path2D();
+
+  let ax = 0, ay = 0, bx = 0, by = 0;
+  for(let t=0;t<ntri;t++){
+    const i3 = 3*t;
+    const a = tris[i3], b = tris[i3+1], c = tris[i3+2];
+    if(!vis[a] || !vis[b] || !vis[c]) continue;
+    const ha = pz[a], hb = pz[b], hc = pz[c];
+    let mn = ha, mx = ha;
+    if(hb < mn) mn = hb; if(hb > mx) mx = hb;
+    if(hc < mn) mn = hc; if(hc > mx) mx = hc;
+    if(mx - mn < 1e-9) continue;
+
+    let lo = 0, hi = nlev-1, st = -1;
+    while(lo <= hi){
+      const md = (lo+hi)>>1;
+      if(levels[md] <= mn) lo = md+1; else { st = md; hi = md-1; }
+    }
+    if(st < 0) continue;
+
+    const xa = sx[a], ya = sy[a], xb = sx[b], yb = sy[b], xc = sx[c], yc = sy[c];
+
+    for(let li=st; li<nlev; li++){
+      const L = levels[li];
+      if(L >= mx) break;
+      let n = 0;
+      // 三条边依次求交，正常情况恰好两点
+      const d1 = ha - L, d2 = hb - L, d3 = hc - L;
+      if(d1*d2 < 0){ const k = d1/(d1-d2); ax = xa + (xb-xa)*k; ay = ya + (yb-ya)*k; n = 1; }
+      if(d2*d3 < 0 && n < 2){
+        const k = d2/(d2-d3);
+        if(n === 0){ ax = xb + (xc-xb)*k; ay = yb + (yc-yb)*k; n = 1; }
+        else { bx = xb + (xc-xb)*k; by = yb + (yc-yb)*k; n = 2; }
+      }
+      if(d3*d1 < 0 && n < 2){
+        const k = d3/(d3-d1);
+        if(n === 0){ ax = xc + (xa-xc)*k; ay = yc + (ya-yc)*k; n = 1; }
+        else { bx = xc + (xa-xc)*k; by = yc + (ya-yc)*k; n = 2; }
+      }
+      if(n !== 2) continue;
+      const target = (li % 5 === 0) ? p2 : p1;
+      target.moveTo(ax, ay);
+      target.lineTo(bx, by);
+    }
+  }
+
+  g.strokeStyle = 'rgba(255,255,255,.50)';
+  g.lineWidth = 1;
+  g.stroke(p1);
+  g.strokeStyle = 'rgba(255,255,255,.92)';
+  g.lineWidth = 1.7;
+  g.stroke(p2);
+}
+
 function drawSurface(){
   const s = S.surf;
   if(!s) return;
+  if(s.kind === 'tin'){ drawTIN(); return; }
   const res = s.res, nx = s.nx;
   const zs = S.zExag;
 
@@ -1990,6 +2786,55 @@ $('chkSkirt').addEventListener('change', e => {
   }
   requestRender();
 });
+/* ---- 成图规则：三角网 DTM / 规则格网 ---- */
+function applyModeUI(){
+  const tin = (S.mode === 'tin');
+  const tb = $('tinBox');
+  if(tb) tb.style.display = tin ? '' : 'none';
+  const hh = $('chkHole');
+  if(hh){
+    hh.disabled = tin;
+    const lb = hh.closest('label');
+    if(lb) lb.style.opacity = tin ? '.4' : '';
+  }
+  const rr = $('rngRes');
+  if(rr) rr.disabled = tin;
+  const rl = rr ? rr.closest('.rng') : null;
+  if(rl) rl.style.opacity = tin ? '.4' : '';
+}
+
+function rebuildScene(){
+  if(!S.loaded) return;
+  showLoading(true, S.mode === 'tin' ? '正在建立三角网…' : '正在插值成图…');
+  setTimeout(() => {
+    buildScene();
+    buildContours();
+    updateBaseInfo();
+    showLoading(false);
+    requestRender();
+  }, 20);
+}
+
+$('selMode').addEventListener('change', e => {
+  S.mode = (e.target.value === 'grid') ? 'grid' : 'tin';
+  applyModeUI();
+  rebuildScene();
+});
+
+let tinTimer = null;
+function onTinParam(){
+  const a = parseFloat($('numAngle').value);
+  const k = parseFloat($('numEdge').value);
+  S.tinMinAngle = isFinite(a) ? clamp(a, 0, 45) : 10;
+  S.tinEdgeK = isFinite(k) ? clamp(k, 1, 60) : 6;
+  clearTimeout(tinTimer);
+  tinTimer = setTimeout(() => { if(S.mode === 'tin') rebuildScene(); }, 340);
+}
+$('numAngle').addEventListener('input', onTinParam);
+$('numEdge').addEventListener('input', onTinParam);
+
+applyModeUI();
+
 $('chkHole').addEventListener('change', e => {
   S.showHole = e.target.checked;
   if(!S.loaded) return;
