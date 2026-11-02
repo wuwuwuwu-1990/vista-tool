@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>深基坑快绘坡面CAD系统 v1.0.7</title>
+<title>基坑快绘坡面CAD系统 v1.0.8</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230ea5a4'/%3E%3Ctext x='50' y='74' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E%E5%9D%91%3C/text%3E%3C/svg%3E">
 <style>
   :root{
@@ -235,8 +235,8 @@
 
 <header>
   <div class="logo">坑</div>
-  <h1>深基坑快绘坡面CAD系统</h1>
-  <span class="ver">v1.0.7</span>
+  <h1>基坑快绘坡面CAD系统</h1>
+  <span class="ver">v1.0.8</span>
   <div class="sp"></div>
   <div class="hset">
     <label for="selScale">出图比例</label>
@@ -266,7 +266,7 @@
       <div class="frow"><label>状态</label><span id="polyInfo" style="font-size:12px;color:var(--sub)">矩形</span></div>
       <div class="frow"><label>坑底长 L</label><input type="number" id="inL" value="20" min="1" max="600" step="0.1" title="矩形坑底沿 X 方向的边长"><span class="unit">m</span></div>
       <div class="frow"><label>坑底宽 W</label><input type="number" id="inW" value="20" min="1" max="600" step="0.1" title="矩形坑底沿 Y 方向的边长"><span class="unit">m</span></div>
-      <div class="frow full"><label>工程名称</label><input type="text" id="inProj" value="深基坑支护专项方案" maxlength="30"></div>
+      <div class="frow full"><label>工程名称</label><input type="text" id="inProj" value="基坑支护专项方案" maxlength="30"></div>
       <div class="frow"><label>轮廓单位</label>
         <select id="selUnit">
           <option value="auto">自动判断</option>
@@ -323,7 +323,7 @@
     </div>
     <div class="panel-sec" id="secTitle" style="display:none">
       <h3>图签</h3>
-      <div class="tb-field"><label>图纸名称</label><input type="text" id="inDwName" value="深基坑放坡平面布置图" maxlength="26"></div>
+      <div class="tb-field"><label>图纸名称</label><input type="text" id="inDwName" value="基坑放坡平面布置图" maxlength="26"></div>
       <div class="tb-field"><label>设计人</label><input type="text" id="inDesigner" value="AI" maxlength="12"></div>
     </div>
   </aside>
@@ -352,7 +352,7 @@
         <button id="pFit" title="适应窗口 (F)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4"/></svg></button>
         <button id="pIn" title="放大"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4"/></svg></button>
         <button id="pOut" title="缩小"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M6.8 9h4.4"/></svg></button>
-        <button id="pGrid" class="on" title="网格背景"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14"/></svg></button>
+        <button id="pGrid" title="网格背景（默认关闭）"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14"/></svg></button>
         <span class="sp"></span>
         <button id="pPng" title="导出平面图 PNG"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="7.4" cy="8.4" r="1.2"/><path d="M3.5 15l4-4.5 3 3 2.5-2.8 3.5 3.8"/></svg></button>
         <button id="pDxf" title="导出平面图 DXF"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3v14M10 3l-3.5 3.5M10 3l3.5 3.5M4 17h12"/></svg></button>
@@ -406,8 +406,8 @@
   <div class="modal" style="min-width:460px">
     <h3><span></span><span class="x" data-close="modalAbout">×</span></h3>
     <div class="about-logo">坑</div>
-    <h3 style="margin-bottom:2px">深基坑快绘坡面CAD系统</h3>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Deep-Pit Quick Slope CAD <span class="about-ver">v1.0.7</span></div>
+    <h3 style="margin-bottom:2px">基坑快绘坡面CAD系统</h3>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Pit Quick Slope CAD <span class="about-ver">v1.0.8</span></div>
     <p class="desc">
       依据基坑轮廓（默认 20m×20m 矩形，可改长宽或导入 DXF），按放坡参数自动生成<b>向内/向外放坡</b>图形：<br>
       ① 左栏输入坑底长 L / 宽 W 即得矩形坑底，也可导入 DXF 识别最大闭合多段线作为边线；② 设置坑深/坑口标高/级数/坡率 1:m/马道宽，一键生成坡顶·马道·坑底逐级偏移环；<br>
@@ -423,6 +423,13 @@
       <tr><th>工程量</th><td>状态栏实时显示开挖总方量（坑底至原地面，按各级面积 Simpson 积分，含放坡）</td></tr>
       <tr><th>导出格式</th><td>PNG / DXF R2000；顶栏「合并导出 DXF」= 图框 + 平面 + 两剖面（图签默认不导出，可在显示选项里勾选）</td></tr>
     </table>
+    <div class="foot-note">
+      <b>v1.0.8：</b>修正<b>陡坡坡率文字不显示</b>——旧版把「水平投影 &gt; 0.3 倍级高」当成坡面判据，
+      坡率 ≤ 1:0.3 时条件恒不成立，陡坡一条坡率都不标；现改为按坡度公式判定，任何坡率都注。
+      坡角 &gt; 60°（陡于 1:0.58）时文字沿坡书写接近竖直、读不出，改用<b>短引线 + 水平字</b>；
+      较缓坡面仍沿坡斜注。另：<b>默认不显示网格背景</b>（工具栏网格按钮可随时打开）；
+      软件更名为<b>基坑快绘坡面CAD系统</b>。
+    </div>
     <div class="foot-note">
       <b>v1.0.7：</b>新增「剖切符号」选择框（天正粗线式 / 国标贯穿式 / 箭头式 / 圆圈编号式），默认<b>天正粗线式（不贯穿）</b>；
       剖切符号位置线不再伸入坑口线内，与坑口线留 1.5mm 净距；剖面<b>右侧</b>同样标注马道宽度与马道标高；
@@ -452,7 +459,7 @@
 
 <script>
 /* =====================================================================
-   深基坑快绘坡面CAD系统 v1.0.2 — 核心几何引擎（纯 JS，无 DOM）
+   基坑快绘坡面CAD系统 v1.0.8 — 核心几何引擎（纯 JS，无 DOM）
    功能：导入基坑轮廓多段线 → 生成向内/向外放坡环（坡脚/马道/坡顶）
          + 沿剖切线生成 剖面轮廓（A-A 横向 / B-B 纵向）
    坐标：世界坐标 mm，Y 向上（与 DXF 一致）；标高 v 向上为正（坑底 -H）。
@@ -970,7 +977,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
 </script>
 <script>
 /* =====================================================================
-   深基坑快绘坡面CAD系统 v1.0.2 — 主逻辑（UI/交互/DXF解析/三视区渲染/导出）
+   基坑快绘坡面CAD系统 v1.0.2 — 主逻辑（UI/交互/DXF解析/三视区渲染/导出）
    依赖：PitCore（几何引擎）、DXF_SKEL（DXF 骨架模板，构建期注入）
    视区：上=平面图(plan) ｜ 下左=A-A剖面 ｜ 下右=B-B剖面
    坐标：世界 mm，Y 向上；剖面世界：x=沿剖切线水平 u，y=标高 v（坑底为负）
@@ -980,12 +987,12 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
   'use strict';
   var C = window.PitCore;
   var $ = function (id) { return document.getElementById(id); };
-  var VER = '1.0.7';
+  var VER = '1.0.8';
 
   var state = {
     poly: null, polyName: '', geo: null,
     view: { plan: null, A: null, B: null },   // 各视区 {cx,cy,s,fitS}
-    drag: null, showGrid: true
+    drag: null, showGrid: false   /* 默认不显示网格背景（2026-11-02 要求） */
   };
   var secEnts = { A: [], B: [] };
   var planEnts = [];
@@ -1221,7 +1228,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     /* 图名前缀：取「图纸名称」去掉结尾的“平面布置图/平面图/图”，空则用工程名称 */
     var dw = (($('inDwName') || {}).value || '').trim();
     var nm = dw.replace(/(平面布置图|平面图|图)$/, '').trim();
-    if (!nm) nm = (($('inProj') || {}).value || '深基坑').trim();
+    if (!nm) nm = (($('inProj') || {}).value || '基坑').trim();
     return {
       tick: $('ckTick').checked, ring: $('ckRing').checked,
       fill: false, lvl: $('ckLvl').checked,
@@ -1781,18 +1788,31 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
       dimH(B, uTn, uRn, yTopDim, Math.round(uRn - uTn), DM, P(9), 'above');
 
       /* b) 坡率 1:m —— 每一个坡面各注一次（左右两侧、每一级都要有），
-            文字紧贴开挖轮廓线：沿坡面法向只偏图纸 2mm，halo 白底压在线上不糊 */
+            文字紧贴开挖轮廓线：沿坡面法向只偏图纸 2mm，halo 白底压在线上不糊。
+            ⚠️ 旧版误用 du > h*0.3 判断坡面，m ≤ 1:0.3 时水平投影恰等于 0.3h，
+               条件恒不成立 → 陡坡一条坡率都不标（2026-11-02 修正）；
+            陡坡（坡角 > 60°，即陡于 1:0.58）沿坡书写会接近竖直、几乎读不出，
+            改为「短引线 + 水平字」，引线自坡面中点法向引出 1.6mm，字贴引线末端。 */
+      var wRate = '1:' + fmtM2(geo.mRate);
       for (var i = 1; i < pro.pts.length; i++) {
         var a = pro.pts[i - 1], b = pro.pts[i];
         var du = Math.abs(b.u - a.u), dv = Math.abs(b.v - a.v);
-        if (dv > h * 0.55 && Math.abs(du / (dv || 1) - geo.mRate) < 0.02 && du > h * 0.3) {
+        if (dv > h * 0.55 && du > 1 && Math.abs(du / dv - geo.mRate) < 0.02) {
           var mu = (a.u + b.u) / 2, mv = (a.v + b.v) / 2;
           var angW = Math.atan2(b.v - a.v, b.u - a.u) * 180 / Math.PI;
           var ux2 = (b.u - a.u) / (du || 1), uy2 = (b.v - a.v) / (dv || 1);
           var nx2 = -uy2, ny2 = ux2;
           if (ny2 < 0) { nx2 = -nx2; ny2 = -ny2; }
-          E(B, 'text', { x: mu + nx2 * P(2.0), y: mv + ny2 * P(2.0), h: P(TH_DIM) * 0.92,
-            str: '1:' + fmtM2(geo.mRate), layer: DM, align: 'c', halo: 1, rot: angW });
+          var th2 = P(TH_DIM) * 0.92;
+          if (Math.abs(angW) > 60) {
+            var lx2 = mu + nx2 * P(1.6), ly2 = mv + ny2 * P(1.6);
+            E(B, 'line', { x1: mu, y1: mv, x2: lx2, y2: ly2, layer: DM, lw: 0.13 });
+            E(B, 'text', { x: lx2 + nx2 * P(0.8), y: ly2 - th2 * 0.35, h: th2,
+              str: wRate, layer: DM, align: (nx2 > 0 ? 'l' : 'r'), halo: 1 });
+          } else {
+            E(B, 'text', { x: mu + nx2 * P(2.0), y: mv + ny2 * P(2.0), h: th2,
+              str: wRate, layer: DM, align: 'c', halo: 1, rot: angW });
+          }
         }
       }
 
@@ -2621,7 +2641,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     merged.push({ t: 'line', x1: (tbX + 120) * SC, y1: tbY * SC, x2: (tbX + 120) * SC, y2: (tbY + TB_H) * SC, layer: LAYER.TB, lw: 0.25 });
     var rows = [
       ['工程名称', t.proj || '—', '图号', 'SJ-01'],
-      ['图　　名', t.name || '深基坑放坡平面及剖面图', '日期', t.date],
+      ['图　　名', t.name || '基坑放坡平面及剖面图', '日期', t.date],
       ['比　　例', '1:' + SC, '设计', t.designer || '—'],
       ['', '', '', '']
     ];
@@ -2642,7 +2662,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     }
     /* 总图名：图框内上方居中（图纸 7 mm，基线由版式算得，文字顶不越内框） */
     merged.push({ t: 'text', x: ((innerL + innerR) / 2) * SC, y: L.titleBase * SC,
-                  h: TH_TITLE * SC, str: (t.proj || '深基坑') + '　放坡平面及剖面图', layer: LAYER.TITLE, align: 'c' });
+                  h: TH_TITLE * SC, str: (t.proj || '基坑') + '　放坡平面及剖面图', layer: LAYER.TITLE, align: 'c' });
 
     /* 提示文字（复刻蓄水池做法）：CAD 对「预定义图案 + 内联定义」的 HATCH 首次不自动计算，
        故写一行黄字提醒。放在图签左侧的空白角，不占图面、可单独关层或删除 */
@@ -2656,7 +2676,7 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
   function exportMergedDxf() {
     var merged = buildMergedBuf();
     if (!merged) { toast('请先完整生成三视区图形', 'err'); return; }
-    saveDxf(dxfFromBuf(merged, SC), '深基坑放坡_平面与剖面合并图');
+    saveDxf(dxfFromBuf(merged, SC), '基坑放坡_平面与剖面合并图');
   }
 
   /* ============ 绑定 ============ */
@@ -2722,18 +2742,18 @@ window.DXF_SKEL = "  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$
     $('pIn').onclick = function () { state.view.plan.s *= 1.25; drawSvgOf($('svgPlan'), planBuf, state.view.plan); };
     $('pOut').onclick = function () { state.view.plan.s /= 1.25; drawSvgOf($('svgPlan'), planBuf, state.view.plan); };
     $('pGrid').onclick = function () { state.showGrid = !state.showGrid; setGridBtn(); };
-    $('pPng').onclick = function () { exportPngOf('svgPlan', '深基坑放坡平面布置图'); };
-    $('pDxf').onclick = function () { exportDxfOf(planBuf, '深基坑放坡平面布置图'); };
+    $('pPng').onclick = function () { exportPngOf('svgPlan', '基坑放坡平面布置图'); };
+    $('pDxf').onclick = function () { exportDxfOf(planBuf, '基坑放坡平面布置图'); };
     $('aFit').onclick = function () { fitViewOf('A', secBufA, $('svgSecA'), 0); drawSvgOf($('svgSecA'), secBufA, state.view.A); };
     $('aIn').onclick = function () { state.view.A.s *= 1.25; drawSvgOf($('svgSecA'), secBufA, state.view.A); };
     $('aOut').onclick = function () { state.view.A.s /= 1.25; drawSvgOf($('svgSecA'), secBufA, state.view.A); };
-    $('aPng').onclick = function () { exportPngOf('svgSecA', '深基坑放坡_A-A剖面图'); };
-    $('aDxf').onclick = function () { exportDxfOf(secBufA, '深基坑放坡_A-A剖面图'); };
+    $('aPng').onclick = function () { exportPngOf('svgSecA', '基坑放坡_A-A剖面图'); };
+    $('aDxf').onclick = function () { exportDxfOf(secBufA, '基坑放坡_A-A剖面图'); };
     $('bFit').onclick = function () { fitViewOf('B', secBufB, $('svgSecB'), 0); drawSvgOf($('svgSecB'), secBufB, state.view.B); };
     $('bIn').onclick = function () { state.view.B.s *= 1.25; drawSvgOf($('svgSecB'), secBufB, state.view.B); };
     $('bOut').onclick = function () { state.view.B.s /= 1.25; drawSvgOf($('svgSecB'), secBufB, state.view.B); };
-    $('bPng').onclick = function () { exportPngOf('svgSecB', '深基坑放坡_B-B剖面图'); };
-    $('bDxf').onclick = function () { exportDxfOf(secBufB, '深基坑放坡_B-B剖面图'); };
+    $('bPng').onclick = function () { exportPngOf('svgSecB', '基坑放坡_B-B剖面图'); };
+    $('bDxf').onclick = function () { exportDxfOf(secBufB, '基坑放坡_B-B剖面图'); };
     // 容器尺寸变化重画
     if (window.ResizeObserver) {
       var ro = new ResizeObserver(function () {
