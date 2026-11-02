@@ -88,7 +88,7 @@
     50%{opacity:1;transform:translate(-50%,-50%) scale(1.18);}
   }
 
-  .wrap{position:relative;z-index:1;max-width:2000px;margin:0 auto;padding:40px 28px 70px;}
+  .wrap{position:relative;z-index:1;max-width:2000px;margin:0 auto;padding:36px 16px 70px;}
   nav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;margin-bottom:26px;flex-wrap:wrap;gap:10px;
        position:sticky;top:0;z-index:50;border-radius:14px;
        background:var(--card);border:1px solid var(--card-b);
@@ -175,8 +175,8 @@
   .sec-title h2{font-size:16px;font-weight:600;letter-spacing:1px;}
   .sec-count{font-size:11.5px;color:var(--muted);font-weight:400;letter-spacing:.5px;margin-left:28px;vertical-align:2px;border-left:1px solid var(--card-b);padding-left:14px;}
   .sec-title span{font-size:12px;color:var(--muted);margin-left:auto;}
-  .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:16px;}
-  .card{position:relative;height:100%;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;}
+  .card{position:relative;height:100%;max-width:400px;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;overflow:hidden;
        background:var(--card);border:1px solid var(--card-b);
        transform-style:preserve-3d;opacity:0;
@@ -257,7 +257,7 @@
        transition:opacity .35s ease .06s,transform .35s cubic-bezier(.34,1.56,.64,1) .06s;}
   .secret-panel.show .sp-inner{opacity:1;transform:translateY(0) scale(1);}
   .secret-panel .sp-head{display:flex;align-items:center;justify-content:space-between;
-       padding:26px 28px 0;max-width:2000px;width:100%;margin:0 auto;}
+       padding:26px 16px 0;max-width:2000px;width:100%;margin:0 auto;}
   .secret-panel .sp-brand{display:flex;align-items:center;gap:12px;}
   .secret-panel .sp-brand .mark{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
        background:var(--sp-mark);box-shadow:var(--mark-shadow);}
@@ -266,13 +266,13 @@
   .secret-panel .sp-close{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.22);
        display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(238,242,251,.7);transition:all .2s;background:rgba(255,255,255,.1);}
   .secret-panel .sp-close:hover{color:#fff;border-color:rgba(248,113,113,.6);background:rgba(248,113,113,.2);}
-  .secret-panel .sp-body{max-width:2000px;width:100%;margin:0 auto;padding:34px 28px 70px;}
+  .secret-panel .sp-body{max-width:2000px;width:100%;margin:0 auto;padding:34px 16px 70px;}
   .secret-panel .sp-sec{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
   .secret-panel .sp-sec .bar{width:4px;height:16px;border-radius:2px;background:var(--sp-bar);}
   .secret-panel .sp-sec h2{font-size:15px;font-weight:600;color:#eef2fb;}
   .secret-panel .sp-sec span{font-size:11.5px;color:rgba(238,242,251,.55);margin-left:auto;}
-  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:16px;}
-  .secret-panel .sp-card{height:100%;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
+  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;}
+  .secret-panel .sp-card{height:100%;max-width:400px;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);
        transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;}
   .secret-panel .sp-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.45);border-color:rgba(255,255,255,.4);}
@@ -287,13 +287,11 @@
   .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;letter-spacing:.5px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
   .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
   .secret-panel .sp-empty{border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:40px;text-align:center;color:rgba(238,242,251,.55);font-size:13px;line-height:2;background:rgba(255,255,255,.04);}
-  @media (max-width:1700px){.grid{grid-template-columns:repeat(6,1fr);}.secret-panel .sp-grid{grid-template-columns:repeat(6,1fr);}}
-  @media (max-width:1300px){.grid{grid-template-columns:repeat(4,1fr);}.secret-panel .sp-grid{grid-template-columns:repeat(4,1fr);}}
-  @media (max-width:1000px){.grid{grid-template-columns:repeat(3,1fr);}.secret-panel .sp-grid{grid-template-columns:repeat(3,1fr);}}
   @media (max-width:720px){
     .secret-panel .sp-head{padding:20px 16px 0;}
     .secret-panel .sp-body{padding:24px 16px 60px;}
     .secret-panel .sp-grid{grid-template-columns:1fr 1fr;gap:12px;}
+    .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
     .nav-right .ver{display:none;}
     .theme-picker .tp{padding:5px 9px;font-size:11px;}
   }
@@ -325,6 +323,30 @@
   .about-log .log-item{border-color:rgba(255,255,255,.1);}
   .about-log .log-item .ld{color:#7dd3fc;}
   .about-log .log-item .lt{color:rgba(238,242,251,.85);}
+  /* ===== 侧栏分类导航布局 ===== */
+  .layout{display:flex;gap:22px;align-items:flex-start;}
+  .side-nav{flex:0 0 178px;position:sticky;top:84px;}
+  .side-nav .side-head{font-size:11px;color:var(--muted);letter-spacing:2px;padding:0 0 12px 12px;}
+  .side-nav .side-item{display:flex;align-items:center;gap:9px;padding:10px 12px;margin-bottom:5px;border-radius:10px;
+       color:var(--muted);text-decoration:none;font-size:13px;cursor:pointer;border:1px solid transparent;transition:all .2s;}
+  .side-nav .side-item .dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+  .side-nav .side-item .cnt{margin-left:auto;font-size:11px;color:var(--muted);opacity:.75;}
+  .side-nav .side-item:hover{color:var(--txt);background:var(--card);border-color:var(--card-b);}
+  .side-nav .side-item.active{color:var(--txt);background:var(--card);border-color:var(--card-b);}
+  .side-nav .side-item.active .cnt{color:var(--cyan);}
+  .content{flex:1;min-width:0;}
+  .cat-sec{margin-bottom:38px;scroll-margin-top:98px;}
+  .cat-title{display:flex;align-items:center;gap:9px;margin:0 0 14px;}
+  .cat-title .dot{width:4px;height:16px;border-radius:2px;flex-shrink:0;}
+  .cat-title .nm{font-size:15px;font-weight:600;letter-spacing:1px;}
+  .cat-title .cnt{font-size:11.5px;color:var(--muted);border-left:1px solid var(--card-b);padding-left:12px;margin-left:8px;}
+  @media (max-width:1000px){
+    .layout{flex-direction:column;}
+    .side-nav{flex:none;width:100%;position:static;display:flex;flex-wrap:wrap;gap:6px;}
+    .side-nav .side-head{display:none;}
+    .side-nav .side-item{margin-bottom:0;}
+  }
+
 </style>
 </head>
 <body data-theme="business" data-bgfx="off">
@@ -364,99 +386,25 @@
   </div>
   <div class="search-empty" id="searchEmpty">未找到匹配的工具</div>
 
-  <div class="sec-title">
-    <div class="bar"></div>
-    <h2>全部工具<span class="sec-count">共 8 款</span></h2>
-  </div>
-  <div class="grid">
-    <a class="card" href="sgjht.html" style="--g1:#3a8ee6;--g2:#5f5ef0;--gs:rgba(74,124,235,.5);--a1:#4f8ef7;--a2:#8b7cf6;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M3 4v16M3 8h18M3 13h18M3 18h18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><rect x="6" y="9.2" width="5" height="3" rx="1" fill="#fff" opacity=".95"/><rect x="13" y="9.2" width="7" height="3" rx="1" fill="#fff" opacity=".65"/><rect x="6" y="14.2" width="8" height="3" rx="1" fill="#fff" opacity=".8"/><rect x="16" y="14.2" width="4" height="3" rx="1" fill="#fff" opacity=".55"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="layout">
+  <aside class="side-nav">
+    <div class="side-head">工具分类</div>
+      <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">4</span></a>
+      <a href="#cat-cad" class="side-item" data-cat="cat-cad"><span class="dot" style="background:#4f8ef7"></span><span class="nm">结构与CAD出图</span><span class="cnt">6</span></a>
+      <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="dot" style="background:#2fd4a8"></span><span class="nm">施工与管理</span><span class="cnt">4</span></a>
+      <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="dot" style="background:#8b7cf6"></span><span class="nm">审图与报告</span><span class="cnt">1</span></a>
+      <a href="#cat-ch" class="side-item" data-cat="cat-ch"><span class="dot" style="background:#38d3f0"></span><span class="nm">测绘与图像</span><span class="cnt">1</span></a>
+      <a href="#cat-tw" class="side-item" data-cat="cat-tw"><span class="dot" style="background:#f472b6"></span><span class="nm">图文工具箱</span><span class="cnt">2</span></a>
+  </aside>
+    <main class="content">
+      <div class="sec-title">
+        <div class="bar"></div>
+        <h2>全部工具<span class="sec-count">共 18 款</span></h2>
       </div>
-      <h3>施工计划图软件</h3>
-      <div class="desc">施工横道图＋双代号时标网络图，自动计算 CPM 关键线路，Excel/Word/SVG 导入导出；☁️ 云端方案跨设备复用整套工序+参数。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(79,142,247,.4);--cc:#8fb6ff;--cbg:rgba(79,142,247,.12)">v1.5.24</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">施工进度</span>
-      </div>
-    </a>
-    <a class="card" href="pltu.html" style="--g1:#4f46e5;--g2:#06b6d4;--gs:rgba(79,70,229,.5);--a1:#6366f1;--a2:#22d3ee;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="5.6" y="2.4" width="12.8" height="4.6" rx="1.4" fill="#fff"/><rect x="5.6" y="17" width="12.8" height="4.6" rx="1.4" fill="#fff" opacity=".6"/><rect x="1.4" y="9.7" width="6" height="4.6" rx="1.4" fill="#fff" opacity=".38"/><path d="M12 7v2.9M12 14.1V17" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M10.1 9.3 12 11.2l1.9-1.9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.4 12h4.1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <h3>流程链路拓扑图</h3>
-      <div class="desc">文本线框＋单向箭头的流程图／链路拓扑：双击空白插入节点、拖圆点连箭头、选中连线中间劈开插节点；可导入 Word 自动解析原图文本框与旁支关系，导出真·文本框＋箭头的矢量 Word（A4 一页）；☁️ 云端方案跨设备复用。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v1.0.3</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">流程 / 拓扑</span>
-      </div>
-    </a>
-    <a class="card" href="murus_old.html" style="--g1:#b03a2e;--g2:#e0763f;--gs:rgba(176,58,46,.5);--a1:#c0483a;--a2:#e0763f;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 20V5l7 2v13" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M8 13h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".55"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <h3>剖筑挡墙断面成图系统</h3>
-      <div class="desc">单形式挡土墙断面参数化成图，内置参数标准表，支持 Excel 导入导出与批量 PNG 出图，独立成图互不干扰。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(176,58,46,.4);--cc:#f0a07e;--cbg:rgba(176,58,46,.12)">v0.3.47</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">单形式</span>
-      </div>
-    </a>
-    <a class="card" href="murus.html" style="--g1:#18b598;--g2:#38d3f0;--gs:rgba(40,200,175,.5);--a1:#2fd4a8;--a2:#38d3f0;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 20h15" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M6 20V9" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M12 20l3.5-11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M18.5 20l-2.8-11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <h3>剖筑多形式挡土墙断面成图系统</h3>
-      <div class="desc">直立 / 仰斜 / 俯斜三形式独立成图，参数与设置互不干扰，支持单张 / 批量 / 合并 A3 / 长图 PNG 与 Excel 导入导出。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(47,212,168,.4);--cc:#6fe6c8;--cbg:rgba(47,212,168,.12)">v0.2.53</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">多形式</span>
-      </div>
-    </a>
-
-    <a class="card" href="bracecad.html" style="--g1:#2563eb;--g2:#06b6d4;--gs:rgba(37,99,235,.5);--a1:#3b82f6;--a2:#22d3ee;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M5 20V6l14-2v16" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 14l5-3M10 11l5-3M15 8l4-2" stroke="#fff" stroke-width="1.2" opacity=".7"/><path d="M3 20h18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M5 6l-2 3M19 4l2 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".8"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <h3>固维挡墙断面CAD自动成图系统</h3>
-      <div class="desc">重力式挡土墙断面参数化成图，一键导出天正标准 DXF（尺寸/毛石填充/参数表/图名），单张·批量·全部合并；☁️ 云端方案跨设备复用参数。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(59,130,246,.4);--cc:#93c5fd;--cbg:rgba(59,130,246,.12)">v0.1.54</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">CAD出图</span>
-      </div>
-    </a>
-
-    <a class="card" href="batchimg.html" style="--g1:#10b981;--g2:#059669;--gs:rgba(16,185,129,.5);--a1:#34d399;--a2:#10b981;">
-      <div class="top">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#fff" stroke-width="1.8"/><circle cx="8.5" cy="8.5" r="2" stroke="#fff" stroke-width="1.5"/><path d="M21 15l-5-5L5 21" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <h3>批量压缩图片软件</h3>
-      <div class="desc">纯前端 Canvas API 图片批量压缩，支持 JPEG/PNG/WebP 格式转换、质量调节、尺寸调整，Chrome/Edge 可自动写入源目录覆盖原文件。</div>
-      <div class="foot">
-        <span class="chip" style="--cb:rgba(16,185,129,.4);--cc:#6ee7b7;--cbg:rgba(16,185,129,.12)">v1.6.7</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">图片工具</span>
-      </div>
-    </a>
-
-    <a class="card" href="cqcost428.html" style="--g1:#f59e0b;--g2:#f97316;--gs:rgba(245,158,11,.5);--a1:#f59e0b;--a2:#f97316;">
+      <section id="cat-zj" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">4 款</span></div>
+        <div class="grid">
+      <a class="card" href="cqcost428.html" style="--g1:#f59e0b;--g2:#f97316;--gs:rgba(245,158,11,.5);--a1:#f59e0b;--a2:#f97316;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -470,7 +418,7 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">造价收费</span>
       </div>
     </a>
-    <a class="card" href="cqcost19.html" style="--g1:#e879f9;--g2:#a855f7;--gs:rgba(232,121,249,.5);--a1:#e879f9;--a2:#a855f7;">
+      <a class="card" href="cqcost19.html" style="--g1:#e879f9;--g2:#a855f7;--gs:rgba(232,121,249,.5);--a1:#e879f9;--a2:#a855f7;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M3 17l5-6 4 4 6-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 21h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -484,7 +432,7 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">差异化监管</span>
       </div>
     </a>
-    <a class="card" href="cqcost306.html" style="--g1:#ea580c;--g2:#c2410c;--gs:rgba(234,88,12,.5);--a1:#ea580c;--a2:#c2410c;">
+      <a class="card" href="cqcost306.html" style="--g1:#ea580c;--g2:#c2410c;--gs:rgba(234,88,12,.5);--a1:#ea580c;--a2:#c2410c;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M8 21h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M12 6H6.5l1.8 4.5a2.8 2.8 0 0 0 5.2 0L15.5 6H12z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M6.8 14l-2 6M17.2 14l2 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M4.8 20h14.4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -498,7 +446,7 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">造价收费</span>
       </div>
     </a>
-    <a class="card" href="cq24q.html" style="--g1:#10b981;--g2:#059669;--gs:rgba(16,185,129,.5);--a1:#10b981;--a2:#059669;">
+      <a class="card" href="cq24q.html" style="--g1:#10b981;--g2:#059669;--gs:rgba(16,185,129,.5);--a1:#10b981;--a2:#059669;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 10h16M4 15h10M4 20h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M18 15l3 3-3 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -512,51 +460,54 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">清单规则</span>
       </div>
     </a>
-    <a class="card" href="stampgen.html" style="--g1:#e11d48;--g2:#be123c;--gs:rgba(225,29,72,.5);--a1:#e11d48;--a2:#be123c;">
+        </div>
+      </section>
+      <section id="cat-cad" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#4f8ef7"></span><span class="nm">结构与CAD出图</span><span class="cnt">6 款</span></div>
+        <div class="grid">
+      <a class="card" href="murus_old.html" style="--g1:#b03a2e;--g2:#e0763f;--gs:rgba(176,58,46,.5);--a1:#c0483a;--a2:#e0763f;">
       <div class="top">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="1.8"/><path d="M12 7.5l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.5-2.5 1.5.6-2.8-2.1-1.9 2.8-.3z" fill="#fff"/></svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M8 20V5l7 2v13" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M8 13h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".55"/></svg>
         </div>
         <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
-      <h3>竣工章生成器</h3>
-      <div class="desc">建设工程 / 水利工程竣工章在线生成，支持建设单位、施工单位、监理单位填写，字体字号字距精细调节，导出透明底 PNG。</div>
+      <h3>剖筑挡墙断面成图系统</h3>
+      <div class="desc">单形式挡土墙断面参数化成图，内置参数标准表，支持 Excel 导入导出与批量 PNG 出图，独立成图互不干扰。</div>
       <div class="foot">
-        <span class="chip" style="--cb:rgba(225,29,72,.4);--cc:#fb7185;--cbg:rgba(225,29,72,.12)">v1.1.0</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">竣工图章</span>
+        <span class="chip" style="--cb:rgba(176,58,46,.4);--cc:#f0a07e;--cbg:rgba(176,58,46,.12)">v0.3.47</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">单形式</span>
       </div>
     </a>
-    <a class="card" href="evalwrite.html" style="--g1:#6366f1;--g2:#8b5cf6;--gs:rgba(99,102,241,.5);--a1:#6366f1;--a2:#8b5cf6;">
+      <a class="card" href="murus.html" style="--g1:#18b598;--g2:#38d3f0;--gs:rgba(40,200,175,.5);--a1:#2fd4a8;--a2:#38d3f0;">
       <div class="top">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6v4h4v14H5V7h4z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 3v4H5l4-4z" fill="#fff" opacity=".6"/><path d="M9 13l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 20h15" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M6 20V9" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M12 20l3.5-11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M18.5 20l-2.8-11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
         <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
-      <h3>工程智审助手 EvalWrite</h3>
-      <div class="desc">导入广联达审核对比表（xlsx），智能解析送审/审定清单，审减明细树形展示，规则识别 + AI 兜底，一键导出审计文本与明细。</div>
+      <h3>剖筑多形式挡土墙断面成图系统</h3>
+      <div class="desc">直立 / 仰斜 / 俯斜三形式独立成图，参数与设置互不干扰，支持单张 / 批量 / 合并 A3 / 长图 PNG 与 Excel 导入导出。</div>
       <div class="foot">
-        <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v2.14.0</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">工程智审</span>
+        <span class="chip" style="--cb:rgba(47,212,168,.4);--cc:#6fe6c8;--cbg:rgba(47,212,168,.12)">v0.2.53</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">多形式</span>
       </div>
     </a>
-    <a class="card" href="pdfdocsprint.html" style="--g1:#16a34a;--g2:#0d9488;--gs:rgba(22,163,74,.5);--a1:#4ade80;--a2:#22d3ee;">
+      <a class="card" href="bracecad.html" style="--g1:#2563eb;--g2:#06b6d4;--gs:rgba(37,99,235,.5);--a1:#3b82f6;--a2:#22d3ee;">
       <div class="top">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#fff" stroke-width="1.8"/><path d="M6 7h12M6 11h8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/><path d="M6 16h5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".5"/><rect x="14" y="14" width="5" height="5" rx="1" fill="#fff" opacity=".85"/></svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 20V6l14-2v16" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 14l5-3M10 11l5-3M15 8l4-2" stroke="#fff" stroke-width="1.2" opacity=".7"/><path d="M3 20h18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M5 6l-2 3M19 4l2 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".8"/></svg>
         </div>
         <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
-      <h3>智印PDF工坊 PdfDocSprint</h3>
-      <div class="desc">PDF 封面单面+内容双面智能打印：首页封面单面、内容页双面、打印份数可选、400dpi 高清渲染、横版自动旋转，偶数页自动补尾页不串页，全程本地解析。</div>
+      <h3>固维挡墙断面CAD自动成图系统</h3>
+      <div class="desc">重力式挡土墙断面参数化成图，一键导出天正标准 DXF（尺寸/毛石填充/参数表/图名），单张·批量·全部合并；☁️ 云端方案跨设备复用参数。</div>
       <div class="foot">
-        <span class="chip" style="--cb:rgba(22,163,74,.4);--cc:#6ee7b7;--cbg:rgba(22,163,74,.12)">v1.0.6</span>
-        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">PDF打印</span>
+        <span class="chip" style="--cb:rgba(59,130,246,.4);--cc:#93c5fd;--cbg:rgba(59,130,246,.12)">v0.1.54</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">CAD出图</span>
       </div>
     </a>
-
-
-    <a class="card" href="scaffold.html" style="--g1:#2563eb;--g2:#3b82f6;--gs:rgba(37,99,235,.5);--a1:#60a5fa;--a2:#38bdf8;">
+      <a class="card" href="scaffold.html" style="--g1:#2563eb;--g2:#3b82f6;--gs:rgba(37,99,235,.5);--a1:#60a5fa;--a2:#38bdf8;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V8l3-3 3 3v13M13 21V5l2-2 2 2v16M9 10h2M9 14h2M17 10h2M17 14h2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11h18" stroke="#fff" stroke-width="1.2" opacity=".5"/></svg>
@@ -570,8 +521,7 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">脚手架CAD</span>
       </div>
     </a>
-
-    <a class="card" href="deeppit.html" style="--g1:#0e7490;--g2:#14b8a6;--gs:rgba(14,116,144,.5);--a1:#2dd4bf;--a2:#0ea5a4;">
+      <a class="card" href="deeppit.html" style="--g1:#0e7490;--g2:#14b8a6;--gs:rgba(14,116,144,.5);--a1:#2dd4bf;--a2:#0ea5a4;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V8l4-3 4 3v13M13 21V5l4-3 4 3v16" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11h2M9 14h2M17 11h2M17 14h2" stroke="#fff" stroke-width="1.2" opacity=".55"/><path d="M4 12h16" stroke="#fff" stroke-width="1.1" stroke-dasharray="3 2.4" opacity=".4"/></svg>
@@ -585,8 +535,7 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">基坑CAD</span>
       </div>
     </a>
-
-    <a class="card" href="cisterna.html" style="--g1:#0369a1;--g2:#0ea5e9;--gs:rgba(3,105,161,.5);--a1:#38bdf8;--a2:#7dd3fc;">
+      <a class="card" href="cisterna.html" style="--g1:#0369a1;--g2:#0ea5e9;--gs:rgba(3,105,161,.5);--a1:#38bdf8;--a2:#7dd3fc;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 10h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.5 13.4c1-.8 2-.8 3 0s2 .8 3 0 2-.8 3 0 2 .8 2 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".85"/><path d="M6.5 16.6c1-.8 2-.8 3 0s2 .8 3 0 2-.8 3 0 2 .8 2 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></svg>
@@ -600,8 +549,26 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">蓄水池CAD</span>
       </div>
     </a>
-
-    <a class="card" href="sgyd.html" style="--g1:#15803d;--g2:#16a34a;--gs:rgba(21,128,61,.5);--a1:#4ade80;--a2:#22c55e;">
+        </div>
+      </section>
+      <section id="cat-sg" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#2fd4a8"></span><span class="nm">施工与管理</span><span class="cnt">4 款</span></div>
+        <div class="grid">
+      <a class="card" href="sgjht.html" style="--g1:#3a8ee6;--g2:#5f5ef0;--gs:rgba(74,124,235,.5);--a1:#4f8ef7;--a2:#8b7cf6;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 4v16M3 8h18M3 13h18M3 18h18" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><rect x="6" y="9.2" width="5" height="3" rx="1" fill="#fff" opacity=".95"/><rect x="13" y="9.2" width="7" height="3" rx="1" fill="#fff" opacity=".65"/><rect x="6" y="14.2" width="8" height="3" rx="1" fill="#fff" opacity=".8"/><rect x="16" y="14.2" width="4" height="3" rx="1" fill="#fff" opacity=".55"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>施工计划图软件</h3>
+      <div class="desc">施工横道图＋双代号时标网络图，自动计算 CPM 关键线路，Excel/Word/SVG 导入导出；☁️ 云端方案跨设备复用整套工序+参数。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(79,142,247,.4);--cc:#8fb6ff;--cbg:rgba(79,142,247,.12)">v1.5.24</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">施工进度</span>
+      </div>
+    </a>
+      <a class="card" href="sgyd.html" style="--g1:#15803d;--g2:#16a34a;--gs:rgba(21,128,61,.5);--a1:#4ade80;--a2:#22c55e;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -615,7 +582,59 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">临电计算</span>
       </div>
     </a>
-    <a class="card" href="survey3d.html" style="--g1:#0f766e;--g2:#0891b2;--gs:rgba(15,118,110,.5);--a1:#2dd4bf;--a2:#22d3ee;">
+      <a class="card" href="pltu.html" style="--g1:#4f46e5;--g2:#06b6d4;--gs:rgba(79,70,229,.5);--a1:#6366f1;--a2:#22d3ee;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5.6" y="2.4" width="12.8" height="4.6" rx="1.4" fill="#fff"/><rect x="5.6" y="17" width="12.8" height="4.6" rx="1.4" fill="#fff" opacity=".6"/><rect x="1.4" y="9.7" width="6" height="4.6" rx="1.4" fill="#fff" opacity=".38"/><path d="M12 7v2.9M12 14.1V17" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M10.1 9.3 12 11.2l1.9-1.9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.4 12h4.1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>流程链路拓扑图</h3>
+      <div class="desc">文本线框＋单向箭头的流程图／链路拓扑：双击空白插入节点、拖圆点连箭头、选中连线中间劈开插节点；可导入 Word 自动解析原图文本框与旁支关系，导出真·文本框＋箭头的矢量 Word（A4 一页）；☁️ 云端方案跨设备复用。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v1.0.3</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">流程 / 拓扑</span>
+      </div>
+    </a>
+      <a class="card" href="stampgen.html" style="--g1:#e11d48;--g2:#be123c;--gs:rgba(225,29,72,.5);--a1:#e11d48;--a2:#be123c;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="1.8"/><path d="M12 7.5l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.5-2.5 1.5.6-2.8-2.1-1.9 2.8-.3z" fill="#fff"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>竣工章生成器</h3>
+      <div class="desc">建设工程 / 水利工程竣工章在线生成，支持建设单位、施工单位、监理单位填写，字体字号字距精细调节，导出透明底 PNG。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(225,29,72,.4);--cc:#fb7185;--cbg:rgba(225,29,72,.12)">v1.1.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">竣工图章</span>
+      </div>
+    </a>
+        </div>
+      </section>
+      <section id="cat-st" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#8b7cf6"></span><span class="nm">审图与报告</span><span class="cnt">1 款</span></div>
+        <div class="grid">
+      <a class="card" href="evalwrite.html" style="--g1:#6366f1;--g2:#8b5cf6;--gs:rgba(99,102,241,.5);--a1:#6366f1;--a2:#8b5cf6;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6v4h4v14H5V7h4z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 3v4H5l4-4z" fill="#fff" opacity=".6"/><path d="M9 13l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>工程智审助手 EvalWrite</h3>
+      <div class="desc">导入广联达审核对比表（xlsx），智能解析送审/审定清单，审减明细树形展示，规则识别 + AI 兜底，一键导出审计文本与明细。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v2.14.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">工程智审</span>
+      </div>
+    </a>
+        </div>
+      </section>
+      <section id="cat-ch" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#38d3f0"></span><span class="nm">测绘与图像</span><span class="cnt">1 款</span></div>
+        <div class="grid">
+      <a class="card" href="survey3d.html" style="--g1:#0f766e;--g2:#0891b2;--gs:rgba(15,118,110,.5);--a1:#2dd4bf;--a2:#22d3ee;">
       <div class="top">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M2 19 8.5 8l4 6.5 2.5-3.5L22 19H2z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M4.5 19h15" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".5"/><circle cx="16.5" cy="6.5" r="1.6" stroke="#fff" stroke-width="1.4"/></svg>
@@ -629,7 +648,44 @@
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">测绘三维</span>
       </div>
     </a>
+        </div>
+      </section>
+      <section id="cat-tw" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#f472b6"></span><span class="nm">图文工具箱</span><span class="cnt">2 款</span></div>
+        <div class="grid">
+      <a class="card" href="pdfdocsprint.html" style="--g1:#16a34a;--g2:#0d9488;--gs:rgba(22,163,74,.5);--a1:#4ade80;--a2:#22d3ee;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#fff" stroke-width="1.8"/><path d="M6 7h12M6 11h8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/><path d="M6 16h5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".5"/><rect x="14" y="14" width="5" height="5" rx="1" fill="#fff" opacity=".85"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>智印PDF工坊 PdfDocSprint</h3>
+      <div class="desc">PDF 封面单面+内容双面智能打印：首页封面单面、内容页双面、打印份数可选、400dpi 高清渲染、横版自动旋转，偶数页自动补尾页不串页，全程本地解析。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(22,163,74,.4);--cc:#6ee7b7;--cbg:rgba(22,163,74,.12)">v1.0.6</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">PDF打印</span>
+      </div>
+    </a>
+      <a class="card" href="batchimg.html" style="--g1:#10b981;--g2:#059669;--gs:rgba(16,185,129,.5);--a1:#34d399;--a2:#10b981;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#fff" stroke-width="1.8"/><circle cx="8.5" cy="8.5" r="2" stroke="#fff" stroke-width="1.5"/><path d="M21 15l-5-5L5 21" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>批量压缩图片软件</h3>
+      <div class="desc">纯前端 Canvas API 图片批量压缩，支持 JPEG/PNG/WebP 格式转换、质量调节、尺寸调整，Chrome/Edge 可自动写入源目录覆盖原文件。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(16,185,129,.4);--cc:#6ee7b7;--cbg:rgba(16,185,129,.12)">v1.6.7</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">图片工具</span>
+      </div>
+    </a>
+        </div>
+      </section>
+    </main>
   </div>
+
   <footer>
   <div class="foot-line1"><span class="dot"></span>元枢工具箱 Vista Hub · 浏览器即开即用 · 数据全程本地处理</div>
   <div class="foot-icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">蜀ICP备2026052775号</a></div>
@@ -1026,34 +1082,51 @@ function filterTools(q){
     card.style.display = hit ? '' : 'none';
     if (hit) shown++;
   });
+  // 分组后：某个分类下无匹配卡片时，连同分类标题一起隐藏
+  document.querySelectorAll('.cat-sec').forEach(function(sec){
+    var visible = false;
+    sec.querySelectorAll('.card').forEach(function(c){ if (c.style.display !== 'none') visible = true; });
+    sec.style.display = visible ? '' : 'none';
+  });
   var empty = document.getElementById('searchEmpty');
   if (empty) empty.style.display = shown ? 'none' : 'block';
 }
 
-// ===== ⑥ 拖动卡片调整位置（localStorage 持久化） =====
+// ===== ⑥ 拖动卡片调整位置（分组后改为组内排序，localStorage 持久化） =====
 (function(){
-  var grid = document.querySelector('.grid');
-  if (!grid) return;
-  var orderKey = 'vista_card_order_v2';
+  var grids = document.querySelectorAll('.grid');
+  if (!grids.length) return;
+  var orderKey = 'vista_card_order_v3';
   var dragEl = null;
+  function gridId(grid, gi){ return grid.getAttribute('data-grid') || ('g' + gi); }
   function saveOrder(){
     try {
-      var arr = Array.prototype.slice.call(grid.querySelectorAll('.card')).map(function(a){ return a.getAttribute('href'); });
-      localStorage.setItem(orderKey, JSON.stringify(arr));
+      var all = {};
+      grids.forEach(function(grid, gi){
+        all[gridId(grid, gi)] = Array.prototype.slice.call(grid.querySelectorAll('.card')).map(function(a){ return a.getAttribute('href'); });
+      });
+      localStorage.setItem(orderKey, JSON.stringify(all));
     } catch(e){}
   }
   function loadOrder(){
     try {
-      var arr = JSON.parse(localStorage.getItem(orderKey));
-      if (arr && arr.length){
-        arr.forEach(function(h){
-          var a = grid.querySelector('.card[href="' + h + '"]');
-          if (a) grid.appendChild(a);
+      var all = JSON.parse(localStorage.getItem(orderKey));
+      if (all){
+        grids.forEach(function(grid, gi){
+          var arr = all[gridId(grid, gi)];
+          if (arr && arr.length){
+            arr.forEach(function(h){
+              var a = grid.querySelector('.card[href="' + h + '"]');
+              if (a) grid.appendChild(a);
+            });
+          }
         });
       }
     } catch(e){}
   }
-  grid.querySelectorAll('.card').forEach(function(a){ a.draggable = true; });
+  grids.forEach(function(grid){
+    grid.querySelectorAll('.card').forEach(function(a){ a.draggable = true; });
+  });
   document.addEventListener('dragstart', function(e){
     var card = e.target.closest ? e.target.closest('.card') : null;
     if (card){
@@ -1066,7 +1139,7 @@ function filterTools(q){
     if (!dragEl) return;
     e.preventDefault();
     var card = e.target.closest ? e.target.closest('.card') : null;
-    if (card && card !== dragEl){
+    if (card && card !== dragEl && card.parentNode === dragEl.parentNode){
       var r = card.getBoundingClientRect();
       var after = (e.clientX - r.left) > r.width / 2;
       if (after) card.parentNode.insertBefore(dragEl, card.nextSibling);
@@ -1086,8 +1159,33 @@ function filterTools(q){
   loadOrder();
 })();
 
+// ===== 侧栏分类导航：滚动高亮当前分类 =====
+(function(){
+  var items = document.querySelectorAll('.side-item');
+  if (!items.length) return;
+  var secs = [];
+  items.forEach(function(it){
+    secs.push(document.getElementById(it.getAttribute('data-cat')));
+  });
+  function onScroll(){
+    var pos = window.scrollY + 130;
+    var cur = -1;
+    secs.forEach(function(sec, i){
+      if (sec && sec.offsetTop <= pos) cur = i;
+    });
+    items.forEach(function(it, i){
+      if (i === cur) it.classList.add('active');
+      else it.classList.remove('active');
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-02', t:'更新：工具箱新增侧栏分类导航——① 左侧新增竖排分类导航（造价与算量／结构与CAD出图／施工与管理／审图与报告／测绘与图像／图文工具箱），左侧栏贴页面最左、卡片展示区贴页面最右，点击分类锚点平滑滚动定位并高亮当前分类；② 18 个工具按 6 大分类重新归类：竣工章生成器归入施工与管理，图文工具箱（智印PDF工坊、批量压缩图片）置于最下方；③ 卡片改为自适应铺满（卡片数少的分类也填满行宽，单卡片限制 400px 不越界）；④ 拖动排序改为分类内排序，搜索时自动隐藏无匹配的空分类；⑤ 私密区同步贴边铺满（不分类）'},
+
   {d:'2026-11-02', t:'更新：测绘数据三维可视化系统 V1.0.10（挖填方真实数字显示、基准面默认按钮、版本号同步）——① 底部基准面的挖方/填方/净方数值不再用「k」缩写、也不再加千分位逗号分隔，统一显示完整真实数值（如 175734、77387）；② 基准面新增「默认」按钮（排在「最低点」前），一键恢复默认基准高程（最低点向下 10 m）；③ 同步修正界面左上角标题栏的版本号显示'},
 
   {d:'2026-11-02', t:'修复：测绘数据三维可视化系统 V1.0.9（三角网挖填方方向与实时计算）——① 修复基准面挖方/填方方向反了的问题：三角网 DTM 模式下计算土方时，基准高程符号写反，导致「最低点向下 10m」的默认基准面本该全部判为挖方，却显示成了填方；② 修复后挖方/填方随基准面高程实时联动：基准面在最低点下方→全挖方、在最高点→全填方、在中间→按高于基准面的面积占比正确切分；③ 该问题仅在三角网 DTM 算法下出现（规则格网 IDW 一直正确）'},
