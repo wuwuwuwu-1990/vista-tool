@@ -384,7 +384,8 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
         <input type="number" id="numBase" step="0.5" placeholder="基准高程 m" title="基准面高程（米）" disabled>
       </div>
       <div style="height:5px"></div>
-      <div class="grid3">
+      <div class="grid4">
+        <button id="btnBaseDef" disabled title="恢复默认基准高程（最低点向下 10 m）">默认</button>
         <button id="btnBaseMin" disabled>最低点</button>
         <button id="btnBaseAvg" disabled>平均</button>
         <button id="btnBaseMax" disabled>最高点</button>
@@ -794,6 +795,7 @@ function buildFromMap(autoScale){
     $('numBase').value = S.baseElev.toFixed(2);
   }
   $('numBase').disabled = false;
+  $('btnBaseDef').disabled = false;
   $('btnBaseMin').disabled = false;
   $('btnBaseAvg').disabled = false;
   $('btnBaseMax').disabled = false;
@@ -3012,6 +3014,11 @@ $('chkHole').addEventListener('change', e => {
 });
 $('numBase').addEventListener('input', e => applyBase(parseFloat(e.target.value)));
 $('numBase').addEventListener('change', e => applyBase(parseFloat(e.target.value)));
+$('btnBaseDef').addEventListener('click', () => {
+  if(!S.rawBox) return;
+  if(!$('chkBase').checked){ $('chkBase').checked = true; S.showBase = true; }
+  applyBase(Math.round((S.rawBox.h0 - 10)*100)/100);   // 默认：最低点向下 10 m
+});
 $('btnBaseMin').addEventListener('click', () => {
   if(!S.rawBox) return;
   if(!$('chkBase').checked){ $('chkBase').checked = true; S.showBase = true; }
