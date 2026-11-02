@@ -2142,12 +2142,12 @@ function updateBaseInfo(){
   // 三角网 DTM 法：逐三角柱积分（CASS「DTM 法土方计算」的算法）
   if(s.kind === 'tin'){
     const tris = s.tris, ntri = s.ntri, px = s.px, py = s.py, pz = s.pz;
-    const base = S.baseElev + S.zCenter;
+    const base = S.baseElev;   // 绝对高程（pz 是减去中心高程后的相对值，需 +zCenter 还原）
     let cut = 0, fill = 0, nAbove = 0;
     for(let t=0;t<ntri;t++){
       const a = tris[3*t], b = tris[3*t+1], c = tris[3*t+2];
       const area = Math.abs((px[b]-px[a])*(py[c]-py[a]) - (py[b]-py[a])*(px[c]-px[a]))*0.5;
-      const hh = (pz[a] + pz[b] + pz[c])/3;
+      const hh = (pz[a] + pz[b] + pz[c])/3 + S.zCenter;   // 还原为绝对高程
       if(hh > base){ cut += (hh - base)*area; nAbove++; }
       else fill += (base - hh)*area;
     }
