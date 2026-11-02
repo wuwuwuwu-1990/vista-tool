@@ -238,7 +238,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.3</small>
+      测绘数据三维可视化系统 <small>V1.0.4</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -275,6 +275,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         <label class="chk"><input type="checkbox" id="chkCloud"> 点云</label>
         <label class="chk"><input type="checkbox" id="chkSurf" checked> 地形曲面</label>
       </div>
+      <label class="chk" style="margin-top:4px" title="勾选后：周围没有测点的空白区域不绘制（多块测区之间留白）；不勾选则整片铺满"><input type="checkbox" id="chkHole"> 无数据区留空</label>
       <div class="rng" style="margin-top:5px"><div class="rh"><span>点大小</span><b id="vPt">1.8</b></div><input type="range" id="rngPt" min="1" max="5" step="0.2" value="1.8"></div>
       <div class="rng"><div class="rh"><span>曲面精度</span><b id="vRes">100</b></div><input type="range" id="rngRes" min="40" max="200" step="10" value="100"></div>
       <div class="rng"><div class="rh"><span>垂直夸张</span><b id="vZ">1.0×</b></div><input type="range" id="rngZ" min="1" max="20" step="0.5" value="1"></div>
@@ -404,7 +405,7 @@ const S = {
   hspan: 1, diag: 1,
   showCloud: false, showSurface: true,
   showContour: false, cntInterval: 0.5, cntIv: 0.5, cntLevels: [],
-  showBase: false, showSkirt: false, baseElev: 0, zCenter: 0,
+  showBase: false, showSkirt: false, showHole: false, baseElev: 0, zCenter: 0,
   pointSize: 1.8, surfaceRes: 100, zExag: 1,
   palette: 'terrain', spin: false, dragging: false,
   surf: null, drawIdx: null, drawN: 0,
@@ -737,6 +738,11 @@ function buildFromMap(autoScale){
   updateBaseInfo();
   fitView();
   requestRender();
+
+  // 周围无测点的区域占比很大时，提示可以只显示实测范围（多测区分离）
+  if(!S.showHole && S.invalidRatio > 0.32){
+    setTimeout(() => toast('周围无测点区域较大：勾选左侧「无数据区留空」可只绘制实测范围', 3600), 1500);
+  }
 }
 
 function updateInfo(){
@@ -864,6 +870,7 @@ function buildSurface(){
   const vy = new Float32Array(nx*ny);
   const vz = new Float32Array(nx*ny);
   const valid = new Uint8Array(nx*ny);
+  const hasZ = new Uint8Array(nx*ny);        // 该格点是否有可信插值高度
   const ci = new Uint8Array(nx*ny);
   const sx = new Float32Array(nx*ny);
   const sy = new Float32Array(nx*ny);
@@ -893,6 +900,7 @@ function buildSurface(){
       if(_he >= 0){
         vz[id] = wz[_he];
         valid[id] = 1;
+        hasZ[id] = 1;
       } else if(_hc > 0){
         let sw = 0, sh = 0;
         for(let k=0;k<_hc;k++){
@@ -904,14 +912,81 @@ function buildSurface(){
         }
         vz[id] = sw > 0 ? sh/sw : wz[nbuf[0]];
         valid[id] = 1;
+        hasZ[id] = 1;
       } else {
         vz[id] = 0;
         valid[id] = 0;
+        hasZ[id] = 0;
       }
       if(valid[id]){
         ci[id] = clampInt(Math.round((vz[id]+halfH)/S.hspan*(PAL_N-1)), 0, PAL_N-1);
       }
     }
+  }
+
+  // 有效区去噪：3×3 多数表决两遍，去掉单格凸起/凹坑（否则边界裁剪后会出现一排排"梳齿"）
+  const totalCells = nx*ny;
+  {
+    const tv = new Uint8Array(totalCells);
+    for(let pass=0; pass<2; pass++){
+      tv.set(valid);
+      for(let j=0;j<ny;j++){
+        for(let i=0;i<nx;i++){
+          const id = j*nx + i;
+          let c = 0, cnt = 0;
+          for(let b=-1;b<=1;b++){
+            const jj = j+b;
+            if(jj < 0 || jj >= ny) continue;
+            const rowJ = jj*nx;
+            for(let a=-1;a<=1;a++){
+              const ii = i+a;
+              if(ii < 0 || ii >= nx) continue;
+              cnt++;
+              if(tv[rowJ+ii]) c++;
+            }
+          }
+          valid[id] = (c*2 > cnt) ? 1 : 0;
+        }
+      }
+    }
+  }
+
+  // 邻近空白格点补高度：只补 3 层，供边界裁剪插值与侧壁使用（不改变"画不画"）
+  {
+    const pend = [];
+    for(let pass=0; pass<3; pass++){
+      pend.length = 0;
+      for(let j=0;j<ny;j++){
+        const row = j*nx;
+        for(let i=0;i<nx;i++){
+          const id = row + i;
+          if(hasZ[id]) continue;
+          let sum = 0, cnt = 0;
+          if(i > 0   && hasZ[id-1]){ sum += vz[id-1]; cnt++; }
+          if(i < nx-1 && hasZ[id+1]){ sum += vz[id+1]; cnt++; }
+          if(j > 0   && hasZ[id-nx]){ sum += vz[id-nx]; cnt++; }
+          if(j < ny-1 && hasZ[id+nx]){ sum += vz[id+nx]; cnt++; }
+          if(cnt){ pend.push(id, sum/cnt); }
+        }
+      }
+      if(!pend.length) break;
+      for(let m=0;m<pend.length;m+=2){ vz[pend[m]] = pend[m+1]; hasZ[pend[m]] = 1; }
+    }
+  }
+
+  // ---- 无数据区处理 ----
+  // 默认（S.showHole=false）：整片铺满，与上一版一致——单测区数据不会因为
+  //   "边界外没有测点"被削成一圈台阶。
+  // 勾选"无数据区留空"：周围没有任何测点的区域保持留空，
+  //   多块测区之间相隔较远的空白地带就不绘制（阶段验收类数据的场景）。
+  const fillMask = new Uint8Array(totalCells);
+  {
+    let invalidCount = 0;
+    for(let k=0;k<totalCells;k++) if(!valid[k]) invalidCount++;
+    S.invalidRatio = invalidCount / totalCells;
+  }
+  if(!S.showHole){
+    for(let k=0;k<totalCells;k++) if(!valid[k]) fillMask[k] = 1;
   }
 
   // 清理孤立小碎块：面积过小的有效区域多为零星散点插出来的孤岛，一并留空
@@ -938,9 +1013,111 @@ function buildSurface(){
     }
   }
 
+  // 铺满外围空白：标记有效，高度由相邻已知格点逐层扩散（外推面平缓，不出现空洞塌陷）
+  {
+    let needFill = 0;
+    for(let k=0;k<totalCells;k++) if(fillMask[k]){ valid[k] = 1; needFill++; }
+    if(needFill){
+      const q = new Int32Array(totalCells);
+      let head = 0, tail = 0;
+      for(let k=0;k<totalCells;k++) if(hasZ[k]) q[tail++] = k;
+      while(head < tail){
+        const cur = q[head++];
+        const cxi = cur % nx, cyi = (cur - cxi)/nx;
+        for(let s2=0;s2<4;s2++){
+          let nb = -1;
+          if(s2 === 0){ if(cxi > 0) nb = cur-1; }
+          else if(s2 === 1){ if(cxi < nx-1) nb = cur+1; }
+          else if(s2 === 2){ if(cyi > 0) nb = cur-nx; }
+          else { if(cyi < ny-1) nb = cur+nx; }
+          if(nb < 0 || hasZ[nb] || !valid[nb]) continue;
+          let sum = 0, cnt = 0;
+          const nxi = nb % nx;
+          if(nxi > 0 && hasZ[nb-1]){ sum += vz[nb-1]; cnt++; }
+          if(nxi < nx-1 && hasZ[nb+1]){ sum += vz[nb+1]; cnt++; }
+          if(nb-nx >= 0 && hasZ[nb-nx]){ sum += vz[nb-nx]; cnt++; }
+          if(nb+nx < totalCells && hasZ[nb+nx]){ sum += vz[nb+nx]; cnt++; }
+          if(cnt){ vz[nb] = sum/cnt; hasZ[nb] = 1; q[tail++] = nb; }
+        }
+      }
+      // 极端情况未扩散到：用整体均值兜底
+      let sg = 0, cg = 0;
+      for(let k=0;k<totalCells;k++) if(hasZ[k]){ sg += vz[k]; cg++; }
+      const avgZ = cg ? sg/cg : 0;
+      for(let k=0;k<totalCells;k++){
+        if(fillMask[k] && !hasZ[k]){ vz[k] = avgZ; hasZ[k] = 1; }
+      }
+
+      // 松弛：把扩散出的阶梯面磨成平缓外推面（真实测点格点固定不动，只当边界条件）
+      const tmp = new Float32Array(totalCells);
+      for(let pass=0; pass<40; pass++){
+        tmp.set(vz);
+        for(let j=0;j<ny;j++){
+          for(let i=0;i<nx;i++){
+            const id = j*nx + i;
+            if(!fillMask[id]) continue;
+            let s9 = 0, c9 = 0;
+            for(let b=-1;b<=1;b++){
+              const jj = j+b;
+              if(jj < 0 || jj >= ny) continue;
+              const rowJ = jj*nx;
+              for(let a=-1;a<=1;a++){
+                const ii = i+a;
+                if(ii < 0 || ii >= nx) continue;
+                s9 += tmp[rowJ+ii]; c9++;
+              }
+            }
+            if(c9) vz[id] = s9/c9;
+          }
+        }
+      }
+
+      // 颜色索引重算
+      for(let k=0;k<totalCells;k++){
+        if(fillMask[k]) ci[k] = clampInt(Math.round((vz[k]+halfH)/S.hspan*(PAL_N-1)), 0, PAL_N-1);
+      }
+    }
+  }
+
+  // 边界线段（Marching Squares，取格边中点）：供侧面填充沿真实边界封口，
+  // 与曲面裁剪用的是同一套判据，壁和曲面就不会错位。
+  let edgeSegs = null;
+  {
+    const segs = [];
+    const mid = (i1, i2, out) => {
+      out[0] = (vx[i1] + vx[i2])*0.5;
+      out[1] = (vy[i1] + vy[i2])*0.5;
+      out[2] = (vz[i1] + vz[i2])*0.5;
+    };
+    const m0 = [0,0,0], m1 = [0,0,0], m2 = [0,0,0], m3 = [0,0,0];
+    // 情形表：每种 4 位状态对应的连接（边号 0=下 1=右 2=上 3=左）
+    const LINK = [
+      [], [[0,3]], [[0,1]], [[1,3]], [[1,2]],
+      [[0,3],[1,2]], [[0,2]], [[2,3]], [[2,3]],
+      [[1,2]], [[0,1],[2,3]], [[1,2]], [[1,3]],
+      [[0,1]], [[0,3]], []
+    ];
+    for(let j=0;j<ny-1;j++){
+      for(let i=0;i<nx-1;i++){
+        const a = j*nx + i, b = a+1, c = a+nx+1, d = a+nx;   // 左下 / 右下 / 右上 / 左上
+        const k = (valid[a]?1:0) | (valid[b]?2:0) | (valid[c]?4:0) | (valid[d]?8:0);
+        if(k === 0 || k === 15) continue;
+        mid(a, b, m0); mid(b, c, m1); mid(c, d, m2); mid(d, a, m3);
+        const mm = [m0, m1, m2, m3];
+        const links = LINK[k];
+        for(let t=0;t<links.length;t++){
+          const p = mm[links[t][0]], q = mm[links[t][1]];
+          segs.push(p[0], p[1], p[2], q[0], q[1], q[2]);
+        }
+      }
+    }
+    if(segs.length) edgeSegs = new Float32Array(segs);
+  }
+
   S.surf = {
     res: res, nx: nx, ny: ny,
     vx: vx, vy: vy, vz: vz, valid: valid, ci: ci,
+    edgeSegs: edgeSegs,
     sx: sx, sy: sy, vis: vis,
     cOff: null, cSeg: null, cIdx: null
   };
@@ -1185,6 +1362,28 @@ function drawSkirt(){
     });
   }
 
+  // 有"内部空白边界"时（无数据区留空模式）沿真实边界封口，与曲面裁剪严格对齐；
+  // 整片铺满时退化为沿有效格网区域边界封口
+  const segs = s.edgeSegs;
+  if(segs && segs.length){
+    for(let k=0;k<segs.length;k+=6){
+      const x1 = segs[k],   y1 = segs[k+1], z1 = segs[k+2]*zs;
+      const x2 = segs[k+3], y2 = segs[k+4], z2 = segs[k+5]*zs;
+      const d1 = z1 - baseZ, d2 = z2 - baseZ;
+      if(Math.abs(d1) < 1e-4 && Math.abs(d2) < 1e-4) continue;
+      if(!proj(x1, y1, z1, pa)) continue;
+      if(!proj(x2, y2, z2, pb)) continue;
+      if(!proj(x2, y2, baseZ, pc)) continue;
+      if(!proj(x1, y1, baseZ, pd)) continue;
+      const sx = x2 - x1, sy = y2 - y1;
+      const sl = Math.hypot(sx, sy) || 1;
+      quads.push({
+        x1:pa[0], y1:pa[1], x2:pb[0], y2:pb[1],
+        x3:pc[0], y3:pc[1], x4:pd[0], y4:pd[1],
+        z:(pa[2]+pb[2])*0.5, cut:(d1+d2) > 0, nxv:-sy/sl, nyv:sx/sl
+      });
+    }
+  } else {
   // 沿"有效格网区域"的边界成壁：多块测区会各自封闭，中间空白处自然断开
   const qnx = nx-1, qny = s.ny-1;
   const qv = new Uint8Array(qnx*qny);
@@ -1207,6 +1406,7 @@ function drawSkirt(){
       if(i === 0 || !qv[j*qnx+i-1]) edge(a, d, -1, 0);          // 西边
       if(i === qnx-1 || !qv[j*qnx+i+1]) edge(d, c, 1, 0);       // 东边
     }
+  }
   }
 
   if(!quads.length) return;
@@ -1414,9 +1614,63 @@ function drawSurface(){
     g.stroke();   // 描边填缝：消除相邻三角形的发丝接缝
   }
 
+  /* 边界格裁剪：格内按"有效/无效"场的 0.5 等值线切开，只填有效一侧。
+     相邻格共享角点取值，切口在格边上线性插值 → 边界是连续折线，不再是格点化的大台阶。 */
+  const _src = new Int32Array(4);
+  const _qx = new Float64Array(10), _qy = new Float64Array(10),
+        _qz = new Float64Array(10);
+  const _px = new Float64Array(10), _py = new Float64Array(10);
+
+  function clipCell(i0, i1, i2, i3, colIdx){
+    _src[0] = i0; _src[1] = i1; _src[2] = i2; _src[3] = i3;
+    let m = 0;
+    for(let k=0;k<4;k++){
+      const ka = _src[k], kb = _src[(k+1) & 3];
+      const va = valid[ka], vb = valid[kb];
+      if(va){
+        _qx[m] = vx[ka]; _qy[m] = vy[ka]; _qz[m] = vz[ka]*zs; m++;
+      }
+      if(va !== vb){
+        const za = vz[ka]*zs, zb = vz[kb]*zs;
+        _qx[m] = (vx[ka] + vx[kb])*0.5;
+        _qy[m] = (vy[ka] + vy[kb])*0.5;
+        _qz[m] = (za + zb)*0.5;
+        m++;
+      }
+      if(m >= 9) break;
+    }
+    if(m < 3) return;
+
+    // 投影（任一点在相机后方则整格放弃）
+    for(let k=0;k<m;k++){
+      const ddx = _qx[k]-ex, ddy = _qy[k]-ey, ddz = _qz[k]-ez;
+      const zc = ddx*fx + ddy*fy + ddz*fz;
+      if(zc < 1) return;
+      const inv = focal/zc;
+      _px[k] = ccx + (ddx*rx + ddy*ry + ddz*rz)*inv;
+      _py[k] = ccy - (ddx*ux + ddy*uy + ddz*uz)*inv;
+    }
+
+    const ax = _qx[1]-_qx[0], ay = _qy[1]-_qy[0], az = _qz[1]-_qz[0];
+    const bx = _qx[2]-_qx[0], by = _qy[2]-_qy[0], bz = _qz[2]-_qz[0];
+    const nvx = ay*bz - az*by, nvy = az*bx - ax*bz, nvz = ax*by - ay*bx;
+    const len = Math.hypot(nvx, nvy, nvz) || 1;
+    const dot = (nvx*LX + nvy*LY + nvz*LZ)/len;
+    let sh = Math.round((dot*0.5 + 0.5)*(SHADE_N-1));
+    if(sh < 0) sh = 0; else if(sh > SHADE_N-1) sh = SHADE_N-1;
+    g.fillStyle = pal[colIdx][sh];
+    g.strokeStyle = pal[colIdx][sh];
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(_px[0], _py[0]);
+    for(let k=1;k<m;k++) g.lineTo(_px[k], _py[k]);
+    g.closePath();
+    g.fill();
+    g.stroke();
+  }
+
   let _ax = 0, _ay = 0, _bx = 0, _by = 0;
-  function seg2d(k){
-    const b = k*6;
+  function seg2d(k){    const b = k*6;
     const dx1 = cSeg[b]-ex, dy1 = cSeg[b+1]-ey, dz1 = cSeg[b+2]*zs-ez;
     const c1 = dx1*fx + dy1*fy + dz1*fz;
     if(c1 < 1) return false;
@@ -1478,9 +1732,15 @@ function drawSurface(){
         const b = a + step;
         const c = a + step*nx;
         const d = c + step;
-        if(vis[a] && vis[b] && vis[c] && vis[d]){
-          tri(a, b, d, ci[a]);
-          tri(a, d, c, ci[a]);
+        const da = valid[a], db = valid[b], dc = valid[c], dd = valid[d];
+        if(da && db && dc && dd){
+          if(vis[a] && vis[b] && vis[c] && vis[d]){
+            tri(a, b, d, ci[a]);
+            tri(a, d, c, ci[a]);
+          }
+        } else if(da || db || dc || dd){
+          // 边界格（内部空白边缘）：按 0.5 等值线裁剪，避免格点化台阶
+          if(vis[a] || vis[b] || vis[c] || vis[d]) clipCell(a, b, d, c, ci[a]);
         }
       }
       if(drawCnt) cellLines(j, i);
@@ -1729,6 +1989,18 @@ $('chkSkirt').addEventListener('change', e => {
     if(S.loaded) updateBaseInfo();
   }
   requestRender();
+});
+$('chkHole').addEventListener('change', e => {
+  S.showHole = e.target.checked;
+  if(!S.loaded) return;
+  showLoading(true, S.showHole ? '正在分离无数据区…' : '正在铺满地形…');
+  setTimeout(() => {
+    buildSurface();
+    buildContours();
+    updateBaseInfo();
+    showLoading(false);
+    requestRender();
+  }, 30);
 });
 $('numBase').addEventListener('input', e => applyBase(parseFloat(e.target.value)));
 $('numBase').addEventListener('change', e => applyBase(parseFloat(e.target.value)));
