@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.27</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.28</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -201,7 +201,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.27</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.28</span></h1>
     </div>
   </div>
   <!-- 顶栏实时显示几何校核与计算结果（v1.0.26）：悬停校核徽标看完整说明 -->
@@ -266,7 +266,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     </div>
 
     <div class="sec" id="secPipe">
-      <div class="sec-h"><span class="bar o"></span><h2>水管与闸阀</h2><span class="tag">平面标示</span><span class="tip">i<span class="tipb" id="pipeHint">水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>、用单独图层区分。</span></span></div>
+      <div class="sec-h"><span class="bar o"></span><h2>水管与闸阀</h2><span class="tag">平面标示</span><span class="tip">i<span class="tipb" id="pipeHint">水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>，块名<b>「水管闸阀_XXXX」</b>（XXXX = 每次导出随机生成的 4 位英文数字，块名跨文件唯一，多图插入同一 DXF 不会重名覆盖），块占用单独图层<b>「水管闸阀」</b>。</span></span></div>
       <div class="field"><label>绘制水管 + 闸阀</label>
         <label class="sw" style="margin-left:auto"><input type="checkbox" id="o_pipe" checked><i></i></label>
       </div>
@@ -383,6 +383,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.28</b><b>DXF 块名加随机英文数字后缀</b>：水管闸阀块的块名由固定「水管闸阀」改为<b>「水管闸阀_XXXX」</b>（XXXX = 每次导出随机生成的 4 位大写英文 + 数字，如 <code>水管闸阀_K7Q2</code>），<b>BLOCK_RECORD / BLOCK / INSERT 三处名称一致</b>，块名因此在本文件内与跨文件都唯一——多张图纸插入同一张 DXF 时不会因重名互相覆盖或被 CAD 自动改名。图层名仍为「水管闸阀」（青 4），点选仍整块选中、可整块开关。</li>
         <li><b>v1.0.27</b><b>修复剖面图右侧素土填充在屏幕上看不见（需放大数倍才出现）</b>：土纹每条斜线原本以「离画布原点的最近点」为基准、向两侧各画一个包围盒对角线那么长；填充区域越靠画布右侧/下方，基准点离区域越远，线段根本够不到 ⇒ 右侧土体整条空白，放大后线段变长才勉强露头。<b>现改为沿斜线方向取覆盖整块画布的全局基准区间</b>，任何位置、任何缩放都完整铺满；且区间端点与区域无关，<b>左右土体与底板下土体的纹理相位严格一致、接缝处不错行</b>。混凝土（AR-CONC）骨料短划同一处隐患一并修正。</li>
         <li><b>v1.0.26</b><b>默认不显示网格 · 闸阀默认落在底板边线之外 · 结果上顶栏 · 说明文字改鼠标悬停</b>：① <b>绘图网格默认关闭</b>（工具栏网格按钮与「绘图网格」复选框双向同步，原先复选框未接事件、点了无效，已修复）；② <b>闸阀默认位置改到放大脚底板边线之外并留 60 mm 间隙</b>，公式 Lv = B + 1.1×DN + 0.06（默认 B=0.50、DN150 ⇒ Lv=0.73 m），改放大脚或管径时自动提升，几何校核新增「闸阀压到底板边线」拦截；③ <b>几何校核与计算结果移到顶栏实时显示</b>（校核徽标 + 内空 V / 混凝土 / 底板面积 / 开挖土方），<b>鼠标悬停校核徽标</b>看完整校核说明（如「全埋式：D = 墙高 H 2.50 + 底板厚 T 0.30 = 2.80 m，池顶与室外地坪齐平」），窄屏（<1220px）自动隐藏；④ 左栏冗长说明改为<b>鼠标悬停的 ⓘ 气泡</b>：蓄水池名称（内空命名规则）、埋置深度 D（全埋 D=H+T 计算规则）、水管与闸阀（平面标示与成块说明），左栏更紧凑。</li>
         <li><b>v1.0.25</b><b>新增水管与闸阀（仅平面图标示，DXF 成块）</b>：在<b>平面图（俯视）</b>中绘制穿墙管路 + 闸阀，<b>剖面图不画</b>。管路固定布置在<b>右侧</b>（无尺寸标注一侧），管轴沿池壁法向穿墙，<b>全段实线（墙体内也为实线）</b>、两端管口封线封闭；闸阀为给排水标准<b>蝴蝶结</b>符号（两等腰三角共顶点），俯视不画阀杆；<b>不标注管径文字</b>。<b>导出 DXF 时水管+闸阀整体打包成一个块（BLOCK+INSERT）</b>，块名「水管闸阀」，INSERT 用单独图层<b>「水管闸阀」（青 4）</b>区分，块内图元放 0 层继承块图层颜色，选中即整体、可整块开关。参数可调：公称管径 DN100~DN300、墙外管长 Lo、伸入池内 Li、闸阀距墙 Lv；三面开口池暂不支持。</li>
@@ -425,7 +426,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.27</span>
+          <span class="ver">v1.0.28</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -1768,16 +1769,26 @@ function dxfFromCmds(cmds, denom){
   const tk = (x, y) => { if(x<bx0)bx0=x; if(y<by0)by0=y; if(x>bx1)bx1=x; if(y>by1)by1=y; };
 
   /* 水管 + 闸阀（v1.0.25）：导出 DXF 时整体打包成一个块（BLOCK + INSERT），
-     块名「水管闸阀」，INSERT 用单独图层「水管闸阀」区分。块内图元放 0 层、
+     块名「水管闸阀_XXXX」（XXXX = 4 位随机英文数字，v1.0.28 起），INSERT 用单独
+     图层「水管闸阀」区分。块内图元放 0 层、
      颜色 ByLayer（继承块图层），块基点 (0,0)、图元保持世界坐标，INSERT 插入点
      (0,0) 缩放 1，故图面位置与散图元完全一致。块句柄用 C0~CC（落在骨架静态句柄
      的空闲区间 B2~FF，动态实体从 0x101 起，互不冲突）。 */
   const PIPE_LAYER = '水管闸阀';
+  /* 块名 = 「水管闸阀」+「_」+ 4 位随机英文数字（A-Z 0-9），每次导出重新生成，
+     使块名在文件内/跨文件唯一：多张图纸插入到同一张 DXF 时不会因重名互相覆盖。 */
+  const bSuffix = (()=>{
+    const CS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let s = '';
+    for(let i=0;i<4;i++) s += CS[Math.floor(Math.random()*CS.length)];
+    return s;
+  })();
+  const PIPE_BLK_NAME = gbkStr('CBAEB9DCD5A2B7A7') + '_' + bSuffix;   // 块名（GBK 中文 + 随机后缀）
   const blockItems = cmds.filter(c => (c.t === 'line' || c.t === 'poly') && c.layer === PIPE_LAYER);
   const brCount = 5 + (blockItems.length ? 1 : 0);
   let blockRec = '', blockDef = '';
   if(blockItems.length){
-    const bName = gbkStr('CBAEB9DCD5A2B7A7');        // 「水管闸阀」GBK
+    const bName = PIPE_BLK_NAME;                     // 「水管闸阀_XXXX」GBK
     const hRec = 'C0', hBlk = 'C1';                  // BLOCK_RECORD / BLOCK 句柄
     blockRec = ['  0','BLOCK_RECORD','  5',hRec,'330','9',
       '100','AcDbSymbolTableRecord','100','AcDbBlockTableRecord',
@@ -1950,7 +1961,7 @@ function dxfFromCmds(cmds, denom){
   if(blockItems.length){
     e(0,'INSERT'); e(5,nh()); e(330,DXF_MS); e(100,'AcDbEntity');
     e(8, ln(PIPE_LAYER));
-    e(100,'AcDbBlockReference'); e(2, gbkStr('CBAEB9DCD5A2B7A7'));
+    e(100,'AcDbBlockReference'); e(2, PIPE_BLK_NAME);
     e(10,'0.0'); e(20,'0.0'); e(30,'0.0');
     e(41,'1.0'); e(42,'1.0'); e(43,'1.0'); e(50,'0.0');
   }
@@ -2219,7 +2230,7 @@ function syncMode(){
   $('o_pipe').disabled = is3;
   $('pipeHint').innerHTML = is3
     ? '三面开口池的侧墙带夹角、管道穿墙位置随墙位变化，本版<b>暂不支持</b>；切回「四面闭合」即可布置水管与闸阀。'
-    : '水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>、用单独图层区分。';
+    : '水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>，块名<b>「水管闸阀_XXXX」</b>（XXXX = 每次导出随机生成的 4 位英文数字，块名跨文件唯一，多图插入同一 DXF 不会重名覆盖），块占用单独图层<b>「水管闸阀」</b>。';
   /* 闸阀默认落在底板边线之外、留 60 mm 间隙：B 或 DN 变化导致不足时自动提升 Lv，
      并保证墙外管长 Lo 足够（管端超出闸阀 ≥ 100 mm）（v1.0.26） */
   (()=>{
