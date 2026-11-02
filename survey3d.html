@@ -238,7 +238,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.5</small>
+      测绘数据三维可视化系统 <small>V1.0.6</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -284,7 +284,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
             <label class="fld-i"><span>长宽比 ≤</span><input type="number" id="numEdge" min="1" max="60" step="1" value="6"></label>
           </div>
           <div class="cntinfo" id="tinInfo">三角网 —</div>
-          <div class="cntinfo" style="opacity:.66;line-height:1.5">三角网只覆盖实测点范围，网外不插值，所以不会插出假地形</div>
+          <div class="cntinfo" style="opacity:.66;line-height:1.5">碎洞自动补平，真空白区才留空</div>
+          <label class="chk" style="margin-top:4px" title="显示三角网线框，可直接看出有没有空洞"><input type="checkbox" id="chkWire"> 三角网线框</label>
         </div>
       </div>
     </div>
@@ -295,6 +296,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         <label class="chk"><input type="checkbox" id="chkCloud"> 点云</label>
         <label class="chk"><input type="checkbox" id="chkSurf" checked> 地形曲面</label>
       </div>
+
       <label class="chk" style="margin-top:4px" title="勾选后：周围没有测点的空白区域不绘制（多块测区之间留白）；不勾选则整片铺满"><input type="checkbox" id="chkHole"> 无数据区留空</label>
       <div class="rng" style="margin-top:5px"><div class="rh"><span>点大小</span><b id="vPt">1.8</b></div><input type="range" id="rngPt" min="1" max="5" step="0.2" value="1.8"></div>
       <div class="rng"><div class="rh"><span>曲面精度</span><b id="vRes">100</b></div><input type="range" id="rngRes" min="40" max="200" step="10" value="100"></div>
@@ -336,8 +338,10 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
     <div class="sec">
       <div class="sec-h">基准面</div>
-      <label class="chk"><input type="checkbox" id="chkBase"> 显示基准面</label>
-      <label class="chk" style="margin-top:3px"><input type="checkbox" id="chkSkirt"> 侧面填充</label>
+      <div class="chkrow">
+        <label class="chk"><input type="checkbox" id="chkBase" checked> 基准面</label>
+        <label class="chk"><input type="checkbox" id="chkSkirt" checked> 侧面填充</label>
+      </div>
       <div style="margin-top:5px">
         <input type="number" id="numBase" step="0.5" placeholder="基准高程 m" title="基准面高程（米）" disabled>
       </div>
@@ -423,9 +427,9 @@ const S = {
   wx: null, wy: null, wz: null, ci: null,  // 东 / 北 / 高程（居中）+ 色索引
   box: {x0:0,x1:1,y0:0,y1:1,z0:0,z1:1},    // 居中后的包围盒（x=东 y=北 z=高）
   hspan: 1, diag: 1,
-  showCloud: false, showSurface: true,
+  showCloud: false, showSurface: true, showWire: false,
   showContour: false, cntInterval: 0.5, cntIv: 0.5, cntLevels: [],
-  showBase: false, showSkirt: false, showHole: false, baseElev: 0, zCenter: 0,
+  showBase: true, showSkirt: true, showHole: false, baseElev: 0, zCenter: 0,
   mode: 'tin',                       // 'tin' = 三角网 DTM（CASS 规则）；'grid' = 规则格网 IDW
   tinMinAngle: 10, tinEdgeK: 6, tin: null, tinSpacing: 0,   // 最小内角(°) / 超长边倍数阈值
   pointSize: 1.8, surfaceRes: 100, zExag: 1,
@@ -744,9 +748,9 @@ function buildFromMap(autoScale){
   $('btnShot').disabled = false;
   $('btnReset').disabled = false;
 
-  // 基准面：无历史设置时落到最低点，取到 0.5 m 整数倍
+  // 基准面：无历史设置时默认取「最低点向下 10 m」
   if(!S.baseTouched){
-    S.baseElev = Math.ceil(h0*2)/2;   // 向上取到 0.5 m，避免基准面压到最低点以下
+    S.baseElev = Math.round((h0 - 10)*100)/100;   // 默认落在最低点向下 10 m，侧壁才有足够进深
     $('numBase').value = S.baseElev.toFixed(2);
   }
   $('numBase').disabled = false;
@@ -1153,6 +1157,7 @@ function buildTIN(){
   const cosMin2 = cosMin * cosMin;
 
   const keep = new Uint8Array(nt0);
+  const reason = new Uint8Array(nt0);        // 1 = 长宽比剔除，2 = 最小内角剔除
   let nKeep = 0, cutEdge = 0, cutAngle = 0;
   for(let t=0;t<nt0;t++){
     const a = tris0[3*t], b = tris0[3*t+1], c = tris0[3*t+2];
@@ -1171,19 +1176,90 @@ function buildTIN(){
     {
       const mnb = lab < lac ? (lab < lbc ? lab : lbc) : (lac < lbc ? lac : lbc);
       const mxb = lab > lac ? (lab > lbc ? lab : lbc) : (lac > lbc ? lac : lbc);
-      if(mnb > 1e-12 && mxb > mnb*edgeK2){ cutEdge++; continue; }
+      if(mnb > 1e-12 && mxb > mnb*edgeK2){ reason[t] = 1; cutEdge++; continue; }
     }
     if(cosMin2 > 0){
       // 余弦判据（免开方）：夹角余弦 > cosMin ⇔ 整数平方比较
       const dA = abx*acx + aby*acy;              // ∠A 夹 ab、ac
-      if(dA > 0 && dA*dA > cosMin2*lab*lac){ cutAngle++; continue; }
+      if(dA > 0 && dA*dA > cosMin2*lab*lac){ reason[t] = 2; cutAngle++; continue; }
       const dB = -abx*bcx - aby*bcy;             // ∠B 夹 ba、bc
-      if(dB > 0 && dB*dB > cosMin2*lab*lbc){ cutAngle++; continue; }
+      if(dB > 0 && dB*dB > cosMin2*lab*lbc){ reason[t] = 2; cutAngle++; continue; }
       const dC = -acx*bcx - acy*bcy;             // ∠C 夹 ca、cb
-      if(dC > 0 && dC*dC > cosMin2*lac*lbc){ cutAngle++; continue; }
+      if(dC > 0 && dC*dC > cosMin2*lac*lbc){ reason[t] = 2; cutAngle++; continue; }
     }
     keep[t] = 1;
     nKeep++;
+  }
+
+  /* ---- 洞块分析 + 碎洞回填（V1.0.6）----------------------------------
+     剔除三角形必然在网里留下空洞。两块真实测区之间的空白区**应当**留空，
+     但被最小内角 / 长宽比判据误删出来的"碎洞、边缘凹口"必须补回来，
+     否则地形上会凭空冒出几个窟窿——这是 V1.0.5 最明显的毛病。
+
+     判据用「洞心到最近实测点的距离 / 点距」：
+       · 凹口、碎洞 —— 中心紧贴实测点（实测两套样本 ≤ 1.90 倍点距）
+       · 真空区   —— 中心离最近测点很远（实测 ≥ 12.86 倍点距）
+     两档之间有 6 倍以上余量，取 6 倍点距为界。按"整洞"一起决策，
+     不逐三角形判断，避免真空区边缘被啃成锯齿。                       */
+  let holeCount = 0, refillHole = 0, refillTri = 0;
+  {
+    // 只给被剔除三角形建边表（数量少，Map 负担轻）；值编码两片三角形下标：
+    // v = p*E2 + (q+1)，q = -1 表示该边只有一片
+    const E2 = 2097152;
+    const em2 = new Map();
+    for(let t=0;t<nt0;t++){
+      if(keep[t]) continue;
+      for(let k=0;k<3;k++){
+        const a = tris0[3*t+k], b = tris0[3*t+(k+1)%3];
+        const key = a < b ? a*np + b : b*np + a;
+        const v = em2.get(key);
+        if(v === undefined) em2.set(key, t*E2);
+        else em2.set(key, Math.floor(v/E2)*E2 + (t+1));
+      }
+    }
+
+    const seen = new Uint8Array(nt0);
+    const stack = new Int32Array(nt0);
+    const comp = new Int32Array(nt0);
+    const lim2 = (spacing*6)*(spacing*6);
+
+    for(let t0=0;t0<nt0;t0++){
+      if(keep[t0] || seen[t0]) continue;
+      let sp = 0, cn = 0, sumX = 0, sumY = 0;
+      stack[sp++] = t0; seen[t0] = 1;
+      while(sp > 0){
+        const u = stack[--sp];
+        comp[cn++] = u;
+        const a0 = tris0[3*u], b0 = tris0[3*u+1], c0 = tris0[3*u+2];
+        sumX += wx[a0] + wx[b0] + wx[c0];
+        sumY += wy[a0] + wy[b0] + wy[c0];
+        for(let k=0;k<3;k++){
+          const a = tris0[3*u+k], b = tris0[3*u+(k+1)%3];
+          const key = a < b ? a*np + b : b*np + a;
+          const v = em2.get(key);
+          if(v === undefined) continue;
+          const p = Math.floor(v/E2), q = v - p*E2 - 1;
+          if(p !== u && !seen[p]){ seen[p] = 1; stack[sp++] = p; }
+          if(q >= 0 && q !== u && !seen[q]){ seen[q] = 1; stack[sp++] = q; }
+        }
+      }
+      holeCount++;
+      // 洞心（按三角形重心算术平均）到最近实测点的距离
+      const hx = sumX/(cn*3), hy = sumY/(cn*3);
+      let near = false;
+      for(let i=0;i<np;i++){
+        const dx = wx[i]-hx, dy = wy[i]-hy;
+        if(dx*dx + dy*dy <= lim2){ near = true; break; }
+      }
+      if(!near) continue;                 // 真空区：保持留空
+      refillHole++;
+      for(let q=0;q<cn;q++){
+        const u = comp[q];
+        if(keep[u]) continue;
+        keep[u] = 1; nKeep++; refillTri++;
+        if(reason[u] === 1) cutEdge--; else if(reason[u] === 2) cutAngle--;
+      }
+    }
   }
   if(nKeep < 2) return;
 
@@ -1247,6 +1323,7 @@ function buildTIN(){
     edgeSegs: segArr.length ? new Float32Array(segArr) : null,
     sx: new Float32Array(nv), sy: new Float32Array(nv), cz: new Float32Array(nv), vis: new Uint8Array(nv),
     tri0: nt0, cutEdge: cutEdge, cutAngle: cutAngle, spacing: spacing,
+    holeCount: holeCount, refillHole: refillHole, refillTri: refillTri,
     np: np, decimated: decimated,
     lod: null, lodKind: 0,
     ms: ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - t0
@@ -1282,8 +1359,11 @@ function updateTinInfo(){
   const s = S.tin;
   if(!s){ el.textContent = '三角网 —'; return; }
   const cut = s.tri0 - s.ntri;
+  const vac = (s.holeCount || 0) - (s.refillHole || 0);
   el.innerHTML = '三角网 <b>' + s.ntri.toLocaleString() + '</b> 面'
     + (cut > 0 ? ' · 剔除 <b>' + cut.toLocaleString() + '</b> 面' : '')
+    + (s.refillTri > 0 ? ' · 补洞 <b>' + s.refillTri.toLocaleString() + '</b> 面' : '')
+    + (vac > 0 ? ' · 空白区 <b>' + vac + '</b> 处' : '')
     + ' · 点距 <b>' + (s.spacing >= 1 ? s.spacing.toFixed(1) : s.spacing.toFixed(2)) + '</b> m'
     + (s.decimated ? ' · 显示抽稀至 <b>' + s.np.toLocaleString() + '</b> 点' : '');
 }
@@ -2238,7 +2318,8 @@ function drawTIN(){
       }
       const col = pal[(k/SHADE_N)|0][k % SHADE_N];
       g.fillStyle = col;
-      g.strokeStyle = col;
+      // 线框：面照常填色，描边换成深色细线，一眼就能看出三角网有没有空洞
+      g.strokeStyle = S.showWire ? 'rgba(6,20,28,.62)' : col;
       g.lineWidth = 1;
       g.lineJoin = 'bevel';   // 默认 miter 会让细长三角形的尖角飞出去变成白刺
       g.miterLimit = 1.4;
@@ -2711,6 +2792,7 @@ $('btnSwap').addEventListener('click', () => {
 
 $('chkCloud').addEventListener('change', e => { S.showCloud = e.target.checked; requestRender(); });
 $('chkSurf').addEventListener('change', e => { S.showSurface = e.target.checked; requestRender(); });
+$('chkWire').addEventListener('change', e => { S.showWire = e.target.checked; requestRender(); });
 $('chkSpin').addEventListener('change', e => { S.spin = e.target.checked; });
 
 $('rngPt').addEventListener('input', e => {
@@ -2795,12 +2877,18 @@ function applyModeUI(){
   if(hh){
     hh.disabled = tin;
     const lb = hh.closest('label');
-    if(lb) lb.style.opacity = tin ? '.4' : '';
+    if(lb) lb.style.display = tin ? 'none' : '';   // 该项只对规则格网有意义
   }
   const rr = $('rngRes');
   if(rr) rr.disabled = tin;
   const rl = rr ? rr.closest('.rng') : null;
   if(rl) rl.style.opacity = tin ? '.4' : '';
+  const cw = $('chkWire');
+  if(cw){
+    cw.disabled = !tin;
+    const lb = cw.closest('label');
+    if(lb) lb.style.opacity = tin ? '' : '.4';
+  }
 }
 
 function rebuildScene(){
