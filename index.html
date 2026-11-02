@@ -325,12 +325,12 @@
   .about-log .log-item .lt{color:rgba(238,242,251,.85);}
   /* ===== 侧栏分类导航布局 ===== */
   .layout{display:flex;gap:22px;align-items:flex-start;}
-  .side-nav{flex:0 0 250px;position:sticky;top:84px;}
-  .side-nav .side-head{font-size:20px;font-weight:700;color:var(--txt);letter-spacing:1px;padding:0 0 14px 14px;}
-  .side-nav .side-item{display:flex;align-items:center;gap:11px;padding:12px 14px;margin-bottom:6px;border-radius:12px;
-       color:var(--muted);text-decoration:none;font-size:22px;cursor:pointer;border:1px solid transparent;transition:all .2s;}
-  .side-nav .side-item .ico{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;line-height:1;}
-  .side-nav .side-item .cnt{margin-left:auto;font-size:13px;color:var(--muted);opacity:.75;}
+  .side-nav{flex:0 0 220px;position:sticky;top:84px;}
+  .side-nav .side-head{font-size:16px;font-weight:700;color:var(--txt);letter-spacing:1px;padding:0 0 14px 14px;}
+  .side-nav .side-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:6px;border-radius:12px;
+       color:var(--muted);text-decoration:none;font-size:18px;cursor:pointer;border:1px solid transparent;transition:all .2s;}
+  .side-nav .side-item .ico{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;line-height:1;}
+  .side-nav .side-item .cnt{margin-left:auto;font-size:12px;color:var(--muted);opacity:.75;}
   .side-nav .side-item:hover{color:var(--txt);background:var(--card);border-color:var(--card-b);}
   .side-nav .side-item.active{color:var(--txt);background:var(--card);border-color:var(--card-b);}
   .side-nav .side-item.active .cnt{color:var(--cyan);}
@@ -1184,6 +1184,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-02', t:'微调：工具箱侧栏分类导航字号与图标比例——① 侧栏标题「工具分类」字号调整为 16px；② 各分类项文字调整为 18px；③ 各分类项前的图标随文字同步缩小至 22px，标题/分类项/图标比例协调、层级清晰'},
   {d:'2026-11-02', t:'优化：工具箱侧栏分类导航放大与卡片统一尺寸——① 左侧分类文字字号放大（标题与各分类项），每条分类项前面新增带彩色背景的图标（计算器／三角尺／施工／放大镜／地图／工具箱）；② 侧栏加宽以容纳放大文字；③ 全部工具卡片统一为同一尺寸（与「结构与CAD出图」分类一致），不再因某分类卡片数量少而被拉伸成 400px 超宽卡片，卡片数少的分类右侧自然留白'},
   {d:'2026-11-02', t:'更新：工具箱新增侧栏分类导航——① 左侧新增竖排分类导航（造价与算量／结构与CAD出图／施工与管理／审图与报告／测绘与图像／图文工具箱），左侧栏贴页面最左、卡片展示区贴页面最右，点击分类锚点平滑滚动定位并高亮当前分类；② 18 个工具按 6 大分类重新归类：竣工章生成器归入施工与管理，图文工具箱（智印PDF工坊、批量压缩图片）置于最下方；③ 卡片改为自适应铺满（卡片数少的分类也填满行宽，单卡片限制 400px 不越界）；④ 拖动排序改为分类内排序，搜索时自动隐藏无匹配的空分类；⑤ 私密区同步贴边铺满（不分类）'},
 
