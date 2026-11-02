@@ -63,7 +63,7 @@ body{
 
 /* ---------- 侧栏 ---------- */
 #side{
-  position:absolute;top:58px;left:14px;width:252px;z-index:11;
+  position:absolute;top:58px;left:14px;width:304px;z-index:11;
   max-height:calc(100% - 74px);overflow-y:auto;overscroll-behavior:contain;
   background:rgba(16,22,30,.9);border:1px solid rgba(255,255,255,.09);
   border-radius:12px;padding:6px;
@@ -74,11 +74,11 @@ body{
 #side::-webkit-scrollbar{width:7px}
 #side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:4px}
 #side::-webkit-scrollbar-track{background:transparent}
-.sec{padding:7px 8px 9px;border-bottom:1px solid rgba(255,255,255,.055)}
+.sec{padding:6px 8px 8px;border-bottom:1px solid rgba(255,255,255,.055)}
 .sec:last-child{border-bottom:none}
 .sec-h{
   font-size:10.5px;font-weight:600;color:#6b7a8d;letter-spacing:1.4px;
-  text-transform:uppercase;margin-bottom:6px;
+  text-transform:uppercase;margin-bottom:5px;
 }
 .meta{font-size:11.5px;color:#8fa0b4;line-height:1.75;word-break:break-all}
 .sec.collapse>.sec-h{cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
@@ -107,7 +107,7 @@ button.act.primary{background:linear-gradient(135deg,#0e7490,#0891b2);border-col
 button.act.primary:hover{filter:brightness(1.15)}
 button.act:disabled{opacity:.35;cursor:not-allowed;filter:none}
 
-.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#c3d0de;cursor:pointer;padding:3px 0;user-select:none}
+.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#c3d0de;cursor:pointer;padding:2px 0;user-select:none}
 .chk input{
   appearance:none;-webkit-appearance:none;width:15px;height:15px;flex:0 0 15px;
   border:1.5px solid #3b4a5c;border-radius:4px;background:#141c25;cursor:pointer;
@@ -120,9 +120,10 @@ button.act:disabled{opacity:.35;cursor:not-allowed;filter:none}
 }
 .chk:hover input{border-color:#22d3ee}
 
-.rng{margin-bottom:7px}
-.rng .rh{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#8fa0b4;margin-bottom:3px}
+.rng{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.rng .rh{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#8fa0b4;margin-bottom:0;flex:0 0 64px}
 .rng .rh b{color:#7dd3e8;font-weight:600;font-variant-numeric:tabular-nums}
+.rng input[type=range]{flex:1;min-width:0}
 input[type=range]{
   -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:3px;
   background:linear-gradient(90deg,#0891b2,#164e63);outline:none;cursor:pointer;
@@ -136,6 +137,7 @@ input[type=number]{
   color:#dbe4ee;background:#1a222c;border:1px solid rgba(255,255,255,.1);
   padding:0 8px;outline:none;transition:.15s;
   font-variant-numeric:tabular-nums;
+  -moz-appearance:textfield;appearance:textfield;
 }
 input[type=number]:hover{border-color:rgba(34,211,238,.42)}
 input[type=number]:focus{border-color:#22d3ee;outline:1px solid rgba(34,211,238,.5)}
@@ -143,7 +145,7 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .row2{display:flex;gap:6px;align-items:center}
 .row2 button.act{width:58px;flex:0 0 58px;padding:0}
-.cntinfo{font-size:11.5px;color:#8fa0b4;margin-top:7px;line-height:1.6}
+.cntinfo{font-size:11.5px;color:#8fa0b4;margin-top:5px;line-height:1.5}
 .cntinfo b{color:#22d3ee;font-weight:600;font-variant-numeric:tabular-nums}
 .bstats{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:7px;font-size:11px;color:#8fa0b4}
 .bstats span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -228,9 +230,29 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
 #loading span{font-size:12.5px;color:#7dd3e8;letter-spacing:.5px}
 
 @media (max-width:820px){
-  #side{width:210px;transform:scale(.96);transform-origin:top left}
+  #side{width:256px;transform:scale(.96);transform-origin:top left}
   #help{display:none}
 }
+
+/* 只读模型视图（导出模型后显示）：浮动视角按钮 + 只读信息卡 */
+#roBar{
+  position:absolute;right:16px;bottom:16px;z-index:20;display:flex;gap:6px;
+}
+#roBar button{
+  height:30px;padding:0 13px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;
+  background:rgba(20,28,38,.82);color:#c3d0de;border:1px solid rgba(255,255,255,.14);
+  transition:.15s;
+}
+#roBar button:hover{background:rgba(34,211,238,.16);border-color:rgba(34,211,238,.5);color:#e6f7fb}
+#roInfo{
+  position:absolute;left:16px;bottom:16px;z-index:20;min-width:190px;padding:10px 12px;
+  border-radius:10px;background:rgba(16,22,30,.86);border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  font-size:11.5px;color:#8fa0b4;line-height:1.75;
+}
+#roInfo .ro-t{font-size:10px;color:#5a6a7d;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px}
+#roInfo b{color:#22d3ee;font-weight:600;font-variant-numeric:tabular-nums}
+#roInfo .ro-row{display:flex;justify-content:space-between;gap:14px}
 </style>
 </head>
 <body>
@@ -257,6 +279,7 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
     <button class="tbtn primary" id="btnOpen">导入 DAT</button>
     <button class="tbtn" id="btnDemo">示例数据</button>
     <button class="tbtn" id="btnShot" disabled>导出图片</button>
+    <button class="tbtn" id="btnExport" disabled>导出模型</button>
     <button class="tbtn" id="btnReset" disabled>复位视角</button>
   </div>
 
@@ -306,8 +329,13 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
       </div>
 
       <label class="chk" style="margin-top:4px" title="勾选后：周围没有测点的空白区域不绘制（多块测区之间留白）；不勾选则整片铺满"><input type="checkbox" id="chkHole"> 无数据区留空</label>
-      <div class="rng" style="margin-top:5px"><div class="rh"><span>点大小</span><b id="vPt">1.8</b></div><input type="range" id="rngPt" min="1" max="5" step="0.2" value="1.8"></div>
-      <div class="rng"><div class="rh"><span>曲面精度</span><b id="vRes">100</b></div><input type="range" id="rngRes" min="40" max="200" step="10" value="100"></div>
+      <label class="chk" style="margin-top:2px"><input type="checkbox" id="chkCnt"> 显示等高线</label>
+      <div class="row2" style="margin-top:5px">
+        <input type="number" id="numCnt" min="0.01" step="0.5" value="0.5" title="等高距（米）">
+        <button class="act" id="btnCntAuto" title="按高差自动计算等高距">自动</button>
+      </div>
+      <div class="cntinfo" id="cntInfo" style="margin-top:5px">等高距 —</div>
+      <div class="rng" style="margin-top:5px"><div class="rh"><span>曲面精度</span><b id="vRes">100</b></div><input type="range" id="rngRes" min="40" max="200" step="10" value="100"></div>
       <div class="rng"><div class="rh"><span>垂直夸张</span><b id="vZ">1.0×</b></div><input type="range" id="rngZ" min="1" max="20" step="0.5" value="1"></div>
       <label class="fld" style="margin-bottom:0"><span>高程配色</span>
         <select id="selPal">
@@ -320,16 +348,6 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
           <option value="gray">灰度</option>
         </select>
       </label>
-    </div>
-
-    <div class="sec">
-      <div class="sec-h">等高线</div>
-      <label class="chk"><input type="checkbox" id="chkCnt"> 显示等高线</label>
-      <div class="row2" style="margin-top:5px">
-        <input type="number" id="numCnt" min="0.01" step="0.5" value="0.5" title="等高距（米）">
-        <button class="act" id="btnCntAuto" title="按高差自动计算等高距">自动</button>
-      </div>
-      <div class="cntinfo" id="cntInfo">等高距 —</div>
     </div>
 
     <div class="sec">
@@ -755,6 +773,7 @@ function buildFromMap(autoScale){
   $('empty').classList.add('hide');
   setTimeout(() => { $('empty').style.display = 'none'; }, 340);
   $('btnShot').disabled = false;
+  $('btnExport').disabled = false;
   $('btnReset').disabled = false;
 
   // 基准面：无历史设置时默认取「最低点向下 10 m」
@@ -1398,13 +1417,9 @@ function updateTinInfo(){
   const cut = s.tri0 - s.ntri;
   const vac = (s.holeCount || 0) - (s.refillHole || 0);
   const me = (s.maxEdge > 0) ? s.maxEdge : 0;
-  el.innerHTML = '三角网 <b>' + s.ntri.toLocaleString() + '</b> 面'
-    + (cut > 0 ? ' · 剔除 <b>' + cut.toLocaleString() + '</b> 面' : '')
-    + (s.refillTri > 0 ? ' · 补洞 <b>' + s.refillTri.toLocaleString() + '</b> 面' : '')
-    + (vac > 0 ? ' · 空白区 <b>' + vac + '</b> 处' : '')
-    + '<br>点距 <b>' + (s.spacing >= 1 ? s.spacing.toFixed(1) : s.spacing.toFixed(2)) + '</b> m'
-    + ' · 间隔 <b>' + (me >= 1 ? me.toFixed(0) : me.toFixed(1)) + '</b> m'
-    + ((s.cutLong || 0) > 0 ? '（超距切 <b>' + s.cutLong.toLocaleString() + '</b> 面）' : '')
+  el.innerHTML = '三角网 <b>' + s.ntri.toLocaleString() + '</b> 面 · 间隔 <b>' + (me >= 1 ? me.toFixed(0) : me.toFixed(1)) + '</b> m'
+    + (s.spacing > 0 ? ' · 点距 <b>' + (s.spacing >= 1 ? s.spacing.toFixed(1) : s.spacing.toFixed(2)) + '</b> m' : '')
+    + (cut > 0 ? '<br>剔除 <b>' + cut.toLocaleString() + '</b> · 补洞 <b>' + s.refillTri.toLocaleString() + '</b>' + (vac > 0 ? ' · 空白 <b>' + vac + '</b>' : '') + ((s.cutLong || 0) > 0 ? ' · 超距 <b>' + s.cutLong.toLocaleString() + '</b>' : '') : '')
     + (s.decimated ? '<br>显示抽稀至 <b>' + s.np.toLocaleString() + '</b> 点' : '');
   // 自动模式下把算出来的当前值提示在输入框里
   const inp = $('numMaxEdge');
@@ -2840,12 +2855,6 @@ $('chkSurf').addEventListener('change', e => { S.showSurface = e.target.checked;
 $('chkWire').addEventListener('change', e => { S.showWire = e.target.checked; requestRender(); });
 $('chkSpin').addEventListener('change', e => { S.spin = e.target.checked; });
 
-$('rngPt').addEventListener('input', e => {
-  S.pointSize = parseFloat(e.target.value);
-  $('vPt').textContent = S.pointSize.toFixed(1);
-  requestRender();
-});
-
 let resTimer = 0;
 $('rngRes').addEventListener('input', e => {
   S.surfaceRes = parseInt(e.target.value, 10);
@@ -3116,6 +3125,127 @@ $('btnReset').addEventListener('click', () => {
   requestRender();
 });
 
+/* ---- 导出模型：生成只读查看的独立 HTML ---- */
+function escStr(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function exportModel(){
+  if(!S.loaded || S.n < 3){ toast('请先载入数据'); return; }
+  try{
+    // 按当前列映射提取绝对坐标（东,北,高），保证导出与当前视图一致
+    const a = S.map.a, b = S.map.b, c = S.map.c, rows = S.rows;
+    const parts = [];
+    for(let i=0;i<rows.length;i++){
+      const r = rows[i];
+      const A = r[a], B = r[b], C = r[c];
+      if(Number.isFinite(A) && Number.isFinite(B) && Number.isFinite(C)) parts.push(A + ',' + B + ',' + C);
+    }
+    if(parts.length < 3){ toast('有效坐标点不足，无法导出'); return; }
+    const data = parts.join('\n');
+    const name = S.fileName || '未命名';
+    const payload = JSON.stringify({
+      data: data,
+      name: name,
+      cfg: {
+        mode: S.mode, tinMinAngle: S.tinMinAngle, tinEdgeK: S.tinEdgeK, tinMaxEdge: S.tinMaxEdge,
+        cntInterval: S.cntInterval, palette: S.palette, zExag: S.zExag,
+        showCloud: S.showCloud, showBase: S.showBase, showSkirt: S.showSkirt, showWire: S.showWire,
+        baseElev: S.baseElev
+      }
+    });
+    // 打包当前整个页面（渲染引擎 + 样式），再注入内嵌数据与只读标志
+    let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const inj = '\n<' + 'script>\nwindow.__EXPORT__ = ' + payload + ';\n</' + 'script>\n';
+    html = html.replace(/<\/body>/i, inj + '</' + 'body>');
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const aEl = document.createElement('a');
+    aEl.href = url;
+    aEl.download = name.replace(/\.(dat|txt|csv)$/i, '') + '_三维模型.html';
+    document.body.appendChild(aEl); aEl.click(); document.body.removeChild(aEl);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    toast('模型已导出（只读查看，' + parts.length.toLocaleString() + ' 点）');
+  }catch(err){
+    toast('导出失败：' + err.message);
+  }
+}
+$('btnExport').addEventListener('click', exportModel);
+
+/* ---- 只读模型模式（导出的 HTML 启动时进入）---- */
+function buildReadonlyUI(){
+  // 浮动视角按钮
+  const bar = document.createElement('div');
+  bar.id = 'roBar';
+  const views = [['等轴','iso'],['俯视','top'],['正视','front'],['侧视','side']];
+  views.forEach(([txt, v]) => {
+    const btn = document.createElement('button');
+    btn.textContent = txt;
+    btn.addEventListener('click', () => {
+      if(v === 'iso'){ cam.azim = Math.PI - 0.52; cam.elev = 0.60; }
+      else if(v === 'top'){ cam.azim = Math.PI; cam.elev = 1.5533; }
+      else if(v === 'front'){ cam.azim = Math.PI; cam.elev = 0.02; }
+      else { cam.azim = Math.PI/2; cam.elev = 0.02; }
+      cam.dist = S.diag*1.35;
+      requestRender();
+    });
+    bar.appendChild(btn);
+  });
+  document.body.appendChild(bar);
+
+  // 只读信息卡
+  const info = document.createElement('div');
+  info.id = 'roInfo';
+  const rb = S.rawBox || {};
+  const tin = S.tin;
+  const spacing = tin ? tin.spacing : 0;
+  const maxEdge = tin ? tin.maxEdge : 0;
+  const cnt = S.cntInterval > 0 ? S.cntInterval : 0;
+  const fmtH = v => (Math.abs(v) >= 1000 ? v.toFixed(2) : v.toFixed(3));
+  let rows = '<div class="ro-t">模型信息</div>'
+    + '<div class="ro-row"><span>文件</span><b>' + escStr(S.fileName || '') + '</b></div>'
+    + '<div class="ro-row"><span>点数</span><b>' + S.n.toLocaleString() + '</b></div>'
+    + '<div class="ro-row"><span>范围</span><b>' + (rb.e1 ? ((rb.e1-rb.e0).toFixed(1) + ' × ' + (rb.n1-rb.n0).toFixed(1) + ' m') : '—') + '</b></div>'
+    + '<div class="ro-row"><span>高程</span><b>' + (rb.h0 !== undefined ? (fmtH(rb.h0) + ' ~ ' + fmtH(rb.h1) + ' m') : '—') + '</b></div>'
+    + '<div class="ro-row"><span>高差</span><b>' + (rb.h1 !== undefined ? ((rb.h1-rb.h0).toFixed(2) + ' m') : '—') + '</b></div>'
+    + (tin ? '<div class="ro-row"><span>三角网</span><b>' + tin.ntri.toLocaleString() + ' 面</b></div>' : '')
+    + (spacing > 0 ? '<div class="ro-row"><span>点距</span><b>' + spacing.toFixed(2) + ' m</b></div>' : '')
+    + (maxEdge > 0 ? '<div class="ro-row"><span>间隔</span><b>' + maxEdge.toFixed(0) + ' m</b></div>' : '')
+    + '<div class="ro-row"><span>等高距</span><b>' + (cnt > 0 ? cnt + ' m' : '—') + '</b></div>';
+  // 挖填方（复用已算好的 baseInfo 内容）
+  const baseEl = $('baseInfo');
+  if(baseEl && baseEl.innerHTML && baseEl.textContent.indexOf('载入数据') < 0){
+    rows += '<div class="ro-t" style="margin-top:6px">挖填方</div>'
+      + '<div class="bstats">' + baseEl.innerHTML + '</div>';
+  }
+  info.innerHTML = rows;
+  document.body.appendChild(info);
+}
+
+function startReadonly(exp){
+  const c = exp.cfg || {};
+  S.mode = (c.mode === 'grid') ? 'grid' : 'tin';
+  S.tinMinAngle = c.tinMinAngle || 10;
+  S.tinEdgeK = c.tinEdgeK || 6;
+  S.tinMaxEdge = c.tinMaxEdge || 0;
+  S.cntInterval = (c.cntInterval > 0) ? c.cntInterval : 0.5;
+  S.palette = c.palette || 'terrain';
+  S.showCloud = !!c.showCloud;
+  S.showBase = (c.showBase !== false);
+  S.showSkirt = (c.showSkirt !== false);
+  S.showWire = !!c.showWire;
+  buildPalette(S.palette);
+  // 隐藏编辑控件，只保留信息条与复位视角
+  ['side','btnOpen','btnDemo','btnShot','btnExport','help'].forEach(id => { const el = $(id); if(el) el.style.display = 'none'; });
+  const sm = document.querySelector('.brand small'); if(sm) sm.textContent = '只读模型';
+  // 载入数据（内部已完成 buildScene/buildContours/updateBaseInfo/fitView）
+  ingest(exp.data, exp.name);
+  // 覆盖自动缩放与基准面，保持导出时的一致外观
+  if(c.zExag && c.zExag > 0) S.zExag = c.zExag;
+  if(typeof c.baseElev === 'number') S.baseElev = c.baseElev;
+  updateBaseInfo();
+  buildReadonlyUI();
+  requestRender();
+}
+
 /* ============================================================
    11. 示例数据
    ============================================================ */
@@ -3349,9 +3479,9 @@ function demoText(){ return DEMO_DAT; }
 $('btnDemo').addEventListener('click', () => {
   showLoading(true, '正在载入示例数据…');
   setTimeout(() => {
-    ingest(demoText(), '进场复测数据.dat');
+    ingest(demoText(), '示例数据.dat');
     showLoading(false);
-    if(S.loaded) toast('示例数据（进场复测）已载入，可拖拽旋转查看');
+    if(S.loaded) toast('示例数据已载入，可拖拽旋转查看');
   }, 40);
 });
 
@@ -3363,10 +3493,15 @@ resize();
 window.addEventListener('resize', resize);
 tick();
 
-// 启动即载入示例数据（?empty=1 可跳过，便于查看空状态）
-if(!/[?&]empty=1/.test(location.search)){
-  setTimeout(() => $('btnDemo').click(), 120);
+// 启动：导出模型为只读查看；否则载入示例数据（?empty=1 可跳过）
+function boot(){
+  if(window.__EXPORT__){
+    startReadonly(window.__EXPORT__);
+  } else if(!/[?&]empty=1/.test(location.search)){
+    $('btnDemo').click();
+  }
 }
+setTimeout(boot, 120);
 
 })();
 </script>
