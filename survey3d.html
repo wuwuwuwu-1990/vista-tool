@@ -274,7 +274,7 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.7</small>
+      测绘数据三维可视化系统 <small>V1.0.10</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -2128,9 +2128,8 @@ function drawSkirt(){
 }
 
 function fmtVol(v){
-  if(v >= 100000) return Math.round(v).toLocaleString();
-  if(v >= 1000) return (v/1000).toFixed(1) + 'k';
-  return v.toFixed(1);
+  // 直接用完整真实数值：不缩写（k）、不加千分位分隔，四舍五入到整数
+  return Math.round(v).toString();
 }
 
 function updateBaseInfo(){
