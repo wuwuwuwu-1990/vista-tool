@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.25</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.26</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -71,7 +71,7 @@ body.resizing .rsz{background:rgba(28,111,208,.30)}
 /* ============ 分区 ============ */
 .sec{border-bottom:1px solid var(--line-2);padding:13px 14px 15px}
 .sec:last-child{border-bottom:none;padding-bottom:26px}
-.sec-h{display:flex;align-items:center;gap:7px;margin-bottom:11px}
+.sec-h{display:flex;align-items:center;gap:7px;margin-bottom:11px;position:relative}
 .sec-h .bar{width:3px;height:13px;border-radius:2px;background:var(--brand-2)}
 .sec-h .bar.g{background:var(--gold)}
 .sec-h .bar.o{background:var(--ok)}
@@ -79,7 +79,7 @@ body.resizing .rsz{background:rgba(28,111,208,.30)}
 .sec-h .tag{margin-left:auto;font-size:10.5px;color:var(--ink-3);font-weight:500}
 
 /* 表单 */
-.field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.field{display:flex;align-items:center;gap:8px;margin-bottom:8px;position:relative}
 .field label{width:104px;flex:none;font-size:12px;color:var(--ink-2)}
 .field label b{color:var(--brand-2);font-weight:700;font-family:"Times New Roman",serif;font-size:13px;font-style:italic}
 .ctl{flex:1;display:flex;align-items:center;height:29px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);transition:.14s;overflow:hidden}
@@ -94,11 +94,13 @@ select.ctl{padding:0 8px;cursor:pointer;-webkit-appearance:none;appearance:none;
   background-repeat:no-repeat;background-position:right 9px center}
 
 /* 校核 */
-.verdict{border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.6;display:flex;gap:7px;align-items:flex-start}
-.verdict .dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:none}
+.verdict{border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;line-height:1.3;display:inline-flex;gap:6px;align-items:center;white-space:nowrap;cursor:help;position:relative;flex:none}
+.verdict .dot{width:6px;height:6px;border-radius:50%;flex:none}
 .verdict.ok{background:var(--ok-soft);color:#10653f}.verdict.ok .dot{background:var(--ok)}
 .verdict.warn{background:var(--warn-soft);color:#8a5606}.verdict.warn .dot{background:var(--warn)}
 .verdict.err{background:var(--err-soft);color:#a02b2b}.verdict.err .dot{background:var(--err)}
+.verdict .tipb{left:50%;right:auto;transform:translateX(-50%);width:292px;top:calc(100% + 9px);animation:tipfade .13s ease-out}
+.verdict:hover .tipb{display:block}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
 .kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
 .kpi .k{font-size:10.5px;color:var(--ink-3);margin-bottom:2px}
@@ -116,6 +118,24 @@ select.ctl{padding:0 8px;cursor:pointer;-webkit-appearance:none;appearance:none;
 .hint{font-size:11px;color:var(--ink-3);line-height:1.65;margin-top:8px}
 .hint code{background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:10.5px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* ===== 顶栏实时校核与计算 KPI（v1.0.26） ===== */
+.topkpi{display:flex;align-items:center;gap:12px;flex:1;justify-content:center;min-width:0;padding:0 18px}
+.tk-list{display:flex;align-items:center;min-width:0;overflow:hidden}
+.tk{display:flex;align-items:baseline;gap:3px;padding:0 11px;border-left:1px solid var(--line);white-space:nowrap}
+.tk:first-child{border-left:none}
+.tk .k{font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:.3px}
+.tk .v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.tk .v small{font-size:9.5px;font-weight:500;color:var(--ink-3);margin-left:1px}
+@media (max-width:1220px){.topkpi{display:none}}
+
+/* ===== 鼠标停留提示（ⓘ 气泡，v1.0.26） ===== */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-3);font-size:9.5px;font-weight:700;font-style:normal;line-height:1;cursor:help;vertical-align:middle;margin-left:5px;flex:none;user-select:none;transition:.14s}
+.tip:hover{background:var(--brand-soft);border-color:var(--brand-2);color:var(--brand-2)}
+.tipb{display:none;position:absolute;z-index:400;left:0;right:0;top:100%;margin-top:7px;background:var(--surface);border:1px solid var(--line);border-radius:9px;box-shadow:0 12px 30px rgba(15,30,55,.18);padding:10px 12px;font-size:11px;font-weight:400;color:var(--ink-2);line-height:1.7;text-align:left;white-space:normal}
+.tip:hover .tipb{display:block;animation:tipdrop .13s ease-out}
+@keyframes tipdrop{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@keyframes tipfade{from{opacity:0}to{opacity:1}}
 
 /* 画布 */
 .stage{display:flex;flex-direction:column;min-width:0;background:var(--surface-2)}
@@ -181,7 +201,17 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.25</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.26</span></h1>
+    </div>
+  </div>
+  <!-- 顶栏实时显示几何校核与计算结果（v1.0.26）：悬停校核徽标看完整说明 -->
+  <div class="topkpi">
+    <div id="verdict" class="verdict ok"><span class="dot"></span><span class="txt">—</span><span class="tipb" id="verdictFull"></span></div>
+    <div class="tk-list">
+      <div class="tk"><span class="k">内空 V</span><span class="v" id="k_V">–<small>m³</small></span></div>
+      <div class="tk"><span class="k">混凝土</span><span class="v" id="k_C">–<small>m³</small></span></div>
+      <div class="tk"><span class="k">底板面积</span><span class="v" id="k_A">–<small>m²</small></span></div>
+      <div class="tk"><span class="k">开挖土方</span><span class="v" id="k_E">–<small>m³</small></span></div>
     </div>
   </div>
   <div class="top-actions">
@@ -202,10 +232,9 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <aside class="panel left" id="panelL">
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>蓄水池参数</h2><span class="tag">单位 m</span></div>
-      <div class="field"><label>蓄水池名称</label>
+      <div class="field"><label>蓄水池名称<span class="tip">i<span class="tipb">剖面图「（内空）」前取名称<b>末尾的构筑物名</b>：鱼水村罗家土取水口 → 取水口（内空）、…蓄水池 → 蓄水池（内空）、…水池 → 水池（内空）。</span></span></label>
         <div class="ctl"><input id="f_name" type="text" value="XXX取水口" maxlength="20" placeholder="XXX取水口" spellcheck="false"></div>
       </div>
-      <div class="hint">剖面图「（内空）」前取名称<b>末尾的构筑物名</b>：鱼水村罗家土取水口 → 取水口（内空）、…蓄水池 → 蓄水池（内空）、…水池 → 水池（内空）。</div>
       <div class="field"><label>蓄水池形式</label>
         <select class="ctl" id="f_type"><option value="4">四面闭合</option><option value="3">三面开口</option></select>
       </div>
@@ -219,8 +248,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <select class="ctl" id="f_bury"><option value="full" selected>全埋（池顶齐地坪）</option><option value="half">半埋（按埋深 D）</option></select>
       </div>
       <div class="field" id="rowHc" style="display:none"><label>覆土厚度 <b>hc</b></label><div class="ctl"><input id="f_hc" type="number" value="0" step="0.1" min="0"><span class="unit">m</span></div></div>
-      <div class="field"><label>埋置深度 <b>D</b></label><div class="ctl" id="ctlD"><input id="f_D" type="number" value="2.80" step="0.1" min="0"><span class="unit">m</span></div></div>
-      <div class="hint" id="rowDh">全埋时 D = 墙高 H + 底板厚 T，自动计算（池顶与室外地坪齐平）。</div>
+      <div class="field"><label>埋置深度 <b>D</b><span class="tip" id="rowDh">i<span class="tipb">全埋时 D = 墙高 H + 底板厚 T，自动计算（池顶与室外地坪齐平）。</span></span></label><div class="ctl" id="ctlD"><input id="f_D" type="number" value="2.80" step="0.1" min="0"><span class="unit">m</span></div></div>
       <div class="field"><label>顶盖</label>
         <select class="ctl" id="f_cover"><option value="0">不设盖板（敞口）</option><option value="1" selected>设置混凝土盖板</option></select>
       </div>
@@ -238,7 +266,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     </div>
 
     <div class="sec" id="secPipe">
-      <div class="sec-h"><span class="bar o"></span><h2>水管与闸阀</h2><span class="tag">平面标示</span></div>
+      <div class="sec-h"><span class="bar o"></span><h2>水管与闸阀</h2><span class="tag">平面标示</span><span class="tip">i<span class="tipb" id="pipeHint">水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>、用单独图层区分。</span></span></div>
       <div class="field"><label>绘制水管 + 闸阀</label>
         <label class="sw" style="margin-left:auto"><input type="checkbox" id="o_pipe" checked><i></i></label>
       </div>
@@ -248,21 +276,9 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
           <option value="200">DN200</option><option value="250">DN250</option><option value="300">DN300</option>
         </select></div>
       </div>
-      <div class="field" id="rowLout"><label>墙外管长 <b>Lo</b></label><div class="ctl"><input id="f_Lout" type="number" value="0.80" step="0.05" min="0.2"><span class="unit">m</span></div></div>
+      <div class="field" id="rowLout"><label>墙外管长 <b>Lo</b></label><div class="ctl"><input id="f_Lout" type="number" value="1.00" step="0.05" min="0.2"><span class="unit">m</span></div></div>
       <div class="field" id="rowLin"><label>伸入池内 <b>Li</b></label><div class="ctl"><input id="f_Lin" type="number" value="0.25" step="0.05" min="0"><span class="unit">m</span></div></div>
-      <div class="field" id="rowVpos"><label>闸阀距墙外表面 <b>Lv</b></label><div class="ctl"><input id="f_vpos" type="number" value="0.55" step="0.05" min="0.1"><span class="unit">m</span></div></div>
-      <div class="hint" id="pipeHint">水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>、用单独图层区分。</div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-h"><span class="bar g"></span><h2>几何校核与计算</h2></div>
-      <div id="verdict" class="verdict ok"><span class="dot"></span><span class="txt"></span></div>
-      <div class="kpis">
-        <div class="kpi"><div class="k">内空容积 V</div><div class="v" id="k_V">–<small>m³</small></div></div>
-        <div class="kpi"><div class="k">混凝土合计</div><div class="v" id="k_C">–<small>m³</small></div></div>
-        <div class="kpi"><div class="k">底板平面面积</div><div class="v" id="k_A">–<small>m²</small></div></div>
-        <div class="kpi"><div class="k">开挖土方</div><div class="v" id="k_E">–<small>m³</small></div></div>
-      </div>
+      <div class="field" id="rowVpos"><label>闸阀距墙外表面 <b>Lv</b></label><div class="ctl"><input id="f_vpos" type="number" value="0.73" step="0.05" min="0.1"><span class="unit">m</span></div></div>
     </div>
 
     <div class="sec">
@@ -290,7 +306,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <label class="sw"><input type="checkbox" id="o_dim" checked><i></i>尺寸标注</label>
         <label class="sw"><input type="checkbox" id="o_note" checked><i></i>说明文字</label>
         <label class="sw"><input type="checkbox" id="o_soil" checked><i></i>素土夯实</label>
-        <label class="sw"><input type="checkbox" id="o_grid" checked><i></i>绘图网格</label>
+        <label class="sw"><input type="checkbox" id="o_grid"><i></i>绘图网格</label>
         <label class="sw"><input type="checkbox" id="o_hatch" checked><i></i>混凝土填充</label>
       </div>
       <div class="hint">滚轮缩放 · 拖拽平移 · 双击适应窗口 · <code>F</code> 键适应。所有图元按 1:比例 生成，导出 CAD 与屏幕所见一致。</div>
@@ -308,7 +324,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <button id="tbIn" title="放大"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M9 6.8v4.4M6.8 9h4.4"/></svg></button>
         <button id="tbOut" title="缩小"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4M6.8 9h4.4"/></svg></button>
         <span class="sp"></span>
-        <button id="tbGrid" class="on" title="显示网格"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14"/></svg></button>
+        <button id="tbGrid" title="显示网格"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h14v14H3zM3 7.7h14M3 12.3h14M7.7 3v14M12.3 3v14"/></svg></button>
       </div>
       <div class="cv-badge">
         <div class="t" id="bgName">—</div>
@@ -367,6 +383,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
+        <li><b>v1.0.26</b><b>默认不显示网格 · 闸阀默认落在底板边线之外 · 结果上顶栏 · 说明文字改鼠标悬停</b>：① <b>绘图网格默认关闭</b>（工具栏网格按钮与「绘图网格」复选框双向同步，原先复选框未接事件、点了无效，已修复）；② <b>闸阀默认位置改到放大脚底板边线之外并留 60 mm 间隙</b>，公式 Lv = B + 1.1×DN + 0.06（默认 B=0.50、DN150 ⇒ Lv=0.73 m），改放大脚或管径时自动提升，几何校核新增「闸阀压到底板边线」拦截；③ <b>几何校核与计算结果移到顶栏实时显示</b>（校核徽标 + 内空 V / 混凝土 / 底板面积 / 开挖土方），<b>鼠标悬停校核徽标</b>看完整校核说明（如「全埋式：D = 墙高 H 2.50 + 底板厚 T 0.30 = 2.80 m，池顶与室外地坪齐平」），窄屏（<1220px）自动隐藏；④ 左栏冗长说明改为<b>鼠标悬停的 ⓘ 气泡</b>：蓄水池名称（内空命名规则）、埋置深度 D（全埋 D=H+T 计算规则）、水管与闸阀（平面标示与成块说明），左栏更紧凑。</li>
         <li><b>v1.0.25</b><b>新增水管与闸阀（仅平面图标示，DXF 成块）</b>：在<b>平面图（俯视）</b>中绘制穿墙管路 + 闸阀，<b>剖面图不画</b>。管路固定布置在<b>右侧</b>（无尺寸标注一侧），管轴沿池壁法向穿墙，<b>全段实线（墙体内也为实线）</b>、两端管口封线封闭；闸阀为给排水标准<b>蝴蝶结</b>符号（两等腰三角共顶点），俯视不画阀杆；<b>不标注管径文字</b>。<b>导出 DXF 时水管+闸阀整体打包成一个块（BLOCK+INSERT）</b>，块名「水管闸阀」，INSERT 用单独图层<b>「水管闸阀」（青 4）</b>区分，块内图元放 0 层继承块图层颜色，选中即整体、可整块开关。参数可调：公称管径 DN100~DN300、墙外管长 Lo、伸入池内 Li、闸阀距墙 Lv；三面开口池暂不支持。</li>
         <li><b>v1.0.24</b><b>不设盖板（敞口）时取消敞口处的那条线</b>：原先全埋且敞口时，会沿池顶在左右池壁之间补一段<b>虚线的室外地坪线</b>，视觉上像把开口封住了；现改为<b>两侧地坪线终止于池壁外表面、中间留空</b>，敞口一目了然。有盖板时地坪线仍整条实线连通（盖板确实把敞口封住，池顶以上是覆土顶面），不影响覆土带填充与上方尺寸链。</li>
         <li><b>v1.0.23</b><b>导出 DXF 增加填充提示文字</b>（复刻固维挡墙断面CAD自动成图系统同款做法）：AutoCAD / 天正对「预定义图案 + 内联图案定义」的 HATCH，首次打开时常常不主动计算填充（图形看着像空白），需在特性面板把<b>「比例」改一次再改回</b>，触发一次重算才显示 —— 这是 CAD 的惰性计算行为，不是文件错误。故在整张图<b>最上方、水平居中</b>（平面图之上 15 mm 图纸处）写一行黄色提示：<b>「提示：CAD 未自动计算填充，若填充显示不正确请修改比例再改回」</b>；新增中文图层<b>「提示文字」</b>（黄色 2 号，可单独开关或删除），字高按图纸 4 mm 换算、超图宽 92% 时自动收小，随 1:25～1:200 各档出图均不溢出且清晰可读。</li>
@@ -407,7 +424,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.25</span>
+          <span class="ver">v1.0.26</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -436,7 +453,7 @@ const state = {
   view: { plan:{cam:{scale:60,cx:0,cy:0}, fit:60, cmds:null},
           sec :{cam:{scale:60,cx:0,cy:0}, fit:60, cmds:null} },
   active:'plan', vpRatio:0.5,
-  denom:50, sheet:null, g:null, grid:true
+  denom:50, sheet:null, g:null, grid:false
 };
 const DEF = {type:'4', L:4.0, W:3.0, H:2.5, t:0.25, T:0.30, B:0.50, D:1.50, aL:90, lL:3.0, aR:90, lR:3.0};
 
@@ -748,6 +765,7 @@ function buildGeom(){
     if(!(Lin >= 0)) throw '伸入池内长度不能为负数';
     if(!(dv > 0)) throw '闸阀距墙外表面必须为正数';
     if(dv - dn*1.1 < 0.04) throw '闸阀离墙太近、阀体压到池壁（Lv 应 ≥ '+(dn*1.1+0.04).toFixed(2)+' m）';
+    if(dv - dn*1.1 < B - 1e-6) throw '闸阀压到底板边线（放大脚 B = '+fmt(B,2)+' m），Lv 应 ≥ '+(B+dn*1.1+0.06).toFixed(2)+' m';
     if(dv + dn*1.1 + 0.04 > Lout) throw '墙外管长不足，闸阀放不下（Lo 应 ≥ '+(dv+dn*1.1+0.04).toFixed(2)+' m）';
     g.pipe = {dnmm, dn, side: 'R', Lout, Lin, dv, gap};
   }else{
@@ -1584,15 +1602,17 @@ function updateSide(g, scene){
 
   const above = g.H + g.T - g.D;
   const v = $('verdict');
-  let msg, cls='ok';
-  if(g.buryFull && Math.abs(above) <= 0.01){ msg = `全埋式：D = 墙高 H ${fmt(g.H,2)} + 底板厚 T ${fmt(g.T,2)} = ${fmt(g.D,2)} m，池顶与室外地坪齐平。`; }
-  else if(g.buryFull){ msg = `全埋式：室外地坪高出池顶 ${fmt(Math.abs(above),2)} m（覆土 ${fmt(Math.abs(above),2)} m），剖面已按覆土绘制。`; }
-  else if(above > 0.01){ msg = `池顶露出室外地坪 ${fmt(above,2)} m（半埋式），池壁外露部分不做土体填充。`; }
-  else if(Math.abs(above) <= 0.01){ msg = '池顶与室外地坪齐平，按全埋校验通过。'; }
-  else { msg = `全埋式：室外地坪高出池顶 ${fmt(-above,2)} m，剖面已按覆土绘制。`; }
+  let msg, cls='ok', short='';
+  if(g.buryFull && Math.abs(above) <= 0.01){ msg = `全埋式：D = 墙高 H ${fmt(g.H,2)} + 底板厚 T ${fmt(g.T,2)} = ${fmt(g.D,2)} m，池顶与室外地坪齐平。`; short = `全埋 · D = ${fmt(g.D,2)} m`; }
+  else if(g.buryFull){ msg = `全埋式：室外地坪高出池顶 ${fmt(Math.abs(above),2)} m（覆土 ${fmt(Math.abs(above),2)} m），剖面已按覆土绘制。`; short = `全埋 · 覆土 ${fmt(Math.abs(above),2)} m`; }
+  else if(above > 0.01){ msg = `池顶露出室外地坪 ${fmt(above,2)} m（半埋式），池壁外露部分不做土体填充。`; short = `半埋 · 露出 ${fmt(above,2)} m`; }
+  else if(Math.abs(above) <= 0.01){ msg = '池顶与室外地坪齐平，按全埋校验通过。'; short = `池顶齐平 · D = ${fmt(g.D,2)} m`; }
+  else { msg = `全埋式：室外地坪高出池顶 ${fmt(-above,2)} m，剖面已按覆土绘制。`; short = `全埋 · 覆土 ${fmt(-above,2)} m`; }
   if(g.B === 0) msg += ' 未设放大脚（B=0），底板与池墙外皮平齐。';
   v.className = 'verdict ' + cls;
-  v.querySelector('.txt').textContent = msg;
+  v.querySelector('.txt').textContent = short;
+  const vf = $('verdictFull');
+  if(vf) vf.textContent = msg;            // 完整校核说明：悬停校核徽标时显示
 
   $('bgName').textContent = g.type==='4' ? '四面闭合蓄水池' : '三面开口蓄水池';
   $('bgSub').textContent = g.type==='4'
@@ -2138,7 +2158,10 @@ function bindUI(){
   $('tbFit').onclick = fitView;
   $('tbIn').onclick = ()=>{ zoomAt(1.25); };
   $('tbOut').onclick = ()=>{ zoomAt(1/1.25); };
-  $('tbGrid').onclick = ()=>{ state.grid = !state.grid; $('tbGrid').classList.toggle('on', state.grid); render(); };
+  /* 网格开关：工具栏按钮与「绘图网格」复选框双向同步，默认关闭（v1.0.26） */
+  const setGrid = on => { state.grid = !!on; $('tbGrid').classList.toggle('on', state.grid); $('o_grid').checked = state.grid; render(); };
+  $('tbGrid').onclick = ()=> setGrid(!state.grid);
+  $('o_grid').addEventListener('change', ()=> setGrid($('o_grid').checked));
 
   /* 关于 */
   $('btnAbout').onclick = ()=> $('mAbout').classList.add('show');
@@ -2188,6 +2211,18 @@ function syncMode(){
   $('pipeHint').innerHTML = is3
     ? '三面开口池的侧墙带夹角、管道穿墙位置随墙位变化，本版<b>暂不支持</b>；切回「四面闭合」即可布置水管与闸阀。'
     : '水管与闸阀<b>只在平面图（俯视）中标示</b>，固定布置在<b>右侧</b>（无尺寸标注一侧），剖面图不画；管道全段实线（墙体内也为实线）、两端封口，闸阀画标准<b>蝴蝶结</b>符号；导出 DXF 时整体<b>做成一个块</b>、用单独图层区分。';
+  /* 闸阀默认落在底板边线之外、留 60 mm 间隙：B 或 DN 变化导致不足时自动提升 Lv，
+     并保证墙外管长 Lo 足够（管端超出闸阀 ≥ 100 mm）（v1.0.26） */
+  (()=>{
+    const bv = numv('f_B'), dnv = (parseInt($('f_dn').value, 10) || 150) / 1000;
+    if(!isFinite(bv) || !(bv >= 0)) return;
+    const dvMin = bv + dnv * 1.1 + 0.06;
+    const el = $('f_vpos'), cur = numv('f_vpos');
+    if(!isFinite(cur) || cur < dvMin - 1e-9) el.value = dvMin.toFixed(2);
+    const loMin = numv('f_vpos') + dnv * 1.1 + 0.10;
+    const loEl = $('f_Lout'), lo = numv('f_Lout');
+    if(!isFinite(lo) || lo < loMin - 1e-9) loEl.value = (Math.ceil(loMin * 20) / 20).toFixed(2);
+  })();
   syncBury();
 }
 
