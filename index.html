@@ -391,7 +391,7 @@
     <div class="side-head">工具分类</div>
       <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="ico" style="background:rgba(245,166,35,.16)">🧮</span><span class="nm">造价与算量</span><span class="cnt">4</span></a>
       <a href="#cat-cad" class="side-item" data-cat="cat-cad"><span class="ico" style="background:rgba(79,142,247,.16)">📐</span><span class="nm">结构与CAD出图</span><span class="cnt">6</span></a>
-      <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="ico" style="background:rgba(47,212,168,.16)">🚧</span><span class="nm">施工与管理</span><span class="cnt">4</span></a>
+      <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="ico" style="background:rgba(47,212,168,.16)">🚧</span><span class="nm">施工与管理</span><span class="cnt">5</span></a>
       <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="ico" style="background:rgba(139,124,246,.16)">🔍</span><span class="nm">审图与报告</span><span class="cnt">1</span></a>
       <a href="#cat-ch" class="side-item" data-cat="cat-ch"><span class="ico" style="background:rgba(56,211,240,.16)">🗺️</span><span class="nm">测绘与图像</span><span class="cnt">1</span></a>
       <a href="#cat-tw" class="side-item" data-cat="cat-tw"><span class="ico" style="background:rgba(244,114,182,.16)">🧰</span><span class="nm">图文工具箱</span><span class="cnt">2</span></a>
@@ -552,7 +552,7 @@
         </div>
       </section>
       <section id="cat-sg" class="cat-sec">
-        <div class="cat-title"><span class="dot" style="background:#2fd4a8"></span><span class="nm">施工与管理</span><span class="cnt">4 款</span></div>
+        <div class="cat-title"><span class="dot" style="background:#2fd4a8"></span><span class="nm">施工与管理</span><span class="cnt">5 款</span></div>
         <div class="grid">
       <a class="card" href="sgjht.html" style="--g1:#3a8ee6;--g2:#5f5ef0;--gs:rgba(74,124,235,.5);--a1:#4f8ef7;--a2:#8b7cf6;">
       <div class="top">
@@ -608,6 +608,20 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(225,29,72,.4);--cc:#fb7185;--cbg:rgba(225,29,72,.12)">v1.1.0</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">竣工图章</span>
+      </div>
+    </a>
+      <a class="card" href="sgzz.html" style="--g1:#f59e0b;--g2:#ea580c;--gs:rgba(245,158,11,.5);--a1:#fbbf24;--a2:#fb923c;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l3 3v15H6z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12h6M9 15.5h6M9 8.5h3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>施工组织设计编写系统</h3>
+      <div class="desc">单文件离线施工组织设计编辑器：九章框架＋附表，WPS风格查找替换、表格/图片插入、封面三区排版、施工流程图数据驱动自动重绘，一键导出 Word。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(245,158,11,.4);--cc:#fcd34d;--cbg:rgba(245,158,11,.12)">v1.0.9</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">施工组织</span>
       </div>
     </a>
         </div>
@@ -1184,6 +1198,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-03', t:'新增：施工组织设计编写系统 v1.0.9（单文件离线施工组织设计编辑器：九章框架＋附表，WPS风格查找替换、表格/图片插入、封面三区排版、施工流程图数据驱动自动重绘、一键导出 Word，归入「施工与管理」分类）'},
   {d:'2026-11-02', t:'微调：工具箱侧栏分类导航字号与图标比例——① 侧栏标题「工具分类」字号调整为 16px；② 各分类项文字调整为 18px；③ 各分类项前的图标随文字同步缩小至 22px，标题/分类项/图标比例协调、层级清晰'},
   {d:'2026-11-02', t:'优化：工具箱侧栏分类导航放大与卡片统一尺寸——① 左侧分类文字字号放大（标题与各分类项），每条分类项前面新增带彩色背景的图标（计算器／三角尺／施工／放大镜／地图／工具箱）；② 侧栏加宽以容纳放大文字；③ 全部工具卡片统一为同一尺寸（与「结构与CAD出图」分类一致），不再因某分类卡片数量少而被拉伸成 400px 超宽卡片，卡片数少的分类右侧自然留白'},
   {d:'2026-11-02', t:'更新：工具箱新增侧栏分类导航——① 左侧新增竖排分类导航（造价与算量／结构与CAD出图／施工与管理／审图与报告／测绘与图像／图文工具箱），左侧栏贴页面最左、卡片展示区贴页面最右，点击分类锚点平滑滚动定位并高亮当前分类；② 18 个工具按 6 大分类重新归类：竣工章生成器归入施工与管理，图文工具箱（智印PDF工坊、批量压缩图片）置于最下方；③ 卡片改为自适应铺满（卡片数少的分类也填满行宽，单卡片限制 400px 不越界）；④ 拖动排序改为分类内排序，搜索时自动隐藏无匹配的空分类；⑤ 私密区同步贴边铺满（不分类）'},
