@@ -442,7 +442,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     </svg>
     <span class="nm">净墨</span>
     <span class="sub">PDF 扫描件优化工作台</span>
-    <span class="vchip" id="vchip">v1.0.7</span>
+    <span class="vchip" id="vchip">v1.0.8</span>
   </div>
   <div class="spacer"></div>
   <button class="tbtn primary" id="btnOpen">
@@ -625,9 +625,11 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
           <span class="txt">导出后自动打开</span>
           <i class="knob"></i>
         </div>
+        <div class="note" id="openNote" style="display:none"></div>
       </div>
       <button class="btn primary" id="btnExport" disabled>导出优化后的 PDF</button>
       <button class="btn ghost" id="btnOpenDir" style="display:none">打开刚导出的文件夹</button>
+      <button class="btn ghost" id="btnOpenPdf" style="display:none">在浏览器里预览成品</button>
     </div>
   </aside>
 </div>
@@ -665,9 +667,11 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     <h4>批量与输出</h4>
     <p><b>单文件导出</b>（默认）：每个文件各自导出成一个 PDF；<b>合成一个</b>则把所有文件按顺序拼成一份 PDF。文件名自动加 <code>_净墨优化</code> 后缀，原件不会被覆盖。顶栏「打开文件」可随时追加，标签上的 <b>×</b> 关掉单个文件，「清空所有文件」一键重来。</p>
 
-    <p><b>保存位置</b>（默认「原文件夹」）：导出时直接存回源 PDF 所在的文件夹，不再落到浏览器下载目录。点「导出」后会先弹系统保存框，位置已经定位到源文件所在文件夹、文件名也填好了 <code>xxx_净墨优化.pdf</code>，回车即存；想换到别处也可当场改。选「下载目录」则静默存进浏览器默认下载目录。</p>
+    <p><b>保存位置</b>（默认「原文件夹」）：导出时直接存回源 PDF 所在的文件夹，不再落到浏览器下载目录。点「导出」后会先弹系统保存框，位置已经定位到源文件所在文件夹、文件名也填好了 <code>xxx_净墨优化.pdf</code>，回车即存；想换到别处也可当场改。选「下载目录」则静默存进浏览器默认下载目录。<b>火狐、Safari</b> 没有「存回原文件夹」所需的文件系统接口，会自动改为存进下载目录（文件名不变）。</p>
 
-    <p><b>导出后自动打开</b>（默认开启）：导出完成后自动用系统默认的 PDF 阅读器打开成品。若浏览器拦截了自动打开，点右栏的「打开刚导出的文件夹」定位文件。</p>
+    <p><b>导出后自动打开</b>（默认开启）：导出完成后自动用系统默认的 PDF 阅读器打开成品，<b>一次导出只开一个标签页</b>。</p>
+
+    <p><b>火狐（Firefox）注意</b>：火狐没有「存回原文件夹」所需的文件系统接口，也没有能静默落盘的下载方式——导出后它会把成品<b>用内置 PDF 预览页打开</b>（就一个标签页，本工具不会再额外打开第二次）。要把成品存成文件，两条路任选：① 在预览页里按 <code>Ctrl+S</code>；② 一次性设置：火狐右上角菜单 → 设置 → 常规 → 应用程序 → 找到「Portable Document Format (PDF)」，处理方式改为<b>「保存文件」</b>，之后导出就会直接存进下载目录。</p>
 
     <p><b>打开刚导出的文件夹</b>：导出后右栏会出现这个按钮。点它会弹出系统的文件夹对话框，<b>已定位到刚导出文件所在的那个文件夹</b>，选定后软件内会列出该文件夹里的所有 PDF，刚导出的那份置顶并标「刚导出」——省去再去翻找。若选的是「下载目录」，则按 <code>Ctrl+J</code> 打开下载页、右键「在文件夹中显示」。</p>
 
@@ -1132,7 +1136,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (function () {
   'use strict';
 
-  var VERSION = '1.0.7';
+  var VERSION = '1.0.8';
 
   /* ---------------- pdf.js worker
      策略：优先用真 Worker（blob URL，不阻塞 UI）；
@@ -1179,6 +1183,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     save: typeof window.showSaveFilePicker === 'function',
     dir: typeof window.showDirectoryPicker === 'function'
   };
+  /* 火狐：application/pdf 的「下载」会被它当成内嵌预览、直接开成一个标签页
+     （browser.download.open_pdf_attachments_inline 默认开启），
+     于是「保存」这一步本身就贡献了一个 PDF 标签页，再叠加自动打开就是两个。 */
+  /* ⚠️ 不能用 /gecko/ 判断：Chrome 的 UA 里也写着「like Gecko」，会误伤 */
+  var IS_GECKO = /Firefox\/\d/i.test(navigator.userAgent || '');
+  var FF_TIP = '火狐默认用内置预览页打开成品（只开一个标签页）。要直接存成文件：预览页里按 Ctrl+S，'
+    + '或在火狐「设置 → 常规 → 应用程序」把 PDF 的处理方式改成「保存文件」，之后导出就会存进下载目录。';
   var PDF_TYPES = [{
     description: 'PDF 与图片',
     accept: {
@@ -1202,7 +1213,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     vTitle: $('vTitle'), pgLabel: $('pgLabel'), pgPrev: $('pgPrev'), pgNext: $('pgNext'),
     bOrig: $('bOrig'), bProc: $('bProc'),
     viewer: document.querySelector('.viewer'),
-    swOpen: $('swOpen'), btnOpenDir: $('btnOpenDir'),
+    swOpen: $('swOpen'), btnOpenDir: $('btnOpenDir'), btnOpenPdf: $('btnOpenPdf'),
     fpSheet: $('fpSheet'), fpPath: $('fpPath'), fpList: $('fpList'), fpClose: $('fpClose')
   };
 
@@ -1646,6 +1657,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function refreshLocNote() {
     var n = $('locNote');
     if (!n) return;
+    if (IS_GECKO) {
+      n.textContent = '火狐不支持存回原文件夹：导出交给浏览器，默认用内置预览页打开（只一个标签页）';
+      return;
+    }
     if (S.opts.loc === 'dl') { n.textContent = '直接存进浏览器默认下载目录，不再弹保存框'; return; }
     if (!FSAPI.save) { n.textContent = '当前浏览器不支持定位原文件夹，导出会退回下载目录'; return; }
     n.textContent = S.files.length
@@ -1813,7 +1828,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     a.download = name;
     document.body.appendChild(a);
     a.click();
-    setTimeout(function () { a.remove(); URL.revokeObjectURL(a.href); }, 4000);
+    setTimeout(function () {
+      var href = a.href;
+      a.remove();
+      URL.revokeObjectURL(href);
+    }, 4000);
   }
 
   function runExport(target) {
@@ -1894,14 +1913,27 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         });
       }
       writeJobs(jobs).then(function (r) {
-        var where = r.fs ? '原文件夹' : '下载目录';
         var msg = r.fs
           ? (jobs.length > 1 ? '已存 ' + r.fs + ' 个到原文件夹，' + r.dl + ' 个到下载目录' : '已保存到原文件所在文件夹')
           : (r.dl ? '已保存到浏览器下载目录' : '导出完成');
         if (r.failDl) msg += '　（' + r.failDl + ' 个写入原文件夹失败，已改存下载目录）';
+        el.btnOpenDir.style.display = '';
+
+        /* 火狐：没有文件系统接口，导出只能交给浏览器自己处理 ——
+           「下载」这一步火狐会自己接走：默认直接把成品用内置 PDF 预览页打开（一个标签页），
+           或者按用户在火狐里的设置存进下载目录。这里再 window.open 一次就成了两个标签页，
+           所以火狐下只保留火狐自己的那一次，不再额外打开。 */
+        if (IS_GECKO && !r.fs) {
+          el.btnOpenDir.style.display = 'none';     // 火狐定位文件夹用不上
+          el.btnOpenPdf.style.display = '';         // 手动预览入口（避免自动多开标签页）
+          // 火狐到底存盘还是预览由浏览器决定，这里不谎报「已保存」
+          toast('已导出「' + jobs[0].name + '」· 火狐接管打开（只一个标签页）· 共 ' + total + ' 页 · ' + dpi + 'dpi', 4200);
+          setTimeout(function () { toast(FF_TIP, 7000); }, 4400);
+          return;
+        }
+
         toast(msg + ' · 共 ' + total + ' 页 · ' + dpi + 'dpi', 3200);
         // 导出后自动打开：只打开一次，且只对「真正落到磁盘的成品」打开
-        el.btnOpenDir.style.display = '';
         if (S.opts.autoOpen && r.openUrl) setTimeout(function () { openOut(r.openUrl); }, 120);
       });
     }
@@ -1959,13 +1991,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   /* 用系统默认 PDF 阅读器打开刚导出的文件（浏览器新标签即系统关联程序）。
-     ⚠️ 同一个导出只会自动打开一次：多文件、写盘回退等路径都可能再次触发，
-        重复 window.open 会让用户看到两个一模一样的 PDF 标签页。 */
-  var openedUrls = {};
+     ⚠️ 同一次导出只会自动打开一次：多文件、写盘回退等路径都可能再次触发，
+        重复 window.open 会让用户看到两个一模一样的 PDF 标签页。
+     除了按 URL 去重，再加一道「1.5 秒内只开一次」的闸：不同 URL 的重复触发也挡得住，
+     并兼容火狐把「下载」变成预览标签页的情况。 */
+  var openedUrls = {}, lastOpenAt = 0;
   function openOut(url) {
     url = url || (S.lastOut && S.lastOut.url);
     if (!url) return false;
     if (openedUrls[url]) return false;
+    if (Date.now() - lastOpenAt < 1500) return false;
     openedUrls[url] = 1;
     var w = null;
     try { w = window.open(url, '_blank'); } catch (e) { w = null; }
@@ -1974,6 +2009,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       toast('已导出，但浏览器拦截了自动打开；可点「打开刚导出的文件夹」定位文件', 4200);
       return false;
     }
+    lastOpenAt = Date.now();
     return true;
   }
 
@@ -2195,7 +2231,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       };
     });
     [].forEach.call($('segLoc').children, function (b) {
-      b.onclick = function () { setLoc(b.dataset.v); };
+      b.onclick = function () {
+        if (IS_GECKO && b.dataset.v === 'src') {
+          toast('火狐没有「存回原文件夹」所需的接口，导出只能交给浏览器处理', 4200);
+          return;
+        }
+        setLoc(b.dataset.v);
+      };
     });
 
     // 滑块
@@ -2247,7 +2289,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       el.swOpen.classList.toggle('on', S.opts.autoOpen);
       toast(S.opts.autoOpen ? '导出后会自动打开文件' : '导出后不再自动打开');
     };
+    /* 火狐：打开与否由浏览器接管，这个开关没有意义，换成一行说明 */
+    if (IS_GECKO) {
+      el.swOpen.style.display = 'none';
+      var on = $('openNote');
+      if (on) {
+        on.style.display = '';
+        on.textContent = '火狐由浏览器接管打开：导出后只有一个预览标签页。要直接存成文件，请在火狐「设置 → 常规 → 应用程序」把 PDF 改为「保存文件」。';
+      }
+      // 「原文件夹」在火狐无实现，选中态落到「下载目录」，免得看着像是在存回原处
+      S.opts.loc = 'dl';
+      [].forEach.call($('segLoc').children, function (x) { x.classList.toggle('on', x.dataset.v === 'dl'); });
+      refreshLocNote();
+    }
     el.btnOpenDir.onclick = openOutDir;
+    el.btnOpenPdf.onclick = function () {
+      if (!S.lastOut) { toast('还没有导出过文件'); return; }
+      delete openedUrls[S.lastOut.url];      // 手动点击允许重复打开
+      lastOpenAt = 0;
+      if (!openOut(S.lastOut.url)) toast('浏览器拦截了新标签页，请在地址栏允许弹窗后重试', 4200);
+    };
     el.fpClose.onclick = function () { el.fpSheet.classList.remove('on'); };
     el.fpSheet.addEventListener('click', function (e) { if (e.target === el.fpSheet) el.fpSheet.classList.remove('on'); });
     $('btnClear').onclick = function () {
