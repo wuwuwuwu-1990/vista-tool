@@ -442,7 +442,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     </svg>
     <span class="nm">净墨</span>
     <span class="sub">PDF 扫描件优化工作台</span>
-    <span class="vchip" id="vchip">v1.0.6</span>
+    <span class="vchip" id="vchip">v1.0.7</span>
   </div>
   <div class="spacer"></div>
   <button class="tbtn primary" id="btnOpen">
@@ -1132,7 +1132,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (function () {
   'use strict';
 
-  var VERSION = '1.0.6';
+  var VERSION = '1.0.7';
 
   /* ---------------- pdf.js worker
      策略：优先用真 Worker（blob URL，不阻塞 UI）；
@@ -1614,6 +1614,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* 清空后复位界面 */
   function resetUI() {
     cache.clear(); S.cur = { f: 0, p: 0 }; S.lastPDF = null; S.lastOut = null; S.dirCache = null;
+    openedUrls = {};   // 清空文件后重来，允许新的导出再次自动打开
     el.btnOpenDir.style.display = 'none';
     el.filebar.innerHTML = '';
     el.paper.style.display = 'none';
@@ -1897,21 +1898,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         var msg = r.fs
           ? (jobs.length > 1 ? '已存 ' + r.fs + ' 个到原文件夹，' + r.dl + ' 个到下载目录' : '已保存到原文件所在文件夹')
           : (r.dl ? '已保存到浏览器下载目录' : '导出完成');
+        if (r.failDl) msg += '　（' + r.failDl + ' 个写入原文件夹失败，已改存下载目录）';
         toast(msg + ' · 共 ' + total + ' 页 · ' + dpi + 'dpi', 3200);
-        // 导出后自动用系统默认 PDF 阅读器（浏览器内置阅读器）打开
+        // 导出后自动打开：只打开一次，且只对「真正落到磁盘的成品」打开
         el.btnOpenDir.style.display = '';
-        if (S.opts.autoOpen) setTimeout(openOut, 120);
+        if (S.opts.autoOpen && r.openUrl) setTimeout(function () { openOut(r.openUrl); }, 120);
       });
     }
 
-    /* 逐个写入，返回 { fs: 存进原文件夹的个数, dl: 走下载的个数 } */
+    /* 逐个写入，返回 { fs: 存进原文件夹的个数, dl: 走下载的个数,
+       openUrl: 供自动打开的那一份（写盘失败改走下载的不算，避免「下载 + 打开」双份） } */
     function writeJobs(jobs) {
-      var i = 0, fs = 0, dl = 0;
+      var i = 0, fs = 0, dl = 0, failDl = 0, openUrl = null;
       function nextJob() {
-        if (i >= jobs.length) return Promise.resolve({ fs: fs, dl: dl });
+        if (i >= jobs.length) return Promise.resolve({ fs: fs, dl: dl, failDl: failDl, openUrl: openUrl });
         var j = jobs[i++];
-        return save(j.pdf, j.name, j.target).then(function (how) {
-          if (how === 'fs') fs++; else dl++;
+        return save(j.pdf, j.name, j.target).then(function (r) {
+          if (r.how === 'fs') {
+            fs++;
+            if (!openUrl) openUrl = r.url;
+          } else {
+            dl++;
+            if (r.failed) failDl++;                    // 写盘失败退回下载：不再自动打开
+            else if (!openUrl) openUrl = r.url;         // 主动选「下载目录」：保持自动打开
+          }
           return nextJob();
         });
       }
@@ -1931,27 +1941,36 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
       if (tgt && tgt.handle) {
         return writeHandle(tgt.handle, blob).then(function () {
-          return 'fs';
+          return { how: 'fs', url: url };
         }).catch(function (e) {
           console.warn('写入原文件夹失败，改走下载', e);
+          // 实际落到下载目录了，状态要跟着改，否则「打开刚导出的文件夹」会指错地方
+          if (S.lastOut && S.lastOut.url === url) { S.lastOut.where = 'dl'; S.lastOut.handle = null; }
           downloadBlob(blob, filename);
-          return 'dl';
+          return { how: 'dl', url: url, failed: true };
         });
       }
       downloadBlob(blob, filename);
       // 多个文件连续下载会被浏览器判为批量行为，稍作错开
-      return new Promise(function (r) { setTimeout(function () { r('dl'); }, 320); });
+      return new Promise(function (r) { setTimeout(function () { r({ how: 'dl', url: url }); }, 320); });
     }
 
     next(0, 0);
   }
 
-  /* 用系统默认 PDF 阅读器打开刚导出的文件（浏览器新标签即系统关联程序） */
-  function openOut() {
-    if (!S.lastOut) return false;
+  /* 用系统默认 PDF 阅读器打开刚导出的文件（浏览器新标签即系统关联程序）。
+     ⚠️ 同一个导出只会自动打开一次：多文件、写盘回退等路径都可能再次触发，
+        重复 window.open 会让用户看到两个一模一样的 PDF 标签页。 */
+  var openedUrls = {};
+  function openOut(url) {
+    url = url || (S.lastOut && S.lastOut.url);
+    if (!url) return false;
+    if (openedUrls[url]) return false;
+    openedUrls[url] = 1;
     var w = null;
-    try { w = window.open(S.lastOut.url, '_blank'); } catch (e) { w = null; }
+    try { w = window.open(url, '_blank'); } catch (e) { w = null; }
     if (!w) {
+      delete openedUrls[url];    // 被拦截则允许之后重试
       toast('已导出，但浏览器拦截了自动打开；可点「打开刚导出的文件夹」定位文件', 4200);
       return false;
     }
