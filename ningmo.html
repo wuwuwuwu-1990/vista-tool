@@ -142,6 +142,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
   color:var(--muted);padding:6px 0;border-radius:8px;cursor:pointer;transition:.16s;
 }
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1);font-weight:500}
+.note{font-size:11.5px;line-height:1.55;color:var(--muted);margin-top:7px}
 
 .switch{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
 .switch .txt{font-size:12.5px;color:var(--ink-2)}
@@ -252,15 +253,21 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
 .pg button:disabled{background:#ebebef;color:#b8b8c0;box-shadow:none;cursor:not-allowed}
 .pg #pgLabel{min-width:56px;text-align:center}
 
+/* 用块级 + margin:auto 居中，而不是 flex 居中：
+   放大后纸面宽于容器时，flex 的 justify-content:center 会把左半边裁到滚动区之外，
+   导致拖动/滚动永远够不着页面左侧。 */
 .canvaswrap{
-  flex:1;min-height:0;overflow:auto;padding:18px;display:flex;
-  align-items:flex-start;justify-content:center;background:#f0f0f2;
+  flex:1;min-height:0;overflow:auto;padding:18px;display:block;background:#f0f0f2;
 }
 .canvaswrap::-webkit-scrollbar{width:9px;height:9px}
 .canvaswrap::-webkit-scrollbar-thumb{background:#cfcfd4;border-radius:8px;border:2px solid #f0f0f2}
+/* 放大模式：左键拖动平移 */
+.canvaswrap.can-pan{cursor:grab;user-select:none;-webkit-user-select:none}
+.canvaswrap.can-pan.grabbing{cursor:grabbing}
+.canvaswrap.can-pan.grabbing .paper{pointer-events:none}
 .paper{
   position:relative;background:#fff;box-shadow:0 10px 34px rgba(0,0,0,.14);
-  flex:none;line-height:0;
+  flex:none;line-height:0;margin:0 auto;
 }
 .paper canvas{display:block}
 .paper .layer{position:absolute;inset:0}
@@ -395,7 +402,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     </svg>
     <span class="nm">净墨</span>
     <span class="sub">PDF 扫描件优化工作台</span>
-    <span class="vchip" id="vchip">v1.0.3</span>
+    <span class="vchip" id="vchip">v1.0.4</span>
   </div>
   <div class="spacer"></div>
   <button class="tbtn primary" id="btnOpen">
@@ -565,6 +572,14 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
         </div>
       </div>
       <div class="field">
+        <div class="lb"><span>保存位置</span></div>
+        <div class="seg" id="segLoc">
+          <button data-v="src" class="on" title="存回打开时所在的文件夹">原文件夹</button>
+          <button data-v="dl" title="存入浏览器默认下载目录">下载目录</button>
+        </div>
+        <div class="note" id="locNote">导出时弹出保存框，位置已定位到源 PDF 所在文件夹，回车即存</div>
+      </div>
+      <div class="field">
         <div class="switch on" id="swOpen">
           <span class="txt">导出后自动打开</span>
           <i class="knob"></i>
@@ -597,10 +612,14 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     <h4>批量与输出</h4>
     <p><b>单文件导出</b>（默认）：每个文件各自导出成一个 PDF；<b>合成一个</b>则把所有文件按顺序拼成一份 PDF。文件名自动加 <code>_净墨优化</code> 后缀，原件不会被覆盖。顶栏「打开文件」可随时追加，标签上的 <b>×</b> 关掉单个文件，「清空所有文件」一键重来。</p>
 
-    <p><b>导出后自动打开</b>（默认开启）：导出完成后自动用系统默认的 PDF 阅读器打开成品，省去再去下载文件夹翻找。若浏览器拦截了自动打开，点右栏的「打开刚导出的 PDF」即可。</p>
+    <p><b>保存位置</b>（默认「原文件夹」）：导出时直接存回源 PDF 所在的文件夹，不再落到浏览器下载目录。点「导出」后会先弹系统保存框，位置已经定位到源文件所在文件夹、文件名也填好了 <code>xxx_净墨优化.pdf</code>，回车即存；想换到别处也可当场改。选「下载目录」则静默存进浏览器默认下载目录。</p>
 
-    <h4>翻页</h4>
+    <p><b>导出后自动打开</b>（默认开启）：导出完成后自动用系统默认的 PDF 阅读器打开成品，省去再去文件夹里翻找。若浏览器拦截了自动打开，点右栏的「打开刚导出的 PDF」即可。</p>
+
+    <h4>翻页与查看</h4>
     <p>预览区里滚动<b>鼠标滚轮</b>即可上下翻页，也可用 <code>←</code> <code>→</code> 方向键，或点工具条右侧的翻页按钮。</p>
+
+    <p>切到 <b>100%</b> 或 <b>200%</b> 放大后，按住<b>鼠标左键拖动</b>即可平移页面，像抓手一样查看局部；「适应」模式下自动关闭拖动，恢复常规选择。</p>
 
     <h4>隐私</h4>
     <p>所有解析与渲染都在你本机浏览器完成，断网可用，任何页面数据都不外发。</p>
@@ -1058,7 +1077,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (function () {
   'use strict';
 
-  var VERSION = '1.0.3';
+  var VERSION = '1.0.4';
 
   /* ---------------- pdf.js worker
      策略：优先用真 Worker（blob URL，不阻塞 UI）；
@@ -1093,9 +1112,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     view: 'split',
     zoom: 'fit',
     split: 0.5,
-    opts: { mode: 'auto', dpi: 300, black: null, white: 230, sharp: 80, bin: false, merge: 'single', autoOpen: true },
+    opts: { mode: 'auto', dpi: 300, black: null, white: 230, sharp: 80, bin: false, merge: 'single', loc: 'src', autoOpen: true },
     lastPDF: null
   };
+  /* File System Access API：用来拿「源文件句柄」，从而把导出件存回原文件夹。
+     Chrome / Edge 支持；Firefox、Safari 没有，自动退回浏览器下载目录。 */
+  var FSAPI = {
+    open: typeof window.showOpenFilePicker === 'function',
+    save: typeof window.showSaveFilePicker === 'function'
+  };
+  var PDF_TYPES = [{
+    description: 'PDF 与图片',
+    accept: {
+      'application/pdf': ['.pdf'],
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/webp': ['.webp']
+    }
+  }];
   var DEF_WHITE = 230;       // 纸面提亮默认值（255 = 自动判定）
   var PREVIEW_DPI = 200;
   var cache = new Map();     // key -> canvas
@@ -1400,6 +1434,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     [el.cvOrig, el.cvProc].forEach(function (c) {
       c.style.width = dw + 'px'; c.style.height = dh + 'px';
     });
+    syncPanMode();
+  }
+
+  /* 放大（100%/200%）时启用左键拖动平移；适应模式关闭 */
+  function syncPanMode() {
+    var on = S.zoom !== 'fit' && S.files.length > 0;
+    el.wrap.classList.toggle('can-pan', on);
+    if (!on) el.wrap.classList.remove('grabbing');
   }
 
   function setView(v) {
@@ -1530,6 +1572,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     drawHist(null, null);
     $('diagbar').classList.remove('live');
     renderFilebar();
+    syncPanMode();
+  }
+
+  /* ---------------- 右栏：保存位置 ---------------- */
+  function setLoc(v) {
+    S.opts.loc = v;
+    [].forEach.call($('segLoc').children, function (x) { x.classList.toggle('on', x.dataset.v === v); });
+    refreshLocNote();
+    toast(v === 'src' ? '导出时存回原文件所在文件夹' : '导出时存进浏览器下载目录');
+  }
+
+  function refreshLocNote() {
+    var n = $('locNote');
+    if (!n) return;
+    if (S.opts.loc === 'dl') { n.textContent = '直接存进浏览器默认下载目录，不再弹保存框'; return; }
+    if (!FSAPI.save) { n.textContent = '当前浏览器不支持定位原文件夹，导出会退回下载目录'; return; }
+    n.textContent = S.files.length
+      ? '导出时弹出保存框，位置已定位到源 PDF 所在文件夹，回车即存'
+      : '导出时弹出保存框，载入文件后自动定位到它所在的文件夹';
   }
 
   /* ---------------- 右栏：文件信息 ---------------- */
@@ -1553,10 +1614,33 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('btnExport').disabled = n === 0;
     $('btnClear').disabled = n === 0;
     if (n === 0) { el.pgPrev.disabled = true; el.pgNext.disabled = true; }
+    refreshLocNote();
   }
 
-  /* ---------------- 选文件 ---------------- */
+  /* ---------------- 选文件 ----------------
+     优先走 showOpenFilePicker：它能返回 FileSystemFileHandle，
+     后面保存时用它的目录定位「源文件所在文件夹」。不支持则退回 <input file>。 */
   function pickFiles() {
+    if (FSAPI.open) {
+      window.showOpenFilePicker({ multiple: true, types: PDF_TYPES }).then(function (handles) {
+        return Promise.all(handles.map(function (h) {
+          return h.getFile().catch(function () { return null; });
+        })).then(function (files) {
+          var okFiles = [], okHandles = [];
+          files.forEach(function (f, i) { if (f) { okFiles.push(f); okHandles.push(handles[i]); } });
+          if (okFiles.length) loadFiles(okFiles, okHandles);
+        });
+      }).catch(function (e) {
+        if (e && e.name === 'AbortError') return;    // 用户自己取消，不兜底
+        console.warn('showOpenFilePicker 不可用，退回文件选择框', e);
+        legacyPick();
+      });
+      return;
+    }
+    legacyPick();
+  }
+
+  function legacyPick() {
     var inp = document.createElement('input');
     inp.type = 'file'; inp.multiple = true; inp.accept = '.pdf,image/*';
     inp.onchange = function () { loadFiles(inp.files); };
@@ -1564,7 +1648,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   /* ---------------- 载入 ---------------- */
-  function loadFiles(fileList) {
+  function loadFiles(fileList, handles) {
     var arr = [].slice.call(fileList);
     if (!arr.length) return;
     el.prog.classList.add('on');
@@ -1578,7 +1662,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         el.progBar.style.width = Math.round(6 + 44 * (i / arr.length)) + '%';
         return file.arrayBuffer().then(function (buf) {
           var kind = /\.pdf$/i.test(file.name) ? 'pdf' : 'img';
-          return addFileFromBuffer(buf, file.name, kind);
+          return addFileFromBuffer(buf, file.name, kind).then(function (f) {
+            if (handles && handles[i]) f.handle = handles[i];   // 记住源文件句柄
+            return f;
+          });
         });
       });
     });
@@ -1600,11 +1687,77 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
   }
 
-  /* ---------------- 导出 ---------------- */
+  /* ---------------- 导出 ----------------
+     保存位置默认「原文件夹」：用源文件的 FileSystemFileHandle 作为 startIn，
+     文件对话框一打开就停在源 PDF 所在的目录，文件名也预填好，回车即可。
+     注意：浏览器要求文件对话框必须由用户手势触发，而多页渲染常常超过手势有效期，
+     所以顺序只能是「先定保存位置 → 再慢慢渲染处理」。 */
   function exportPDF() {
     if (!S.files.length) return;
     var JPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
     if (!JPDF) { toast('PDF 引擎未就绪，请刷新页面'); return; }
+    var merge = S.opts.merge === 'merge';
+    var outName;
+    if (merge) {
+      var b = baseName(S.files[0].name);
+      outName = (S.files.length > 1 ? b + '等' + S.files.length + '个文件' : b) + '_净墨优化.pdf';
+    } else {
+      outName = baseName(S.files[0].name) + '_净墨优化.pdf';
+    }
+    prepareTarget(outName, firstHandle()).then(function (t) {
+      if (t.mode === 'cancel') { toast('已取消导出'); return; }
+      runExport(t);
+    });
+  }
+
+  /* 第一个能拿到句柄的源文件（用于定位原文件夹） */
+  function firstHandle() {
+    for (var i = 0; i < S.files.length; i++) if (S.files[i].handle) return S.files[i].handle;
+    return null;
+  }
+
+  /* 决定保存目标：{ mode:'fs'|'dl'|'cancel', handle } */
+  function prepareTarget(name, src) {
+    return new Promise(function (resolve) {
+      if (S.opts.loc !== 'src') return resolve({ mode: 'dl', handle: null });
+      if (!FSAPI.save) return resolve({ mode: 'dl', handle: null, why: 'unsupported' });
+      var opt = { suggestedName: name, types: [{ description: 'PDF 文件', accept: { 'application/pdf': ['.pdf'] } }] };
+      function call(useStart) {
+        if (useStart && src) return window.showSaveFilePicker(Object.assign({ startIn: src }, opt));
+        return window.showSaveFilePicker(opt);
+      }
+      call(true).catch(function (e) {
+        if (e && e.name === 'TypeError') return call(false);   // 该环境不认 startIn，退回不定位
+        throw e;
+      }).then(function (h) {
+        resolve({ mode: 'fs', handle: h });
+      }).catch(function (e) {
+        if (e && e.name === 'AbortError') return resolve({ mode: 'cancel' });
+        console.warn('保存对话框不可用，退回下载目录', e);
+        resolve({ mode: 'dl', handle: null, why: 'blocked' });
+      });
+    });
+  }
+
+  /* 把 blob 直接写进用户选定的文件句柄 */
+  function writeHandle(handle, blob) {
+    return handle.createWritable().then(function (w) {
+      return w.write(blob).then(function () { return w.close(); });
+    });
+  }
+
+  /* 退回浏览器下载目录 */
+  function downloadBlob(blob, name) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { a.remove(); URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  function runExport(target) {
+    var JPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
     var merge = S.opts.merge === 'merge';
     var dpi = S.opts.dpi;
     var total = S.files.reduce(function (a, f) { return a + f.pageCount; }, 0);
@@ -1666,47 +1819,69 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     function finish() {
       var base = baseName(S.files[0].name);
       el.prog.classList.remove('on');
+      var jobs = [];
       if (merge) {
         var n1 = S.files.length > 1 ? base + '等' + S.files.length + '个文件' : base;
-        save(doc, n1 + '_净墨优化.pdf');
-        toast('已合成 1 个 PDF · 共 ' + total + ' 页 · ' + dpi + 'dpi');
+        jobs.push({ pdf: doc, name: n1 + '_净墨优化.pdf', target: target });
       } else {
-        /* 单文件导出：每个源文件各出一份 PDF。连续点击会被浏览器判定为批量下载而拦截，
-           这里错开 320ms 逐个触发。 */
-        var cnt = 0, delay = 0;
         S.files.forEach(function (f, i) {
           if (!groups[i]) return;
-          var name = baseName(f.name) + '_净墨优化.pdf';
-          var pdf = groups[i].pdf, at = delay;
-          cnt++; delay += 320;
-          if (at === 0) save(pdf, name);
-          else setTimeout(function () { save(pdf, name); }, at);
+          jobs.push({
+            pdf: groups[i].pdf,
+            name: baseName(f.name) + '_净墨优化.pdf',
+            target: jobs.length === 0 ? target : null   // 手势只剩一次，其余走下载目录
+          });
         });
-        toast(cnt > 1
-          ? '已导出 ' + cnt + ' 个 PDF · 共 ' + total + ' 页 · ' + dpi + 'dpi'
-          : '已导出 · 共 ' + total + ' 页 · ' + dpi + 'dpi');
       }
-      // 导出后自动用系统默认 PDF 阅读器（浏览器内置阅读器）打开
-      el.btnOpenOut.style.display = '';
-      if (S.opts.autoOpen) setTimeout(openOut, 120);
+      writeJobs(jobs).then(function (r) {
+        var where = r.fs ? '原文件夹' : '下载目录';
+        var msg = r.fs
+          ? (jobs.length > 1 ? '已存 ' + r.fs + ' 个到原文件夹，' + r.dl + ' 个到下载目录' : '已保存到原文件所在文件夹')
+          : (r.dl ? '已保存到浏览器下载目录' : '导出完成');
+        toast(msg + ' · 共 ' + total + ' 页 · ' + dpi + 'dpi', 3200);
+        // 导出后自动用系统默认 PDF 阅读器（浏览器内置阅读器）打开
+        el.btnOpenOut.style.display = '';
+        if (S.opts.autoOpen) setTimeout(openOut, 120);
+      });
     }
 
-    function save(pdfDoc, filename) {
+    /* 逐个写入，返回 { fs: 存进原文件夹的个数, dl: 走下载的个数 } */
+    function writeJobs(jobs) {
+      var i = 0, fs = 0, dl = 0;
+      function nextJob() {
+        if (i >= jobs.length) return Promise.resolve({ fs: fs, dl: dl });
+        var j = jobs[i++];
+        return save(j.pdf, j.name, j.target).then(function (how) {
+          if (how === 'fs') fs++; else dl++;
+          return nextJob();
+        });
+      }
+      return nextJob();
+    }
+
+    function save(pdfDoc, filename, tgt) {
       var blob = pdfDoc.output('blob');
       S.lastPDF = { name: filename, size: blob.size };
       var url = URL.createObjectURL(blob);
+      S.lastOut = { url: url, name: filename, where: tgt && tgt.handle ? 'fs' : 'dl' };
       // 保留 URL 供「自动打开／再次打开」使用，5 分钟后再释放
-      S.lastOut = { url: url, name: filename };
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () { a.remove(); }, 1500);
       setTimeout(function () {
         if (S.lastOut && S.lastOut.url === url) return;   // 仍是最近一次导出，先留着
         URL.revokeObjectURL(url);
       }, 300000);
+
+      if (tgt && tgt.handle) {
+        return writeHandle(tgt.handle, blob).then(function () {
+          return 'fs';
+        }).catch(function (e) {
+          console.warn('写入原文件夹失败，改走下载', e);
+          downloadBlob(blob, filename);
+          return 'dl';
+        });
+      }
+      downloadBlob(blob, filename);
+      // 多个文件连续下载会被浏览器判为批量行为，稍作错开
+      return new Promise(function (r) { setTimeout(function () { r('dl'); }, 320); });
     }
 
     next(0, 0);
@@ -1735,7 +1910,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
     window.addEventListener('drop', function (e) {
       e.preventDefault();
-      if (e.dataTransfer && e.dataTransfer.files.length) loadFiles(e.dataTransfer.files);
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      var dt = e.dataTransfer;
+      // 拖进来的文件同样能拿到句柄，之后导出即可存回它的原文件夹
+      var jobs = [];
+      if (dt.items && dt.items.length) {
+        for (var i = 0; i < dt.items.length; i++) {
+          var it = dt.items[i];
+          jobs.push(it.kind === 'file' && it.getAsFileSystemHandle
+            ? it.getAsFileSystemHandle().catch(function () { return null; })
+            : Promise.resolve(null));
+        }
+      }
+      if (!jobs.length) { loadFiles(dt.files); return; }
+      Promise.all(jobs).then(function (hs) {
+        loadFiles(dt.files, hs);
+      }).catch(function () { loadFiles(dt.files); });
     });
     el.drop.addEventListener('click', pickFiles);
     $('btnOpen').onclick = pickFiles;
@@ -1790,6 +1980,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         S.opts.merge = b.dataset.v;
         [].forEach.call($('segMerge').children, function (x) { x.classList.toggle('on', x === b); });
       };
+    });
+    [].forEach.call($('segLoc').children, function (b) {
+      b.onclick = function () { setLoc(b.dataset.v); };
     });
 
     // 滑块
@@ -1884,6 +2077,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     el.viewer.addEventListener('wheel', function (e) {
       if (!S.files.length) return;                 // 无文件时不拦截，页面照常滚动
       if (e.ctrlKey) return;                       // Ctrl+滚轮留给浏览器缩放
+      if (S.zoom !== 'fit') return;                // 放大后滚轮交给原生滚动，配合拖动查看
       var d = e.deltaY;
       if (e.deltaMode === 1) d *= 18;              // 行模式
       else if (e.deltaMode === 2) d *= 100;        // 页模式
@@ -1899,6 +2093,33 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       wAcc = 0;
       if (moved) { showPage(); wLock = now + 300; }
     }, { passive: false });
+
+    /* 放大（100% / 200%）时，按住左键拖动平移页面 */
+    var pan = null;
+    el.wrap.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;                                  // 只认左键
+      if (S.zoom === 'fit' || !S.files.length) return;             // 适应模式不拖
+      if (e.target.closest && e.target.closest('.divider')) return; // 分割线拖拽优先
+      pan = { id: e.pointerId, x: e.clientX, y: e.clientY, l: el.wrap.scrollLeft, t: el.wrap.scrollTop };
+      el.wrap.classList.add('grabbing');
+      try { el.wrap.setPointerCapture(e.pointerId); } catch (err) { }
+      e.preventDefault();
+    });
+    el.wrap.addEventListener('pointermove', function (e) {
+      if (!pan || e.pointerId !== pan.id) return;
+      el.wrap.scrollLeft = pan.l - (e.clientX - pan.x);
+      el.wrap.scrollTop = pan.t - (e.clientY - pan.y);
+      e.preventDefault();
+    });
+    function endPan(e) {
+      if (!pan || e.pointerId !== pan.id) return;
+      var id = pan.id;
+      pan = null;
+      el.wrap.classList.remove('grabbing');
+      try { el.wrap.releasePointerCapture(id); } catch (err) { }
+    }
+    el.wrap.addEventListener('pointerup', endPan);
+    el.wrap.addEventListener('pointercancel', endPan);
   }
 
   /* ---------------- 启动 ---------------- */
