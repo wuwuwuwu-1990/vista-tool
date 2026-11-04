@@ -259,8 +259,16 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
 .canvaswrap{
   flex:1;min-height:0;overflow:auto;padding:18px;display:block;background:#f0f0f2;
 }
-.canvaswrap::-webkit-scrollbar{width:9px;height:9px}
-.canvaswrap::-webkit-scrollbar-thumb{background:#cfcfd4;border-radius:8px;border:2px solid #f0f0f2}
+/* 放大后要能在页面上上下左右「滑」，滚动条必须看得见、抓得住：
+   12px 宽（原来 8px 太细，指针常滑到内容区被平移逻辑吃掉），常显 + hover 加深。 */
+.canvaswrap::-webkit-scrollbar{width:12px;height:12px}
+.canvaswrap::-webkit-scrollbar-track{background:#e4e4e9}
+.canvaswrap::-webkit-scrollbar-thumb{
+  background:#a9a9b4;border-radius:8px;border:2px solid #e4e4e9;min-height:40px;min-width:40px;
+}
+.canvaswrap::-webkit-scrollbar-thumb:hover{background:#8e8e9b}
+.canvaswrap::-webkit-scrollbar-thumb:active{background:#6f6f7c}
+.canvaswrap::-webkit-scrollbar-corner{background:#e4e4e9}
 /* 放大模式：左键拖动平移 */
 .canvaswrap.can-pan{cursor:grab;user-select:none;-webkit-user-select:none}
 .canvaswrap.can-pan.grabbing{cursor:grabbing}
@@ -434,7 +442,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     </svg>
     <span class="nm">净墨</span>
     <span class="sub">PDF 扫描件优化工作台</span>
-    <span class="vchip" id="vchip">v1.0.5</span>
+    <span class="vchip" id="vchip">v1.0.6</span>
   </div>
   <div class="spacer"></div>
   <button class="tbtn primary" id="btnOpen">
@@ -485,8 +493,8 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
 
       <div class="field">
         <div class="lb"><span>纸面提亮</span><span class="val" id="whiteVal">230</span></div>
-        <input type="range" id="rWhite" min="180" max="255" step="1" value="205"
-               title="往右拖，纸面更白（白场数值随之变小；拖到最左为自动判定）">
+        <input type="range" id="rWhite" min="180" max="255" step="1" value="230"
+               title="默认 230；拖到最右端（255）为自动判定">
       </div>
 
       <div class="field">
@@ -648,7 +656,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
 
     <h4>三个参数怎么用</h4>
     <p><b>墨色加深</b>：决定多深的灰被压成纯黑。数值越大、字越实，过大则细笔画会粘连。<br>
-    <b>纸面提亮</b>：决定多亮的灰被压成纯白，用来清掉纸张底色和扫描阴影。<b>滑块往右＝纸面更白</b>（白场数值随之变小，默认 230，可到 180）；拖到最左端为自动判定。<br>
+    <b>纸面提亮</b>：决定多亮的灰被压成纯白，用来清掉纸张底色和扫描阴影。默认 230，拉到 255 则为自动判定。<br>
     <b>边缘锐化</b>：把发虚的字边拉回来，常规文档 70–90% 足够，超过 120% 容易起白边。</p>
 
     <h4>什么时候开"纯黑白"</h4>
@@ -1124,7 +1132,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (function () {
   'use strict';
 
-  var VERSION = '1.0.5';
+  var VERSION = '1.0.6';
 
   /* ---------------- pdf.js worker
      策略：优先用真 Worker（blob URL，不阻塞 UI）；
@@ -1180,13 +1188,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       'image/webp': ['.webp']
     }
   }];
-  var DEF_WHITE = 230;       // 纸面白场默认值（数值越小，纸面越白；255 = 自动判定）
-  /* 白场滑块与数值是反向的：滑块越往右 → 白场越小 → 纸面越白。
-     滑块 s ∈ [180,255]，白场 = 435 - s。
-     s=205 → 白场 230（默认）｜s=255 → 180（最白）｜s=180 → 255（自动判定） */
-  var WH_SUM = 435;
-  function sliderToWhite(s) { return WH_SUM - s; }
-  function whiteToSlider(w) { return WH_SUM - w; }
+  var DEF_WHITE = 230;       // 纸面提亮默认值（255 = 自动判定）
   var PREVIEW_DPI = 200;
   var cache = new Map();     // key -> canvas
   var seq = 0;
@@ -2095,10 +2097,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
     [].forEach.call($('segZoom').children, function (b) {
       b.onclick = function () {
+        /* 切换缩放时记住「视口中心」落在整页的相对位置，切完按新尺寸还原，
+           否则一放大就跳回页面左上角，得重新找刚才看的地方。
+           用纸面尺寸换算而不是等重排后读 scrollWidth —— 后者在样式刚改完时读到旧值，
+           会把位置夹到最大值（实测会跳到右下角）。 */
+        var keep = null;
+        if (S.zoom !== 'fit' && el.paper.offsetWidth) {
+          keep = {
+            cx: (el.wrap.scrollLeft + el.wrap.clientWidth / 2) / el.paper.offsetWidth,
+            cy: (el.wrap.scrollTop + el.wrap.clientHeight / 2) / el.paper.offsetHeight
+          };
+        }
         S.zoom = b.dataset.v;
         [].forEach.call($('segZoom').children, function (x) { x.classList.toggle('on', x === b); });
         var src = curFile();
         if (src) { applyLayout(el.cvOrig.width, el.cvOrig.height); }
+        if (keep && el.paper.offsetWidth) {
+          el.wrap.scrollLeft = Math.max(0, Math.round(keep.cx * el.paper.offsetWidth - el.wrap.clientWidth / 2));
+          el.wrap.scrollTop = Math.max(0, Math.round(keep.cy * el.paper.offsetHeight - el.wrap.clientHeight / 2));
+        }
       };
     });
 
@@ -2181,9 +2198,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       paintRange(rB); debounce();
     };
     rW.oninput = function () {
-      var s = +rW.value;
-      S.opts.white = (s <= +rW.min) ? null : sliderToWhite(s);   // 拖到最左＝自动判定
-      $('whiteVal').textContent = S.opts.white == null ? '自动' : String(S.opts.white);
+      S.opts.white = (rW.value === '255') ? null : +rW.value;
+      $('whiteVal').textContent = S.opts.white == null ? '自动' : rW.value;
       paintRange(rW); debounce();
     };
     rS.oninput = function () {
@@ -2200,7 +2216,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     $('btnAuto').onclick = function () {
       S.opts.black = null; S.opts.white = DEF_WHITE;
-      rB.value = 0; rW.value = whiteToSlider(DEF_WHITE); paintRange(rB); paintRange(rW);
+      rB.value = 0; rW.value = DEF_WHITE; paintRange(rB); paintRange(rW);
       $('blackVal').textContent = '自动'; $('whiteVal').textContent = DEF_WHITE;
       showPage();
       toast('已恢复默认参数（纸面提亮 ' + DEF_WHITE + '）');
@@ -2274,18 +2290,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (moved) { showPage(); wLock = now + 300; }
     }, { passive: false });
 
-    /* 放大（100% / 200%）时，按住左键拖动平移页面 */
+    /* 放大（100% / 200%）时，按住左键拖动平移页面。
+       ⚠️ 两个必须绕开的坑，否则表现为「侧边滚动条拖不动 / 方向乱跑」：
+          1) 指针落在滚动条带上（clientX >= clientWidth 或 clientY >= clientHeight）。
+             原生滚动条没有独立 DOM 节点，事件 target 就是 .canvaswrap 本身，
+             一旦在这里 preventDefault + setPointerCapture，滚动条拖拽就被夺走，
+             平移动画与滚动条滚动互相打架。
+          2) 分割线（.divider）拖拽优先。
+       事件挂 document 而非 setPointerCapture：指针移出手柄/预览区也严格跟手。 */
     var pan = null;
+    function inScrollbar(e) {
+      var r = el.wrap.getBoundingClientRect();
+      return (e.clientX - r.left - el.wrap.clientLeft) >= el.wrap.clientWidth
+          || (e.clientY - r.top - el.wrap.clientTop) >= el.wrap.clientHeight;
+    }
     el.wrap.addEventListener('pointerdown', function (e) {
-      if (e.button !== 0) return;                                  // 只认左键
-      if (S.zoom === 'fit' || !S.files.length) return;             // 适应模式不拖
-      if (e.target.closest && e.target.closest('.divider')) return; // 分割线拖拽优先
+      if (e.button !== 0) return;                                   // 只认左键
+      if (S.zoom === 'fit' || !S.files.length) return;              // 适应模式不拖
+      if (inScrollbar(e)) return;                                   // 滚动条交给浏览器
+      if (e.target.closest && e.target.closest('.divider')) return;  // 分割线拖拽优先
       pan = { id: e.pointerId, x: e.clientX, y: e.clientY, l: el.wrap.scrollLeft, t: el.wrap.scrollTop };
       el.wrap.classList.add('grabbing');
-      try { el.wrap.setPointerCapture(e.pointerId); } catch (err) { }
       e.preventDefault();
     });
-    el.wrap.addEventListener('pointermove', function (e) {
+    document.addEventListener('pointermove', function (e) {
       if (!pan || e.pointerId !== pan.id) return;
       el.wrap.scrollLeft = pan.l - (e.clientX - pan.x);
       el.wrap.scrollTop = pan.t - (e.clientY - pan.y);
@@ -2293,13 +2321,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
     function endPan(e) {
       if (!pan || e.pointerId !== pan.id) return;
-      var id = pan.id;
       pan = null;
       el.wrap.classList.remove('grabbing');
-      try { el.wrap.releasePointerCapture(id); } catch (err) { }
     }
-    el.wrap.addEventListener('pointerup', endPan);
-    el.wrap.addEventListener('pointercancel', endPan);
+    document.addEventListener('pointerup', endPan);
+    document.addEventListener('pointercancel', endPan);
   }
 
   /* ---------------- 启动 ---------------- */
