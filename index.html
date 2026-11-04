@@ -394,12 +394,12 @@
       <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="ico" style="background:rgba(47,212,168,.16)">🚧</span><span class="nm">施工与管理</span><span class="cnt">5</span></a>
       <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="ico" style="background:rgba(139,124,246,.16)">🔍</span><span class="nm">审图与报告</span><span class="cnt">1</span></a>
       <a href="#cat-ch" class="side-item" data-cat="cat-ch"><span class="ico" style="background:rgba(56,211,240,.16)">🗺️</span><span class="nm">测绘与图像</span><span class="cnt">1</span></a>
-      <a href="#cat-tw" class="side-item" data-cat="cat-tw"><span class="ico" style="background:rgba(244,114,182,.16)">🧰</span><span class="nm">图文工具箱</span><span class="cnt">2</span></a>
+      <a href="#cat-tw" class="side-item" data-cat="cat-tw"><span class="ico" style="background:rgba(244,114,182,.16)">🧰</span><span class="nm">图文工具箱</span><span class="cnt">3</span></a>
   </aside>
     <main class="content">
       <div class="sec-title">
         <div class="bar"></div>
-        <h2>全部工具<span class="sec-count">共 18 款</span></h2>
+        <h2>全部工具<span class="sec-count">共 20 款</span></h2>
       </div>
       <section id="cat-zj" class="cat-sec">
         <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">4 款</span></div>
@@ -665,7 +665,7 @@
         </div>
       </section>
       <section id="cat-tw" class="cat-sec">
-        <div class="cat-title"><span class="dot" style="background:#f472b6"></span><span class="nm">图文工具箱</span><span class="cnt">2 款</span></div>
+        <div class="cat-title"><span class="dot" style="background:#f472b6"></span><span class="nm">图文工具箱</span><span class="cnt">3 款</span></div>
         <div class="grid">
       <a class="card" href="pdfdocsprint.html" style="--g1:#16a34a;--g2:#0d9488;--gs:rgba(22,163,74,.5);--a1:#4ade80;--a2:#22d3ee;">
       <div class="top">
@@ -693,6 +693,20 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(16,185,129,.4);--cc:#6ee7b7;--cbg:rgba(16,185,129,.12)">v1.6.7</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">图片工具</span>
+      </div>
+    </a>
+      <a class="card" href="ningmo.html" style="--g1:#0284c7;--g2:#0050b3;--gs:rgba(2,132,199,.5);--a1:#38bdf8;--a2:#7dd3fc;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.2c2.9 3.3 4.8 5.6 4.8 8a4.8 4.8 0 1 1-9.6 0c0-2.4 1.9-4.7 4.8-8z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><circle cx="13.9" cy="11.6" r="1.5" fill="#fff" opacity=".8"/><path d="M4 20h16M6.5 17.4h11" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".55"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>净墨PDF扫描件优化工作台</h3>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">修复发灰发雾的扫描件：去灰雾、压实墨、锐化字边，红章彩章自动保留。三段式界面左调参、中对比、右导出，支持 PDF 与图片混排、多文件合并，全程本地处理不上传。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(2,132,199,.45);--cc:#7dd3fc;--cbg:rgba(2,132,199,.14)">v1.0.1</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">PDF优化</span>
       </div>
     </a>
         </div>
@@ -1198,6 +1212,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-04', t:'新增：净墨PDF扫描件优化工作台 v1.0.1（单文件离线扫描件清晰化工具：专治「分辨率够但发灰发雾」的扫描件——色阶重映射去灰雾、淡墨压成实墨、字边锐化还原，彩色印章与红章自动保留；三段式界面左参数／中分割对比预览／右文件信息与导出，顶栏新增「打开文件」「清空文件」，翻页按钮改主色填充，新增文件信息卡；支持 PDF 与 JPG/PNG/WebP 混排、多文件合并或各自导出，全程本地处理，归入「图文工具箱」分类）'},
   {d:'2026-11-03', t:'新增：施工组织设计编写系统 v1.0.9（单文件离线施工组织设计编辑器：九章框架＋附表，WPS风格查找替换、表格/图片插入、封面三区排版、施工流程图数据驱动自动重绘、一键导出 Word，归入「施工与管理」分类）'},
   {d:'2026-11-02', t:'微调：工具箱侧栏分类导航字号与图标比例——① 侧栏标题「工具分类」字号调整为 16px；② 各分类项文字调整为 18px；③ 各分类项前的图标随文字同步缩小至 22px，标题/分类项/图标比例协调、层级清晰'},
   {d:'2026-11-02', t:'优化：工具箱侧栏分类导航放大与卡片统一尺寸——① 左侧分类文字字号放大（标题与各分类项），每条分类项前面新增带彩色背景的图标（计算器／三角尺／施工／放大镜／地图／工具箱）；② 侧栏加宽以容纳放大文字；③ 全部工具卡片统一为同一尺寸（与「结构与CAD出图」分类一致），不再因某分类卡片数量少而被拉伸成 400px 超宽卡片，卡片数少的分类右侧自然留白'},
@@ -1310,7 +1325,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
