@@ -165,6 +165,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
 .btn.primary:disabled{background:#c7c7cc;cursor:not-allowed;box-shadow:none}
 .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink-2)}
 .btn.ghost:hover{background:#fafafa}
+#btnOpenOut{margin-top:8px}
 .btn:active:not(:disabled){transform:scale(.985)}
 
 /* 底部诊断条 */
@@ -394,7 +395,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
     </svg>
     <span class="nm">净墨</span>
     <span class="sub">PDF 扫描件优化工作台</span>
-    <span class="vchip" id="vchip">v1.0.2</span>
+    <span class="vchip" id="vchip">v1.0.3</span>
   </div>
   <div class="spacer"></div>
   <button class="tbtn primary" id="btnOpen">
@@ -563,7 +564,14 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
           <button data-v="merge">合成一个</button>
         </div>
       </div>
+      <div class="field">
+        <div class="switch on" id="swOpen">
+          <span class="txt">导出后自动打开</span>
+          <i class="knob"></i>
+        </div>
+      </div>
       <button class="btn primary" id="btnExport" disabled>导出优化后的 PDF</button>
+      <button class="btn ghost" id="btnOpenOut" style="display:none">打开刚导出的 PDF</button>
     </div>
   </aside>
 </div>
@@ -588,6 +596,8 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1
 
     <h4>批量与输出</h4>
     <p><b>单文件导出</b>（默认）：每个文件各自导出成一个 PDF；<b>合成一个</b>则把所有文件按顺序拼成一份 PDF。文件名自动加 <code>_净墨优化</code> 后缀，原件不会被覆盖。顶栏「打开文件」可随时追加，标签上的 <b>×</b> 关掉单个文件，「清空所有文件」一键重来。</p>
+
+    <p><b>导出后自动打开</b>（默认开启）：导出完成后自动用系统默认的 PDF 阅读器打开成品，省去再去下载文件夹翻找。若浏览器拦截了自动打开，点右栏的「打开刚导出的 PDF」即可。</p>
 
     <h4>翻页</h4>
     <p>预览区里滚动<b>鼠标滚轮</b>即可上下翻页，也可用 <code>←</code> <code>→</code> 方向键，或点工具条右侧的翻页按钮。</p>
@@ -1048,7 +1058,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (function () {
   'use strict';
 
-  var VERSION = '1.0.2';
+  var VERSION = '1.0.3';
 
   /* ---------------- pdf.js worker
      策略：优先用真 Worker（blob URL，不阻塞 UI）；
@@ -1083,7 +1093,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     view: 'split',
     zoom: 'fit',
     split: 0.5,
-    opts: { mode: 'auto', dpi: 300, black: null, white: 230, sharp: 80, bin: false, merge: 'single' },
+    opts: { mode: 'auto', dpi: 300, black: null, white: 230, sharp: 80, bin: false, merge: 'single', autoOpen: true },
     lastPDF: null
   };
   var DEF_WHITE = 230;       // 纸面提亮默认值（255 = 自动判定）
@@ -1099,7 +1109,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     toast: $('toast'), sheet: $('sheet'), hist: $('hist'),
     vTitle: $('vTitle'), pgLabel: $('pgLabel'), pgPrev: $('pgPrev'), pgNext: $('pgNext'),
     bOrig: $('bOrig'), bProc: $('bProc'),
-    viewer: document.querySelector('.viewer')
+    viewer: document.querySelector('.viewer'),
+    swOpen: $('swOpen'), btnOpenOut: $('btnOpenOut')
   };
 
   /* ---------------- 工具 ---------------- */
@@ -1501,7 +1512,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* 清空后复位界面 */
   function resetUI() {
-    cache.clear(); S.cur = { f: 0, p: 0 }; S.lastPDF = null;
+    cache.clear(); S.cur = { f: 0, p: 0 }; S.lastPDF = null; S.lastOut = null;
+    el.btnOpenOut.style.display = 'none';
     el.filebar.innerHTML = '';
     el.paper.style.display = 'none';
     el.empty.style.display = 'flex';
@@ -1674,20 +1686,42 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           ? '已导出 ' + cnt + ' 个 PDF · 共 ' + total + ' 页 · ' + dpi + 'dpi'
           : '已导出 · 共 ' + total + ' 页 · ' + dpi + 'dpi');
       }
+      // 导出后自动用系统默认 PDF 阅读器（浏览器内置阅读器）打开
+      el.btnOpenOut.style.display = '';
+      if (S.opts.autoOpen) setTimeout(openOut, 120);
     }
 
     function save(pdfDoc, filename) {
       var blob = pdfDoc.output('blob');
       S.lastPDF = { name: filename, size: blob.size };
+      var url = URL.createObjectURL(blob);
+      // 保留 URL 供「自动打开／再次打开」使用，5 分钟后再释放
+      S.lastOut = { url: url, name: filename };
       var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      a.href = url;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+      setTimeout(function () { a.remove(); }, 1500);
+      setTimeout(function () {
+        if (S.lastOut && S.lastOut.url === url) return;   // 仍是最近一次导出，先留着
+        URL.revokeObjectURL(url);
+      }, 300000);
     }
 
     next(0, 0);
+  }
+
+  /* 用系统默认 PDF 阅读器打开刚导出的文件（浏览器新标签即系统关联程序） */
+  function openOut() {
+    if (!S.lastOut) return false;
+    var w = null;
+    try { w = window.open(S.lastOut.url, '_blank'); } catch (e) { w = null; }
+    if (!w) {
+      toast('已导出，但浏览器拦截了自动打开；点「打开刚导出的 PDF」即可', 4200);
+      return false;
+    }
+    return true;
   }
 
   /* ---------------- 事件绑定 ---------------- */
@@ -1802,6 +1836,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
 
     $('btnExport').onclick = exportPDF;
+    el.swOpen.onclick = function () {
+      S.opts.autoOpen = !S.opts.autoOpen;
+      el.swOpen.classList.toggle('on', S.opts.autoOpen);
+      toast(S.opts.autoOpen ? '导出后会自动打开文件' : '导出后不再自动打开');
+    };
+    el.btnOpenOut.onclick = function () {
+      if (!S.lastOut) { toast('还没有导出过文件'); return; }
+      openOut();
+    };
     $('btnClear').onclick = function () {
       if (!S.files.length) return;
       S.files.forEach(function (f) {
