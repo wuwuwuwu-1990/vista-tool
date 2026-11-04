@@ -274,7 +274,7 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.11</small>
+      测绘数据三维可视化系统 <small>V1.0.12</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -330,9 +330,9 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
           <div class="cntinfo" id="tinInfo">三角网 —</div>
           <label class="chk" style="margin-top:4px" title="显示三角网线框，可直接看出有没有空洞"><input type="checkbox" id="chkWire"> 三角网线框</label>
           <label class="chk" style="margin-top:4px" title="在稀疏实测点之间密集内插高程点，使三角网更密、三维表面显示更平缓（仅影响显示，实测点与挖填方量算不变）"><input type="checkbox" id="chkDense"> 密集内插（更平缓）</label>
-          <div class="row2" id="denseBox" style="display:none;margin-top:5px">
-            <label class="fld-i"><span>内插边长 m</span><input type="number" id="numDenseLen" min="0" step="0.5" placeholder="自动" title="内插目标边长（米）：超过该长度的三角网边会在中点插入新点细分。留空/0 = 按实测点距自动。"></label>
-            <label class="fld-i"><span>平滑</span><input type="number" id="numDenseSmooth" min="0" max="1" step="0.1" value="0.5" title="平滑强度 0~1：0 = 纯线性仅加密，1 = 最强平滑，越大表面越圆润。"></label>
+          <div id="denseBox" style="display:none;margin-top:5px">
+            <label class="fld-i" style="margin-bottom:6px"><span>内插边长 m</span><input type="number" id="numDenseLen" min="0" step="0.5" placeholder="自动" title="内插目标边长（米）：超过该长度的三角网边会在中点插入新点细分。留空/0 = 按实测点距自动。"></label>
+            <label class="fld-i" style="margin-bottom:0"><span style="flex:0 0 66px">平滑强度</span><input type="number" id="numDenseSmooth" min="0" max="1" step="0.1" value="0.5" title="平滑强度 0~1：0 = 纯线性仅加密，1 = 最强平滑，越大表面越圆润。"></label>
           </div>
           <div class="cntinfo" id="denseInfo" style="display:none">—</div>
         </div>
