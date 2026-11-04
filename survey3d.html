@@ -274,7 +274,7 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
   <div id="top">
     <div class="brand">
       <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e7490"/><path d="M9 46 L23 22 L36 35 L55 15" stroke="#a5f3fc" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      测绘数据三维可视化系统 <small>V1.0.10</small>
+      测绘数据三维可视化系统 <small>V1.0.11</small>
     </div>
     <div id="topInfo">
       <span class="ti file"><i>文件</i><b id="tiFile">未载入</b></span>
@@ -329,6 +329,12 @@ button.mini:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.
           </div>
           <div class="cntinfo" id="tinInfo">三角网 —</div>
           <label class="chk" style="margin-top:4px" title="显示三角网线框，可直接看出有没有空洞"><input type="checkbox" id="chkWire"> 三角网线框</label>
+          <label class="chk" style="margin-top:4px" title="在稀疏实测点之间密集内插高程点，使三角网更密、三维表面显示更平缓（仅影响显示，实测点与挖填方量算不变）"><input type="checkbox" id="chkDense"> 密集内插（更平缓）</label>
+          <div class="row2" id="denseBox" style="display:none;margin-top:5px">
+            <label class="fld-i"><span>内插边长 m</span><input type="number" id="numDenseLen" min="0" step="0.5" placeholder="自动" title="内插目标边长（米）：超过该长度的三角网边会在中点插入新点细分。留空/0 = 按实测点距自动。"></label>
+            <label class="fld-i"><span>平滑</span><input type="number" id="numDenseSmooth" min="0" max="1" step="0.1" value="0.5" title="平滑强度 0~1：0 = 纯线性仅加密，1 = 最强平滑，越大表面越圆润。"></label>
+          </div>
+          <div class="cntinfo" id="denseInfo" style="display:none">—</div>
         </div>
       </div>
     </div>
@@ -472,6 +478,7 @@ const S = {
   mode: 'tin',                       // 'tin' = 三角网 DTM（CASS 规则）；'grid' = 规则格网 IDW
   tinMinAngle: 10, tinEdgeK: 6, tin: null, tinSpacing: 0,   // 最小内角(°) / 超长边倍数阈值
   tinMaxEdge: 0,                     // 最大连接边长(m)：相隔超过此距离的两点不建三角网；0 = 按点距自动
+  dense: false, denseLen: 0, denseSmooth: 0.5,   // 密集内插(更平缓)：开关 / 目标边长(m,0=按点距自动) / 平滑强度0~1
   pointSize: 1.8, surfaceRes: 100, zExag: 1,
   palette: 'terrain', spin: false, dragging: false,
   surf: null, drawIdx: null, drawN: 0,
@@ -1100,6 +1107,7 @@ function delaunayTIN(px, py, n){
    山脊、沟谷这些特征点不会丢。 */
 const AUTO_EDGE_K = 15;            // 自动连接距离 = 实测点距 × 该倍数
 const MAX_TIN_PTS = 25000;
+const MAX_DENSE_V = 30000;           // 密集内插后顶点上限：防大数据加密后卡死
 
 function decimateIdx(wx, wy, wz, n, target){
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -1399,7 +1407,126 @@ function buildTIN(){
     ms: ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - t0
   };
   S.surf = S.tin;
+  // ---- 密集内插 + 平滑（V1.0.11）：默认关闭，仅生成"显示层"加密数据 ----
+  // 实测点坐标与 S.tin（供挖填方量算 / 信息显示）完全不变。
+  S.tin.dense = (S.dense && S.mode === 'tin') ? densifyTIN(S.tin) : null;
   S.invalidRatio = 0;
+}
+
+/* 密集内插 + 平滑：对三角网中"边长 > 目标边长"的边做中点细分（1→2/3/4），
+   新点高程在「边中点线性值」与「邻域重心平均」之间按平滑强度插值，
+   让稀疏实测点之间的大三角变得更密、表面更平缓。
+   仅生成显示层数据；实测点、原始三角网、挖填方量算均不受影响。 */
+function densifyTIN(tin){
+  const px = tin.px, py = tin.py, pz = tin.pz, nv = tin.nv;
+  const tris = tin.tris, ntri = tin.ntri;
+  const spacing = tin.spacing || 1;
+  let targetLen = S.denseLen > 0 ? S.denseLen : spacing * 0.55;
+  if(!(targetLen > 0.001)) targetLen = spacing * 0.55;
+  const sm = (isFinite(S.denseSmooth) ? clamp(S.denseSmooth, 0, 1) : 0.5);
+
+  // 收集长边（u<v）及其所属三角形的第三点（1~2 个，供平滑取邻域重心）
+  function collect(t2){
+    const edge = new Map();
+    for(let t=0;t<ntri;t++){
+      const a = tris[3*t], b = tris[3*t+1], c = tris[3*t+2];
+      let u, v, w;
+      u=a; v=b; w=c; if(u>v){u=b;v=a;}
+      { const dx=px[v]-px[u], dy=py[v]-py[u]; if(dx*dx+dy*dy > t2){ const k=u*nv+v; let e=edge.get(k); if(!e){e={u:u,v:v,third:[]};edge.set(k,e);} if(e.third.length<2) e.third.push(w); } }
+      u=b; v=c; w=a; if(u>v){u=c;v=b;}
+      { const dx=px[v]-px[u], dy=py[v]-py[u]; if(dx*dx+dy*dy > t2){ const k=u*nv+v; let e=edge.get(k); if(!e){e={u:u,v:v,third:[]};edge.set(k,e);} if(e.third.length<2) e.third.push(w); } }
+      u=c; v=a; w=b; if(u>v){u=a;v=c;}
+      { const dx=px[v]-px[u], dy=py[v]-py[u]; if(dx*dx+dy*dy > t2){ const k=u*nv+v; let e=edge.get(k); if(!e){e={u:u,v:v,third:[]};edge.set(k,e);} if(e.third.length<2) e.third.push(w); } }
+    }
+    return edge;
+  }
+
+  let t2 = targetLen * targetLen;
+  let edge = collect(t2);
+  let guard = 0;
+  while(nv + edge.size > MAX_DENSE_V && guard < 8){
+    targetLen *= 1.6; t2 = targetLen * targetLen; edge = collect(t2); guard++;
+  }
+  const addV = edge.size;
+  if(addV < 1) return null;
+  if(nv + addV > MAX_DENSE_V) return null;
+
+  const nv2 = nv + addV;
+  const px2 = new Float64Array(nv2), py2 = new Float64Array(nv2), pz2 = new Float64Array(nv2);
+  px2.set(px.subarray(0, nv)); py2.set(py.subarray(0, nv)); pz2.set(pz.subarray(0, nv));
+  const midIdx = new Map();
+  let ni = nv;
+  edge.forEach((e, key) => {
+    const u = e.u, v = e.v;
+    px2[ni] = (px[u] + px[v]) * 0.5;
+    py2[ni] = (py[u] + py[v]) * 0.5;
+    const zlin = (pz[u] + pz[v]) * 0.5;
+    let zavg;
+    if(e.third.length >= 2) zavg = (pz[u] + pz[v] + pz[e.third[0]] + pz[e.third[1]]) * 0.25;
+    else if(e.third.length === 1) zavg = (pz[u] + pz[v] + pz[e.third[0]]) / 3;
+    else zavg = zlin;
+    pz2[ni] = zlin + sm * (zavg - zlin);   // 平滑：线性中点 → 邻域重心 之间插值
+    midIdx.set(key, ni);
+    ni++;
+  });
+
+  // 拆分三角形（按被细分边数 1/2/3 → 2/3/4 个子三角）
+  const out = [];
+  const kf = (u, v) => (u < v ? u*nv + v : v*nv + u);
+  for(let t=0;t<ntri;t++){
+    const a = tris[3*t], b = tris[3*t+1], c = tris[3*t+2];
+    const mab = midIdx.get(kf(a,b));
+    const mbc = midIdx.get(kf(b,c));
+    const mca = midIdx.get(kf(c,a));
+    const hasAB = mab !== undefined, hasBC = mbc !== undefined, hasCA = mca !== undefined;
+    const cnt = (hasAB?1:0) + (hasBC?1:0) + (hasCA?1:0);
+    if(cnt === 0){ out.push(a, b, c); }
+    else if(cnt === 1){
+      if(hasAB){ out.push(a, mab, c, mab, b, c); }
+      else if(hasBC){ out.push(b, mbc, a, mbc, c, a); }
+      else { out.push(c, mca, b, mca, a, b); }
+    }
+    else if(cnt === 2){
+      if(hasAB && hasCA){ out.push(a, mab, mca, mab, b, c, mab, c, mca); }
+      else if(hasAB && hasBC){ out.push(b, mbc, mab, mbc, c, a, mbc, a, mab); }
+      else { out.push(c, mca, mbc, mca, a, b, mca, b, mbc); }
+    }
+    else { out.push(a, mab, mca, mab, b, mbc, mca, mbc, c, mab, mbc, mca); }
+  }
+
+  const ntri2 = out.length / 3;
+  const tris2 = new Int32Array(out);
+  const halfH = S.hspan / 2;
+  const invH = (S.hspan > 0) ? (PAL_N - 1) / S.hspan : 0;
+  const fci = new Uint8Array(ntri2);
+  const fnx = new Float32Array(ntri2);
+  const fny = new Float32Array(ntri2);
+  for(let t=0;t<ntri2;t++){
+    const a = tris2[3*t], b = tris2[3*t+1], c = tris2[3*t+2];
+    const ax = px2[a], ay = py2[a], az = pz2[a];
+    const bx = px2[b], by = py2[b], bz = pz2[b];
+    const cx = px2[c], cy = py2[c], czz = pz2[c];
+    const ux1 = bx-ax, uy1 = by-ay, uz1 = bz-az;
+    const ux2 = cx-ax, uy2 = cy-ay, uz2 = czz-az;
+    const nX = uy1*uz2 - uz1*uy2;
+    const nY = uz1*ux2 - ux1*uz2;
+    const nZ = ux1*uy2 - uy1*ux2;
+    if(nZ > 1e-12){ fnx[t] = -nX/nZ; fny[t] = -nY/nZ; }
+    else { fnx[t] = 0; fny[t] = 0; }
+    const ha = (az + bz + czz) / 3;
+    fci[t] = clampInt(Math.round((ha + halfH) * invH), 0, PAL_N-1);
+  }
+
+  return {
+    kind: 'tin',
+    px: px2, py: py2, pz: pz2, nv: nv2,
+    tris: tris2, ntri: ntri2,
+    fci: fci, fnx: fnx, fny: fny, fsh: null, fshZ: -1,
+    edgeSegs: null,
+    sx: new Float32Array(nv2), sy: new Float32Array(nv2), cz: new Float32Array(nv2), vis: new Uint8Array(nv2),
+    rt: null,
+    spacing: spacing, dense: true, addV: addV
+  };
 }
 
 /* ============================================================
@@ -1440,6 +1567,7 @@ function updateTinInfo(){
   if(inp && !(S.tinMaxEdge > 0)){
     inp.placeholder = (s.autoMaxEdge > 0) ? ('自动 ' + Math.round(s.autoMaxEdge)) : '自动';
   }
+  updateDenseInfo();
 }
 
 function buildSurface(){
@@ -2256,8 +2384,9 @@ function drawCloud(){
    按面重心深度分桶（远→近），桶内再按"色带×明暗"合并成一条路径一次填充，
    canvas 调用次数从上百万降到几千，同时保住前后遮挡关系。 */
 function drawTIN(){
-  const s = S.surf;
-  if(!s || s.kind !== 'tin') return;
+  const base = S.surf;
+  if(!base || base.kind !== 'tin') return;
+  const s = (S.dense && base.dense) ? base.dense : base;
   const zs = S.zExag;
   const px = s.px, py = s.py, pz = s.pz, nv = s.nv;
   const tris = s.tris, ntri = s.ntri;
@@ -2998,6 +3127,38 @@ $('btnMaxAuto').addEventListener('click', () => {
   if(S.mode === 'tin') rebuildScene();
 });
 
+/* ---- 密集内插 + 平滑（V1.0.11）---- */
+function updateDenseInfo(){
+  const el = $('denseInfo');
+  if(!el) return;
+  if(!S.dense || S.mode !== 'tin' || !S.tin){ el.style.display = 'none'; return; }
+  const d = S.tin.dense;
+  el.style.display = 'block';
+  if(!d){ el.textContent = '密集内插：无长边需细分'; return; }
+  el.textContent = '内插加密：顶点 ' + S.tin.nv.toLocaleString() + ' → ' + d.nv.toLocaleString()
+    + ' · 面 ' + S.tin.ntri.toLocaleString() + ' → ' + d.ntri.toLocaleString();
+}
+
+$('chkDense').addEventListener('change', e => {
+  S.dense = e.target.checked;
+  const db = $('denseBox');
+  if(db) db.style.display = S.dense ? '' : 'none';
+  updateDenseInfo();
+  if(S.loaded && S.mode === 'tin') rebuildScene();
+});
+
+let denseTimer = null;
+function onDenseParam(){
+  const l = parseFloat($('numDenseLen').value);
+  S.denseLen = (isFinite(l) && l > 0) ? l : 0;
+  const s = parseFloat($('numDenseSmooth').value);
+  S.denseSmooth = (isFinite(s)) ? clamp(s, 0, 1) : 0.5;
+  clearTimeout(denseTimer);
+  denseTimer = setTimeout(() => { if(S.dense && S.mode === 'tin' && S.loaded) rebuildScene(); }, 300);
+}
+$('numDenseLen').addEventListener('input', onDenseParam);
+$('numDenseSmooth').addEventListener('input', onDenseParam);
+
 applyModeUI();
 
 $('chkHole').addEventListener('change', e => {
@@ -3167,6 +3328,7 @@ function exportModel(){
         mode: S.mode, tinMinAngle: S.tinMinAngle, tinEdgeK: S.tinEdgeK, tinMaxEdge: S.tinMaxEdge,
         cntInterval: S.cntInterval, palette: S.palette, zExag: S.zExag,
         showCloud: S.showCloud, showBase: S.showBase, showSkirt: S.showSkirt, showWire: S.showWire,
+        dense: S.dense, denseLen: S.denseLen, denseSmooth: S.denseSmooth,
         baseElev: S.baseElev
       }
     });
@@ -3250,6 +3412,9 @@ function startReadonly(exp){
   S.showBase = (c.showBase !== false);
   S.showSkirt = (c.showSkirt !== false);
   S.showWire = !!c.showWire;
+  S.dense = !!c.dense;
+  S.denseLen = (c.denseLen > 0) ? c.denseLen : 0;
+  S.denseSmooth = (typeof c.denseSmooth === 'number') ? c.denseSmooth : 0.5;
   buildPalette(S.palette);
   // 隐藏编辑控件，只保留信息条与复位视角
   ['side','btnOpen','btnDemo','btnShot','btnExport','help'].forEach(id => { const el = $(id); if(el) el.style.display = 'none'; });
