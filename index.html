@@ -389,7 +389,7 @@
   <div class="layout">
   <aside class="side-nav">
     <div class="side-head">工具分类</div>
-      <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="ico" style="background:rgba(245,166,35,.16)">🧮</span><span class="nm">造价与算量</span><span class="cnt">5</span></a>
+      <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="ico" style="background:rgba(245,166,35,.16)">🧮</span><span class="nm">造价与算量</span><span class="cnt">6</span></a>
       <a href="#cat-cad" class="side-item" data-cat="cat-cad"><span class="ico" style="background:rgba(79,142,247,.16)">📐</span><span class="nm">结构与CAD出图</span><span class="cnt">6</span></a>
       <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="ico" style="background:rgba(47,212,168,.16)">🚧</span><span class="nm">施工与管理</span><span class="cnt">5</span></a>
       <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="ico" style="background:rgba(139,124,246,.16)">🔍</span><span class="nm">审图与报告</span><span class="cnt">1</span></a>
@@ -399,10 +399,10 @@
     <main class="content">
       <div class="sec-title">
         <div class="bar"></div>
-        <h2>全部工具<span class="sec-count">共 21 款</span></h2>
+        <h2>全部工具<span class="sec-count">共 22 款</span></h2>
       </div>
       <section id="cat-zj" class="cat-sec">
-        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">5 款</span></div>
+        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">6 款</span></div>
         <div class="grid">
       <a class="card" href="cqcost428.html" style="--g1:#f59e0b;--g2:#f97316;--gs:rgba(245,158,11,.5);--a1:#f59e0b;--a2:#f97316;">
       <div class="top">
@@ -472,6 +472,20 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(34,197,94,.4);--cc:#86efac;--cbg:rgba(34,197,94,.12)">v1.0.6</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">五金速算</span>
+      </div>
+    </a>
+      <a class="card" href="nervus.html" style="--g1:#1a56db;--g2:#0f766e;--gs:rgba(26,86,219,.5);--a1:#1a56db;--a2:#0f766e;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="6" rx="7" ry="2.4" stroke="#fff" stroke-width="1.6"/><ellipse cx="12" cy="12" rx="7" ry="2.4" stroke="#fff" stroke-width="1.6"/><ellipse cx="12" cy="18" rx="7" ry="2.4" stroke="#fff" stroke-width="1.6"/><path d="M5 6v12M19 6v12" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M12 3.6v16.8" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".55"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>桩基钢筋笼三维计算系统 Nervus</h3>
+      <div class="desc">圆形端承桩钢筋笼参数化三维建模与算量：主筋／螺旋箍／加劲箍／内三角撑／声测管／垫块全构件分层可剖切，含承台与桩顶嵌入深度、主筋锚固长度联动；参数一改即重算出量并做 12 项构造校核，一键导出 xlsx 工程量表。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(26,86,219,.4);--cc:#7cb0ff;--cbg:rgba(26,86,219,.12)">v1.0.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">钢筋算量</span>
       </div>
     </a>
         </div>
@@ -1226,6 +1240,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-06', t:'新增：桩基钢筋笼三维计算系统 Nervus v1.0.0（圆形端承桩钢筋笼参数化三维建模与算量，归入「造价与算量」分类）——① 全构件三维建模：主筋／螺旋箍筋（分段螺距）／加劲箍／内三角撑（三角锥桁架）／声测管／保护层垫块／混凝土桩身／承台，八图层独立显隐、可动态剖切（剖至轴线半剖）、可点选查构件明细；② 承台与入承台构造：承台长宽厚、桩顶嵌入承台深度 he、主筋锚固长度 la（自承台底起算）联动，笼顶高度按 la−he 自动推算，新增「入承台节点」视角一键聚焦；③ 实时算量：螺旋箍按单圈 √[(πDs)²+p²] 分段累加、内三角撑按 3 弦杆+3 腹杆、声测管按 π(Dp−tp)·tp·7.85e-3，参数改动 ≤100ms 重算；④ 12 项构造校核（保护层／主筋净距／配筋率／嵌入深度／锚固长度／承台厚度余量等）；⑤ 导出 xlsx 四表（参数表／钢筋明细／汇总／校核）与 CSV、2×/4× 高清视图 PNG；⑥ 苹果字体、单文件 1.5MB 全内联，断网双击即用，不涉及三维模型格式导出'},
   {d:'2026-11-06', t:'新增：五金速典 v1.0.6（单文件离线五金速查与速算工具，归入「造价与算量」分类）——① 五金手册 50 类 1601 条：型钢／棒材／管材／板材／有色金属／紧固件／焊接材料／建筑材料八大分组，逐类列规格、截面面积、理论重量与执行标准，左侧分类两列排布；② 五金计算 41 项计算器：含 6 个国标公式型钢计算器（等边／不等边角钢、工字钢、槽钢、H 型钢、圆钢等按 b／d／r 计算），分五组收纳，实时出结果并可直接复制重量；③ 每类配手绘截面示意图，支持点击无损放大（滚轮缩放 0.5~5 倍、拖动平移、1:1 复位）；④ 最右「真材图鉴」栏 50 张实物照片配文字介绍；⑤ 内置 20 项国标规范表与 6 张常用数据表，全部标准版本已按 2024~2026 最新版核订；⑥ 深色玻璃界面、苹果字体，全程离线无需联网'},
   {d:'2026-11-05', t:'更新：测绘数据三维可视化系统 V1.0.12（优化密集内插面板布局）——① 「平滑强度」输入框由与「内插边长」挤在同一行改为独占一行、宽度加倍，标签文字由「平滑」补全为「平滑强度」并完整显示；② 平滑强度设定下移到「内插边长」下方，两行上下排列、互不遮挡，功能文字清晰可读'},
   {d:'2026-11-05', t:'更新：测绘数据三维可视化系统 V1.0.11（新增密集内插、使三维模型显示更平缓）——① 新增「密集内插（更平缓）」开关：在稀疏实测点之间对三角网长边做中点细分加密，新点高程在「线性中点」与「邻域重心」之间按可调平滑强度插值，让大三角变密、表面更圆润；② 内插边长（米）可自定义或按点距自动，平滑强度 0~1 可调；③ 仅作用于三维显示层——实测点、原始三角网、挖填方量算完全不受影响；④ 大数据自动设顶点上限，加密后不卡顿'},
