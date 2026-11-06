@@ -300,7 +300,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.12</div>
+        <div class="en">NERVUS · v1.0.13</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -371,7 +371,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.12 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.13 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
 </div>
 
@@ -3385,7 +3385,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.12
+   桩基钢筋笼三维计算系统 Nervus v1.0.13
    ===================================================================== */
 "use strict";
 
@@ -3621,7 +3621,7 @@ let ROUGH = null, NORM_RIB = null, NORM_FINE = null;
 let CONC_NORM = null, CONC_ROUGH = null;
 let composer = null, ssaoPass = null;      // SSAO 后处理管线
 let SSAO_ON = true;                        // 环境光遮蔽开关（默认开）
-let needRender = true;                     // 按需渲染脏标记（静止时不重绘，省 GPU）
+let needRender = true;                     // 遗留脏标记：V1.0.13 起已改为每帧无条件渲染，此标记仅作兼容保留
 function requestRender(){ needRender = true; }
 
 function initGL(){
@@ -4631,16 +4631,13 @@ function animate(){
     const e = 1 - Math.pow(1-k, 3);
     camera.position.lerpVectors(tw.p0, tw.p1, e);
     controls.target.lerpVectors(tw.q0, tw.q1, e);
-    needRender = true;
     if (k === 1) tw = null;
   }
-  if (controls.update()) needRender = true;   // 交互/阻尼衰减时相机有变化才重绘
-  if (needRender){                            // 静止时跳过渲染，GPU 占用归零
-    needRender = false;
-    if (SSAO_ON && composer) composer.render(); else renderer.render(scene, camera);
-    updateLabels();
-    drawAxis();
-  }
+  controls.update();
+  // 每帧无条件渲染，保证缩放/平移丝滑，避免按需渲染的触发延迟造成卡顿
+  if (SSAO_ON && composer) composer.render(); else renderer.render(scene, camera);
+  updateLabels();
+  drawAxis();
 }
 
 /* =====================================================================
@@ -5124,7 +5121,7 @@ function boot(){
   });
   /* ===== 云端方案：与 BraceCad 共用自建同步服务，按 app 分桶，跨设备互通 ===== */
   const NCLOUD = { api:'https://srv.wbc2023.top/sync', app:'nervus', token:'af91def02e8a9a205fe630e970b1b39a' };
-  const APP_VER = 'v1.0.12';
+  const APP_VER = 'v1.0.13';
   let clCache = [];
   function clHttp(act, method, body){
     const opt = { method: method||'GET', headers:{'Content-Type':'application/json','X-Token':NCLOUD.token} };
