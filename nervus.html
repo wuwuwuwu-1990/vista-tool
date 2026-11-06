@@ -98,7 +98,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #axis{
   position:absolute;right:16px;top:58px;width:112px;height:112px;pointer-events:none;
-  z-index:4;filter:drop-shadow(0 2px 6px rgba(20,40,70,.18));
+  z-index:4;filter:drop-shadow(0 1px 2px rgba(20,40,70,.22));
 }
 .lab{
   position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
@@ -300,7 +300,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.5</div>
+        <div class="en">NERVUS · v1.0.6</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -366,7 +366,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.5 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.6 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
 </div>
 
@@ -1698,7 +1698,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.5
+   桩基钢筋笼三维计算系统 Nervus v1.0.6
    ===================================================================== */
 "use strict";
 
@@ -2739,23 +2739,20 @@ const axCtx = axCv.getContext('2d');
 const AX_DPR = Math.min(2, window.devicePixelRatio || 1);
 axCv.width = 112 * AX_DPR; axCv.height = 112 * AX_DPR;
 const AX_AXES = [
-  {v:[1,0,0], col:'#ff7b72', n:'X'},
-  {v:[0,1,0], col:'#5ee08a', n:'Y'},
-  {v:[0,0,1], col:'#6ab8ff', n:'Z'}
+  {v:[1,0,0], col:'#cf3f34', n:'X'},
+  {v:[0,1,0], col:'#1d8452', n:'Y'},
+  {v:[0,0,1], col:'#1f63b8', n:'Z'}
 ];
 function drawAxis(){
-  /* 复刻「测绘数据三维可视化系统」右上角方向轴：
-     暗色半透明圆盘背板 + 三根细轴线 + 轴端实心圆点 + 轴外彩色字母 + 中心白点 */
-  const S = 112, ox = S/2, oy = S/2, R = 28;
+  /* 方向轴：无背板，三根细轴线自圆心发散 + 轴端实心圆点 + 轴外彩色字母 + 中心点
+     字母带白色描边，浅蓝天空 / 绿色地面 / 深色构件上都能读清 */
+  const S = 112, ox = S/2, oy = S/2, R = 33;
   axCtx.setTransform(AX_DPR, 0, 0, AX_DPR, 0, 0);
   axCtx.clearRect(0, 0, S, S);
 
-  axCtx.beginPath(); axCtx.arc(ox, oy, R + 21, 0, Math.PI*2);
-  axCtx.fillStyle = 'rgba(11,16,23,.62)'; axCtx.fill();
-  axCtx.strokeStyle = 'rgba(255,255,255,.10)'; axCtx.lineWidth = 1; axCtx.stroke();
-
   axCtx.lineCap = 'round';
-  axCtx.font = '700 11px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif';
+  axCtx.lineJoin = 'round';
+  axCtx.font = '700 12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif';
   axCtx.textAlign = 'center'; axCtx.textBaseline = 'middle';
 
   const m = camera.matrixWorldInverse.elements;
@@ -2773,11 +2770,16 @@ function drawAxis(){
     axCtx.beginPath(); axCtx.moveTo(ox, oy); axCtx.lineTo(ex, ey); axCtx.stroke();
     axCtx.beginPath(); axCtx.arc(ex, ey, 3.2, 0, Math.PI*2);
     axCtx.fillStyle = a.col; axCtx.fill();
+    const tx = ex + a.px*12, ty = ey - a.py*12;
+    axCtx.shadowColor = 'rgba(255,255,255,.92)';   // 白色外发光打底：笔画保持饱和，浅底深底都清楚
+    axCtx.shadowBlur = 3;
     axCtx.fillStyle = a.col;
-    axCtx.fillText(a.n, ex + a.px*13, ey - a.py*13);
+    axCtx.fillText(a.n, tx, ty);
+    axCtx.shadowBlur = 0;
+    axCtx.shadowColor = 'transparent';
   });
-  axCtx.beginPath(); axCtx.arc(ox, oy, 2.2, 0, Math.PI*2);
-  axCtx.fillStyle = 'rgba(255,255,255,.55)'; axCtx.fill();
+  axCtx.beginPath(); axCtx.arc(ox, oy, 2.4, 0, Math.PI*2);
+  axCtx.fillStyle = 'rgba(70,84,104,.9)'; axCtx.fill();
 }
 
 /* ---------- 渲循环 ---------- */
@@ -3240,7 +3242,7 @@ function boot(){
   });
   /* ===== 云端方案：与 BraceCad 共用自建同步服务，按 app 分桶，跨设备互通 ===== */
   const NCLOUD = { api:'https://srv.wbc2023.top/sync', app:'nervus', token:'af91def02e8a9a205fe630e970b1b39a' };
-  const APP_VER = 'v1.0.5';
+  const APP_VER = 'v1.0.6';
   let clCache = [];
   function clHttp(act, method, body){
     const opt = { method: method||'GET', headers:{'Content-Type':'application/json','X-Token':NCLOUD.token} };
