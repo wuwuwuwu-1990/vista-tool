@@ -78,7 +78,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 
 /* ============ 中：三维 ============ */
 #stage{flex:1;position:relative;min-width:0;background:
-  radial-gradient(120% 90% at 50% 0%,#fbfdff 0%,#e8eef6 55%,#dde5ef 100%);}
+  radial-gradient(120% 90% at 50% 0%,#eef4fb 0%,#d6e0ec 55%,#c0cddd 100%);}
 #view{position:absolute;inset:0}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .lab{
@@ -236,7 +236,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.1</div>
+        <div class="en">NERVUS · v1.0.2</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -298,7 +298,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.1 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.2 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
 </div>
 
@@ -306,7 +306,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
   <div id="secBox">
     <div class="secHead"><b>钢筋笼参数代号剖面图</b><span>A—A 横剖面 · B—B 纵剖面 · C 桩顶入承台节点放大</span><button id="secClose">关闭</button></div>
     <div class="secBody">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 900" class="secsvg" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif">
+<svg class="secsvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 900" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif">
 <defs><pattern id="hatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="8" stroke="#b6c6dc" stroke-width="1.1"/></pattern></defs>
 <rect width="1560" height="900" fill="#ffffff"/>
 <text x="40.0" y="48.0" font-size="21" fill="#141a24" text-anchor="start" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">圆形端承桩钢筋笼 · 参数代号剖面图</text>
@@ -319,10 +319,9 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 <circle cx="300.0" cy="500.0" r="118.0" fill="none" stroke="#b45309" stroke-width="2.4" opacity="1"/>
 <circle cx="300.0" cy="500.0" r="113.0" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="5 4" opacity="0.7"/>
 <path d="M300.0,613.0 L397.9,443.5 L202.1,443.5 Z" fill="none" stroke="#7c3aed" stroke-width="3.2" stroke-linejoin="round"/>
-<line x1="300.0" y1="500.0" x2="300.0" y2="613.0" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="butt" opacity="1"/>
-<line x1="300.0" y1="500.0" x2="397.9" y2="443.5" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="butt" opacity="1"/>
-<line x1="300.0" y1="500.0" x2="202.1" y2="443.5" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="butt" opacity="1"/>
-<circle cx="300.0" cy="500.0" r="4.0" fill="#7c3aed" stroke="#7c3aed" stroke-width="0" opacity="1"/>
+<circle cx="300.0" cy="613.0" r="3.6" fill="#7c3aed" stroke="#7c3aed" stroke-width="0" opacity="1"/>
+<circle cx="397.9" cy="443.5" r="3.6" fill="#7c3aed" stroke="#7c3aed" stroke-width="0" opacity="1"/>
+<circle cx="202.1" cy="443.5" r="3.6" fill="#7c3aed" stroke="#7c3aed" stroke-width="0" opacity="1"/>
 <circle cx="300.0" cy="366.0" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
 <circle cx="337.8" cy="371.4" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
 <circle cx="372.4" cy="387.3" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
@@ -393,7 +392,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 <path d="M48.0,668.0 L51.2,673.6 L44.8,673.6 Z" fill="#64748b"/>
 <text x="41.0" y="504.0" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1"></text>
 <text x="36.0" y="505.0" font-size="13" fill="#141a24" text-anchor="middle" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1" transform="rotate(-90 36 505)">D</text>
-<text x="300.0" y="796.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">主筋沿 Dₘ 圆周均布 n 根；双排时内外各一圈（排距 a），两束时每处并排 2 根</text>
+<text x="300.0" y="796.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">主筋沿圆周均布 n 处，每处分外排 / 内排各设 1–3 根并排；双排时加劲箍居中于两排之间</text>
 <text x="300.0" y="818.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">c 为保护层厚度，自螺旋箍外表面量至桩身表面</text>
 <text x="806.0" y="126.0" font-size="14" fill="#141a24" text-anchor="middle" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">B—B 纵剖面</text>
 <line x1="760.0" y1="134.0" x2="852.0" y2="134.0" stroke="#cbd5e1" stroke-width="1.2" stroke-linecap="butt" opacity="1"/>
@@ -1624,7 +1623,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.1
+   桩基钢筋笼三维计算系统 Nervus v1.0.2
    ===================================================================== */
 "use strict";
 
@@ -1632,10 +1631,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 const DEFAULTS = {
   D:1500, L:25, c:50, hb:70, grade:'C35',
   Bx:2600, By:2600, Hc:1600, he:100, laK:35, capShow:'半透明',
-  d:25, n:22, rows:1, bundle:1, sg:'HRB400E', conn:'机械连接', lapK:35,
+  d:25, n:22, rows:1, bundleO:1, bundleI:1, sg:'HRB400E', conn:'机械连接', lapK:35,
   ds:8, p:200, p1:100, Lm:5, Lmb:3,
   dr:16, sr:2000, lj:10,
-  dt:16, ht:0,
+  dt:16,
   Dp:57, tp:1.5, np:3,
   eta:2.0, blockGap:2, blockPer:4
 };
@@ -1662,11 +1661,12 @@ const SCHEMA = [
     {k:'d', l:'主筋直径 d', type:'select', opts:[12,14,16,18,20,22,25,28,32], suffix:'mm'},
     {k:'n', l:'每排根数 n', u:'根', min:4, max:60, step:1},
     {k:'rows', l:'主筋排数', type:'select', opts:[1,2], suffix:' 排'},
-    {k:'bundle', l:'每束根数', type:'select', opts:[1,2], suffix:' 根'},
+    {k:'bundleO', l:'外排每束根数', type:'select', opts:[1,2,3], suffix:' 根'},
+    {k:'bundleI', l:'内排每束根数', type:'select', opts:[1,2,3], suffix:' 根'},
     {k:'sg', l:'钢种', type:'select', opts:['HRB400E','HRB500E','HRB400','HRB500','HPB300']},
     {k:'conn', l:'连接方式', type:'select', opts:['机械连接','绑扎搭接','焊接']},
     {k:'lapK', l:'搭接长度', u:'×d', min:30, max:45, step:1},
-    {note:'排数×束数×每排根数 = 主筋总根数；双排为内外同心两圈，两束为每处并排两根。'}
+    {note:'外排×每束根数 ＋ 内排×每束根数 = 主筋总根数。单排时只计外排。双排时加劲箍居中置于两排之间——外排在其外侧、内排在其内侧。'}
   ]},
   {t:'螺旋箍 N2', items:[
     {k:'ds', l:'箍筋直径 d\u209B', type:'select', opts:[6,8,10,12,14], suffix:'mm'},
@@ -1682,8 +1682,7 @@ const SCHEMA = [
   ]},
   {t:'内三角撑 N6', items:[
     {k:'dt', l:'杆径 d\u209C', type:'select', opts:[12,14,16,18,20,22], suffix:'mm'},
-    {k:'ht', l:'锥高 h\u209C', u:'mm', min:0, max:800, step:50},
-    {note:'道数与标高自动跟随加劲箍，两者同位置布置（锥高 0 即平面三角架）。'}
+    {note:'等边三角形，仅设三边弦杆（无中间腹杆）。道数与标高自动跟随加劲箍，自承台底面起算。'}
   ]},
   {t:'声测管 N4', items:[
     {k:'Dp', l:'外径 D\u209A', u:'mm', min:50, max:60, step:1},
@@ -1718,17 +1717,22 @@ function calc(){
   const s = ST;
   const D=s.D, c=s.c, ds=s.ds, d=s.d, hb=s.hb/1000, he=s.he/1000, L=s.L;
   const la = s.laK * d;                                   // mm，自承台底面起算
-  const rows = Math.max(1, Math.round(s.rows)), bun = Math.max(1, Math.round(s.bundle));
+  const rows = Math.max(1, Math.round(s.rows));
+  const bunO = Math.max(1, Math.round(s.bundleO));
+  const bunI = rows > 1 ? Math.max(1, Math.round(s.bundleI)) : 0;   // 单排只有外排
   const nPos = Math.max(3, Math.round(s.n));
-  const Nb = nPos * rows * bun;                           // 主筋总根数
-  const rowGap = rows > 1 ? Math.max(2*d, 80) : 0;        // 排距 mm
+  const Nb = nPos * (bunO + bunI);                        // 主筋总根数
+  // 排距需容得下加劲箍：d + dᵣ + 30 mm 净空
+  const rowGap = rows > 1 ? Math.max(2*d, 80, d + s.dr + 30) : 0;
 
   const Ds  = D - 2*c - ds;
   const Dm  = D - 2*c - 2*ds - d;                         // 外排主筋中心线
-  const rowD = []; for (let i=0;i<rows;i++) rowD.push(Dm - 2*rowGap*i);
+  const rowD = rows > 1 ? [Dm, Dm - 2*rowGap] : [Dm];
   const Di  = rowD[rowD.length-1];                        // 内排主筋中心线
-  const Dr  = Di - d - s.dr;                              // 加劲箍中心线
-  const Dt  = Di - 2*d;                                   // 内三角撑外接圆
+  // 双排：加劲箍居中于两排之间（外排在外、内排在内）；单排：紧贴主筋内侧
+  const Dr  = rows > 1 ? (Dm + Di)/2 : Dm - d - s.dr;
+  // 内三角撑外接圆：须同时让开加劲箍内缘与内排主筋，取两者较小值
+  const Dt  = Math.min(Dr - s.dr - s.dt, Di - d - s.dt);
 
   const cageTop = (la - s.he)/1000;                       // 笼顶高出桩顶 m
   /* --- ① 主筋 N1 --- */
@@ -1763,17 +1767,18 @@ function calc(){
   });
   const G2 = T2 * w(ds);
 
-  /* --- ③ 加劲箍 N3（沿整根笼长布置） --- */
-  const Nr = Math.ceil(L1 / (s.sr/1000)) + 1;
+  /* --- ③ 加劲箍 N3（自承台底面起算，沿笼长布置至桩底） --- */
+  const yRingTop = -he;                                   // 承台底面标高（m）
+  const ringSpan = Math.max(1e-6, yRingTop - (-(L - hb))); // 承台底面→桩底主筋端
+  const Nr = Math.ceil(ringSpan / (s.sr/1000)) + 1;
   const lr = Math.PI*Dr/1000 + s.lj*s.dr/1000;
   const T3 = Nr * lr;
   const G3 = T3 * w(s.dr);
 
-  /* --- ④ 内三角撑 N6（道数/位置 = 加劲箍） --- */
+  /* --- ④ 内三角撑 N6（等边三角形三边，道数/位置 = 加劲箍） --- */
   const Nt = Nr;
-  const chord = Math.sqrt(3)/2 * Dt/1000;
-  const web   = s.ht > 0 ? Math.sqrt(Math.pow(Dt/2000,2) + Math.pow(s.ht/1000,2)) : Dt/2000;
-  const perTri = 3 * (chord + web);
+  const chord = Math.sqrt(3)/2 * Dt/1000;                 // 等边三角形边长
+  const perTri = 3 * chord;                               // 仅三边弦杆
   const T6 = Nt * perTri;
   const G6 = T6 * w(s.dt);
 
@@ -1789,8 +1794,11 @@ function calc(){
   const V  = Math.PI*D*D/4/1e6 * L;
   const Vc = s.Bx*s.By*s.Hc/1e9;
   const q  = Gs / V;
-  const sClear = Math.PI*Dm/nPos - (bun > 1 ? 2.1*d : d);
-  const sRow = rows > 1 ? rowGap - d : 999;
+  const occ = k => (1.1*k - 0.1)*d;                       // 一束 k 根并排的切向占宽
+  const sClearO = Math.PI*Dm/nPos - occ(bunO);
+  const sClearI = rows > 1 ? Math.PI*Di/nPos - occ(bunI) : 1e9;
+  const sClear = Math.min(sClearO, sClearI);
+  const sRow = rows > 1 ? rowGap - d - s.dr : 999;        // 排间净距（已扣加劲箍占位）
   const rho = Nb*d*d/(D*D)*100;
   const yBot = -(L - hb);
 
@@ -1800,8 +1808,9 @@ function calc(){
   add('保护层厚度', `c = ${c} mm`, c>=50, '水下灌注桩保护层不应小于 50 mm');
   add('主筋净距', `s = ${fmt(sClear,1)} mm`, sClear>=60, '主筋净距不应小于 60 mm');
   add('配筋率', `ρ = ${fmt(rho,2)} %`, rho>=0.6 && rho<=2.0, '宜控制在 0.6%～2.0%');
-  add('主筋总根数', `n = ${Nb} 根（${rows}排×${bun}束×${nPos}）`, Nb>=6 && nPos%2===0, '端承桩不应少于 6 根，每排宜对称布置');
+  add('主筋总根数', `n = ${Nb} 根（${rows>1?('外'+bunO+'+内'+bunI):bunO}根/束×${nPos}处）`, Nb>=6 && nPos%2===0, '端承桩不应少于 6 根，每排宜对称布置');
   add('双排主筋排距', rows>1 ? `a = ${rowGap} mm（净 ${fmt(sRow,0)} mm）` : '单排布置', rows===1 || (sRow>=25 && sRow<=120), '双排主筋排间净距宜 25～120 mm');
+  add('加劲箍设于双排之间', rows>1 ? `a = ${rowGap} ≥ d+d\u1D63+30 = ${d+s.dr+30} mm` : '单排，箍置主筋内侧', rows===1 || rowGap >= d+s.dr+30, '双排时应保证加劲箍能置于内外排之间');
   add('螺旋箍筋直径', `d\u209B = ${ds} mm`, ds>=6, '箍筋直径不应小于 6 mm');
   add('桩顶加密螺距', `p\u2081 = ${s.p1} mm`, s.p1<=s.p && s.p1<=100, '加密段螺距应小于非加密段且不大于 100 mm');
   add('加密区划分', `顶 ${s.Lm} m ＋ 底 ${s.Lmb} m ＜ L ${L} m`, s.Lm + s.Lmb < L - 0.5, '桩顶与桩底加密段之间应保留非加密段');
@@ -1809,13 +1818,15 @@ function calc(){
   add('桩顶嵌入承台', `h\u2091 = ${s.he} mm`, s.he >= (D>=800?100:50), D>=800?'大直径桩嵌入深度不宜小于 100 mm':'不宜小于 50 mm');
   add('主筋锚固长度', `l\u2090 = ${la} mm = ${s.laK}d`, la>=35*d, '锚固长度不宜小于 35d');
   add('承台厚度余量', `H\u1D9C = ${s.Hc} ≥ ${la+s.he+50} mm`, s.Hc >= la+s.he+50, '承台厚度需容纳锚固段，否则笼顶将顶出承台');
+  add('加劲箍起算位置', `承台底 −${fmt(he,2)} m 起算，共 ${Nr} 道`, Nr>=1, '加劲箍与内三角撑均自承台底面起算，不进入承台');
   add('内三角撑道数', `N\u209C = ${Nt} 道（同加劲箍）`, Nt>=1, '道数与加劲箍一一对应，自动跟随');
   add('声测管数量', `n\u209A = ${s.np} 根`, s.np===0 || (D>1500? s.np>=4 : s.np>=3), D>1500?'桩径大于 1.5 m 时宜设 4 根':'宜设 3 根');
 
   return {
-    D,c,ds,d,hb,he,L,la,Ds,Dm,Di,Dr,Dt,rowD,rowGap,rows,bun,nPos,Nb,
+    D,c,ds,d,hb,he,L,la,Ds,Dm,Di,Dr,Dt,rowD,rowGap,rows,bunO,bunI,nPos,Nb,
     L1,nLap,lapAdd,nJoin,nCoupler,T1,G1,
-    segs,T2,turns,G2,Nr,lr,T3,G3,Nt,chord,web,perTri,T6,G6,T4,G4,wp,Lp,
+    segs,T2,turns,G2,Nr,lr,T3,G3,Nt,chord,perTri,T6,G6,T4,G4,wp,Lp,
+    yRingTop,ringSpan,
     Gs,G,V,Vc,q,sClear,sRow,rho,cageTop,yBot,ck,laK:s.laK
   };
 }
@@ -1843,7 +1854,7 @@ let LABELS_ON = true;
 let toast = null;
 let CONC_T = 0.30;                 // 混凝土不透明度系数 0~1
 let CONC = {pile:null, cap:null, capEdge:null};
-let RIB = null;
+let ROUGH = null, NORM_RIB = null, NORM_FINE = null;
 
 function initGL(){
   const el = document.getElementById('view');
@@ -1853,6 +1864,9 @@ function initGL(){
   renderer.setClearColor(0x000000, 0);
   renderer.localClippingEnabled = true;
   renderer.clippingPlanes = [clipPlane];
+  if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.00;
   el.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
@@ -1865,34 +1879,74 @@ function initGL(){
   controls.maxDistance = 500;
   controls.minDistance = 0.25;
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa8bd, 1.05));
-  const d1 = new THREE.DirectionalLight(0xffffff, 1.0); d1.position.set(1.2, 2.2, 1.6); scene.add(d1);
-  const d2 = new THREE.DirectionalLight(0xeaf2ff, 0.55); d2.position.set(-1.6, -1.0, -1.2); scene.add(d2);
-  const d3 = new THREE.DirectionalLight(0xffffff, 0.35); d3.position.set(0, -2.4, 0.4); scene.add(d3);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8d99a8, 0.72));
+  const d1 = new THREE.DirectionalLight(0xffffff, 1.05); d1.position.set(1.2, 2.2, 1.6); scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0xdfe9f7, 0.38); d2.position.set(-1.6, -1.0, -1.2); scene.add(d2);
+  const d3 = new THREE.DirectionalLight(0xffffff, 0.20); d3.position.set(0, -2.4, 0.4); scene.add(d3);
 
   try { scene.environment = makeEnv(); } catch(e){}
-  RIB = makeRibTexture();
+  ROUGH = makeSteelRough();
+  NORM_RIB = makeNormalMap(true);
+  NORM_FINE = makeNormalMap(false);
 
   clock = new THREE.Clock();
   window.addEventListener('resize', onResize);
   animate();
 }
 
-/* 程序化环境贴图 —— 让金属材质有真实反射 */
+/* 程序化环境贴图（A 版）—— 金属质感 90% 来自反射内容：
+   冷白天窗 + 地平线亮带 + 三条竖直灯带 + 深灰地面反光。
+   竖直灯带在圆柱面上形成沿轴向的长条高光，是真实钢筋最标志性的视觉特征。 */
 function makeEnv(){
-  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
+  const W = 1024, H = 512;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
-  const grd = g.createLinearGradient(0,0,0,256);
-  grd.addColorStop(0,'#f4f7fb'); grd.addColorStop(0.42,'#c2cddb');
-  grd.addColorStop(0.52,'#7d8b9e'); grd.addColorStop(1,'#2f3743');
-  g.fillStyle = grd; g.fillRect(0,0,512,256);
-  const lg = g.createLinearGradient(0,0,512,0);
-  lg.addColorStop(0,'rgba(255,255,255,0)'); lg.addColorStop(0.30,'rgba(255,255,255,.85)');
-  lg.addColorStop(0.34,'rgba(255,255,255,0)'); lg.addColorStop(0.70,'rgba(255,255,255,.55)');
-  lg.addColorStop(0.74,'rgba(255,255,255,0)');
-  g.fillStyle = lg; g.fillRect(20,10,472,90);
+
+  /* 天空 → 地平线 → 地面 */
+  const grd = g.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0.00,'#cfdae8');
+  grd.addColorStop(0.20,'#abbbd0');
+  grd.addColorStop(0.40,'#7e90a7');
+  grd.addColorStop(0.485,'#414a57');
+  grd.addColorStop(0.505,'#39424f');
+  grd.addColorStop(0.74,'#171b22');
+  grd.addColorStop(1.00,'#0c0f13');
+  g.fillStyle = grd; g.fillRect(0,0,W,H);
+
+  /* 顶部大面积柔光（厂房天窗） */
+  let rg = g.createRadialGradient(W*0.33, H*0.03, 8, W*0.33, H*0.03, W*0.46);
+  rg.addColorStop(0,'rgba(255,255,255,0.62)');
+  rg.addColorStop(0.45,'rgba(255,255,255,0.18)');
+  rg.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = rg; g.fillRect(0,0,W,H*0.62);
+
+  /* 三条竖直灯带（宽度/亮度不对称，避免对称假感） */
+  [[0.135,0.040,1.00],[0.605,0.022,0.72],[0.835,0.011,0.42]].forEach(([x,w,a])=>{
+    const lg = g.createLinearGradient(W*x - W*w, 0, W*x + W*w, 0);
+    lg.addColorStop(0,'rgba(255,255,255,0)');
+    lg.addColorStop(0.42,`rgba(255,255,255,${a})`);
+    lg.addColorStop(0.58,`rgba(255,255,255,${a})`);
+    lg.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle = lg;
+    g.fillRect(W*(x-w), H*0.01, W*2*w, H*0.88);
+  });
+
+  /* 地平线亮带 —— 给水平环向构件一条清晰的高光边 */
+  const hz = g.createLinearGradient(0,H*0.455,0,H*0.515);
+  hz.addColorStop(0,'rgba(255,255,255,0)');
+  hz.addColorStop(0.5,'rgba(226,236,248,0.30)');
+  hz.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = hz; g.fillRect(0,H*0.455,W,H*0.06);
+
+  /* 地面反光（略偏暖，压制整体发蓝） */
+  const fg = g.createLinearGradient(0,H*0.52,0,H);
+  fg.addColorStop(0,'rgba(150,152,150,0)');
+  fg.addColorStop(1,'rgba(120,118,112,0.50)');
+  g.fillStyle = fg; g.fillRect(0,H*0.52,W,H*0.48);
+
   const tex = new THREE.CanvasTexture(cv);
   tex.mapping = THREE.EquirectangularReflectionMapping;
+  if (THREE.sRGBEncoding !== undefined) tex.encoding = THREE.sRGBEncoding;
   const pm = new THREE.PMREMGenerator(renderer);
   pm.compileEquirectangularShader();
   const env = pm.fromEquirectangular(tex).texture;
@@ -1900,21 +1954,85 @@ function makeEnv(){
   return env;
 }
 
-/* 钢筋横肋凹凸贴图 */
-function makeRibTexture(){
-  const cv = document.createElement('canvas'); cv.width = 24; cv.height = 128;
+/* 钢筋表面粗糙度贴图（A 版）—— 氧化斑 + 轧制划痕，让高光断裂、不再是塑料均匀反光。
+   UV 的 v 方向 = 钢筋长度方向，所以划痕画成竖线。 */
+function makeSteelRough(){
+  const S = 512;
+  const cv = document.createElement('canvas'); cv.width = cv.height = S;
   const g = cv.getContext('2d');
-  g.fillStyle = '#8c8c8c'; g.fillRect(0,0,24,128);
-  for (let i=0;i<8;i++){
-    const y = i*16;
-    const grd = g.createLinearGradient(0,y,0,y+16);
-    grd.addColorStop(0,'#a5a5a5'); grd.addColorStop(0.30,'#ffffff');
-    grd.addColorStop(0.55,'#585858'); grd.addColorStop(1,'#909090');
-    g.fillStyle = grd; g.fillRect(0,y+1,24,11);
+  g.fillStyle = '#3b3b3b'; g.fillRect(0,0,S,S);
+
+  /* 低频氧化斑 */
+  for (let i=0;i<240;i++){
+    const x = Math.random()*S, y = Math.random()*S, r = 10 + Math.random()*78;
+    const v = 46 + Math.random()*96;
+    const rg = g.createRadialGradient(x,y,0,x,y,r);
+    rg.addColorStop(0,`rgba(${v},${v},${v},0.26)`);
+    rg.addColorStop(1,`rgba(${v},${v},${v},0)`);
+    g.fillStyle = rg; g.beginPath(); g.arc(x,y,r,0,6.2832); g.fill();
+  }
+  /* 纵向轧制划痕 */
+  for (let i=0;i<620;i++){
+    const x = Math.random()*S, y = Math.random()*S, len = 24 + Math.random()*180;
+    const v = Math.random() < 0.5 ? 52 : 186;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.09+Math.random()*0.20})`;
+    g.lineWidth = 0.6 + Math.random()*1.5;
+    g.beginPath(); g.moveTo(x,y); g.lineTo(x, y+len); g.stroke();
   }
   const t = new THREE.CanvasTexture(cv);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(1, 48);
+  t.repeat.set(1, 5);
+  t.anisotropy = 4;
+  return t;
+}
+
+/* 钢筋表面法线贴图 —— 螺纹钢的横肋（45°斜向）+ 两条纵肋 + 细颗粒。
+   由高度场经 Sobel 求梯度生成切线空间法线，纯程序化、不占体积。 */
+function makeNormalMap(ribs){
+  const S = 256;
+  const h = new Float32Array(S*S);
+  const P = S/6;                       // 每张 6 道横肋
+  for (let y=0;y<S;y++){
+    for (let x=0;x<S;x++){
+      let v = 0;
+      if (ribs){
+        const t = y + x*0.5;           // 45° 倾斜，保证横向无缝
+        const ph = ((t/P) % 1 + 1) % 1;
+        /* 窄肋 + 平谷：真实螺纹钢横肋占螺距约一半，两条肋之间是光滑母材 */
+        const u = Math.abs(ph - 0.5) / 0.19;
+        if (u < 1) v += Math.pow(Math.cos(u*Math.PI*0.5), 1.2);
+        const dx1 = Math.min(Math.abs(x - S*0.28), S - Math.abs(x - S*0.28));
+        const dx2 = Math.min(Math.abs(x - S*0.78), S - Math.abs(x - S*0.78));
+        v += (dx1 < 2.6 || dx2 < 2.6) ? 0.42 : 0;
+      } else {
+        /* 细颗粒（用于螺旋箍/声测管等细径构件），不含横肋 */
+        v += 0.16*Math.sin(x*1.7 + y*0.9) + 0.10*Math.sin(y*3.1 - x*0.6);
+      }
+      h[y*S+x] = v;
+    }
+  }
+  const cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d');
+  const img = g.createImageData(S, S);
+  const d = img.data;
+  const st = ribs ? 3.0 : 0.9;
+  const at = (x,y)=> h[(((y%S)+S)%S)*S + (((x%S)+S)%S)];
+  for (let y=0;y<S;y++){
+    for (let x=0;x<S;x++){
+      const dx = (at(x+1,y) - at(x-1,y)) * st;
+      const dy = (at(x,y+1) - at(x,y-1)) * st;
+      const L = Math.hypot(dx, dy, 1);
+      const i = (y*S+x)*4;
+      d[i]   = Math.round(((-dx/L)*0.5 + 0.5)*255);
+      d[i+1] = Math.round(((-dy/L)*0.5 + 0.5)*255);
+      d[i+2] = Math.round((1/L)*0.5*255 + 127.5);
+      d[i+3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(cv);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = 8;
   return t;
 }
 
@@ -1933,11 +2051,27 @@ function mat(key, color, opt={}){
   }, opt));
   return MAT[key];
 }
-/* 真实钢筋材质：高金属度 + 环境反射 + 横肋凹凸 */
+/* 真实钢筋材质（A 版）：统一钢色 + 高金属度 + 程序化粗糙度 + 强化环境反射。
+   各类钢筋只留极小的氧化色差（±6 灰阶），不再用不同色相区分构件。 */
+const STEEL = {
+  main:   0xb6bdc6,
+  spiral: 0xb2b9c2,
+  ring:   0xbcc3cc,
+  tri:    0xb4bbc4,
+  tube:   0xc2c9d2
+};
 function steelMat(key, tint){
   if (MAT[key]) return MAT[key];
+  const rib = (key === 'main');   // 直主筋带横肋（环筋/螺旋箍 UV 方向不同，用细颗粒）
+  const nm = rib ? NORM_RIB : NORM_FINE;
   MAT[key] = new THREE.MeshStandardMaterial({
-    color: tint, metalness: 0.92, roughness: 0.34, envMapIntensity: 0.95
+    color: (tint !== undefined ? tint : STEEL[key]) || STEEL.main,
+    metalness: 0.93,
+    roughness: 1.00,
+    roughnessMap: ROUGH,
+    normalMap: nm,
+    normalScale: new THREE.Vector2(rib ? 0.85 : 0.35, rib ? 0.85 : 0.35),
+    envMapIntensity: 1.05
   });
   return MAT[key];
 }
@@ -2013,6 +2147,8 @@ function build(){
   const yTop = R.cageTop;
   const yBot = R.yBot;
   const tk = y => taperK(y, yBot);
+  /* 横肋间距 ≈ 0.7d：按主筋下料长反算法线贴图重复次数（每张图 6 道肋） */
+  if (NORM_RIB) NORM_RIB.repeat.set(1, Math.max(24, Math.round(R.L1 / (4.2*ST.d/1000))));
 
   /* ---- 承台 ---- */
   const gCap = new THREE.Group(); gCap.name='承台'; root.add(gCap); LAYERS.cap = gCap;
@@ -2062,12 +2198,18 @@ function build(){
   /* ---- 主筋 N1（支持双排 / 两束 + 机械连接套筒 + 桩底收口） ---- */
   const gMain = new THREE.Group(); root.add(gMain); LAYERS.main = gMain;
   const barR = ST.d/2000;
-  const steelMain = steelMat('main', 0x9aa3ad);
+  const steelMain = steelMat('main', 0xb6bdc6);
+  /* 一束 k 根沿切向并排（中心距 1.1d），返回各根的切向偏移 */
+  const bundleOffs = k => {
+    if (k <= 1) return [0];
+    const w = barR*2.2;
+    return Array.from({length:k}, (_, j)=>(j-(k-1)/2)*w);
+  };
   {
-    const offs = R.bun === 1 ? [0] : [-1.1*barR, 1.1*barR];
     R.rowD.forEach((ringDmm, ri)=>{
       const ringR = ringDmm/2000;
-      offs.forEach(off=>{
+      const kBun = ri === 0 ? R.bunO : R.bunI;
+      bundleOffs(kBun).forEach(off=>{
         const geo = bakeCyl(ringR, off, barR, R.L1, yTop, yBot, 8, false);
         const im = new THREE.InstancedMesh(geo, steelMain, R.nPos);
         const dummy = new THREE.Object3D();
@@ -2082,8 +2224,12 @@ function build(){
         gMain.add(im);
       });
     });
+    const bunTxt = R.rows > 1
+      ? ('外排 '+R.nPos+'处×'+R.bunO+'根 ＋ 内排 '+R.nPos+'处×'+R.bunI+'根 = 共 '+R.Nb+' 根')
+      : (R.nPos+' 处 × '+R.bunO+' 根 = 共 '+R.Nb+' 根');
     gMain.userData = {info:'主筋 N1', lines:[
-      R.nPos+' 根/排 × '+R.rows+' 排 × '+R.bun+' 束 = 共 '+R.Nb+' 根',
+      bunTxt,
+      R.rows>1 ? ('排距 '+R.rowGap+' mm，加劲箍居中置于两排之间') : '单排布置，加劲箍置主筋内侧',
       'φ'+ST.d+' '+ST.sg+'　单根下料 '+fmt(R.L1)+' m',
       '伸入承台 '+fmt(R.cageTop)+' m　桩底 1 m 收口（半径系数 '+TAPER_K+'）',
       '总长 '+fmt(R.T1)+' m　重量 '+fmt(R.G1)+' kg'
@@ -2093,25 +2239,26 @@ function build(){
   /* 机械连接套筒 */
   const gCpl = new THREE.Group(); root.add(gCpl); LAYERS.cpl = gCpl;
   if (R.nCoupler > 0){
-    const cM = new THREE.MeshStandardMaterial({color:0x5d6670, metalness:0.98, roughness:0.32, envMapIntensity:1.2});
+    const cM = new THREE.MeshStandardMaterial({color:0x6f7883, metalness:0.86, roughness:0.52, envMapIntensity:1.05});
     const geo = new THREE.CylinderGeometry(barR*1.9, barR*1.9, barR*7.2, 14, 1);
     const im = new THREE.InstancedMesh(geo, cM, R.nCoupler);
     const dummy = new THREE.Object3D();
     let idx = 0;
     for (let j=1;j<=R.nJoin;j++){
-      R.rowD.forEach((ringDmm)=>{
+      R.rowD.forEach((ringDmm, ri)=>{
         const ringR = ringDmm/2000;
-        const offs = R.bun === 1 ? [0] : [-1.1*barR, 1.1*barR];
-        for (let i=0;i<R.nPos;i++){
-          const a = i*2*Math.PI/R.nPos;
-          const y = yTop - 9*j + ((i%2)? 0.35 : 0);       // 接头错开 350 mm
-          const k = tk(y);
-          dummy.position.set((ringR+ (R.bun===1?0:0))*k*Math.cos(a) + (0), y, ringR*k*Math.sin(a));
-          dummy.position.x += (R.bun===2 ? 0 : 0);
-          dummy.rotation.set(0,0,0);
-          dummy.updateMatrix();
-          im.setMatrixAt(idx++, dummy.matrix);
-        }
+        const kBun = ri === 0 ? R.bunO : R.bunI;
+        bundleOffs(kBun).forEach(offZ=>{
+          for (let i=0;i<R.nPos;i++){
+            const a = i*2*Math.PI/R.nPos;
+            const y = yTop - 9*j + ((i%2)? 0.35 : 0);       // 接头错开 350 mm
+            const k = tk(y);
+            const rr = ringR*k, ofs = offZ*k;
+            dummy.position.set(rr*Math.cos(a) - ofs*Math.sin(a), y, rr*Math.sin(a) + ofs*Math.cos(a));
+            dummy.updateMatrix();
+            im.setMatrixAt(idx++, dummy.matrix);
+          }
+        });
       });
     }
     im.count = Math.min(idx, R.nCoupler);
@@ -2130,7 +2277,7 @@ function build(){
     const curve = new Helix(R.Ds/2000, yTop, R.segs.map(g=>({H:g.H, p:g.p})), tk);
     const tubular = Math.max(480, Math.min(6400, Math.round(R.turns * 26)));
     const geo = new THREE.TubeGeometry(curve, tubular, ST.ds/2000, 7, false);
-    const mesh = new THREE.Mesh(geo, steelMat('spiral', 0x87968f));
+    const mesh = new THREE.Mesh(geo, steelMat('spiral', 0xb2b9c2));
     mesh.userData = {info:'螺旋箍筋 N2', lines:[
       'φ'+ST.ds+'　共 '+R.turns+' 圈',
       R.segs.map(g=>g.tag+' '+fmt(g.H)+' m @'+g.p+'（'+g.N+'圈）').join('；'),
@@ -2142,9 +2289,9 @@ function build(){
   /* ---- 加劲箍 N3 ---- */
   const gRing = new THREE.Group(); root.add(gRing); LAYERS.ring = gRing;
   const ringY = [];
-  for (let i=0;i<R.Nr;i++) ringY.push(R.Nr>1 ? yTop + (yBot-yTop)*i/(R.Nr-1) : yTop);
+  for (let i=0;i<R.Nr;i++) ringY.push(R.Nr>1 ? R.yRingTop + (yBot - R.yRingTop)*i/(R.Nr-1) : R.yRingTop);
   {
-    const sm = steelMat('ring', 0xa2937a);
+    const sm = steelMat('ring', 0xbcc3cc);
     ringY.forEach((y, i)=>{
       const rr = R.Dr/2000 * tk(y);
       const geo = new THREE.TorusGeometry(rr, ST.dr/2000, 7, 56);
@@ -2159,10 +2306,10 @@ function build(){
     });
   }
 
-  /* ---- 内三角撑 N6（道数/标高 = 加劲箍） ---- */
+  /* ---- 内三角撑 N6（等边三角形三边弦杆，无数值腹杆；道数/标高 = 加劲箍） ---- */
   const gTri = new THREE.Group(); root.add(gTri); LAYERS.tri = gTri;
   if (R.Nt > 0){
-    const barMat = steelMat('tri', 0x8f88a6);
+    const barMat = steelMat('tri', 0xb4bbc4);
     const rb = ST.dt/2000;
     ringY.forEach((y)=>{
       const rt = R.Dt/2000 * tk(y);
@@ -2171,19 +2318,11 @@ function build(){
         return new THREE.Vector3(rt*Math.cos(a), y, rt*Math.sin(a));
       });
       for (let i=0;i<3;i++) gTri.add(rod(v[i], v[(i+1)%3], rb, barMat));
-      if (ST.ht > 0){
-        const apex = new THREE.Vector3(0, y + ST.ht/1000, 0);
-        for (let i=0;i<3;i++) gTri.add(rod(v[i], apex, rb, barMat));
-        const sp = new THREE.Mesh(new THREE.SphereGeometry(rb*1.5, 8, 6), barMat);
-        sp.position.copy(apex); gTri.add(sp);
-      } else {
-        for (let i=0;i<3;i++) gTri.add(rod(v[i], new THREE.Vector3(0, y, 0), rb, barMat));
-      }
     });
     gTri.userData = {info:'内三角撑 N6', lines:[
       'φ'+ST.dt+'　共 '+R.Nt+' 道（与加劲箍同位置自动跟随）',
-      ST.ht>0 ? ('锥高 '+ST.ht+' mm 三角锥') : '锥高 0，平面三角架',
-      '弦杆 '+fmt(R.chord*1000,1)+' mm × 3 ／ 腹杆 '+fmt(R.web*1000,1)+' mm × 3',
+      '等边三角形，仅三边弦杆，无中间腹杆',
+      '外接圆 D\u209C = '+fmt(R.Dt,0)+' mm　边长 = '+fmt(R.chord*1000,1)+' mm × 3',
       '总长 '+fmt(R.T6)+' m　重量 '+fmt(R.G6)+' kg'
     ]};
   }
@@ -2194,7 +2333,7 @@ function build(){
     const rr = (R.Di/2 - ST.d/2 - ST.Dp/2)/1000;
     const len = R.Lp;
     const yTip = yTop + 0.2;
-    const tM = steelMat('tube', 0xb0a396);
+    const tM = steelMat('tube', 0xc2c9d2);
     const capM = new THREE.MeshStandardMaterial({color:0xd93b3b, metalness:0.08, roughness:0.55});
     for (let i=0;i<ST.np;i++){
       const a = (i*360/ST.np + 15) * Math.PI/180;
@@ -2213,7 +2352,7 @@ function build(){
       gTube.add(rot);
       // 管顶封板
       const seal = new THREE.Mesh(new THREE.CircleGeometry(ST.Dp/2000, 18),
-        new THREE.MeshStandardMaterial({color:0x9aa6b4, metalness:0.9, roughness:0.4, side:THREE.DoubleSide}));
+        new THREE.MeshStandardMaterial({color:0x9aa2ac, metalness:0.9, roughness:0.5, roughnessMap:ROUGH, side:THREE.DoubleSide}));
       seal.rotation.x = -Math.PI/2; seal.position.set(rr, 0, 0);
       rot.add(seal);
       // 塑料盖帽
@@ -2462,25 +2601,26 @@ function renderResults(R){
     if (frm) rows.push(`<tr class="frmrow"><td colspan="3" class="frm">${frm}</td></tr>`);
   };
 
-  line('item','主筋 N1','#9aa3ad', fmt(R.T1), fmt(R.G1), 'N1',
+  line('item','主筋 N1','#b6bdc6', fmt(R.T1), fmt(R.G1), 'N1',
     `L₁ = L + l\u2090 − h\u2091 − h\u1D47${R.nLap?(' + '+R.nLap+'×'+ST.lapK+'d'):''} = ${ST.L} + ${(R.la/1000).toFixed(2)} − ${(ST.he/1000).toFixed(2)} − ${(ST.hb/1000).toFixed(2)} = <b>${fmt(R.L1)} m</b><br>
-     总根数 = ${R.nPos} × ${R.rows} 排 × ${R.bun} 束 = <b>${R.Nb} 根</b>　·　单位重 ${fmt(w(ST.d),3)} kg/m<br>
+     ${R.rows>1 ? ('总根数 = '+R.nPos+' 处 × (外排 '+R.bunO+' + 内排 '+R.bunI+') = ') : ('总根数 = '+R.nPos+' 处 × '+R.bunO+' = ')}<b>${R.Nb} 根</b>　·　单位重 ${fmt(w(ST.d),3)} kg/m<br>
      G₁ = ${R.Nb} × ${fmt(R.L1)} × ${fmt(w(ST.d),3)} = <b>${fmt(R.G1)} kg</b>`);
 
-  line('item','螺旋箍 N2','#87968f', fmt(R.T2), fmt(R.G2), 'N2',
+  line('item','螺旋箍 N2','#b2b9c2', fmt(R.T2), fmt(R.G2), 'N2',
     `D\u209B = D − 2c − d\u209B = ${fmt(R.Ds,0)} mm　单圈 l\u1D62 = √[(πD\u209B)² + p²]<br>
      ${R.segs.map(g=>`${g.tag}：${fmt(g.H)} m / ${g.p} mm = ${g.N} 圈 × ${fmt(g.li,4)} m`).join('<br>')}<br>
      Σ L₂ = ${fmt(R.T2)} m　G₂ = <b>${fmt(R.G2)} kg</b>`);
 
-  line('item','加劲箍 N3','#a2937a', fmt(R.T3), fmt(R.G3), 'N3',
-    `D\u1D63 = D\u2098 − d − d\u1D63 = ${fmt(R.Dr,0)} mm　数量 N\u1D63 = ⌈L₁/${fmt(ST.sr/1000,1)}⌉ + 1 = ${R.Nr} 个<br>
+  line('item','加劲箍 N3','#bcc3cc', fmt(R.T3), fmt(R.G3), 'N3',
+    `${R.rows>1 ? ('D\u1D63 = (D\u2098 + D\u1D62)/2（居中于双排主筋之间）') : ('D\u1D63 = D\u2098 − d − d\u1D63（主筋内侧）')} = ${fmt(R.Dr,0)} mm<br>
+     自承台底面（−${fmt(ST.he/1000,2)} m）起算至桩底：N\u1D63 = ⌈${fmt(R.ringSpan,2)}/${fmt(ST.sr/1000,1)}⌉ + 1 = <b>${R.Nr} 个</b><br>
      单个 l\u1D63 = πD\u1D63 + ${ST.lj}d\u1D63 = ${fmt(R.lr)} m<br>
      G₃ = ${R.Nr} × ${fmt(R.lr)} × ${fmt(w(ST.dr),3)} = <b>${fmt(R.G3)} kg</b>`);
 
-  line('item','内三角撑 N6','#8f88a6', fmt(R.T6), fmt(R.G6), 'N6',
-    `道数与标高同加劲箍：<b>${R.Nt} 道</b>　D\u209C = D\u2098 − 2d = ${fmt(R.Dt,0)} mm<br>
-     弦杆 = (√3/2)D\u209C = ${fmt(R.chord*1000,1)} mm　腹杆 = √[(D\u209C/2)²+h\u209C²] = ${fmt(R.web*1000,1)} mm<br>
-     单道 = 3×(${fmt(R.chord,3)}+${fmt(R.web,3)}) = ${fmt(R.perTri)} m<br>
+  line('item','内三角撑 N6','#b4bbc4', fmt(R.T6), fmt(R.G6), 'N6',
+    `道数与标高同加劲箍：<b>${R.Nt} 道</b>　D\u209C = D\u1D62 − d − d\u209C = ${fmt(R.Dt,0)} mm<br>
+     等边三角形，仅设三边弦杆（无中间腹杆）：边长 = (√3/2)D\u209C = ${fmt(R.chord*1000,1)} mm<br>
+     单道 = 3 × ${fmt(R.chord,3)} = ${fmt(R.perTri)} m<br>
      G₆ = ${fmt(R.T6)} × ${fmt(w(ST.dt),3)} = <b>${fmt(R.G6)} kg</b>`);
 
   rows.push(`<tr class="sum"><td>钢筋小计</td><td>${fmt(R.T1+R.T2+R.T3+R.T6)}</td><td>${fmt(R.Gs)}</td></tr>`);
@@ -2558,9 +2698,10 @@ function exportXlsx(){
     ['承台','主筋锚固长度','la',R.la,'mm',ST.laK+'d，自承台底面起算'],
     ['配筋','主筋直径','d',ST.d,'mm',''],
     ['配筋','每排主筋根数','n',ST.n,'根',''],
-    ['配筋','主筋排数','—',ST.rows,'排','双排为内外同心两圈'],
-    ['配筋','每束根数','—',ST.bundle,'根','两束为每处并排两根'],
-    ['配筋','主筋总根数','Nb',R.Nb,'根','n × 排数 × 每束根数'],
+    ['配筋','主筋排数','—',ST.rows,'排','双排为内外同心两圈，加劲箍居中'],
+    ['配筋','外排每束根数','—',ST.bundleO,'根','沿切向并排，中心距 1.1d'],
+    ['配筋','内排每束根数','—',R.rows>1?ST.bundleI:0,'根','单排时不设内排'],
+    ['配筋','主筋总根数','Nb',R.Nb,'根','n × (外排束数 + 内排束数)'],
     ['配筋','主筋钢种','—',ST.sg,'',''],
     ['配筋','主筋连接方式','—',ST.conn,'',''],
     ['配筋','机械连接套筒数量','—',R.nCoupler,'个','每 9 m 一个接头'],
@@ -2574,7 +2715,6 @@ function exportXlsx(){
     ['配筋','加劲箍接头倍数','lj',ST.lj,'×dr',''],
     ['配筋','内三角撑道数','Nt',R.Nt,'道','自动跟随加劲箍'],
     ['配筋','内三角撑杆径','dt',ST.dt,'mm',''],
-    ['配筋','内三角撑锥高','ht',ST.ht,'mm','0 为平面三角架'],
     ['配筋','声测管外径/壁厚','Dp/tp',ST.Dp+'/'+ST.tp,'mm',''],
     ['配筋','声测管数量','np',ST.np,'根',''],
     ['计价','钢筋损耗率','η',ST.eta,'%',''],
@@ -2584,8 +2724,9 @@ function exportXlsx(){
     ['外排主筋中心线直径','Dm',R.Dm,'mm','D − 2c − 2ds − d'],
     ['内排主筋中心线直径','Di',R.Di,'mm','Dm − 2×排距'],
     ['双排主筋排距','a',R.rowGap,'mm',''],
-    ['加劲箍中心线直径','Dr',R.Dr,'mm','Di − d − dr'],
-    ['内三角撑外接圆直径','Dt',R.Dt,'mm','Di − 2d'],
+    ['加劲箍中心线直径','Dr',R.Dr,'mm',R.rows>1?'(Dm + Di)/2':'Dm − d − dr'],
+    ['内三角撑外接圆直径','Dt',R.Dt,'mm','min(Dr − dr − dt, Di − d − dt)'],
+    ['加劲箍起算标高','—',r3(-ST.he/1000),'m','承台底面（内三角撑同）'],
     ['主筋净距','s',r2(R.sClear),'mm','πDm/n − 主筋束宽'],
     ['配筋率','ρ',r2(R.rho),'%','Nb·d²/D²'],
     ['笼顶超出桩顶','Δh',r3(R.cageTop*1000),'mm','la − he'],
@@ -2599,13 +2740,13 @@ function exportXlsx(){
   const d = [
     ['编号','部位','规格','根数/道数','单根长度 m','总长 m','单位重 kg/m','重量 kg','计算式'],
     ['N1','主筋', 'φ'+ST.d+' '+ST.sg, R.Nb, r2(R.L1), r2(R.T1), r3(w(ST.d)), r2(R.G1),
-      'L1 = L + la - he - hb = '+ST.L+'+'+(R.la/1000).toFixed(2)+'-'+(ST.he/1000).toFixed(2)+'-'+(ST.hb/1000).toFixed(2)+' = '+R.L1.toFixed(2)],
+      'L1 = L + la - he - hb = '+ST.L+'+'+(R.la/1000).toFixed(3)+'-'+(ST.he/1000).toFixed(2)+'-'+(ST.hb/1000).toFixed(2)+' = '+R.L1.toFixed(3)],
     ['N2','螺旋箍筋','φ'+ST.ds, R.turns+' 圈', r2(R.segs[0].li), r2(R.T2), r3(w(ST.ds)), r2(R.G2),
       R.segs.map(g=>g.tag+' '+g.N+'×'+g.li.toFixed(4)).join(' + ')],
     ['N3','加劲箍','φ'+ST.dr, R.Nr+' 个', r2(R.lr), r2(R.T3), r3(w(ST.dr)), r2(R.G3),
       'πDr + '+ST.lj+'dr = '+R.lr.toFixed(4)],
     ['N6','内三角撑','φ'+ST.dt, R.Nt+' 道', r2(R.perTri), r2(R.T6), r3(w(ST.dt)), r2(R.G6),
-      '3×(弦'+R.chord.toFixed(3)+'+腹'+R.web.toFixed(3)+')'],
+      '3×弦'+R.chord.toFixed(3)+'（等边三角形三边）'],
     ['小计','','','','', r2(R.T1+R.T2+R.T3+R.T6),'', r2(R.Gs),''],
     ['损耗',''+ST.eta+'%','','','','','', r2(R.G-R.Gs),''],
     ['合计','钢筋','','','','','', r2(R.G),''],
@@ -2635,7 +2776,7 @@ function exportXlsx(){
     ['承台体积（参考）', r2(R.Vc), 'm³', 'Bx·By·Hc'],
     ['含钢量指标', r2(R.q), 'kg/m³', '钢筋小计/桩身体积'],
     ['单位桩长含钢量', r2(R.Gs/ST.L), 'kg/m', ''],
-    ['主筋总根数', R.Nb, '根', R.nPos+'×'+R.rows+'排×'+R.bun+'束'],
+    ['主筋总根数', R.Nb, '根', R.rows>1?('外'+R.bunO+'+内'+R.bunI+'根/束×'+R.nPos+'处'):(R.bunO+'根/束×'+R.nPos+'处')],
     ['机械连接套筒', R.nCoupler, '个', '每 9 m 一个接头']
   ];
   const ws3 = XLSX.utils.aoa_to_sheet(s);
