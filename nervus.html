@@ -11,8 +11,10 @@
   --line:#e2e8f1; --line2:#cfd8e5;
   --blue:#1a56db; --blue-l:#eaf0fd; --blue-d:#1442a8;
   --green:#0f766e; --amber:#b45309; --purple:#7c3aed; --red:#b91c1c; --slate:#64748b;
-  --mono:"SF Mono","Menlo","Cascadia Mono","Consolas",monospace;
-  --sans:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Text","PingFang SC","Helvetica Neue","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  /* 全站统一苹果字体：不再混用 Consolas / Cascadia 等非苹果字体 */
+  --num:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Text","SF Pro Display","PingFang SC","Helvetica Neue","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Text","SF Pro Display","PingFang SC","Helvetica Neue","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono:var(--num);
 }
 *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
 html,body{height:100%;margin:0}
@@ -20,6 +22,7 @@ body{
   font-family:var(--sans);background:var(--bg);color:var(--ink);
   font-size:13px;overflow:hidden;
 }
+button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabular-nums}
 #app{display:flex;height:100vh;width:100vw}
 
 /* ============ 左：参数 ============ */
@@ -57,7 +60,7 @@ body{
 .row{display:flex;align-items:center;gap:8px;margin:7px 0}
 .row label{flex:1;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row input[type=number],.row select{
-  width:88px;flex:none;font-family:var(--sans);font-size:12.5px;color:var(--ink);
+  width:88px;flex:none;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ink);
   border:1px solid var(--line2);border-radius:6px;padding:4px 7px;background:#fff;
   transition:.15s;text-align:right;
 }
@@ -65,6 +68,7 @@ body{
 .row input[type=number]:focus,.row select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.12)}
 .row .u{width:26px;flex:none;font-size:11px;color:var(--muted)}
 .row.bad input{border-color:#e28b8b;background:#fff7f7}
+.hint{font-size:11px;color:var(--muted);line-height:1.6;padding:2px 0 6px}
 .sfoot{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--line);background:#fbfcfe}
 .sfoot button{
   flex:1;font-family:var(--sans);font-size:12px;padding:6px 0;border-radius:7px;cursor:pointer;
@@ -80,7 +84,7 @@ body{
 .lab{
   position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
   background:rgba(255,255,255,.92);border:1px solid var(--line2);border-radius:5px;
-  padding:1px 6px;font-size:11px;color:var(--ink2);font-family:var(--mono);
+  padding:1px 6px;font-size:11px;color:var(--ink2);font-family:var(--num);font-variant-numeric:tabular-nums;
   box-shadow:0 1px 4px rgba(20,26,36,.08);
 }
 .lab.k{background:#1a56db;color:#fff;border-color:#1a56db}
@@ -95,7 +99,7 @@ body{
 }
 #toolbar .seg button{
   border:none;background:none;font-family:var(--sans);font-size:12px;color:var(--ink2);
-  padding:6px 11px;cursor:pointer;border-right:1px solid var(--line);
+  padding:6px 10px;cursor:pointer;border-right:1px solid var(--line);white-space:nowrap;
 }
 #toolbar .seg button:last-child{border-right:none}
 #toolbar .seg button:hover{background:var(--blue-l);color:var(--blue)}
@@ -106,7 +110,8 @@ body{
   border:1px solid var(--line2);border-radius:8px;padding:4px 11px;pointer-events:auto;
   box-shadow:0 2px 8px rgba(20,26,36,.07);font-size:11.5px;color:var(--ink2);
 }
-#toolbar .clip input{width:96px;accent-color:var(--blue)}
+#toolbar .clip span{white-space:nowrap}
+#toolbar .clip input[type=range]{width:82px;accent-color:var(--blue)}
 
 #toggles{
   position:absolute;left:12px;bottom:12px;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 24px);
@@ -124,8 +129,8 @@ body{
 
 #tip{
   position:absolute;pointer-events:none;background:#141a24;color:#fff;font-size:11.5px;
-  padding:5px 9px;border-radius:6px;opacity:0;transition:opacity .12s;max-width:280px;
-  line-height:1.6;font-family:var(--mono);z-index:5;
+  padding:5px 9px;border-radius:6px;opacity:0;transition:opacity .12s;max-width:290px;
+  line-height:1.6;font-family:var(--num);font-variant-numeric:tabular-nums;z-index:5;
 }
 #tip.on{opacity:1}
 
@@ -139,7 +144,7 @@ body{
 
 /* ============ 右：结果 ============ */
 #right{
-  width:326px;flex:none;background:var(--panel);border-left:1px solid var(--line);
+  width:330px;flex:none;background:var(--panel);border-left:1px solid var(--line);
   display:flex;flex-direction:column;box-shadow:-2px 0 12px rgba(20,26,36,.04);z-index:3;
 }
 .rhead{padding:13px 16px 11px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:8px}
@@ -149,7 +154,7 @@ body{
 .kpi{
   border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fbfcfe;
 }
-.kpi .v{font-size:19px;font-weight:700;letter-spacing:-.4px;font-family:var(--mono);line-height:1.2}
+.kpi .v{font-size:18px;font-weight:700;letter-spacing:-.3px;font-family:var(--num);font-variant-numeric:tabular-nums;line-height:1.2}
 .kpi .v small{font-size:11px;font-weight:500;color:var(--muted);margin-left:2px;letter-spacing:0}
 .kpi .l{font-size:11px;color:var(--muted);margin-top:2px}
 .kpi.hi .v{color:var(--blue)}
@@ -163,8 +168,8 @@ body{
   border-bottom:1px solid var(--line2);letter-spacing:.4px;
 }
 .rt th:first-child{text-align:left}
-.rt td{padding:6px 4px;border-bottom:1px solid #f1f4f9;text-align:right;font-family:var(--mono);
-  font-size:11.5px;color:var(--ink2);transition:.2s}
+.rt td{padding:6px 4px;border-bottom:1px solid #f1f4f9;text-align:right;font-family:var(--num);
+  font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--ink2);transition:.2s}
 .rt td:first-child{text-align:left;font-family:var(--sans);font-size:12px}
 .rt tr.item{cursor:pointer}
 .rt tr.item:hover td{background:#f7faff}
@@ -172,19 +177,19 @@ body{
 .rt tr.sum td{background:#f4f7fc;font-weight:700;color:var(--ink)}
 .rt tr.tot td{background:var(--blue-l);font-weight:700;color:var(--blue-d);font-size:12px}
 .rt tr.sub td{color:var(--muted)}
-.rt .frm{font-family:var(--mono);font-size:10.8px;color:var(--muted);padding:0 4px 8px;
+.rt .frm{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:10.8px;color:var(--muted);padding:0 4px 8px;
   display:none;line-height:1.7;text-align:left;background:#fbfcfe;border-bottom:1px solid #f1f4f9}
 .rt tr.open + tr.frmrow .frm{display:block}
 .frm b{color:var(--blue);font-weight:600}
 
-#checks{padding:6px 14px 10px;border-top:1px solid var(--line);max-height:170px;overflow-y:auto}
+#checks{padding:6px 14px 10px;border-top:1px solid var(--line);max-height:176px;overflow-y:auto}
 .ck{display:flex;gap:7px;align-items:flex-start;padding:3px 0;font-size:11.5px;line-height:1.55}
 .ck .dot{width:14px;height:14px;border-radius:50%;flex:none;margin-top:1px;display:flex;
   align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700}
 .ck.pass .dot{background:#0f9d76}
 .ck.fail .dot{background:#dc2626}
 .ck .tx{flex:1;color:var(--ink2)}
-.ck .tx em{font-family:var(--mono);font-style:normal;color:var(--muted);font-size:10.5px}
+.ck .tx em{font-family:var(--num);font-variant-numeric:tabular-nums;font-style:normal;color:var(--muted);font-size:10.5px}
 .ck.fail .tx{color:#b91c1c}
 
 .rexport{padding:10px 14px 14px;border-top:1px solid var(--line);background:#fbfcfe}
@@ -203,8 +208,24 @@ body{
 }
 .ver{text-align:center;font-size:10.5px;color:#a9b3c2;padding:0 0 10px;letter-spacing:.3px}
 
+
+/* ============ 参数剖面图浮层 ============ */
+#secMask{position:fixed;inset:0;background:rgba(20,26,36,.42);display:none;align-items:center;
+  justify-content:center;z-index:60;padding:24px}
+#secMask.on{display:flex}
+#secBox{background:#fff;border-radius:14px;width:min(1440px,96vw);max-height:92vh;display:flex;
+  flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(20,26,36,.32)}
+.secHead{display:flex;align-items:baseline;gap:10px;padding:11px 18px;border-bottom:1px solid var(--line);flex:none}
+.secHead b{font-size:13.5px}
+.secHead span{font-size:11px;color:var(--muted)}
+.secHead button{margin-left:auto;font-size:12px;padding:5px 14px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--line2);background:#fff;color:var(--ink2)}
+.secHead button:hover{border-color:#b9cdf7;color:var(--blue);background:var(--blue-l)}
+.secBody{overflow:auto;padding:8px 14px 16px}
+.secBody svg.secsvg{width:100%;height:auto;display:block}
+
 @media (max-width:1180px){
-  #side{width:262px} #right{width:292px}
+  #side{width:262px} #right{width:296px}
 }
 </style>
 </head>
@@ -215,7 +236,7 @@ body{
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.0</div>
+        <div class="en">NERVUS · v1.0.1</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -235,17 +256,25 @@ body{
         <button data-view="front">正视</button>
         <button data-view="side">侧视</button>
         <button data-view="top">俯视</button>
-        <button data-view="node">入承台节点</button>
+        <button data-view="node">入承台</button>
+        <button data-view="inside">桩内</button>
         <button data-view="reset">复位</button>
       </div>
       <div class="spacer"></div>
       <div class="clip">
         <span>剖切</span>
         <input id="clipRange" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="clip">
+        <span>混凝土</span>
+        <input id="concRange" type="range" min="0" max="100" value="30">
+      </div>
+      <div class="clip">
         <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11.5px">
           <input id="clipOn" type="checkbox" style="accent-color:#1a56db"> 标注
         </label>
       </div>
+      <button id="btnSec" class="clip" style="cursor:pointer;color:#1a56db;font-weight:600">参数剖面图</button>
     </div>
     <div id="toggles"></div>
     <div id="tip"></div>
@@ -269,8 +298,218 @@ body{
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.0 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.1 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
+</div>
+
+<div id="secMask">
+  <div id="secBox">
+    <div class="secHead"><b>钢筋笼参数代号剖面图</b><span>A—A 横剖面 · B—B 纵剖面 · C 桩顶入承台节点放大</span><button id="secClose">关闭</button></div>
+    <div class="secBody">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 900" class="secsvg" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif">
+<defs><pattern id="hatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="8" stroke="#b6c6dc" stroke-width="1.1"/></pattern></defs>
+<rect width="1560" height="900" fill="#ffffff"/>
+<text x="40.0" y="48.0" font-size="21" fill="#141a24" text-anchor="start" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">圆形端承桩钢筋笼 · 参数代号剖面图</text>
+<text x="40.0" y="72.0" font-size="12" fill="#77839a" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">A—A 横剖面（桩身断面）　B—B 纵剖面（全桩）　C 桩顶入承台节点放大　·　径向细部已放大以便识读，实配以计算为准</text>
+<text x="300.0" y="126.0" font-size="14" fill="#141a24" text-anchor="middle" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">A—A 横剖面</text>
+<line x1="254.0" y1="134.0" x2="346.0" y2="134.0" stroke="#cbd5e1" stroke-width="1.2" stroke-linecap="butt" opacity="1"/>
+<circle cx="300.0" cy="500.0" r="168.0" fill="#f6f9fc" stroke="#94a3b8" stroke-width="2.2" opacity="1"/>
+<circle cx="300.0" cy="500.0" r="146.0" fill="none" stroke="#0f766e" stroke-width="1.4" stroke-dasharray="7 3 2 3" opacity="1"/>
+<circle cx="300.0" cy="500.0" r="134.0" fill="none" stroke="#1a56db" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+<circle cx="300.0" cy="500.0" r="118.0" fill="none" stroke="#b45309" stroke-width="2.4" opacity="1"/>
+<circle cx="300.0" cy="500.0" r="113.0" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="5 4" opacity="0.7"/>
+<path d="M300.0,613.0 L397.9,443.5 L202.1,443.5 Z" fill="none" stroke="#7c3aed" stroke-width="3.2" stroke-linejoin="round"/>
+<line x1="300.0" y1="500.0" x2="300.0" y2="613.0" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="butt" opacity="1"/>
+<line x1="300.0" y1="500.0" x2="397.9" y2="443.5" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="butt" opacity="1"/>
+<line x1="300.0" y1="500.0" x2="202.1" y2="443.5" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="butt" opacity="1"/>
+<circle cx="300.0" cy="500.0" r="4.0" fill="#7c3aed" stroke="#7c3aed" stroke-width="0" opacity="1"/>
+<circle cx="300.0" cy="366.0" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="337.8" cy="371.4" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="372.4" cy="387.3" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="401.3" cy="412.2" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="421.9" cy="444.3" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="432.6" cy="480.9" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="432.6" cy="519.1" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="421.9" cy="555.7" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="401.3" cy="587.8" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="372.4" cy="612.7" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="337.8" cy="628.6" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="300.0" cy="634.0" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="262.2" cy="628.6" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="227.6" cy="612.7" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="198.7" cy="587.8" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="178.1" cy="555.7" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="167.4" cy="519.1" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="167.4" cy="480.9" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="178.1" cy="444.3" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="198.7" cy="412.2" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="227.6" cy="387.3" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="262.2" cy="371.4" r="5.4" fill="#2f6fe0" stroke="#0b3fa8" stroke-width="1" opacity="1"/>
+<circle cx="300.0" cy="408.0" r="10.5" fill="#fef2f2" stroke="#991b1b" stroke-width="1.6" opacity="1"/>
+<circle cx="300.0" cy="408.0" r="7.6" fill="none" stroke="#b91c1c" stroke-width="1.2" opacity="1"/>
+<circle cx="220.3" cy="546.0" r="10.5" fill="#fef2f2" stroke="#991b1b" stroke-width="1.6" opacity="1"/>
+<circle cx="220.3" cy="546.0" r="7.6" fill="none" stroke="#b91c1c" stroke-width="1.2" opacity="1"/>
+<circle cx="379.7" cy="546.0" r="10.5" fill="#fef2f2" stroke="#991b1b" stroke-width="1.6" opacity="1"/>
+<circle cx="379.7" cy="546.0" r="7.6" fill="none" stroke="#b91c1c" stroke-width="1.2" opacity="1"/>
+<line x1="173.6" y1="427.0" x2="128.0" y2="322.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="173.6" cy="427.0" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="121.0" y="326.0" font-size="11.5" fill="#141a24" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Dₛ 螺旋箍中心线</text>
+<line x1="168.0" y1="476.7" x2="128.0" y2="402.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="168.0" cy="476.7" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="121.0" y="406.0" font-size="11.5" fill="#141a24" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Dₘ 主筋中心线</text>
+<line x1="184.6" y1="524.5" x2="128.0" y2="486.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="184.6" cy="524.5" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="121.0" y="490.0" font-size="11.5" fill="#141a24" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Dᵣ 加劲箍中心线</text>
+<line x1="204.2" y1="559.9" x2="128.0" y2="570.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="204.2" cy="559.9" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="121.0" y="574.0" font-size="11.5" fill="#141a24" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Dₜ 三角撑外接圆</text>
+<line x1="206.1" y1="639.3" x2="128.0" y2="652.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="206.1" cy="639.3" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="121.0" y="656.0" font-size="11.5" fill="#141a24" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">D 桩径</text>
+<line x1="408.4" y1="421.2" x2="482.0" y2="330.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="408.4" cy="421.2" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="489.0" y="334.0" font-size="11.5" fill="#141a24" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">d 主筋直径</text>
+<line x1="441.7" y1="464.7" x2="482.0" y2="408.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="441.7" cy="464.7" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="489.0" y="412.0" font-size="11.5" fill="#141a24" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">dₛ 箍筋直径</text>
+<line x1="415.4" y1="524.5" x2="482.0" y2="486.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="415.4" cy="524.5" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="489.0" y="490.0" font-size="11.5" fill="#141a24" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">dᵣ 加劲箍</text>
+<line x1="386.6" y1="572.6" x2="482.0" y2="566.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="386.6" cy="572.6" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="489.0" y="570.0" font-size="11.5" fill="#141a24" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">dₜ 三角撑杆径</text>
+<line x1="379.7" y1="546.0" x2="482.0" y2="646.0" stroke="#64748b" stroke-width="1" stroke-linecap="round" opacity="0.9"/>
+<circle cx="379.7" cy="546.0" r="2.4" fill="#64748b" stroke="#64748b" stroke-width="0" opacity="1"/>
+<text x="489.0" y="650.0" font-size="11.5" fill="#141a24" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Dₚ×tₚ 声测管</text>
+<line x1="300.0" y1="322.0" x2="300.0" y2="352.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<line x1="300.0" y1="334.0" x2="300.0" y2="374.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<line x1="300.0" y1="339.0" x2="300.0" y2="361.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M300.0,339.0 L295.7,341.5 L295.7,336.5 Z" fill="#64748b"/>
+<path d="M300.0,361.0 L304.3,358.5 L304.3,363.5 Z" fill="#64748b"/>
+<line x1="300.0" y1="324.0" x2="452.0" y2="232.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<text x="456.0" y="236.0" font-size="11.5" fill="#141a24" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">c 保护层</text>
+<line x1="48.0" y1="332.0" x2="48.0" y2="668.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M48.0,332.0 L44.8,326.4 L51.2,326.4 Z" fill="#64748b"/>
+<path d="M48.0,668.0 L51.2,673.6 L44.8,673.6 Z" fill="#64748b"/>
+<text x="41.0" y="504.0" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1"></text>
+<text x="36.0" y="505.0" font-size="13" fill="#141a24" text-anchor="middle" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1" transform="rotate(-90 36 505)">D</text>
+<text x="300.0" y="796.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">主筋沿 Dₘ 圆周均布 n 根；双排时内外各一圈（排距 a），两束时每处并排 2 根</text>
+<text x="300.0" y="818.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">c 为保护层厚度，自螺旋箍外表面量至桩身表面</text>
+<text x="806.0" y="126.0" font-size="14" fill="#141a24" text-anchor="middle" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">B—B 纵剖面</text>
+<line x1="760.0" y1="134.0" x2="852.0" y2="134.0" stroke="#cbd5e1" stroke-width="1.2" stroke-linecap="butt" opacity="1"/>
+<rect x="694" y="141.9" width="224" height="43.1" fill="#eef3fa" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="694" y="141.9" width="224" height="43.1" fill="url(#hatch)" opacity="0.55"/>
+<rect x="774" y="185" width="64" height="673" fill="#f8fafd" stroke="#94a3b8" stroke-width="1.6"/>
+<line x1="774.0" y1="185.0" x2="838.0" y2="185.0" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="6 4" stroke-linecap="butt" opacity="1"/>
+<line x1="780.0" y1="164.1" x2="780.0" y2="856.1" stroke="#1a56db" stroke-width="2.6" stroke-linecap="butt" opacity="1"/>
+<line x1="832.0" y1="164.1" x2="832.0" y2="856.1" stroke="#1a56db" stroke-width="2.6" stroke-linecap="butt" opacity="1"/>
+<line x1="794.0" y1="158.8" x2="794.0" y2="858.0" stroke="#b91c1c" stroke-width="1.5" stroke-linecap="butt" opacity="1"/>
+<rect x="791" y="152.8" width="6" height="6" fill="#d93b3b" stroke="#991b1b" stroke-width="0.7"/>
+<line x1="818.0" y1="158.8" x2="818.0" y2="858.0" stroke="#b91c1c" stroke-width="1.5" stroke-linecap="butt" opacity="1"/>
+<rect x="815" y="152.8" width="6" height="6" fill="#d93b3b" stroke="#991b1b" stroke-width="0.7"/>
+<path d="M836.0,164.1 L776.0,175.1 L836.0,186.1 L776.0,197.1 L836.0,208.1 L776.0,219.1 L836.0,230.1 L776.0,241.1 L836.0,252.1 L776.0,263.1 L836.0,274.1 L776.0,285.1 L836.0,296.1 L776.0,307.1 L836.0,318.1 L776.0,329.1 L836.0,340.1 L776.0,351.1 L836.0,362.1 L776.0,373.1 L836.0,384.1 L776.0,395.1 L836.0,406.1 L776.0,417.1 L836.0,428.1 L776.0,439.1 L836.0,450.1 L776.0,461.1 L836.0,472.1 L776.0,483.1 L836.0,494.1 L776.0,505.1 L836.0,516.1 L776.0,527.1 L836.0,538.1 L776.0,549.1 L836.0,560.1 L776.0,571.1 L836.0,582.1 L776.0,593.1 L836.0,604.1 L776.0,615.1 L836.0,626.1 L776.0,637.1 L836.0,648.1 L776.0,659.1 L836.0,670.1 L776.0,681.1 L836.0,692.1 L776.0,703.1 L836.0,714.1 L776.0,725.1 L836.0,736.1 L776.0,747.1 L836.0,758.1 L776.0,769.1 L836.0,780.1 L776.0,791.1 L836.0,802.1 L776.0,813.1 L836.0,824.1 L776.0,835.1 L836.0,846.1" fill="none" stroke="#0f766e" stroke-width="1.4" opacity="0.92"/>
+<line x1="777.0" y1="164.1" x2="835.0" y2="164.1" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,164.1 L816.0,164.1 L806.0,159.6 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="218.0" x2="835.0" y2="218.0" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,218.0 L816.0,218.0 L806.0,213.5 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="271.8" x2="835.0" y2="271.8" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,271.8 L816.0,271.8 L806.0,267.3 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="325.7" x2="835.0" y2="325.7" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,325.7 L816.0,325.7 L806.0,321.2 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="379.5" x2="835.0" y2="379.5" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,379.5 L816.0,379.5 L806.0,375.0 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="433.3" x2="835.0" y2="433.3" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,433.3 L816.0,433.3 L806.0,428.8 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="487.2" x2="835.0" y2="487.2" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,487.2 L816.0,487.2 L806.0,482.7 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="541.0" x2="835.0" y2="541.0" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,541.0 L816.0,541.0 L806.0,536.5 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="594.9" x2="835.0" y2="594.9" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,594.9 L816.0,594.9 L806.0,590.4 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="648.7" x2="835.0" y2="648.7" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,648.7 L816.0,648.7 L806.0,644.2 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="702.5" x2="835.0" y2="702.5" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,702.5 L816.0,702.5 L806.0,698.0 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="756.4" x2="835.0" y2="756.4" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,756.4 L816.0,756.4 L806.0,751.9 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="777.0" y1="810.2" x2="835.0" y2="810.2" stroke="#b45309" stroke-width="1.9" stroke-linecap="butt" opacity="1"/>
+<path d="M796.0,810.2 L816.0,810.2 L806.0,805.7 Z" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+<line x1="780.0" y1="831.1" x2="798.0" y2="856.1" stroke="#1a56db" stroke-width="2.2" stroke-linecap="butt" opacity="1"/>
+<line x1="832.0" y1="831.1" x2="814.0" y2="856.1" stroke="#1a56db" stroke-width="2.2" stroke-linecap="butt" opacity="1"/>
+<line x1="798.0" y1="856.1" x2="814.0" y2="856.1" stroke="#1a56db" stroke-width="1.4" stroke-dasharray="4 3" stroke-linecap="butt" opacity="1"/>
+<line x1="876.0" y1="185.0" x2="876.0" y2="319.6" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M876.0,185.0 L872.8,179.4 L879.2,179.4 Z" fill="#64748b"/>
+<path d="M876.0,319.6 L879.2,325.2 L872.8,325.2 Z" fill="#64748b"/>
+<text x="883.0" y="256.3" font-size="11.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Lₘ 桩顶加密</text>
+<line x1="876.0" y1="777.2" x2="876.0" y2="858.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M876.0,777.2 L872.8,771.6 L879.2,771.6 Z" fill="#64748b"/>
+<path d="M876.0,858.0 L879.2,863.6 L872.8,863.6 Z" fill="#64748b"/>
+<text x="883.0" y="821.6" font-size="11.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Lₘᵇ 桩底加密</text>
+<line x1="946.0" y1="831.1" x2="946.0" y2="858.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M946.0,831.1 L942.8,825.5 L949.2,825.5 Z" fill="#64748b"/>
+<path d="M946.0,858.0 L949.2,863.6 L942.8,863.6 Z" fill="#64748b"/>
+<text x="953.0" y="848.5" font-size="11.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">收口 1 m</text>
+<line x1="732.0" y1="185.0" x2="732.0" y2="858.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M732.0,185.0 L728.8,179.4 L735.2,179.4 Z" fill="#64748b"/>
+<path d="M732.0,858.0 L735.2,863.6 L728.8,863.6 Z" fill="#64748b"/>
+<text x="725.0" y="431.3" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">L  桩长</text>
+<line x1="666.0" y1="164.1" x2="666.0" y2="856.1" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M666.0,164.1 L662.8,158.5 L669.2,158.5 Z" fill="#64748b"/>
+<path d="M666.0,856.1 L669.2,861.7 L662.8,861.7 Z" fill="#64748b"/>
+<text x="659.0" y="571.9" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">L₁  主筋下料长</text>
+<line x1="836.0" y1="831.1" x2="946.0" y2="831.1" stroke="#64748b" stroke-width="1" stroke-dasharray="3 3" stroke-linecap="butt" opacity="1"/>
+<line x1="694.0" y1="153.9" x2="630.0" y2="143.9" stroke="#64748b" stroke-width="1" stroke-dasharray="4 3" stroke-linecap="butt" opacity="1"/>
+<text x="626.0" y="139.9" font-size="11.5" fill="#141a24" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">承台</text>
+<line x1="836.0" y1="521.5" x2="858.0" y2="521.5" stroke="#0f766e" stroke-width="1" stroke-dasharray="3 3" stroke-linecap="butt" opacity="1"/>
+<text x="862.0" y="525.5" font-size="12" fill="#0f766e" text-anchor="start" font-weight="600" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">p</text>
+<line x1="836.0" y1="276.5" x2="858.0" y2="276.5" stroke="#0f766e" stroke-width="1" stroke-dasharray="3 3" stroke-linecap="butt" opacity="1"/>
+<text x="862.0" y="280.5" font-size="12" fill="#0f766e" text-anchor="start" font-weight="600" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">p₁</text>
+<line x1="836.0" y1="218.0" x2="850.0" y2="218.0" stroke="#b45309" stroke-width="1" stroke-dasharray="3 3" stroke-linecap="butt" opacity="1"/>
+<text x="854.0" y="210.0" font-size="12" fill="#b45309" text-anchor="start" font-weight="600" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">sᵣ</text>
+<text x="1268.0" y="126.0" font-size="14" fill="#141a24" text-anchor="middle" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">C 桩顶入承台节点放大</text>
+<line x1="1193.0" y1="134.0" x2="1343.0" y2="134.0" stroke="#cbd5e1" stroke-width="1.2" stroke-linecap="butt" opacity="1"/>
+<rect x="1120" y="215" width="296" height="184.0" fill="#eef3fa" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="1120" y="215" width="296" height="184.0" fill="url(#hatch)" opacity="0.55"/>
+<rect x="1186" y="387.5" width="164" height="312.5" fill="#f8fafd" stroke="#94a3b8" stroke-width="1.6"/>
+<line x1="1186.0" y1="387.5" x2="1350.0" y2="387.5" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="7 4" stroke-linecap="butt" opacity="1"/>
+<line x1="1202.0" y1="298.4" x2="1202.0" y2="700.0" stroke="#1a56db" stroke-width="6" stroke-linecap="butt" opacity="1"/>
+<rect x="1193" y="295.375" width="18" height="11" rx="2.5" fill="#1a56db"/>
+<line x1="1334.0" y1="298.4" x2="1334.0" y2="700.0" stroke="#1a56db" stroke-width="6" stroke-linecap="butt" opacity="1"/>
+<rect x="1325" y="295.375" width="18" height="11" rx="2.5" fill="#1a56db"/>
+<line x1="1236.0" y1="275.4" x2="1236.0" y2="700.0" stroke="#b91c1c" stroke-width="4.2" stroke-linecap="butt" opacity="1"/>
+<rect x="1229.5" y="262.4" width="13" height="13" fill="#d93b3b" stroke="#991b1b" stroke-width="1"/>
+<line x1="1300.0" y1="275.4" x2="1300.0" y2="700.0" stroke="#b91c1c" stroke-width="4.2" stroke-linecap="butt" opacity="1"/>
+<rect x="1293.5" y="262.4" width="13" height="13" fill="#d93b3b" stroke="#991b1b" stroke-width="1"/>
+<path d="M1345.0,298.4 L1191.0,326.4 L1345.0,354.4 L1191.0,382.4 L1345.0,410.4 L1191.0,438.4 L1345.0,466.4 L1191.0,494.4 L1345.0,522.4 L1191.0,550.4 L1345.0,578.4 L1191.0,606.4 L1345.0,634.4 L1191.0,662.4 L1345.0,690.4" fill="none" stroke="#0f766e" stroke-width="2.8"/>
+<line x1="1194.0" y1="298.4" x2="1342.0" y2="298.4" stroke="#b45309" stroke-width="4" stroke-linecap="butt" opacity="1"/>
+<line x1="1202.0" y1="306.4" x2="1334.0" y2="306.4" stroke="#7c3aed" stroke-width="2.6" stroke-linecap="butt" opacity="1"/>
+<line x1="1090.0" y1="215.0" x2="1090.0" y2="399.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M1090.0,215.0 L1086.8,209.4 L1093.2,209.4 Z" fill="#64748b"/>
+<path d="M1090.0,399.0 L1093.2,404.6 L1086.8,404.6 Z" fill="#64748b"/>
+<text x="1083.0" y="311.0" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Hc</text>
+<line x1="1128.0" y1="298.4" x2="1128.0" y2="399.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M1128.0,298.4 L1124.8,292.7 L1131.2,292.7 Z" fill="#64748b"/>
+<path d="M1128.0,399.0 L1131.2,404.6 L1124.8,404.6 Z" fill="#64748b"/>
+<text x="1121.0" y="352.7" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">lₐ</text>
+<line x1="1164.0" y1="298.4" x2="1164.0" y2="387.5" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M1164.0,298.4 L1160.8,292.7 L1167.2,292.7 Z" fill="#64748b"/>
+<path d="M1164.0,387.5 L1167.2,393.1 L1160.8,393.1 Z" fill="#64748b"/>
+<text x="1157.0" y="346.9" font-size="11.5" fill="#475569" text-anchor="end" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">Δh</text>
+<line x1="1376.0" y1="387.5" x2="1376.0" y2="399.0" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M1376.0,387.5 L1372.8,381.9 L1379.2,381.9 Z" fill="#64748b"/>
+<path d="M1376.0,399.0 L1379.2,404.6 L1372.8,404.6 Z" fill="#64748b"/>
+<text x="1383.0" y="397.2" font-size="11.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">hₑ</text>
+<line x1="1348.0" y1="298.4" x2="1428.0" y2="298.4" stroke="#64748b" stroke-width="1" stroke-dasharray="3 3" stroke-linecap="butt" opacity="1"/>
+<line x1="1348.0" y1="275.4" x2="1428.0" y2="275.4" stroke="#64748b" stroke-width="1" stroke-dasharray="3 3" stroke-linecap="butt" opacity="1"/>
+<line x1="1428.0" y1="275.4" x2="1428.0" y2="298.4" stroke="#64748b" stroke-width="1" stroke-linecap="butt" opacity="1"/>
+<path d="M1428.0,275.4 L1424.8,269.7 L1431.2,269.7 Z" fill="#64748b"/>
+<path d="M1428.0,298.4 L1431.2,304.0 L1424.8,304.0 Z" fill="#64748b"/>
+<text x="1435.0" y="290.9" font-size="11.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">0.2</text>
+<text x="1268.0" y="740.0" font-size="11" fill="#475569" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">lₐ = laK·d（自承台底面起算）　·　Δh = lₐ − hₑ（笼顶高出桩顶）</text>
+<text x="1268.0" y="762.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">主筋伸入承台；声测管顶再高出笼顶 0.2 m（图中虚线段），管顶封板并加盖塑料帽封闭</text>
+</svg>
+    </div>
+  </div>
 </div>
 
 <script>/**
@@ -1385,18 +1624,18 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.0
+   桩基钢筋笼三维计算系统 Nervus v1.0.1
    ===================================================================== */
 "use strict";
 
-/* ---------- 默认参数（= 任务书 5.4 算例） ---------- */
+/* ---------- 默认参数 ---------- */
 const DEFAULTS = {
-  D:800, L:25, c:50, hb:70, grade:'C35',
-  Bx:2400, By:2400, Hc:1400, he:100, laK:35, capShow:'半透明',
-  d:20, n:12, sg:'HRB400', conn:'机械连接', lapK:35,
-  ds:8, p:200, p1:100, Lm:5,
+  D:1500, L:25, c:50, hb:70, grade:'C35',
+  Bx:2600, By:2600, Hc:1600, he:100, laK:35, capShow:'半透明',
+  d:25, n:22, rows:1, bundle:1, sg:'HRB400E', conn:'机械连接', lapK:35,
+  ds:8, p:200, p1:100, Lm:5, Lmb:3,
   dr:16, sr:2000, lj:10,
-  Nt:2, dt:16, ht:300, triLayout:'顶+底',
+  dt:16, ht:0,
   Dp:57, tp:1.5, np:3,
   eta:2.0, blockGap:2, blockPer:4
 };
@@ -1421,16 +1660,20 @@ const SCHEMA = [
   ]},
   {t:'主筋 N1', items:[
     {k:'d', l:'主筋直径 d', type:'select', opts:[12,14,16,18,20,22,25,28,32], suffix:'mm'},
-    {k:'n', l:'主筋根数 n', u:'根', min:6, max:60, step:1},
-    {k:'sg', l:'钢种', type:'select', opts:['HRB400','HRB500','HPB300']},
+    {k:'n', l:'每排根数 n', u:'根', min:4, max:60, step:1},
+    {k:'rows', l:'主筋排数', type:'select', opts:[1,2], suffix:' 排'},
+    {k:'bundle', l:'每束根数', type:'select', opts:[1,2], suffix:' 根'},
+    {k:'sg', l:'钢种', type:'select', opts:['HRB400E','HRB500E','HRB400','HRB500','HPB300']},
     {k:'conn', l:'连接方式', type:'select', opts:['机械连接','绑扎搭接','焊接']},
-    {k:'lapK', l:'搭接长度', u:'×d', min:30, max:45, step:1}
+    {k:'lapK', l:'搭接长度', u:'×d', min:30, max:45, step:1},
+    {note:'排数×束数×每排根数 = 主筋总根数；双排为内外同心两圈，两束为每处并排两根。'}
   ]},
   {t:'螺旋箍 N2', items:[
     {k:'ds', l:'箍筋直径 d\u209B', type:'select', opts:[6,8,10,12,14], suffix:'mm'},
     {k:'p', l:'非加密螺距 p', u:'mm', min:100, max:400, step:10},
     {k:'p1', l:'加密螺距 p\u2081', u:'mm', min:50, max:200, step:10},
-    {k:'Lm', l:'加密段长度 L\u2098', u:'m', min:0, max:15, step:0.5}
+    {k:'Lm', l:'桩顶加密段 L\u2098', u:'m', min:0, max:20, step:0.5},
+    {k:'Lmb', l:'桩底加密段 L\u2098\u1D47', u:'m', min:0, max:20, step:0.5}
   ]},
   {t:'加劲箍 N3', items:[
     {k:'dr', l:'加劲箍直径 d\u1D63', type:'select', opts:[12,14,16,18,20], suffix:'mm'},
@@ -1438,10 +1681,9 @@ const SCHEMA = [
     {k:'lj', l:'接头倍数 l\u2C7C', type:'select', opts:[0,5,10], suffix:'×d'}
   ]},
   {t:'内三角撑 N6', items:[
-    {k:'Nt', l:'道数 N\u209C', u:'道', min:0, max:8, step:1},
     {k:'dt', l:'杆径 d\u209C', type:'select', opts:[12,14,16,18,20,22], suffix:'mm'},
     {k:'ht', l:'锥高 h\u209C', u:'mm', min:0, max:800, step:50},
-    {k:'triLayout', l:'布置方式', type:'select', opts:['顶+底','均布']}
+    {note:'道数与标高自动跟随加劲箍，两者同位置布置（锥高 0 即平面三角架）。'}
   ]},
   {t:'声测管 N4', items:[
     {k:'Dp', l:'外径 D\u209A', u:'mm', min:50, max:60, step:1},
@@ -1459,34 +1701,58 @@ const SCHEMA = [
    1. 计算内核
    ===================================================================== */
 const WK = 0.00617;
-const w = x => WK * x * x;          // 钢筋单位理论重量 kg/m
-const f2 = x => (Math.round(x * 100) / 100);
-const fmt = (x, n=2) => x.toLocaleString('zh-CN',{minimumFractionDigits:n, maximumFractionDigits:n});
+const w = x => WK * x * x;                     // 钢筋单位理论重量 kg/m
+const fmt = (x, n=2) => (isFinite(x) ? Number(x).toFixed(n) : '—');   // 不使用千位分隔
+const r2 = x => Math.round(x*100)/100;
+const r3 = x => Math.round(x*1000)/1000;
+const TAPER_H = 1.0;     // 桩底收口段高度 m
+const TAPER_K = 0.55;    // 收口后半径系数
+
+function taperK(y, yBot){
+  if (y >= yBot + TAPER_H) return 1;
+  const t = Math.min(1, Math.max(0, (yBot + TAPER_H - y)/TAPER_H));
+  return 1 - (1 - TAPER_K) * t;
+}
 
 function calc(){
   const s = ST;
   const D=s.D, c=s.c, ds=s.ds, d=s.d, hb=s.hb/1000, he=s.he/1000, L=s.L;
-  const la = s.laK * d;                       // mm，自承台底面起算
-  const Ds = D - 2*c - ds;
-  const Dm = D - 2*c - 2*ds - d;
-  const Dr = Dm - d - s.dr;
-  const Dt = Dm - 2*d;
+  const la = s.laK * d;                                   // mm，自承台底面起算
+  const rows = Math.max(1, Math.round(s.rows)), bun = Math.max(1, Math.round(s.bundle));
+  const nPos = Math.max(3, Math.round(s.n));
+  const Nb = nPos * rows * bun;                           // 主筋总根数
+  const rowGap = rows > 1 ? Math.max(2*d, 80) : 0;        // 排距 mm
 
+  const Ds  = D - 2*c - ds;
+  const Dm  = D - 2*c - 2*ds - d;                         // 外排主筋中心线
+  const rowD = []; for (let i=0;i<rows;i++) rowD.push(Dm - 2*rowGap*i);
+  const Di  = rowD[rowD.length-1];                        // 内排主筋中心线
+  const Dr  = Di - d - s.dr;                              // 加劲箍中心线
+  const Dt  = Di - 2*d;                                   // 内三角撑外接圆
+
+  const cageTop = (la - s.he)/1000;                       // 笼顶高出桩顶 m
   /* --- ① 主筋 N1 --- */
-  let L1 = L + la/1000 - he - hb;             // 未含搭接
-  let nj = 0, lapAdd = 0;
+  let L1 = L + la/1000 - he - hb;
+  let nLap = 0, lapAdd = 0;
   if (s.conn !== '机械连接'){
-    nj = Math.max(0, Math.ceil(L1 / 9) - 1);  // 定尺 9 m
-    lapAdd = nj * s.lapK * d / 1000;
+    nLap = Math.max(0, Math.ceil(L1 / 9) - 1);
+    lapAdd = nLap * s.lapK * d / 1000;
     L1 += lapAdd;
   }
-  const T1 = s.n * L1;
+  const nJoin = s.conn === '机械连接' ? Math.max(0, Math.ceil(L1/9) - 1) : 0;
+  const nCoupler = nJoin * Nb;
+  const T1 = Nb * L1;
   const G1 = T1 * w(d);
 
-  /* --- ② 螺旋箍 N2 --- */
+  /* --- ② 螺旋箍 N2（覆盖整根钢筋笼，含承台内段） --- */
   const segs = [];
-  if (s.Lm > 0 && s.Lm < L) segs.push({H:s.Lm, p:s.p1, tag:'加密'},{H:L-s.Lm, p:s.p, tag:'非加密'});
-  else segs.push({H:L, p:s.p, tag:'全长'});
+  const H0 = Math.max(0, cageTop);
+  const Lm1 = Math.min(s.Lm, L), Lmb = Math.min(s.Lmb, L);
+  const mid = L1 - H0 - Lm1 - Lmb;
+  if (H0 > 0.001) segs.push({H:H0, p:s.p, tag:'承台内'});
+  if (Lm1 > 0.001) segs.push({H:Lm1, p:s.p1, tag:'桩顶加密'});
+  if (mid > 0.001) segs.push({H:mid, p:s.p, tag:'非加密'});
+  if (Lmb > 0.001) segs.push({H:Lmb, p:s.p1, tag:'桩底加密'});
   let T2 = 0, turns = 0;
   segs.forEach(g=>{
     const pi = g.p/1000;
@@ -1497,21 +1763,22 @@ function calc(){
   });
   const G2 = T2 * w(ds);
 
-  /* --- ③ 加劲箍 N3 --- */
-  const Nr = Math.ceil(L / (s.sr/1000)) + 1;
+  /* --- ③ 加劲箍 N3（沿整根笼长布置） --- */
+  const Nr = Math.ceil(L1 / (s.sr/1000)) + 1;
   const lr = Math.PI*Dr/1000 + s.lj*s.dr/1000;
   const T3 = Nr * lr;
   const G3 = T3 * w(s.dr);
 
-  /* --- ④ 内三角撑 N6 --- */
+  /* --- ④ 内三角撑 N6（道数/位置 = 加劲箍） --- */
+  const Nt = Nr;
   const chord = Math.sqrt(3)/2 * Dt/1000;
   const web   = s.ht > 0 ? Math.sqrt(Math.pow(Dt/2000,2) + Math.pow(s.ht/1000,2)) : Dt/2000;
   const perTri = 3 * (chord + web);
-  const T6 = s.Nt * perTri;
+  const T6 = Nt * perTri;
   const G6 = T6 * w(s.dt);
 
-  /* --- ⑤ 声测管 N4 --- */
-  const Lp = L + 0.25;
+  /* --- ⑤ 声测管 N4（顶面高出笼顶 200 mm） --- */
+  const Lp = L + cageTop + 0.2;
   const wp = Math.PI*(s.Dp - s.tp)*s.tp*7.85e-3;
   const T4 = s.np * Lp;
   const G4 = T4 * wp;
@@ -1522,9 +1789,10 @@ function calc(){
   const V  = Math.PI*D*D/4/1e6 * L;
   const Vc = s.Bx*s.By*s.Hc/1e9;
   const q  = Gs / V;
-  const sClear = Math.PI*Dm/s.n - d;
-  const rho = s.n*d*d/(D*D)*100;
-  const cageTop = (la - s.he)/1000;
+  const sClear = Math.PI*Dm/nPos - (bun > 1 ? 2.1*d : d);
+  const sRow = rows > 1 ? rowGap - d : 999;
+  const rho = Nb*d*d/(D*D)*100;
+  const yBot = -(L - hb);
 
   /* --- 校核 --- */
   const ck = [];
@@ -1532,20 +1800,23 @@ function calc(){
   add('保护层厚度', `c = ${c} mm`, c>=50, '水下灌注桩保护层不应小于 50 mm');
   add('主筋净距', `s = ${fmt(sClear,1)} mm`, sClear>=60, '主筋净距不应小于 60 mm');
   add('配筋率', `ρ = ${fmt(rho,2)} %`, rho>=0.6 && rho<=2.0, '宜控制在 0.6%～2.0%');
-  add('主筋根数', `n = ${s.n} 根`, s.n>=6 && s.n%2===0, '端承桩不应少于 6 根，宜对称布置');
+  add('主筋总根数', `n = ${Nb} 根（${rows}排×${bun}束×${nPos}）`, Nb>=6 && nPos%2===0, '端承桩不应少于 6 根，每排宜对称布置');
+  add('双排主筋排距', rows>1 ? `a = ${rowGap} mm（净 ${fmt(sRow,0)} mm）` : '单排布置', rows===1 || (sRow>=25 && sRow<=120), '双排主筋排间净距宜 25～120 mm');
   add('螺旋箍筋直径', `d\u209B = ${ds} mm`, ds>=6, '箍筋直径不应小于 6 mm');
-  add('加密段螺距', `p\u2081 = ${s.p1} mm`, s.p1<=s.p && s.p1<=100, '加密段螺距应小于非加密段且不大于 100 mm');
+  add('桩顶加密螺距', `p\u2081 = ${s.p1} mm`, s.p1<=s.p && s.p1<=100, '加密段螺距应小于非加密段且不大于 100 mm');
+  add('加密区划分', `顶 ${s.Lm} m ＋ 底 ${s.Lmb} m ＜ L ${L} m`, s.Lm + s.Lmb < L - 0.5, '桩顶与桩底加密段之间应保留非加密段');
   add('加劲箍间距', `s\u1D63 = ${s.sr} mm`, s.sr<=2000, '间距大于 2 m 时钢筋笼吊装易变形');
   add('桩顶嵌入承台', `h\u2091 = ${s.he} mm`, s.he >= (D>=800?100:50), D>=800?'大直径桩嵌入深度不宜小于 100 mm':'不宜小于 50 mm');
   add('主筋锚固长度', `l\u2090 = ${la} mm = ${s.laK}d`, la>=35*d, '锚固长度不宜小于 35d');
   add('承台厚度余量', `H\u1D9C = ${s.Hc} ≥ ${la+s.he+50} mm`, s.Hc >= la+s.he+50, '承台厚度需容纳锚固段，否则笼顶将顶出承台');
-  add('内三角撑道数', `N\u209C = ${s.Nt} 道`, L<=12 || s.Nt>=2, '桩长大于 12 m 时宜不少于 2 道');
+  add('内三角撑道数', `N\u209C = ${Nt} 道（同加劲箍）`, Nt>=1, '道数与加劲箍一一对应，自动跟随');
   add('声测管数量', `n\u209A = ${s.np} 根`, s.np===0 || (D>1500? s.np>=4 : s.np>=3), D>1500?'桩径大于 1.5 m 时宜设 4 根':'宜设 3 根');
 
   return {
-    D,c,ds,d,hb,he,L,la,Ds,Dm,Dr,Dt,L1,nj,lapAdd,T1,G1,
-    segs,T2,turns,G2,Nr,lr,T3,G3,chord,web,perTri,T6,G6,T4,G4,wp,Lp,
-    Gs,G,V,Vc,q,sClear,rho,cageTop,ck,laK:s.laK
+    D,c,ds,d,hb,he,L,la,Ds,Dm,Di,Dr,Dt,rowD,rowGap,rows,bun,nPos,Nb,
+    L1,nLap,lapAdd,nJoin,nCoupler,T1,G1,
+    segs,T2,turns,G2,Nr,lr,T3,G3,Nt,chord,web,perTri,T6,G6,T4,G4,wp,Lp,
+    Gs,G,V,Vc,q,sClear,sRow,rho,cageTop,yBot,ck,laK:s.laK
   };
 }
 
@@ -1553,14 +1824,15 @@ function calc(){
    2. 三维场景
    ===================================================================== */
 let renderer, scene, camera, controls, clock;
+let root = null;
 const LAYERS = {};
 const LAYER_DEF = [
-  {k:'main', n:'主筋', col:'#1a56db'},
-  {k:'spiral', n:'螺旋箍', col:'#0f766e'},
-  {k:'ring', n:'加劲箍', col:'#b45309'},
-  {k:'tri', n:'内三角撑', col:'#7c3aed'},
-  {k:'tube', n:'声测管', col:'#b91c1c'},
-  {k:'block', n:'垫块', col:'#64748b'},
+  {k:'main', n:'主筋', col:'#9aa3ad'},
+  {k:'spiral', n:'螺旋箍', col:'#87968f'},
+  {k:'ring', n:'加劲箍', col:'#a2937a'},
+  {k:'tri', n:'内三角撑', col:'#8f88a6'},
+  {k:'tube', n:'声测管', col:'#b0a396'},
+  {k:'block', n:'垫块', col:'#8c96a4'},
   {k:'pile', n:'混凝土桩身', col:'#94a3b8'},
   {k:'cap', n:'承台', col:'#64748b'}
 ];
@@ -1569,6 +1841,9 @@ LAYER_DEF.forEach(l=>VIS[l.k]=true);
 const clipPlane = new THREE.Plane(new THREE.Vector3(0,0,-1), 1e9);
 let LABELS_ON = true;
 let toast = null;
+let CONC_T = 0.30;                 // 混凝土不透明度系数 0~1
+let CONC = {pile:null, cap:null, capEdge:null};
+let RIB = null;
 
 function initGL(){
   const el = document.getElementById('view');
@@ -1588,15 +1863,59 @@ function initGL(){
   controls.dampingFactor = 0.08;
   controls.rotateSpeed = 0.85;
   controls.maxDistance = 500;
-  controls.minDistance = 0.4;
+  controls.minDistance = 0.25;
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa8bd, 1.15));
-  const d1 = new THREE.DirectionalLight(0xffffff, 0.85); d1.position.set(1.2, 2.2, 1.6); scene.add(d1);
-  const d2 = new THREE.DirectionalLight(0xffffff, 0.45); d2.position.set(-1.6, -1.0, -1.2); scene.add(d2);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa8bd, 1.05));
+  const d1 = new THREE.DirectionalLight(0xffffff, 1.0); d1.position.set(1.2, 2.2, 1.6); scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0xeaf2ff, 0.55); d2.position.set(-1.6, -1.0, -1.2); scene.add(d2);
+  const d3 = new THREE.DirectionalLight(0xffffff, 0.35); d3.position.set(0, -2.4, 0.4); scene.add(d3);
+
+  try { scene.environment = makeEnv(); } catch(e){}
+  RIB = makeRibTexture();
 
   clock = new THREE.Clock();
   window.addEventListener('resize', onResize);
   animate();
+}
+
+/* 程序化环境贴图 —— 让金属材质有真实反射 */
+function makeEnv(){
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
+  const g = cv.getContext('2d');
+  const grd = g.createLinearGradient(0,0,0,256);
+  grd.addColorStop(0,'#f4f7fb'); grd.addColorStop(0.42,'#c2cddb');
+  grd.addColorStop(0.52,'#7d8b9e'); grd.addColorStop(1,'#2f3743');
+  g.fillStyle = grd; g.fillRect(0,0,512,256);
+  const lg = g.createLinearGradient(0,0,512,0);
+  lg.addColorStop(0,'rgba(255,255,255,0)'); lg.addColorStop(0.30,'rgba(255,255,255,.85)');
+  lg.addColorStop(0.34,'rgba(255,255,255,0)'); lg.addColorStop(0.70,'rgba(255,255,255,.55)');
+  lg.addColorStop(0.74,'rgba(255,255,255,0)');
+  g.fillStyle = lg; g.fillRect(20,10,472,90);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  const pm = new THREE.PMREMGenerator(renderer);
+  pm.compileEquirectangularShader();
+  const env = pm.fromEquirectangular(tex).texture;
+  pm.dispose(); tex.dispose();
+  return env;
+}
+
+/* 钢筋横肋凹凸贴图 */
+function makeRibTexture(){
+  const cv = document.createElement('canvas'); cv.width = 24; cv.height = 128;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#8c8c8c'; g.fillRect(0,0,24,128);
+  for (let i=0;i<8;i++){
+    const y = i*16;
+    const grd = g.createLinearGradient(0,y,0,y+16);
+    grd.addColorStop(0,'#a5a5a5'); grd.addColorStop(0.30,'#ffffff');
+    grd.addColorStop(0.55,'#585858'); grd.addColorStop(1,'#909090');
+    g.fillStyle = grd; g.fillRect(0,y+1,24,11);
+  }
+  const t = new THREE.CanvasTexture(cv);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(1, 48);
+  return t;
 }
 
 function onResize(){
@@ -1614,17 +1933,24 @@ function mat(key, color, opt={}){
   }, opt));
   return MAT[key];
 }
+/* 真实钢筋材质：高金属度 + 环境反射 + 横肋凹凸 */
+function steelMat(key, tint){
+  if (MAT[key]) return MAT[key];
+  MAT[key] = new THREE.MeshStandardMaterial({
+    color: tint, metalness: 0.92, roughness: 0.34, envMapIntensity: 0.95
+  });
+  return MAT[key];
+}
 
-/* --- 螺旋线：解析曲线，可按分段螺距精确生成 --- */
+/* --- 螺旋线：解析曲线，可按分段螺距精确生成，支持桩底收口 --- */
 class Helix extends THREE.Curve {
-  constructor(r, yTop, segs){
+  constructor(r, yTop, segs, tk){
     super();
-    this.r = r; this.yTop = yTop;
-    this.segs = segs;
-    this.total = segs.reduce((a,s)=>a+s.H,0);
+    this.r = r; this.yTop = yTop; this.tk = tk || null;
+    this.total = segs.reduce((a,s)=>a+s.H,0) || 1e-6;
     let ang = 0;
     this.segs = segs.map(s=>{
-      const pitch = s.p > 5 ? s.p/1000 : s.p;   // 容错：mm 或 m
+      const pitch = s.p > 5 ? s.p/1000 : s.p;
       const o = {H:s.H, pitch, a0:ang};
       ang += 2*Math.PI * s.H / o.pitch;
       o.a1 = ang;
@@ -1632,6 +1958,7 @@ class Helix extends THREE.Curve {
     });
     this.arcLengthDivisions = 4000;
   }
+  getPointAt(u, target = new THREE.Vector3()){ return this.getPoint(u, target); }
   getPoint(t, target = new THREE.Vector3()){
     const dist = Math.min(Math.max(t, 0), 1) * this.total;
     let acc = 0, seg = this.segs[this.segs.length-1], local = 0;
@@ -1642,97 +1969,171 @@ class Helix extends THREE.Curve {
     }
     const k = seg.H > 0 ? Math.max(0, Math.min(1, local/seg.H)) : 0;
     const ang = seg.a0 + (seg.a1 - seg.a0) * k;
-    return target.set(this.r*Math.cos(ang), this.yTop - dist, this.r*Math.sin(ang));
+    const y = this.yTop - dist;
+    const rr = this.r * (this.tk ? this.tk(y) : 1);
+    return target.set(rr*Math.cos(ang), y, rr*Math.sin(ang));
   }
 }
 
-let root = null;
+function applyConc(){
+  const t = CONC_T;
+  if (CONC.pile) CONC.pile.opacity = 0.012 + 0.52*t;
+  if (CONC.cap)  CONC.cap.opacity  = 0.015 + 0.58*t;
+  if (CONC.capEdge) CONC.capEdge.opacity = 0.18 + 0.75*t;
+}
+
+/* 竖向构件几何：把环向位置烘进顶点，并在桩底 1 m 段按锥面收口
+   yOff = 该构件顶面所在的世界 y，用于让局部坐标对上收口标高 */
+function bakeCyl(ringR, offZ, r, h, yOff, yBot, radial, open){
+  const g = new THREE.CylinderGeometry(r, r, h, radial||10, 72, !!open);
+  g.translate(0, -h/2, 0);
+  const pos = g.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos, i);
+    const k = taperK(v.y + yOff, yBot);
+    pos.setXYZ(i, ringR*k + v.x, v.y, offZ*k + v.z);
+  }
+  pos.needsUpdate = true;
+  g.computeVertexNormals();
+  return g;
+}
+
 function build(){
   if (root){
-    root.traverse(o=>{
-      if (o.geometry) o.geometry.dispose();
-    });
+    root.traverse(o=>{ if (o.geometry) o.geometry.dispose(); });
     scene.remove(root);
   }
   root = new THREE.Group();
   scene.add(root);
+  CONC = {pile:null, cap:null, capEdge:null};
 
   const R = calc();
   const M = 1/1000;
-  const yTop = R.cageTop;                 // 笼顶（高于桩顶）
-  const yPileTop = 0;
-  const yPileBot = -R.L;
+  const yTop = R.cageTop;
+  const yBot = R.yBot;
+  const tk = y => taperK(y, yBot);
 
   /* ---- 承台 ---- */
   const gCap = new THREE.Group(); gCap.name='承台'; root.add(gCap); LAYERS.cap = gCap;
   if (ST.capShow !== '隐藏'){
     const bw = ST.Bx*M, bd = ST.By*M, bh = ST.Hc*M;
     const geo = new THREE.BoxGeometry(bw, bh, bd);
-    let m;
     if (ST.capShow === '线框'){
-      m = new THREE.MeshBasicMaterial({color:0x8899b0, wireframe:true, transparent:true, opacity:0.55});
+      const m = new THREE.MeshBasicMaterial({color:0x8899b0, wireframe:true, transparent:true, opacity:0.55});
+      CONC.capEdge = m;
+      const box = new THREE.Mesh(geo, m);
+      box.position.set(0, -R.he + bh/2, 0);
+      box.userData = {info:'承台', lines:['尺寸 '+ST.Bx+'×'+ST.By+'×'+ST.Hc+' mm','体积 '+fmt(R.Vc)+' m³（参考量）']};
+      gCap.add(box);
     } else {
-      m = new THREE.MeshStandardMaterial({color:0x5b7290, metalness:0.05, roughness:0.9,
+      const m = new THREE.MeshStandardMaterial({color:0x6b7f98, metalness:0.05, roughness:0.88,
         transparent:true, opacity:0.22, depthWrite:false, side:THREE.DoubleSide});
+      CONC.cap = m;
+      const box = new THREE.Mesh(geo, m);
+      box.position.set(0, -R.he + bh/2, 0);
+      box.userData = {info:'承台', lines:['尺寸 '+ST.Bx+'×'+ST.By+'×'+ST.Hc+' mm','体积 '+fmt(R.Vc)+' m³（参考量）']};
+      gCap.add(box);
+      const em = new THREE.LineBasicMaterial({color:0x7c8ea8, transparent:true, opacity:0.75});
+      CONC.capEdge = em;
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), em);
+      edges.position.copy(box.position);
+      gCap.add(edges);
     }
-    const box = new THREE.Mesh(geo, m);
-    box.position.set(0, -R.he + bh/2, 0);
-    box.userData = {info:'承台', lines:['尺寸 '+ST.Bx+'×'+ST.By+'×'+ST.Hc+' mm','体积 '+fmt(R.Vc)+' m³（参考量）']};
-    gCap.add(box);
-    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
-      new THREE.LineBasicMaterial({color:0x7c8ea8, transparent:true, opacity:0.95}));
-    edges.position.copy(box.position);
-    gCap.add(edges);
   }
 
   /* ---- 混凝土桩身 ---- */
   const gPile = new THREE.Group(); root.add(gPile); LAYERS.pile = gPile;
   {
-    const geo = new THREE.CylinderGeometry(ST.D/2000, ST.D/2000, R.L, 56, 1, true);
-    const m = new THREE.MeshStandardMaterial({color:0xb9c6d8, metalness:0.03, roughness:0.95,
+    const geo = new THREE.CylinderGeometry(ST.D/2000, ST.D/2000, R.L, 64, 1, true);
+    const m = new THREE.MeshStandardMaterial({color:0xb9c6d8, metalness:0.04, roughness:0.94,
       transparent:true, opacity:0.16, depthWrite:false, side:THREE.DoubleSide});
+    CONC.pile = m;
     const cyl = new THREE.Mesh(geo, m);
     cyl.position.set(0, -R.L/2, 0);
-    cyl.userData = {info:'混凝土桩身', lines:['直径 '+ST.D+' mm　桩长 '+ST.L+' m','体积 '+fmt(R.V)+' m³']};
+    cyl.userData = {info:'混凝土桩身', lines:['直径 '+ST.D+' mm　桩长 '+ST.L+' m','体积 '+fmt(R.V)+' m³','透明度可用顶部「混凝土」滑块调节']};
     gPile.add(cyl);
-    const ring = new THREE.Mesh(new THREE.CircleGeometry(ST.D/2000, 56),
-      new THREE.MeshBasicMaterial({color:0xc3cede, transparent:true, opacity:0.35, side:THREE.DoubleSide}));
+    const ring = new THREE.Mesh(new THREE.CircleGeometry(ST.D/2000, 64),
+      new THREE.MeshBasicMaterial({color:0xc3cede, transparent:true, opacity:0.28, side:THREE.DoubleSide}));
     ring.rotation.x = -Math.PI/2; ring.position.y = -R.L;
     gPile.add(ring);
   }
 
-  /* ---- 主筋 N1 ---- */
+  /* ---- 主筋 N1（支持双排 / 两束 + 机械连接套筒 + 桩底收口） ---- */
   const gMain = new THREE.Group(); root.add(gMain); LAYERS.main = gMain;
+  const barR = ST.d/2000;
+  const steelMain = steelMat('main', 0x9aa3ad);
   {
-    const radius = R.Dm/2000;
-    const geo = new THREE.CylinderGeometry(ST.d/2000, ST.d/2000, R.L1, 10, 1);
-    const im = new THREE.InstancedMesh(geo, mat('main',0x1a56db,{metalness:0.6,roughness:0.3}), ST.n);
-    const dummy = new THREE.Object3D();
-    for (let i=0;i<ST.n;i++){
-      const a = i*2*Math.PI/ST.n;
-      dummy.position.set(radius*Math.cos(a), yTop - R.L1/2, radius*Math.sin(a));
-      dummy.rotation.set(0,0,0);
-      dummy.updateMatrix();
-      im.setMatrixAt(i, dummy.matrix);
-    }
-    im.userData = {info:'主筋 N1', lines:[
-      ST.n+' 根 φ'+ST.d+' '+ST.sg,
-      '单根下料 '+fmt(R.L1)+' m（含伸入承台 '+fmt(R.cageTop)+' m）',
+    const offs = R.bun === 1 ? [0] : [-1.1*barR, 1.1*barR];
+    R.rowD.forEach((ringDmm, ri)=>{
+      const ringR = ringDmm/2000;
+      offs.forEach(off=>{
+        const geo = bakeCyl(ringR, off, barR, R.L1, yTop, yBot, 8, false);
+        const im = new THREE.InstancedMesh(geo, steelMain, R.nPos);
+        const dummy = new THREE.Object3D();
+        for (let i=0;i<R.nPos;i++){
+          const a = i*2*Math.PI/R.nPos;
+          dummy.position.set(0, yTop, 0);
+          dummy.rotation.set(0, -a, 0);
+          dummy.updateMatrix();
+          im.setMatrixAt(i, dummy.matrix);
+        }
+        im.instanceMatrix.needsUpdate = true;
+        gMain.add(im);
+      });
+    });
+    gMain.userData = {info:'主筋 N1', lines:[
+      R.nPos+' 根/排 × '+R.rows+' 排 × '+R.bun+' 束 = 共 '+R.Nb+' 根',
+      'φ'+ST.d+' '+ST.sg+'　单根下料 '+fmt(R.L1)+' m',
+      '伸入承台 '+fmt(R.cageTop)+' m　桩底 1 m 收口（半径系数 '+TAPER_K+'）',
       '总长 '+fmt(R.T1)+' m　重量 '+fmt(R.G1)+' kg'
     ]};
-    gMain.add(im);
+  }
+
+  /* 机械连接套筒 */
+  const gCpl = new THREE.Group(); root.add(gCpl); LAYERS.cpl = gCpl;
+  if (R.nCoupler > 0){
+    const cM = new THREE.MeshStandardMaterial({color:0x5d6670, metalness:0.98, roughness:0.32, envMapIntensity:1.2});
+    const geo = new THREE.CylinderGeometry(barR*1.9, barR*1.9, barR*7.2, 14, 1);
+    const im = new THREE.InstancedMesh(geo, cM, R.nCoupler);
+    const dummy = new THREE.Object3D();
+    let idx = 0;
+    for (let j=1;j<=R.nJoin;j++){
+      R.rowD.forEach((ringDmm)=>{
+        const ringR = ringDmm/2000;
+        const offs = R.bun === 1 ? [0] : [-1.1*barR, 1.1*barR];
+        for (let i=0;i<R.nPos;i++){
+          const a = i*2*Math.PI/R.nPos;
+          const y = yTop - 9*j + ((i%2)? 0.35 : 0);       // 接头错开 350 mm
+          const k = tk(y);
+          dummy.position.set((ringR+ (R.bun===1?0:0))*k*Math.cos(a) + (0), y, ringR*k*Math.sin(a));
+          dummy.position.x += (R.bun===2 ? 0 : 0);
+          dummy.rotation.set(0,0,0);
+          dummy.updateMatrix();
+          im.setMatrixAt(idx++, dummy.matrix);
+        }
+      });
+    }
+    im.count = Math.min(idx, R.nCoupler);
+    im.instanceMatrix.needsUpdate = true;
+    gCpl.add(im);
+    gCpl.userData = {info:'机械连接套筒', lines:[
+      '主筋每 9 m 一个接头，接头错开 350 mm',
+      '共 '+R.nJoin+' 个接头高度 × '+R.Nb+' 根 = '+R.nCoupler+' 个',
+      '仅三维示意，重量并入主筋'
+    ]};
   }
 
   /* ---- 螺旋箍 N2 ---- */
   const gSp = new THREE.Group(); root.add(gSp); LAYERS.spiral = gSp;
-  if (ST.ds > 0){
-    const curve = new Helix(R.Ds/2000, yPileTop, R.segs.map(g=>({H:g.H, p:g.p/1000})));
-    const tubular = Math.max(240, Math.min(3200, Math.round(R.turns * 14)));
+  if (ST.ds > 0 && R.segs.length){
+    const curve = new Helix(R.Ds/2000, yTop, R.segs.map(g=>({H:g.H, p:g.p})), tk);
+    const tubular = Math.max(480, Math.min(6400, Math.round(R.turns * 26)));
     const geo = new THREE.TubeGeometry(curve, tubular, ST.ds/2000, 7, false);
-    const mesh = new THREE.Mesh(geo, mat('spiral',0x0f766e,{metalness:0.5,roughness:0.36}));
+    const mesh = new THREE.Mesh(geo, steelMat('spiral', 0x87968f));
     mesh.userData = {info:'螺旋箍筋 N2', lines:[
       'φ'+ST.ds+'　共 '+R.turns+' 圈',
-      R.segs.map(g=>g.tag+' '+g.H+' m @'+g.p+'（'+g.N+'圈）').join('；'),
+      R.segs.map(g=>g.tag+' '+fmt(g.H)+' m @'+g.p+'（'+g.N+'圈）').join('；'),
       '总长 '+fmt(R.T2)+' m　重量 '+fmt(R.G2)+' kg'
     ]};
     gSp.add(mesh);
@@ -1740,39 +2141,31 @@ function build(){
 
   /* ---- 加劲箍 N3 ---- */
   const gRing = new THREE.Group(); root.add(gRing); LAYERS.ring = gRing;
+  const ringY = [];
+  for (let i=0;i<R.Nr;i++) ringY.push(R.Nr>1 ? yTop + (yBot-yTop)*i/(R.Nr-1) : yTop);
   {
-    const y0 = 0, y1 = -(R.L - 0.07);
-    for (let i=0;i<R.Nr;i++){
-      const y = R.Nr>1 ? y0 + (y1-y0)*i/(R.Nr-1) : y0;
-      const geo = new THREE.TorusGeometry(R.Dr/2000, ST.dr/2000, 7, 52);
-      const m = new THREE.Mesh(geo, mat('ring',0xb45309,{metalness:0.5,roughness:0.4}));
+    const sm = steelMat('ring', 0xa2937a);
+    ringY.forEach((y, i)=>{
+      const rr = R.Dr/2000 * tk(y);
+      const geo = new THREE.TorusGeometry(rr, ST.dr/2000, 7, 56);
+      const m = new THREE.Mesh(geo, sm);
       m.rotation.x = -Math.PI/2; m.position.y = y;
       m.userData = {info:'加劲箍 N3 #'+(i+1), lines:[
-        'φ'+ST.dr+'　中心直径 '+R.Dr+' mm',
+        'φ'+ST.dr+'　中心直径 '+fmt(R.Dr)+' mm（该处实做 '+fmt(rr*2000,0)+' mm）',
         '单个展开 '+fmt(R.lr)+' m　共 '+R.Nr+' 个',
         '总长 '+fmt(R.T3)+' m　重量 '+fmt(R.G3)+' kg'
       ]};
       gRing.add(m);
-    }
+    });
   }
 
-  /* ---- 内三角撑 N6 ---- */
+  /* ---- 内三角撑 N6（道数/标高 = 加劲箍） ---- */
   const gTri = new THREE.Group(); root.add(gTri); LAYERS.tri = gTri;
-  if (ST.Nt > 0){
-    const rt = R.Dt/2000;
-    const positions = [];
-    if (ST.triLayout === '均布' && ST.Nt > 1){
-      const a = -Math.min(1.0, R.L*0.1), b = -(R.L - Math.min(1.0, R.L*0.1));
-      for (let i=0;i<ST.Nt;i++) positions.push(a + (b-a)*i/(ST.Nt-1));
-    } else {
-      for (let i=0;i<ST.Nt;i++){
-        if (ST.Nt === 1) positions.push(-R.L/2);
-        else positions.push(i===0 ? -Math.min(1.0,R.L*0.1) : (i===ST.Nt-1 ? -(R.L-Math.min(1.0,R.L*0.1)) : -R.L*0.5));
-      }
-    }
-    const barMat = mat('tri',0x7c3aed,{metalness:0.5,roughness:0.38});
+  if (R.Nt > 0){
+    const barMat = steelMat('tri', 0x8f88a6);
     const rb = ST.dt/2000;
-    positions.forEach((y, idx)=>{
+    ringY.forEach((y)=>{
+      const rt = R.Dt/2000 * tk(y);
       const v = [0,1,2].map(i=>{
         const a = (-90 + i*120) * Math.PI/180;
         return new THREE.Vector3(rt*Math.cos(a), y, rt*Math.sin(a));
@@ -1781,34 +2174,55 @@ function build(){
       if (ST.ht > 0){
         const apex = new THREE.Vector3(0, y + ST.ht/1000, 0);
         for (let i=0;i<3;i++) gTri.add(rod(v[i], apex, rb, barMat));
-        const s = new THREE.Mesh(new THREE.SphereGeometry(rb*1.5, 8, 6), barMat);
-        s.position.copy(apex); gTri.add(s);
+        const sp = new THREE.Mesh(new THREE.SphereGeometry(rb*1.5, 8, 6), barMat);
+        sp.position.copy(apex); gTri.add(sp);
+      } else {
+        for (let i=0;i<3;i++) gTri.add(rod(v[i], new THREE.Vector3(0, y, 0), rb, barMat));
       }
     });
     gTri.userData = {info:'内三角撑 N6', lines:[
-      'φ'+ST.dt+'　共 '+ST.Nt+' 道'+(ST.ht>0?('　锥高 '+ST.ht+' mm'):'（平面三角架）'),
+      'φ'+ST.dt+'　共 '+R.Nt+' 道（与加劲箍同位置自动跟随）',
+      ST.ht>0 ? ('锥高 '+ST.ht+' mm 三角锥') : '锥高 0，平面三角架',
       '弦杆 '+fmt(R.chord*1000,1)+' mm × 3 ／ 腹杆 '+fmt(R.web*1000,1)+' mm × 3',
       '总长 '+fmt(R.T6)+' m　重量 '+fmt(R.G6)+' kg'
     ]};
   }
 
-  /* ---- 声测管 N4 ---- */
+  /* ---- 声测管 N4（顶面高出笼顶 200，顶部塑料盖帽封闭） ---- */
   const gTube = new THREE.Group(); root.add(gTube); LAYERS.tube = gTube;
   if (ST.np > 0){
-    const rr = (R.Dm/2 - ST.d/2 - ST.Dp/2)/1000;
+    const rr = (R.Di/2 - ST.d/2 - ST.Dp/2)/1000;
     const len = R.Lp;
+    const yTip = yTop + 0.2;
+    const tM = steelMat('tube', 0xb0a396);
+    const capM = new THREE.MeshStandardMaterial({color:0xd93b3b, metalness:0.08, roughness:0.55});
     for (let i=0;i<ST.np;i++){
       const a = (i*360/ST.np + 15) * Math.PI/180;
-      const geo = new THREE.CylinderGeometry(ST.Dp/2000, ST.Dp/2000, len, 14, 1, true);
-      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-        color:0xb91c1c, metalness:0.72, roughness:0.3, side:THREE.DoubleSide}));
-      m.position.set(rr*Math.cos(a), 0.25 - len/2, rr*Math.sin(a));
+      const geo = bakeCyl(rr, 0, ST.Dp/2000, len, yTip, yBot, 18, true);
+      const m = new THREE.Mesh(geo, tM);
+      const rot = new THREE.Group();
+      rot.rotation.y = -a;
       m.userData = {info:'声测管 N4 #'+(i+1), lines:[
         'φ'+ST.Dp+'×'+ST.tp+'　共 '+ST.np+' 根',
-        '单根 '+fmt(R.Lp)+' m　单位重 '+fmt(R.wp,3)+' kg/m',
-        '总长 '+fmt(R.T4)+' m　重量 '+fmt(R.G4)+' kg'
+        '单根 '+fmt(R.Lp)+' m（顶面高出笼顶 200 mm）',
+        '单位重 '+fmt(R.wp,3)+' kg/m　总长 '+fmt(R.T4)+' m',
+        '重量 '+fmt(R.G4)+' kg'
       ]};
-      gTube.add(m);
+      rot.add(m);
+      rot.position.set(0, yTip, 0);
+      gTube.add(rot);
+      // 管顶封板
+      const seal = new THREE.Mesh(new THREE.CircleGeometry(ST.Dp/2000, 18),
+        new THREE.MeshStandardMaterial({color:0x9aa6b4, metalness:0.9, roughness:0.4, side:THREE.DoubleSide}));
+      seal.rotation.x = -Math.PI/2; seal.position.set(rr, 0, 0);
+      rot.add(seal);
+      // 塑料盖帽
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(ST.Dp/2000*1.14, ST.Dp/2000*1.14, 0.055, 18, 1, true), capM);
+      cap.position.set(rr, 0.028, 0);
+      rot.add(cap);
+      const capTop = new THREE.Mesh(new THREE.CircleGeometry(ST.Dp/2000*1.14, 18), capM);
+      capTop.rotation.x = -Math.PI/2; capTop.position.set(rr, 0.055, 0);
+      rot.add(capTop);
     }
   }
 
@@ -1817,8 +2231,8 @@ function build(){
   {
     const rb = ST.D/2000 - ST.c/2000/2;
     const step = ST.blockGap;
-    const m = new THREE.MeshStandardMaterial({color:0x64748b, roughness:0.9, metalness:0.05});
-    for (let y = -1; y > -R.L; y -= step){
+    const m = new THREE.MeshStandardMaterial({color:0x8c96a4, roughness:0.9, metalness:0.05});
+    for (let y = -1; y > yBot; y -= step){
       for (let i=0;i<ST.blockPer;i++){
         const a = i*2*Math.PI/ST.blockPer + Math.PI/ST.blockPer;
         const g = new THREE.BoxGeometry(ST.c/1000*0.9, 0.05, 0.05);
@@ -1831,6 +2245,7 @@ function build(){
     }
   }
 
+  applyConc();
   applyVis();
   document.getElementById('sumTag').textContent = '桩 ' + ST.D + ' / ' + ST.L + ' m';
 }
@@ -1849,6 +2264,7 @@ function applyVis(){
   LAYER_DEF.forEach(l=>{
     if (LAYERS[l.k]) LAYERS[l.k].visible = !!VIS[l.k];
   });
+  if (LAYERS.cpl) LAYERS.cpl.visible = VIS.main;
 }
 
 /* ---------- 相机 ---------- */
@@ -1862,6 +2278,9 @@ function setView(k){
     case 'top':   pos = new THREE.Vector3(0.01, L*1.05, 0.01); tgt = new THREE.Vector3(0, 0, 0); break;
     case 'node':  { const k = Math.max(3.4, D/1000*4.4);
                     pos = new THREE.Vector3(k, k*1.05, k); tgt = new THREE.Vector3(0, 0.55, 0); break; }
+    case 'inside':{ const r = D/2000*0.42;
+                    pos = new THREE.Vector3(r, -L*0.08, r*0.55);
+                    tgt = new THREE.Vector3(0, -L*0.62, 0); break; }
     case 'reset':
     case 'iso':
     default:      pos = new THREE.Vector3(L*0.50, L*0.26, L*0.50); tgt = new THREE.Vector3(0, -L*0.46, 0); break;
@@ -1946,6 +2365,13 @@ function buildParamForm(){
     const body = document.createElement('div');
     body.className = 'body';
     g.items.forEach(it=>{
+      if (it.note){
+        const p = document.createElement('div');
+        p.className = 'hint';
+        p.textContent = it.note;
+        body.appendChild(p);
+        return;
+      }
       const row = document.createElement('div');
       row.className = 'row';
       row.dataset.k = it.k;
@@ -1970,15 +2396,9 @@ function buildParamForm(){
       inp.addEventListener('input', ()=>onParam(it, inp));
       inp.addEventListener('change', ()=>onParam(it, inp));
       row.appendChild(inp);
-      if (it.u){
-        const u = document.createElement('span');
-        u.className = 'u'; u.textContent = it.u;
-        row.appendChild(u);
-      } else {
-        const u = document.createElement('span');
-        u.className = 'u'; u.textContent = '';
-        row.appendChild(u);
-      }
+      const u = document.createElement('span');
+      u.className = 'u'; u.textContent = it.u || '';
+      row.appendChild(u);
       body.appendChild(row);
     });
     det.appendChild(body);
@@ -2026,16 +2446,14 @@ function buildToggles(){
 }
 
 function renderResults(R){
-  /* --- KPI --- */
   const cards = document.getElementById('cards');
   cards.innerHTML = [
-    kpi('钢筋合计', fmt(R.G,1), 'kg', true),
+    kpi('钢筋合计', fmt(R.G), 'kg', true),
     kpi('含钢量', fmt(R.q,1), 'kg/m³', false),
     kpi('混凝土', fmt(R.V), 'm³', false),
     kpi('笼顶超出桩顶', fmt(R.cageTop,3), 'm', false)
   ].join('');
 
-  /* --- 分项表 --- */
   const rows = [];
   const line = (cls, name, sw, len, kg, key, frm) => {
     rows.push(`<tr class="${cls}" ${key?'data-key="'+key+'"':''}>
@@ -2044,35 +2462,37 @@ function renderResults(R){
     if (frm) rows.push(`<tr class="frmrow"><td colspan="3" class="frm">${frm}</td></tr>`);
   };
 
-  line('item','主筋 N1','#1a56db', fmt(R.T1), fmt(R.G1), 'N1',
-    `L₁ = L + l\u2090 − h\u2091 − h\u1D47${R.nj?(' + '+R.nj+'×'+ST.lapK+'d'):''} = ${ST.L} + ${(R.la/1000).toFixed(2)} − ${(ST.he/1000).toFixed(2)} − ${(ST.hb/1000).toFixed(2)} = <b>${fmt(R.L1)} m</b><br>
-     Σ L₁ = ${ST.n} × ${fmt(R.L1)} = ${fmt(R.T1)} m　·　单位重 ${fmt(w(ST.d),3)} kg/m<br>
-     G₁ = ${fmt(R.T1)} × ${fmt(w(ST.d),3)} = <b>${fmt(R.G1)} kg</b>`);
+  line('item','主筋 N1','#9aa3ad', fmt(R.T1), fmt(R.G1), 'N1',
+    `L₁ = L + l\u2090 − h\u2091 − h\u1D47${R.nLap?(' + '+R.nLap+'×'+ST.lapK+'d'):''} = ${ST.L} + ${(R.la/1000).toFixed(2)} − ${(ST.he/1000).toFixed(2)} − ${(ST.hb/1000).toFixed(2)} = <b>${fmt(R.L1)} m</b><br>
+     总根数 = ${R.nPos} × ${R.rows} 排 × ${R.bun} 束 = <b>${R.Nb} 根</b>　·　单位重 ${fmt(w(ST.d),3)} kg/m<br>
+     G₁ = ${R.Nb} × ${fmt(R.L1)} × ${fmt(w(ST.d),3)} = <b>${fmt(R.G1)} kg</b>`);
 
-  line('item','螺旋箍 N2','#0f766e', fmt(R.T2), fmt(R.G2), 'N2',
-    `D\u209B = D − 2c − d\u209B = ${R.Ds} mm　单圈 l\u1D62 = √[(πD\u209B)² + p²]<br>
-     ${R.segs.map(g=>`${g.tag}：${g.H} m / ${g.p} mm = ${g.N} 圈 × ${fmt(g.li,4)} m`).join('<br>')}<br>
+  line('item','螺旋箍 N2','#87968f', fmt(R.T2), fmt(R.G2), 'N2',
+    `D\u209B = D − 2c − d\u209B = ${fmt(R.Ds,0)} mm　单圈 l\u1D62 = √[(πD\u209B)² + p²]<br>
+     ${R.segs.map(g=>`${g.tag}：${fmt(g.H)} m / ${g.p} mm = ${g.N} 圈 × ${fmt(g.li,4)} m`).join('<br>')}<br>
      Σ L₂ = ${fmt(R.T2)} m　G₂ = <b>${fmt(R.G2)} kg</b>`);
 
-  line('item','加劲箍 N3','#b45309', fmt(R.T3), fmt(R.G3), 'N3',
-    `D\u1D63 = D\u2098 − d − d\u1D63 = ${R.Dr} mm　数量 N\u1D63 = ⌈${ST.L}/${ST.sr/1000}⌉ + 1 = ${R.Nr} 个<br>
+  line('item','加劲箍 N3','#a2937a', fmt(R.T3), fmt(R.G3), 'N3',
+    `D\u1D63 = D\u2098 − d − d\u1D63 = ${fmt(R.Dr,0)} mm　数量 N\u1D63 = ⌈L₁/${fmt(ST.sr/1000,1)}⌉ + 1 = ${R.Nr} 个<br>
      单个 l\u1D63 = πD\u1D63 + ${ST.lj}d\u1D63 = ${fmt(R.lr)} m<br>
      G₃ = ${R.Nr} × ${fmt(R.lr)} × ${fmt(w(ST.dr),3)} = <b>${fmt(R.G3)} kg</b>`);
 
-  line('item','内三角撑 N6','#7c3aed', fmt(R.T6), fmt(R.G6), 'N6',
-    `D\u209C = D\u2098 − 2d = ${R.Dt} mm　弦杆 = (√3/2)D\u209C = ${fmt(R.chord*1000,1)} mm　腹杆 = √[(D\u209C/2)²+h\u209C²] = ${fmt(R.web*1000,1)} mm<br>
-     单道 = 3×(${fmt(R.chord,3)}+${fmt(R.web,3)}) = ${fmt(R.perTri)} m　共 ${ST.Nt} 道<br>
+  line('item','内三角撑 N6','#8f88a6', fmt(R.T6), fmt(R.G6), 'N6',
+    `道数与标高同加劲箍：<b>${R.Nt} 道</b>　D\u209C = D\u2098 − 2d = ${fmt(R.Dt,0)} mm<br>
+     弦杆 = (√3/2)D\u209C = ${fmt(R.chord*1000,1)} mm　腹杆 = √[(D\u209C/2)²+h\u209C²] = ${fmt(R.web*1000,1)} mm<br>
+     单道 = 3×(${fmt(R.chord,3)}+${fmt(R.web,3)}) = ${fmt(R.perTri)} m<br>
      G₆ = ${fmt(R.T6)} × ${fmt(w(ST.dt),3)} = <b>${fmt(R.G6)} kg</b>`);
 
   rows.push(`<tr class="sum"><td>钢筋小计</td><td>${fmt(R.T1+R.T2+R.T3+R.T6)}</td><td>${fmt(R.Gs)}</td></tr>`);
   rows.push(`<tr class="sub"><td>损耗 ${ST.eta}%</td><td>—</td><td>${fmt(R.G-R.Gs)}</td></tr>`);
   rows.push(`<tr class="tot"><td>钢筋合计</td><td>—</td><td>${fmt(R.G)}</td></tr>`);
 
-  line('item','声测管 N4','#b91c1c', fmt(R.T4), fmt(R.G4), 'N4',
+  line('item','声测管 N4','#b0a396', fmt(R.T4), fmt(R.G4), 'N4',
     `w\u209A = π(D\u209A−t\u209A)t\u209A×7.85×10⁻³ = ${fmt(R.wp,3)} kg/m<br>
-     L\u209A = L + 0.25 = ${fmt(R.Lp)} m × ${ST.np} 根<br>
+     L\u209A = L + 笼顶 ${fmt(R.cageTop,3)} + 0.20 = ${fmt(R.Lp)} m × ${ST.np} 根（顶部塑料盖帽封闭）<br>
      G₄ = <b>${fmt(R.G4)} kg</b>（不计损耗，单列）`);
 
+  rows.push(`<tr class="sub"><td>机械连接套筒</td><td>${R.nCoupler} 个</td><td>—</td></tr>`);
   rows.push(`<tr class="sub"><td>混凝土桩身</td><td>—</td><td>${fmt(R.V)} m³</td></tr>`);
   rows.push(`<tr class="sub"><td>承台（参考）</td><td>—</td><td>${fmt(R.Vc)} m³</td></tr>`);
   rows.push(`<tr class="sub"><td>含钢量指标</td><td>—</td><td>${fmt(R.q,1)} kg/m³</td></tr>`);
@@ -2085,7 +2505,6 @@ function renderResults(R){
     tr.addEventListener('click', ()=>tr.classList.toggle('open'));
   });
 
-  /* --- 校核 --- */
   const ck = R.ck;
   const bad = ck.filter(x=>!x.ok).length;
   document.getElementById('checks').innerHTML = ck.map(x=>`
@@ -2138,66 +2557,77 @@ function exportXlsx(){
     ['承台','桩顶嵌入承台深度','he',ST.he,'mm','桩顶面高出承台底面'],
     ['承台','主筋锚固长度','la',R.la,'mm',ST.laK+'d，自承台底面起算'],
     ['配筋','主筋直径','d',ST.d,'mm',''],
-    ['配筋','主筋根数','n',ST.n,'根',''],
+    ['配筋','每排主筋根数','n',ST.n,'根',''],
+    ['配筋','主筋排数','—',ST.rows,'排','双排为内外同心两圈'],
+    ['配筋','每束根数','—',ST.bundle,'根','两束为每处并排两根'],
+    ['配筋','主筋总根数','Nb',R.Nb,'根','n × 排数 × 每束根数'],
     ['配筋','主筋钢种','—',ST.sg,'',''],
     ['配筋','主筋连接方式','—',ST.conn,'',''],
+    ['配筋','机械连接套筒数量','—',R.nCoupler,'个','每 9 m 一个接头'],
     ['配筋','螺旋箍直径','ds',ST.ds,'mm',''],
     ['配筋','非加密段螺距','p',ST.p,'mm',''],
     ['配筋','加密段螺距','p1',ST.p1,'mm',''],
-    ['配筋','加密段长度','Lm',ST.Lm,'m',''],
+    ['配筋','桩顶加密段长度','Lm',ST.Lm,'m','自桩顶向下'],
+    ['配筋','桩底加密段长度','Lmb',ST.Lmb,'m','自桩底向上'],
     ['配筋','加劲箍直径','dr',ST.dr,'mm',''],
     ['配筋','加劲箍间距','sr',ST.sr,'mm',''],
     ['配筋','加劲箍接头倍数','lj',ST.lj,'×dr',''],
-    ['配筋','内三角撑道数','Nt',ST.Nt,'道',''],
+    ['配筋','内三角撑道数','Nt',R.Nt,'道','自动跟随加劲箍'],
     ['配筋','内三角撑杆径','dt',ST.dt,'mm',''],
-    ['配筋','内三角撑锥高','ht',ST.ht,'mm',''],
+    ['配筋','内三角撑锥高','ht',ST.ht,'mm','0 为平面三角架'],
     ['配筋','声测管外径/壁厚','Dp/tp',ST.Dp+'/'+ST.tp,'mm',''],
     ['配筋','声测管数量','np',ST.np,'根',''],
     ['计价','钢筋损耗率','η',ST.eta,'%',''],
     [],
     ['派生几何'],
     ['螺旋箍中心线直径','Ds',R.Ds,'mm','D − 2c − ds'],
-    ['主筋中心线直径','Dm',R.Dm,'mm','D − 2c − 2ds − d'],
-    ['加劲箍中心线直径','Dr',R.Dr,'mm','Dm − d − dr'],
-    ['内三角撑外接圆直径','Dt',R.Dt,'mm','Dm − 2d'],
-    ['主筋净距','s',R.sClear,'mm','πDm/n − d'],
-    ['配筋率','ρ',R.rho,'%','n·d²/D²'],
-    ['笼顶超出桩顶','Δh',R.cageTop*1000,'mm','la − he']
+    ['外排主筋中心线直径','Dm',R.Dm,'mm','D − 2c − 2ds − d'],
+    ['内排主筋中心线直径','Di',R.Di,'mm','Dm − 2×排距'],
+    ['双排主筋排距','a',R.rowGap,'mm',''],
+    ['加劲箍中心线直径','Dr',R.Dr,'mm','Di − d − dr'],
+    ['内三角撑外接圆直径','Dt',R.Dt,'mm','Di − 2d'],
+    ['主筋净距','s',r2(R.sClear),'mm','πDm/n − 主筋束宽'],
+    ['配筋率','ρ',r2(R.rho),'%','Nb·d²/D²'],
+    ['笼顶超出桩顶','Δh',r3(R.cageTop*1000),'mm','la − he'],
+    ['桩底收口段高度','—',TAPER_H*1000,'mm','桩底 1 m 段向内收锥']
   ];
   const ws1 = XLSX.utils.aoa_to_sheet(p);
   ws1['!cols'] = [{wch:8},{wch:22},{wch:10},{wch:12},{wch:8},{wch:34}];
   XLSX.utils.book_append_sheet(wb, ws1, '参数表');
 
-  /* 2 钢筋明细 */
+  /* 2 钢筋明细（长度、重量保留两位小数） */
   const d = [
     ['编号','部位','规格','根数/道数','单根长度 m','总长 m','单位重 kg/m','重量 kg','计算式'],
-    ['N1','主筋', 'φ'+ST.d+' '+ST.sg, ST.n, R.L1, R.T1, w(ST.d), R.G1,
+    ['N1','主筋', 'φ'+ST.d+' '+ST.sg, R.Nb, r2(R.L1), r2(R.T1), r3(w(ST.d)), r2(R.G1),
       'L1 = L + la - he - hb = '+ST.L+'+'+(R.la/1000).toFixed(2)+'-'+(ST.he/1000).toFixed(2)+'-'+(ST.hb/1000).toFixed(2)+' = '+R.L1.toFixed(2)],
-    ['N2','螺旋箍筋','φ'+ST.ds, R.turns+' 圈', R.segs[0].li, R.T2, w(ST.ds), R.G2,
+    ['N2','螺旋箍筋','φ'+ST.ds, R.turns+' 圈', r2(R.segs[0].li), r2(R.T2), r3(w(ST.ds)), r2(R.G2),
       R.segs.map(g=>g.tag+' '+g.N+'×'+g.li.toFixed(4)).join(' + ')],
-    ['N3','加劲箍','φ'+ST.dr, R.Nr, R.lr, R.T3, w(ST.dr), R.G3,
+    ['N3','加劲箍','φ'+ST.dr, R.Nr+' 个', r2(R.lr), r2(R.T3), r3(w(ST.dr)), r2(R.G3),
       'πDr + '+ST.lj+'dr = '+R.lr.toFixed(4)],
-    ['N6','内三角撑','φ'+ST.dt, ST.Nt+' 道', R.perTri, R.T6, w(ST.dt), R.G6,
+    ['N6','内三角撑','φ'+ST.dt, R.Nt+' 道', r2(R.perTri), r2(R.T6), r3(w(ST.dt)), r2(R.G6),
       '3×(弦'+R.chord.toFixed(3)+'+腹'+R.web.toFixed(3)+')'],
-    ['小计','','','','', R.T1+R.T2+R.T3+R.T6,'', R.Gs,''],
-    ['损耗',''+ST.eta+'%','','','','','', R.G-R.Gs,''],
-    ['合计','钢筋','','','','','', R.G,''],
-    ['N4','声测管','φ'+ST.Dp+'×'+ST.tp, ST.np, R.Lp, R.T4, R.wp, R.G4,'π(Dp-tp)tp×7.85e-3（不计损耗）']
+    ['小计','','','','', r2(R.T1+R.T2+R.T3+R.T6),'', r2(R.Gs),''],
+    ['损耗',''+ST.eta+'%','','','','','', r2(R.G-R.Gs),''],
+    ['合计','钢筋','','','','','', r2(R.G),''],
+    ['N4','声测管','φ'+ST.Dp+'×'+ST.tp, ST.np+' 根', r2(R.Lp), r2(R.T4), r3(R.wp), r2(R.G4),'π(Dp-tp)tp×7.85e-3（不计损耗）'],
+    ['—','机械连接套筒','φ'+ST.d, R.nCoupler+' 个','','','','—','接头错开 350 mm，重量已并入主筋']
   ];
   const ws2 = XLSX.utils.aoa_to_sheet(d);
-  ws2['!cols'] = [{wch:6},{wch:12},{wch:12},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:52}];
+  ws2['!cols'] = [{wch:6},{wch:14},{wch:13},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:52}];
   XLSX.utils.book_append_sheet(wb, ws2, '钢筋明细');
 
   /* 3 汇总 */
   const s = [
     ['项目','数值','单位','备注'],
-    ['钢筋小计（N1+N2+N3+N6）', R.Gs.toFixed(2), 'kg', ''],
-    ['损耗后合计', R.G.toFixed(2), 'kg', '损耗率 '+ST.eta+'%'],
-    ['声测管', R.G4.toFixed(2), 'kg', '单列，不计损耗'],
-    ['混凝土桩身体积', R.V.toFixed(2), 'm³', 'πD²/4·L'],
-    ['承台体积（参考）', R.Vc.toFixed(2), 'm³', 'Bx·By·Hc'],
-    ['含钢量指标', R.q.toFixed(2), 'kg/m³', '钢筋小计/桩身体积'],
-    ['单位桩长含钢量', (R.Gs/ST.L).toFixed(2), 'kg/m', '']
+    ['钢筋小计（N1+N2+N3+N6）', r2(R.Gs), 'kg', ''],
+    ['损耗后合计', r2(R.G), 'kg', '损耗率 '+ST.eta+'%'],
+    ['声测管', r2(R.G4), 'kg', '单列，不计损耗'],
+    ['混凝土桩身体积', r2(R.V), 'm³', 'πD²/4·L'],
+    ['承台体积（参考）', r2(R.Vc), 'm³', 'Bx·By·Hc'],
+    ['含钢量指标', r2(R.q), 'kg/m³', '钢筋小计/桩身体积'],
+    ['单位桩长含钢量', r2(R.Gs/ST.L), 'kg/m', ''],
+    ['主筋总根数', R.Nb, '根', R.nPos+'×'+R.rows+'排×'+R.bun+'束'],
+    ['机械连接套筒', R.nCoupler, '个', '每 9 m 一个接头']
   ];
   const ws3 = XLSX.utils.aoa_to_sheet(s);
   ws3['!cols'] = [{wch:30},{wch:12},{wch:8},{wch:24}];
@@ -2207,7 +2637,7 @@ function exportXlsx(){
   const c = [['校核项','判定值','结论','说明']];
   R.ck.forEach(x=>c.push([x.name, x.val, x.ok?'通过':'待复核', x.ok?'':x.tip]));
   const ws4 = XLSX.utils.aoa_to_sheet(c);
-  ws4['!cols'] = [{wch:18},{wch:34},{wch:10},{wch:42}];
+  ws4['!cols'] = [{wch:18},{wch:38},{wch:10},{wch:42}];
   XLSX.utils.book_append_sheet(wb, ws4, '校核');
 
   XLSX.writeFile(wb, '桩基钢筋笼工程量_Nervus_'+stamp()+'.xlsx');
@@ -2217,16 +2647,16 @@ function exportCsv(){
   const R = calc();
   const L = [];
   L.push(['编号','部位','规格','根数/道数','总长(m)','重量(kg)']);
-  L.push(['N1','主筋','φ'+ST.d,ST.n,R.T1.toFixed(2),R.G1.toFixed(2)]);
-  L.push(['N2','螺旋箍筋','φ'+ST.ds,R.turns,R.T2.toFixed(2),R.G2.toFixed(2)]);
-  L.push(['N3','加劲箍','φ'+ST.dr,R.Nr,R.T3.toFixed(2),R.G3.toFixed(2)]);
-  L.push(['N6','内三角撑','φ'+ST.dt,ST.Nt,R.T6.toFixed(2),R.G6.toFixed(2)]);
-  L.push(['','钢筋小计','','',(R.T1+R.T2+R.T3+R.T6).toFixed(2),R.Gs.toFixed(2)]);
-  L.push(['','损耗'+ST.eta+'%','','','',(R.G-R.Gs).toFixed(2)]);
-  L.push(['','钢筋合计','','','',R.G.toFixed(2)]);
-  L.push(['N4','声测管','φ'+ST.Dp+'×'+ST.tp,ST.np,R.T4.toFixed(2),R.G4.toFixed(2)]);
-  L.push(['','混凝土','','','',R.V.toFixed(2)+' m³']);
-  L.push(['','含钢量','','','',R.q.toFixed(1)+' kg/m³']);
+  L.push(['N1','主筋','φ'+ST.d+' '+ST.sg,R.Nb,r2(R.T1).toFixed(2),r2(R.G1).toFixed(2)]);
+  L.push(['N2','螺旋箍筋','φ'+ST.ds,R.turns,r2(R.T2).toFixed(2),r2(R.G2).toFixed(2)]);
+  L.push(['N3','加劲箍','φ'+ST.dr,R.Nr,r2(R.T3).toFixed(2),r2(R.G3).toFixed(2)]);
+  L.push(['N6','内三角撑','φ'+ST.dt,R.Nt,r2(R.T6).toFixed(2),r2(R.G6).toFixed(2)]);
+  L.push(['','钢筋小计','','',r2(R.T1+R.T2+R.T3+R.T6).toFixed(2),r2(R.Gs).toFixed(2)]);
+  L.push(['','损耗'+ST.eta+'%','','','',r2(R.G-R.Gs).toFixed(2)]);
+  L.push(['','钢筋合计','','','',r2(R.G).toFixed(2)]);
+  L.push(['N4','声测管','φ'+ST.Dp+'×'+ST.tp,ST.np,r2(R.T4).toFixed(2),r2(R.G4).toFixed(2)]);
+  L.push(['','混凝土','','','',r2(R.V).toFixed(2)+' m³']);
+  L.push(['','含钢量','','','',r2(R.q).toFixed(2)+' kg/m³']);
   const csv = '\uFEFF' + L.map(r=>r.join(',')).join('\r\n');
   dl(new Blob([csv],{type:'text/csv;charset=utf-8'}), '桩基钢筋笼工程量_Nervus_'+stamp()+'.csv');
 }
@@ -2236,7 +2666,6 @@ function exportPng(){
   const el = document.getElementById('view');
   const wpx = el.clientWidth, hpx = el.clientHeight;
   const dpr = renderer.getPixelRatio();
-  LABELS_ON_BACKUP = LABELS_ON;
   renderer.setPixelRatio(k);
   renderer.setSize(wpx, hpx, false);
   renderer.render(scene, camera);
@@ -2249,7 +2678,6 @@ function exportPng(){
   a.download = '钢筋笼视图_Nervus_'+k+'x_'+stamp()+'.png';
   a.click();
 }
-let LABELS_ON_BACKUP = true;
 
 /* =====================================================================
    5. 事件与启动
@@ -2301,6 +2729,10 @@ function boot(){
     const Rr = ST.D/2000;
     clipPlane.constant = Rr * 1.20 * (1 - t);   // 0% 不剖，100% 剖至轴线（半剖）
   });
+  document.getElementById('concRange').addEventListener('input', e=>{
+    CONC_T = Number(e.target.value)/100;
+    applyConc();
+  });
   document.getElementById('clipOn').addEventListener('change', e=>{
     LABELS_ON = e.target.checked;
   });
@@ -2335,11 +2767,17 @@ function boot(){
     };
     f.click();
   });
+  const mask = document.getElementById('secMask');
+  document.getElementById('btnSec').addEventListener('click', ()=>mask.classList.add('on'));
+  document.getElementById('secClose').addEventListener('click', ()=>mask.classList.remove('on'));
+  mask.addEventListener('click', e=>{ if (e.target === mask) mask.classList.remove('on'); });
+  window.addEventListener('keydown', e=>{ if (e.key === 'Escape') mask.classList.remove('on'); });
   document.getElementById('btnXlsx').addEventListener('click', exportXlsx);
   document.getElementById('btnCsv').addEventListener('click', exportCsv);
   document.getElementById('btnPng').addEventListener('click', exportPng);
 
-  window.NERVUS = {calc, ST:()=>ST, build, scene:()=>scene, cam:()=>camera, root:()=>root, Helix:Helix};
+  window.NERVUS = {calc, ST:()=>ST, build, scene:()=>scene, cam:()=>camera, root:()=>root, Helix:Helix,
+                   layers:()=>LAYERS, conc:()=>CONC, setConc:t=>{CONC_T=t; applyConc();}, ctl:()=>controls};
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
