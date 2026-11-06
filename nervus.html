@@ -300,7 +300,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.10</div>
+        <div class="en">NERVUS · v1.0.11</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -366,7 +366,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.10 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.11 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
 </div>
 
@@ -3380,7 +3380,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.10
+   桩基钢筋笼三维计算系统 Nervus v1.0.11
    ===================================================================== */
 "use strict";
 
@@ -4438,19 +4438,21 @@ function bindClipMaterials(){
   });
 }
 
-/* 剖切截面盖：剖开后在 z=constant 处补一块不透明的灰白混凝土截面（纯色，无骨料贴图），
-   避免"剖开看到空心壳"。截面盖豁免裁剪（noClip），随剖切滑块实时更新位置与宽度。 */
+/* 剖切截面盖：剖开后在 z=constant 处补一块透明截面（不遮挡内部钢筋，纯透明）。
+   截面盖豁免裁剪（noClip），随剖切滑块实时更新位置与宽度。 */
 let CUTCAP = null;
 function buildCutCaps(R){
   if (CUTCAP){ root.remove(CUTCAP.group); CUTCAP = null; }
   const g = new THREE.Group(); g.name = '剖切截面'; g.visible = false;
 
-  const pileM = new THREE.MeshStandardMaterial({color:0xd8d2c6, metalness:0.0, roughness:0.92, side:THREE.DoubleSide});
+  const pileM = new THREE.MeshStandardMaterial({color:0xd8d2c6, metalness:0.0, roughness:0.92, side:THREE.DoubleSide,
+    transparent:true, opacity:0.0, depthWrite:false});
   const pileCap = new THREE.Mesh(new THREE.PlaneGeometry(1,1), pileM);
   pileCap.userData = {noClip:true};
   g.add(pileCap);
 
-  const capM = new THREE.MeshStandardMaterial({color:0xc9ced4, metalness:0.0, roughness:0.9, side:THREE.DoubleSide});
+  const capM = new THREE.MeshStandardMaterial({color:0xc9ced4, metalness:0.0, roughness:0.9, side:THREE.DoubleSide,
+    transparent:true, opacity:0.0, depthWrite:false});
   const capCap = new THREE.Mesh(new THREE.PlaneGeometry(1,1), capM);
   capCap.userData = {noClip:true};
   g.add(capCap);
@@ -5099,7 +5101,7 @@ function boot(){
   });
   /* ===== 云端方案：与 BraceCad 共用自建同步服务，按 app 分桶，跨设备互通 ===== */
   const NCLOUD = { api:'https://srv.wbc2023.top/sync', app:'nervus', token:'af91def02e8a9a205fe630e970b1b39a' };
-  const APP_VER = 'v1.0.10';
+  const APP_VER = 'v1.0.11';
   let clCache = [];
   function clHttp(act, method, body){
     const opt = { method: method||'GET', headers:{'Content-Type':'application/json','X-Token':NCLOUD.token} };
