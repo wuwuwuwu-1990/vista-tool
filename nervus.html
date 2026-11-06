@@ -2614,6 +2614,15 @@ function exportXlsx(){
   ];
   const ws2 = XLSX.utils.aoa_to_sheet(d);
   ws2['!cols'] = [{wch:6},{wch:14},{wch:13},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:52}];
+  // 单根长度 / 总长 / 重量 固定两位小数显示，单位重三位
+  for (let r = 2; r <= d.length; r++){
+    ['E','F','H'].forEach(col=>{
+      const c = ws2[col + r];
+      if (c && typeof c.v === 'number') c.z = '0.00';
+    });
+    const g2 = ws2['G' + r];
+    if (g2 && typeof g2.v === 'number') g2.z = '0.000';
+  }
   XLSX.utils.book_append_sheet(wb, ws2, '钢筋明细');
 
   /* 3 汇总 */
@@ -2631,6 +2640,10 @@ function exportXlsx(){
   ];
   const ws3 = XLSX.utils.aoa_to_sheet(s);
   ws3['!cols'] = [{wch:30},{wch:12},{wch:8},{wch:24}];
+  for (let r = 2; r <= s.length; r++){
+    const c = ws3['B' + r];
+    if (c && typeof c.v === 'number') c.z = '0.00';
+  }
   XLSX.utils.book_append_sheet(wb, ws3, '汇总');
 
   /* 4 校核 */
