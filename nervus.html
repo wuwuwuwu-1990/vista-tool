@@ -69,7 +69,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 .row .u{width:26px;flex:none;font-size:11px;color:var(--muted)}
 .row.bad input{border-color:#e28b8b;background:#fff7f7}
 .hint{font-size:11px;color:var(--muted);line-height:1.6;padding:2px 0 6px}
-.sfoot{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--line);background:#fbfcfe}
+.sfoot{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px;border-top:1px solid var(--line);background:#fbfcfe}
 .sfoot button{
   flex:1;font-family:var(--sans);font-size:12px;padding:6px 0;border-radius:7px;cursor:pointer;
   border:1px solid var(--line2);background:#fff;color:var(--ink2);transition:.15s;
@@ -224,6 +224,42 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 .secBody{overflow:auto;padding:8px 14px 16px}
 .secBody svg.secsvg{width:100%;height:auto;display:block}
 
+/* ============ 云端方案 ============ */
+#clMask{position:fixed;inset:0;background:rgba(20,26,36,.42);display:none;align-items:center;
+  justify-content:center;z-index:62;padding:24px}
+#clMask.on{display:flex}
+#clBox{background:#fff;border-radius:14px;width:min(680px,94vw);max-height:86vh;display:flex;
+  flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(20,26,36,.32)}
+.clHead{display:flex;align-items:baseline;gap:10px;padding:11px 18px;border-bottom:1px solid var(--line);flex:none}
+.clHead b{font-size:13.5px}
+.clHead span{font-size:11px;color:var(--muted)}
+.clHead button{margin-left:auto;font-size:12px;padding:5px 14px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--line2);background:#fff;color:var(--ink2)}
+.clHead button:hover{border-color:#b9cdf7;color:var(--blue);background:var(--blue-l)}
+.clBody{overflow:auto;padding:14px 18px 16px}
+.clSave{display:flex;gap:8px}
+.clSave input{flex:1;min-width:0;border:1px solid var(--line2);border-radius:8px;padding:8px 11px;
+  font-family:var(--sans);font-size:12.5px;color:var(--ink);outline:none;background:#fff}
+.clSave input:focus{border-color:#9dbdf5;box-shadow:0 0 0 3px rgba(26,86,219,.10)}
+.clSave button{flex:none;border:none;border-radius:8px;padding:8px 15px;font-family:var(--sans);font-size:12.5px;
+  font-weight:600;color:#fff;background:var(--blue);cursor:pointer}
+.clSave button:hover{background:var(--blue-d)}
+.clSave button:disabled{opacity:.55;cursor:default}
+.clList{margin-top:12px;border-top:1px solid var(--line)}
+.clRow{display:flex;align-items:center;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:12.5px}
+.clNm{flex:1;min-width:0;font-weight:600;color:var(--ink);word-break:break-all}
+.clSub{color:var(--muted);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.clTm{color:#a9b3c2;font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.clBtn{flex:none;border:1px solid var(--line2);background:#fff;border-radius:7px;padding:4px 10px;
+  font-family:var(--sans);font-size:11.5px;color:var(--ink2);cursor:pointer}
+.clBtn:hover{border-color:#b9cdf7;color:var(--blue);background:var(--blue-l)}
+.clBtn.del{color:#c0392b}
+.clBtn.del:hover{border-color:#f0c0bb;color:#c0392b;background:#fdf0ef}
+.clInp{flex:1;min-width:0;border:1px solid #9dbdf5;border-radius:7px;padding:5px 9px;font-family:var(--sans);
+  font-size:12.5px;outline:none}
+.clEmpty{color:#a9b3c2;text-align:center;padding:18px 0;font-size:12.5px}
+.clFoot{margin-top:10px;font-size:11.5px;color:var(--muted);min-height:16px}
+
 @media (max-width:1180px){
   #side{width:262px} #right{width:296px}
 }
@@ -236,12 +272,13 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.2</div>
+        <div class="en">NERVUS · v1.0.3</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
     <div class="sfoot">
       <button id="btnReset">恢复默认</button>
+      <button id="btnCloud">☁️ 云端方案</button>
       <button id="btnSave">导出参数</button>
       <button id="btnLoad">导入参数</button>
     </div>
@@ -298,8 +335,23 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.2 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.3 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
+</div>
+
+<div id="clMask">
+  <div id="clBox">
+    <div class="clHead"><b>☁️ 云端方案</b><span id="clHint">跨设备保存与复用整套参数</span>
+      <button id="clClose">关闭</button></div>
+    <div class="clBody">
+      <div class="clSave">
+        <input id="clName" placeholder="方案名称，例如：1#楼 ZJ-1 φ1500" maxlength="40">
+        <button id="clSaveBtn">保存到云端</button>
+      </div>
+      <div class="clList" id="clList"></div>
+      <div class="clFoot" id="clFoot"></div>
+    </div>
+  </div>
 </div>
 
 <div id="secMask">
@@ -504,7 +556,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 <path d="M1428.0,275.4 L1424.8,269.7 L1431.2,269.7 Z" fill="#64748b"/>
 <path d="M1428.0,298.4 L1431.2,304.0 L1424.8,304.0 Z" fill="#64748b"/>
 <text x="1435.0" y="290.9" font-size="11.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">0.2</text>
-<text x="1268.0" y="740.0" font-size="11" fill="#475569" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">lₐ = laK·d（自承台底面起算）　·　Δh = lₐ − hₑ（笼顶高出桩顶）</text>
+<text x="1268.0" y="740.0" font-size="11" fill="#475569" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">lₐ = laK·d（自桩顶面起算，即笼顶高出桩顶的高度）　·　笼顶标高 = 桩顶 + lₐ</text>
 <text x="1268.0" y="762.0" font-size="11" fill="#77839a" text-anchor="middle" font-weight="400" font-family="-apple-system,BlinkMacSystemFont,'SF Pro SC','PingFang SC','Helvetica Neue',sans-serif" opacity="1">主筋伸入承台；声测管顶再高出笼顶 0.2 m（图中虚线段），管顶封板并加盖塑料帽封闭</text>
 </svg>
     </div>
@@ -1623,7 +1675,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.2
+   桩基钢筋笼三维计算系统 Nervus v1.0.3
    ===================================================================== */
 "use strict";
 
@@ -1654,7 +1706,8 @@ const SCHEMA = [
     {k:'By', l:'承台宽 B\u1D67', u:'mm', min:800, max:8000, step:100},
     {k:'Hc', l:'承台厚 H\u1D9C', u:'mm', min:600, max:3000, step:50},
     {k:'he', l:'桩顶嵌入承台 h\u2091', u:'mm', min:0, max:300, step:10},
-    {k:'laK', l:'主筋锚固 l\u2090', u:'×d', min:20, max:45, step:1},
+    {k:'laK', l:'笼顶超出桩顶 l\u2090', u:'×d', min:20, max:50, step:1},
+    {note:'l\u2090 为钢筋笼顶面高出桩顶面的长度（锚固段），自桩顶面起算，笼顶标高 = 桩顶 + l\u2090；h\u2091 只决定桩顶在承台内的位置。'},
     {k:'capShow', l:'承台显示', type:'select', opts:['半透明','线框','隐藏']}
   ]},
   {t:'主筋 N1', items:[
@@ -1716,7 +1769,7 @@ function taperK(y, yBot){
 function calc(){
   const s = ST;
   const D=s.D, c=s.c, ds=s.ds, d=s.d, hb=s.hb/1000, he=s.he/1000, L=s.L;
-  const la = s.laK * d;                                   // mm，自承台底面起算
+  const la = s.laK * d;                                   // mm，笼顶超出桩顶（自桩顶面起算）
   const rows = Math.max(1, Math.round(s.rows));
   const bunO = Math.max(1, Math.round(s.bundleO));
   const bunI = rows > 1 ? Math.max(1, Math.round(s.bundleI)) : 0;   // 单排只有外排
@@ -1734,9 +1787,9 @@ function calc(){
   // 内三角撑外接圆：须同时让开加劲箍内缘与内排主筋，取两者较小值
   const Dt  = Math.min(Dr - s.dr - s.dt, Di - d - s.dt);
 
-  const cageTop = (la - s.he)/1000;                       // 笼顶高出桩顶 m
+  const cageTop = la/1000;                                // 笼顶高出桩顶 m（= la）
   /* --- ① 主筋 N1 --- */
-  let L1 = L + la/1000 - he - hb;
+  let L1 = L + la/1000 - hb;                              // 笼长 = 桩长 + 超出桩顶 − 桩底保护
   let nLap = 0, lapAdd = 0;
   if (s.conn !== '机械连接'){
     nLap = Math.max(0, Math.ceil(L1 / 9) - 1);
@@ -1750,7 +1803,7 @@ function calc(){
 
   /* --- ② 螺旋箍 N2（覆盖整根钢筋笼，含承台内段） --- */
   const segs = [];
-  const H0 = Math.max(0, cageTop);
+  const H0 = Math.max(0, cageTop + he);                   // 承台内段：笼顶→承台底（承台底在 −he）
   const Lm1 = Math.min(s.Lm, L), Lmb = Math.min(s.Lmb, L);
   const mid = L1 - H0 - Lm1 - Lmb;
   if (H0 > 0.001) segs.push({H:H0, p:s.p, tag:'承台内'});
@@ -1816,8 +1869,8 @@ function calc(){
   add('加密区划分', `顶 ${s.Lm} m ＋ 底 ${s.Lmb} m ＜ L ${L} m`, s.Lm + s.Lmb < L - 0.5, '桩顶与桩底加密段之间应保留非加密段');
   add('加劲箍间距', `s\u1D63 = ${s.sr} mm`, s.sr<=2000, '间距大于 2 m 时钢筋笼吊装易变形');
   add('桩顶嵌入承台', `h\u2091 = ${s.he} mm`, s.he >= (D>=800?100:50), D>=800?'大直径桩嵌入深度不宜小于 100 mm':'不宜小于 50 mm');
-  add('主筋锚固长度', `l\u2090 = ${la} mm = ${s.laK}d`, la>=35*d, '锚固长度不宜小于 35d');
-  add('承台厚度余量', `H\u1D9C = ${s.Hc} ≥ ${la+s.he+50} mm`, s.Hc >= la+s.he+50, '承台厚度需容纳锚固段，否则笼顶将顶出承台');
+  add('笼顶超出桩顶', `l\u2090 = ${la} mm = ${s.laK}d（笼顶高出桩顶 ${fmt(cageTop,3)} m）`, la>=35*d, '自桩顶面起算，锚固长度不宜小于 35d');
+  add('承台厚度余量', `H\u1D9C = ${s.Hc} ≥ l\u2090 + h\u2091 + 50 = ${la+s.he+50} mm`, s.Hc >= la+s.he+50, '承台顶面至笼顶须留出保护层，否则笼顶将顶出承台');
   add('加劲箍起算位置', `承台底 −${fmt(he,2)} m 起算，共 ${Nr} 道`, Nr>=1, '加劲箍与内三角撑均自承台底面起算，不进入承台');
   add('内三角撑道数', `N\u209C = ${Nt} 道（同加劲箍）`, Nt>=1, '道数与加劲箍一一对应，自动跟随');
   add('声测管数量', `n\u209A = ${s.np} 根`, s.np===0 || (D>1500? s.np>=4 : s.np>=3), D>1500?'桩径大于 1.5 m 时宜设 4 根':'宜设 3 根');
@@ -1960,7 +2013,7 @@ function makeSteelRough(){
   const S = 512;
   const cv = document.createElement('canvas'); cv.width = cv.height = S;
   const g = cv.getContext('2d');
-  g.fillStyle = '#3b3b3b'; g.fillRect(0,0,S,S);
+  g.fillStyle = '#4a4a4a'; g.fillRect(0,0,S,S);
 
   /* 低频氧化斑 */
   for (let i=0;i<240;i++){
@@ -2054,25 +2107,86 @@ function mat(key, color, opt={}){
 /* 真实钢筋材质（A 版）：统一钢色 + 高金属度 + 程序化粗糙度 + 强化环境反射。
    各类钢筋只留极小的氧化色差（±6 灰阶），不再用不同色相区分构件。 */
 const STEEL = {
-  main:   0xb6bdc6,
-  spiral: 0xb2b9c2,
-  ring:   0xbcc3cc,
-  tri:    0xb4bbc4,
-  tube:   0xc2c9d2
+  main:   0x8d969f,
+  spiral: 0x88919a,
+  ring:   0x969fa9,
+  tri:    0x8e97a1,
+  tube:   0x9ca5af
 };
+/* B 版：程序化横肋 —— 不靠贴图，直接在片元着色器里按 UV 解析求肋坡法线，
+   逐像素精度，近看是真实螺纹钢的斜向横肋，远看不出摩尔纹。 */
+const RIB_U = { per:{value:1400}, amp:{value:0.086}, twist:{value:Math.PI/0.7}, w:{value:0.36} };
+function ribShader(m){
+  m.onBeforeCompile = (sh)=>{
+    sh.uniforms.uRibPer   = RIB_U.per;
+    sh.uniforms.uRibAmp   = RIB_U.amp;
+    sh.uniforms.uRibTwist = RIB_U.twist;
+    sh.uniforms.uRibW     = RIB_U.w;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vRibAxis;')
+      .replace('#include <defaultnormal_vertex>',
+               '#include <defaultnormal_vertex>\n\tvRibAxis = normalize( normalMatrix * vec3(0.0, 1.0, 0.0) );');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', [
+        '#include <common>',
+        'varying vec3 vRibAxis;',
+        'uniform float uRibPer;',
+        'uniform float uRibAmp;',
+        'uniform float uRibTwist;',
+        'uniform float uRibW;',
+        /* 月牙肋剖面：顶部圆缓、两侧收窄、肋间为平谷 */
+        'float ribH(float t){',
+        '  float u = abs(fract(t) - 0.5) / uRibW;',
+        '  if (u >= 1.0) return 0.0;',
+        '  return pow(cos(u * 1.5707963), 1.7);',
+        '}',
+        /* 两条纵肋：环向位置固定，宽约 1.2 mm */
+        'float longRib(float x){',
+        '  float d1 = min(abs(x - 0.26), 1.0 - abs(x - 0.26));',
+        '  float d2 = min(abs(x - 0.76), 1.0 - abs(x - 0.76));',
+        '  float d  = min(d1, d2);',
+        '  return d < 0.010 ? cos(d / 0.010 * 1.5707963) : 0.0;',
+        '}'
+      ].join('\n'))
+      .replace('#include <normal_fragment_maps>', [
+        '#include <normal_fragment_maps>',
+        '{',
+        '  vec3 A = normalize(vRibAxis - normal * dot(vRibAxis, normal));',
+        '  vec3 B = normalize(cross(normal, A));',
+        '  float t = vUv.y * uRibPer + vUv.x * uRibTwist;',
+        '  float e = 0.006;',
+        /* 横肋：沿轴向抬坡 */
+        '  float dhA = (ribH(t + e) - ribH(t - e)) / (2.0 * e);',
+        /* 带限滤波：一个像素跨过半个肋距时淡出，远看是光洁钢面，近看才是肋 */
+        '  float lodA = 1.0 - smoothstep(0.42, 1.10, fwidth(t));',
+        '  float aA  = atan(dhA * uRibAmp) * lodA;',
+        /* 纵肋：沿环向抬坡 */
+        '  float dhB = (longRib(vUv.x + 0.002) - longRib(vUv.x - 0.002)) / 0.004;',
+        '  float aB  = atan(dhB * 0.020);',
+        '  normal = normalize(normal + A * aA + B * aB);',
+        '}'
+      ].join('\n'));
+  };
+  m.customProgramCacheKey = ()=> 'nervus-rib';
+  return m;
+}
+
 function steelMat(key, tint){
   if (MAT[key]) return MAT[key];
-  const rib = (key === 'main');   // 直主筋带横肋（环筋/螺旋箍 UV 方向不同，用细颗粒）
-  const nm = rib ? NORM_RIB : NORM_FINE;
+  const rib = (key === 'main');   // 直主筋：shader 解析横肋；其余构件用细颗粒法线
   MAT[key] = new THREE.MeshStandardMaterial({
     color: (tint !== undefined ? tint : STEEL[key]) || STEEL.main,
     metalness: 0.93,
     roughness: 1.00,
     roughnessMap: ROUGH,
-    normalMap: nm,
-    normalScale: new THREE.Vector2(rib ? 0.85 : 0.35, rib ? 0.85 : 0.35),
-    envMapIntensity: 1.05
+    normalMap: rib ? null : NORM_FINE,
+    normalScale: new THREE.Vector2(0.35, 0.35),
+    envMapIntensity: 0.88
   });
+  if (rib){
+    MAT[key].extensions = { derivatives: true };
+    ribShader(MAT[key]);
+  }
   return MAT[key];
 }
 
@@ -2147,8 +2261,9 @@ function build(){
   const yTop = R.cageTop;
   const yBot = R.yBot;
   const tk = y => taperK(y, yBot);
-  /* 横肋间距 ≈ 0.7d：按主筋下料长反算法线贴图重复次数（每张图 6 道肋） */
-  if (NORM_RIB) NORM_RIB.repeat.set(1, Math.max(24, Math.round(R.L1 / (4.2*ST.d/1000))));
+  /* 横肋：间距取 0.7d（符合 GB/T 1499.2 月牙肋间距要求），肋高约 0.06d */
+  RIB_U.per.value = Math.max(60, (R.L1*1000) / (0.7*ST.d));
+  RIB_U.amp.value = 0.086;
 
   /* ---- 承台 ---- */
   const gCap = new THREE.Group(); gCap.name='承台'; root.add(gCap); LAYERS.cap = gCap;
@@ -2198,7 +2313,7 @@ function build(){
   /* ---- 主筋 N1（支持双排 / 两束 + 机械连接套筒 + 桩底收口） ---- */
   const gMain = new THREE.Group(); root.add(gMain); LAYERS.main = gMain;
   const barR = ST.d/2000;
-  const steelMain = steelMat('main', 0xb6bdc6);
+  const steelMain = steelMat('main', 0x8d969f);
   /* 一束 k 根沿切向并排（中心距 1.1d），返回各根的切向偏移 */
   const bundleOffs = k => {
     if (k <= 1) return [0];
@@ -2277,7 +2392,7 @@ function build(){
     const curve = new Helix(R.Ds/2000, yTop, R.segs.map(g=>({H:g.H, p:g.p})), tk);
     const tubular = Math.max(480, Math.min(6400, Math.round(R.turns * 26)));
     const geo = new THREE.TubeGeometry(curve, tubular, ST.ds/2000, 7, false);
-    const mesh = new THREE.Mesh(geo, steelMat('spiral', 0xb2b9c2));
+    const mesh = new THREE.Mesh(geo, steelMat('spiral', 0x88919a));
     mesh.userData = {info:'螺旋箍筋 N2', lines:[
       'φ'+ST.ds+'　共 '+R.turns+' 圈',
       R.segs.map(g=>g.tag+' '+fmt(g.H)+' m @'+g.p+'（'+g.N+'圈）').join('；'),
@@ -2291,7 +2406,7 @@ function build(){
   const ringY = [];
   for (let i=0;i<R.Nr;i++) ringY.push(R.Nr>1 ? R.yRingTop + (yBot - R.yRingTop)*i/(R.Nr-1) : R.yRingTop);
   {
-    const sm = steelMat('ring', 0xbcc3cc);
+    const sm = steelMat('ring', 0x969fa9);
     ringY.forEach((y, i)=>{
       const rr = R.Dr/2000 * tk(y);
       const geo = new THREE.TorusGeometry(rr, ST.dr/2000, 7, 56);
@@ -2309,7 +2424,7 @@ function build(){
   /* ---- 内三角撑 N6（等边三角形三边弦杆，无数值腹杆；道数/标高 = 加劲箍） ---- */
   const gTri = new THREE.Group(); root.add(gTri); LAYERS.tri = gTri;
   if (R.Nt > 0){
-    const barMat = steelMat('tri', 0xb4bbc4);
+    const barMat = steelMat('tri', 0x8e97a1);
     const rb = ST.dt/2000;
     ringY.forEach((y)=>{
       const rt = R.Dt/2000 * tk(y);
@@ -2333,7 +2448,7 @@ function build(){
     const rr = (R.Di/2 - ST.d/2 - ST.Dp/2)/1000;
     const len = R.Lp;
     const yTip = yTop + 0.2;
-    const tM = steelMat('tube', 0xc2c9d2);
+    const tM = steelMat('tube', 0x9ca5af);
     const capM = new THREE.MeshStandardMaterial({color:0xd93b3b, metalness:0.08, roughness:0.55});
     for (let i=0;i<ST.np;i++){
       const a = (i*360/ST.np + 15) * Math.PI/180;
@@ -2438,7 +2553,7 @@ function initLabels(){
   const defs = [
     {k:'cap', t:()=>'承台 '+ST.Bx+'×'+ST.By+'×'+ST.Hc},
     {k:'he',  t:()=>'he = '+ST.he+' mm', cls:'k'},
-    {k:'la',  t:()=>'la = '+(ST.laK*ST.d)+' mm ('+ST.laK+'d)'},
+    {k:'la',  t:()=>'la = '+(ST.laK*ST.d)+' mm = '+ST.laK+'d（笼顶超出桩顶）'},
     {k:'L',   t:()=>'L = '+ST.L.toFixed(1)+' m'},
     {k:'D',   t:()=>'D = '+ST.D+' mm'}
   ];
@@ -2601,23 +2716,23 @@ function renderResults(R){
     if (frm) rows.push(`<tr class="frmrow"><td colspan="3" class="frm">${frm}</td></tr>`);
   };
 
-  line('item','主筋 N1','#b6bdc6', fmt(R.T1), fmt(R.G1), 'N1',
-    `L₁ = L + l\u2090 − h\u2091 − h\u1D47${R.nLap?(' + '+R.nLap+'×'+ST.lapK+'d'):''} = ${ST.L} + ${(R.la/1000).toFixed(2)} − ${(ST.he/1000).toFixed(2)} − ${(ST.hb/1000).toFixed(2)} = <b>${fmt(R.L1)} m</b><br>
+  line('item','主筋 N1','#8d969f', fmt(R.T1), fmt(R.G1), 'N1',
+    `L₁ = L + l\u2090 − h\u1D47${R.nLap?(' + '+R.nLap+'×'+ST.lapK+'d'):''} = ${ST.L} + ${(R.la/1000).toFixed(3)} − ${(ST.hb/1000).toFixed(2)} = <b>${fmt(R.L1)} m</b><br>
      ${R.rows>1 ? ('总根数 = '+R.nPos+' 处 × (外排 '+R.bunO+' + 内排 '+R.bunI+') = ') : ('总根数 = '+R.nPos+' 处 × '+R.bunO+' = ')}<b>${R.Nb} 根</b>　·　单位重 ${fmt(w(ST.d),3)} kg/m<br>
      G₁ = ${R.Nb} × ${fmt(R.L1)} × ${fmt(w(ST.d),3)} = <b>${fmt(R.G1)} kg</b>`);
 
-  line('item','螺旋箍 N2','#b2b9c2', fmt(R.T2), fmt(R.G2), 'N2',
+  line('item','螺旋箍 N2','#88919a', fmt(R.T2), fmt(R.G2), 'N2',
     `D\u209B = D − 2c − d\u209B = ${fmt(R.Ds,0)} mm　单圈 l\u1D62 = √[(πD\u209B)² + p²]<br>
      ${R.segs.map(g=>`${g.tag}：${fmt(g.H)} m / ${g.p} mm = ${g.N} 圈 × ${fmt(g.li,4)} m`).join('<br>')}<br>
      Σ L₂ = ${fmt(R.T2)} m　G₂ = <b>${fmt(R.G2)} kg</b>`);
 
-  line('item','加劲箍 N3','#bcc3cc', fmt(R.T3), fmt(R.G3), 'N3',
+  line('item','加劲箍 N3','#969fa9', fmt(R.T3), fmt(R.G3), 'N3',
     `${R.rows>1 ? ('D\u1D63 = (D\u2098 + D\u1D62)/2（居中于双排主筋之间）') : ('D\u1D63 = D\u2098 − d − d\u1D63（主筋内侧）')} = ${fmt(R.Dr,0)} mm<br>
      自承台底面（−${fmt(ST.he/1000,2)} m）起算至桩底：N\u1D63 = ⌈${fmt(R.ringSpan,2)}/${fmt(ST.sr/1000,1)}⌉ + 1 = <b>${R.Nr} 个</b><br>
      单个 l\u1D63 = πD\u1D63 + ${ST.lj}d\u1D63 = ${fmt(R.lr)} m<br>
      G₃ = ${R.Nr} × ${fmt(R.lr)} × ${fmt(w(ST.dr),3)} = <b>${fmt(R.G3)} kg</b>`);
 
-  line('item','内三角撑 N6','#b4bbc4', fmt(R.T6), fmt(R.G6), 'N6',
+  line('item','内三角撑 N6','#8e97a1', fmt(R.T6), fmt(R.G6), 'N6',
     `道数与标高同加劲箍：<b>${R.Nt} 道</b>　D\u209C = D\u1D62 − d − d\u209C = ${fmt(R.Dt,0)} mm<br>
      等边三角形，仅设三边弦杆（无中间腹杆）：边长 = (√3/2)D\u209C = ${fmt(R.chord*1000,1)} mm<br>
      单道 = 3 × ${fmt(R.chord,3)} = ${fmt(R.perTri)} m<br>
@@ -2695,7 +2810,7 @@ function exportXlsx(){
     ['承台','承台宽度','By',ST.By,'mm',''],
     ['承台','承台厚度','Hc',ST.Hc,'mm',''],
     ['承台','桩顶嵌入承台深度','he',ST.he,'mm','桩顶面高出承台底面'],
-    ['承台','主筋锚固长度','la',R.la,'mm',ST.laK+'d，自承台底面起算'],
+    ['承台','笼顶超出桩顶','la',R.la,'mm',ST.laK+'d，自桩顶面起算'],
     ['配筋','主筋直径','d',ST.d,'mm',''],
     ['配筋','每排主筋根数','n',ST.n,'根',''],
     ['配筋','主筋排数','—',ST.rows,'排','双排为内外同心两圈，加劲箍居中'],
@@ -2729,7 +2844,7 @@ function exportXlsx(){
     ['加劲箍起算标高','—',r3(-ST.he/1000),'m','承台底面（内三角撑同）'],
     ['主筋净距','s',r2(R.sClear),'mm','πDm/n − 主筋束宽'],
     ['配筋率','ρ',r2(R.rho),'%','Nb·d²/D²'],
-    ['笼顶超出桩顶','Δh',r3(R.cageTop*1000),'mm','la − he'],
+    ['笼顶超出桩顶','la',r3(R.cageTop*1000),'mm','laK·d，自桩顶面起算'],
     ['桩底收口段高度','—',TAPER_H*1000,'mm','桩底 1 m 段向内收锥']
   ];
   const ws1 = XLSX.utils.aoa_to_sheet(p);
@@ -2740,7 +2855,7 @@ function exportXlsx(){
   const d = [
     ['编号','部位','规格','根数/道数','单根长度 m','总长 m','单位重 kg/m','重量 kg','计算式'],
     ['N1','主筋', 'φ'+ST.d+' '+ST.sg, R.Nb, r2(R.L1), r2(R.T1), r3(w(ST.d)), r2(R.G1),
-      'L1 = L + la - he - hb = '+ST.L+'+'+(R.la/1000).toFixed(3)+'-'+(ST.he/1000).toFixed(2)+'-'+(ST.hb/1000).toFixed(2)+' = '+R.L1.toFixed(3)],
+      'L1 = L + la - hb = '+ST.L+'+'+(R.la/1000).toFixed(3)+'-'+(ST.hb/1000).toFixed(2)+' = '+R.L1.toFixed(3)],
     ['N2','螺旋箍筋','φ'+ST.ds, R.turns+' 圈', r2(R.segs[0].li), r2(R.T2), r3(w(ST.ds)), r2(R.G2),
       R.segs.map(g=>g.tag+' '+g.N+'×'+g.li.toFixed(4)).join(' + ')],
     ['N3','加劲箍','φ'+ST.dr, R.Nr+' 个', r2(R.lr), r2(R.T3), r3(w(ST.dr)), r2(R.G3),
@@ -2921,11 +3036,139 @@ function boot(){
     };
     f.click();
   });
+  /* ===== 云端方案：与 BraceCad 共用自建同步服务，按 app 分桶，跨设备互通 ===== */
+  const NCLOUD = { api:'https://srv.wbc2023.top/sync', app:'nervus', token:'af91def02e8a9a205fe630e970b1b39a' };
+  const APP_VER = 'v1.0.3';
+  let clCache = [];
+  function clHttp(act, method, body){
+    const opt = { method: method||'GET', headers:{'Content-Type':'application/json','X-Token':NCLOUD.token} };
+    if (body) opt.body = JSON.stringify(body);
+    return fetch(NCLOUD.api+'/'+act+'/'+NCLOUD.app, opt).then(r=>{
+      if (r.status === 401) throw new Error('同步令牌无效');
+      if (!r.ok) throw new Error('云端响应 HTTP '+r.status);
+      return r.json();
+    });
+  }
+  const clEsc = x => String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const clTime = v => { const d = new Date(v); if (isNaN(d)) return '';
+    const p = n => String(n).padStart(2,'0');
+    return (d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
+  const clSummary = d => { const t = (d && d.st) || {};
+    return 'φ'+(t.D||'-')+' · L'+(t.L||'-')+' · '+(t.n||'-')+'φ'+(t.d||'-'); };
+  function clMsg(t, ok){ const el = document.getElementById('clFoot');
+    el.textContent = t; el.style.color = (ok === false) ? '#c0392b' : '#1a7f5a'; }
+
+  function clRefresh(){
+    const list = document.getElementById('clList');
+    list.innerHTML = '<div class="clEmpty">同步中…</div>';
+    clHttp('pull').then(j=>{
+      clCache = ((j && j.records) || []).filter(r => r && !r.del && r.data && r.data.st);
+      if (!clCache.length){ list.innerHTML = '<div class="clEmpty">云端还没有方案，先在上面命名保存</div>';
+        document.getElementById('clHint').textContent = '跨设备保存与复用整套参数'; return; }
+      list.innerHTML = clCache.map(r=>{
+        const id = r.id, nm = (r.data && r.data.name) || id;
+        return '<div class="clRow" data-id="'+clEsc(id)+'">'
+          + '<span class="clNm">'+clEsc(nm)+'</span>'
+          + '<span class="clSub">'+clEsc(clSummary(r.data))+'</span>'
+          + '<span class="clTm">'+clTime(r.v)+'</span>'
+          + '<button class="clBtn" data-act="imp" data-id="'+clEsc(id)+'">导入</button>'
+          + '<button class="clBtn" data-act="ren" data-id="'+clEsc(id)+'">重命名</button>'
+          + '<button class="clBtn del" data-act="del" data-id="'+clEsc(id)+'">删除</button>'
+          + '</div>';
+      }).join('');
+      document.getElementById('clHint').textContent = '共 '+clCache.length+' 套';
+    }).catch(e=>{
+      list.innerHTML = '<div class="clEmpty">加载失败：'+clEsc(e.message||e)+'</div>';
+    });
+  }
+
+  function clSave(){
+    const inp = document.getElementById('clName');
+    const name = inp.value.trim();
+    if (!name){ clMsg('请先输入方案名称', false); inp.focus(); return; }
+    if (clCache.some(r => r.id === name) && !confirm('云端已有同名方案「'+name+'」，覆盖吗？')) return;
+    const data = { name: name, ver: APP_VER, st: JSON.parse(JSON.stringify(ST)), ts: Date.now() };
+    const btn = document.getElementById('clSaveBtn'); btn.disabled = true;
+    clHttp('push','POST',{ records:[{ id:name, v:Date.now(), data:data, del:false }] })
+      .then(()=>{ inp.value=''; btn.disabled=false; clMsg('已保存「'+name+'」', true); clRefresh(); })
+      .catch(e=>{ btn.disabled=false; clMsg('保存失败：'+(e.message||e), false); });
+  }
+
+  function clImport(id){
+    const r = clCache.find(x => x.id === id);
+    if (!r) return;
+    ST = Object.assign({}, DEFAULTS, r.data.st || {});
+    buildParamForm(); build(); renderResults(calc()); setView('iso');
+    document.getElementById('clMask').classList.remove('on');
+    document.getElementById('clName').value = (r.data && r.data.name) || id;
+  }
+
+  function clDel(id){
+    const hit = clCache.find(x => x.id === id);
+    const nm = (hit && hit.data && hit.data.name) || id;
+    if (!confirm('确认删除云端方案「'+nm+'」？')) return;
+    clHttp('push','POST',{ records:[{ id:id, v:Date.now(), data:null, del:true }] })
+      .then(()=>{ clMsg('已删除「'+nm+'」', true); clRefresh(); })
+      .catch(e=>clMsg('删除失败：'+(e.message||e), false));
+  }
+
+  function clRename(id){
+    const row = document.querySelector('.clRow[data-id="'+id+'"]');
+    const hit = clCache.find(x => x.id === id);
+    if (!row || !hit) return;
+    const cur = (hit.data && hit.data.name) || id;
+    row.innerHTML = '<input class="clInp" id="clRenInp" maxlength="40" value="'+clEsc(cur)+'">'
+      + '<button class="clBtn" data-act="renok" data-id="'+clEsc(id)+'">确定</button>'
+      + '<button class="clBtn" data-act="renno">取消</button>';
+    const i = document.getElementById('clRenInp');
+    i.focus(); i.select();
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') clRenameOk(id);
+      if (e.key === 'Escape') clRefresh(); });
+  }
+
+  function clRenameOk(id){
+    const i = document.getElementById('clRenInp');
+    if (!i) return;
+    const nn = i.value.trim();
+    const hit = clCache.find(x => x.id === id);
+    const old = (hit && hit.data && hit.data.name) || id;
+    if (!nn){ clMsg('名称不能为空', false); return; }
+    if (nn === old){ clRefresh(); return; }
+    if (clCache.some(x => x.id === nn)){ clMsg('已存在同名方案「'+nn+'」', false); return; }
+    const data = Object.assign({}, hit.data, { name: nn });
+    const v = Date.now();
+    clHttp('push','POST',{ records:[ { id:nn, v:v, data:data, del:false },
+                                    { id:id, v:v+1, data:null, del:true } ] })
+      .then(()=>{ clMsg('已重命名为「'+nn+'」', true); clRefresh(); })
+      .catch(e=>clMsg('重命名失败：'+(e.message||e), false));
+  }
+
+  const clMask = document.getElementById('clMask');
+  document.getElementById('btnCloud').addEventListener('click', ()=>{
+    document.getElementById('clFoot').textContent = '';
+    clMask.classList.add('on'); clRefresh();
+  });
+  document.getElementById('clClose').addEventListener('click', ()=>clMask.classList.remove('on'));
+  clMask.addEventListener('click', e=>{ if (e.target === clMask) clMask.classList.remove('on'); });
+  document.getElementById('clSaveBtn').addEventListener('click', clSave);
+  document.getElementById('clName').addEventListener('keydown', e=>{ if (e.key === 'Enter') clSave(); });
+  document.getElementById('clList').addEventListener('click', e=>{
+    const b = e.target.closest ? e.target.closest('button[data-act]') : null;
+    if (!b) return;
+    const id = b.getAttribute('data-id'), act = b.getAttribute('data-act');
+    if (act === 'imp') clImport(id);
+    else if (act === 'del') clDel(id);
+    else if (act === 'ren') clRename(id);
+    else if (act === 'renok') clRenameOk(id);
+    else if (act === 'renno') clRefresh();
+  });
+
   const mask = document.getElementById('secMask');
   document.getElementById('btnSec').addEventListener('click', ()=>mask.classList.add('on'));
   document.getElementById('secClose').addEventListener('click', ()=>mask.classList.remove('on'));
   mask.addEventListener('click', e=>{ if (e.target === mask) mask.classList.remove('on'); });
-  window.addEventListener('keydown', e=>{ if (e.key === 'Escape') mask.classList.remove('on'); });
+  window.addEventListener('keydown', e=>{ if (e.key === 'Escape'){ mask.classList.remove('on'); document.getElementById('clMask').classList.remove('on'); } });
   document.getElementById('btnXlsx').addEventListener('click', exportXlsx);
   document.getElementById('btnCsv').addEventListener('click', exportCsv);
   document.getElementById('btnPng').addEventListener('click', exportPng);
