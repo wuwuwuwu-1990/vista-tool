@@ -155,13 +155,6 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
 .chip.off i{opacity:.18}
 .chip:hover{border-color:#b9cdf7}
 
-#tip{
-  position:absolute;pointer-events:none;background:#141a24;color:#fff;font-size:11.5px;
-  padding:5px 9px;border-radius:6px;opacity:0;transition:opacity .12s;max-width:290px;
-  line-height:1.6;font-family:var(--num);font-variant-numeric:tabular-nums;z-index:5;
-}
-#tip.on{opacity:1}
-
 #hintbar{
   position:absolute;right:12px;bottom:12px;
   background:rgba(255,255,255,.95);border:1px solid var(--line2);border-radius:8px;
@@ -300,7 +293,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.6</div>
+        <div class="en">NERVUS · v1.0.7</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -345,8 +338,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <button id="btnSec" class="clip" style="cursor:pointer;color:#1a56db;font-weight:600">参数剖面图</button>
     </div>
     <div id="toggles"></div>
-    <div id="tip"></div>
-    <div id="hintbar">左键旋转 · 右键平移 · 滚轮缩放 · 单击构件查看明细</div>
+    <div id="hintbar">左键旋转 · 右键平移 · 滚轮缩放</div>
   </main>
 
   <aside id="right">
@@ -366,7 +358,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.6 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.7 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
 </div>
 
@@ -1698,7 +1690,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.6
+   桩基钢筋笼三维计算系统 Nervus v1.0.7
    ===================================================================== */
 "use strict";
 
@@ -1927,7 +1919,6 @@ LAYER_DEF.forEach(l=>VIS[l.k]=true);
 const clipPlane = new THREE.Plane(new THREE.Vector3(0,0,-1), 1e9);
 const CLIP_LOCAL = [clipPlane];          // 材质级裁剪平面（只作用于构件，不含地面）
 let LABELS_ON = true;
-let toast = null;
 let CONC_T = 0.30;                 // 混凝土不透明度系数 0~1
 let CONC = {pile:null, cap:null, capEdge:null};
 let ROUGH = null, NORM_RIB = null, NORM_FINE = null;
@@ -2598,9 +2589,9 @@ function buildDims(R){
   };
 
   const D2 = ST.D/2000, L = ST.L, yBot = R.yBot, cT = R.cageTop;
-  /* 左：外道＝桩长 L，内道＝主筋笼长 L₁ */
-  vDim(-D2, -(D2+1.85), 0, -L);
-  vDim(-D2, -(D2+0.55), cT, yBot);
+  /* 左：外道＝主筋笼长 L₁，内道＝桩长 L */
+  vDim(-D2, -(D2+1.85), cT, yBot);
+  vDim(-D2, -(D2+0.55), 0, -L);
   /* 右：笼顶超出 lₐ ／ 桩顶加密 Lₘ ／ 桩底加密 Lₘᵇ */
   vDim(D2, D2+0.55, cT, 0);
   vDim(D2, D2+0.55, 0, -Math.min(ST.Lm, L));
@@ -2717,8 +2708,8 @@ function updateLabels(){
     const k = l.d.k;
     if (k==='cap'){ if(!VIS.cap){ l.el.style.display='none'; return; }
       v.set(-(ST.Bx/2000 + 0.35), ST.Hc/1000*0.72, 0); }
-    else if (k==='dimL'){  v.set(-(D2+1.90), -ST.L*0.30, 0); }
-    else if (k==='dimL1'){ v.set(-(D2+0.59), (cT + yBot)/2, 0); }
+    else if (k==='dimL'){  v.set(-(D2+0.59), -ST.L*0.30, 0); }        // L 走内道
+    else if (k==='dimL1'){ v.set(-(D2+1.90), (cT + yBot)/2, 0); }     // L₁ 走外道
     else if (k==='dimLa'){ v.set(D2+0.59, cT*0.5, 0); }
     else if (k==='dimLm'){ v.set(D2+0.59, -Math.min(ST.Lm, ST.L)*0.5, 0); }
     else if (k==='dimLmb'){v.set(D2+0.59, yBot + Math.min(ST.Lmb, ST.L)*0.5, 0); }
@@ -3148,36 +3139,6 @@ function exportPng(){
 /* =====================================================================
    5. 事件与启动
    ===================================================================== */
-function pick(ev){
-  const rect = renderer.domElement.getBoundingClientRect();
-  const m = new THREE.Vector2(
-    ((ev.clientX - rect.left)/rect.width)*2 - 1,
-    -((ev.clientY - rect.top)/rect.height)*2 + 1
-  );
-  const ray = new THREE.Raycaster();
-  ray.setFromCamera(m, camera);
-  const hits = ray.intersectObjects(root.children, true);
-  const tip = document.getElementById('tip');
-  for (const h of hits){
-    let o = h.object, info = null;
-    while (o && !info){
-      if (o.userData && o.userData.info) info = o.userData;
-      else if (o.parent && o.parent.userData && o.parent.userData.info && o.parent.userData.lines) info = o.parent.userData;
-      o = o.parent;
-    }
-    if (info){
-      tip.innerHTML = '<b>'+info.info+'</b><br>'+ (info.lines||[]).join('<br>');
-      tip.style.left = (ev.clientX - rect.left + 14) + 'px';
-      tip.style.top  = (ev.clientY - rect.top + 14) + 'px';
-      tip.classList.add('on');
-      clearTimeout(toast);
-      toast = setTimeout(()=>tip.classList.remove('on'), 4200);
-      return;
-    }
-  }
-  tip.classList.remove('on');
-}
-
 function boot(){
   initGL();
   initLabels();
@@ -3211,12 +3172,6 @@ function boot(){
   });
   document.getElementById('clipOn').checked = true;
 
-  renderer.domElement.addEventListener('pointerdown', e=>{ e.target._dx = e.clientX; e.target._dy = e.clientY; });
-  renderer.domElement.addEventListener('pointerup', e=>{
-    const dx = Math.abs(e.clientX - (e.target._dx||0)), dy = Math.abs(e.clientY - (e.target._dy||0));
-    if (dx < 5 && dy < 5) pick(e);
-  });
-
   document.getElementById('btnReset').addEventListener('click', ()=>{
     ST = Object.assign({}, DEFAULTS);
     buildParamForm(); build(); renderResults(calc()); setView('iso');
@@ -3242,7 +3197,7 @@ function boot(){
   });
   /* ===== 云端方案：与 BraceCad 共用自建同步服务，按 app 分桶，跨设备互通 ===== */
   const NCLOUD = { api:'https://srv.wbc2023.top/sync', app:'nervus', token:'af91def02e8a9a205fe630e970b1b39a' };
-  const APP_VER = 'v1.0.6';
+  const APP_VER = 'v1.0.7';
   let clCache = [];
   function clHttp(act, method, body){
     const opt = { method: method||'GET', headers:{'Content-Type':'application/json','X-Token':NCLOUD.token} };
