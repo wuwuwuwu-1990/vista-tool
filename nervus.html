@@ -300,7 +300,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
       <div class="logo">N</div>
       <div>
         <div class="nm">桩基钢筋笼三维计算系统</div>
-        <div class="en">NERVUS · v1.0.4</div>
+        <div class="en">NERVUS · v1.0.5</div>
       </div>
     </div>
     <div class="pscroll" id="pform"></div>
@@ -366,7 +366,7 @@ button,input,select,textarea{font-family:var(--sans);font-variant-numeric:tabula
         </select>
       </div>
     </div>
-    <div class="ver">Nervus v1.0.4 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
+    <div class="ver">Nervus v1.0.5 · 依据 JGJ 94-2008 / GB 50204-2015 / 22G813</div>
   </aside>
 </div>
 
@@ -1698,7 +1698,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </script>
 <script>
 /* =====================================================================
-   桩基钢筋笼三维计算系统 Nervus v1.0.4
+   桩基钢筋笼三维计算系统 Nervus v1.0.5
    ===================================================================== */
 "use strict";
 
@@ -1925,6 +1925,7 @@ const LAYER_DEF = [
 const VIS = {};
 LAYER_DEF.forEach(l=>VIS[l.k]=true);
 const clipPlane = new THREE.Plane(new THREE.Vector3(0,0,-1), 1e9);
+const CLIP_LOCAL = [clipPlane];          // 材质级裁剪平面（只作用于构件，不含地面）
 let LABELS_ON = true;
 let toast = null;
 let CONC_T = 0.30;                 // 混凝土不透明度系数 0~1
@@ -1938,7 +1939,9 @@ function initGL(){
   renderer.setSize(el.clientWidth, el.clientHeight);
   renderer.setClearColor(0x000000, 0);
   renderer.localClippingEnabled = true;
-  renderer.clippingPlanes = [clipPlane];
+  // 注意：不用 renderer.clippingPlanes（全局裁剪会把地面一起剖开），
+  // 改为材质级裁剪（见 bindClipMaterials），地面 / 尺寸标注永不被剖。
+  renderer.clippingPlanes = [];
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.00;
@@ -2561,6 +2564,7 @@ function build(){
 
   applyConc();
   applyVis();
+  bindClipMaterials();
   document.getElementById('sumTag').textContent = '桩 ' + ST.D + ' / ' + ST.L + ' m';
 }
 
@@ -2607,6 +2611,7 @@ function buildDims(R){
   const geo = new THREE.BufferGeometry().setFromPoints(pts);
   const ln = new THREE.LineSegments(geo, mat);
   ln.renderOrder = 30;
+  ln.userData = {noClip:true};        // 尺寸标注不受剖切影响
   g.add(ln);
 }
 
@@ -2625,6 +2630,27 @@ function applyVis(){
     if (LAYERS[l.k]) LAYERS[l.k].visible = !!VIS[l.k];
   });
   if (LAYERS.cpl) LAYERS.cpl.visible = VIS.main;
+}
+
+/* ---------- 材质级剖切（地面与尺寸标注豁免） ---------- */
+function inGround(o){
+  let p = o;
+  while (p){ if (p === LAYERS.ground) return true; p = p.parent; }
+  return false;
+}
+function bindClipMaterials(){
+  if (!root) return;
+  root.traverse(o=>{
+    if (!(o.isMesh || o.isLine || o.isLineSegments || o.isPoints)) return;
+    if (inGround(o)) return;                     // 地面不参与剖切，始终保持完整
+    if (o.userData && o.userData.noClip) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    mats.forEach(m=>{
+      if (!m || m.clippingPlanes === CLIP_LOCAL) return;
+      m.clippingPlanes = CLIP_LOCAL;
+      m.needsUpdate = true;
+    });
+  });
 }
 
 /* ---------- 相机 ---------- */
@@ -2713,17 +2739,24 @@ const axCtx = axCv.getContext('2d');
 const AX_DPR = Math.min(2, window.devicePixelRatio || 1);
 axCv.width = 112 * AX_DPR; axCv.height = 112 * AX_DPR;
 const AX_AXES = [
-  {v:[1,0,0], col:'#d9534f', n:'X'},
-  {v:[0,1,0], col:'#4a9e5c', n:'Y'},
-  {v:[0,0,1], col:'#3d7bd0', n:'Z'}
+  {v:[1,0,0], col:'#ff7b72', n:'X'},
+  {v:[0,1,0], col:'#5ee08a', n:'Y'},
+  {v:[0,0,1], col:'#6ab8ff', n:'Z'}
 ];
 function drawAxis(){
-  const S = 112, c = S/2, Rr = 33;
+  /* 复刻「测绘数据三维可视化系统」右上角方向轴：
+     暗色半透明圆盘背板 + 三根细轴线 + 轴端实心圆点 + 轴外彩色字母 + 中心白点 */
+  const S = 112, ox = S/2, oy = S/2, R = 28;
   axCtx.setTransform(AX_DPR, 0, 0, AX_DPR, 0, 0);
   axCtx.clearRect(0, 0, S, S);
-  axCtx.beginPath(); axCtx.arc(c, c, Rr + 14, 0, Math.PI*2);
-  axCtx.fillStyle = 'rgba(255,255,255,.86)'; axCtx.fill();
-  axCtx.strokeStyle = 'rgba(150,180,215,.85)'; axCtx.lineWidth = 1; axCtx.stroke();
+
+  axCtx.beginPath(); axCtx.arc(ox, oy, R + 21, 0, Math.PI*2);
+  axCtx.fillStyle = 'rgba(11,16,23,.62)'; axCtx.fill();
+  axCtx.strokeStyle = 'rgba(255,255,255,.10)'; axCtx.lineWidth = 1; axCtx.stroke();
+
+  axCtx.lineCap = 'round';
+  axCtx.font = '700 11px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif';
+  axCtx.textAlign = 'center'; axCtx.textBaseline = 'middle';
 
   const m = camera.matrixWorldInverse.elements;
   const list = AX_AXES.map(a=>{
@@ -2731,21 +2764,20 @@ function drawAxis(){
     const vx = m[0]*x + m[4]*y + m[8]*z;
     const vy = m[1]*x + m[5]*y + m[9]*z;
     const vz = m[2]*x + m[6]*y + m[10]*z;
-    return {col:a.col, n:a.n, sx:vx*Rr, sy:-vy*Rr, sz:vz};
-  }).sort((p,q)=> p.sz - q.sz);
+    return {col:a.col, n:a.n, px:vx, py:vy, sz:vz};
+  }).sort((p,q)=> p.sz - q.sz);        // 先远后近
 
   list.forEach(a=>{
-    axCtx.beginPath(); axCtx.moveTo(c, c); axCtx.lineTo(c + a.sx, c + a.sy);
-    axCtx.strokeStyle = a.col; axCtx.lineWidth = 2.4; axCtx.lineCap = 'round'; axCtx.stroke();
-    axCtx.beginPath(); axCtx.arc(c + a.sx, c + a.sy, 8.2, 0, Math.PI*2);
+    const ex = ox + a.px*R, ey = oy - a.py*R;
+    axCtx.strokeStyle = a.col; axCtx.lineWidth = 2.2;
+    axCtx.beginPath(); axCtx.moveTo(ox, oy); axCtx.lineTo(ex, ey); axCtx.stroke();
+    axCtx.beginPath(); axCtx.arc(ex, ey, 3.2, 0, Math.PI*2);
     axCtx.fillStyle = a.col; axCtx.fill();
-    axCtx.fillStyle = '#fff';
-    axCtx.font = '700 9.5px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif';
-    axCtx.textAlign = 'center'; axCtx.textBaseline = 'middle';
-    axCtx.fillText(a.n, c + a.sx, c + a.sy + 0.5);
+    axCtx.fillStyle = a.col;
+    axCtx.fillText(a.n, ex + a.px*13, ey - a.py*13);
   });
-  axCtx.beginPath(); axCtx.arc(c, c, 3.2, 0, Math.PI*2);
-  axCtx.fillStyle = '#5c6b80'; axCtx.fill();
+  axCtx.beginPath(); axCtx.arc(ox, oy, 2.2, 0, Math.PI*2);
+  axCtx.fillStyle = 'rgba(255,255,255,.55)'; axCtx.fill();
 }
 
 /* ---------- 渲循环 ---------- */
@@ -3163,7 +3195,7 @@ function boot(){
     const Rr = ST.D/2000;
     clipPlane.constant = Rr * 1.20 * (1 - t);   // 0% 不剖，100% 剖至轴线（半剖）
     clipValEl.textContent = e.target.value + '%';
-    if (LAYERS.ground) LAYERS.ground.visible = (t <= 0.001);   // 剖切时收起地面，避免被剖开
+    // 地面已改用材质级裁剪豁免，无需再隐藏（旧做法会让桩笼悬在天空里）
   });
   document.getElementById('concRange').addEventListener('input', e=>{
     CONC_T = Number(e.target.value)/100;
@@ -3208,7 +3240,7 @@ function boot(){
   });
   /* ===== 云端方案：与 BraceCad 共用自建同步服务，按 app 分桶，跨设备互通 ===== */
   const NCLOUD = { api:'https://srv.wbc2023.top/sync', app:'nervus', token:'af91def02e8a9a205fe630e970b1b39a' };
-  const APP_VER = 'v1.0.4';
+  const APP_VER = 'v1.0.5';
   let clCache = [];
   function clHttp(act, method, body){
     const opt = { method: method||'GET', headers:{'Content-Type':'application/json','X-Token':NCLOUD.token} };
