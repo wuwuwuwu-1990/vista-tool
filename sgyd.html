@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>施工用电负荷计算书 v1.0.4</title>
+<title>施工用电负荷计算书 v1.0.5</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316a34a'/%3E%3Cpath d='M36 8 18 36h12l-4 20 22-30H34l6-18z' fill='%23fde047'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -98,8 +98,19 @@
     background:rgba(255,255,255,.9); color:var(--primary-2); border-radius:9px; cursor:pointer; transition:all .15s;
   }
   .cd-btn:hover{border-color:var(--primary); background:#fff;}
-  .cd-btn.del{color:var(--warn); border-color:#f0cbc8;}
-  .cd-btn.del:hover{border-color:var(--warn);}
+  .cd-btn.del{color:var(--warn); border-color:#f0cbc8; padding:4px 9px; line-height:1; font-size:13px; font-weight:700;}
+  .cd-btn.del:hover{border-color:var(--warn); background:#fef2f2;}
+  /* 两段确认：第一次点 ✕ → 变红底白字「删除」，5 秒内不点则自动撤回 */
+  .cd-btn.del.armed{
+    background:var(--warn); color:#fff; border-color:var(--warn);
+    padding:5px 11px; font-size:12.5px; letter-spacing:.5px;
+    animation:delPulse .9s ease-in-out infinite alternate;
+  }
+  .cd-btn.del.armed:hover{background:#b91c1c; border-color:#b91c1c;}
+  @keyframes delPulse{
+    from{box-shadow:0 2px 7px rgba(220,38,38,.26);}
+    to{box-shadow:0 2px 15px rgba(220,38,38,.55);}
+  }
   .cd-empty{font-size:13px; color:var(--muted); text-align:center; padding:18px 0;}
   .cm-foot{font-size:11.5px; color:var(--muted); padding-top:10px; text-align:right;}
   .cm-rbox{width:min(460px,100%);}
@@ -234,7 +245,7 @@
 <body>
 
 <div class="toolbar">
-  <div class="brand"><span class="logo">⚡</span><b>施工用电负荷计算书</b><span class="ver">v1.0.4</span></div>
+  <div class="brand"><span class="logo">⚡</span><b>施工用电负荷计算书</b><span class="ver">v1.0.5</span></div>
   <div class="dd">
     <button type="button" onclick="togglePresetMenu(event)">➕ 常用设备 ▾</button>
     <div class="dd-menu" id="presetMenu"></div>
@@ -366,11 +377,12 @@
 <div class="mask" id="aboutMask">
   <div class="about">
     <h2>⚡ 施工用电负荷计算书</h2>
-    <p><b>版本：</b>v1.0.4</p>
+    <p><b>版本：</b>v1.0.5</p>
     <p><b>功能：</b>输入施工现场机械设备及额定功率，按需要系数法自动完成额定功率之和、有功计算负荷、视在计算负荷、总计算电流计算，自动选配电缆并生成计算书，可一键导出 Word。</p>
     <p><b>电缆选型参数：</b>芯数（单芯/三芯/四芯/五芯）、导体材质（铜芯/铝芯）、绝缘类型（XLPE 交联聚乙烯 / PVC 聚氯乙烯）、环境温度修正；载流量数据参照《工业与民用供配电设计手册》第四版 / IEC 60364-5-523（30℃空气中），N 线及 PE 线截面按 GB/T 12706 配比自动匹配。</p>
     <p><b>依据：</b>《建筑与市政工程施工现场临时用电安全技术标准》JGJ/T 46-2024；《电力工程电缆设计标准》GB 50217-2018。</p>
     <p><b>云端同步：</b>点击工具栏「☁️ 云端同步」打开弹窗，可命名保存当前计算书到云端（srv.wbc2023.top），列表内支持<b>导入 / 重命名 / 删除</b>，跨设备随时复用。</p>
+    <p><b>删除确认：</b>删除采用两段确认 —— 先点列表行尾的「✕」，按钮变为红底白字「删除」，5 秒内再点一次才真正删除，点别处或按 Esc 即撤回。</p>
     <p><b>说明：</b>工程名称、编制人、编制日期可留空 —— 留空时计算书中对应项自动隐藏（导出 Word 同样生效）。数据同时自动保存在本机浏览器；计算结果供方案编制参考，应以现场实际与规范复核为准。</p>
     <button onclick="hideAbout()">知道了</button>
   </div>
@@ -409,25 +421,6 @@
       <div class="cm-raction">
         <button type="button" class="cm-cbtn" onclick="cloudRenameHide()">取消</button>
         <button type="button" class="cm-cbtn ok" onclick="cloudRenameOk()">确定</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 删除确认弹窗 -->
-<div class="cm-mask" id="delMask" style="z-index:8100" onclick="cloudDelHide(event)">
-  <div class="cm-box cm-rbox">
-    <div class="cm-head">
-      <span class="cm-t">🗑 删除计算书</span>
-      <button type="button" class="cm-x" onclick="cloudDelHide()" title="关闭">✕</button>
-    </div>
-    <div class="cm-body">
-      <div class="cm-deltxt">确认删除云端计算书 <b id="delName"></b> ？
-        <span class="sub">删除后不可恢复（仅删除云端副本，本机数据不受影响）。</span>
-      </div>
-      <div class="cm-raction">
-        <button type="button" class="cm-cbtn" onclick="cloudDelHide()">取消</button>
-        <button type="button" class="cm-cbtn danger" onclick="cloudDelOk()">确认删除</button>
       </div>
     </div>
   </div>
@@ -787,11 +780,13 @@ function cloudOpen(){
 }
 function cloudClose(ev){
   if(ev && ev.target && ev.target !== ev.currentTarget) return;   // 点面板内部不关闭
+  delArmReset();
   $('cloudMask').classList.remove('show');
 }
 var cloudCache = [];
 function cloudRefresh(){
   var list = $('cloudList');
+  delArmReset();   // 重渲染前清掉上一轮的首段确认状态
   list.innerHTML = '<div class="cd-empty">同步中…</div>';
   $('cloudHint').textContent = '';
   cloudHttp('pull').then(function(j){
@@ -807,7 +802,7 @@ function cloudRefresh(){
            '<span class="cd-tm">' + n + '项</span><span class="cd-tm">' + cloudFmt(rc.v) + '</span>' +
            '<button type="button" class="cd-btn" data-act="imp" data-id="' + escH(rc.id) + '">导入</button>' +
            '<button type="button" class="cd-btn" data-act="ren" data-id="' + escH(rc.id) + '">重命名</button>' +
-           '<button type="button" class="cd-btn del" data-act="del" data-id="' + escH(rc.id) + '">删除</button>' +
+           '<button type="button" class="cd-btn del" data-act="del" data-id="' + escH(rc.id) + '" title="删除">✕</button>' +
            '</div>';
     }
     list.innerHTML = h;
@@ -904,29 +899,31 @@ function cloudRenameOk(){
     cloudRefresh();
   }).catch(function(e){ toast('重命名失败：' + (e.message || e)); });
 }
-/* ---- 删除（模糊弹窗确认） ---- */
-var cloudDelTarget = null;
-function cloudDel(id){
+/* ---- 删除（行内两段确认：点 ✕ → 变红底白字「删除」→ 再点才真删） ---- */
+var delArmBtn = null, delArmId = null, delArmTimer = null;
+function delArmReset(){
+  if(delArmTimer){ clearTimeout(delArmTimer); delArmTimer = null; }
+  if(delArmBtn && delArmBtn.isConnected){
+    delArmBtn.classList.remove('armed');
+    delArmBtn.textContent = '✕';
+    delArmBtn.setAttribute('title', '删除');
+  }
+  delArmBtn = null; delArmId = null;
+}
+function delArmStart(btn, id){
+  delArmReset();
+  delArmBtn = btn; delArmId = id;
+  btn.classList.add('armed');
+  btn.textContent = '删除';
+  btn.setAttribute('title', '再点一次确认删除（5 秒后自动撤回）');
+  delArmTimer = setTimeout(delArmReset, 5000);
+}
+function cloudDelNow(id){
   var rc = cloudFind(id);
   var nm = (rc && rc.data && rc.data.name) || id;
-  cloudDelTarget = id;
-  $('delName').textContent = '「' + nm + '」';
-  $('delMask').classList.add('show');
-}
-function cloudDelHide(ev){
-  if(ev && ev.target && ev.target !== ev.currentTarget) return;
-  $('delMask').classList.remove('show');
-  cloudDelTarget = null;
-}
-function cloudDelOk(){
-  var id = cloudDelTarget;
-  if(!id) return;
-  var rc = cloudFind(id);
-  var nm = (rc && rc.data && rc.data.name) || id;
+  delArmReset();
   cloudHttp('push', 'POST', { records:[{ id:id, v:Date.now(), data:null, del:true }] })
     .then(function(){
-      $('delMask').classList.remove('show');
-      cloudDelTarget = null;
       toast('已删除「' + nm + '」');
       cloudRefresh();
     })
@@ -997,12 +994,16 @@ document.addEventListener('click', function(e){
   var btn = e.target && e.target.closest ? e.target.closest('#cloudList button[data-act]') : null;
   if(btn){
     var id = btn.getAttribute('data-id'), act = btn.getAttribute('data-act');
-    if(act === 'imp') cloudImport(id);
-    else if(act === 'ren') cloudRename(id);
-    else if(act === 'del') cloudDel(id);
+    if(act === 'imp'){ delArmReset(); cloudImport(id); }
+    else if(act === 'ren'){ delArmReset(); cloudRename(id); }
+    else if(act === 'del'){
+      if(delArmBtn === btn && delArmId === id) cloudDelNow(id);   // 第二段：真正删除
+      else delArmStart(btn, id);                                  // 第一段：按钮转红底「删除」
+    }
     e.stopPropagation();
     return;
   }
+  delArmReset();   // 点别处撤回首段确认
   if(e.target.closest && !e.target.closest('.dd')){
     document.querySelectorAll('.dd-menu.show').forEach(function(x){ x.classList.remove('show'); });
   }
@@ -1014,7 +1015,7 @@ document.addEventListener('keydown', function(e){
     // 模糊弹窗逐层关闭：先子弹窗，再主弹窗
     if($('askMask').classList.contains('show')){ askHide(); return; }
     if($('renameMask').classList.contains('show')){ cloudRenameHide(); return; }
-    if($('delMask').classList.contains('show')){ cloudDelHide(); return; }
+    if(delArmBtn){ delArmReset(); return; }
     if($('cloudMask').classList.contains('show')){ cloudClose(); return; }
   }
 });
