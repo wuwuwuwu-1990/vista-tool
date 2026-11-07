@@ -402,7 +402,7 @@
         <h2>全部工具<span class="sec-count">共 22 款</span></h2>
       </div>
       <section id="cat-zj" class="cat-sec">
-        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">6 款</span></div>
+        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">7 款</span></div>
         <div class="grid">
       <a class="card" href="cqcost428.html" style="--g1:#f59e0b;--g2:#f97316;--gs:rgba(245,158,11,.5);--a1:#f59e0b;--a2:#f97316;">
       <div class="top">
@@ -486,6 +486,20 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(26,86,219,.4);--cc:#7cb0ff;--cbg:rgba(26,86,219,.12)">v1.0.16</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">钢筋算量</span>
+      </div>
+    </a>
+      <a class="card" href="poleprice.html" style="--g1:#17568f;--g2:#2563eb;--gs:rgba(23,86,143,.5);--a1:#3b82f6;--a2:#60a5fa;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.4v17.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M5.6 7.6h12.8M7.2 12h9.6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="6.1" cy="7.6" r="1.05" fill="#fff"/><circle cx="17.9" cy="7.6" r="1.05" fill="#fff"/><circle cx="7.7" cy="12" r=".95" fill="#fff" opacity=".85"/><circle cx="16.3" cy="12" r=".95" fill="#fff" opacity=".85"/><path d="M4.2 20.6h15.6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".6"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>电杆杆上设备材料单价计算器</h3>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">锥形水泥杆杆上设备材料组价：直线／耐张／转角／终端四种杆型内置模板，杆型卡片右上角 i 键调出 10kV 单回组装分解图与单基构件用量清单；热镀锌钢材价一处改价、型钢按理论重量自动算材料费，紧固件速典选规格即带名称与单价；单价核算区支持条目新增／复制／插入／上下移动，登记成清单后一键导出 Excel（清单汇总＋材料明细）。☁️ 云端备份整套工程命名存档、跨设备载入继续编辑，另备 JSON 离线导出导入。苹果字体 · 单文件离线。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(37,99,235,.42);--cc:#93c5fd;--cbg:rgba(37,99,235,.12)">v1.0.9</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">材料组价</span>
       </div>
     </a>
         </div>
@@ -1240,6 +1254,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-07', t:'新增：电杆杆上设备材料单价计算器 v1.0.9（锥形水泥杆杆上设备材料组价上线——直线／耐张／转角／终端四杆型模板，杆型卡片右上角 i 键调出 10kV 单回组装分解图与单基构件用量清单；热镀锌钢材价一处改价即联动型钢理论重量自动算材料费，紧固件速典选规格自动带出名称与单价；单价核算区支持条目新增／复制／插入／上下移动与二段确认删除，登记成清单后一键导出 Excel（清单汇总＋材料明细，列宽自适应）；☁️ 云端备份整套工程命名存档、跨设备载入继续编辑，可重命名／删除，另备本地 JSON 导出导入离线搬运。苹果字体 · 单文件离线）'},
   {d:'2026-11-07', t:'升级：施工用电负荷计算书 v1.0.5（云端计算书删除改为两段确认 —— 列表行尾按钮由文字「删除」改为「✕」，第一次点击后按钮变红底白字「删除」并带呼吸光晕，5 秒内再点一次才真正删除，超时或点别处／按 Esc 自动撤回，避免误删；原删除确认弹窗随之取消，弹窗层级更清爽）'},
   {d:'2026-11-07', t:'升级：混凝土蓄水池CAD自动成图系统 v1.0.31（拖动与缩放回到 v1.0.29 手感，撤销 v1.0.30 的交互分级渲染）——v1.0.30 试过拖动／滚轮期间把土纹换成淡色底块、停手 140 ms 再恢复，以及只重绘被操作的视口、滚轮按滚动量连续缩放，帧时间确实从 12.9 ms 降到 1.1 ms，但实机观感反而更不自然（填充纹理忽隐忽现、缩放幅度也不是原来那一档）；现整版回退：拖动与缩放期间照常绘制完整土纹与骨料纹理、缩放回到固定 1.12 倍每格、恢复重绘两个视口；仅保留两处不影响观感的小优化（状态栏与坐标值不变不写 DOM、画布屏幕矩形缓存），出图与 DXF 导出与 v1.0.29 逐像素一致）'},
   {d:'2026-11-07', t:'升级：混凝土蓄水池CAD自动成图系统 v1.0.30（拖拽缩放再提速，单视口单帧 12.9 ms → 1.1 ms——交互分级渲染：剖面实测土纹与骨料纹理占光栅化时间九成四，拖动与滚轮期间改为淡色底块（区域一眼可辨、只是不描上千段虚线），停手 140 ms 后自动恢复完整纹理；平移缩放只重绘被操作的那个视口，另一视口像素原样保留不再整块清屏；滚轮改为按滚动量连续取值（鼠标一格约 1.17 倍、触控板平滑微缩），不再固定 1.12 倍一跳；交互期间不画网格、状态栏数值与坐标仅在变化时写 DOM、画布屏幕矩形缓存避免每帧强制布局。实测 1680×950 dpr2 剖面单视口 12.9 ms 降至 1.1 ms、拖动一帧 17.5 ms 降至 6.5 ms，精绘图与上版逐像素一致、DXF 同为 62327 B）'},
@@ -1383,7 +1398,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
