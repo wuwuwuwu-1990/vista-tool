@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="%230d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="%238ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="%234ea1e8"/></svg>'>
-<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.30</title>
+<title>混凝土蓄水池CAD自动成图系统 Cisterna v1.0.31</title>
 <style>
 /* ============ 设计令牌（Murus 体系） ============ */
 :root{
@@ -201,7 +201,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
   <div class="brand">
     <svg class="logo" viewBox="0 0 36 36"><rect x="1.5" y="1.5" width="33" height="33" rx="8" fill="#0d3f6e"/><path d="M7 13h22v10a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="none" stroke="#8ec3f5" stroke-width="2.4"/><path d="M6 24.5h24" stroke="#8ec3f5" stroke-width="2.4"/><path d="M18 6.5c2.6 3 4 5 4 6.9a4 4 0 1 1-8 0c0-1.9 1.4-3.9 4-6.9z" fill="#4ea1e8"/></svg>
     <div>
-      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.30</span></h1>
+      <h1>混凝土蓄水池CAD自动成图系统 <em>CISTERNA</em><span class="vbadge" id="hdVer">v1.0.31</span></h1>
     </div>
   </div>
   <!-- 顶栏实时显示几何校核与计算结果（v1.0.26）：悬停校核徽标看完整说明 -->
@@ -383,7 +383,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
     <div class="sec">
       <div class="sec-h"><span class="bar"></span><h2>更新日志</h2></div>
       <ul class="chlog">
-        <li><b>v1.0.30</b><b>拖拽与缩放再提速：交互分级渲染（单视口单帧 12.9 ms → 1.1 ms）</b>：① <b>图案填充分级（LOD）</b>——剖面实测土纹/骨料纹理占光栅化时间的 <b>94%</b>，现将拖动、滚轮期间改为<b>淡色底块</b>（区域一眼可辨是土还是混凝土，但不再画上千段虚线），停止操作 <b>140 ms 后自动恢复完整纹理</b>，与地图/CAD 软件交互期简化显示的做法一致；② <b>只重绘被操作的那个视口</b>——平移/缩放只改一个视口，另一个视口的像素原样保留，不再整块画布清屏重画；③ <b>滚轮缩放改为按滚动量连续取值</b>（鼠标一格约 1.17 倍，触控板小步长平滑微缩），不再是固定 1.12 倍一跳；④ 交互期间不画绘图网格，状态栏百分比与鼠标坐标<b>值不变就不写 DOM</b>，画布屏幕矩形<b>缓存</b>（避免每帧强制同步布局）。实测 1680×950 / DPR 2：剖面单视口重绘 <b>12.9 ms → 1.1 ms</b>，拖动一帧总耗时 <b>17.5 ms → 6.6 ms</b>；<b>出图与 DXF 导出完全未变</b>——精绘图与 v1.0.29 逐像素比对 <b>0 差异</b>，DXF 同为 62327 B。</li>
+        <li><b>v1.0.31</b><b>拖动与缩放回到 v1.0.29 的手感（撤销 v1.0.30 的交互分级渲染）</b>：v1.0.30 试过「拖动/滚轮期间把土纹换成淡色底块、停手 140 ms 再恢复」以及「只重绘被操作的那个视口」「滚轮按滚动量连续缩放」，实测帧时间确实从 12.9 ms 降到 1.1 ms，但<b>实机观感反而更不自然</b>（拖动时填充纹理忽隐忽现、缩放幅度也不是原来那一档）。现按你的要求整版回退：<b>拖动与缩放期间照常绘制完整土纹与骨料纹理</b>，不再有淡色底块与「纹理恢复」过程；<b>缩放比例回到固定 1.12 倍/格</b>；<b>恢复重绘两个视口</b>。仅保留两处不影响任何观感的小优化——状态栏百分比 / 出图比例 / 鼠标坐标 / 光标样式「值不变就不写 DOM」，以及画布屏幕矩形缓存（避免每帧强制同步布局）。<b>出图与 DXF 导出与 v1.0.29 完全一致</b>（逐像素比对 0 差异）。</li>
         <li><b>v1.0.29</b><b>平移缩放性能优化（单帧 30.4 ms → 5.2 ms）</b>：① 图案填充重写——原来每条平行线都从「画布原点」向两端各延伸一整条对角线，一根线就横穿整屏、虚线节拍上千段，且逐线 <code>beginPath</code> + <code>stroke</code>；现改为只画到<b>填充区域在该斜线方向上的投影区间</b>，并把<b>同相位的平行线合并成一条路径一次描边</b>；② 拖拽 / 滚轮渲染改为<b>合并到下一个动画帧</b>（一帧内几十次鼠标事件只重绘一次），分隔带拖动同样合并；③ 去掉重复的全画布填充（清屏 + 灰底 + 每视口白底三次全屏填充，现一次 clearRect，画布白底交由 CSS），并把画布 DPR 上限锁在 2，避免 300% 缩放时像素爆炸。实测单帧耗时 30.4 ms → <b>5.2 ms</b>（1600 宽 dpr1.25：28.2 ms → 6.3 ms；1920 宽 dpr2：103 ms → 13.8 ms），拖拽与缩放明显顺滑；<b>出图观感、DXF 导出与所有参数逻辑均未改变</b>（填充纹理相位有亚像素级微移）。</li>
         <li><b>v1.0.28</b><b>DXF 块名加随机英文数字后缀</b>：水管闸阀块的块名由固定「水管闸阀」改为<b>「水管闸阀_XXXX」</b>（XXXX = 每次导出随机生成的 4 位大写英文 + 数字，如 <code>水管闸阀_K7Q2</code>），<b>BLOCK_RECORD / BLOCK / INSERT 三处名称一致</b>，块名因此在本文件内与跨文件都唯一——多张图纸插入同一张 DXF 时不会因重名互相覆盖或被 CAD 自动改名。图层名仍为「水管闸阀」（青 4），点选仍整块选中、可整块开关。</li>
         <li><b>v1.0.27</b><b>修复剖面图右侧素土填充在屏幕上看不见（需放大数倍才出现）</b>：土纹每条斜线原本以「离画布原点的最近点」为基准、向两侧各画一个包围盒对角线那么长；填充区域越靠画布右侧/下方，基准点离区域越远，线段根本够不到 ⇒ 右侧土体整条空白，放大后线段变长才勉强露头。<b>现改为沿斜线方向取覆盖整块画布的全局基准区间</b>，任何位置、任何缩放都完整铺满；且区间端点与区域无关，<b>左右土体与底板下土体的纹理相位严格一致、接缝处不错行</b>。混凝土（AR-CONC）骨料短划同一处隐患一并修正。</li>
@@ -428,7 +428,7 @@ table.rec tr.tot td{background:var(--gold-soft);font-weight:700;color:var(--warn
         <div>
           <h4>混凝土蓄水池CAD自动成图系统</h4>
           <p>Cisterna · Concrete Water Tank Drawing Generator</p>
-          <span class="ver">v1.0.30</span>
+          <span class="ver">v1.0.31</span>
         </div>
       </div>
       <b style="color:var(--ink)">功能</b>
@@ -1349,8 +1349,8 @@ const COL = {
   '水管闸阀':'#0f9b8e'
 };
 let W = 0, H = 0;
-/* ⚡ v1.0.30：缓存画布的屏幕矩形。getBoundingClientRect() 会强制同步布局，
-   mousemove 每帧调一次（页面上刚写过状态栏文本 → 布局脏）会明显拖慢交互。 */
+/* ⚡ v1.0.31：缓存画布屏幕矩形。getBoundingClientRect() 会强制同步布局（页面上刚写过
+   状态栏文本 → 布局脏），mousemove 每帧调一次会拖慢拖拽手感；矩形在 resize / 滚动时失效。 */
 let _cvRect = null;
 function cvBox(){ return _cvRect || (_cvRect = cv.getBoundingClientRect()); }
 window.addEventListener('resize', ()=>{ _cvRect = null; });
@@ -1386,11 +1386,10 @@ function drawGridIn(rc, cam){
   ctx.restore();
 }
 
-const HATCHED_LAYERS = new Set(['混凝土填充','素土填充']);
 function drawCmds(list, c2d, w, h, cam, scaleRef){
   const X = x => w/2 + (x - cam.cx)*cam.scale;
   const Y = y => h/2 + (y - cam.cy)*cam.scale;
-  const hatched = HATCHED_LAYERS;
+  const hatched = new Set(['混凝土填充','素土填充']);
   list.forEach(c=>{
     const col = COL[c.layer] || '#16202e';
     if(c.t==='hatch'){
@@ -1407,22 +1406,9 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
          缩放变大）才勉强露头。现改为沿 d 取全局固定参数区间 [-U, +U]（U = 画布对角线），
          任何落在画布内的点都被覆盖；区间端点与区域无关，跨区域纹理相位严格一致、无缝。 */
       const sp = (c.sp || 0.09)*cam.scale;
+      if(sp < 2.0) return;                        // 缩得太小，纹理已不可辨，直接不画（省渲染）
       const isEarth = c.pat === 'EARTH';
       const pts = c.pts.map(p=>({x:X(p.x), y:Y(p.y)}));
-      /* ⚡ v1.0.30：交互期（LOD=1）土纹是整张图最贵的一笔（剖面实测占 94% 光栅化时间），
-         拖动 / 缩放时改为「淡色底 + 不描纹理」——区域仍然一眼可辨是土还是混凝土，
-         但不再有上千段虚线的光栅化开销；停手 140 ms 后自动恢复完整纹理。 */
-      if(LOD > 0){
-        c2d.save();
-        c2d.beginPath();
-        pts.forEach((p,i)=> i ? c2d.lineTo(p.x,p.y) : c2d.moveTo(p.x,p.y));
-        c2d.closePath();
-        c2d.fillStyle = isEarth ? 'rgba(157,138,88,.13)' : 'rgba(119,135,155,.15)';
-        c2d.fill();
-        c2d.restore();
-        return;
-      }
-      if(sp < 2.0) return;                        // 缩得太小，纹理已不可辨，直接不画（省渲染）
       c2d.save();
       c2d.beginPath();
       pts.forEach((p,i)=> i ? c2d.lineTo(p.x,p.y) : c2d.moveTo(p.x,p.y));
@@ -1520,8 +1506,6 @@ function drawCmds(list, c2d, w, h, cam, scaleRef){
       c2d.save();
       c2d.translate(X(c.x), Y(c.y));
       if(c.rot) c2d.rotate(c.rot*DEG);
-      /* ⚠️ 字体缓存不要做：c2d.save()/restore() 会把 font 恢复到栈里的旧值，
-         用「上次设过就不再设」的缓存会让文字落到错的字号上（曾出现亚像素级渲染差）。 */
       c2d.font = `${c.layer==='尺寸标注'?400:500} ${fs}px "仿宋","FangSong","STFangsong","SimSun","Songti SC",serif`;
       c2d.textAlign = c.align==='right' ? 'right' : (c.align==='center' ? 'center' : 'left');
       c2d.textBaseline = 'alphabetic';
@@ -1577,44 +1561,18 @@ function drawChip(rc, key){
   ctx.fillText(txt, x+8, y+h/2+0.5);
   ctx.restore();
 }
-/* ⚡ v1.0.30 交互分级（LOD）：拖动 / 滚轮期间不追求满配画质，只求跟手；
-   停止操作 140 ms 后自动回到精绘。这是地图与 CAD 软件通用的做法。
-   LOD 0 = 精绘（土纹完整、两个视口全画）
-   LOD 1 = 交互（土纹抽稀到约 1/3、只重绘被操作的那个视口） */
-let LOD = 0, _lodTimer = 0;
-function touchLOD(){
-  LOD = 1;
-  clearTimeout(_lodTimer);
-  _lodTimer = setTimeout(()=>{        // 停手后补一张精绘图
-    LOD = 0;
-    render();
-  }, 140);
-}
-function endLOD(){
-  clearTimeout(_lodTimer);
-  if(LOD){ LOD = 0; render(); }
-}
-
-function render(opt){
+function render(){
   const g = state.g, scene = state.scene;
-  const only = opt && opt.only;       // 只重绘某个视口（另一个视口像素原样保留）
   /* ⚡ v1.0.29：两个视口 + 分隔带正好铺满整块画布，故一次性白底铺满即可，
      去掉原先「clearRect 清屏 + 灰底全屏填充 + 每视口白底填充」的三次全画布填充，
-     高 DPI（dpr 2）下省掉近一半填充率开销。
-     ⚡ v1.0.30：拖拽 / 缩放只动一个视口时，只清那一块矩形，另一个视口一个像素都不碰。 */
-  if(only){
-    const r0 = viewRect(only);
-    ctx.clearRect(r0.x, r0.y, r0.w, r0.h);
-  }else{
-    ctx.clearRect(0, 0, W, H);      // 画布 CSS 底色为白，clear 比 fillRect 省一次混合
-  }
+     高 DPI（dpr 2）下省掉近一半填充率开销。 */
+  ctx.clearRect(0, 0, W, H);        // 画布 CSS 底色为白，clear 比 fillRect 省一次混合
   VKEYS.forEach(key=>{
-    if(only && only !== key) return;
     const rc = viewRect(key), v = state.view[key];
     ctx.save();
     ctx.beginPath(); ctx.rect(rc.x, rc.y, rc.w, rc.h); ctx.clip();
     ctx.translate(rc.x, rc.y);
-    if(state.grid && LOD === 0) drawGridIn(rc, v.cam);   // v1.0.30：交互期不画网格（每帧上百条线）
+    if(state.grid) drawGridIn(rc, v.cam);
     if(g && scene && v.cmds && v.cmds.length) drawCmds(v.cmds, ctx, rc.w, rc.h, v.cam);
     ctx.restore();
     ctx.strokeStyle = state.active===key ? '#9cb8d8' : '#ccd8e6';
@@ -1622,43 +1580,35 @@ function render(opt){
     ctx.strokeRect(rc.x+0.5, rc.y+0.5, rc.w-1, rc.h-1);
     drawChip(rc, key);
   });
-  /* 分隔带 + 拖拽手柄（只在整体重绘时画） */
-  if(!only){
-    const a = viewRect('plan');
-    const gy = a.y + a.h;
-    ctx.fillStyle = '#e4eaf2'; ctx.fillRect(0, gy, W, VGUT);
-    ctx.strokeStyle = '#cdd8e6'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, gy+0.5); ctx.lineTo(W, gy+0.5);
-    ctx.moveTo(0, gy+VGUT-0.5); ctx.lineTo(W, gy+VGUT-0.5); ctx.stroke();
-    const hx = W/2, hy = gy + VGUT/2;
-    ctx.fillStyle = '#b9c7da';
-    for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.arc(hx + i*7, hy, 1.6, 0, Math.PI*2); ctx.fill(); }
-  }
-  /* 状态栏（值不变就不写 DOM，避免每帧强制样式重算） */
+  /* 分隔带 + 拖拽手柄 */
+  const a = viewRect('plan');
+  const gy = a.y + a.h;
+  ctx.fillStyle = '#e4eaf2'; ctx.fillRect(0, gy, W, VGUT);
+  ctx.strokeStyle = '#cdd8e6'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, gy+0.5); ctx.lineTo(W, gy+0.5);
+  ctx.moveTo(0, gy+VGUT-0.5); ctx.lineTo(W, gy+VGUT-0.5); ctx.stroke();
+  const hx = W/2, hy = gy + VGUT/2;
+  ctx.fillStyle = '#b9c7da';
+  for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.arc(hx + i*7, hy, 1.6, 0, Math.PI*2); ctx.fill(); }
+  /* 状态栏 */
   if(scene){
     const v = state.view[state.active];
-    const z = Math.round(v.cam.scale/(v.fit||v.cam.scale)*100) + '%';
-    const sc = '1:' + scene.denom;
-    const e1 = $('stZoom'), e2 = $('stScale');
-    if(e1.textContent !== z) e1.textContent = z;
-    if(e2.textContent !== sc) e2.textContent = sc;
+    /* ⚡ v1.0.31：值不变就不写 DOM——每帧 textContent 赋值会让样式/布局在下一帧变脏 */
+    const _z = Math.round(v.cam.scale/(v.fit||v.cam.scale)*100) + '%';
+    const _s = '1:' + scene.denom;
+    const _e1 = $('stZoom'), _e2 = $('stScale');
+    if(_e1.textContent !== _z) _e1.textContent = _z;
+    if(_e2.textContent !== _s) _e2.textContent = _s;
   }
 }
 
 /* ⚡ v1.0.29：渲染调度。鼠标拖拽 / 滚轮一帧内可能触发几十次事件，原实现每次都同步
    render 一遍（一次全量重绘），帧率被事件频率拖死。改为合并到下一个动画帧统一重绘，
-   同一帧内多次 pan/zoom 只画一次，手感与帧率对齐。
-   ⚡ v1.0.30：可指定只重绘哪个视口（传 'plan' / 'sec'）；不传则整块重绘。 */
-let _rafId = 0, _rafOnly = null, _rafAll = false;
-function scheduleRender(only){
-  if(only) _rafOnly = only; else _rafAll = true;
+   同一帧内多次 pan/zoom 只画一次，手感与帧率对齐。 */
+let _rafId = 0;
+function scheduleRender(){
   if(_rafId) return;
-  _rafId = requestAnimationFrame(()=>{
-    _rafId = 0;
-    const all = _rafAll, o = _rafOnly;
-    _rafAll = false; _rafOnly = null;
-    render((all || !o) ? null : { only: o });
-  });
+  _rafId = requestAnimationFrame(()=>{ _rafId = 0; render(); });
 }
 
 function fitView(){
@@ -1728,7 +1678,6 @@ function updateSide(g, scene){
 
 /* ================= 主流程 ================= */
 function refresh(keepView){
-  clearTimeout(_lodTimer); LOD = 0;      // v1.0.30：参数改动后必须精绘
   const g = (()=>{ try { return buildGeom(); } catch(e){ toast(String(e), 'err'); return null; } })();
   if(!g) return;
   state.g = g;
@@ -2156,7 +2105,6 @@ function exportDXF(){
 /* ================= PNG 导出 ================= */
 function exportPNG(){
   if(!state.scene){ toast('暂无可导出的图形', 'warn'); return; }
-  clearTimeout(_lodTimer); LOD = 0;      // v1.0.30：导出必须走精绘（不能是交互期的淡色底）
   const sel = parseInt($('e_res').value,10);
   const targetW = sel===1 ? 2000 : sel===2 ? 3200 : 4800;
   const bb = state.scene.sheetBB;
@@ -2208,24 +2156,19 @@ function bindUI(){
     const lx = mx - rc.x, ly = my - rc.y;
     const wx = v.cam.cx + (lx - rc.w/2)/v.cam.scale;
     const wy = v.cam.cy + (ly - rc.h/2)/v.cam.scale;
-    /* ⚡ v1.0.30：原来按 deltaY 正负固定 1.12 倍，鼠标一格与触控板一次滑动缩放幅度
-       完全一样（触控板连续几十次事件 → 瞬间缩到底、很"跳"）。改为按滚动量连续取值：
-       鼠标一格（deltaY=±100）约 1.17 倍，触控板小步长则平滑微缩。 */
-    const d = e.deltaMode === 1 ? e.deltaY*33 : (e.deltaMode === 2 ? e.deltaY*400 : e.deltaY);
-    const k = Math.max(0.6, Math.min(1.6, Math.exp(-d*0.00155)));
+    const k = e.deltaY < 0 ? 1.12 : 1/1.12;
     const ns = Math.max(v.fit*0.15, Math.min(v.fit*40, v.cam.scale*k));
     v.cam.scale = ns;
     v.cam.cx = wx - (lx - rc.w/2)/ns;
     v.cam.cy = wy - (ly - rc.h/2)/ns;
-    touchLOD();
-    scheduleRender(key);
+    scheduleRender();
   }, {passive:false});
 
   cv.addEventListener('mousedown', e=>{
     const r = cvBox();
     const mx = e.clientX - r.left, my = e.clientY - r.top;
     const gy = viewRect('plan').y + viewRect('plan').h;
-    if(my >= gy-3 && my <= gy+VGUT+3){ splitDrag = true; document.body.style.cursor='row-resize'; touchLOD(); return; }
+    if(my >= gy-3 && my <= gy+VGUT+3){ splitDrag = true; document.body.style.cursor='row-resize'; return; }
     state.active = paneAt(my);
     dragging = true; moved = false; lastX = e.clientX; lastY = e.clientY;
     cv.classList.add('drag');
@@ -2236,7 +2179,6 @@ function bindUI(){
       const r = cvBox();
       const my = Math.max(0, Math.min(H, e.clientY - r.top));
       state.vpRatio = Math.min(0.8, Math.max(0.2, (my - VGUT/2) / Math.max(1,(H - VGUT))));
-      touchLOD();
       fitView();
       return;
     }
@@ -2247,8 +2189,7 @@ function bindUI(){
       v.cam.cx -= dx/v.cam.scale;
       v.cam.cy -= dy/v.cam.scale;
       lastX = e.clientX; lastY = e.clientY;
-      touchLOD();                        // v1.0.30：拖动期间走精简绘制，且只重绘被拖的那个视口
-      scheduleRender(state.active);
+      scheduleRender();
       return;
     }
     const r = cvBox();
@@ -2256,16 +2197,16 @@ function bindUI(){
       const key = paneAt(e.clientY - r.top), rc = viewRect(key), v = state.view[key];
       const wx = v.cam.cx + (e.clientX-r.left - rc.x - rc.w/2)/v.cam.scale;
       const wy = v.cam.cy + (e.clientY-r.top - rc.y - rc.h/2)/v.cam.scale;
-      const sxy = fmt(wx,3) + ', ' + fmt(wy,3);
-      const eXY = $('stXY');
-      if(eXY.textContent !== sxy) eXY.textContent = sxy;   // 值不变不写 DOM
+      const _xy = fmt(wx,3) + ', ' + fmt(wy,3);
+      const _exy = $('stXY');
+      if(_exy.textContent !== _xy) _exy.textContent = _xy;
       const gy = viewRect('plan').y + viewRect('plan').h;
       const my = e.clientY - r.top;
-      const cur = (my >= gy-3 && my <= gy+VGUT+3) ? 'row-resize' : 'default';
-      if(cv.style.cursor !== cur) cv.style.cursor = cur;
+      const _cur = (my >= gy-3 && my <= gy+VGUT+3) ? 'row-resize' : 'default';
+      if(cv.style.cursor !== _cur) cv.style.cursor = _cur;
     }
   });
-  window.addEventListener('mouseup', ()=>{ dragging = false; splitDrag = false; document.body.style.cursor=''; cv.classList.remove('drag'); endLOD(); });
+  window.addEventListener('mouseup', ()=>{ dragging = false; splitDrag = false; document.body.style.cursor=''; cv.classList.remove('drag'); });
   cv.addEventListener('dblclick', e=>{
     const r = cvBox();
     state.active = paneAt(e.clientY - r.top);
@@ -2278,7 +2219,7 @@ function bindUI(){
   $('tbIn').onclick = ()=>{ zoomAt(1.25); };
   $('tbOut').onclick = ()=>{ zoomAt(1/1.25); };
   /* 网格开关：工具栏按钮与「绘图网格」复选框双向同步，默认关闭（v1.0.26） */
-  const setGrid = on => { state.grid = !!on; $('tbGrid').classList.toggle('on', state.grid); $('o_grid').checked = state.grid; clearTimeout(_lodTimer); LOD = 0; render(); };
+  const setGrid = on => { state.grid = !!on; $('tbGrid').classList.toggle('on', state.grid); $('o_grid').checked = state.grid; render(); };
   $('tbGrid').onclick = ()=> setGrid(!state.grid);
   $('o_grid').addEventListener('change', ()=> setGrid($('o_grid').checked));
 
@@ -2295,8 +2236,7 @@ function bindUI(){
 function zoomAt(k){
   const v = state.view[state.active];
   v.cam.scale = Math.max(v.fit*0.15, Math.min(v.fit*40, v.cam.scale*k));
-  clearTimeout(_lodTimer); LOD = 0;
-  render({ only: state.active });        // v1.0.30：只重绘当前视口，另一视口像素不动
+  render();
 }
 function attachResizer(el, prop, min, max, dir){
   el.addEventListener('mousedown', e=>{
