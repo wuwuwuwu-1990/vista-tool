@@ -287,7 +287,7 @@
     max-height:min(50vh,400px);
   }
   .cl-row{
-    display:flex;align-items:center;gap:10px;padding:7px 11px;
+    display:flex;align-items:center;gap:10px;padding:6px 11px;
     border-bottom:1px solid var(--line2);font-size:12.5px;
   }
   .cl-row:last-child{border-bottom:none;}
@@ -298,9 +298,12 @@
   }
   .cl-meta{
     font-size:11px;color:#8b9aab;white-space:nowrap;
-    font-variant-numeric:tabular-nums;flex:none;
+    font-variant-numeric:tabular-nums;flex:none;text-align:right;
   }
-  .cl-meta.mny{color:#0b5a4f;font-weight:600;}
+  .cl-meta.n{min-width:42px;}
+  .cl-meta.mny{color:#0b5a4f;font-weight:600;min-width:72px;}
+  .cl-meta.tm{min-width:74px;}
+  .cloud-save .cs-lb{font-size:12px;color:#5b6673;white-space:nowrap;flex:none;}
   .cl-act{display:flex;gap:4px;flex:none;}
   .cl-ren{
     flex:1;min-width:0;border:1px solid #9dc0e0;border-radius:3px;padding:4px 8px;
@@ -565,7 +568,8 @@
     <div class="modal-bd">
       <div class="cloud-list" id="cloudList"><div class="cl-empty">正在连接云端…</div></div>
       <div class="cloud-save">
-        <input id="cloudName" type="text" maxlength="40" placeholder="备份名称，如：XX线路-10kV单回锥形直线杆组价">
+        <label class="cs-lb" for="cloudName">备份名称</label>
+        <input id="cloudName" type="text" maxlength="40" placeholder="如：XX线路-10kV单回锥形直线杆组价">
         <button class="btn primary" data-act="cloud-save">☁ 备份当前工程</button>
       </div>
       <div class="cloud-note">
@@ -2414,9 +2418,12 @@ function cloudHttp(act, method, body){
     return r.json();
   }).catch(err=>{
     if(timer) clearTimeout(timer);
-    const aborted = err && (err.name === 'AbortError' || /abort/i.test(String(err.message||'')));
-    throw new Error(aborted ? '连接云端超时，请检查网络后重试'
-                            : ('云端连接失败：' + (err && err.message ? err.message : err)));
+    const raw = String((err && err.message) || err || '');
+    const aborted = (err && err.name === 'AbortError') || /abort/i.test(raw);
+    const netFail = /Failed to fetch|Load failed|NetworkError|net::|ERR_/i.test(raw);
+    throw new Error(aborted ? '连接云端超时（12 秒无响应），请检查网络后重试'
+                  : netFail ? '网络不通或云端服务未响应'
+                            : ('云端连接失败：' + raw));
   });
 }
 function cloudTime(v){
@@ -2436,6 +2443,11 @@ function cloudSnap(){
     draft: state.draft ? JSON.parse(JSON.stringify(state.draft)) : null,
     sel: state.sel || null
   };
+}
+/* 服务端按 v 取最新：本机时钟偏慢时也必须比已有版本大，否则写不进 */
+function cloudNextV(id){
+  const hit = cloudCache.find(r=>r.id === id);
+  return Math.max(Date.now(), ((hit && hit.v) || 0) + 1);
 }
 function cloudSum(d){
   const its = (d && d.items) || [];
@@ -2493,9 +2505,9 @@ function cloudRender(){
     }
     return '<div class="cl-row" data-rid="' + esc(r.id) + '">' +
       '<span class="cl-nm" title="' + esc(nm) + '">' + esc(nm) + '</span>' +
-      '<span class="cl-meta">' + (sm.n ? sm.n + ' 条' : '空') + '</span>' +
+      '<span class="cl-meta n">' + (sm.n ? sm.n + ' 条' : '空') + '</span>' +
       '<span class="cl-meta mny">' + m2(sm.m) + '</span>' +
-      '<span class="cl-meta">' + cloudTime(r.v) + '</span>' +
+      '<span class="cl-meta tm">' + cloudTime(r.v) + '</span>' +
       '<span class="cl-act">' +
         '<button class="btn primary mini" data-act="cloud-load" data-id="' + esc(r.id) + '">载入</button>' +
         '<button class="btn mini" data-act="cloud-ren" data-id="' + esc(r.id) + '">重命名</button>' +
@@ -2552,7 +2564,7 @@ function cloudSave(){
   data.name = name;
   if(btn){ btn.disabled = true; btn.textContent = '保存中…'; }
   const done = ()=>{ if(btn){ btn.disabled = false; btn.textContent = '☁ 备份当前工程'; } };
-  cloudHttp('push', 'POST', { records: [{ id:name, v:Date.now(), data:data, del:false }] })
+  cloudHttp('push', 'POST', { records: [{ id:name, v:cloudNextV(name), data:data, del:false }] })
     .then(()=>{
       done();
       try{ localStorage.setItem(CLOUD_LAST, JSON.stringify({ name:name, ts:Date.now() })); }catch(e){}
@@ -2573,7 +2585,7 @@ function cloudDel(id){
   const r = cloudCache.find(x=>x.id === id);
   const nm = (r && r.data && r.data.name) || id;
   if(!confirm('确认删除云端备份「' + nm + '」？\n删除后其他设备也无法再载入。')) return;
-  cloudHttp('push', 'POST', { records: [{ id:id, v:Date.now(), data:null, del:true }] })
+  cloudHttp('push', 'POST', { records: [{ id:id, v:cloudNextV(id), data:null, del:true }] })
     .then(()=>{ toast('已删除「' + nm + '」'); cloudPull(); })
     .catch(e=>toast(e.message || '删除失败'));
 }
@@ -2588,7 +2600,7 @@ function cloudRenOk(id){
   const hit = cloudCache.find(r=>r.id === id);
   const data = JSON.parse(JSON.stringify((hit && hit.data) || {}));
   data.name = nn;
-  const v = Date.now();
+  const v = Math.max(Date.now(), ((hit && hit.v) || 0) + 1);
   cloudHttp('push', 'POST', { records: [
     { id:nn, v:v,     data:data, del:false },
     { id:id, v:v + 1, data:null, del:true  }
