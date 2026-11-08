@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>公路组价价构引擎RateStruct Highway V1.0.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23475569'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#f3f7f5; --card:#ffffff; --ink:#1c2b26; --sub:#63796f;
+    --line:#e3ece7; --brand:#10714f; --brand2:#2f9c76;
+    --ok:#1f9d55; --danger:#e0533d; --chip:#e8f3ee;
+    --radius:14px; --shadow:0 6px 24px rgba(18,52,40,.08);
+    /* 统一字体：苹果系统字体优先（SF Pro / 苹方），非苹果环境逐级回落 */
+    --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+           "PingFang SC", "Hiragino Sans GB", "Helvetica Neue",
+           "Microsoft YaHei", "微软雅黑", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0 auto; max-width:2080px; font-family:var(--font);
+    background:var(--bg); color:var(--ink); line-height:1.6; padding:24px;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility; font-kerning:normal;
+  }
+  /* 表单控件默认不继承字体，统一锁定为同一字体，避免个别控件回落成系统默认字体 */
+  button, input, select, textarea, optgroup, option, label{
+    font-family:var(--font); letter-spacing:inherit; font-kerning:inherit;
+  }
+  h1{font-size:22px; margin:0 0 4px;}
+  .desc{color:var(--sub); font-size:13px; margin:0 0 20px;}
+  /* brand */
+  .brand{display:flex; align-items:center; gap:14px; margin-bottom:22px; flex-wrap:wrap;}
+  .brand .logo{
+    width:48px; height:48px; border-radius:13px; flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand2));
+    color:#fff; font-weight:700; font-size:16px; letter-spacing:.5px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(16,113,79,.3);
+  }
+  .brand .meta{flex:1; min-width:240px;}
+  .brand h1{font-size:23px; margin:0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+  .brand h1 .en{font-size:13px; color:var(--brand); font-weight:600; letter-spacing:.5px;}
+  .brand .desc{margin:3px 0 0;}
+  .ver{font-size:11px; color:var(--brand); border:1px solid var(--brand); border-radius:20px; padding:3px 10px; font-weight:600; white-space:nowrap;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px 20px; margin-bottom:20px;
+  }
+  .card h2{font-size:15px; margin:0 0 14px; display:flex; align-items:center; gap:8px;}
+  .card h2 .tag{font-size:11px; color:#fff; background:var(--brand); border-radius:6px; padding:2px 8px;}
+  /* toolbar */
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  button{
+    font-family:inherit; font-size:13px; cursor:pointer; border:none; border-radius:9px;
+    padding:8px 14px; transition:.15s; color:#fff; background:var(--brand);
+  }
+  button:hover{filter:brightness(1.05); transform:translateY(-1px);}
+  button.ghost{background:#fff; color:var(--brand); border:1px solid var(--brand);}
+  button.danger{background:var(--danger);}
+  button.soft{background:var(--chip); color:var(--brand);}
+  /* 依据体系切换条 */
+  .sysbar{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px;
+    padding:9px 11px; background:#f6faf8; border:1px solid var(--line); border-radius:10px;}
+  .syslabel{font-size:11.5px; color:var(--sub); font-weight:600; white-space:nowrap;}
+  .seg-group{display:inline-flex; border:1px solid var(--brand); border-radius:8px; overflow:hidden;}
+  .seg-group button{
+    background:#fff; color:var(--brand); border-radius:0; font-size:12px; padding:5px 11px;
+    border-right:1px solid var(--line);
+  }
+  .seg-group button:last-child{border-right:none;}
+  .seg-group button.on{background:var(--brand); color:#fff; font-weight:600;}
+  .seg-group button:hover{transform:none; filter:brightness(1.03);}
+  .seg-group button:disabled{
+    color:#b6c6bf; background:#f4f7f5; cursor:not-allowed; border-color:var(--line);
+  }
+  .seg-group button:disabled:hover{filter:none;}
+  /* table */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:middle;}
+  th{background:#f5faf7; color:var(--sub); font-weight:600;}
+  td input{border:1px solid var(--line); border-radius:6px; padding:6px 8px; width:100%; font-family:inherit; font-size:13px;}
+  td input:focus{outline:none; border-color:var(--brand);}
+  .idx{width:42px; text-align:center; color:var(--sub);}
+  .sel{width:54px; text-align:center;}
+  .sel input{width:16px;height:16px;cursor:pointer;}
+  .ref-note{font-size:12px; color:var(--sub); margin:10px 0 0;}
+  /* 分组行 */
+  tr.grp td{
+    background:#edf6f1; color:var(--brand); font-size:11.5px; font-weight:700;
+    padding:5px 8px; letter-spacing:.3px; border-left:3px solid var(--brand2);
+  }
+  /* output */
+  .out-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+  .stat{font-size:12px; color:var(--sub);}
+  textarea{
+    width:100%; min-height:170px; resize:vertical; border:1px solid var(--line);
+    border-radius:10px; padding:14px; font-family:var(--font);
+    font-size:14px; line-height:1.9; color:var(--ink); background:#fbfdfc;
+  }
+  textarea:focus{outline:none; border-color:var(--brand);}
+  .copied{color:var(--ok) !important; background:var(--ok) !important;}
+  .footer{font-size:12px; color:var(--sub); text-align:center; margin-top:8px;}
+  .brand-foot{text-align:center; font-size:12px; color:#a3b3ab; letter-spacing:.6px; margin:26px 0 6px;}
+  /* 竖向三栏（左中右） */
+  .cols{display:grid; grid-template-columns:1.1fr 1.35fr 1.15fr; gap:18px; align-items:stretch;}
+  @media (max-width:1240px){ .cols{grid-template-columns:1fr;} }
+  .col{padding:16px 16px 18px; display:flex; flex-direction:column;}
+  .col h2{font-size:14px; margin-bottom:12px;}
+  .colnum{width:24px; height:24px; border-radius:50%; flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; font-size:12px; font-weight:700;
+    display:inline-flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(16,113,79,.28);}
+  .col table{font-size:12px; table-layout:fixed;}
+  .col th,.col td{padding:6px; }
+  .col .idx{width:26px;}
+  .col .sel{width:44px;}
+  .lockmark{font-size:11px; color:var(--ok);}
+  .col .cd{width:172px;}
+  #refTable .cd{width:140px;}
+  #refTable .cd input{font-size:10.5px;}
+  .col .cd input{font-size:10.5px; padding:5px 5px;}
+  .col td input{font-size:12px; padding:5px 6px;}
+  /* 代号列数字等宽对齐，仍沿用同一字体（不使用等宽字体） */
+  .col .cd input, #refTable .cd input{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
+  /* 名称单元格：多行自动增高，文字完整可见 */
+  td textarea.cell{
+    display:block; width:100%; min-height:30px; border:1px solid var(--line); border-radius:6px;
+    padding:5px 6px; font-family:inherit; font-size:12px; line-height:1.5; color:var(--ink);
+    background:#fff; resize:vertical; overflow:hidden; word-break:break-word;
+  }
+  td textarea.cell:focus{outline:none; border-color:var(--brand);}
+  .col .out-head{flex-direction:column; align-items:flex-start; gap:8px;}
+  .col .seg{margin-left:0; flex-wrap:wrap;}
+  /* 轻提示 */
+  .toast{
+    position:fixed; left:50%; bottom:34px; transform:translate(-50%,10px);
+    background:#173229; color:#fff; font-size:13px; padding:9px 18px; border-radius:10px;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:99;
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  button.armed{background:var(--danger) !important; color:#fff !important;}
+  /* 整段输出 */
+  .out-text{border:1px solid var(--line); border-radius:10px; background:#fbfdfc;
+    padding:12px 14px; font-size:14px; line-height:1.95; color:var(--ink);
+    word-break:break-word; min-height:220px;}
+  .out-text:empty::before{content:"—"; color:#c2cec8;}
+  /* 独立滚动 */
+  .scroll-box{flex:1 1 auto; max-height:calc(100vh - 340px); min-height:240px; overflow-y:auto;
+    border:1px solid var(--line); border-radius:8px; padding:2px;}
+  .scroll-box thead th{position:sticky; top:0; z-index:1;}
+  .scroll-box::-webkit-scrollbar{width:8px;}
+  .scroll-box::-webkit-scrollbar-thumb{background:#c6d8ce; border-radius:8px;}
+  .scroll-box::-webkit-scrollbar-track{background:transparent;}
+  .seg{display:inline-flex; gap:6px; margin-left:auto;}
+  .seg button{padding:6px 12px; font-size:12px;}
+  ::selection{background:#cbe8da;}
+</style>
+</head>
+<body>
+  
+<!-- rs-entry-bar v1 -->
+<div class="rsbar"><a class="rsbar-home" href="ratestruct.html">← 体系入口</a><span class="rsbar-t">RateStruct 系列 · 8 套计价体系</span></div>
+<style>
+.rsbar{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;font-size:12.5px;line-height:1.5;}
+.rsbar a{display:inline-flex;align-items:center;gap:5px;color:#2f6df0;background:#eef3fe;border:1px solid rgba(47,109,240,.22);border-radius:20px;padding:5px 13px;text-decoration:none;font-weight:600;transition:background .15s,color .15s,border-color .15s;}
+.rsbar a:hover{background:#2f6df0;color:#fff;border-color:transparent;}
+.rsbar-t{color:#9aa5b5;}
+@media print{.rsbar{display:none;}}
+</style>
+<header class="brand">
+    <div class="logo">HW</div>
+    <div class="meta">
+      <h1>公路组价价构引擎 <span class="en">RateStruct Highway</span></h1>
+      <p class="desc">左栏清单计量依据 · 中栏定额组价依据 · 右栏输出，三栏并排竖向操作；可一键切换「部颁 2018 / 重庆养护 2018」与「预算 / 概算」阶段（养护工程只编预算），勾选即自动生成"重新组价 + 清单计量"两段式计价说明条款，可整段复制。</p>
+    </div>
+    <span class="ver">V1.0.0</span>
+  </header>
+
+  <main class="cols">
+  <!-- ① 计量依据 -->
+  <div class="card col">
+    <h2><span class="colnum">1</span><span class="tag">计量依据</span> 清单与计量规则</h2>
+    <div class="toolbar">
+      <button id="addRef" class="soft">＋ 新增引用</button>
+      <button id="refAll" class="ghost">全选</button>
+      <button id="resetRef" class="ghost">恢复默认引用</button>
+    </div>
+    <table id="refTable">
+      <thead>
+        <tr><th class="idx">#</th><th>规范 / 规则名称</th><th class="cd">代号</th><th class="sel">选用</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="ref-note">提示：公路工程的计量依据体系与建筑、水利都不同——<b>没有独立的"工程量计算规范"</b>，清单子目的计量规则写在《公路工程标准施工招标文件》（2018年版）技术规范第 200～700 章的"计量与支付"条款里，重庆另有一本地方性的《重庆市公路工程工程量清单及计量规范》（渝内字〔2016〕009号）作本地口径，两者并用即可覆盖。清单子目号采用五级编码、按图纸所示实体净值计量，超挖超填、施工附加量、模板支架等一般不另计量。项目有专用技术规范时，用第三行勾选后填写项目名称。</p>
+  </div>
+
+  <!-- ② 组价依据 -->
+  <div class="card col">
+    <h2><span class="colnum">2</span><span class="tag">组价依据</span> 定额与编制办法</h2>
+    <div class="sysbar">
+      <span class="syslabel">依据体系</span>
+      <div class="seg-group" id="seriesSeg">
+        <button data-s="jtg" class="on">部颁 2018</button>
+        <button data-s="yh">重庆养护 2018</button>
+      </div>
+      <span class="syslabel">计价阶段</span>
+      <div class="seg-group" id="stageSeg">
+        <button data-t="budget" class="on">预算</button>
+        <button data-t="estimate">概算</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button id="addQuota" class="soft">＋ 新增定额</button>
+      <button id="checkAll" class="ghost">全选</button>
+      <button id="uncheckAll" class="ghost">清空</button>
+      <button id="resetQuota" class="danger">恢复默认定额</button>
+    </div>
+    <div class="scroll-box">
+      <table id="quotaTable">
+        <thead>
+          <tr><th class="idx">#</th><th>定额名称</th><th class="cd">代号</th><th class="sel">选用</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="ref-note">提示：部颁体系为交通运输部 2018 系列（2019-05-01 施行），其中《公路工程预算定额》JTG/T 3832-2018 与《公路工程机械台班费用定额》JTG/T 3833-2018 目前正在修订、仍处征求意见稿阶段，尚未发布，故仍按 2018 版执行；重庆养护体系为渝交管养〔2018〕101号（2018-11-01 施行），只编预算、不编概算，切到养护体系时"概算"按钮会被禁用。「机械台班费用定额」与「编制办法」为必选项，默认勾选、不可取消，名称与代号仍可编辑。</p>
+  </div>
+
+  <!-- ③ 输出 -->
+  <div class="card col">
+    <div class="out-head">
+      <h2 style="margin:0;"><span class="colnum">3</span><span class="tag">输出</span> 计价说明整段文本</h2>
+      <div class="seg" style="align-items:center;">
+        <button id="copyAll">复制全文</button>
+      </div>
+    </div>
+    <div class="stat" id="stat">—</div>
+    <div class="out-text" id="outText"></div>
+    <p class="footer">两段结构：① 组价依据（定额 + 编制办法）重新组价　② 清单计量（必含）。按《名称》（代号）全角括号拼接，复制后可直接粘贴到编制说明或变更估价条款。</p>
+  </div>
+  </main>
+
+  <p class="brand-foot">公路组价价构引擎 RateStruct Highway　V1.0.0</p>
+  <div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const LS_Q = "hw_quota_v1";
+  const LS_R = "hw_ref_v1";
+  const LS_SYS = "hw_sys_v1";
+
+  // grp: jtg = 交通运输部 2018 系列；yh = 重庆公路养护 2018；other = 税费与安全费配套
+  // core: 该体系的核心依据（机械台班费用定额 + 编制办法），在当前体系下锁定不可取消
+  const DEFAULT_QUOTAS = [
+    // ---- 交通运输部 2018 系列 ----
+    {name:"公路工程预算定额", code:"JTG/T 3832-2018", grp:"jtg", on:true},
+    {name:"公路工程概算定额", code:"JTG/T 3831-2018", grp:"jtg", on:false},
+    {name:"公路工程机械台班费用定额", code:"JTG/T 3833-2018", grp:"jtg", on:true, core:true},
+    {name:"公路工程建设项目概算预算编制办法", code:"JTG 3830-2018", grp:"jtg", on:true, core:true},
+    {name:"公路工程估算指标", code:"JTG/T 3821-2018", grp:"jtg", on:false},
+    {name:"公路工程建设项目投资估算编制办法", code:"JTG 3820-2018", grp:"jtg", on:false},
+    // ---- 重庆市公路养护 2018 ----
+    {name:"重庆市公路养护工程预算定额", code:"渝交管养〔2018〕101号", grp:"yh", on:false},
+    {name:"重庆市公路养护工程机械台班费用定额", code:"渝交管养〔2018〕101号", grp:"yh", on:false, core:true},
+    {name:"重庆市公路养护工程预算编制办法", code:"渝交管养〔2018〕101号", grp:"yh", on:false, core:true},
+    // ---- 税费与安全生产费配套 ----
+    {name:"交通运输部关于调整《公路工程建设项目投资估算编制办法》和《公路工程建设项目概算预算编制办法》中“税金”有关规定的公告", code:"交通运输部公告2019年第26号", grp:"other", on:false},
+    {name:"公路工程营业税改增值税计价依据调整方案", code:"交办公路〔2016〕66号", grp:"other", on:false},
+    {name:"重庆市交通委员会关于转发交通运输部公路工程营业税改增值税计价依据调整方案的通知", code:"渝交委路〔2016〕26号", grp:"other", on:false},
+    {name:"企业安全生产费用提取和使用管理办法", code:"财资〔2022〕136号", grp:"other", on:false},
+    {name:"重庆市交通行业安全生产费用管理规定", code:"渝交安〔2014〕32号", grp:"other", on:false}
+  ];
+
+  const DEFAULT_REFS = [
+    {name:"公路工程标准施工招标文件技术规范及工程量清单", code:"2018年版", on:true},
+    {name:"重庆市公路工程工程量清单及计量规范", code:"渝内字〔2016〕009号", on:true},
+    {name:"招标项目专用技术规范（计量与支付条款）", code:"", on:false}
+  ];
+
+  const GRP_TITLE = {
+    jtg:  "交通运输部 2018 系列（2019-05-01 施行）",
+    yh:   "重庆市公路养护 2018 版（渝交管养〔2018〕101号，2018-11-01 施行）",
+    other:"税费与安全生产费配套文件"
+  };
+
+  // 体系 × 阶段 → 默认勾选的定额名称
+  const SUBSET = {
+    "jtg/budget": [
+      "公路工程预算定额",
+      "公路工程机械台班费用定额",
+      "公路工程建设项目概算预算编制办法"
+    ],
+    "jtg/estimate": [
+      "公路工程概算定额",
+      "公路工程机械台班费用定额",
+      "公路工程建设项目概算预算编制办法"
+    ],
+    "yh/budget": [
+      "重庆市公路养护工程预算定额",
+      "重庆市公路养护工程机械台班费用定额",
+      "重庆市公路养护工程预算编制办法"
+    ],
+    // 养护工程只编预算，不编概算；保留同键仅为兜底
+    "yh/estimate": [
+      "重庆市公路养护工程预算定额",
+      "重庆市公路养护工程机械台班费用定额",
+      "重庆市公路养护工程预算编制办法"
+    ]
+  };
+
+  function load(key, def){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) return def;
+      const v = JSON.parse(raw);
+      return (v === null || v === undefined) ? def : v;
+    }catch(e){ return def; }
+  }
+  function loadArr(key, def){
+    const v = load(key, def);
+    return Array.isArray(v) ? v : def;
+  }
+
+  const sys = load(LS_SYS, {});
+  let series = sys.series === "yh" ? "yh" : "jtg";
+  let stage  = sys.stage === "estimate" ? "estimate" : "budget";
+  if(series === "yh") stage = "budget";   // 养护体系不存在概算阶段
+
+  function clone(o){
+    const r = {};
+    for(const k in o){ if(Object.prototype.hasOwnProperty.call(o,k)) r[k] = o[k]; }
+    return r;
+  }
+
+  function normQuota(o){
+    if(Array.isArray(o)) o = {name:o[0], code:o[1], on:false};
+    o = o || {};
+    const name = String(o.name == null ? "" : o.name);
+    const def = DEFAULT_QUOTAS.find(d => d.name === name);
+    return {
+      name,
+      code: o.code === undefined || o.code === null ? (def ? def.code : "") : String(o.code),
+      on: !!o.on,
+      grp: o.grp || (def ? def.grp : "other"),
+      core: o.core === undefined ? !!(def && def.core) : !!o.core
+    };
+  }
+  function normRef(o){
+    if(Array.isArray(o)) o = {name:o[0], code:o[1], on:true};
+    o = o || {};
+    return {
+      name: String(o.name == null ? "" : o.name),
+      code: String(o.code == null ? "" : o.code),
+      on: o.on === undefined ? true : !!o.on
+    };
+  }
+
+  let quotas = loadArr(LS_Q, DEFAULT_QUOTAS.map(clone)).map(normQuota);
+  let refs   = loadArr(LS_R, DEFAULT_REFS.map(clone)).map(normRef);
+
+  // 当前体系下的锁定项：只有本系列的核心依据被锁
+  const isLocked = q => !!q.core && q.grp === series;
+
+  // 缺省清单升级：补入本地缺失的条目（保留用户原有勾选与改名）
+  (function mergeDefaults(){
+    const names = new Set(quotas.map(q => q.name));
+    let added = 0;
+    DEFAULT_QUOTAS.forEach(d => { if(!names.has(d.name)){ quotas.push(clone(d)); added++; } });
+    if(added) save();
+  })();
+
+  function save(){
+    try{
+      localStorage.setItem(LS_Q, JSON.stringify(quotas));
+      localStorage.setItem(LS_R, JSON.stringify(refs));
+      localStorage.setItem(LS_SYS, JSON.stringify({series, stage}));
+    }catch(e){ /* localStorage 不可用（隐私模式 / file://）时忽略，不阻断界面 */ }
+  }
+
+  const qBody = document.querySelector("#quotaTable tbody");
+  const rBody = document.querySelector("#refTable tbody");
+  const stat  = document.getElementById("stat");
+  const outText = document.getElementById("outText");
+  let currentText = "";
+
+  function esc(s){
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+      .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ---- 渲染定额表（按体系分组，带分组标题行）----
+  function renderQuotas(){
+    qBody.innerHTML = "";
+    let n = 0, lastGrp = null;
+    quotas.forEach((q,i)=>{
+      if(q.grp !== lastGrp && GRP_TITLE[q.grp]){
+        lastGrp = q.grp;
+        const g = document.createElement("tr");
+        g.className = "grp";
+        g.innerHTML = `<td colspan="4">${esc(GRP_TITLE[q.grp])}</td>`;
+        qBody.appendChild(g);
+      }
+      n++;
+      const lock = isLocked(q);
+      const checked = (q.on || lock) ? "checked" : "";
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td class="idx">${n}</td>`+
+        `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(q.name)}</textarea></td>`+
+        `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(q.code)}" /></td>`+
+        (lock
+          ? `<td class="sel"><input type="checkbox" ${checked} disabled title="必选项，不可取消" /><div style="font-size:11px;color:var(--ok);margin-top:2px;">必选</div></td>`
+          : `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`);
+      qBody.appendChild(tr);
+    });
+    bindInputs();
+    growAll();
+    generate();
+    syncSysButtons();
+  }
+
+  // ---- 渲染引用表 ----
+  function renderRefs(){
+    rBody.innerHTML = "";
+    refs.forEach((r,i)=>{
+      const checked = (r.on === undefined ? true : !!r.on) ? "checked" : "";
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td class="idx">${i+1}</td>`+
+        `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(r.name)}</textarea></td>`+
+        `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(r.code)}" /></td>`+
+        `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`;
+      rBody.appendChild(tr);
+    });
+    bindRefInputs();
+    growAll();
+    generate();
+  }
+
+  // 名称文本框自动增高，保证文字全部显示
+  function grow(el){
+    el.style.height = "auto";
+    const h = el.scrollHeight;
+    el.style.height = (h > 0 ? h + 2 : 30) + "px";
+  }
+  function growAll(){
+    document.querySelectorAll("textarea.cell").forEach(grow);
+  }
+
+  function bindInputs(){
+    qBody.querySelectorAll("input, textarea").forEach(inp=>{
+      inp.addEventListener("input", e=>{
+        if(e.target.dataset.i === undefined) return;   // 跳过锁定项等无索引输入
+        const i = +e.target.dataset.i, k = e.target.dataset.k;
+        quotas[i][k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+        if(e.target.tagName === "TEXTAREA") grow(e.target);
+        generate();   // 先渲染输出，保证勾选/编辑立即生效
+        save();       // 再持久化；存储失败不影响界面
+      });
+    });
+  }
+  function bindRefInputs(){
+    rBody.querySelectorAll("input, textarea").forEach(inp=>{
+      inp.addEventListener("input", e=>{
+        if(e.target.dataset.i === undefined) return;
+        const i = +e.target.dataset.i, k = e.target.dataset.k;
+        refs[i][k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+        if(e.target.tagName === "TEXTAREA") grow(e.target);
+        generate();
+        save();
+      });
+    });
+  }
+
+  // ---- 生成条款（两段式）----
+  function fmt(item){
+    const name = String(item.name || "").trim();
+    const c = String(item.code || "").trim();
+    if(!c) return "《" + name + "》";
+    return "《" + name + "》（" + c + "）";
+  }
+
+  // 相邻且代号相同的条目合并括注，如重庆养护三本同属渝交管养〔2018〕101号：
+  // 《A》、《B》、《C》（渝交管养〔2018〕101号）
+  function fmtList(items){
+    const parts = [];
+    let i = 0;
+    while(i < items.length){
+      const c = String(items[i].code || "").trim();
+      let j = i + 1;
+      if(c){
+        while(j < items.length && String(items[j].code || "").trim() === c) j++;
+      }
+      const names = items.slice(i, j)
+        .map(x => "《" + String(x.name || "").trim() + "》")
+        .join("、");
+      parts.push(c ? names + "（" + c + "）" : names);
+      i = j;
+    }
+    return parts.join("、");
+  }
+
+  function buildSegments(){
+    // 段一：组价依据（勾选 或 本体系锁定项）
+    const pricing = quotas.filter(q => q.name.trim() && (q.on || isLocked(q)));
+    // 段二：计量依据（仅勾选项）
+    const refItems = refs.filter(r => r.name.trim() && r.on !== false);
+
+    const s1 = pricing.length
+      ? "按照" + fmtList(pricing) + "及相关配套文件重新组价"
+      : "";
+    const s2 = refItems.length
+      ? "工程量按照" + fmtList(refItems) +
+        "及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量。"
+      : "";
+
+    return { s1, s2, pricing, refItems };
+  }
+
+  function generate(){
+    const { s1, s2, pricing, refItems } = buildSegments();
+
+    const cores = [];
+    if(s1) cores.push(s1.replace(/[。；;]\s*$/, ""));
+    if(s2) cores.push(s2.replace(/[。；;]\s*$/, ""));
+    const text = cores.length
+      ? cores.join("；") + "。"
+      : "（请在左栏勾选计量依据、在中栏勾选组价定额）";
+
+    currentText = cores.length ? text : "";
+    if(outText) outText.textContent = text;
+
+    const sysName = series === "yh" ? "重庆养护 2018" : "部颁 2018";
+    const stageName = series === "yh" ? "预算（养护不编概算）" : (stage === "estimate" ? "概算" : "预算");
+    stat.textContent = "体系 " + sysName + " · " + stageName + "　｜　组价 " +
+      pricing.length + " 项　｜　计量依据 " + refItems.length + " 项";
+  }
+
+  // ---- 体系 / 阶段切换 ----
+  function applySys(s, t, tip){
+    if(s === "yh") t = "budget";      // 养护工程只编预算
+    series = s; stage = t;
+    const allow = SUBSET[s + "/" + t] || [];
+    quotas.forEach(q=>{
+      if(q.grp === "jtg" || q.grp === "yh"){
+        // 本体系按阶段给默认组合；另一体系一律取消勾选
+        q.on = (q.grp === s) ? allow.indexOf(q.name) >= 0 : false;
+      }
+      // other 分组保持用户原有勾选
+    });
+    save();
+    renderQuotas();
+    toast(tip);
+  }
+
+  function syncSysButtons(){
+    document.querySelectorAll("#seriesSeg button").forEach(b=>{
+      b.classList.toggle("on", b.dataset.s === series);
+    });
+    document.querySelectorAll("#stageSeg button").forEach(b=>{
+      const est = b.dataset.t === "estimate";
+      const disabled = est && series === "yh";   // 养护无概算
+      b.disabled = disabled;
+      b.title = disabled ? "养护工程只编预算，不编概算" : "";
+      b.classList.toggle("on", b.dataset.t === stage);
+    });
+  }
+
+  document.querySelectorAll("#seriesSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const toYh = b.dataset.s === "yh";
+      applySys(b.dataset.s, toYh ? "budget" : stage,
+        toYh ? "已切换为重庆市公路养护 2018 版（只编预算）"
+             : "已切换为交通运输部 2018 系列");
+    });
+  });
+  document.querySelectorAll("#stageSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(b.disabled) return;
+      applySys(series, b.dataset.t,
+        b.dataset.t === "estimate" ? "已切换为概算阶段（初步设计概算用）" : "已切换为预算阶段（施工图预算 / 招标用）");
+    });
+  });
+
+  // ---- 按钮 ----
+  document.getElementById("addQuota").addEventListener("click", ()=>{
+    const item = {name:"", code:"", on:true, grp:"other", core:false};
+    // 插到"税费配套"分组末尾之前，保证分组标题不重复、不错序
+    const lastOther = quotas.map(q=>q.grp).lastIndexOf("other");
+    if(lastOther >= 0) quotas.splice(lastOther + 1, 0, item); else quotas.push(item);
+    save(); renderQuotas();
+  });
+  document.getElementById("addRef").addEventListener("click", ()=>{
+    refs.push({name:"", code:"", on:true});
+    save(); renderRefs();
+  });
+  document.getElementById("refAll").addEventListener("click", ()=>{
+    refs.forEach(r=>{ r.on = true; }); save(); renderRefs();
+  });
+  document.getElementById("checkAll").addEventListener("click", ()=>{
+    quotas.forEach(q=>{ q.on = true; }); save(); renderQuotas();
+  });
+  document.getElementById("uncheckAll").addEventListener("click", ()=>{
+    quotas.forEach(q=>{ if(!isLocked(q)) q.on = false; }); save(); renderQuotas();
+  });
+  document.getElementById("resetQuota").addEventListener("click", e=>{
+    armConfirm(e.currentTarget, "再点一次恢复", ()=>{
+      quotas = DEFAULT_QUOTAS.map(clone);
+      const allow = SUBSET[series + "/" + stage] || [];
+      quotas.forEach(q=>{
+        if(q.grp === "jtg" || q.grp === "yh") q.on = (q.grp === series) && allow.indexOf(q.name) >= 0;
+      });
+      save(); renderQuotas();
+      toast("已恢复默认定额清单（" + quotas.length + " 项）");
+    });
+  });
+  document.getElementById("resetRef").addEventListener("click", e=>{
+    armConfirm(e.currentTarget, "再点一次恢复", ()=>{
+      refs = DEFAULT_REFS.map(clone);
+      save(); renderRefs();
+      toast("已恢复默认计量依据（" + refs.length + " 项）");
+    });
+  });
+
+  // 无弹窗二次确认：首次点击按钮变红提示，3 秒内再点即执行
+  function armConfirm(btn, tip, action){
+    if(btn.dataset.armed === "1"){
+      clearTimeout(Number(btn.dataset.timer));
+      btn.dataset.armed = "";
+      btn.textContent = btn.dataset.label;
+      btn.classList.remove("armed");
+      action();
+      return;
+    }
+    btn.dataset.label = btn.textContent;
+    btn.dataset.armed = "1";
+    btn.textContent = tip;
+    btn.classList.add("armed");
+    btn.dataset.timer = String(setTimeout(()=>{
+      btn.dataset.armed = "";
+      btn.textContent = btn.dataset.label;
+      btn.classList.remove("armed");
+    }, 3000));
+  }
+
+  let toastTimer = null;
+  function toast(msg){
+    const el = document.getElementById("toast");
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.classList.remove("show"), 1800);
+  }
+
+  function fallbackCopy(text, cb){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); cb(); }
+    catch(e){ toast("复制失败，请手动选择文本复制"); }
+    document.body.removeChild(ta);
+  }
+  function copyText(text, btn){
+    const done = ()=>{
+      const old = btn.textContent;
+      btn.textContent = "已复制 ✓";
+      btn.classList.add("copied");
+      setTimeout(()=>{ btn.textContent = old; btn.classList.remove("copied"); }, 1400);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+    }else{ fallbackCopy(text, done); }
+  }
+
+  document.getElementById("copyAll").addEventListener("click", e=>{
+    if(!currentText){ toast("当前无内容可复制，请先勾选计量依据或组价定额"); return; }
+    copyText(currentText, e.target);
+  });
+
+  // ---- 初始化 ----
+  try{ renderQuotas(); }catch(err){ console.error("渲染定额表失败:", err); }
+  try{ renderRefs(); }catch(err){ console.error("渲染引用表失败:", err); }
+  generate();   // 兜底：确保输出栏一定有内容
+
+  window.addEventListener("load", ()=>{ requestAnimationFrame(()=>{ try{ growAll(); }catch(e){} }); });
+  window.addEventListener("resize", ()=>{ try{ growAll(); }catch(e){} });
+})();
+</script>
+</body>
+</html>
