@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>建设组价价构引擎RateStruct Building V1.0.10</title>
+<title>建设组价价构引擎RateStruct Building V1.0.11</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232f6df0'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -145,6 +145,14 @@
   .seg{display:inline-flex; gap:6px; margin-left:auto;}
   .seg button{padding:6px 12px; font-size:12px;}
   ::selection{background:#cfe0ff;}
+
+  /* 文本类型切换（预算类 / 结算类） */
+  .docseg{display:flex; align-items:center; gap:6px; margin:0 0 10px;}
+  .docseg-t{font-size:11.5px; color:var(--sub); margin-right:2px;}
+  .docseg button{font-size:12px; font-weight:600; padding:4px 12px; border-radius:16px; border:1px solid var(--line);
+    background:#fff; color:var(--sub); cursor:pointer; transition:background .15s,color .15s,border-color .15s;}
+  .docseg button:hover{border-color:var(--brand); color:var(--brand);}
+  .docseg button.on{background:var(--brand); border-color:var(--brand); color:#fff;}
 </style>
 </head>
 <body>
@@ -161,11 +169,11 @@
     <div class="logo">JS</div>
     <div class="meta">
       <h1>建设组价价构引擎 <span class="en">RateStruct Building</span></h1>
-      <p class="desc">建设工程（房屋建筑与装饰、通用安装、市政、园林、轨道等）· 左栏计量依据 · 中栏组价依据 · 右栏输出，三栏并排竖向操作；可一键在「2013 版 / 2024 版」清单计价依据间切换，勾选即自动生成"重新组价 + 清单计量"两段式计价说明条款，可整段复制。</p>
+      <p class="desc">建设工程（房屋建筑与装饰、通用安装、市政、园林、轨道等）· 左栏计量依据 · 中栏组价依据 · 右栏输出，三栏并排竖向操作；可一键在「2013 版 / 2024 版」清单计价依据间切换，勾选即自动生成「依据—组价—计量」整段计价说明条款（预算类／结算类可切换），可整段复制。</p>
     </div>
 
     <a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口">← 体系入口</a>
-    <span class="ver">V1.0.10</span>
+    <span class="ver">V1.0.11</span>
   </header>
 
   <main class="cols">
@@ -215,18 +223,27 @@
         <button id="copyAll">复制全文</button>
       </div>
     </div>
+    <div class="docseg" id="docSeg">
+      <span class="docseg-t">文本类型</span>
+      <button type="button" data-doc="budget">预算类</button>
+      <button type="button" data-doc="settle">结算类</button>
+    </div>
     <div class="stat" id="stat">—</div>
     <div class="out-text" id="outText"></div>
-    <p class="footer">两段结构：① 计价定额（含费用定额）重新组价　② 清单规范计量（必含）。按《名称》（代号）全角括号拼接，复制后可直接粘贴到编制说明。</p>
+    <p class="footer">两种文本类型：预算类（末句「计算工程量」）／结算类（末句「计算实际合格工程量」）。条目按《名称》（代号）全角括号拼接，计量依据之间用顿号、末项前用「及」，复制后可直接粘贴到编制说明。</p>
   </div>
   </main>
 
-  <p class="brand-foot">建设组价价构引擎 RateStruct Building　V1.0.10</p>
+  <p class="brand-foot">建设组价价构引擎 RateStruct Building　V1.0.11</p>
   <div id="toast" class="toast"></div>
 
 <script>
 (function(){
   "use strict";
+  const LS_DOC = "rs_doc_type_v1";
+  let docType = "budget";
+  try{ if(localStorage.getItem(LS_DOC) === "settle") docType = "settle"; }catch(e){}
+
   const LS_Q = "quota_list_v2";
   const LS_R = "ref_list_v2";
 
@@ -488,35 +505,61 @@
     return "《"+item.name+"》（"+c+"）";
   }
 
-  function buildSegments(){
-    // 段一：组价（全部选用定额，勾选 或 必选锁定；费用定额一并归入）
+    function buildSegments(){
+    // 组价依据（勾选 或 本体系锁定项）
     const pricing = quotas.filter(q => q.name.trim() && (q.on || isLocked(q)));
-    // 段二：计量依据（仅勾选项；默认全选）
+    // 计量依据（仅勾选项）
     const refItems = refs.filter(r => r.name.trim() && r.on !== false);
-
-    const s1 = pricing.length
-      ? "按照" + pricing.map(fmt).join("、") + "及相关配套文件重新组价"
-      : "";
-    const s2 = refItems.length
-      ? "工程量按照" + refItems.map(fmt).join("、") +
-        "及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量。"
-      : "";
-
-    return { s1, s2, pricing, refItems };
+    return { pricing, refItems };
   }
 
+  // 列表拼接：有 fmtList 的体系沿用其同文号合并规则
+  function joinAll(items){
+    return (typeof fmtList === "function") ? fmtList(items) : items.map(fmt).join("、");
+  }
+  // 末项前用「及」：把最后一个书名号前的顿号换成「及」
+  function joinAnd(items){
+    return joinAll(items).replace(/、(?=《[^《]*$)/, "及");
+  }
+
+  // 整段条款：预算类 / 结算类仅末句不同
+  function buildText(pricing, refItems){
+    const settle = (docType === "settle") ? "实际合格" : "";
+    if(refItems.length && pricing.length){
+      return "依据" + joinAnd(refItems) + "的规定，按照" + joinAll(pricing) +
+             "及相关配套文件重新组价；并按上述工程量清单计量规则计算" + settle + "工程量。";
+    }
+    if(refItems.length){
+      return "依据" + joinAnd(refItems) + "的规定计算" + settle + "工程量。";
+    }
+    if(pricing.length){
+      return "按照" + joinAll(pricing) + "及相关配套文件重新组价。";
+    }
+    return "（请在左栏勾选计量依据、在中栏勾选组价定额）";
+  }
+
+  // 文本类型切换
+  (function(){
+    const box = document.getElementById("docSeg");
+    if(!box) return;
+    const btns = Array.prototype.slice.call(box.querySelectorAll("button"));
+    btns.forEach(function(b){
+      if(b.dataset.doc === docType) b.classList.add("on");
+      b.addEventListener("click", function(){
+        docType = b.dataset.doc;
+        btns.forEach(function(x){ x.classList.toggle("on", x === b); });
+        try{ localStorage.setItem(LS_DOC, docType); }catch(e){}
+        generate();
+      });
+    });
+  })();
+
   function generate(){
-    const { s1, s2, pricing, refItems } = buildSegments();
+    const { pricing, refItems } = buildSegments();
 
-    // 合并为一整段：段间以分号衔接，末尾句号；某段为空则自动省略
-    const cores = [];
-    if (s1) cores.push(s1.replace(/[。；;]\s*$/, ""));
-    if (s2) cores.push(s2.replace(/[。；;]\s*$/, ""));
-    const text = cores.length
-      ? cores.join("；") + "。"
-      : "（请在左栏勾选计量依据、在中栏勾选组价定额）";
+    const text = buildText(pricing, refItems);
 
-    currentText = cores.length ? text : "";
+    currentText = (pricing.length || refItems.length) ? text : "";
     if (outText) outText.textContent = text;
 
     stat.textContent = "组价类 " + pricing.length + " 本（含费用定额）｜ 计量依据 " + refItems.length + " 项";
