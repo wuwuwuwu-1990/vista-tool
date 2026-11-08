@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>公路组价价构引擎RateStruct Highway V1.0.1</title>
+<title>公路组价价构引擎RateStruct Highway V1.0.2</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23475569'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -163,6 +163,39 @@
     background:#fff; color:var(--sub); cursor:pointer; transition:background .15s,color .15s,border-color .15s;}
   .docseg button:hover{border-color:var(--brand); color:var(--brand);}
   .docseg button.on{background:var(--brand); border-color:var(--brand); color:#fff;}
+  /* 输出区切换过渡（预算类／结算类） */
+  .out-text{transition:opacity .13s ease, transform .13s ease;}
+  .out-text.swap{opacity:.25; transform:translateY(2px);}
+  /* 复制按钮定宽，避免「已复制 ✓」让按钮忽宽忽窄 */
+  #copyAll{min-width:92px; text-align:center;}
+  /* 页头右上角：依据文号与出处 */
+  .rs-tail{margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:7px; position:relative;}
+  .rsmeta-btn{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--brand);
+    background:#fff; border:1px solid rgba(47,109,240,.3); border-radius:20px; padding:4px 10px; cursor:pointer;
+    white-space:nowrap; transition:background .15s,color .15s,border-color .15s,box-shadow .15s;}
+  .rsmeta-btn:hover{background:var(--brand); color:#fff; border-color:var(--brand); box-shadow:0 4px 12px rgba(47,109,240,.26);}
+  .rsmeta-btn .dot{width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.75;}
+  .rsmeta-pop{position:absolute; top:calc(100% + 8px); right:0; width:410px; max-width:calc(100vw - 32px);
+    background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 18px 44px rgba(22,34,64,.18);
+    padding:14px 16px 12px; z-index:80; display:none; text-align:left;}
+  .rsmeta-pop.show{display:block; animation:rsPop .16s ease;}
+  @keyframes rsPop{from{opacity:0; transform:translateY(-5px);} to{opacity:1; transform:none;}}
+  .rsmeta-hd{display:flex; align-items:center; justify-content:space-between; font-size:12.5px; font-weight:700;
+    color:var(--ink); margin-bottom:8px;}
+  .rsmeta-hd span{font-size:11px; font-weight:500; color:var(--sub);}
+  .rsmeta-row{position:relative; padding:8px 52px 8px 0; border-top:1px dashed var(--line);}
+  .rsmeta-row:first-of-type{border-top:none; padding-top:2px;}
+  .rsmeta-t{font-size:12px; color:var(--ink); line-height:1.55; margin-bottom:4px;}
+  .rsmeta-i{font-size:11.5px; color:var(--sub); line-height:1.7; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px;}
+  .rsmeta-i b{font-weight:600; color:var(--brand);}
+  .rsmeta-i a{color:var(--brand); text-decoration:none; border-bottom:1px dotted currentColor;}
+  .rsmeta-i a:hover{color:var(--brand2);}
+  .rsmeta-tag{position:absolute; right:0; top:9px; font-size:10px; padding:1px 6px; border-radius:4px;
+    background:#eaf7ef; color:#0f7a45; font-weight:600;}
+  .rsmeta-tag.dead{background:#f2f4f8; color:#7c8798;}
+  .rsmeta-ft{margin-top:10px; padding-top:8px; border-top:1px solid var(--line); font-size:11px; color:#9aa5b5; line-height:1.6;}
+  @media (max-width:760px){ .rs-tail{align-items:flex-start;} .rsmeta-pop{right:auto; left:0;} }
+
 </style>
 </head>
 <body>
@@ -183,7 +216,16 @@
     </div>
 
     <a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口">← 体系入口</a>
-    <span class="ver">V1.0.1</span>
+    <div class="rs-tail">
+      <span class="ver">V1.0.2</span>
+      <button type="button" class="rsmeta-btn" id="rsMetaBtn" aria-expanded="false" aria-controls="rsMetaPop"><i class="dot"></i>依据文号与出处</button>
+      <div class="rsmeta-pop" id="rsMetaPop" role="dialog" aria-label="依据发布信息">
+        <div class="rsmeta-hd">依据发布信息<span>2 项 · 文号／实施日期／出处</span></div>
+      <div class="rsmeta-row"><div class="rsmeta-t">公路工程 2018 系列（JTG 3820／3830 + JTG/T 3821／3831／3832／3833）</div><div class="rsmeta-i"><b>交通运输部公告第 86 号</b> · 实施 2019-05-01 · <a href="https://xxgk.mot.gov.cn/2020/jigou/glj/202103/P020240425401407397768.pdf" target="_blank" rel="noopener">官网原文 ↗</a> <span class="rsmeta-tag">现行</span></div></div>
+      <div class="rsmeta-row"><div class="rsmeta-t">重庆市公路养护工程预算定额／机械台班费用定额／预算编制办法</div><div class="rsmeta-i"><b>渝交管养〔2018〕101号</b> · <span class="rsmeta-tag">现行</span></div></div>
+        <div class="rsmeta-ft">出处为发布机关官网原文。未列批次请以现行文件为准；标注「已废止」的仅作历史项目沿用参考。</div>
+      </div>
+    </div>
   </header>
 
   <main class="cols">
@@ -255,7 +297,7 @@
   </div>
   </main>
 
-  <p class="brand-foot">公路组价价构引擎 RateStruct Highway　V1.0.1</p>
+  <p class="brand-foot">公路组价价构引擎 RateStruct Highway　V1.0.2</p>
   <div id="toast" class="toast"></div>
 
 <script>
@@ -543,7 +585,7 @@
     const settle = (docType === "settle") ? "实际合格" : "";
     if(refItems.length && pricing.length){
       return "依据" + joinAnd(refItems) + "的规定，按照" + joinAll(pricing) +
-             "及相关配套文件重新组价；并按上述工程量清单计量规则计算" + settle + "工程量。";
+             "及相关配套文件重新组价；并按上述工程量清单计量计价规则计算" + settle + "工程量。";
     }
     if(refItems.length){
       return "依据" + joinAnd(refItems) + "的规定计算" + settle + "工程量。";
@@ -562,26 +604,44 @@
     btns.forEach(function(b){
       if(b.dataset.doc === docType) b.classList.add("on");
       b.addEventListener("click", function(){
+        if(b.dataset.doc === docType) return;          // 同项重复点击不再重算
         docType = b.dataset.doc;
         btns.forEach(function(x){ x.classList.toggle("on", x === b); });
         try{ localStorage.setItem(LS_DOC, docType); }catch(e){}
-        generate();
+        generate(true);                                 // true = 走淡入淡出
       });
     });
   })();
 
-  function generate(){
+  // ---- 输出区更新（带过渡）与统计行写入 ----
+  let outSwapTimer = null;
+  function setOutText(text, animate){
+    if(!outText) return;
+    if(outText.textContent === text) return;            // 内容没变就不动 DOM
+    if(!animate){ outText.textContent = text; return; }
+    outText.classList.add("swap");
+    clearTimeout(outSwapTimer);
+    outSwapTimer = setTimeout(function(){
+      outText.textContent = text;
+      requestAnimationFrame(function(){ outText.classList.remove("swap"); });
+    }, 90);
+  }
+  function setStat(s){
+    if(stat && stat.textContent !== s) stat.textContent = s;
+  }
+
+  function generate(animate){
     const { pricing, refItems } = buildSegments();
 
     const text = buildText(pricing, refItems);
 
     currentText = (pricing.length || refItems.length) ? text : "";
-    if(outText) outText.textContent = text;
+    setOutText(text, animate);
 
     const sysName = series === "yh" ? "重庆养护 2018" : "部颁 2018";
     const stageName = series === "yh" ? "预算（养护不编概算）" : (stage === "estimate" ? "概算" : "预算");
-    stat.textContent = "体系 " + sysName + " · " + stageName + "　｜　组价 " +
-      pricing.length + " 项　｜　计量依据 " + refItems.length + " 项";
+    setStat("体系 " + sysName + " · " + stageName + "　｜　组价 " +
+      pricing.length + " 项　｜　计量依据 " + refItems.length + " 项");
   }
 
   // ---- 体系 / 阶段切换 ----
@@ -712,21 +772,44 @@
     document.body.removeChild(ta);
   }
   function copyText(text, btn){
+    if(!btn) return;
+    // 原按钮文案一次性记住，避免连点后把「已复制 ✓」当成原文案导致卡死
+    if(!btn.dataset.label) btn.dataset.label = btn.textContent;
     const done = ()=>{
-      const old = btn.textContent;
       btn.textContent = "已复制 ✓";
       btn.classList.add("copied");
-      setTimeout(()=>{ btn.textContent = old; btn.classList.remove("copied"); }, 1400);
+      clearTimeout(btn._copyTimer);
+      btn._copyTimer = setTimeout(()=>{
+        btn.textContent = btn.dataset.label;
+        btn.classList.remove("copied");
+      }, 2000);
+      toast("已复制全文，可直接粘贴");
     };
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
-    }else{ fallbackCopy(text, done); }
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallback(text,done));
+    }else{ fallback(text,done); }
   }
 
   document.getElementById("copyAll").addEventListener("click", e=>{
     if(!currentText){ toast("当前无内容可复制，请先勾选计量依据或组价定额"); return; }
-    copyText(currentText, e.target);
+    copyText(currentText, e.currentTarget);
   });
+
+  // ---- 依据文号与出处面板 ----
+  (function rsMetaToggle(){
+    const btn = document.getElementById("rsMetaBtn");
+    const pop = document.getElementById("rsMetaPop");
+    if(!btn || !pop) return;
+    function close(){ pop.classList.remove("show"); btn.setAttribute("aria-expanded","false"); }
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      const on = pop.classList.toggle("show");
+      btn.setAttribute("aria-expanded", on ? "true" : "false");
+    });
+    pop.addEventListener("click", function(e){ e.stopPropagation(); });
+    document.addEventListener("click", close);
+    document.addEventListener("keydown", function(e){ if(e.key === "Escape") close(); });
+  })();
 
   // ---- 初始化 ----
   try{ renderQuotas(); }catch(err){ console.error("渲染定额表失败:", err); }
