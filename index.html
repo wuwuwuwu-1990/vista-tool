@@ -389,7 +389,7 @@
   <div class="layout">
   <aside class="side-nav">
     <div class="side-head">工具分类</div>
-      <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="ico" style="background:rgba(245,166,35,.16)">🧮</span><span class="nm">造价与算量</span><span class="cnt">6</span></a>
+      <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="ico" style="background:rgba(245,166,35,.16)">🧮</span><span class="nm">造价与算量</span><span class="cnt">8</span></a>
       <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="ico" style="background:rgba(139,124,246,.16)">🔍</span><span class="nm">审图与报告</span><span class="cnt">2</span></a>
       <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="ico" style="background:rgba(47,212,168,.16)">🚧</span><span class="nm">施工与管理</span><span class="cnt">5</span></a>
       <a href="#cat-cad" class="side-item" data-cat="cat-cad"><span class="ico" style="background:rgba(79,142,247,.16)">📐</span><span class="nm">结构CAD图</span><span class="cnt">6</span></a>
@@ -402,7 +402,7 @@
         <h2>全部工具<span class="sec-count">共 22 款</span></h2>
       </div>
       <section id="cat-zj" class="cat-sec">
-        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">7 款</span></div>
+        <div class="cat-title"><span class="dot" style="background:#f5a623"></span><span class="nm">造价与算量</span><span class="cnt">8 款</span></div>
         <div class="grid">
       <a class="card" href="cqcost428.html" style="--g1:#f59e0b;--g2:#f97316;--gs:rgba(245,158,11,.5);--a1:#f59e0b;--a2:#f97316;">
       <div class="top">
@@ -500,6 +500,20 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(37,99,235,.42);--cc:#93c5fd;--cbg:rgba(37,99,235,.12)">v1.0.9</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">材料组价</span>
+      </div>
+    </a>
+      <a class="card" href="equidraft.html" style="--g1:#0f7b4f;--g2:#17a166;--gs:rgba(15,123,79,.5);--a1:#0f7b4f;--a2:#17a166;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M17.6 4.6H7l5.3 7.4-5.3 7.4h10.6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.6 9.4h-3.2M19.6 14.6h-3.2" stroke="#fff" stroke-width="1.7" stroke-linecap="round" opacity=".7"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>审核对比表格公式快写工具 EquiDraft</h3>
+      <div class="desc">审核对比表逐行写差异公式的快写工具：送审／审定工程量与合同单价一填，自动生成一句可直接粘进 Excel 的公式——按单位自动分配工程量小数位（m² 取 2 位、m³ 取 3 位，t／km 单独归组，其余单位可另指定），有合同列／无合同列两套列号映射一键切换、「说明列」写到哪一列随你指定（默认 T），整句分支／紧凑内嵌／仅合同单价三种句形任选，审增审减按差值自动判词并支持自定措辞模板；表内直接改数，成句预览、本行复制与整列复制一键可得，粘进去双击填充柄向下填充即批量成稿。苹果字体 · 单文件离线。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(15,123,79,.4);--cc:#34d399;--cbg:rgba(15,123,79,.12)">v1.0.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">审核对比</span>
       </div>
     </a>
         </div>
@@ -1268,6 +1282,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-09', t:'新增：审核对比表格公式快写工具 EquiDraft v1.0.0（审核对比表逐行写差异公式的快写工具，归入「造价与算量」分类）—— ① 表格内直接改数，填送审工程量／审定工程量／合同单价与合同合价即可，计算列只读；② 按单位自动分配工程量小数位：m² 取 2 位、m³ 取 3 位，t／km 单独归组，其余单位可另选档位或固定位数，左侧实时预览格式化结果；③ 有合同列（A–P）／无合同列（A–M）两套列号映射一键切换，「说明列」可指定写到任意列（默认 T）；④ 三种句形任选：整句分支／紧凑内嵌／仅合同单价，审增审减按差值自动判词，也可固定措辞并自定义句子模板（带 {name}／{q1}／{q2}／{price}／{word}／{d} 占位符）；⑤ 成句预览、复制本行、整列复制一键可得，粘进 Excel 双击填充柄向下填充即批量成稿；⑥ 参数与表格自动本地缓存，重开即续，苹果字体、单文件离线可用'},
   {d:'2026-11-08', t:'升级：工程组价价构引擎 RateStruct 全系列（建设 V1.0.14／公路・水运・水利・农田・土地整治・电力・通信 V1.0.4）—— 页头去掉整段说明文字，只留标题与右上角版本号，首栏直接上移；「← 体系入口」改为实心胶囊按钮悬浮在<b>顶栏正中</b>，宽屏居中、≤960px 自动回到版本号左侧避让标题；建设中栏「依据体系／计价阶段」与计量依据「用概算版」、8 套「依据文号与出处」官网原文均延续上一版'},
 
 
@@ -1416,7 +1431,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07', 'ratestruct.html': '2026-11-08'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07', 'ratestruct.html': '2026-11-08', 'equidraft.html': '2026-11-09'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
