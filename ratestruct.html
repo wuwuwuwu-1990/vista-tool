@@ -3,15 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>工程组价价构引擎RateStruct V1.0.9</title>
+<title>工程组价价构引擎RateStruct · 计价体系入口</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232f6df0'/%3E%3Cstop offset='1' stop-color='%235b8def'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
-    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2733; --sub:#6b7686;
-    --line:#e6eaf2; --brand:#2f6df0; --brand2:#5b8def;
-    --ok:#1f9d55; --danger:#e0533d; --chip:#eef3fe;
-    --radius:14px; --shadow:0 6px 24px rgba(31,39,51,.08);
-    /* 统一字体：苹果系统字体优先（SF Pro / 苹方），非苹果环境逐级回落 */
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2733; --sub:#6b7686; --line:#e6eaf2;
+    --brand:#2f6df0; --brand2:#5b8def; --chip:#eef3fe;
+    --radius:16px; --shadow:0 6px 24px rgba(31,39,51,.07);
     --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
            "PingFang SC", "Hiragino Sans GB", "Helvetica Neue",
            "Microsoft YaHei", "微软雅黑", system-ui, sans-serif;
@@ -19,602 +17,263 @@
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
   body{
-    margin:0 auto; max-width:2080px; font-family:var(--font);
-    background:var(--bg); color:var(--ink); line-height:1.6; padding:24px;
+    margin:0 auto; max-width:1560px; font-family:var(--font); background:var(--bg);
+    color:var(--ink); line-height:1.6; padding:34px 28px 26px;
     -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     text-rendering:optimizeLegibility; font-kerning:normal;
   }
-  /* 表单控件默认不继承字体，统一锁定为同一字体，避免个别控件回落成系统默认字体 */
-  button, input, select, textarea, optgroup, option, label{
-    font-family:var(--font); letter-spacing:inherit; font-kerning:inherit;
-  }
-  h1{font-size:22px; margin:0 0 4px;}
-  .desc{color:var(--sub); font-size:13px; margin:0 0 20px;}
-  /* brand */
-  .brand{display:flex; align-items:center; gap:14px; margin-bottom:22px; flex-wrap:wrap;}
-  .brand .logo{
-    width:48px; height:48px; border-radius:13px; flex:none;
-    background:linear-gradient(135deg,var(--brand),var(--brand2));
-    color:#fff; font-weight:700; font-size:17px; letter-spacing:.5px;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 20px rgba(47,109,240,.35);
-  }
-  .brand .meta{flex:1; min-width:240px;}
-  .brand h1{font-size:23px; margin:0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
-  .brand h1 .en{font-size:13px; color:var(--brand); font-weight:600; letter-spacing:.5px;}
-  .brand .desc{margin:3px 0 0;}
-  .ver{font-size:11px; color:var(--brand); border:1px solid var(--brand); border-radius:20px; padding:3px 10px; font-weight:600; white-space:nowrap;}
-  .card{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    box-shadow:var(--shadow); padding:18px 20px; margin-bottom:20px;
-  }
-  .card h2{font-size:15px; margin:0 0 14px; display:flex; align-items:center; gap:8px;}
-  .card h2 .tag{font-size:11px; color:#fff; background:var(--brand); border-radius:6px; padding:2px 8px;}
-  /* toolbar */
-  .toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
-  button{
-    font-family:inherit; font-size:13px; cursor:pointer; border:none; border-radius:9px;
-    padding:8px 14px; transition:.15s; color:#fff; background:var(--brand);
-  }
-  button:hover{filter:brightness(1.05); transform:translateY(-1px);}
-  button.ghost{background:#fff; color:var(--brand); border:1px solid var(--brand);}
-  button.danger{background:var(--danger);}
-  button.soft{background:var(--chip); color:var(--brand);}
-  /* table */
-  table{width:100%; border-collapse:collapse; font-size:13px;}
-  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:middle;}
-  th{background:#f7f9fd; color:var(--sub); font-weight:600;}
-  td input{border:1px solid var(--line); border-radius:6px; padding:6px 8px; width:100%; font-family:inherit; font-size:13px;}
-  td input:focus{outline:none; border-color:var(--brand);}
-  .idx{width:42px; text-align:center; color:var(--sub);}
-  .sel{width:54px; text-align:center;}
-  .op{width:54px; text-align:center;}
-  .sel input{width:16px;height:16px;cursor:pointer;}
-  .row-del{color:var(--danger); background:none; padding:4px 8px; font-size:12px;}
-  .row-del:hover{background:#fdeae6;}
-  .ref-note{font-size:12px; color:var(--sub); margin:6px 0 0;}
-  /* output */
-  .out-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
-  .stat{font-size:12px; color:var(--sub);}
-  textarea{
-    width:100%; min-height:170px; resize:vertical; border:1px solid var(--line);
-    border-radius:10px; padding:14px; font-family:var(--font);
-    font-size:14px; line-height:1.9; color:var(--ink); background:#fbfcfe;
-  }
-  textarea:focus{outline:none; border-color:var(--brand);}
-  .copied{color:var(--ok) !important; background:var(--ok) !important;}
-  .footer{font-size:12px; color:var(--sub); text-align:center; margin-top:8px;}
-  .brand-foot{text-align:center; font-size:12px; color:#a5afbe; letter-spacing:.6px; margin:26px 0 6px;}
-  /* 竖向三栏（左中右） */
-  .cols{display:grid; grid-template-columns:1.05fr 1.3fr 1.25fr; gap:18px; align-items:stretch;}
-  @media (max-width:1240px){ .cols{grid-template-columns:1fr;} }
-  .col{padding:16px 16px 18px; display:flex; flex-direction:column;}
-  .col h2{font-size:14px; margin-bottom:12px;}
-  .colnum{width:24px; height:24px; border-radius:50%; flex:none;
-    background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; font-size:12px; font-weight:700;
-    display:inline-flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(47,109,240,.3);}
-  .col table{font-size:12px; table-layout:fixed;}
-  .col th,.col td{padding:6px; }
-  .col .idx{width:26px;}
-  .col .sel{width:44px;}
-  .col .op{width:58px;}
-  .lockmark{font-size:11px; color:var(--ok);}
-  .col .cd{width:132px;}
-  #refTable .cd{width:186px;}   /* 容纳 GB/T 50854-2024等9部计算标准、JJYJ 50-003-2026 等长代号 */
-  #refTable .cd input{font-size:11.5px;}
-  .col td input{font-size:12px; padding:5px 6px;}
-  /* 代号列数字等宽对齐，仍沿用同一字体（不使用等宽字体） */
-  .col .cd input, #refTable .cd input{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
-  /* 名称单元格：多行自动增高，文字完整可见 */
-  td textarea.cell{
-    display:block; width:100%; min-height:30px; border:1px solid var(--line); border-radius:6px;
-    padding:5px 6px; font-family:inherit; font-size:12px; line-height:1.5; color:var(--ink);
-    background:#fff; resize:vertical; overflow:hidden; word-break:break-word;
-  }
-  td textarea.cell:focus{outline:none; border-color:var(--brand);}
-  .col .out-head{flex-direction:column; align-items:flex-start; gap:8px;}
-  .col .seg{margin-left:0; flex-wrap:wrap;}
-  /* 轻提示 */
-  .toast{
-    position:fixed; left:50%; bottom:34px; transform:translate(-50%,10px);
-    background:#1f2a3a; color:#fff; font-size:13px; padding:9px 18px; border-radius:10px;
-    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:99;
-  }
-  .toast.show{opacity:1; transform:translate(-50%,0);}
-  button.armed{background:var(--danger) !important; color:#fff !important;}
-  /* 竖向三段输出 */
-  .seg-out{display:flex; flex-direction:column; gap:12px;}
-  .seg-block{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fbfcfe;}
-  .seg-label{font-size:12px; font-weight:600; color:var(--brand); background:#eef3fe; padding:6px 12px;
-    border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px;}
-  .seg-label .dot{width:8px; height:8px; border-radius:50%; background:var(--brand); flex:none;}
-  .seg-body{padding:12px 14px; font-size:14px; line-height:1.9; color:var(--ink); word-break:break-word;}
-  .seg-body:empty::before{content:"—"; color:#c2cad6;}
-  /* 整段输出 */
-  .out-text{border:1px solid var(--line); border-radius:10px; background:#fbfcfe;
-    padding:12px 14px; font-size:14px; line-height:1.95; color:var(--ink);
-    word-break:break-word; min-height:220px;}
-  .out-text:empty::before{content:"—"; color:#c2cad6;}
-  /* 左栏独立滚动 */
-  .scroll-box{flex:1 1 auto; max-height:calc(100vh - 300px); min-height:240px; overflow-y:auto;
-    border:1px solid var(--line); border-radius:8px; padding:2px;}
-  .scroll-box thead th{position:sticky; top:0; z-index:1;}
-  .scroll-box::-webkit-scrollbar{width:8px;}
-  .scroll-box::-webkit-scrollbar-thumb{background:#cfd8e6; border-radius:8px;}
-  .scroll-box::-webkit-scrollbar-track{background:transparent;}
-  .seg{display:inline-flex; gap:6px; margin-left:auto;}
-  .seg button{padding:6px 12px; font-size:12px;}
+  button, input, select, textarea, label{font-family:var(--font);}
+  a{color:inherit; text-decoration:none;}
   ::selection{background:#cfe0ff;}
+
+  /* ---------- 页头 ---------- */
+  .hero{display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:6px;}
+  .hero .logo{
+    width:54px; height:54px; border-radius:15px; flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand2));
+    color:#fff; font-weight:700; font-size:18px; letter-spacing:.5px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 24px rgba(47,109,240,.32);
+  }
+  .hero .meta{flex:1 1 320px; min-width:260px;}
+  .hero h1{font-size:24px; margin:0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; letter-spacing:.2px;}
+  .hero h1 .en{font-size:13px; color:var(--brand); font-weight:600; letter-spacing:.6px;}
+  .hero .lead{margin:5px 0 0; font-size:13.5px; color:var(--sub); max-width:820px;}
+  .hero .series{
+    align-self:center; display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .pill{
+    font-size:11.5px; font-weight:600; color:var(--brand); background:var(--chip);
+    border:1px solid rgba(47,109,240,.22); border-radius:20px; padding:5px 12px; white-space:nowrap;
+  }
+  .pill.plain{color:var(--sub); background:#fff; border-color:var(--line); font-weight:500;}
+
+  /* ---------- 数据条 ---------- */
+  .stats{display:flex; gap:26px; flex-wrap:wrap; margin:22px 0 20px; padding:14px 20px;
+    background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow);}
+  .stat{display:flex; align-items:baseline; gap:7px;}
+  .stat b{font-size:19px; font-weight:700; letter-spacing:.4px;}
+  .stat span{font-size:12.5px; color:var(--sub);}
+  .stats .hint{margin-left:auto; font-size:12px; color:#98a2b3; align-self:center;}
+
+  /* ---------- 卡片网格 ---------- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(292px,1fr)); gap:18px;}
+  @media (max-width:700px){ body{padding:22px 16px;} .grid{grid-template-columns:1fr;} }
+
+  .sys{
+    position:relative; display:flex; flex-direction:column; overflow:hidden;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px 20px 16px;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .sys::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(90deg,var(--g1),var(--g2)); opacity:.9;
+  }
+  .sys:hover{transform:translateY(-3px); border-color:rgba(47,109,240,.24);
+    box-shadow:0 14px 34px rgba(31,39,51,.13);}
+  .sys:focus-visible{outline:2px solid var(--brand); outline-offset:3px;}
+  .sys-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:13px;}
+  .sys .ico{
+    width:42px; height:42px; border-radius:12px; flex:none;
+    background:linear-gradient(135deg,var(--g1),var(--g2));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 7px 16px var(--gs);
+  }
+  .sys .ico svg{width:22px; height:22px;}
+  .sys .arrow{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:#c3ccda; background:#f6f8fc; transition:.18s;}
+  .sys:hover .arrow{color:#fff; background:linear-gradient(135deg,var(--g1),var(--g2));}
+  .sys h2{font-size:16.5px; margin:0 0 3px; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap;}
+  .sys h2 em{font-style:normal; font-size:11.5px; font-weight:600; color:var(--g1); letter-spacing:.4px;}
+  .sys .desc{font-size:12.5px; color:var(--sub); margin:0; min-height:56px;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .facts{list-style:none; margin:12px 0 0; padding:11px 0 0; border-top:1px dashed var(--line);
+    display:flex; flex-direction:column; gap:6px; flex:none;}
+  .facts li{display:flex; gap:8px; font-size:12px; color:#4a5666; line-height:1.5;}
+  .facts li b{flex:none; width:34px; font-weight:600; color:#9aa5b5; font-size:11.5px; padding-top:1px;}
+  .facts li span{flex:1; min-width:0;}
+  .sys-foot{display:flex; align-items:center; gap:7px; margin-top:auto; padding-top:14px; flex-wrap:wrap;}
+  .tag{font-size:11px; font-weight:600; border-radius:6px; padding:3px 9px; white-space:nowrap;
+    color:var(--g1); background:var(--gbg); border:1px solid var(--gc);}
+  .tag.main{color:#fff; background:linear-gradient(135deg,var(--g1),var(--g2)); border-color:transparent;}
+  .tag.ghost{color:#8894a4; background:#f7f9fc; border-color:var(--line); font-weight:500;}
+
+  /* ---------- 页脚 ---------- */
+  .note{margin:22px 0 0; padding:15px 20px; background:#fff; border:1px solid var(--line);
+    border-radius:13px; font-size:12.5px; color:var(--sub); line-height:1.85;}
+  .note b{color:var(--ink);}
+  .brand-foot{text-align:center; font-size:12px; color:#a5afbe; letter-spacing:.6px; margin:22px 0 4px;}
 </style>
 </head>
 <body>
-  <header class="brand">
-    <div class="logo">RS</div>
-    <div class="meta">
-      <h1>工程组价价构引擎 <span class="en">RateStruct</span></h1>
-      <p class="desc">左栏计量依据 · 中栏组价依据 · 右栏输出，三栏并排竖向操作；勾选适用定额即自动生成"重新组价 + 计量规则"两段式计价说明条款，可整段复制。</p>
-    </div>
-    <span class="ver">V1.0.9</span>
-  </header>
 
-  <main class="cols">
-  <!-- ① 计量依据 -->
-  <div class="card col">
-    <h2><span class="colnum">1</span><span class="tag">计量依据</span> 清单计价规范引用</h2>
-    <div class="toolbar">
-      <button id="addRef" class="soft">＋ 新增引用</button>
-      <button id="ref2024" class="ghost" title="一键勾选 2024 版国家计价计算标准与重庆实施细则">用 2024 版</button>
-      <button id="ref2013" class="ghost" title="一键勾选 2013 版清单计价规范与重庆两项清单规则">用 2013 版</button>
-      <button id="resetRef" class="ghost">恢复默认引用</button>
-    </div>
-    <table id="refTable">
-      <thead>
-        <tr><th class="idx">#</th><th>规范 / 规则名称</th><th>代号</th><th class="sel">选用</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <p class="ref-note">提示：2013 版三项（清单计价规范 + 重庆两项清单规则）排在最前且默认勾选；2024 版《建设工程工程量清单计价标准》（GB/T 50500-2024）、9 部工程量计算标准（合并记为 GB/T 50854-2024等9部计算标准）及《重庆市建设工程工程量清单计价实施细则》（JJYJ 50-003-2026）默认不勾选，需要时勾选即可。所有勾选框均可自由勾选或取消，仅勾选项进入输出文本。连接词"及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量"为固定后缀。</p>
+<header class="hero">
+  <div class="logo">RS</div>
+  <div class="meta">
+    <h1>工程组价价构引擎 <span class="en">RateStruct</span></h1>
+    <p class="lead">八套计价体系共用同一副交互骨架——左栏计量依据、中栏组价依据、右栏输出，勾选即生成「重新组价＋清单计量」两段式计价说明条款。点击下方的体系入口，进入对应的组价价构引擎；各体系的依据库、版本与本地缓存彼此独立。</p>
   </div>
-
-  <!-- ② 组价依据 -->
-  <div class="card col">
-    <h2><span class="colnum">2</span><span class="tag">组价依据</span> 定额类目清单</h2>
-    <div class="toolbar">
-      <button id="addQuota" class="soft">＋ 新增定额</button>
-      <button id="checkAll" class="ghost">全选</button>
-      <button id="uncheckAll" class="ghost">清空</button>
-      <button id="resetQuota" class="danger">恢复默认定额</button>
-    </div>
-    <div class="scroll-box">
-      <table id="quotaTable">
-        <thead>
-          <tr><th class="idx">#</th><th>定额名称</th><th>代号</th><th class="sel">选用</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <p class="ref-note">提示：清单收录 2018 系列全部计价定额、2019 年管廊与管线迁改、2021 年排水管网养护维修、2022 年装配式建筑、2023 年装配式市政与轨道运营改造等定额（概算定额未纳入）。带"必选"的四本（仪器仪表台班、机械台班、配合比表、费用定额）默认勾选、不可取消，名称/代号仍可编辑。</p>
+  <div class="series">
+    <span class="pill">8 套计价体系</span>
+    <span class="pill plain">单文件 · 离线 · 零依赖</span>
   </div>
+</header>
 
-  <!-- ③ 输出 -->
-  <div class="card col">
-    <div class="out-head">
-      <h2 style="margin:0;"><span class="colnum">3</span><span class="tag">输出</span> 计价说明整段文本</h2>
-      <div class="seg" style="align-items:center;">
-        <button id="copyAll">复制全文</button>
-      </div>
+<div class="stats">
+  <div class="stat"><b>8</b><span>计价体系</span></div>
+  <div class="stat"><b>191</b><span>条定额与编制办法</span></div>
+  <div class="stat"><b>32</b><span>条计量依据</span></div>
+  <div class="stat"><b>3</b><span>栏并排操作</span></div>
+  <div class="hint">各体系版本独立演进，进入后左上角可随时返回本页</div>
+</div>
+
+<main class="grid">
+
+  <!-- 建设 -->
+  <a class="sys" href="rs-building.html" style="--g1:#2f6df0;--g2:#5b8def;--gs:rgba(47,109,240,.34);--gbg:#eef3fe;--gc:rgba(47,109,240,.25);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 21V7l7-4v18M11 21V10l9 5v6" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M6.6 10h1.6M6.6 13.4h1.6M6.6 16.8h1.6M14 15h2.4M14 18h2.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     </div>
-    <div class="stat" id="stat">—</div>
-    <div class="out-text" id="outText"></div>
-    <p class="footer">两段结构：① 计价定额（含费用定额）重新组价　② 清单规范计量（必含）。按《名称》（代号）全角括号拼接，复制后可直接粘贴到编制说明。</p>
-  </div>
-  </main>
+    <h2>建设工程 <em>Building</em></h2>
+    <p class="desc">房屋建筑与装饰、通用安装、市政、园林绿化、构筑物、轨道交通等建设工程的计价定额与清单计量依据，重庆 2018 系列为主。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>2013 版清单 / 2024 版清单标准（一键切换）</span></li>
+      <li><b>规模</b><span>21 本定额（含四本必选）· 6 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag main">V1.0.10</span>
+      <span class="tag ghost">主力体系</span>
+    </div>
+  </a>
 
-  <p class="brand-foot">工程组价价构引擎 RateStruct　V1.0.9</p>
-  <div id="toast" class="toast"></div>
+  <!-- 公路 -->
+  <a class="sys" href="rs-highway.html" style="--g1:#475569;--g2:#64748b;--gs:rgba(71,85,105,.3);--gbg:#f1f5f9;--gc:rgba(71,85,105,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M8.4 3 4.6 21M15.6 3l3.8 18" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/><path d="M12 3.4v3.2M12 10v3.2M12 16.6v3.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".95"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>公路工程 <em>Highway</em></h2>
+    <p class="desc">部颁公路定额与重庆公路养护定额两套体系，预算／概算阶段分离，养护工程只编预算；相邻同文号条目自动合并括注。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>部颁 2018 / 重庆养护 2018（预算·养护不编概算）</span></li>
+      <li><b>规模</b><span>14 条定额与编制办法 · 3 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-<script>
-(function(){
-  "use strict";
-  const LS_Q = "quota_list_v2";
-  const LS_R = "ref_list_v2";
+  <!-- 水运 -->
+  <a class="sys" href="rs-waterway.html" style="--g1:#0e7490;--g2:#06b6d4;--gs:rgba(14,116,144,.3);--gbg:#ecfeff;--gc:rgba(14,116,144,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15.6h16l-1.8 4.2H5.8z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.4 15.6V8.4h7.2v7.2M12 8.4V4.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>水运工程 <em>Waterway</em></h2>
+    <p class="desc">内河航运、沿海港口、疏浚工程三条定额线，共用 JTS/T 116 编规与 JTS/T 277 材料用量定额，预算／概算分册组价。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>内河航运 / 沿海港口 / 疏浚工程（预算·概算）</span></li>
+      <li><b>规模</b><span>30 条定额与编规 · 3 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-  const DEFAULT_QUOTAS = [
-    ["重庆市房屋建筑与装饰工程计价定额","CQJZZSDE-2018"],
-    ["重庆市绿色建筑工程计价定额","CQLSJZDE-2018"],
-    ["重庆市仿古建筑工程计价定额","CQFGDE-2018"],
-    ["重庆市房屋修缮工程计价定额","CQXSDE-2018"],
-    ["重庆市装配式建筑工程计价定额","CQZPDE-2018"],
-    ["重庆市通用安装工程计价定额","CQAZDE-2018"],
-    ["重庆市市政工程计价定额","CQSZDE-2018"],
-    ["重庆市园林绿化工程计价定额","CQYLLHDE-2018"],
-    ["重庆市构筑物工程计价定额","CQGZWDE-2018"],
-    ["重庆市城市轨道交通工程计价定额","CQGDDE-2018"],
-    ["重庆市城市管线迁改工程计价定额","CQGXDE-2019"],
-    ["重庆市城市地下综合管廊工程计价定额","CQGLDE-2019"],
-    ["重庆市爆破工程计价定额","CQBPDE-2018"],
-    ["重庆市排水管网设施养护维修定额","CQPWDE-2021"],
-    ["重庆市装配式建筑工程计价定额（2022）",""],
-    ["重庆市装配式市政工程计价定额（2023）",""],
-    ["重庆市城市轨道交通运营改造工程计价定额","CQGDGZDE-2023"],
-    ["重庆市建设工程施工机械台班定额","CQJXDE-2018"],
-    ["重庆市建设工程混凝土及砂浆配合比表","CQPHBB-2018"],
-    ["重庆市建设工程施工仪器仪表台班定额","CQYQYBDE-2018"],
-    ["重庆市建设工程费用定额","CQFYDE-2018"]
-  ];
+  <!-- 水利 -->
+  <a class="sys" href="rs-hydro.html" style="--g1:#0f766e;--g2:#14b8a6;--gs:rgba(15,118,110,.28);--gbg:#f0fdfa;--gc:rgba(15,118,110,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M3.5 18.6c2.4 0 2.4-2.2 4.8-2.2s2.4 2.2 4.8 2.2 2.4-2.2 4.8-2.2 2.4 2.2 2.6 2.2" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.2c3.4 4 5.4 6.6 5.4 9a5.4 5.4 0 0 1-10.8 0c0-2.4 2-5 5.4-9z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>水利工程 <em>Hydro</em></h2>
+    <p class="desc">重庆 2021 版与水利部 2025 版两套水利定额，预算／概算双阶段，覆盖建筑工程、安装工程、施工机械台时等册别。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>重庆 2021 / 水利部 2025（预算·概算）</span></li>
+      <li><b>规模</b><span>21 条定额与编规 · 4 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-  const DEFAULT_REFS = [
-    ["建设工程工程量清单计价规范","GB50500-2013"],
-    ["重庆市建设工程工程量清单计价规则","CQJJGZ-2013"],
-    ["重庆市建设工程工程量清单计算规则","CQJLGZ-2013"],
-    ["建设工程工程量清单计价标准","GB/T 50500-2024"],
-    ["房屋建筑与装饰工程工程量计算标准","GB/T 50854-2024等9部计算标准"],
-    ["重庆市建设工程工程量清单计价实施细则","JJYJ 50-003-2026"]
-  ];
+  <!-- 农田 -->
+  <a class="sys" href="rs-farmland.html" style="--g1:#4d7c0f;--g2:#84cc16;--gs:rgba(77,124,15,.28);--gbg:#f7fee7;--gc:rgba(77,124,15,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17.5h18M3 21h18" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M12 17.5V9.2M12 9.2c-2.6 0-4.2-1.5-4.2-3.6 2.3 0 4.2 1.2 4.2 3.6zM12 9.2c2.6 0 4.2-1.5 4.2-3.6-2.3 0-4.2 1.2-4.2 3.6z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>农田工程 <em>Farmland</em></h2>
+    <p class="desc">农业农村部 2026 与土地整治 2011 两套高标准农田定额，预算／概算分阶段（土地整治只有预算定额，概算按钮锁定）。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>农业农村部 2026 / 土地整治 2011（预算·概算）</span></li>
+      <li><b>规模</b><span>17 条定额与编规 · 4 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-  // 两套计量依据系列：2013 版（默认勾选，排在最前）/ 2024 版 + 重庆实施细则
-  const REF_SERIES_2013 = ["GB50500-2013","CQJJGZ-2013","CQJLGZ-2013"];
-  const REF_SERIES_2024 = [
-    "GB/T 50500-2024",
-    "GB/T 50854-2024等9部计算标准",
-    "JJYJ 50-003-2026"
-  ];
-  // 旧版逐条列出的 9 部计算标准代号（升级时合并为一条）
-  const REF_9SPLIT = [
-    "GB/T 50854-2024","GB/T 50855-2024","GB/T 50856-2024","GB/T 50857-2024","GB/T 50858-2024",
-    "GB/T 50859-2024","GB/T 50860-2024","GB/T 50861-2024","GB/T 50862-2024"
-  ];
+  <!-- 土地整治 -->
+  <a class="sys" href="rs-land.html" style="--g1:#92400e;--g2:#d97706;--gs:rgba(146,64,14,.3);--gbg:#fffbeb;--gc:rgba(146,64,14,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M3.4 8.4 12 4l8.6 4.4L12 12.8z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M3.4 12.8 12 17.2l8.6-4.4M3.4 16.9 12 21.3l8.6-4.4" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" opacity=".85"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>土地整治 <em>Land</em></h2>
+    <p class="desc">重庆 2023 与国家 2011 两套土地整治定额，两者都只编预算不编概算，切换时概算阶段自动禁用。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>重庆 2023 / 国家 2011（仅预算，无概算）</span></li>
+      <li><b>规模</b><span>19 条定额与编规 · 4 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-  // 必选（强制包含、锁定不可取消）的定额代号
-  const MANDATORY = ["CQYQYBDE-2018","CQJXDE-2018","CQPHBB-2018","CQFYDE-2018"];
-  const isLocked = q => MANDATORY.includes(String(q.code||"").trim());
+  <!-- 电力 -->
+  <a class="sys" href="rs-power.html" style="--g1:#c2410c;--g2:#f97316;--gs:rgba(194,65,12,.3);--gbg:#fff7ed;--gc:rgba(194,65,12,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M13.4 2.6 4.8 13.4h5.2l-1.4 8 8.6-10.8h-5.2z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>电力工程 <em>Power</em></h2>
+    <p class="desc">火力发电与电网两套编规，预算／概算两套定额册，均为 2025 年版（2026-08-01 起施行，2018 年版已废止）。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>火力发电 / 电网（2025 年版 · 预算·概算）</span></li>
+      <li><b>规模</b><span>51 条定额与编规 · 4 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-  // 计量依据：全部条目均可自由勾选，默认全选（不再有锁定项）
+  <!-- 通信 -->
+  <a class="sys" href="rs-telecom.html" style="--g1:#6d28d9;--g2:#a855f7;--gs:rgba(109,40,217,.28);--gbg:#faf5ff;--gc:rgba(109,40,217,.22);">
+    <div class="sys-top">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20.4v-6.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12.2" r="1.9" fill="#fff"/><path d="M8.3 8.5a5.2 5.2 0 0 0 0 7.4M15.7 8.5a5.2 5.2 0 0 1 0 7.4" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M5.6 5.8a9.1 9.1 0 0 0 0 12.8M18.4 5.8a9.1 9.1 0 0 1 0 12.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></svg></span>
+      <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <h2>通信工程 <em>Telecom</em></h2>
+    <p class="desc">设备安装类与线路管道类两个专业分支，预算／概算阶段；通信无概算定额，概算阶段以预算定额代编。</p>
+    <ul class="facts">
+      <li><b>体系</b><span>设备安装 / 线路管道（预算·概算以预算代编）</span></li>
+      <li><b>规模</b><span>18 条定额与编规 · 4 条计量依据</span></li>
+    </ul>
+    <div class="sys-foot">
+      <span class="tag">V1.0.0</span>
+    </div>
+  </a>
 
-  // 规范化旧数据 / 异常数据，避免 .trim() 报错导致输出空白
-  function normQuota(o){
-    if(Array.isArray(o)) return {name:String(o[0]||""), code:String(o[1]||""), on:false};
-    o = o || {};
-    return {name:String(o.name||""), code:String(o.code||""), on:!!o.on};
-  }
-  function normRef(o){
-    if(Array.isArray(o)) return {name:String(o[0]||""), code:String(o[1]||""), on:true};
-    o = o || {};
-    return {name:String(o.name||""), code:String(o.code||""), on: o.on === undefined ? true : !!o.on};
-  }
+</main>
 
-  let quotas = load(LS_Q, DEFAULT_QUOTAS.map(r=>({name:r[0],code:r[1],on:false}))).map(normQuota);
-  let refs   = load(LS_R, DEFAULT_REFS).map(normRef);
+<p class="note">
+  <b>关于这套工具：</b>八个体系共用同一套输出规则——条目写作《名称》（代号）、顿号分隔、两段之间用分号、末尾唯一句号，代号为空时只出书名号、相邻同文号条目合并括注；名称与代号均可就地改写、可自行新增条目。<b>各体系依据库、版本号与本地缓存键彼此独立</b>（如建设为 <code>quota_list_v2</code>、公路为 <code>hw_quota_v1</code>），在某一体系里的改动不会影响其他体系。全部为单文件 HTML，无 CDN、无网络请求，可离线双击打开，也可发邮件或内网分发。
+</p>
 
-  // 概算定额不纳入本工具：清理本地缓存中遗留的概算条目
-  (function purgeGS(){
-    const before = quotas.length;
-    quotas = quotas.filter(q => !/概算/.test(String(q.name||"")) && !/^CQGSDE/i.test(String(q.code||"").trim()));
-    if(quotas.length !== before) save();
-  })();
+<p class="brand-foot">工程组价价构引擎 RateStruct　·　计价体系入口　·　8 套体系</p>
 
-  // 2022 版装配式建筑定额：官方通知未载明代号，清掉旧缓存里遗留的 CQZPDE-2022
-  (function migrateZPCode(){
-    let changed = false;
-    quotas.forEach(q=>{
-      const c = String(q.code||"").trim();
-      if(/^CQZPDE-2022$/i.test(c)){
-        if(/装配式建筑/.test(String(q.name||""))){ q.code = ""; changed = true; }
-      }
-    });
-    if(changed) save();
-  })();
-
-  // 计量依据改为"可勾选、默认全选"：旧版缓存里锁定项可能存的是未勾选，一次性全部置为勾选
-  (function migrateRefsAllOn(){
-    try{
-      if(localStorage.getItem("ref_all_on_v3") === "1") return;
-      refs.forEach(r => { r.on = true; });
-      localStorage.setItem("ref_all_on_v3", "1");
-      save();
-    }catch(e){ /* 存储不可用时，本次内存态同样全部勾选 */ 
-      refs.forEach(r => { r.on = true; });
-    }
-  })();
-
-  // 默认清单升级时，把本地缺失的新增定额静默补入（保留用户原有勾选与改名）
-  function mergeDefaults(list, defs){
-    const codes = new Set(list.map(x => String(x.code||"").trim()).filter(Boolean));
-    let added = 0;
-    defs.forEach(([name, code])=>{
-      const c = String(code||"").trim();
-      if(c && !codes.has(c)){ list.push({name, code:c, on:false}); added++; }
-    });
-    return added;
-  }
-
-  // 计量依据：9 部计算标准合并为一条；2013 三项排最前且默认勾选，其余默认不勾选
-  (function migrateRefLayout(){
-    let changed = false;
-
-    // 1) 删除旧版逐条列出的 9 部计算标准
-    const before = refs.length;
-    refs = refs.filter(r => !REF_9SPLIT.includes(String(r.code||"").trim()));
-    if(refs.length !== before) changed = true;
-
-    // 2) 补入缺失的默认条目（按默认顺序插到前面）
-    const codes = new Set(refs.map(r => String(r.code||"").trim()));
-    const missing = DEFAULT_REFS.filter(([, code]) => !codes.has(code));
-    if(missing.length){
-      refs = missing.map(([name, code]) => ({name, code, on: REF_SERIES_2013.includes(code)})).concat(refs);
-      changed = true;
-    }
-
-    // 3) 排序：默认清单按既定顺序在前（2013 三项 → 2024 三项），用户自建条目排后
-    const order = new Map(DEFAULT_REFS.map(([, code], i) => [code, i]));
-    refs.sort((a,b)=>{
-      const ia = order.has(String(a.code||"").trim()) ? order.get(String(a.code||"").trim()) : 999;
-      const ib = order.has(String(b.code||"").trim()) ? order.get(String(b.code||"").trim()) : 999;
-      return ia - ib;
-    });
-
-    // 4) 首次升级：仅 2013 三项默认勾选，其余默认不勾选
-    try{
-      if(localStorage.getItem("ref_layout_v3") !== "1"){
-        refs.forEach(r => { r.on = REF_SERIES_2013.includes(String(r.code||"").trim()); });
-        localStorage.setItem("ref_layout_v3", "1");
-        changed = true;
-      }
-    }catch(e){
-      refs.forEach(r => { if(REF_SERIES_2013.includes(String(r.code||"").trim())) r.on = true; });
-    }
-
-    if(changed) save();
-  })();
-  try{
-    if(mergeDefaults(quotas, DEFAULT_QUOTAS) > 0) save();
-  }catch(e){}
-
-  function load(key, def){
-    try{
-      const raw = localStorage.getItem(key);
-      if(!raw) return def;
-      const v = JSON.parse(raw);
-      return Array.isArray(v) ? v : def;
-    }catch(e){ return def; }
-  }
-  function save(){
-    try{
-      localStorage.setItem(LS_Q, JSON.stringify(quotas));
-      localStorage.setItem(LS_R, JSON.stringify(refs));
-    }catch(e){ /* localStorage 不可用（隐私模式 / file://）时忽略，不阻断界面 */ }
-  }
-
-  const qBody = document.querySelector("#quotaTable tbody");
-  const rBody = document.querySelector("#refTable tbody");
-  const stat  = document.getElementById("stat");
-  const outText = document.getElementById("outText") || document.querySelector(".out-text");
-  let currentText = "";
-
-  // ---- 渲染定额表 ----
-  function renderQuotas(){
-    qBody.innerHTML = "";
-    quotas.forEach((q,i)=>{
-      const lock = isLocked(q);
-      const checked = (q.on || lock) ? "checked" : "";
-      const tr = document.createElement("tr");
-      tr.innerHTML =
-        `<td class="idx">${i+1}</td>`+
-        `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(q.name)}</textarea></td>`+
-        `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(q.code)}" /></td>`+
-        (lock
-          ? `<td class="sel"><input type="checkbox" ${checked} disabled title="必选项，不可取消" /><div style="font-size:11px;color:var(--ok);margin-top:2px;">必选</div></td>`
-          : `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`);
-      qBody.appendChild(tr);
-    });
-    bindInputs();
-    growAll();
-    generate();
-  }
-
-  // ---- 渲染引用表 ----
-  function renderRefs(){
-    rBody.innerHTML = "";
-    refs.forEach((r,i)=>{
-      const checked = (r.on === undefined ? true : !!r.on) ? "checked" : "";
-      const tr = document.createElement("tr");
-      tr.innerHTML =
-        `<td class="idx">${i+1}</td>`+
-        `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(r.name)}</textarea></td>`+
-        `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(r.code)}" /></td>`+
-        `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`;
-      rBody.appendChild(tr);
-    });
-    bindRefInputs();
-    growAll();
-    generate();
-  }
-
-  // 名称文本框自动增高，保证文字全部显示
-  function grow(el){
-    el.style.height = "auto";
-    const h = el.scrollHeight;
-    el.style.height = (h > 0 ? h + 2 : 30) + "px";
-  }
-  function growAll(){
-    document.querySelectorAll("textarea.cell").forEach(grow);
-  }
-
-  function bindInputs(){
-    qBody.querySelectorAll("input, textarea").forEach(inp=>{
-      inp.addEventListener("input", e=>{
-        if(e.target.dataset.i === undefined) return;   // 跳过锁定项等无索引输入
-        const i = +e.target.dataset.i, k = e.target.dataset.k;
-        quotas[i][k] = e.target.type==="checkbox" ? e.target.checked : e.target.value;
-        if(e.target.tagName === "TEXTAREA") grow(e.target);
-        generate();   // 先渲染输出，保证勾选/编辑立即生效
-        save();       // 再持久化；存储失败不影响界面
-      });
-    });
-  }
-  function bindRefInputs(){
-    rBody.querySelectorAll("input, textarea").forEach(inp=>{
-      inp.addEventListener("input", e=>{
-        if(e.target.dataset.i === undefined) return;
-        const i = +e.target.dataset.i, k = e.target.dataset.k;
-        refs[i][k] = e.target.type==="checkbox" ? e.target.checked : e.target.value;
-        if(e.target.tagName === "TEXTAREA") grow(e.target);
-        generate();   // 先渲染
-        save();       // 再持久化
-      });
-    });
-  }
-
-  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-  // ---- 生成条款（三段式）----
-  function fmt(item){
-    const c = String(item.code||"").trim();
-    if(!c) return "《"+item.name+"》";
-    // "GB/T 50854-2024等9部计算标准" → 《名称》（GB/T 50854-2024）等9部计算标准
-    const m = c.match(/^(.+?)等(\d+部[^0-9]*)$/);
-    if(m) return "《"+item.name+"》（"+m[1]+"）等"+m[2];
-    return "《"+item.name+"》（"+c+"）";
-  }
-
-  function buildSegments(){
-    // 段一：组价（全部选用定额，勾选 或 必选锁定；费用定额一并归入）
-    const pricing = quotas.filter(q => q.name.trim() && (q.on || isLocked(q)));
-    // 段二：计量依据（仅勾选项；默认全选）
-    const refItems = refs.filter(r => r.name.trim() && r.on !== false);
-
-    const s1 = pricing.length
-      ? "按照" + pricing.map(fmt).join("、") + "及相关配套文件重新组价"
-      : "";
-    const s2 = refItems.length
-      ? "工程量按照" + refItems.map(fmt).join("、") +
-        "及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量。"
-      : "";
-
-    return { s1, s2, pricing, refItems };
-  }
-
-  function generate(){
-    const { s1, s2, pricing, refItems } = buildSegments();
-
-    // 合并为一整段：段间以分号衔接，末尾句号；某段为空则自动省略
-    const cores = [];
-    if (s1) cores.push(s1.replace(/[。；;]\s*$/, ""));
-    if (s2) cores.push(s2.replace(/[。；;]\s*$/, ""));
-    const text = cores.length
-      ? cores.join("；") + "。"
-      : "（请在左栏勾选计量依据、在中栏勾选组价定额）";
-
-    currentText = cores.length ? text : "";
-    if (outText) outText.textContent = text;
-
-    stat.textContent = "组价类 " + pricing.length + " 本（含费用定额）｜ 计量依据 " + refItems.length + " 项";
-  }
-
-  // ---- 按钮 ----
-  document.getElementById("addQuota").addEventListener("click", ()=>{
-    quotas.push({name:"", code:"", on:true}); save(); renderQuotas();
-  });
-  document.getElementById("addRef").addEventListener("click", ()=>{
-    refs.push({name:"", code:"", on:true}); save(); renderRefs();
-  });
-  // 一键切换计量依据系列
-  function applyRefSeries(list, tip){
-    refs.forEach(r=>{
-      const c = String(r.code||"").trim();
-      if(list.includes(c)) r.on = true;
-      else if(REF_SERIES_2024.includes(c) || REF_SERIES_2013.includes(c)) r.on = false;
-    });
-    save(); renderRefs(); toast(tip);
-  }
-  document.getElementById("ref2024").addEventListener("click", ()=>{
-    applyRefSeries(REF_SERIES_2024, "已切换为 2024 版计价计算标准 + 重庆实施细则");
-  });
-  document.getElementById("ref2013").addEventListener("click", ()=>{
-    applyRefSeries(REF_SERIES_2013, "已切换为 2013 版清单计价规范 + 重庆清单规则");
-  });
-  document.getElementById("checkAll").addEventListener("click", ()=>{
-    quotas.forEach(q=>q.on=true); save(); renderQuotas();
-  });
-  document.getElementById("uncheckAll").addEventListener("click", ()=>{
-    quotas.forEach(q=>{ if(!isLocked(q)) q.on=false; }); save(); renderQuotas();
-  });
-  document.getElementById("resetQuota").addEventListener("click", e=>{
-    armConfirm(e.currentTarget, "再点一次恢复", ()=>{
-      quotas = DEFAULT_QUOTAS.map(r=>({name:r[0],code:r[1],on:false}));
-      save(); renderQuotas();
-      toast("已恢复默认定额清单（" + quotas.length + " 本）");
-    });
-  });
-  document.getElementById("resetRef").addEventListener("click", e=>{
-    armConfirm(e.currentTarget, "再点一次恢复", ()=>{
-      refs = DEFAULT_REFS.map(([name, code]) => ({name, code, on: REF_SERIES_2013.includes(code)}));
-      save(); renderRefs();
-      toast("已恢复默认计量依据（" + refs.length + " 项，2013 版默认勾选）");
-    });
-  });
-
-  // 无弹窗二次确认：首次点击按钮变红提示，3 秒内再点即执行
-  function armConfirm(btn, tip, action){
-    if(btn.dataset.armed === "1"){
-      clearTimeout(Number(btn.dataset.timer));
-      btn.dataset.armed = "";
-      btn.textContent = btn.dataset.label;
-      btn.classList.remove("armed");
-      action();
-      return;
-    }
-    btn.dataset.label = btn.textContent;
-    btn.dataset.armed = "1";
-    btn.textContent = tip;
-    btn.classList.add("armed");
-    btn.dataset.timer = String(setTimeout(()=>{
-      btn.dataset.armed = "";
-      btn.textContent = btn.dataset.label;
-      btn.classList.remove("armed");
-    }, 3000));
-  }
-
-  let toastTimer = null;
-  function toast(msg){
-    const el = document.getElementById("toast");
-    if(!el) return;
-    el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=>el.classList.remove("show"), 1800);
-  }
-
-  function copyText(text, btn){
-    const done = ()=>{
-      const old = btn.textContent; btn.textContent="已复制 ✓"; btn.classList.add("copied");
-      setTimeout(()=>{ btn.textContent=old; btn.classList.remove("copied"); }, 1400);
-    };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(done).catch(()=>fallback(text,done));
-    }else{ fallback(text,done); }
-  }
-  function fallback(text, cb){
-    const ta=document.createElement("textarea"); ta.value=text;
-    ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
-    ta.select(); try{ document.execCommand("copy"); cb(); }catch(e){ toast("复制失败，请手动选择文本复制"); }
-    document.body.removeChild(ta);
-  }
-
-  document.getElementById("copyAll").addEventListener("click", e=>{
-    if(!currentText){ toast("当前无内容可复制，请先勾选计量依据或组价定额"); return; }
-    copyText(currentText, e.target);
-  });
-
-  // ---- 初始化 ----
-  try{ renderQuotas(); }catch(err){ console.error("渲染定额表失败:", err); }
-  try{ renderRefs(); }catch(err){ console.error("渲染引用表失败:", err); }
-  generate();   // 兜底：确保输出栏一定有内容
-
-  // 字体/布局就绪后再校准一次文本框高度，防止文字被截断
-  window.addEventListener("load", ()=>{ requestAnimationFrame(()=>{ try{ growAll(); }catch(e){} }); });
-  window.addEventListener("resize", ()=>{ try{ growAll(); }catch(e){} });
-})();
-</script>
 </body>
 </html>
