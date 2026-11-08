@@ -47,6 +47,73 @@
     --sp-bar:linear-gradient(180deg,#ffc861,#f5a623);
     --foot-c:#7e9cc0;
   }
+  /* ===== 主题 3：柔光渐变（蓝 → 紫 → 粉 三色柔光 + 白色玻璃） ===== */
+  body[data-theme="aurora"]{
+    --bg1:#e3ecfb; --bg2:#fde9f3;
+    --bg-extra1:rgba(122,164,226,.78); --bg-extra2:rgba(178,158,226,.72); --bg-extra3:rgba(244,178,208,.68);
+    --card:rgba(255,255,255,.62); --card-b:rgba(255,255,255,.92);
+    --txt:#1b2540; --muted:#55658a;
+    --blue:#4f7fd6; --cyan:#2f9fc0; --violet:#8b7cf6; --teal:#1fa88c;
+    --title-grad:linear-gradient(120deg,#26365e 12%,#6a5aa8 58%,#b4688f 92%);
+    --kicker-c:#6b5aad; --kicker-b:rgba(255,255,255,.66); --kicker-bd:rgba(139,124,246,.38);
+    --card-hover:0 18px 42px rgba(96,116,168,.26);
+    --card-hover-bd:rgba(139,124,246,.48);
+    --sec-bar:linear-gradient(180deg,#7ea6e0,#c39ad8);
+    --chip-def-bd:rgba(96,116,168,.22); --chip-def-c:#55658a; --chip-def-bg:rgba(255,255,255,.6);
+    --mark-grad:linear-gradient(135deg,#6f9be0,#a98bd6);
+    --mark-shadow:0 8px 22px rgba(111,155,224,.45);
+    --btn-ok:linear-gradient(135deg,#5b87d8,#9379d8);
+    --sp-mark:linear-gradient(135deg,#6f9be0,#c39ad8);
+    --sp-bar:linear-gradient(180deg,#7ea6e0,#c39ad8);
+    --foot-c:#55658a;
+  }
+  /* 三色柔光底：蓝(右上) → 紫(左) → 粉(右下)，外加 150° 三色线性过渡 */
+  body[data-theme="aurora"]{
+    background:
+      radial-gradient(1040px 660px at 88% -12%,rgba(112,156,224,.95),transparent 62%),
+      radial-gradient(940px 620px at -12% 22%,rgba(170,150,224,.9),transparent 64%),
+      radial-gradient(860px 640px at 58% 118%,rgba(246,168,202,.88),transparent 62%),
+      linear-gradient(150deg,#d5e3f8 0%,#e3d6f4 48%,#fbd9eb 100%);
+  }
+  /* —— 浅色主题下需要跟随的硬编码深色组件 —— */
+  body[data-theme="aurora"] .card:hover{background:rgba(255,255,255,.88);}
+  body[data-theme="aurora"] .card::after{background:radial-gradient(circle,rgba(255,255,255,.7),transparent 62%);}
+  /* 卡片 chip 与私密标签原本是给深色底调的浅色，浅色底上统一压暗 + 提饱和 */
+  body[data-theme="aurora"] .card .chip,
+  body[data-theme="aurora"] .secret-panel .sp-card .tag{filter:brightness(.6) saturate(1.45);}
+  body[data-theme="aurora"] nav{box-shadow:0 8px 26px rgba(96,116,168,.18);}
+  body[data-theme="aurora"] .theme-picker .tp.on{background:rgba(255,255,255,.95);color:#2f4a7a;
+       box-shadow:0 3px 10px rgba(120,140,190,.3);}
+  body[data-theme="aurora"] .secret-btn.unlocked{color:#b45309;border-color:rgba(180,83,9,.4);background:rgba(251,191,36,.22);}
+  body[data-theme="aurora"] .secret-btn.unlocked svg{color:#b45309;}
+  body[data-theme="aurora"] .modal-mask{background:rgba(68,84,120,.38);}
+  body[data-theme="aurora"] .modal{background:linear-gradient(160deg,rgba(255,255,255,.97),rgba(247,242,252,.97));
+       border-color:rgba(255,255,255,.95);box-shadow:0 24px 70px rgba(80,100,150,.3);}
+  body[data-theme="aurora"] .modal h3{color:#1b2540;}
+  body[data-theme="aurora"] .modal p{color:#55658a;}
+  body[data-theme="aurora"] .modal input{background:rgba(255,255,255,.9);border-color:rgba(96,116,168,.26);color:#1b2540;}
+  body[data-theme="aurora"] .modal input:focus{border-color:#7ea6e0;}
+  body[data-theme="aurora"] .modal .cancel{background:rgba(96,116,168,.1);color:#55658a;}
+  body[data-theme="aurora"] .modal .cancel:hover{background:rgba(96,116,168,.18);color:#1b2540;}
+  body[data-theme="aurora"] .modal .err{color:#d33b3b;}
+  body[data-theme="aurora"] .modal .about-avatar{border-color:rgba(255,255,255,.9);}
+  body[data-theme="aurora"] .about-log{border-top-color:rgba(96,116,168,.18);}
+  body[data-theme="aurora"] .about-log-title{color:#1b2540;}
+  body[data-theme="aurora"] .about-log .log-item{border-color:rgba(96,116,168,.14);}
+  body[data-theme="aurora"] .about-log .log-item .ld{color:#4f7fd6;}
+  body[data-theme="aurora"] .about-log .log-item .lt{color:#33415e;}
+  body[data-theme="aurora"] .secret-panel{background:rgba(228,234,247,.55);}
+  body[data-theme="aurora"] .secret-panel .sp-brand b{color:#1b2540;}
+  body[data-theme="aurora"] .secret-panel .sp-brand span{color:rgba(44,58,88,.55);}
+  body[data-theme="aurora"] .secret-panel .sp-sec h2{color:#1b2540;}
+  body[data-theme="aurora"] .secret-panel .sp-sec span{color:rgba(44,58,88,.55);}
+  body[data-theme="aurora"] .secret-panel .sp-close{color:rgba(44,58,88,.65);border-color:rgba(120,140,180,.3);background:rgba(255,255,255,.7);}
+  body[data-theme="aurora"] .secret-panel .sp-card{background:rgba(255,255,255,.62);border-color:rgba(255,255,255,.92);}
+  body[data-theme="aurora"] .secret-panel .sp-card:hover{box-shadow:0 16px 40px rgba(96,116,168,.26);border-color:#fff;}
+  body[data-theme="aurora"] .secret-panel .sp-card h4{color:#1b2540;}
+  body[data-theme="aurora"] .secret-panel .sp-card p{color:rgba(44,58,88,.72);}
+  body[data-theme="aurora"] .secret-panel .sp-card .meta{color:rgba(44,58,88,.6);}
+  body[data-theme="aurora"] .secret-panel .sp-empty{border-color:rgba(120,140,180,.32);color:rgba(44,58,88,.6);background:rgba(255,255,255,.45);}
   html{scroll-behavior:smooth;}
   body{min-height:100vh;font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
        color:var(--txt);overflow-x:hidden;transition:background .3s;
@@ -295,6 +362,13 @@
     .nav-right .ver{display:none;}
     .theme-picker .tp{padding:5px 9px;font-size:11px;}
   }
+  /* 窄屏：三套主题 + 两个按钮挤成两行，改为整行均布，避免「关于」孤零零掉到第三行 */
+  @media (max-width:560px){
+    .nav-right{width:100%;justify-content:space-between;gap:8px;}
+    .theme-picker{padding:2px;gap:2px;}
+    .theme-picker .tp{padding:5px 7px;font-size:10.5px;}
+    .theme-picker .tp .tp-s{display:none;}
+  }
 
   /* ===== 工具搜索框 ===== */
   .tool-search{max-width:480px;margin:0 auto 26px;position:relative;}
@@ -363,8 +437,9 @@
     </div>
     <div class="nav-right">
     <div class="theme-picker" id="themePicker" title="切换界面主题">
-      <button class="tp" data-t="space" onclick="setTheme('space')">深空科技</button>
-      <button class="tp on" data-t="business" onclick="setTheme('business')">商务深蓝</button>
+      <button class="tp" data-t="space" onclick="setTheme('space')">深空<span class="tp-s">科技</span></button>
+      <button class="tp on" data-t="business" onclick="setTheme('business')">商务<span class="tp-s">深蓝</span></button>
+      <button class="tp" data-t="aurora" onclick="setTheme('aurora')">柔光<span class="tp-s">渐变</span></button>
     </div>
 
 
@@ -1063,8 +1138,8 @@ document.addEventListener('keydown', function(e){
 });
 
 // ===== 主题切换 =====
-var THEMES = ['space','business'];
-var THEME_VER = 'v4';  // 主题精简为2个(space/business)，递增作废旧记忆  // 默认主题版本，变更默认主题时递增以作废旧记忆
+var THEMES = ['space','business','aurora'];
+var THEME_VER = 'v4';  // 主题：space/business/aurora，递增作废旧记忆  // 默认主题版本，变更默认主题时递增以作废旧记忆
 function setTheme(t, save){
   document.body.setAttribute('data-theme', t);
   document.querySelectorAll('.theme-picker .tp').forEach(function(b){
@@ -1458,7 +1533,7 @@ updateLogBadge();
   try {
     var saved = localStorage.getItem('vista_theme');
     var ver = localStorage.getItem('vista_theme_ver');
-    if (saved && ver === THEME_VER && (saved === 'space' || saved === 'business')) t = saved;
+    if (saved && ver === THEME_VER && THEMES.indexOf(saved) !== -1) t = saved;
   } catch(e){}
   setTheme(t, false);  // 不重复写 localStorage
 })();
