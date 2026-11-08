@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f7b4f'/%3E%3Ctext x='32' y='44' font-family='Helvetica,Arial' font-size='30' font-weight='700' fill='%23fff' text-anchor='middle'%3Efx%3C/text%3E%3C/svg%3E">
+<title>审核对比表格公式快写工具 EquiDraft</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","PingFang SC","Hiragino Sans GB","Helvetica Neue",sans-serif;
+  --mono:"SF Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,"PingFang SC",monospace;
+  --ink:#161d26;--ink2:#4a5765;--ink3:#8494a3;--ink4:#b3bfca;
+  --line:#dde4ec;--line2:#e6ecf3;--grid:#dfe6ee;
+  --bg:#edf1f5;--card:#fff;
+  --brand:#0f7b4f;--brand-d:#0a5c3a;--brand-soft:#e6f4ed;
+  --blue:#2f6fed;--blue-soft:#eaf1ff;
+}
+html,body{height:100%;margin:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:13px;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow:hidden}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+::selection{background:#bfe3d2}
+.app{height:100vh;display:flex;flex-direction:column;min-width:1000px}
+
+/* ---------- 顶栏 ---------- */
+.topbar{height:54px;flex:none;display:flex;align-items:center;gap:13px;padding:0 18px;
+  background:var(--card);border-bottom:1px solid var(--line);position:relative;z-index:20}
+.logo{display:flex;align-items:center;gap:9px;flex:none}
+.logo .mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(160deg,#17a166,#0a5c3a);
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;letter-spacing:-.5px;
+  box-shadow:0 1px 2px rgba(11,80,52,.28),inset 0 1px 0 rgba(255,255,255,.22)}
+.logo b{font-size:15px;font-weight:600;letter-spacing:.2px}
+.logo .en{font-size:11px;color:var(--ink3);letter-spacing:.6px;margin-left:2px;font-weight:500}
+.ver{font-size:10.5px;color:var(--ink3);border:1px solid var(--line);border-radius:20px;
+  padding:2px 8px;font-variant-numeric:tabular-nums;font-weight:500;background:#fafbfc}
+.topbar .grow{flex:1}
+.tbtns{display:flex;align-items:center;gap:8px;flex:none}
+.btn{height:30px;padding:0 12px;border:1px solid var(--line);background:#fff;border-radius:8px;
+  cursor:pointer;font-weight:500;color:var(--ink2);transition:.14s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:#f7f9fb;border-color:#d2dae2;color:var(--ink)}
+.btn:active{transform:translateY(.5px)}
+.btn.primary{background:var(--brand);border-color:var(--brand-d);color:#fff;box-shadow:0 1px 2px rgba(10,92,58,.22)}
+.btn.primary:hover{background:#0d6f47}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:#f1f4f7}
+.btn.sm{height:26px;padding:0 9px;font-size:12px;border-radius:7px}
+
+/* ---------- 顶部：数据行 / 说明列 ---------- */
+.locate{flex:none;height:40px;background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 18px}
+.loc-head{display:flex;align-items:center;gap:8px;width:100%}
+.loc-head .lt{font-size:10.5px;font-weight:650;color:var(--ink3);letter-spacing:1.1px;text-transform:uppercase}
+.loc-head .lh{font-size:11px;color:var(--ink4)}
+.loc-head .lh b{color:var(--ink3);font-weight:600;font-family:var(--mono)}
+.loc-head .lrow{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+.loc-head .lrow label{color:var(--ink3);font-size:11.5px}
+.loc-head .lrow select{height:26px;min-width:56px;border:1px solid var(--line);border-radius:6px;background:#fff;
+  padding:0 4px;font-family:var(--mono);font-size:11.5px;color:var(--ink2);outline:none;cursor:pointer}
+.loc-head .lrow select:focus{border-color:var(--brand)}
+.loc-head .lrow .la{font-family:var(--mono);font-size:10.5px;color:var(--brand-d);background:var(--brand-soft);
+  border:1px solid #d7e8df;border-radius:4px;padding:1px 6px;font-weight:600}
+.loc-head .lrow .sep2{width:1px;height:16px;background:var(--line);margin:0 3px}
+.loc-head input{width:62px;height:26px;border:1px solid var(--line);border-radius:6px;
+  padding:0 6px;text-align:center;font-family:var(--mono);font-weight:600;color:var(--brand-d);outline:none;transition:.14s}
+.loc-head input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,123,79,.1)}
+
+/* ---------- 主体 ---------- */
+.main{flex:1;display:grid;grid-template-columns:266px minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-height:0}
+.side{background:var(--card);border-right:1px solid var(--line);overflow-y:auto;overflow-x:hidden;padding:2px 0 30px}
+.side::-webkit-scrollbar{width:9px}
+.side::-webkit-scrollbar-thumb{background:#d2dae2;border-radius:9px;border:2px solid #fff}
+.pane{padding:14px 15px;border-bottom:1px solid var(--line2)}
+.pane:last-child{border-bottom:0}
+.pane h3{margin:0 0 11px;font-size:10.5px;font-weight:650;color:var(--ink3);letter-spacing:1.1px;
+  text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.pane h3 .hint{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink4);font-size:11px;margin-left:auto}
+
+.row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.row:last-child{margin-bottom:0}
+.row label{flex:none;width:70px;color:var(--ink2);font-size:12.5px}
+.row select{flex:1;min-width:0;height:28px;border:1px solid var(--line);border-radius:7px;
+  background:#fff;padding:0 8px;outline:none;transition:.14s}
+.row select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,123,79,.1)}
+
+/* 分段 / 预设 */
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
+.presets button{height:26px;padding:0 10px;border:1px solid var(--line);background:#fff;border-radius:20px;
+  font-size:11.5px;cursor:pointer;color:var(--ink2);transition:.14s;font-weight:500}
+.presets button:hover{border-color:#cdd6df;background:#f8fafb}
+.presets button.on{background:var(--brand-soft);border-color:#a8d8c2;color:var(--brand-d);font-weight:600}
+
+.bucket{margin-bottom:10px}
+.bucket .bh{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.bucket .bh b{font-size:11.5px;color:var(--ink2);font-weight:600}
+.bucket .bh .pat{font-family:var(--mono);font-size:10.5px;color:var(--ink3);background:#f4f7f9;
+  border-radius:4px;padding:1px 5px}
+.bucket .bh .cnt{margin-left:auto;font-size:10.5px;color:var(--ink4)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:1px;height:21px;padding:0 2px 0 6px;border-radius:6px;
+  background:#f4f7f9;border:1px solid #e6ecf1;font-size:11.5px;color:var(--ink2);font-family:var(--mono)}
+.chip i{cursor:pointer;color:var(--ink4);font-style:normal;font-size:12px;line-height:1;padding:0 2px;border-radius:3px}
+.chip i:hover{color:#c0392b;background:#fdecea}
+.chip.add{padding:0;width:26px;justify-content:center;border-style:dashed;color:var(--ink3);cursor:pointer}
+.chip.add:hover{border-color:var(--brand);color:var(--brand)}
+.chip input{width:52px;height:20px;border:0;background:transparent;outline:none;font-family:var(--mono);font-size:11.5px;padding:0 2px}
+
+.monopv{margin-top:9px;font-family:var(--mono);font-size:10px;line-height:1.62;color:var(--ink2);
+  background:#f7f9fb;border:1px solid var(--line2);border-radius:7px;padding:7px 8px;word-break:break-all;
+  max-height:152px;overflow:auto}
+.monopv b{color:var(--brand);font-weight:600}
+
+.chk{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--ink2);cursor:pointer;line-height:1.5}
+.chk input{margin:2px 0 0;accent-color:var(--brand);width:13px;height:13px;flex:none}
+.note{font-size:11px;color:var(--ink4);line-height:1.6;margin:6px 0 0;padding-left:20px}
+textarea#tpl{width:100%;height:70px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;
+  font-family:var(--mono);font-size:11px;line-height:1.6;resize:vertical;outline:none;color:var(--ink);background:#fff}
+textarea#tpl:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,123,79,.1)}
+.tokens{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.tokens button{height:22px;padding:0 7px;border:1px solid var(--line);background:#fff;border-radius:5px;
+  font-size:11px;color:var(--ink2);cursor:pointer;font-family:var(--mono)}
+.tokens button:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+
+/* 有合同列 / 无合同列：两种颜色填充 */
+.btn.mode.g1{background:#dcf0e5;border-color:#b0dbc8;color:var(--brand-d);font-weight:600}
+.btn.mode.g1:hover{background:#ddf0e6;border-color:#a8d8c2;color:var(--brand-d)}
+.btn.mode.g2{background:#dfe9fd;border-color:#b6cbf8;color:#1f4fc4;font-weight:600}
+.btn.mode.g2:hover{background:#d3e1fc;border-color:#a2bcf5;color:#1f4fc4}
+.btn.mode.on{color:#fff}
+.btn.mode.on.g1{background:var(--brand);border-color:var(--brand-d);box-shadow:0 1px 2px rgba(10,92,58,.24)}
+.btn.mode.on.g1:hover{background:#0d6f47;color:#fff}
+.btn.mode.on.g2{background:var(--blue);border-color:#2559c9;box-shadow:0 1px 2px rgba(47,111,237,.26)}
+.btn.mode.on.g2:hover{background:#2a63d8;color:#fff}
+
+
+/* ---------- 工作区 ---------- */
+.work{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--card)}
+.fxbar{height:36px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;
+  border-bottom:1px solid var(--line);background:#fbfcfd}
+.namebox{width:64px;height:23px;border:1px solid var(--line);border-radius:5px;background:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11.5px;
+  color:var(--ink2);font-variant-numeric:tabular-nums;flex:none;font-weight:600}
+.fx{font-family:"Times New Roman",serif;font-style:italic;font-size:14px;color:var(--ink3);flex:none;padding:0 2px;user-select:none}
+.fxval{flex:1;height:23px;border:1px solid var(--line);border-radius:5px;background:#fff;
+  display:flex;align-items:center;padding:0 8px;font-family:var(--mono);font-size:11.5px;color:var(--ink2);
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fxval.f{color:var(--brand-d);background:#f8fcfa}
+.fxhint{flex:none;font-size:11px;color:var(--ink4);padding-left:6px;white-space:nowrap;user-select:none}
+
+.sheetwrap{flex:none;overflow:auto;background:#f4f6f9;position:relative;border-bottom:1px solid var(--line)}
+.sheetwrap::-webkit-scrollbar{height:9px;width:9px}
+.sheetwrap::-webkit-scrollbar-thumb{background:#ccd5de;border-radius:9px;border:2px solid #fff}
+table.sheet{border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:12px;width:auto}
+table.sheet th,table.sheet td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);
+  height:30px;padding:0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;font-weight:400}
+thead th{position:sticky;top:0;z-index:3;background:#eef3f8;color:#5c6b7a;font-size:10.5px;
+  font-weight:600;text-align:center;border-bottom:1px solid var(--line)!important;user-select:none;letter-spacing:.4px}
+thead tr.lh th{height:25px}
+thead tr.gh th{top:25px;height:23px;background:#e9eff5;font-size:11px;font-weight:650;color:#3f4d5c;letter-spacing:1px;z-index:2}
+thead tr.sh th{top:48px;height:25px;background:#f1f5f9;font-size:10.5px;color:#5f6e7d;font-weight:600;z-index:2}
+thead th.ch{cursor:pointer;overflow:visible}
+thead th.ch:hover{background:#eaf0f5;color:var(--ink2)}
+thead th.ch.on{background:var(--brand-soft);color:var(--brand-d)}
+thead th.corner{left:0;z-index:6;background:#e8eef5;font-family:var(--mono);font-size:10.5px;color:#5c6b7a}
+.sheet th.rh{position:sticky;left:0;z-index:2;background:#eef3f8;color:#5c6b7a;font-size:10.5px;
+  text-align:center;font-variant-numeric:tabular-nums;width:46px;font-weight:600;border-right:1px solid var(--line)}
+.sheet tr.cur th.rh{background:var(--brand);color:#fff}
+.sheet td{background:#fff;color:var(--ink);cursor:default;font-variant-numeric:tabular-nums}
+.sheet td.num{text-align:right}
+.sheet td.ctr{text-align:center}
+.sheet td.calc{background:#f7f9fb;color:#3f4e5d;cursor:default}
+.sheet td.flw{background:#fbfcfd}
+.sheet td.sel{outline:2px solid var(--brand);outline-offset:-2px;background:#f1fbf6;position:relative;z-index:1}
+.sheet td.calc.sel{background:#e8f5ee}
+.grip{position:absolute;right:-3px;top:0;width:7px;height:100%;cursor:col-resize;z-index:7}
+
+/* ---------- 成句预览 ---------- */
+.sent{flex:none;padding:10px 16px 11px;background:#fcfdfe;border-bottom:1px solid var(--line)}
+.sent-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.sent-h span{font-size:10.5px;font-weight:650;color:var(--ink3);letter-spacing:1.1px;text-transform:uppercase}
+.sent-h .btn{margin-left:auto}
+#sentText{margin:0;font-size:13.5px;line-height:1.8;color:var(--ink);letter-spacing:.1px;user-select:text;
+  max-height:56px;overflow:auto}
+#sentText.empty{color:var(--ink4);font-style:italic;font-size:12.5px}
+
+/* ---------- 公式面板 ---------- */
+.fpanel{flex:1;min-height:190px;background:var(--card);display:flex;flex-direction:column;min-width:0}
+.fp-head{height:40px;flex:none;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--line2)}
+.fp-title{font-size:12px;font-weight:650;color:var(--ink);letter-spacing:.2px}
+.fp-pos{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums;padding-left:2px;
+  max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-head .grow{flex:1}
+.seg{display:inline-flex;background:#f1f4f7;border-radius:8px;padding:2px;gap:2px}
+.seg button{border:0;background:transparent;height:23px;padding:0 9px;border-radius:6px;cursor:pointer;
+  font-size:11.5px;color:var(--ink2);font-weight:500;transition:.14s;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:#fff;color:var(--brand);box-shadow:0 1px 2px rgba(16,32,48,.1);font-weight:600}
+.fp-body{flex:1;min-height:0;overflow:auto;padding:10px 14px;background:#fcfdfe}
+.fp-body::-webkit-scrollbar{width:10px}
+.fp-body::-webkit-scrollbar-thumb{background:#d3dbe3;border-radius:10px;border:3px solid #fcfdfe}
+pre.code{margin:0;font-family:var(--mono);font-size:12px;line-height:1.8;color:#20303f;
+  white-space:pre-wrap;word-break:break-all;user-select:text}
+pre.code i.s{color:#0b7a4b;font-style:normal}
+pre.code b.fn{color:#2f6fed;font-weight:600}
+pre.code em.rf{color:#8b4bbf;font-style:normal;font-weight:500}
+pre.code.placeholder{color:var(--ink4);font-family:var(--font);font-style:italic;font-size:12px}
+.fp-note{margin-top:13px;padding-top:10px;border-top:1px dashed var(--line);font-size:11px;
+  line-height:1.75;color:var(--ink4);max-width:760px}
+.fp-note b{color:var(--ink2);font-weight:600}
+.fp-note code{font-family:var(--mono);font-size:10.5px;background:#f2f6f9;border-radius:3px;padding:0 3px;color:var(--ink2)}
+.fp-foot{height:31px;flex:none;display:flex;align-items:center;gap:14px;padding:0 14px;
+  border-top:1px solid var(--line2);font-size:11px;color:var(--ink3);background:#fbfcfd}
+.fp-foot .tip{margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp-foot b{color:var(--ink2);font-weight:600;font-family:var(--mono)}
+
+/* ---------- 浮层 / 提示 ---------- */
+.pop{position:fixed;z-index:200;background:#fff;border:1px solid #dce3ea;border-radius:10px;
+  box-shadow:0 12px 34px rgba(20,40,60,.16),0 2px 6px rgba(20,40,60,.06);padding:5px;min-width:214px;
+  max-height:72vh;overflow:auto;
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:.13s}
+.pop.on{opacity:1;transform:translateY(0);pointer-events:auto}
+.pop .ph{padding:5px 9px 7px;font-size:10.5px;color:var(--ink3);letter-spacing:.8px;text-transform:uppercase;font-weight:650}
+.pop button{display:flex;align-items:center;gap:8px;width:100%;height:28px;padding:0 9px;border:0;background:transparent;
+  border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--ink2);text-align:left;white-space:nowrap}
+.pop button:hover{background:#f3f7fa;color:var(--ink)}
+.pop button.on{background:var(--brand-soft);color:var(--brand-d);font-weight:600}
+.pop button .k{font-family:var(--mono);font-size:11px;color:var(--ink4);margin-left:auto}
+.pop .sep{height:1px;background:var(--line2);margin:4px 2px}
+.toast{position:fixed;right:22px;bottom:22px;transform:translateY(14px);z-index:400;
+  background:rgba(22,29,38,.93);color:#fff;padding:8px 16px;border-radius:9px;font-size:12.5px;
+  box-shadow:0 8px 26px rgba(0,0,0,.24);opacity:0;transition:.2s;pointer-events:none;backdrop-filter:blur(6px)}
+.toast.on{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="logo">
+      <div class="mark">Eq</div>
+      <b>审核对比表格公式快写工具</b><span class="en">EquiDraft</span>
+    </div>
+    <span class="ver" id="verTag">v1.0.0</span>
+    <div class="grow"></div>
+    <div class="tbtns">
+      <button class="btn sm mode g1" id="btnWithC" title="表格里有合同工程量 / 合同单价 / 合同合价（默认）">有合同列</button>
+      <button class="btn sm mode g2" id="btnNoC" title="表格里没有合同工程量 / 合同单价 / 合同合价，列号自动前移">无合同列</button>
+      <span style="width:6px"></span>
+      <button class="btn sm" id="btnSample">载入示例</button>
+      <button class="btn sm" id="btnClear">清空表格</button>
+      <button class="btn sm primary" id="btnCopy">复制公式</button>
+    </div>
+  </header>
+
+  <section class="locate">
+    <div class="loc-head">
+      <span class="lt">数据行</span>
+      <input type="number" id="dataRow" min="3" max="9999" step="1" value="5">
+      <span class="lh">表头占第 <b>1、2</b> 行，数据从第 <b>3</b> 行起</span>
+      <span class="lrow">
+        <i class="sep2"></i>
+        <label for="outColSel">说明列</label>
+        <select id="outColSel"></select>
+        <span class="la" id="outAddr">T5</span>
+      </span>
+    </div>
+  </section>
+
+  <div class="main">
+    <aside class="side">
+      <div class="pane">
+        <h3>工程量小数位</h3>
+        <div class="presets" id="presets"></div>
+        <div id="tiers"></div>
+        <div class="row" style="margin-top:10px"><label>其他单位</label>
+          <select id="fallback"></select>
+        </div>
+        <div class="row" id="fixedRow" style="display:none"><label>固定位数</label>
+          <select id="fixedDigits"></select>
+        </div>
+        <div class="monopv" id="fmtPv"></div>
+      </div>
+
+      <div class="pane">
+        <h3>措辞</h3>
+        <label class="chk"><input type="checkbox" id="smart"><span>按差值自动判断「审增 / 审减」</span></label>
+        <p class="note" id="smartNote"></p>
+        <div class="row" id="wordRow" style="margin-top:9px;display:none"><label>固定措辞</label>
+          <select id="wordSel">
+            <option value="审减金额">审减金额</option>
+            <option value="审增金额">审增金额</option>
+            <option value="核减金额">核减金额</option>
+          </select>
+        </div>
+        <div style="height:11px"></div>
+        <textarea id="tpl" spellcheck="false"></textarea>
+        <div class="tokens" id="tokens"></div>
+      </div>
+    </aside>
+
+    <section class="work">
+      <div class="fxbar">
+        <div class="namebox" id="nameBox">G5</div>
+        <div class="fx">fx</div>
+        <div class="fxval" id="fxVal"></div>
+        <span class="fxhint" id="fxHint">点单元格直接改 · 计算列只读</span>
+      </div>
+
+      <div class="sheetwrap" id="sheetWrap">
+        <table class="sheet" id="sheet"></table>
+      </div>
+
+      <div class="sent">
+        <div class="sent-h">
+          <span>成句预览</span>
+          <button class="btn sm ghost" id="btnCopySent">复制句子</button>
+        </div>
+        <p id="sentText"></p>
+      </div>
+
+      <div class="fpanel">
+        <div class="fp-head">
+          <span class="fp-title">生成公式</span>
+          <span class="fp-pos" id="fpPos"></span>
+          <div class="grow"></div>
+          <div class="seg" id="formSeg">
+            <button data-f="wrap">整句分支</button>
+            <button data-f="compact">紧凑内嵌</button>
+            <button data-f="single">仅合同单价</button>
+          </div>
+          <button class="btn sm primary" id="btnCopyOne">复制本行</button>
+        </div>
+        <div class="fp-body">
+          <pre class="code" id="fpCode"></pre>
+          <div class="fp-note" id="fpNote"></div>
+        </div>
+        <div class="fp-foot">
+          <span id="fpMeta"></span>
+          <span class="tip">粘贴到 <b id="fpCell">T5</b> → 双击填充柄向下填充</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="pop" id="pop"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   审核对比表格公式快写工具 EquiDraft  v1.0.0
+   表头 2 行（1 组头 / 2 子头）+ 数据行 3 起，说明列不进表格
+   有合同列 A–P / 无合同列 A–M，列号自动连续
+   左侧可调工程量小数位、措辞与句子模板
+   ============================================================ */
+
+const VERSION = '1.0.0';
+const LS_KEY = 'equidraft.state.v1';   /* 与版本号解耦，升级不丢本地数据 */
+const DEF_TPL = '{name}送审工程量{q1}{unit}，审定工程量{q2}{unit}；{price}；此项{word}为{d}元。';
+
+/* ---------- 小工具 ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function LETTER(i){ let s=''; i++; while(i>0){ const m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=Math.floor((i-1)/26);} return s; }
+function IDX(v){ let n=0; const s=String(v||'').toUpperCase(); for(let i=0;i<s.length;i++){ const k=s.charCodeAt(i)-64; if(k<1||k>26) return -1; n=n*26+k; } return n-1; }
+function toNum(v){ if(v==null||v==='') return 0; if(typeof v==='number') return v; const n=parseFloat(String(v).replace(/[,\s]/g,'')); return isNaN(n)?0:n; }
+function isNumStr(s){ return /^-?\d+(\.\d+)?$/.test(String(s).trim()); }
+function r2(n){ return Math.sign(n)*Math.round(Math.abs(n)*100+1e-7)/100; }
+function fmt(v,d){ let n=toNum(v); const p=Math.pow(10,d);
+  n=Math.sign(n)*Math.round(Math.abs(n)*p+1e-9)/p; if(n===0) n=0; return n.toFixed(d); }
+function grpFmt(v,d){
+  const s = fmt(v,d), neg = s.charAt(0)==='-', body = neg ? s.slice(1) : s;
+  const pa = body.split('.');
+  pa[0] = pa[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg?'-':'') + pa.join('.');
+}
+function pat(d){ return '0' + (d ? '.' + new Array(d+1).join('0') : ''); }
+
+/* ---------- 字段定义（与原表 16 列一一对应） ----------
+   grp = 表头上层（合同/送审/审定/审增审减），sub = 表头下层
+   calc = 纯计算列（只读）  follow = 留空时跟随其他列
+--------------------------------------------------------- */
+const FIELDS = [
+  { key:'idx',  label:'序号',       def:'A', w:44,  grp:'',        sub:'序号' },
+  { key:'name', label:'项目名称',   def:'B', w:204, grp:'',        sub:'项目名称' },
+  { key:'unit', label:'单位',       def:'C', w:52,  grp:'',        sub:'单位' },
+  { key:'qc',   label:'合同工程量', def:'D', w:64,  grp:'合同',    sub:'工程量',  follow:1 },
+  { key:'pc',   label:'合同单价',   def:'E', w:60,  grp:'合同',    sub:'单价(元)', follow:1 },
+  { key:'fc',   label:'合同合价',   def:'F', w:76,  grp:'合同',    sub:'合价(元)', calc:1 },
+  { key:'q1',   label:'送审工程量', def:'G', w:64,  grp:'送审',    sub:'工程量' },
+  { key:'ps',   label:'送审单价',   def:'H', w:60,  grp:'送审',    sub:'单价(元)' },
+  { key:'fs',   label:'送审合价',   def:'I', w:76,  grp:'送审',    sub:'合价(元)', calc:1 },
+  { key:'q2',   label:'审定工程量', def:'J', w:64,  grp:'审定',    sub:'工程量' },
+  { key:'pa',   label:'审核单价',   def:'K', w:60,  grp:'审定',    sub:'单价(元)', follow:1 },
+  { key:'fa',   label:'审定合价',   def:'L', w:76,  grp:'审定',    sub:'合价(元)', calc:1 },
+  { key:'mq',   label:'审减工程量', def:'M', w:68,  grp:'审增审减', sub:'工程量',  calc:1 },
+  { key:'mp',   label:'审减单价',   def:'N', w:60,  grp:'审增审减', sub:'单价(元)', calc:1 },
+  { key:'diff', label:'审减金额',   def:'O', w:72,  grp:'审增审减', sub:'合价(元)', calc:1 },
+  { key:'note', label:'备注',       def:'P', w:140, grp:'',        sub:'备注' }
+];
+/* 两种表格布局：有合同列 A–P；无合同列 A–M（列号连续，不留空列） */
+const MAP_WITH = { idx:'A', name:'B', unit:'C', qc:'D', pc:'E', fc:'F', q1:'G', ps:'H', fs:'I',
+                   q2:'J', pa:'K', fa:'L', mq:'M', mp:'N', diff:'O', note:'P' };
+const MAP_NO   = { idx:'A', name:'B', unit:'C', q1:'D', ps:'E', fs:'F', q2:'G', pa:'H', fa:'I',
+                   mq:'J', mp:'K', diff:'L', note:'M' };
+const MAXCOL = 19;               /* T 列：说明列可选到的最右列 */
+function lastCol(){ return IDX(S.cfg.map.note); }
+
+/* 通用模板：计件类取整；m / m² / m³ / 亩 等取 2 位；公顷 / t / km 等取 3 位；其余兜底 2 位 */
+const TIER0 = ['个','项','座','套','处','台','组','根','樘','只','块','系统'];
+const TIER3 = ['公顷','ha','t','吨','km','公里','km²','km2','万m³','千m³'];
+const TIER2 = ['m','m²','m³','m2','m3','㎡','kg','%','亩'];
+
+/* 示例：第 1~2 行表头，第 3 行清单项（合价、单价、审减额全部自动算） */
+const SAMPLE_ROWS = [
+  { r:5, v:{ idx:'1.1', name:'排水沟清淤', unit:'m³', q1:267, q2:232, ps:36.92, pc:25.89, pa:25.89 } }
+];
+
+const DEF_MAP = M2O(FIELDS.reduce((o,f)=> (o[f.key]=f.def, o), {}));
+function M2O(o){ return o; }
+
+/* ---------- 状态 ---------- */
+let S = {
+  row: 5,                         /* 数据行（Excel 行号）：表头占 row-2、row-1 */
+  rows: {},                       /* { 行号: [按列索引存的值] } —— 表格里永远只有这一行 */
+  stash: {},                      /* 无合同列时暂存的合同工程量 / 单价 / 合价 */
+  sel: { r:5, c:IDX('G') },
+  colW: {},
+  cfg: {
+    outCol:'T',
+    map: Object.assign({}, MAP_WITH),
+    noContract:false,             /* 表格里没有合同工程量 / 单价 / 合价 */
+    mode:'tier',                  /* tier 通用模板 | fixed 全表固定 */
+    tier:{ d0:TIER0.slice(), d2:TIER2.slice(), d3:TIER3.slice() },
+    fallback:2,
+    fixedDigits:2,
+    form:'wrap',                  /* wrap 整句分支 | compact 紧凑内嵌 | single 仅合同单价 */
+    smart:true,                   /* 按差值自动判断审增 / 审减 */
+    word:'审减金额',
+    tpl:DEF_TPL
+  }
+};
+
+/* ---------- 取值 ---------- */
+function rowArr(r){ let a = S.rows[r]; if(!a){ a = S.rows[r] = []; } return a; }
+function hasRow(r){ return !!S.rows[r]; }
+function getv(r,k){
+  const c = IDX(S.cfg.map[k]); if(c < 0) return null;
+  const a = S.rows[r]; if(!a) return null;
+  const v = a[c];
+  return (v==null || String(v).trim()==='') ? null : v;
+}
+function setv(r,k,v){
+  const c = IDX(S.cfg.map[k]); if(c < 0) return;
+  rowArr(r)[c] = v;
+}
+function unitOf(r){ const v = getv(r,'unit'); return v==null ? '' : String(v).trim(); }
+function outIdx(){ return IDX(S.cfg.outCol); }
+function refOf(k){ return S.cfg.map[k] + S.row; }
+function fieldAt(c){ const L = LETTER(c); return FIELDS.find(f=>S.cfg.map[f.key]===L) || null; }
+function roleOfCol(c){ const f = fieldAt(c); return f ? f.key : ''; }
+function lastRow(){ return S.row; }
+
+/* ---------- 精度 ---------- */
+function fmtExpr(u){
+  const c = S.cfg;
+  if(c.mode==='fixed') return '"' + pat(Number(c.fixedDigits)) + '"';
+  let e = '"' + pat(Number(c.fallback)) + '"';
+  const g2 = (c.tier.d2||[]), g0 = (c.tier.d0||[]), g3 = (c.tier.d3||[]);
+  if(g3.length) e = 'IF(OR(' + u + '={' + g3.map(x=>'"'+x+'"').join(',') + '}),"' + pat(3) + '",' + e + ')';
+  if(g2.length) e = 'IF(OR(' + u + '={' + g2.map(x=>'"'+x+'"').join(',') + '}),"' + pat(2) + '",' + e + ')';
+  if(g0.length) e = 'IF(OR(' + u + '={' + g0.map(x=>'"'+x+'"').join(',') + '}),"' + pat(0) + '",' + e + ')';
+  return e;
+}
+function digitsOf(unit){
+  const c = S.cfg;
+  if(c.mode==='fixed') return Number(c.fixedDigits);
+  const s = String(unit==null?'':unit).trim();
+  if((c.tier.d0||[]).indexOf(s) >= 0) return 0;
+  if((c.tier.d2||[]).indexOf(s) >= 0) return 2;
+  if((c.tier.d3||[]).indexOf(s) >= 0) return 3;
+  return Number(c.fallback);
+}
+
+/* ---------- 行内计算：合同/合价/审减 全自动 ---------- */
+function rowCalc(r){
+  const n = k => { const v = getv(r,k); return v==null ? null : toNum(v); };
+  const q1 = n('q1'), q2 = n('q2'), ps = n('ps');
+  const nc = !!S.cfg.noContract;
+  let  qc = nc ? null : n('qc');
+  let  pc = nc ? null : n('pc');
+  let  pa = n('pa');
+
+  if(nc){
+    if(pa == null) pa = (q2 === 0 ? 0 : ps);                 /* 无合同列：审核单价 跟 送审 */
+  } else {
+    if(qc == null) qc = q1;                                  /* 合同工程量 跟 送审 */
+    if(pc == null) pc = ps;                                  /* 合同单价 跟 送审 */
+    if(pa == null) pa = (pc == null ? null : (q2 === 0 ? 0 : pc)); /* 审核单价 跟 合同 */
+  }
+
+  return {
+    qc:qc, pc:pc, pa:pa, q1:q1, q2:q2, ps:ps,
+    fc: (qc!=null && pc!=null) ? r2(qc*pc) : null,
+    fs: (q1!=null && ps!=null) ? r2(q1*ps) : null,
+    fa: (q2!=null && pa!=null) ? r2(q2*pa) : null,
+    mq: (q2!=null && q1!=null) ? r2(q2-q1) : null,
+    mp: (pa!=null && ps!=null) ? r2(pa-ps) : null,
+    diff: null
+  };
+}
+function diffOf(r){ const P = rowCalc(r); return (P.fa!=null && P.fs!=null) ? r2(P.fa - P.fs) : null; }
+
+/* 单元格显示文本 */
+function cellText(r,key){
+  const P = rowCalc(r);
+  if(key === 'idx' || key === 'name' || key === 'unit' || key === 'note'){
+    const v = getv(r,key); return v==null ? '' : String(v);
+  }
+  let v;
+  if(key === 'diff'){ v = diffOf(r); }
+  else { v = P[key]; }
+  if(v == null) return '';
+  if(key==='qc'||key==='q1'||key==='q2'||key==='mq') return fmt(v, digitsOf(unitOf(r)));
+  if(key==='fc'||key==='fs'||key==='fa'||key==='diff') return grpFmt(v,2);
+  return fmt(v,2);
+}
+
+/* 计算列对应的 Excel 写法（仅供 fx 栏展示） */
+function calcFormula(r,key){
+  const m = k => S.cfg.map[k] + r;
+  if(key==='fc')   return '=ROUND(' + m('qc') + '*' + m('pc') + ',2)';
+  if(key==='fs')   return '=ROUND(' + m('q1') + '*' + m('ps') + ',2)';
+  if(key==='fa')   return '=IF(' + m('pa') + '="",0,ROUND(' + m('q2') + '*' + m('pa') + ',2))';
+  if(key==='mq')   return '=ROUND(' + m('q2') + '-' + m('q1') + ',2)';
+  if(key==='mp')   return '=ROUND(' + m('pa') + '-' + m('ps') + ',2)';
+  if(key==='diff') return '=ROUND(' + m('fa') + '-' + m('fs') + ',2)';
+  if(key==='qc')   return '=' + m('q1') + '  ← 跟随送审工程量';
+  if(key==='pc')   return '=' + m('ps') + '  ← 跟随送审单价';
+  if(key==='pa')   return S.cfg.noContract
+    ? '=' + m('ps') + '  ← 跟随送审单价'
+    : '=IF(' + m('q2') + '=0,0,' + m('pc') + ')  ← 跟随合同单价';
+  return '';
+}
+
+/* ---------- 公式编译：原子序列 → 表达式 ---------- */
+function priceAtoms(kind){
+  const u = refOf('unit');
+  const dual = [{lit:'送审单价'},{expr:'TEXT('+refOf('ps')+',"0.00")'},{lit:'元/'},{expr:u},
+                {lit:'，审核单价'},{expr:'TEXT('+refOf('pa')+',"0.00")'},{lit:'元/'},{expr:u}];
+  const one  = [{lit:'合同单价'},{expr:'TEXT('+refOf('pc')+',"0.00")'},{lit:'元/'},{expr:u}];
+  if(kind==='dual') return dual;
+  if(kind==='contract') return one;
+  const p = refOf('pc');
+  const flat = a => a.map(x => x.lit!==undefined ? '"'+x.lit+'"' : x.expr).join('&');
+  return [{ expr:'IF(OR(' + p + '=0,' + p + '=""),' + flat(dual) + ',' + flat(one) + ')' }];
+}
+function atomsFor(kind){
+  const c = S.cfg, u = refOf('unit'), fe = fmtExpr(u), dref = refOf('diff');
+  return {
+    name: [{lit:'“'},{expr:refOf('name')},{lit:'”'}],
+    nameRaw:[{expr:refOf('name')}],
+    unit: [{expr:u}],
+    q1: [{expr:'TEXT(' + refOf('q1') + ',' + fe + ')'}],
+    q2: [{expr:'TEXT(' + refOf('q2') + ',' + fe + ')'}],
+    p:  [{expr:'TEXT(' + refOf('pc') + ',"0.00")'}],
+    ps: [{expr:'TEXT(' + refOf('ps') + ',"0.00")'}],
+    pa: [{expr:'TEXT(' + refOf('pa') + ',"0.00")'}],
+    d:  [{expr:'TEXT(ABS(' + dref + '),"0.00")'}],
+    dd: [{expr:'ABS(' + dref + ')'}],
+    word: c.smart
+      ? [{expr:'IF(ROUND(' + dref + ',2)>0,"审增金额","审减金额")'}]
+      : [{lit:c.word}],
+    price: priceAtoms(kind)
+  };
+}
+function compile(kind){
+  const c = S.cfg, toks = atomsFor(kind);
+  const chunks = String(c.tpl||'').split(/(\{[A-Za-z0-9]+\})/).filter(s=>s!=='');
+  const atoms = [];
+  for(const ch of chunks){
+    const m = /^\{([A-Za-z0-9]+)\}$/.exec(ch);
+    if(m && toks[m[1]]) atoms.push.apply(atoms, toks[m[1]]);
+    else atoms.push({ lit: ch.replace(/\{([A-Za-z0-9]+)\}/g, '$1') });
+  }
+  const merged = [];
+  for(const a of atoms){
+    if(a.lit!==undefined){
+      if(!a.lit) continue;
+      const last = merged[merged.length-1];
+      if(last && last.lit!==undefined) last.lit += a.lit;
+      else merged.push({ lit:a.lit });
+    } else merged.push({ expr:a.expr });
+  }
+  return merged.map(a => a.lit!==undefined ? '"' + a.lit.replace(/"/g,'""') + '"' : a.expr).join('&');
+}
+function buildFormula(){
+  const c = S.cfg, p = refOf('pc');
+  if(c.noContract) return '=' + compile('dual');       /* 没有合同列：直接写送审/审核单价 */
+  if(c.form === 'compact') return '=' + compile('auto');
+  if(c.form === 'single')  return '=' + compile('contract');
+  return '=IF(OR(' + p + '=0,' + p + '=""),' + compile('dual') + ',' + compile('contract') + ')';
+}
+
+/* ---------- 句子预览 ---------- */
+function isEmptyRow(r){
+  return ['name','q1','q2','ps','pc'].every(k=> getv(r,k)==null);
+}
+function buildSentence(){
+  const r = S.row, c = S.cfg, P = rowCalc(r);
+  const unit = unitOf(r);
+  const dg = digitsOf(unit);
+  const d = diffOf(r) == null ? 0 : diffOf(r);
+  const noPc = (c.noContract || P.pc==null || toNum(P.pc)===0);
+  const price = (c.form !== 'single' && noPc)
+    ? '送审单价' + fmt(P.ps,2) + '元/' + unit + '，审核单价' + fmt(P.pa,2) + '元/' + unit
+    : '合同单价' + fmt(P.pc,2) + '元/' + unit;
+  const word = c.smart ? (r2(d) > 0 ? '审增金额' : '审减金额') : c.word;
+  const nm = getv(r,'name');
+  const vals = {
+    name: '“' + (nm==null?'':String(nm)) + '”', nameRaw: nm==null?'':String(nm), unit: unit,
+    q1: fmt(P.q1,dg), q2: fmt(P.q2,dg),
+    p: fmt(P.pc,2), ps: fmt(P.ps,2), pa: fmt(P.pa,2),
+    price: price, d: fmt(Math.abs(d),2), dd: fmt(Math.abs(d),2), word: word
+  };
+  return String(c.tpl||'').replace(/\{([A-Za-z0-9]+)\}/g, (m,k)=> (k in vals ? vals[k] : m));
+}
+
+/* ---------- 语法高亮 ---------- */
+function hlCode(f){
+  const src = String(f||'');
+  const parts = [];
+  let i = 0, m;
+  const re = /"[^"]*"/g;
+  while((m = re.exec(src))){
+    if(m.index > i) parts.push({ t:'c', v:src.slice(i, m.index) });
+    parts.push({ t:'s', v:m[0] });
+    i = m.index + m[0].length;
+  }
+  if(i < src.length) parts.push({ t:'c', v:src.slice(i) });
+
+  const tint = t => esc(t)
+    .replace(/(IF|OR|AND|TEXT|ABS|ROUND)\(/g, '<b class="fn">$1</b>(')
+    .replace(/\b([A-Z]{1,3}\d+)\b/g, '<em class="rf">$1</em>');
+
+  let out = '';
+  parts.forEach((p, idx)=>{
+    if(p.t === 's'){
+      const prev = parts[idx-1];
+      if(prev && prev.t === 'c' && /&$/.test(prev.v) && /^"[；，]/.test(p.v)) out += '\n    ';
+      out += '<i class="s">' + esc(p.v) + '</i>';
+    } else {
+      out += tint(p.v);
+    }
+  });
+  return out;
+}
+
+/* ---------- 渲染：顶部数据行 / 说明列 ---------- */
+function colOptions(sel, from, to){
+  let h = '';
+  const s = from == null ? 0 : from, e = to == null ? MAXCOL : to;
+  for(let c=s;c<=e;c++){
+    const L = LETTER(c);
+    h += '<option value="' + L + '"' + (L===sel?' selected':'') + '>' + L + '</option>';
+  }
+  return h;
+}
+function renderHead(){
+  const c = S.cfg;
+  $('#outColSel').innerHTML = colOptions(c.outCol, lastCol() + 1);
+  $('#outAddr').textContent = c.outCol + S.row;
+  $('#dataRow').value = S.row;
+  $('.loc-head .lh').innerHTML = '表头占第 <b>' + (S.row-2) + '、' + (S.row-1) + '</b> 行，数据在第 <b>' + S.row + '</b> 行';
+}
+function syncAddr(){
+  const c = S.cfg;
+  const opt = $('#outColSel');
+  if(opt.innerHTML === '' || !opt.querySelector('option[value="' + c.outCol + '"]')) opt.innerHTML = colOptions(c.outCol, lastCol() + 1);
+  $('#outColSel').value = c.outCol;
+  $('#outAddr').textContent = c.outCol + S.row;
+  $('#dataRow').value = S.row;
+  $('.loc-head .lh').innerHTML = '表头占第 <b>' + (S.row-2) + '、' + (S.row-1) + '</b> 行，数据在第 <b>' + S.row + '</b> 行';
+}
+
+/* ---------- 渲染：表格 ---------- */
+function colWidth(c){
+  if(S.colW[c]) return S.colW[c];
+  if(c === 0) return 46;
+  const f = fieldAt(c);
+  return f ? f.w : 58;
+}
+function visibleCols(){
+  const out = [], lc = lastCol();
+  for(let c=0;c<=lc;c++){
+    if(c === outIdx()) continue;       /* 说明列不进表格 */
+    out.push(c);
+  }
+  return out;
+}
+function nearCol(c){
+  const VC = visibleCols();
+  if(VC.indexOf(c) >= 0) return c;
+  let best = VC[0];
+  VC.forEach(v=>{ if(Math.abs(v-c) < Math.abs(best-c)) best = v; });
+  return best;
+}
+function stepCol(c, dir){
+  const VC = visibleCols(), i = VC.indexOf(c);
+  if(i < 0) return nearCol(c);
+  return VC[Math.max(0, Math.min(VC.length-1, i + dir))];
+}
+function runsOf(VC){
+  const out = [];
+  VC.forEach(x=>{
+    const f = fieldAt(x), g = f ? f.grp : '', s = f ? f.sub : '';
+    const last = out[out.length-1];
+    if(last && g && last.grp === g){ last.n++; last.cols.push(x); }
+    else out.push({ grp:g, sub:s, n:1, cols:[x] });
+  });
+  return out;
+}
+function renderSheet(){
+  const VC = visibleCols(), R = S.row;
+
+  let h = '<colgroup><col style="width:46px">';
+  VC.forEach(x=> h += '<col data-c="' + x + '" style="width:' + colWidth(x) + 'px">');
+  h += '</colgroup><thead>';
+
+  /* 列标 */
+  h += '<tr class="lh"><th class="corner"></th>';
+  VC.forEach(x=>{
+    const cls = ['ch'];
+    if(x === S.sel.c) cls.push('on');
+    h += '<th class="' + cls.join(' ') + '" data-c="' + x + '">' + LETTER(x)
+       + '<span class="grip" data-g="' + x + '"></span></th>';
+  });
+  h += '</tr>';
+
+  const runs = runsOf(VC);
+
+  /* 表头 第 1 行：合并组头（合同 / 送审 / 审定 / 审增审减） */
+  h += '<tr class="gh"><th class="corner">' + (R-2) + '</th>';
+  runs.forEach(run=>{
+    h += run.grp
+      ? '<th colspan="' + run.n + '">' + esc(run.grp) + '</th>'
+      : '<th rowspan="2">' + esc(run.sub) + '</th>';
+  });
+  h += '</tr>';
+
+  /* 表头 第 2 行：子表头（工程量 / 单价 / 合价） */
+  h += '<tr class="sh"><th class="corner">' + (R-1) + '</th>';
+  runs.forEach(run=>{
+    if(!run.grp) return;
+    run.cols.forEach(x=>{
+      const f = fieldAt(x);
+      h += '<th>' + (f ? esc(f.sub) : '') + '</th>';
+    });
+  });
+  h += '</tr></thead><tbody>';
+
+  /* 唯一的数据行：内容永远是这条示例，行号跟着「数据行」走 */
+  h += '<tr data-r="' + R + '" class="cur"><th class="rh" data-r="' + R + '">' + R + '</th>';
+  VC.forEach(x=>{
+    const f = fieldAt(x), key = f ? f.key : '';
+    const cls = [];
+    if(key === 'unit') cls.push('ctr');
+    if(key && f.calc) cls.push('calc');
+    else if(key && f.follow && getv(R,key)==null) cls.push('flw');
+    if(x === S.sel.c) cls.push('sel');
+    let txt = '';
+    if(key){
+      txt = cellText(R,key);
+      if(/^-?[\d,]+(\.\d+)?$/.test(txt)) cls.push('num');
+    } else {
+      const raw = S.rows[R] ? S.rows[R][x] : null;
+      txt = raw==null ? '' : String(raw);
+    }
+    h += '<td class="' + cls.join(' ') + '" data-r="' + R + '" data-c="' + x + '" contenteditable="false">'
+       + esc(txt) + '</td>';
+  });
+  h += '</tr></tbody>';
+
+  const table = $('#sheet');
+  table.innerHTML = h;
+  let total = 46;
+  VC.forEach(x=> total += colWidth(x));
+  table.style.width = total + 'px';
+}
+
+/* 刷新数据行的非编辑单元格 */
+function paintRow(r){
+  const tr = $('#sheet tr[data-r="' + r + '"]');
+  if(!tr) return;
+  tr.querySelectorAll('td[data-c]').forEach(td=>{
+    if(td.isContentEditable) return;
+    const x = +td.dataset.c, key = roleOfCol(x);
+    if(x === outIdx()) return;
+    const txt = key ? cellText(r,key) : (S.rows[r] && S.rows[r][x]!=null ? String(S.rows[r][x]) : '');
+    td.textContent = txt;
+    td.classList.toggle('num', /^-?[\d,]+(\.\d+)?$/.test(txt));
+  });
+}
+
+/* ---------- 渲染：侧栏 ---------- */
+function renderSide(){
+  const c = S.cfg;
+
+  $('#presets').innerHTML =
+      '<button data-p="tier"' + (c.mode==='tier'?' class="on"':'') + '>通用模板</button>'
+    + '<button data-p="fixed"' + (c.mode==='fixed'?' class="on"':'') + '>全表固定 ' + c.fixedDigits + ' 位</button>';
+
+  const buckets = [ {k:'d0', d:0, t:'取整（计件）'}, {k:'d2', d:2, t:'2 位小数'}, {k:'d3', d:3, t:'3 位小数'} ];
+  $('#tiers').innerHTML = buckets.map(b=>{
+    const list = (c.tier[b.k]||[]).slice();
+    return '<div class="bucket"><div class="bh"><b>' + b.t + '</b><span class="pat">' + pat(b.d) + '</span>'
+         + '<span class="cnt">' + list.length + '</span></div><div class="chips">'
+         + list.map(u=>'<span class="chip">' + esc(u) + '<i data-del="' + b.k + '" data-u="' + esc(u) + '" title="移除">×</i></span>').join('')
+         + '<span class="chip add" data-add="' + b.k + '" title="添加单位">+</span></div></div>';
+  }).join('');
+
+  let fb = '';
+  for(let d=0;d<=4;d++) fb += '<option value="' + d + '"' + (Number(c.fallback)===d?' selected':'') + '>' + d + ' 位</option>';
+  $('#fallback').innerHTML = fb;
+
+  let fd = '';
+  for(let d=0;d<=4;d++) fd += '<option value="' + d + '"' + (Number(c.fixedDigits)===d?' selected':'') + '>' + d + ' 位</option>';
+  $('#fixedDigits').innerHTML = fd;
+  $('#fixedRow').style.display = c.mode==='fixed' ? 'flex' : 'none';
+  $('#fallback').closest('.row').style.display = c.mode==='fixed' ? 'none' : 'flex';
+
+  const exprTxt = esc(fmtExpr(refOf('unit'))).replace(/IF\(OR\(/g, '<br>IF(OR(').replace(/^<br>/, '');
+  $('#fmtPv').innerHTML = c.mode==='fixed'
+    ? '公式里直接写死 <b>"' + pat(c.fixedDigits) + '"</b>，最短；计件单位也会带小数，需人工复核。'
+    : '写进公式的单位判断（按顺序命中）：<br><b>' + exprTxt + '</b>';
+
+  $('#smart').checked = !!c.smart;
+  $('#wordRow').style.display = c.smart ? 'none' : 'flex';
+  $('#wordSel').value = c.word;
+  $('#smartNote').textContent = c.smart
+    ? '当前：' + refOf('diff') + ' 大于 0 →「审增金额」，小于等于 0 →「审减金额」，判断写在公式里。'
+    : '当前：一律用固定措辞，不看差值正负。';
+  $('#tpl').value = c.tpl;
+  $$('#formSeg button').forEach(x=>x.classList.toggle('on', x.dataset.f===c.form));
+}
+
+function renderTokens(){
+  const list = [['name','名称“”'],['nameRaw','名称'],['unit','单位'],['q1','送审量'],['q2','审定量'],
+                ['price','单价句'],['p','合同单价'],['ps','送审单价'],['pa','审核单价'],
+                ['d','审减额'],['dd','差额原值'],['word','审增/审减']];
+  $('#tokens').innerHTML = list.map(x=>'<button data-t="' + x[0] + '" title="插入 {' + x[0] + '}">' + x[1] + '</button>').join('');
+}
+
+/* ---------- 渲染：公式与预览 ---------- */
+function formName(){ return S.cfg.noContract ? '无合同列' : (S.cfg.form==='wrap' ? '整句分支' : S.cfg.form==='compact' ? '紧凑内嵌' : '仅合同单价'); }
+function precName(){ return S.cfg.mode==='fixed' ? '全表固定 ' + S.cfg.fixedDigits + ' 位' : '通用模板 · 按单位判断'; }
+
+function renderSent(){
+  const el = $('#sentText');
+  const empty = isEmptyRow(S.row);
+  el.textContent = empty ? '这一行还没有数据 —— 点右上角「载入示例」，或直接在单元格里录入。' : buildSentence();
+  el.classList.toggle('empty', empty);
+}
+
+function updateFormula(){
+  const f = buildFormula();
+  const box = $('#fpCode');
+  if(isEmptyRow(S.row)){
+    box.className = 'code placeholder';
+    box.textContent = '填上项目名称与工程量，这里就生成公式。';
+  } else {
+    box.className = 'code';
+    box.innerHTML = hlCode(f);
+  }
+  $('#fpMeta').textContent = '公式 ' + f.length + ' 字符 · ' + formName() + ' · ' + precName();
+  $('#fpNote').innerHTML = (S.cfg.mode==='fixed'
+      ? '口径：全表统一 <b>' + S.cfg.fixedDigits + ' 位</b>小数，<code>TEXT()</code> 里直接写死，公式最短；计件单位也会带小数，需要时改回通用模板。'
+      : '口径：工程量的位数写死在公式里 —— 计件（个 / 项 / 座 / 套 …）取整，m / m² / m³ / 亩 / kg 等取 <b>2 位</b>，公顷 / t / 吨 / km / 公里 等取 <b>3 位</b>，其余单位按 <b>'
+        + S.cfg.fallback + ' 位</b>；单价与金额固定 2 位。')
+    + (S.cfg.noContract
+      ? ' 表格没有合同列，句子按 <b>送审单价 + 审核单价</b> 表述，不套 <code>IF(OR(' + refOf('pc') + '=0…))</code> 分支；列号已自动前移。'
+      : '')
+    + (S.cfg.smart
+      ? ' 措辞按 ' + refOf('diff') + ' 的正负自动切换审增 / 审减。'
+      : ' 措辞固定为「' + S.cfg.word + '」。');
+  $('#fpCell').textContent = S.cfg.outCol + S.row;
+  const nm = getv(S.row,'name');
+  $('#fpPos').textContent = '第 ' + S.row + ' 行' + (nm ? ' · ' + String(nm).slice(0,20) : '');
+
+  /* fx 栏 */
+  const key = roleOfCol(S.sel.c);
+  const fv = $('#fxVal');
+  const fdef = key ? FIELDS.find(x=>x.key===key) : null;
+  const following = key && fdef && fdef.follow && getv(S.row,key)==null;
+  if(key && ((fdef && fdef.calc) || following)){
+    fv.className = 'fxval f';
+    fv.textContent = calcFormula(S.row,key);
+  } else {
+    fv.className = 'fxval';
+    fv.textContent = key ? cellText(S.row,key) : '';
+  }
+  $('#nameBox').textContent = LETTER(S.sel.c) + S.row;
+  renderSent();
+}
+
+function renderAll(){
+  renderHead(); renderSide(); renderSheet(); updateFormula();
+  $('#verTag').textContent = 'v' + VERSION;
+  const nc = !!S.cfg.noContract;
+  $('#btnWithC').classList.toggle('on', !nc);
+  $('#btnNoC').classList.toggle('on', nc);
+}
+
+/* ---------- 布局切换：有合同列 A–P / 无合同列 A–M ---------- */
+function applyLayout(nc){
+  nc = !!nc;
+  if(!!S.cfg.noContract === nc) return;
+  const selKeyKeep = roleOfCol(S.sel.c);
+
+  /* 合同三列：去掉时先暂存，切回来再放回去，不丢数 */
+  const stash = {};
+  if(nc){
+    Object.keys(S.rows).forEach(r=>{
+      const a = S.rows[r] || [], t = {};
+      ['qc','pc','fc'].forEach(k=>{
+        const i = IDX(S.cfg.map[k]);
+        if(i >= 0 && a[i] != null && a[i] !== '') t[k] = a[i];
+      });
+      if(Object.keys(t).length) stash[r] = t;
+    });
+  }
+
+  const snap = {};
+  Object.keys(S.rows).forEach(r=>{
+    snap[r] = {};
+    FIELDS.forEach(f=>{ const v = getv(r, f.key); if(v != null) snap[r][f.key] = v; });
+  });
+  S.cfg.noContract = nc;
+  S.cfg.map = Object.assign({}, nc ? MAP_NO : MAP_WITH);
+  S.rows = {};
+  Object.keys(snap).forEach(r=>{
+    FIELDS.forEach(f=>{ if(snap[r][f.key] !== undefined) setv(r, f.key, snap[r][f.key]); });
+  });
+  if(nc && Object.keys(stash).length) S.stash = stash;
+  if(!nc && S.stash){
+    Object.keys(S.stash).forEach(r=>{
+      FIELDS.forEach(f=>{ if(S.stash[r][f.key] !== undefined) setv(r, f.key, S.stash[r][f.key]); });
+    });
+    S.stash = {};
+  }
+  const lc = lastCol();
+  if(IDX(S.cfg.outCol) <= lc) S.cfg.outCol = LETTER(lc + 1);  /* 说明列被占就右移一格 */
+  S.colW = {};
+  /* 选中列跟着同一个字段走，不跟着列号走 */
+  const selKey = selKeyKeep;
+  S.sel.c = (selKey && S.cfg.map[selKey]) ? IDX(S.cfg.map[selKey]) : nearCol(S.sel.c);
+  renderAll(); saveLocal();
+}
+
+/* ---------- 交互 ---------- */
+function selectAt(r,c){
+  c = nearCol(c);
+  S.row = Math.max(3, Math.round(Number(r) || S.row));
+  S.sel = { r:S.row, c:c };
+  $$('#sheet td.sel').forEach(td=>td.classList.remove('sel'));
+  $$('#sheet th.ch').forEach(th=>th.classList.remove('on'));
+  $$('#sheet tr.cur').forEach(tr=>tr.classList.remove('cur'));
+  const tr = $('#sheet tr[data-r="' + S.row + '"]');
+  if(tr) tr.classList.add('cur');
+  const td = $('#sheet tr[data-r="' + S.row + '"] td[data-c="' + c + '"]');
+  if(td) td.classList.add('sel');
+  const ch = $('#sheet th.ch[data-c="' + c + '"]');
+  if(ch) ch.classList.add('on');
+  syncAddr();
+  updateFormula();
+}
+
+function isCalcCol(c){
+  const f = fieldAt(c);
+  return !!(f && f.calc);
+}
+
+/* 进入单元格编辑：单击落光标，双击/Enter 全选 */
+function editCell(td, x, y, selectAll){
+  if(!td || isCalcCol(+td.dataset.c)) return false;
+  td.setAttribute('contenteditable','true');
+  try{ td.focus({ preventScroll:true }); }catch(err){ td.focus(); }
+  const sel = window.getSelection();
+  let rng = null;
+  if(!selectAll && x != null){
+    if(document.caretRangeFromPoint){
+      rng = document.caretRangeFromPoint(x, y);
+    } else if(document.caretPositionFromPoint){
+      const p = document.caretPositionFromPoint(x, y);
+      if(p){ rng = document.createRange(); rng.setStart(p.offsetNode, p.offset); rng.collapse(true); }
+    }
+    if(rng && rng.startContainer && !td.contains(rng.startContainer)) rng = null;
+  }
+  if(!rng){
+    rng = document.createRange();
+    rng.selectNodeContents(td);
+    if(!selectAll) rng.collapse(false);
+  }
+  sel.removeAllRanges(); sel.addRange(rng);
+  return true;
+}
+
+/* 改「数据行」：表格永远只用这一行，数据整行搬家，行号自动跟着变 */
+function setDataRow(v){
+  v = Math.round(Number(v) || S.row);
+  v = Math.max(3, Math.min(9999, v));
+  if(v === S.row){ $('#dataRow').value = S.row; return; }
+  const arr = S.rows[S.row], st = S.stash[S.row];
+  S.rows = {}; S.stash = {};
+  if(arr) S.rows[v] = arr;
+  if(st) S.stash[v] = st;
+  S.row = v; S.sel = { r:v, c:S.sel.c };
+  renderAll(); saveLocal();
+}
+
+function bind(){
+  const sheet = $('#sheet');
+
+  sheet.addEventListener('click', e=>{
+    if(e.target.closest('.grip')) return;
+    const th = e.target.closest('th.ch');
+    if(th){ selectAt(S.row, +th.dataset.c); return; }
+    const td = e.target.closest('td[data-c]');
+    if(!td) return;
+    selectAt(+td.dataset.r, +td.dataset.c);
+    editCell(td, e.clientX, e.clientY, false);   /* 点进去就有光标 */
+  });
+
+  sheet.addEventListener('dblclick', e=>{
+    const td = e.target.closest('td[data-c]');
+    if(td) editCell(td, null, null, true);
+  });
+
+  sheet.addEventListener('focusout', e=>{
+    const td = e.target.closest('td[data-c]');
+    if(!td) return;
+    td.setAttribute('contenteditable','false');
+    paintRow(+td.dataset.r);
+    updateFormula(); saveLocal();
+  });
+
+  sheet.addEventListener('input', e=>{
+    const td = e.target.closest('td[data-c]');
+    if(!td) return;
+    const c = +td.dataset.c, r = +td.dataset.r;
+    const key = roleOfCol(c);
+    if(key && (FIELDS.find(f=>f.key===key)||{}).calc) return;   /* 计算列不接受输入 */
+    const txt = td.textContent.trim();
+    rowArr(r)[c] = txt==='' ? null : (isNumStr(txt) ? Number(txt) : txt);
+    paintRow(r);
+    updateFormula(); saveLocal();
+  });
+
+  /* 粘贴：表格只有一行，取第一行，多列铺开 */
+  sheet.addEventListener('paste', e=>{
+    const txt = (e.clipboardData || window.clipboardData).getData('text');
+    if(txt==null || !/[\t\n]/.test(txt)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const lines = String(txt).replace(/\r/g,'').split('\n').filter(s=>s!=='');
+    if(!lines.length) return;
+    const c0 = S.sel.c, r = S.row;
+    lines[0].split('\t').forEach((v,k)=>{
+      const x = c0 + k;
+      if(x > lastCol() || x === outIdx()) return;
+      const key = roleOfCol(x);
+      if(key && (FIELDS.find(f=>f.key===key)||{}).calc) return;
+      const t = v.trim();
+      rowArr(r)[x] = t==='' ? null : (isNumStr(t) ? Number(t) : t);
+    });
+    renderSheet(); selectAt(r, c0); saveLocal();
+    toast(lines.length > 1 ? '表格只保留一行，已取第一行' : '已粘贴');
+  });
+
+  let drag = null;
+  sheet.addEventListener('mousedown', e=>{
+    const g = e.target.closest('.grip');
+    if(!g) return;
+    e.preventDefault();
+    drag = { c:+g.dataset.g, x:e.clientX, w:colWidth(+g.dataset.g) };
+    document.body.style.cursor = 'col-resize';
+  });
+  document.addEventListener('mousemove', e=>{
+    if(!drag) return;
+    const w = Math.max(40, drag.w + (e.clientX - drag.x));
+    S.colW[drag.c] = w;
+    const colEl = $('#sheet colgroup').querySelector('col[data-c="' + drag.c + '"]');
+    if(colEl) colEl.style.width = w + 'px';
+    let total = 46;
+    visibleCols().forEach(c=> total += colWidth(c));
+    $('#sheet').style.width = total + 'px';
+  });
+  document.addEventListener('mouseup', ()=>{
+    if(drag){ drag=null; document.body.style.cursor=''; saveLocal(); }
+  });
+
+  /* 说明列 */
+  $('#outColSel').addEventListener('change', e=>{
+    S.cfg.outCol = e.target.value;
+    renderAll(); saveLocal();
+  });
+
+  /* 数据行：1、2 行是表头，最小 3 */
+  const rowInp = $('#dataRow');
+  rowInp.addEventListener('input', e=>{
+    const n = Number(e.target.value);
+    if(e.target.value === '' || isNaN(n)) return;
+    if(n >= 3) setDataRow(n);
+  });
+  rowInp.addEventListener('change', e=>{
+    const n = Number(e.target.value);
+    if(isNaN(n) || n < 3){
+      e.target.value = S.row;
+      toast('数据行最小为第 3 行（上面两行留给表头）', true);
+    } else setDataRow(n);
+  });
+
+  /* 有合同列 / 无合同列 */
+  $('#btnWithC').addEventListener('click', ()=>{
+    if(!S.cfg.noContract){ toast('当前就是「有合同列」'); return; }
+    applyLayout(false);
+    toast('已切到「有合同列」：A–P，合同 D/E/F 回来了');
+  });
+  $('#btnNoC').addEventListener('click', ()=>{
+    if(S.cfg.noContract){ toast('当前就是「无合同列」'); return; }
+    applyLayout(true);
+    toast('已切到「无合同列」：列号 A–M 连续，公式按送审单价 + 审核单价');
+  });
+
+  /* 侧栏：工程量小数位 */
+  $('#presets').addEventListener('click', e=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    S.cfg.mode = b.dataset.p === 'fixed' ? 'fixed' : 'tier';
+    renderSide(); renderSheet(); updateFormula(); saveLocal();
+  });
+
+  $('#tiers').addEventListener('click', e=>{
+    const del = e.target.closest('[data-del]');
+    if(del){
+      const k = del.dataset.del, u = del.dataset.u;
+      S.cfg.tier[k] = (S.cfg.tier[k]||[]).filter(x=>x!==u);
+      renderSide(); renderSheet(); updateFormula(); saveLocal();
+      return;
+    }
+    const add = e.target.closest('[data-add]');
+    if(add){
+      const k = add.dataset.add, wrap = add.parentNode;
+      const inp = document.createElement('input');
+      inp.placeholder = '单位';
+      wrap.replaceChild(inp, add);
+      inp.focus();
+      const commit = ()=>{
+        const v = inp.value.trim();
+        if(v && (S.cfg.tier[k]||[]).indexOf(v) < 0) (S.cfg.tier[k] = S.cfg.tier[k]||[]).push(v);
+        renderSide(); renderSheet(); updateFormula(); saveLocal();
+      };
+      inp.addEventListener('keydown', ev=>{ if(ev.key==='Enter') commit(); if(ev.key==='Escape') renderSide(); });
+      inp.addEventListener('blur', commit);
+      return;
+    }
+  });
+
+  $('#fallback').addEventListener('change', e=>{
+    S.cfg.fallback = Number(e.target.value);
+    renderSide(); renderSheet(); updateFormula(); saveLocal();
+  });
+  $('#fixedDigits').addEventListener('change', e=>{
+    S.cfg.fixedDigits = Number(e.target.value);
+    S.cfg.mode = 'fixed';
+    renderSide(); renderSheet(); updateFormula(); saveLocal();
+  });
+
+  /* 侧栏：措辞与模板 */
+  $('#smart').addEventListener('change', e=>{
+    S.cfg.smart = e.target.checked;
+    renderSide(); updateFormula(); saveLocal();
+  });
+  $('#wordSel').addEventListener('change', e=>{
+    S.cfg.word = e.target.value;
+    updateFormula(); saveLocal();
+  });
+  $('#tpl').addEventListener('input', e=>{
+    S.cfg.tpl = e.target.value;
+    updateFormula(); saveLocal();
+  });
+  $('#tokens').addEventListener('click', e=>{
+    const b = e.target.closest('button[data-t]');
+    if(!b) return;
+    const ta = $('#tpl'), ins = '{' + b.dataset.t + '}';
+    const a = ta.selectionStart, z = ta.selectionEnd;
+    ta.value = ta.value.slice(0,a) + ins + ta.value.slice(z);
+    ta.selectionStart = ta.selectionEnd = a + ins.length;
+    ta.focus();
+    S.cfg.tpl = ta.value; updateFormula(); saveLocal();
+  });
+
+  /* 公式形态 */
+  $('#formSeg').addEventListener('click', e=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    S.cfg.form = b.dataset.f;
+    $$('#formSeg button').forEach(x=>x.classList.toggle('on', x.dataset.f===S.cfg.form));
+    updateFormula(); saveLocal();
+  });
+
+  /* 顶栏 */
+  $('#btnSample').addEventListener('click', ()=>{ loadSample(); toast('已载入示例'); });
+  $('#btnClear').addEventListener('click', ()=>{
+    if(!confirm('清空表格里的数据？（小数位、措辞等设置会保留）')) return;
+    S.rows = {};
+    renderAll(); selectAt(S.row, S.sel.c); saveLocal();
+    toast('已清空');
+  });
+  $('#btnCopy').addEventListener('click', ()=>{
+    if(isEmptyRow(S.row)){ toast('这一行还没有数据，没有公式可复制', true); return; }
+    copy(buildFormula(), '已复制公式，粘贴到 ' + S.cfg.outCol + S.row);
+  });
+  $('#btnCopyOne').addEventListener('click', ()=>{
+    if(isEmptyRow(S.row)){ toast('这一行还没有数据，没有公式可复制', true); return; }
+    copy(buildFormula(), '已复制公式，粘贴到 ' + S.cfg.outCol + S.row);
+  });
+  $('#btnCopySent').addEventListener('click', ()=>{
+    if(isEmptyRow(S.row)){ toast('这一行还没有数据', true); return; }
+    copy(buildSentence(), '已复制成句');
+  });
+
+  /* 键盘：单元格内 Esc/Enter 退出；选中未编辑时直接打字即替换 */
+  document.addEventListener('keydown', e=>{
+    if(e.target.isContentEditable){
+      if(e.key==='Escape' || e.key==='Enter'){ e.preventDefault(); e.target.blur(); }
+      return;
+    }
+    if(e.target.matches('input,textarea,select')) return;
+
+    const td = $('#sheet tr[data-r="' + S.row + '"] td[data-c="' + S.sel.c + '"]');
+    const editable = td && !isCalcCol(S.sel.c);
+
+    if(e.key==='Enter' || e.key==='F2'){
+      if(editable){ e.preventDefault(); editCell(td, null, null, false); return; }
+    }
+    if(e.key==='ArrowLeft' || e.key==='ArrowRight'){
+      e.preventDefault();
+      const c = stepCol(S.sel.c, e.key==='ArrowLeft' ? -1 : 1);
+      selectAt(S.row, c);
+      return;
+    }
+    if(e.key==='Tab'){
+      e.preventDefault();
+      selectAt(S.row, stepCol(S.sel.c, e.shiftKey ? -1 : 1));
+      return;
+    }
+    if(!editable) return;
+    if(e.key==='Backspace' || e.key==='Delete'){
+      e.preventDefault();
+      td.textContent = '';
+      td.dispatchEvent(new Event('input', { bubbles:true }));
+      return;
+    }
+    if(e.key.length!==1 || e.ctrlKey || e.metaKey || e.altKey) return;
+
+    e.preventDefault();
+    td.setAttribute('contenteditable','true');
+    td.textContent = e.key;
+    td.focus();
+    const rg = document.createRange(); rg.selectNodeContents(td); rg.collapse(false);
+    const sl = window.getSelection(); sl.removeAllRanges(); sl.addRange(rg);
+    td.dispatchEvent(new Event('input', { bubbles:true }));
+  });
+}
+
+/* ---------- 复制 ---------- */
+function copy(text, msg){
+  const done = ()=> toast(msg || '已复制');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>{ legacyCopy(text); done(); });
+  } else { legacyCopy(text); done(); }
+}
+function legacyCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'; ta.style.left='-9999px';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(err){}
+  document.body.removeChild(ta);
+}
+
+/* ---------- 数据 ---------- */
+function loadSample(){
+  S.cfg.noContract = false;
+  S.cfg.map = Object.assign({}, MAP_WITH);
+  S.cfg.outCol = 'T';
+  S.rows = {};
+  SAMPLE_ROWS.forEach(it=>{
+    Object.keys(it.v).forEach(k=> setv(it.r, k, it.v[k]));
+  });
+  S.row = 5; S.sel = { r:5, c:IDX('G') };
+  renderAll(); selectAt(5, IDX('G'));
+}
+
+/* ---------- 持久化 ---------- */
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      rows:S.rows, row:S.row, cfg:S.cfg, sel:S.sel, colW:S.colW
+    }));
+  }catch(e){}
+}
+function loadLocal(){
+  try{
+    let raw = localStorage.getItem(LS_KEY);
+    /* 兼容测试期旧缓存键 */
+    if(!raw){
+      raw = localStorage.getItem('equidraft.v1.0.5');
+      if(raw){ try{ localStorage.setItem(LS_KEY, raw); localStorage.removeItem('equidraft.v1.0.5'); }catch(e){} }
+    }
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+    if(!d || !d.cfg) return false;
+    S.cfg = Object.assign(S.cfg, d.cfg);
+    S.cfg.map = Object.assign({}, S.cfg.noContract ? MAP_NO : MAP_WITH);
+    if(!S.cfg.tpl) S.cfg.tpl = DEF_TPL;
+    if(!S.cfg.tier) S.cfg.tier = { d0:TIER0.slice(), d2:TIER2.slice(), d3:TIER3.slice() };
+    if(!Array.isArray(S.cfg.tier.d3)) S.cfg.tier.d3 = TIER3.slice();
+    if(Array.isArray(S.cfg.tier.d2)){
+      /* 旧版把 t / km 放在 2 位组里，统一挪到 3 位组 */
+      const moved = S.cfg.tier.d2.filter(u=> u==='t' || u==='km');
+      if(moved.length){
+        S.cfg.tier.d2 = S.cfg.tier.d2.filter(u=> u!=='t' && u!=='km');
+        moved.forEach(u=>{ if(S.cfg.tier.d3.indexOf(u) < 0) S.cfg.tier.d3.push(u); });
+      }
+    }
+    if(!S.cfg.form) S.cfg.form = 'wrap';
+    S.rows = d.rows || {};
+    S.row = Math.max(3, d.row || 5);
+    S.sel = { r:S.row, c:(d.sel && d.sel.c != null) ? d.sel.c : IDX('G') };
+    S.colW = d.colW || {};
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ---------- 提示 ---------- */
+let tTimer = null;
+function toast(msg, warn){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.style.background = warn ? 'rgba(150,42,32,.94)' : 'rgba(22,29,38,.93)';
+  t.classList.add('on');
+  clearTimeout(tTimer);
+  tTimer = setTimeout(()=> t.classList.remove('on'), 2400);
+}
+
+/* ---------- 启动 ---------- */
+(function init(){
+  bind();
+  renderTokens();
+  if(!loadLocal()) loadSample();
+  renderAll();
+  selectAt(S.row, S.sel.c);
+})();
+</script>
+</body>
+</html>
