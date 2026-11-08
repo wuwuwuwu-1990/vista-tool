@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>建设组价价构引擎RateStruct Building V1.0.12</title>
+<title>建设组价价构引擎RateStruct Building V1.0.13</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232f6df0'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -60,6 +60,27 @@
   button.ghost{background:#fff; color:var(--brand); border:1px solid var(--brand);}
   button.danger{background:var(--danger);}
   button.soft{background:var(--chip); color:var(--brand);}
+  /* 依据体系 / 计价阶段 切换条 */
+  .sysbar{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px;
+    padding:9px 11px; background:#f6f9ff; border:1px solid var(--line); border-radius:10px;}
+  .syslabel{font-size:11.5px; color:var(--sub); font-weight:600; white-space:nowrap;}
+  .seg-group{display:inline-flex; border:1px solid var(--brand); border-radius:8px; overflow:hidden;}
+  .seg-group button{
+    background:#fff; color:var(--brand); border-radius:0; font-size:12px; padding:5px 11px;
+    border-right:1px solid var(--line);
+  }
+  .seg-group button:last-child{border-right:none;}
+  .seg-group button.on{background:var(--brand); color:#fff; font-weight:600;}
+  .seg-group button:hover{transform:none; filter:brightness(1.03);}
+  /* table */
+  /* 分组行 */
+  tr.grp td{
+    background:#eef3fe; color:var(--brand); font-size:11.5px; font-weight:700;
+    padding:5px 8px; letter-spacing:.3px; border-left:3px solid var(--brand2);
+  }
+  tr.dim td{opacity:.45;}
+  tr.dim td.sel input{cursor:not-allowed;}
+  .ref-note .hl{color:var(--brand); font-weight:600;}
   /* table */
   table{width:100%; border-collapse:collapse; font-size:13px;}
   th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:middle;}
@@ -202,12 +223,12 @@
     <div class="logo">JS</div>
     <div class="meta">
       <h1>建设组价价构引擎 <span class="en">RateStruct Building</span></h1>
-      <p class="desc">建设工程（房屋建筑与装饰、通用安装、市政、园林、轨道等）· 左栏计量依据 · 中栏组价依据 · 右栏输出，三栏并排竖向操作；可一键在「2013 版 / 2024 版」清单计价依据间切换，勾选即自动生成「依据—组价—计量」整段计价说明条款（预算类／结算类可切换），可整段复制。</p>
+      <p class="desc">建设工程（房屋建筑与装饰、通用安装、市政、园林、轨道等）· 左栏计量依据 · 中栏组价依据 · 右栏输出，三栏并排竖向操作；清单依据可一键切「2013 版 / 2024 版」，定额按「2018 计价 / 2021 概算」两套体系分类勾选，勾选即自动生成「依据—组价—计量」整段计价说明条款（预算类／结算类可切换），可整段复制。</p>
     </div>
 
     <a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口">← 体系入口</a>
     <div class="rs-tail">
-      <span class="ver">V1.0.12</span>
+      <span class="ver">V1.0.13</span>
       <button type="button" class="rsmeta-btn" id="rsMetaBtn" aria-expanded="false" aria-controls="rsMetaPop"><i class="dot"></i>依据文号与出处</button>
       <div class="rsmeta-pop" id="rsMetaPop" role="dialog" aria-label="依据发布信息">
         <div class="rsmeta-hd">依据发布信息<span>5 项 · 文号／实施日期／出处</span></div>
@@ -216,7 +237,7 @@
       <div class="rsmeta-row"><div class="rsmeta-t">2021 年重庆市设计概算编制办法（CQGSBF-JA-2021／CQGSBF-GD-2021）</div><div class="rsmeta-i"><b>渝建管〔2021〕80号</b> · 实施 2021-06-01 · <a href="https://www.cecn.org.cn/NewView.asp?id=10827" target="_blank" rel="noopener">官网原文 ↗</a> <span class="rsmeta-tag">现行</span></div></div>
       <div class="rsmeta-row"><div class="rsmeta-t">《建设工程工程量清单计价标准》GB/T 50500-2024</div><div class="rsmeta-i"><b>住建部公告 2024 年第 212 号</b> · 实施 2025-09-01 · <a href="https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2024/art_6186304e164c4c4982904f8734983235.html" target="_blank" rel="noopener">官网原文 ↗</a> <span class="rsmeta-tag">现行</span></div></div>
       <div class="rsmeta-row"><div class="rsmeta-t">《建设工程工程量清单计价规范》GB 50500-2013（已被 GB/T 50500-2024 替代）</div><div class="rsmeta-i"><b>住房城乡建设部 2013 年发布</b> · 实施 2013-07-01 · <a href="https://www.mohurd.gov.cn/" target="_blank" rel="noopener">官网原文 ↗</a> <span class="rsmeta-tag dead">已废止</span></div></div>
-        <div class="rsmeta-ft">出处为发布机关官网原文。未列批次请以现行文件为准；标注「已废止」的仅作历史项目沿用参考。</div>
+        <div class="rsmeta-ft">建设中栏按「依据体系／计价阶段」分类：重庆 2018 版＝预算定额（渝建〔2018〕200号，含 2019 年管廊与管线迁改、2021 年排水管网养护维修、2022／2023 装配式等补充定额）；重庆 2021 版＝概算定额（渝建管〔2021〕79号，6 本）。切换阶段只改变适用范围，不删除任何条目。出处为发布机关官网原文；标注「已废止」的仅作历史项目沿用参考。</div>
       </div>
     </div>
   </header>
@@ -229,6 +250,7 @@
       <button id="addRef" class="soft">＋ 新增引用</button>
       <button id="ref2024" class="ghost" title="一键勾选 2024 版国家计价计算标准与重庆实施细则">用 2024 版</button>
       <button id="ref2013" class="ghost" title="一键勾选 2013 版清单计价规范与重庆两项清单规则">用 2013 版</button>
+      <button id="refGS" class="ghost" title="一键勾选 2021 版概算编制办法（编制设计概算时使用）">用概算版</button>
       <button id="resetRef" class="ghost">恢复默认引用</button>
     </div>
     <table id="refTable">
@@ -237,12 +259,24 @@
       </thead>
       <tbody></tbody>
     </table>
-    <p class="ref-note">提示：2013 版三项（清单计价规范 + 重庆两项清单规则）排在最前且默认勾选；2024 版《建设工程工程量清单计价标准》（GB/T 50500-2024）、9 部工程量计算标准（合并记为 GB/T 50854-2024等9部计算标准）及《重庆市建设工程工程量清单计价实施细则》（JJYJ 50-003-2026）默认不勾选，需要时勾选即可。所有勾选框均可自由勾选或取消，仅勾选项进入输出文本。连接词"及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量"为固定后缀。中栏最下方 6 本「概算定额」与左栏 2 项「概算编制办法」对应 2021 年重庆市概算体系（渝建管〔2021〕79／80号），编制设计概算时勾选，与预算定额互不自动勾选，按项目阶段自行取舍。</p>
+    <p class="ref-note">提示：2013 版三项（清单计价规范 + 重庆两项清单规则）排在最前且默认勾选；2024 版《建设工程工程量清单计价标准》（GB/T 50500-2024）、9 部工程量计算标准（合并记为 GB/T 50854-2024等9部计算标准）及《重庆市建设工程工程量清单计价实施细则》（JJYJ 50-003-2026）默认不勾选，需要时勾选即可。所有勾选框均可自由勾选或取消，仅勾选项进入输出文本。连接词"及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量"为固定后缀。中栏最下方 6 本「概算定额」与左栏 2 项「概算编制办法」对应 2021 年重庆市概算体系（渝建管〔2021〕79／80号），编制设计概算时勾选，与预算定额互不自动勾选，按项目阶段自行取舍。<span class="hl">「用概算版」</span>一键勾选两项概算编制办法并取消清单三项（编制设计概算时使用）；「用 2013 版／用 2024 版」用于清单计价项目。</p>
   </div>
 
   <!-- ② 组价依据 -->
   <div class="card col">
     <h2><span class="colnum">2</span><span class="tag">组价依据</span> 定额类目清单</h2>
+    <div class="sysbar">
+      <span class="syslabel">依据体系</span>
+      <div class="seg-group" id="seriesSeg">
+        <button type="button" data-s="cq2018" class="on">重庆 2018 版</button>
+        <button type="button" data-s="cq2021">重庆 2021 版</button>
+      </div>
+      <span class="syslabel">计价阶段</span>
+      <div class="seg-group" id="stageSeg">
+        <button type="button" data-t="budget" class="on">预算</button>
+        <button type="button" data-t="estimate">概算</button>
+      </div>
+    </div>
     <div class="toolbar">
       <button id="addQuota" class="soft">＋ 新增定额</button>
       <button id="checkAll" class="ghost">全选</button>
@@ -257,7 +291,7 @@
         <tbody></tbody>
       </table>
     </div>
-    <p class="ref-note">提示：清单收录 2018 系列全部计价定额、2019 年管廊与管线迁改、2021 年排水管网养护维修、2022 年装配式建筑、2023 年装配式市政与轨道运营改造等定额（概算定额未纳入）。带"必选"的四本（仪器仪表台班、机械台班、配合比表、费用定额）默认勾选、不可取消，名称/代号仍可编辑。</p>
+    <p class="ref-note">提示：2018 版＝预算定额、2021 版＝概算定额（渝建管〔2021〕79号）；切换只改阶段、不删条目，非当前阶段置灰不可选，切回即恢复。必选四本（台班／配合比／费用定额）两阶段共用。</p>
   </div>
 
   <!-- ③ 输出 -->
@@ -279,7 +313,7 @@
   </div>
   </main>
 
-  <p class="brand-foot">建设组价价构引擎 RateStruct Building　V1.0.12</p>
+  <p class="brand-foot">建设组价价构引擎 RateStruct Building　V1.0.13</p>
   <div id="toast" class="toast"></div>
 
 <script>
@@ -341,6 +375,8 @@
     "GB/T 50854-2024等9部计算标准",
     "JJYJ 50-003-2026"
   ];
+  // 概算体系：设计概算不用工程量清单，依据换为两项概算编制办法
+  const REF_SERIES_GS = ["CQGSBF-JA-2021","CQGSBF-GD-2021"];
   // 旧版逐条列出的 9 部计算标准代号（升级时合并为一条）
   const REF_9SPLIT = [
     "GB/T 50854-2024","GB/T 50855-2024","GB/T 50856-2024","GB/T 50857-2024","GB/T 50858-2024",
@@ -351,13 +387,45 @@
   const MANDATORY = ["CQYQYBDE-2018","CQJXDE-2018","CQPHBB-2018","CQFYDE-2018"];
   const isLocked = q => MANDATORY.includes(String(q.code||"").trim());
 
+  // ---- 依据体系 / 计价阶段 ----
+  // ys = 2018 系列计价定额（预算阶段）；gs = 2021 系列概算定额（概算阶段）
+  // base = 预算与概算共用的配套定额（台班、配合比、费用定额，必选）；other = 用户自建，两个阶段都参与
+  const GRP_TITLE = {
+    ys:   "重庆 2018 系列计价定额 · 预算阶段（渝建〔2018〕200号）",
+    gs:   "重庆 2021 系列概算定额 · 概算阶段（渝建管〔2021〕79号）",
+    base: "配套定额 · 预算与概算共用（必选）",
+    other:"自定义 / 其他"
+  };
+  const GRP_ORDER = ["ys","gs","base","other"];
+  const ACTIVE_OF = {cq2018:"ys", cq2021:"gs"};
+
+  function defGrp(name, code){
+    const c = String(code||"").trim(), nm = String(name||"");
+    if(/^CQGSDE-/i.test(c) || /概算/.test(nm)) return "gs";
+    if(MANDATORY.includes(c) || /台班定额|配合比表|费用定额/.test(nm)) return "base";
+    if(/^CQ[A-Z]/i.test(c) || /计价定额/.test(nm)) return "ys";
+    return "other";
+  }
+
+  const LS_SYS = "quota_sys_v1";
+  const _sys = load(LS_SYS, {series:"cq2018", stage:"budget"}) || {};
+  let stage  = _sys.stage === "estimate" ? "estimate" : "budget";
+  let series = stage === "estimate" ? "cq2021" : "cq2018";
+  const activeGrp = () => ACTIVE_OF[series];
+  // 当前阶段是否适用（自定义 / 配套定额始终适用）
+  const inStage = q => {
+    const g = q.grp || "other";
+    return (g === "ys" || g === "gs") ? g === activeGrp() : true;
+  };
+
   // 计量依据：全部条目均可自由勾选，默认全选（不再有锁定项）
 
   // 规范化旧数据 / 异常数据，避免 .trim() 报错导致输出空白
   function normQuota(o){
-    if(Array.isArray(o)) return {name:String(o[0]||""), code:String(o[1]||""), on:false};
+    if(Array.isArray(o)) return {name:String(o[0]||""), code:String(o[1]||""), on:false, grp:defGrp(o[0], o[1])};
     o = o || {};
-    return {name:String(o.name||""), code:String(o.code||""), on:!!o.on};
+    return {name:String(o.name||""), code:String(o.code||""), on:!!o.on,
+            grp: o.grp || defGrp(o.name, o.code)};
   }
   function normRef(o){
     if(Array.isArray(o)) return {name:String(o[0]||""), code:String(o[1]||""), on:true};
@@ -477,6 +545,7 @@
     try{
       localStorage.setItem(LS_Q, JSON.stringify(quotas));
       localStorage.setItem(LS_R, JSON.stringify(refs));
+      localStorage.setItem(LS_SYS, JSON.stringify({series, stage}));
     }catch(e){ /* localStorage 不可用（隐私模式 / file://）时忽略，不阻断界面 */ }
   }
 
@@ -486,20 +555,31 @@
   const outText = document.getElementById("outText") || document.querySelector(".out-text");
   let currentText = "";
 
-  // ---- 渲染定额表 ----
+  // ---- 渲染定额表（按体系分组，非当前阶段置灰）----
   function renderQuotas(){
     qBody.innerHTML = "";
+    let lastGrp = "";
     quotas.forEach((q,i)=>{
+      const g = GRP_TITLE[q.grp] ? q.grp : "other";
+      if(g !== lastGrp){
+        lastGrp = g;
+        const gh = document.createElement("tr");
+        gh.className = "grp";
+        gh.innerHTML = `<td colspan="4">${esc(GRP_TITLE[g])}</td>`;
+        qBody.appendChild(gh);
+      }
       const lock = isLocked(q);
+      const dim = !inStage(q);
       const checked = (q.on || lock) ? "checked" : "";
       const tr = document.createElement("tr");
+      if(dim) tr.className = "dim";
       tr.innerHTML =
         `<td class="idx">${i+1}</td>`+
         `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(q.name)}</textarea></td>`+
         `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(q.code)}" /></td>`+
         (lock
           ? `<td class="sel"><input type="checkbox" ${checked} disabled title="必选项，不可取消" /><div style="font-size:11px;color:var(--ok);margin-top:2px;">必选</div></td>`
-          : `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`);
+          : `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} ${dim ? 'disabled title="当前计价阶段不适用，切换阶段后生效"' : ""} /></td>`);
       qBody.appendChild(tr);
     });
     bindInputs();
@@ -574,7 +654,7 @@
 
     function buildSegments(){
     // 组价依据（勾选 或 本体系锁定项）
-    const pricing = quotas.filter(q => q.name.trim() && (q.on || isLocked(q)));
+    const pricing = quotas.filter(q => q.name.trim() && (isLocked(q) || (q.on && inStage(q))));
     // 计量依据（仅勾选项）
     const refItems = refs.filter(r => r.name.trim() && r.on !== false);
     return { pricing, refItems };
@@ -647,7 +727,9 @@
     currentText = (pricing.length || refItems.length) ? text : "";
     setOutText(text, animate);
 
-    setStat("组价类 " + pricing.length + " 本（含费用定额）｜ 计量依据 " + refItems.length + " 项");
+    const stageName = stage === "estimate" ? "概算阶段" : "预算阶段";
+    const sysName = series === "cq2021" ? "重庆 2021 版（概算定额）" : "重庆 2018 版（计价定额）";
+    setStat(sysName + " · " + stageName + "　｜　组价类 " + pricing.length + " 本（含费用定额）｜ 计量依据 " + refItems.length + " 项");
   }
 
   // ---- 按钮 ----
@@ -672,17 +754,59 @@
   document.getElementById("ref2013").addEventListener("click", ()=>{
     applyRefSeries(REF_SERIES_2013, "已切换为 2013 版清单计价规范 + 重庆清单规则");
   });
+  document.getElementById("refGS").addEventListener("click", ()=>{
+    applyRefSeries(REF_SERIES_GS, "已切换为 2021 版概算编制办法（清单三项已取消勾选）");
+  });
+  // 依据体系 / 计价阶段：2018 系列只有预算定额、2021 系列只有概算定额，两者联动
+  function applySys(t, tip){
+    stage  = (t === "estimate") ? "estimate" : "budget";
+    series = (stage === "estimate") ? "cq2021" : "cq2018";
+    const g = activeGrp();
+    // 首次进入某阶段：该组尚无勾选时自动勾选本组全部定额，避免切过去输出为空
+    if(!quotas.some(q => (q.grp || "other") === g && q.on)){
+      quotas.forEach(q => { if((q.grp || "other") === g) q.on = true; });
+    }
+    save(); renderQuotas(); paintSys();
+    if(tip) toast(tip);
+  }
+  function paintSys(){
+    document.querySelectorAll("#seriesSeg button").forEach(b=>{
+      b.classList.toggle("on", (b.dataset.s === "cq2021") === (series === "cq2021"));
+    });
+    document.querySelectorAll("#stageSeg button").forEach(b=>{
+      b.classList.toggle("on", (b.dataset.t === "estimate") === (stage === "estimate"));
+    });
+  }
+  document.querySelectorAll("#seriesSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if((b.dataset.s === "cq2021") === (series === "cq2021")) return;
+      const est = b.dataset.s === "cq2021";
+      applySys(est ? "estimate" : "budget",
+        est ? "已切到 2021 版概算体系（概算阶段，6 本概算定额）"
+            : "已切到 2018 版计价体系（预算阶段）");
+    });
+  });
+  document.querySelectorAll("#stageSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if((b.dataset.t === "estimate") === (stage === "estimate")) return;
+      const est = b.dataset.t === "estimate";
+      applySys(b.dataset.t,
+        est ? "已切到概算阶段（2021 版概算定额）" : "已切到预算阶段（2018 版计价定额）");
+    });
+  });
+
   document.getElementById("checkAll").addEventListener("click", ()=>{
-    quotas.forEach(q=>q.on=true); save(); renderQuotas();
+    quotas.forEach(q=>{ if(inStage(q) || isLocked(q)) q.on=true; }); save(); renderQuotas();
   });
   document.getElementById("uncheckAll").addEventListener("click", ()=>{
-    quotas.forEach(q=>{ if(!isLocked(q)) q.on=false; }); save(); renderQuotas();
+    quotas.forEach(q=>{ if(!isLocked(q) && inStage(q)) q.on=false; }); save(); renderQuotas();
   });
   document.getElementById("resetQuota").addEventListener("click", e=>{
     armConfirm(e.currentTarget, "再点一次恢复", ()=>{
-      quotas = DEFAULT_QUOTAS.map(r=>({name:r[0],code:r[1],on:false}));
-      save(); renderQuotas();
-      toast("已恢复默认定额清单（" + quotas.length + " 本）");
+      quotas = DEFAULT_QUOTAS.map(r=>({name:r[0],code:r[1],on:false,grp:defGrp(r[0],r[1])}));
+      stage = "budget"; series = "cq2018";
+      save(); renderQuotas(); paintSys();
+      toast("已恢复默认定额清单（" + quotas.length + " 本，预算阶段）");
     });
   });
   document.getElementById("resetRef").addEventListener("click", e=>{
@@ -771,6 +895,7 @@
   })();
 
   // ---- 初始化 ----
+  try{ paintSys(); }catch(err){ console.error("体系按钮初始化失败:", err); }
   try{ renderQuotas(); }catch(err){ console.error("渲染定额表失败:", err); }
   try{ renderRefs(); }catch(err){ console.error("渲染引用表失败:", err); }
   generate();   // 兜底：确保输出栏一定有内容
