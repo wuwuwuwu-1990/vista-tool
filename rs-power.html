@@ -163,13 +163,13 @@
 </head>
 <body>
   
-<!-- rs-entry-bar v3 -->
-<a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口">← 体系入口</a>
+<!-- rs-entry-bar v5 -->
 <style>
-.rsbar-home{position:fixed;top:9px;right:14px;z-index:900;display:inline-flex;align-items:center;gap:5px;color:#fff;background:#c2410c;border:1px solid #c2410c;border-radius:20px;padding:4px 12px 4px 10px;text-decoration:none;font-weight:600;font-size:11.5px;letter-spacing:.2px;line-height:1.4;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;box-shadow:0 4px 14px rgba(16,32,56,.22);transition:filter .15s,box-shadow .15s,transform .1s;}
-.rsbar-home:hover{filter:brightness(.92);box-shadow:0 8px 20px rgba(16,32,56,.3);}
+.rsbar-home{display:inline-flex;align-items:center;gap:5px;margin:0 4px 0 auto;color:#fff;background:#c2410c;border:1px solid #c2410c;border-radius:20px;padding:4px 12px 4px 10px;text-decoration:none;font-weight:600;font-size:11.5px;letter-spacing:.2px;line-height:1.4;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;box-shadow:0 3px 10px rgba(16,32,56,.16);transition:filter .15s,box-shadow .15s,transform .1s;}
+.rsbar-home:hover{filter:brightness(.92);box-shadow:0 6px 16px rgba(16,32,56,.24);}
 .rsbar-home:active{transform:translateY(1px);}
-@media print{.rsbar-home{display:none;}}
+.rs-note-fixed{position:fixed;bottom:0;z-index:8;margin:0;padding:10px 0 9px;background:var(--card);box-shadow:0 -10px 16px -10px rgba(16,32,56,.18);}
+@media print{.rsbar-home{display:none;}.rs-note-fixed{position:static;box-shadow:none;}}
 </style>
 <header class="brand">
     <div class="logo">PW</div>
@@ -177,6 +177,8 @@
       <h1>电力组价价构引擎 <span class="en">RateStruct Power</span></h1>
       <p class="desc">左栏计量依据 · 中栏定额组价依据 · 右栏输出，三栏并排竖向操作；可一键切换「火力发电 / 电网」两套编规与「预算 / 概算」两套定额册（2025 年版，2026-08-01 起施行，2018 年版已废止），勾选即自动生成“重新组价 + 清单计量”两段式计价说明条款，可整段复制。</p>
     </div>
+
+    <a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口">← 体系入口</a>
     <span class="ver">V1.0.0</span>
   </header>
 
@@ -691,6 +693,44 @@
 
   window.addEventListener("load", ()=>{ requestAnimationFrame(()=>{ try{ growAll(); }catch(e){} }); });
   window.addEventListener("resize", ()=>{ try{ growAll(); }catch(e){} });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var card = document.querySelector('.cols > .card:nth-child(2)');
+    if(!card) return;
+    var note = card.querySelector('.ref-note');
+    if(!note) return;
+    var pad0 = null;
+    function layout(){
+      var r = card.getBoundingClientRect();
+      var cs = getComputedStyle(card);
+      var pl = parseFloat(cs.paddingLeft) || 0, pr = parseFloat(cs.paddingRight) || 0;
+      note.style.left = (r.left + pl) + 'px';
+      note.style.width = Math.max(80, r.width - pl - pr) + 'px';
+    }
+    function pin(){
+      if(note.classList.contains('rs-note-fixed')) return;
+      pad0 = parseFloat(getComputedStyle(card).paddingBottom) || 0;
+      note.classList.add('rs-note-fixed');
+      card.style.paddingBottom = (pad0 + note.offsetHeight + 8) + 'px';
+    }
+    function unpin(){
+      if(!note.classList.contains('rs-note-fixed')) return;
+      note.classList.remove('rs-note-fixed');
+      note.style.left = ''; note.style.width = '';
+      card.style.paddingBottom = '';
+    }
+    function update(){
+      var r = card.getBoundingClientRect();
+      var need = (r.bottom > innerHeight + 6) && (r.top < innerHeight - 90);
+      if(need){ pin(); layout(); } else { unpin(); }
+    }
+    addEventListener('scroll', update, {passive:true});
+    addEventListener('resize', update);
+    update();
+  }catch(e){}
 })();
 </script>
 </body>
