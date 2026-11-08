@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>农田组价价构引擎RateStruct Farmland V1.0.3</title>
+<title>农田组价价构引擎RateStruct Farmland V1.0.4</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%234d7c0f'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -30,7 +30,7 @@
   }
   h1{font-size:22px; margin:0 0 4px;}
   .desc{color:var(--sub); font-size:13px; margin:0 0 20px;}
-  .brand{display:flex; align-items:center; gap:14px; margin-bottom:22px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:14px; margin-bottom:20px; flex-wrap:wrap;}
   .brand .logo{
     width:48px; height:48px; border-radius:13px; flex:none;
     background:linear-gradient(135deg,var(--brand),var(--brand2));
@@ -200,24 +200,30 @@
 </head>
 <body>
   
-<!-- rs-entry-bar v5 -->
+<!-- rs-entry-bar v6 -->
 <style>
-.rsbar-home{display:inline-flex;align-items:center;gap:5px;margin:0 4px 0 auto;color:#fff;background:#4d7c0f;border:1px solid #4d7c0f;border-radius:20px;padding:4px 12px 4px 10px;text-decoration:none;font-weight:600;font-size:11.5px;letter-spacing:.2px;line-height:1.4;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;box-shadow:0 3px 10px rgba(16,32,56,.16);transition:filter .15s,box-shadow .15s,transform .1s;}
-.rsbar-home:hover{filter:brightness(.92);box-shadow:0 6px 16px rgba(16,32,56,.24);}
-.rsbar-home:active{transform:translateY(1px);}
+.brand{position:relative;}
+.rsbar-home{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;margin:0;display:inline-flex;align-items:center;gap:6px;color:#fff;background:#4d7c0f;border:1px solid #4d7c0f;border-radius:999px;padding:6px 16px 6px 13px;text-decoration:none;font-weight:600;font-size:12px;letter-spacing:.3px;line-height:1.4;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;box-shadow:0 4px 14px -2px rgba(16,32,56,.28);transition:filter .15s,box-shadow .15s,transform .12s;}
+.rsbar-home:hover{filter:brightness(.92);box-shadow:0 8px 22px -2px rgba(16,32,56,.34);transform:translate(-50%,-50%);}
+.rsbar-home:active{transform:translate(-50%,calc(-50% + 1px));}
+.rsbar-home:focus-visible{outline:2px solid rgba(255,255,255,.92);outline-offset:2px;}
 .rs-note-fixed{position:fixed;bottom:0;z-index:8;margin:0;padding:10px 0 9px;background:var(--card);box-shadow:0 -10px 16px -10px rgba(16,32,56,.18);}
+@media (max-width:960px){
+  .rsbar-home{position:static;transform:none;margin:0;padding:5px 13px;font-size:11.5px;}
+  .rsbar-home:hover{transform:none;}
+  .rsbar-home:active{transform:translateY(1px);}
+}
 @media print{.rsbar-home{display:none;}.rs-note-fixed{position:static;box-shadow:none;}}
 </style>
 <header class="brand">
     <div class="logo">FL</div>
     <div class="meta">
       <h1>农田组价价构引擎 <span class="en">RateStruct Farmland</span></h1>
-      <p class="desc">左栏计量依据 · 中栏定额组价依据 · 右栏输出，三栏并排竖向操作；可一键切换「农业农村部 2026 / 土地整治 2011」与「预算 / 概算」阶段（土地整治只有预算定额），勾选即自动生成「依据—组价—计量」整段计价说明条款（预算类／结算类可切换），可整段复制。</p>
     </div>
 
     <a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口">← 体系入口</a>
     <div class="rs-tail">
-      <span class="ver">V1.0.3</span>
+      <span class="ver">V1.0.4</span>
       <button type="button" class="rsmeta-btn" id="rsMetaBtn" aria-expanded="false" aria-controls="rsMetaPop"><i class="dot"></i>依据文号与出处</button>
       <div class="rsmeta-pop" id="rsMetaPop" role="dialog" aria-label="依据发布信息">
         <div class="rsmeta-hd">依据发布信息<span>2 项 · 文号／实施日期／出处</span></div>
@@ -297,7 +303,7 @@
   </div>
   </main>
 
-  <p class="brand-foot">农田组价价构引擎 RateStruct Farmland　V1.0.3</p>
+  <p class="brand-foot">农田组价价构引擎 RateStruct Farmland　V1.0.4</p>
   <div id="toast" class="toast"></div>
 
 <script>
