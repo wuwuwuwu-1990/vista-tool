@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>水运组价价构引擎RateStruct Waterway V1.0.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230e7490'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#f2f6fa; --card:#ffffff; --ink:#182633; --sub:#5c7183;
+    --line:#dae4ee; --brand:#14507a; --brand2:#3d84b8;
+    --ok:#3f8f2e; --danger:#e0533d; --chip:#e4eef7;
+    --radius:14px; --shadow:0 6px 24px rgba(20,52,90,.09);
+    /* 统一字体：苹果系统字体优先（SF Pro / 苹方），非苹果环境逐级回落 */
+    --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+           "PingFang SC", "Hiragino Sans GB", "Helvetica Neue",
+           "Microsoft YaHei", "微软雅黑", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0 auto; max-width:2080px; font-family:var(--font);
+    background:var(--bg); color:var(--ink); line-height:1.6; padding:24px;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility; font-kerning:normal;
+  }
+  /* 表单控件默认不继承字体，统一锁定为同一字体，避免个别控件回落成系统默认字体 */
+  button, input, select, textarea, optgroup, option, label{
+    font-family:var(--font); letter-spacing:inherit; font-kerning:inherit;
+  }
+  h1{font-size:22px; margin:0 0 4px;}
+  .desc{color:var(--sub); font-size:13px; margin:0 0 20px;}
+  .brand{display:flex; align-items:center; gap:14px; margin-bottom:22px; flex-wrap:wrap;}
+  .brand .logo{
+    width:48px; height:48px; border-radius:13px; flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand2));
+    color:#fff; font-weight:700; font-size:16px; letter-spacing:.5px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(20,80,122,.3);
+  }
+  .brand .meta{flex:1; min-width:240px;}
+  .brand h1{font-size:23px; margin:0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+  .brand h1 .en{font-size:13px; color:var(--brand); font-weight:600; letter-spacing:.5px;}
+  .brand .desc{margin:3px 0 0;}
+  .ver{font-size:11px; color:var(--brand); border:1px solid var(--brand); border-radius:20px; padding:3px 10px; font-weight:600; white-space:nowrap;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px 20px; margin-bottom:20px;
+  }
+  .card h2{font-size:15px; margin:0 0 14px; display:flex; align-items:center; gap:8px;}
+  .card h2 .tag{font-size:11px; color:#fff; background:var(--brand); border-radius:6px; padding:2px 8px;}
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  button{
+    font-family:inherit; font-size:13px; cursor:pointer; border:none; border-radius:9px;
+    padding:8px 14px; transition:.15s; color:#fff; background:var(--brand);
+  }
+  button:hover{filter:brightness(1.05); transform:translateY(-1px);}
+  button.ghost{background:#fff; color:var(--brand); border:1px solid var(--brand);}
+  button.danger{background:var(--danger);}
+  button.soft{background:var(--chip); color:var(--brand);}
+  /* 依据体系切换条 */
+  .sysbar{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px;
+    padding:9px 11px; background:#f5f9fc; border:1px solid var(--line); border-radius:10px;}
+  .syslabel{font-size:11.5px; color:var(--sub); font-weight:600; white-space:nowrap;}
+  .seg-group{display:inline-flex; border:1px solid var(--brand); border-radius:8px; overflow:hidden;}
+  .seg-group button{
+    background:#fff; color:var(--brand); border-radius:0; font-size:12px; padding:5px 11px;
+    border-right:1px solid var(--line);
+  }
+  .seg-group button:last-child{border-right:none;}
+  .seg-group button.on{background:var(--brand); color:#fff; font-weight:600;}
+  .seg-group button:hover{transform:none; filter:brightness(1.03);}
+  .seg-group button:disabled{
+    color:#bdbfae; background:#f6f6f2; cursor:not-allowed; border-color:var(--line);
+  }
+  .seg-group button:disabled:hover{filter:none;}
+  /* table */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:middle;}
+  th{background:#f3f8fc; color:var(--sub); font-weight:600;}
+  td input{border:1px solid var(--line); border-radius:6px; padding:6px 8px; width:100%; font-family:inherit; font-size:13px;}
+  td input:focus{outline:none; border-color:var(--brand);}
+  .idx{width:42px; text-align:center; color:var(--sub);}
+  .sel{width:54px; text-align:center;}
+  .sel input{width:16px;height:16px;cursor:pointer;}
+  .ref-note{font-size:12px; color:var(--sub); margin:10px 0 0;}
+  /* 分组行 */
+  tr.grp td{
+    background:#e3edf6; color:var(--brand); font-size:11.5px; font-weight:700;
+    padding:5px 8px; letter-spacing:.3px; border-left:3px solid var(--brand2);
+  }
+  /* output */
+  .out-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+  .stat{font-size:12px; color:var(--sub);}
+  textarea{
+    width:100%; min-height:170px; resize:vertical; border:1px solid var(--line);
+    border-radius:10px; padding:14px; font-family:var(--font);
+    font-size:14px; line-height:1.9; color:var(--ink); background:#fafcfe;
+  }
+  textarea:focus{outline:none; border-color:var(--brand);}
+  .copied{color:var(--ok) !important; background:var(--ok) !important;}
+  .footer{font-size:12px; color:var(--sub); text-align:center; margin-top:8px;}
+  .brand-foot{text-align:center; font-size:12px; color:#8ca0b3; letter-spacing:.6px; margin:26px 0 6px;}
+  /* 竖向三栏（左中右） */
+  .cols{display:grid; grid-template-columns:1fr 1.4fr 1.15fr; gap:18px; align-items:stretch;}
+  @media (max-width:1240px){ .cols{grid-template-columns:1fr;} }
+  .col{padding:16px 16px 18px; display:flex; flex-direction:column;}
+  .col h2{font-size:14px; margin-bottom:12px;}
+  .colnum{width:24px; height:24px; border-radius:50%; flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; font-size:12px; font-weight:700;
+    display:inline-flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(20,80,122,.28);}
+  .col table{font-size:12px; table-layout:fixed;}
+  .col th,.col td{padding:6px; }
+  .col .idx{width:26px;}
+  .col .sel{width:48px; padding:6px 3px;}
+  /* 锁定行的复选框与“必选”二字水平居中，二者上下对齐 */
+  .col .sel input[type=checkbox]{display:block; margin:0 auto;}
+  /* 锁定行的复选框与“必选”二字水平居中，二者上下对齐 */
+  .col .sel input[type=checkbox]{display:block; margin:0 auto;}
+  /* 必选标记：单行显示，不与复选框挤成两行 */
+  .locktag{font-size:10px; color:var(--ok); margin-top:1px; white-space:nowrap; line-height:1.2; text-align:center;}
+  .lockmark{font-size:11px; color:var(--ok);}
+  .col .cd{width:184px;}
+  #refTable .cd{width:146px;}
+  #refTable .cd input{font-size:10.5px;}
+  .col .cd input{font-size:10.5px; padding:5px 5px;}
+  .col td input{font-size:12px; padding:5px 6px;}
+  /* 代号列数字等宽对齐，仍沿用同一字体（不使用等宽字体） */
+  .col .cd input, #refTable .cd input{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
+  /* 名称单元格：多行自动增高，文字完整可见 */
+  td textarea.cell{
+    display:block; width:100%; min-height:30px; border:1px solid var(--line); border-radius:6px;
+    padding:5px 6px; font-family:inherit; font-size:12px; line-height:1.5; color:var(--ink);
+    background:#fff; resize:vertical; overflow:hidden; word-break:break-word;
+  }
+  td textarea.cell:focus{outline:none; border-color:var(--brand);}
+  .col .out-head{flex-direction:column; align-items:flex-start; gap:8px;}
+  .col .seg{margin-left:0; flex-wrap:wrap;}
+  /* 轻提示 */
+  .toast{
+    position:fixed; left:50%; bottom:34px; transform:translate(-50%,10px);
+    background:#122430; color:#fff; font-size:13px; padding:9px 18px; border-radius:10px;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:99;
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  button.armed{background:var(--danger) !important; color:#fff !important;}
+  /* 整段输出 */
+  .out-text{border:1px solid var(--line); border-radius:10px; background:#fafcfe;
+    padding:12px 14px; font-size:14px; line-height:1.95; color:var(--ink);
+    word-break:break-word; min-height:220px;}
+  .out-text:empty::before{content:"—"; color:#c2d1e0;}
+  /* 独立滚动 */
+  .scroll-box{flex:1 1 auto; max-height:calc(100vh - 340px); min-height:240px; overflow-y:auto;
+    border:1px solid var(--line); border-radius:8px; padding:2px;}
+  .scroll-box thead th{position:sticky; top:0; z-index:1;}
+  .scroll-box::-webkit-scrollbar{width:8px;}
+  .scroll-box::-webkit-scrollbar-thumb{background:#b9cee2; border-radius:8px;}
+  .scroll-box::-webkit-scrollbar-track{background:transparent;}
+  .seg{display:inline-flex; gap:6px; margin-left:auto;}
+  .seg button{padding:6px 12px; font-size:12px;}
+  ::selection{background:#cfe0f0;}
+</style>
+</head>
+<body>
+  
+<!-- rs-entry-bar v1 -->
+<div class="rsbar"><a class="rsbar-home" href="ratestruct.html">← 体系入口</a><span class="rsbar-t">RateStruct 系列 · 8 套计价体系</span></div>
+<style>
+.rsbar{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;font-size:12.5px;line-height:1.5;}
+.rsbar a{display:inline-flex;align-items:center;gap:5px;color:#2f6df0;background:#eef3fe;border:1px solid rgba(47,109,240,.22);border-radius:20px;padding:5px 13px;text-decoration:none;font-weight:600;transition:background .15s,color .15s,border-color .15s;}
+.rsbar a:hover{background:#2f6df0;color:#fff;border-color:transparent;}
+.rsbar-t{color:#9aa5b5;}
+@media print{.rsbar{display:none;}}
+</style>
+<header class="brand">
+    <div class="logo">WT</div>
+    <div class="meta">
+      <h1>水运组价价构引擎 <span class="en">RateStruct Waterway</span></h1>
+      <p class="desc">左栏计量依据 · 中栏定额组价依据 · 右栏输出，三栏并排竖向操作；可一键切换「内河航运 / 沿海港口 / 疏浚工程」三条定额线（共用 JTS/T 116 编规与 JTS/T 277 材料用量定额），勾选即自动生成“重新组价 + 清单计量”两段式计价说明条款，可整段复制。</p>
+    </div>
+    <span class="ver">V1.0.0</span>
+  </header>
+
+  <main class="cols">
+  <!-- ① 计量依据 -->
+  <div class="card col">
+    <h2><span class="colnum">1</span><span class="tag">计量依据</span> 清单计价规范与计量规则</h2>
+    <div class="toolbar">
+      <button id="addRef" class="soft">＋ 新增引用</button>
+      <button id="refAll" class="ghost">全选</button>
+      <button id="resetRef" class="ghost">恢复默认引用</button>
+    </div>
+    <table id="refTable">
+      <thead>
+        <tr><th class="idx">#</th><th>标准 / 规则名称</th><th class="cd">代号</th><th class="sel">选用</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="ref-note">提示：水运的计量规则<b>写在清单计价规范里</b>——JTS/T 271-2020（2020-10-15 起施行，替代 JTS 271-2008）附录 D 给出分项工程量计算规则，并明确“工程数量以设计图纸净尺度为准”；JTS/T 116-2019 规定概算、预算的费用构成与计算程序。两者并行才是完整的计量依据。疏浚工程量按水下自然方计、以设计断面为准，超深超宽不予计量，与陆上土方口径不同。</p>
+  </div>
+
+  <!-- ② 组价依据 -->
+  <div class="card col">
+    <h2><span class="colnum">2</span><span class="tag">组价依据</span> 定额与概算预算编制规定</h2>
+    <div class="sysbar">
+      <span class="syslabel">依据体系</span>
+      <div class="seg-group" id="seriesSeg">
+        <button data-s="nh" class="on">内河航运</button>
+        <button data-s="yh">沿海港口</button>
+        <button data-s="sj">疏浚工程</button>
+      </div>
+      <span class="syslabel">计价阶段</span>
+      <div class="seg-group" id="stageSeg">
+        <button data-t="budget" class="on">预算</button>
+        <button data-t="estimate">概算</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button id="addQuota" class="soft">＋ 新增定额</button>
+      <button id="checkAll" class="ghost">全选</button>
+      <button id="uncheckAll" class="ghost">清空</button>
+      <button id="resetQuota" class="danger">恢复默认定额</button>
+    </div>
+    <div class="scroll-box">
+      <table id="quotaTable">
+        <thead>
+          <tr><th class="idx">#</th><th>定额名称</th><th class="cd">代号</th><th class="sel">选用</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="ref-note">提示：交通运输部公告 2019 年第 57 号一次发布 <b>11 项推荐性标准</b>：编规 JTS/T 116 管总，内河用 275 系列、沿海港口用 276 系列、疏浚用 278 系列，混凝土与砂浆材料用量定额 JTS/T 277 三条线共用。<b>JTS/T 116 同时规定概算与预算</b>，水运没有独立的概算定额，所以切换“预算／概算”不改变定额组合，只改变取费口径，状态栏会照实标明。两处易错：JTS/T 278-1 的耙吸挖泥船艏吹部分已于 2024 年局部修订；《内河航运水工建筑工程定额》的通航建筑物与整治建筑物部分 2025 年才出征求意见稿，尚未发布，仍按 2019 版执行。</p>
+  </div>
+
+  <!-- ③ 输出 -->
+  <div class="card col">
+    <div class="out-head">
+      <h2 style="margin:0;"><span class="colnum">3</span><span class="tag">输出</span> 计价说明整段文本</h2>
+      <div class="seg" style="align-items:center;">
+        <button id="copyAll">复制全文</button>
+      </div>
+    </div>
+    <div class="stat" id="stat">—</div>
+    <div class="out-text" id="outText"></div>
+    <p class="footer">两段结构：① 组价依据（编规 + 船机艘台班费定额 + 专业定额）重新组价　② 计量依据（必含）。按《名称》（代号）全角括号拼接，相邻同文号自动合并且只括注一次，复制后可直接粘贴到概算编制说明或变更估价条款。</p>
+  </div>
+  </main>
+
+  <p class="brand-foot">水运组价价构引擎 RateStruct Waterway　V1.0.0</p>
+  <div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const LS_Q = "wy_quota_v1";
+  const LS_R = "wy_ref_v1";
+  const LS_SYS = "wy_sys_v1";
+  const DEFAULT_SERIES = "nh";
+  const NO_ESTIMATE = [];
+
+  // 依据体系元信息：short = 状态栏名称；estimateNote = 概算阶段的显示名；*Tip = 切换时的提示语
+  const META = {
+    "nh": {short:"内河航运", estimateNote:"概算", estTip:"已切换为概算阶段（定额组合不变，取费按概算口径）"},
+    "yh": {short:"沿海港口", estimateNote:"概算", estTip:"已切换为概算阶段（定额组合不变，取费按概算口径）"},
+    "sj": {short:"疏浚工程", estimateNote:"概算", estTip:"已切换为概算阶段（定额组合不变，取费按概算口径）"},
+  };
+
+  // 分组标题（按数组中分组首次出现的顺序成行）
+  const GRP_TITLE = {
+    "common": "水运工程通用（交通运输部公告 2019 年第 57 号）",
+    "nh": "内河航运（JTS/T 275 系列）",
+    "yh": "沿海港口（JTS/T 276 系列）",
+    "sj": "疏浚工程（JTS/T 278 系列）",
+    "cq": "重庆市地方配套（DB50/T 1875-2025）",
+    "borrow": "借用定额（水运定额缺项时套用）",
+    "other": "税费与安全生产费配套文件",
+  };
+
+  // app：适用的依据体系；stg：适用的计价阶段；不含 app 的条目不随体系切换重置
+  const DEFAULT_QUOTAS = [
+    // ---- 水运工程通用（交通运输部公告 2019 年第 57 号） ----
+    {name:"水运建设工程概算预算编制规定", code:"JTS/T 116-2019", grp:"common", on:true, core:true, app:["nh","yh","sj"]},
+    {name:"水运工程混凝土和砂浆材料用量定额", code:"JTS/T 277-2019", grp:"common", on:true, app:["nh","yh","sj"]},
+    {name:"水运工程定额材料基价单价（2019年版）", code:"交通运输部公告2019年第57号", grp:"common", on:false, app:["nh","yh","sj"], dg:false},
+    // ---- 内河航运（JTS/T 275 系列） ----
+    {name:"内河航运水工建筑工程定额", code:"JTS/T 275-1-2019", grp:"nh", on:true, core:true, app:["nh"]},
+    {name:"内河航运工程船舶机械艘（台）班费用定额", code:"JTS/T 275-2-2019", grp:"nh", on:true, core:true, app:["nh"]},
+    {name:"内河航运设备安装工程定额", code:"JTS/T 275-3-2019", grp:"nh", on:false, app:["nh"], dg:false},
+    {name:"内河航运工程参考定额", code:"JTS/T 275-4-2019", grp:"nh", on:false, app:["nh"], dg:false},
+    // ---- 沿海港口（JTS/T 276 系列） ----
+    {name:"沿海港口水工建筑工程定额", code:"JTS/T 276-1-2019", grp:"yh", on:false, core:true, app:["yh"]},
+    {name:"沿海港口工程船舶机械艘（台）班费用定额", code:"JTS/T 276-2-2019", grp:"yh", on:false, core:true, app:["yh"]},
+    {name:"沿海港口工程参考定额", code:"JTS/T 276-3-2019", grp:"yh", on:false, app:["yh"], dg:false},
+    // ---- 疏浚工程（JTS/T 278 系列） ----
+    {name:"疏浚工程预算定额", code:"JTS/T 278-1-2019", grp:"sj", on:false, core:true, app:["sj"]},
+    {name:"疏浚工程船舶艘（台）班费用定额", code:"JTS/T 278-2-2019", grp:"sj", on:false, core:true, app:["sj"]},
+    // ---- 重庆市地方配套（DB50/T 1875-2025） ----
+    {name:"重庆市水运建设工程补充预算定额", code:"DB50/T 1875-2025", grp:"cq", on:true},
+    {name:"重庆市水运工程造价管理办法", code:"渝交规〔2024〕1号", grp:"cq", on:false},
+    // ---- 借用定额（水运定额缺项时套用） ----
+    {name:"重庆市市政工程计价定额", code:"CQSZDE-2018", grp:"borrow", on:false},
+    {name:"重庆市房屋建筑与装饰工程计价定额", code:"CQJZZSDE-2018", grp:"borrow", on:false},
+    // ---- 税费与安全生产费配套文件 ----
+    {name:"关于深化增值税改革有关政策的公告（建筑服务税率 9%）", code:"公告2019年第39号", grp:"other", on:false},
+    {name:"企业安全生产费用提取和使用管理办法", code:"财资〔2022〕136号", grp:"other", on:false}
+  ];
+
+  const DEFAULT_REFS = [
+    {name:"水运工程工程量清单计价规范", code:"JTS/T 271-2020", on:true},
+    {name:"水运建设工程概算预算编制规定（含工程量计算规则）", code:"JTS/T 116-2019", on:true},
+    {name:"建设工程工程量清单计价标准", code:"GB/T 50500-2024", on:false}
+  ];
+
+  function load(key, def){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) return def;
+      const v = JSON.parse(raw);
+      return (v === null || v === undefined) ? def : v;
+    }catch(e){ return def; }
+  }
+  function loadArr(key, def){
+    const v = load(key, def);
+    return Array.isArray(v) ? v : def;
+  }
+
+  const sys = load(LS_SYS, {});
+  let series = (typeof sys.series === "string" && META[sys.series]) ? sys.series : DEFAULT_SERIES;
+  let stage  = sys.stage === "estimate" ? "estimate" : "budget";
+  if(NO_ESTIMATE.indexOf(series) >= 0) stage = "budget";
+
+  function clone(o){
+    const r = {};
+    for(const k in o){ if(Object.prototype.hasOwnProperty.call(o,k)) r[k] = o[k]; }
+    return r;
+  }
+
+  function normQuota(o){
+    if(Array.isArray(o)) o = {name:o[0], code:o[1], on:false};
+    o = o || {};
+    const name = String(o.name == null ? "" : o.name);
+    const def = DEFAULT_QUOTAS.find(d => d.name === name);
+    const base = def || {};
+    return {
+      name,
+      code: o.code === undefined || o.code === null ? (def ? def.code : "") : String(o.code),
+      on: !!o.on,
+      grp: o.grp || (def ? def.grp : "other"),
+      core: o.core === undefined ? !!(def && def.core) : !!o.core,
+      // app：适用的依据体系代码；不填表示与体系无关（地方配套 / 借用 / 税费），不随切换重置
+      app: Array.isArray(o.app) ? o.app : (Array.isArray(base.app) ? base.app : null),
+      // stg：适用的计价阶段；不填表示概算预算通用
+      stg: Array.isArray(o.stg) ? o.stg : (Array.isArray(base.stg) ? base.stg : null),
+      // dg：该体系+阶段下的默认勾选状态
+      dg: o.dg === undefined ? (base.dg === undefined ? true : !!base.dg) : !!o.dg
+    };
+  }
+  function normRef(o){
+    if(Array.isArray(o)) o = {name:o[0], code:o[1], on:true};
+    o = o || {};
+    return {
+      name: String(o.name == null ? "" : o.name),
+      code: String(o.code == null ? "" : o.code),
+      on: o.on === undefined ? true : !!o.on
+    };
+  }
+
+  let quotas = loadArr(LS_Q, DEFAULT_QUOTAS.map(clone)).map(normQuota);
+  let refs   = loadArr(LS_R, DEFAULT_REFS.map(clone)).map(normRef);
+
+  // 当前体系下的锁定项：只有"适用于本体系"的核心依据被锁
+  const isLocked = q => !!q.core && Array.isArray(q.app) && q.app.indexOf(series) >= 0;
+
+  // 按「体系 × 阶段」重算适用条目的勾选（地方配套 / 借用 / 税费不参与，保留用户选择）
+  function applyMatrix(s, t){
+    quotas.forEach(q=>{
+      if(Array.isArray(q.app) && q.app.length){
+        q.on = q.app.indexOf(s) >= 0
+            && (!q.stg || q.stg.indexOf(t) >= 0)
+            && q.dg !== false;
+      }
+    });
+  }
+
+  // 缺省清单升级：补入本地缺失的条目（保留用户原有勾选与改名）
+  (function mergeDefaults(){
+    const names = new Set(quotas.map(q => q.name));
+    let added = 0;
+    DEFAULT_QUOTAS.forEach(d => { if(!names.has(d.name)){ quotas.push(clone(d)); added++; } });
+    if(added) save();
+  })();
+
+  function save(){
+    try{
+      localStorage.setItem(LS_Q, JSON.stringify(quotas));
+      localStorage.setItem(LS_R, JSON.stringify(refs));
+      localStorage.setItem(LS_SYS, JSON.stringify({series, stage}));
+    }catch(e){ /* localStorage 不可用（隐私模式 / file://）时忽略，不阻断界面 */ }
+  }
+
+  const qBody = document.querySelector("#quotaTable tbody");
+  const rBody = document.querySelector("#refTable tbody");
+  const stat  = document.getElementById("stat");
+  const outText = document.getElementById("outText");
+  let currentText = "";
+
+  function esc(s){
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+      .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ---- 渲染定额表（按体系分组，带分组标题行）----
+  function renderQuotas(){
+    qBody.innerHTML = "";
+    let n = 0, lastGrp = null;
+    quotas.forEach((q,i)=>{
+      if(q.grp !== lastGrp && GRP_TITLE[q.grp]){
+        lastGrp = q.grp;
+        const g = document.createElement("tr");
+        g.className = "grp";
+        g.innerHTML = `<td colspan="4">${esc(GRP_TITLE[q.grp])}</td>`;
+        qBody.appendChild(g);
+      }
+      n++;
+      const lock = isLocked(q);
+      const checked = (q.on || lock) ? "checked" : "";
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td class="idx">${n}</td>`+
+        `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(q.name)}</textarea></td>`+
+        `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(q.code)}" /></td>`+
+        (lock
+          ? `<td class="sel"><input type="checkbox" ${checked} disabled title="必选项，不可取消" /><div class="locktag">必选</div></td>`
+          : `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`);
+      qBody.appendChild(tr);
+    });
+    bindInputs();
+    growAll();
+    generate();
+    syncSysButtons();
+  }
+
+  // ---- 渲染引用表 ----
+  function renderRefs(){
+    rBody.innerHTML = "";
+    refs.forEach((r,i)=>{
+      const checked = (r.on === undefined ? true : !!r.on) ? "checked" : "";
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td class="idx">${i+1}</td>`+
+        `<td><textarea class="cell" rows="1" data-i="${i}" data-k="name">${esc(r.name)}</textarea></td>`+
+        `<td class="cd"><input data-i="${i}" data-k="code" value="${esc(r.code)}" /></td>`+
+        `<td class="sel"><input type="checkbox" data-i="${i}" data-k="on" ${checked} /></td>`;
+      rBody.appendChild(tr);
+    });
+    bindRefInputs();
+    growAll();
+    generate();
+  }
+
+  // 名称文本框自动增高，保证文字全部显示
+  function grow(el){
+    el.style.height = "auto";
+    const h = el.scrollHeight;
+    el.style.height = (h > 0 ? h + 2 : 30) + "px";
+  }
+  function growAll(){
+    document.querySelectorAll("textarea.cell").forEach(grow);
+  }
+
+  function bindInputs(){
+    qBody.querySelectorAll("input, textarea").forEach(inp=>{
+      inp.addEventListener("input", e=>{
+        if(e.target.dataset.i === undefined) return;   // 跳过锁定项等无索引输入
+        const i = +e.target.dataset.i, k = e.target.dataset.k;
+        quotas[i][k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+        if(e.target.tagName === "TEXTAREA") grow(e.target);
+        generate();   // 先渲染输出，保证勾选/编辑立即生效
+        save();       // 再持久化；存储失败不影响界面
+      });
+    });
+  }
+  function bindRefInputs(){
+    rBody.querySelectorAll("input, textarea").forEach(inp=>{
+      inp.addEventListener("input", e=>{
+        if(e.target.dataset.i === undefined) return;
+        const i = +e.target.dataset.i, k = e.target.dataset.k;
+        refs[i][k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+        if(e.target.tagName === "TEXTAREA") grow(e.target);
+        generate();
+        save();
+      });
+    });
+  }
+
+  // ---- 生成条款（两段式）----
+  // 相邻且代号相同的条目合并括注：同一文件号下的多本定额只括注一次
+  function fmtList(items){
+    const parts = [];
+    let i = 0;
+    while(i < items.length){
+      const c = String(items[i].code || "").trim();
+      let j = i + 1;
+      if(c){
+        while(j < items.length && String(items[j].code || "").trim() === c) j++;
+      }
+      const names = items.slice(i, j)
+        .map(x => "《" + String(x.name || "").trim() + "》")
+        .join("、");
+      parts.push(c ? names + "（" + c + "）" : names);
+      i = j;
+    }
+    return parts.join("、");
+  }
+
+  function buildSegments(){
+    // 段一：组价依据（勾选 或 本体系锁定项）
+    const pricing = quotas.filter(q => q.name.trim() && (q.on || isLocked(q)));
+    // 段二：计量依据（仅勾选项）
+    const refItems = refs.filter(r => r.name.trim() && r.on !== false);
+
+    const s1 = pricing.length
+      ? "按照" + fmtList(pricing) + "及相关配套文件重新组价"
+      : "";
+    const s2 = refItems.length
+      ? "工程量按照" + fmtList(refItems) +
+        "及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量。"
+      : "";
+
+    return { s1, s2, pricing, refItems };
+  }
+
+  function generate(){
+    const { s1, s2, pricing, refItems } = buildSegments();
+
+    const cores = [];
+    if(s1) cores.push(s1.replace(/[。；;]\s*$/, ""));
+    if(s2) cores.push(s2.replace(/[。；;]\s*$/, ""));
+    const text = cores.length
+      ? cores.join("；") + "。"
+      : "（请在左栏勾选计量依据、在中栏勾选组价定额）";
+
+    currentText = cores.length ? text : "";
+    if(outText) outText.textContent = text;
+
+    const meta = META[series] || {};
+    const sysName = meta.short || series;
+    const stageName = (NO_ESTIMATE.indexOf(series) >= 0)
+      ? "预算（无概算定额）"
+      : (stage === "estimate" ? (meta.estimateNote || "概算") : "预算");
+    stat.textContent = "体系 " + sysName + " · " + stageName + "　｜　组价 " +
+      pricing.length + " 项　｜　计量依据 " + refItems.length + " 项";
+  }
+
+  // ---- 体系 / 阶段切换 ----
+  function applySys(s, t, tip){
+    if(NO_ESTIMATE.indexOf(s) >= 0) t = "budget";
+    series = s; stage = t;
+    applyMatrix(series, stage);
+    save();
+    renderQuotas();
+    toast(tip);
+  }
+
+  function syncSysButtons(){
+    document.querySelectorAll("#seriesSeg button").forEach(b=>{
+      b.classList.toggle("on", b.dataset.s === series);
+    });
+    document.querySelectorAll("#stageSeg button").forEach(b=>{
+      const est = b.dataset.t === "estimate";
+      const disabled = est && NO_ESTIMATE.indexOf(series) >= 0;
+      b.disabled = disabled;
+      b.title = disabled ? (META[series] && META[series].noEstReason || "本体系不编概算") : "";
+      b.classList.toggle("on", b.dataset.t === stage);
+    });
+  }
+
+  document.querySelectorAll("#seriesSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const s = b.dataset.s;
+      const meta = META[s] || {};
+      applySys(s, (meta.noEstimate ? "budget" : stage), meta.clickTip || ("已切换为" + meta.short));
+    });
+  });
+  document.querySelectorAll("#stageSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(b.disabled) return;
+      const est = b.dataset.t === "estimate";
+      const meta = META[series] || {};
+      applySys(series, b.dataset.t,
+        est ? (meta.estTip || "已切换为概算阶段（初步设计概算用）")
+            : (meta.budTip || "已切换为预算阶段（施工图预算 / 招标用）"));
+    });
+  });
+
+  // ---- 按钮 ----
+  document.getElementById("addQuota").addEventListener("click", ()=>{
+    const item = {name:"", code:"", on:true, grp:"other", core:false};
+    // 插到"税费配套"分组末尾之前，保证分组标题不重复、不错序
+    const lastOther = quotas.map(q=>q.grp).lastIndexOf("other");
+    if(lastOther >= 0) quotas.splice(lastOther + 1, 0, item); else quotas.push(item);
+    save(); renderQuotas();
+  });
+  document.getElementById("addRef").addEventListener("click", ()=>{
+    refs.push({name:"", code:"", on:true});
+    save(); renderRefs();
+  });
+  document.getElementById("refAll").addEventListener("click", ()=>{
+    refs.forEach(r=>{ r.on = true; }); save(); renderRefs();
+  });
+  document.getElementById("checkAll").addEventListener("click", ()=>{
+    quotas.forEach(q=>{ q.on = true; }); save(); renderQuotas();
+  });
+  document.getElementById("uncheckAll").addEventListener("click", ()=>{
+    quotas.forEach(q=>{ if(!isLocked(q)) q.on = false; }); save(); renderQuotas();
+  });
+  document.getElementById("resetQuota").addEventListener("click", e=>{
+    armConfirm(e.currentTarget, "再点一次恢复", ()=>{
+      quotas = DEFAULT_QUOTAS.map(clone);
+      applyMatrix(series, stage);
+      save(); renderQuotas();
+      toast("已恢复默认定额清单（" + quotas.length + " 项）");
+    });
+  });
+  document.getElementById("resetRef").addEventListener("click", e=>{
+    armConfirm(e.currentTarget, "再点一次恢复", ()=>{
+      refs = DEFAULT_REFS.map(clone);
+      save(); renderRefs();
+      toast("已恢复默认计量依据（" + refs.length + " 项）");
+    });
+  });
+
+  // 无弹窗二次确认：首次点击按钮变红提示，3 秒内再点即执行
+  function armConfirm(btn, tip, action){
+    if(btn.dataset.armed === "1"){
+      clearTimeout(Number(btn.dataset.timer));
+      btn.dataset.armed = "";
+      btn.textContent = btn.dataset.label;
+      btn.classList.remove("armed");
+      action();
+      return;
+    }
+    btn.dataset.label = btn.textContent;
+    btn.dataset.armed = "1";
+    btn.textContent = tip;
+    btn.classList.add("armed");
+    btn.dataset.timer = String(setTimeout(()=>{
+      btn.dataset.armed = "";
+      btn.textContent = btn.dataset.label;
+      btn.classList.remove("armed");
+    }, 3000));
+  }
+
+  let toastTimer = null;
+  function toast(msg){
+    const el = document.getElementById("toast");
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.classList.remove("show"), 1800);
+  }
+
+  function fallbackCopy(text, cb){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); cb(); }
+    catch(e){ toast("复制失败，请手动选择文本复制"); }
+    document.body.removeChild(ta);
+  }
+  function copyText(text, btn){
+    const done = ()=>{
+      const old = btn.textContent;
+      btn.textContent = "已复制 ✓";
+      btn.classList.add("copied");
+      setTimeout(()=>{ btn.textContent = old; btn.classList.remove("copied"); }, 1400);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+    }else{ fallbackCopy(text, done); }
+  }
+
+  document.getElementById("copyAll").addEventListener("click", e=>{
+    if(!currentText){ toast("当前无内容可复制，请先勾选计量依据或组价定额"); return; }
+    copyText(currentText, e.target);
+  });
+
+  // ---- 初始化 ----
+  try{ renderQuotas(); }catch(err){ console.error("渲染定额表失败:", err); }
+  try{ renderRefs(); }catch(err){ console.error("渲染引用表失败:", err); }
+  generate();   // 兜底：确保输出栏一定有内容
+
+  window.addEventListener("load", ()=>{ requestAnimationFrame(()=>{ try{ growAll(); }catch(e){} }); });
+  window.addEventListener("resize", ()=>{ try{ growAll(); }catch(e){} });
+})();
+</script>
+</body>
+</html>
