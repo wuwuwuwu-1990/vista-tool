@@ -390,7 +390,7 @@
   <aside class="side-nav">
     <div class="side-head">工具分类</div>
       <a href="#cat-zj" class="side-item" data-cat="cat-zj"><span class="ico" style="background:rgba(245,166,35,.16)">🧮</span><span class="nm">造价与算量</span><span class="cnt">6</span></a>
-      <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="ico" style="background:rgba(139,124,246,.16)">🔍</span><span class="nm">审图与报告</span><span class="cnt">1</span></a>
+      <a href="#cat-st" class="side-item" data-cat="cat-st"><span class="ico" style="background:rgba(139,124,246,.16)">🔍</span><span class="nm">审图与报告</span><span class="cnt">2</span></a>
       <a href="#cat-sg" class="side-item" data-cat="cat-sg"><span class="ico" style="background:rgba(47,212,168,.16)">🚧</span><span class="nm">施工与管理</span><span class="cnt">5</span></a>
       <a href="#cat-cad" class="side-item" data-cat="cat-cad"><span class="ico" style="background:rgba(79,142,247,.16)">📐</span><span class="nm">结构CAD图</span><span class="cnt">6</span></a>
       <a href="#cat-ch" class="side-item" data-cat="cat-ch"><span class="ico" style="background:rgba(56,211,240,.16)">🗺️</span><span class="nm">测绘与图像</span><span class="cnt">1</span></a>
@@ -505,7 +505,7 @@
         </div>
       </section>
       <section id="cat-st" class="cat-sec">
-        <div class="cat-title"><span class="dot" style="background:#8b7cf6"></span><span class="nm">审图与报告</span><span class="cnt">1 款</span></div>
+        <div class="cat-title"><span class="dot" style="background:#8b7cf6"></span><span class="nm">审图与报告</span><span class="cnt">2 款</span></div>
         <div class="grid">
       <a class="card" href="evalwrite.html" style="--g1:#6366f1;--g2:#8b5cf6;--gs:rgba(99,102,241,.5);--a1:#6366f1;--a2:#8b5cf6;">
       <div class="top">
@@ -519,6 +519,20 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(99,102,241,.4);--cc:#a5b4fc;--cbg:rgba(99,102,241,.12)">v2.14.0</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">工程智审</span>
+      </div>
+    </a>
+      <a class="card" href="ratestruct.html" style="--g1:#b45309;--g2:#f59e0b;--gs:rgba(180,83,9,.5);--a1:#fbbf24;--a2:#f59e0b;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14H6z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 11.5 12 14l2-2.5M12 14v5M10 15.5h4M10 18h4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>工程组价价构引擎 RateStruct</h3>
+      <div class="desc">勾选适用的重庆计价定额与清单计价规范，自动拼装「按照…重新组价；工程量按照…」整段计价说明条款，一键复制粘贴进投标／预算编制说明。内置 21 本计价定额（机械台班／配合比表／仪器仪表台班／费用定额四本必选锁定）、2013 与 2024 两套清单规范一键切换，9 部计算标准合并写法自动把「等9部计算标准」移到括号外；名称与代号可改可增，勾选即实时出文，整段无换行。苹果字体 · 单文件离线。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(245,158,11,.42);--cc:#fcd34d;--cbg:rgba(245,158,11,.12)">v1.0.9</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">计价依据</span>
       </div>
     </a>
         </div>
@@ -1254,6 +1268,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-08', t:'新增：工程组价价构引擎 RateStruct v1.0.9（计价说明条款一句话自动成文，归入「审图与报告」分类）——在左栏勾选清单计价规范、中栏勾选计价定额，右栏即时拼出「按照《…》（代号）、…及相关配套文件重新组价；工程量按照《…》（代号）、…及相关配套文件等工程量清单和工程量清单编制说明约定的计量规则计算的实际合格工程量。」整段条款，一键复制即可粘贴进投标／预算编制说明，不再手抄几十个书名号与代号；内置 21 本重庆计价定额（机械台班／混凝土及砂浆配合比表／施工仪器仪表台班／费用定额四本锁定为必选，清空也跳过）与 6 条计量依据，2013 与 2024 两套标准一键互斥切换、9 部计算标准合并为一行并在输出时把「等9部计算标准」移到括号外；代号留空的定额只出书名号不出空括号，名称与代号均可改名新增，勾选即实时重算，整段无换行。苹果字体 · 单文件离线）'},
   {d:'2026-11-08', t:'升级：施工用电负荷计算书 v1.0.7（云端计算书删除也改为两段确认 —— 列表行尾按钮由「删除」改为「✕」，首次点击变为红底白字「删除」并带呼吸光晕，5 秒内再点同一按钮才真正删除；超时、点别处、按 Esc 或列表刷新都会自动撤回，避免误删云端存档；原「确认删除」弹窗已移除，弹窗层级更清爽；设备清单行删除保持两段确认不变）'},
   {d:'2026-11-07', t:'新增：电杆杆上设备材料单价计算器 v1.0.9（锥形水泥杆杆上设备材料组价上线——直线／耐张／转角／终端四杆型模板，杆型卡片右上角 i 键调出 10kV 单回组装分解图与单基构件用量清单；热镀锌钢材价一处改价即联动型钢理论重量自动算材料费，紧固件速典选规格自动带出名称与单价；单价核算区支持条目新增／复制／插入／上下移动与二段确认删除，登记成清单后一键导出 Excel（清单汇总＋材料明细，列宽自适应）；☁️ 云端备份整套工程命名存档、跨设备载入继续编辑，可重命名／删除，另备本地 JSON 导出导入离线搬运。苹果字体 · 单文件离线）'},
   {d:'2026-11-08', t:'升级：施工用电负荷计算书 v1.0.6（用电设备清单行删除改为两段确认 —— 每行末尾的「✕」首次点击后变为红底白字「删除」并带呼吸光晕，5 秒内再点一次才真正删除该行，超时、点别处或按 Esc 自动撤回；删除按钮随行淡出不再回弹成 ✕；删除列宽由 40px 加宽到 56px，红底「删除」两字完整显示不挤压；云端计算书删除仍保持原弹窗确认方式）'},
@@ -1399,7 +1414,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07', 'ratestruct.html': '2026-11-08'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
