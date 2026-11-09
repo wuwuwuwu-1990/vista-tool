@@ -4879,11 +4879,14 @@ void main() {
 <style>
 /* 静态离线网页下载按钮：四字＋四字两行 */
 .rv-dlbtn{display:none;flex-direction:column;align-items:center;justify-content:center;gap:1px;
-  height:36px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.07);color:#f3f4f6;cursor:pointer;line-height:1;font-weight:600;
-  transition:background .2s ease,color .2s ease,border-color .2s ease}
-.rv-dlbtn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.22);color:#fff}
-.rv-dlbtn:active{transform:translateY(1px)}
+  height:36px;padding:0 14px;border-radius:12px;border:1px solid #f7b267;
+  background:linear-gradient(135deg,#fbb040 0%,#ee8422 52%,#cf5f0d 100%);
+  color:#fff;cursor:pointer;line-height:1;font-weight:700;
+  box-shadow:0 3px 12px rgba(207,95,13,.42),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:filter .18s ease,transform .18s ease,box-shadow .18s ease}
+.rv-dlbtn:hover{filter:brightness(1.08);transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(207,95,13,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.rv-dlbtn:active{transform:translateY(0);filter:brightness(.97)}
 .rv-dlbtn i{display:block;font-style:normal;font-size:11px;line-height:1.18;letter-spacing:.6px;white-space:nowrap}
 @media (min-width:1024px){.rv-dlbtn{display:inline-flex}}
 </style>
