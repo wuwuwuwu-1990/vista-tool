@@ -365,22 +365,25 @@
   .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;letter-spacing:.5px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
   .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
   .secret-panel .sp-empty{border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:40px;text-align:center;color:rgba(238,242,251,.55);font-size:13px;line-height:2;background:rgba(255,255,255,.04);}
-  /* 私密区更新日志：只在私密面板内，深色玻璃风格 */
-  .secret-panel .sp-log{max-height:260px;overflow-y:auto;margin-top:-2px;
-    border-top:1px solid rgba(255,255,255,.1);text-align:left;}
-  .secret-panel .sp-log .log-item{display:flex;gap:10px;padding:8px 2px;line-height:1.55;
-    border-bottom:1px solid rgba(255,255,255,.08);}
-  .secret-panel .sp-log .log-item:last-child{border-bottom:none;}
-  .secret-panel .sp-log .log-item .ld{flex-shrink:0;font-size:11.5px;font-weight:600;
-    padding-top:1px;color:#c4b5fd;}
-  .secret-panel .sp-log .log-item .lt{font-size:12.5px;color:rgba(238,242,251,.85);}
-  .secret-panel .sp-log::-webkit-scrollbar{width:6px;}
-  .secret-panel .sp-log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:3px;}
-  .secret-panel .sp-log::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3);}
-  body[data-theme="aurora"] .secret-panel .sp-log{border-top-color:rgba(96,116,168,.18);}
-  body[data-theme="aurora"] .secret-panel .sp-log .log-item{border-color:rgba(96,116,168,.14);}
-  body[data-theme="aurora"] .secret-panel .sp-log .log-item .ld{color:#7a63d8;}
-  body[data-theme="aurora"] .secret-panel .sp-log .log-item .lt{color:#28365a;}
+  /* 私密面板头部右侧：更新日志入口 + 退出按钮 */
+  .secret-panel .sp-actions{display:flex;align-items:center;gap:10px;}
+  .secret-panel .sp-log-btn{height:36px;padding:0 13px;border-radius:18px;border:1px solid rgba(255,255,255,.22);
+       display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;letter-spacing:.5px;
+       color:rgba(238,242,251,.78);background:rgba(255,255,255,.1);transition:all .2s;user-select:none;}
+  .secret-panel .sp-log-btn:hover{color:#fff;border-color:rgba(167,139,250,.6);background:rgba(167,139,250,.22);}
+  .secret-panel .sp-log-btn svg{flex-shrink:0;}
+  .secret-panel .sp-log-btn .num{font-size:10.5px;font-weight:700;min-width:17px;height:16px;line-height:16px;
+       text-align:center;border-radius:8px;background:rgba(255,255,255,.2);color:#eef2fb;padding:0 4px;}
+  /* 私密更新日志弹窗：复用关于弹窗的日志排版，列表更高一点 */
+  .modal.modal-log{width:420px;max-height:calc(100vh - 36px);overflow-y:auto;}
+  .modal.modal-log .about-log{margin-top:14px;}
+  .modal.modal-log .about-log .log-list{max-height:330px;margin-top:4px;}
+  /* 矮屏（笔记本横屏 / 手机横屏）收紧列表，避免弹窗自身出现第二条滚动条 */
+  @media (max-height:660px){ .modal.modal-log .about-log .log-list{max-height:190px;} }
+  .modal .about-log-title span{float:right;font-weight:400;font-size:11.5px;letter-spacing:0;opacity:.62;}
+  body[data-theme="aurora"] .secret-panel .sp-log-btn{color:rgba(44,58,88,.72);border-color:rgba(120,140,180,.3);background:rgba(255,255,255,.7);}
+  body[data-theme="aurora"] .secret-panel .sp-log-btn:hover{color:#4f3d96;border-color:rgba(122,99,216,.5);background:rgba(255,255,255,.94);}
+  body[data-theme="aurora"] .secret-panel .sp-log-btn .num{background:rgba(122,99,216,.16);color:#4f3d96;}
   @media (max-width:720px){
     .secret-panel .sp-head{padding:20px 16px 0;}
     .secret-panel .sp-body{padding:24px 16px 60px;}
@@ -397,6 +400,9 @@
     .theme-picker .tp .tp-s{display:none;}
     /* 音效按钮加入后一行放不下，「关于」窄屏收成纯图标（保留 title 提示与更新角标） */
     .about-btn{width:32px;height:32px;padding:0;justify-content:center;font-size:0;}
+    /* 私密面板头部同样收窄：日志按钮只留图标 + 条数 */
+    .secret-panel .sp-log-btn{padding:0 10px;gap:5px;}
+    .secret-panel .sp-log-btn .txt{display:none;}
     .nav-right{gap:6px;}
     .secret-btn{padding:6px 10px;}
     .theme-picker .tp{padding:5px 6px;}
@@ -923,8 +929,15 @@
       <div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#0a0f22" stroke-width="2.2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#0a0f22" stroke-width="2.2" stroke-linecap="round"/></svg></div>
       <div><b>我的私密</b><span>PRIVATE SPACE</span></div>
     </div>
-    <div class="sp-close" onclick="closeSecret()" title="退出">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    <div class="sp-actions">
+      <div class="sp-log-btn" onclick="openSecretLog()" title="私密更新日志" role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSecretLog();}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6h10M9 12h10M9 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.6" cy="6" r="1.35" fill="currentColor"/><circle cx="4.6" cy="12" r="1.35" fill="currentColor"/><circle cx="4.6" cy="18" r="1.35" fill="currentColor"/></svg>
+        <span class="txt">更新日志</span><span class="num" id="spLogNum"></span>
+      </div>
+      <div class="sp-close" onclick="closeSecret()" title="退出">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </div>
     </div>
   </div>
   <div class="sp-body">
@@ -934,12 +947,6 @@
       <span id="spCount"></span>
     </div>
     <div class="sp-grid" id="spGrid"></div>
-    <div class="sp-sec" style="margin-top:34px;">
-      <div class="bar"></div>
-      <h2>更新日志</h2>
-      <span id="spLogCount"></span>
-    </div>
-    <div class="sp-log" id="spLogList"></div>
     <div class="sp-sec" style="margin-top:34px;">
       <div class="bar"></div>
       <h2>使用说明</h2>
@@ -975,6 +982,21 @@
     </div>
     <div class="btns">
       <button class="ok" onclick="closeAbout()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 私密区更新日志弹窗 -->
+<div class="modal-mask" id="spLogMask">
+  <div class="modal modal-log">
+    <div class="lock sp-log-lock"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M9 6h10M9 12h10M9 18h10" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/><circle cx="4.6" cy="6" r="1.35" fill="#fff"/><circle cx="4.6" cy="12" r="1.35" fill="#fff"/><circle cx="4.6" cy="18" r="1.35" fill="#fff"/></svg></div>
+    <h3>私密更新日志</h3>
+    <div class="about-log">
+      <div class="about-log-title">更新日志 <span id="spLogCount"></span></div>
+      <div class="log-list" id="spLogList"></div>
+    </div>
+    <div class="btns">
+      <button class="ok" onclick="closeSecretLog()">关闭</button>
     </div>
   </div>
 </div>
@@ -1146,6 +1168,15 @@ function renderSecretLog(){
   }).join('');
   var c = document.getElementById('spLogCount');
   if (c) c.textContent = '共 ' + SECRET_LOG.length + ' 条';
+  var b = document.getElementById('spLogNum');
+  if (b) b.textContent = SECRET_LOG.length;
+}
+function openSecretLog(){
+  renderSecretLog();
+  document.getElementById('spLogMask').classList.add('show');
+}
+function closeSecretLog(){
+  document.getElementById('spLogMask').classList.remove('show');
 }
 function showSecretPanel(){
   document.getElementById('secretBtn').classList.add('unlocked');
@@ -1185,7 +1216,10 @@ document.getElementById('pwdMask').addEventListener('click', function(e){
   if (e.target === this) closePwd();
 });
 document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape'){ closePwd(); closeSecret(); }
+  if (e.key === 'Escape'){
+    if (document.getElementById('spLogMask').classList.contains('show')){ closeSecretLog(); return; }
+    closePwd(); closeSecret();
+  }
 });
 
 // ===== 卡片悬停音效（Web Audio 实时合成，零外部音频文件）=====
