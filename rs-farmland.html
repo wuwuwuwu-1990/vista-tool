@@ -200,20 +200,37 @@
 </head>
 <body>
   
-<!-- rs-entry-bar v6 -->
+<!-- rs-entry-bar v7 -->
 <style>
 .brand{position:relative;}
-.rsbar-home{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;margin:0;display:inline-flex;align-items:center;gap:6px;color:#fff;background:#4d7c0f;border:1px solid #4d7c0f;border-radius:999px;padding:6px 16px 6px 13px;text-decoration:none;font-weight:600;font-size:12px;letter-spacing:.3px;line-height:1.4;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;box-shadow:0 4px 14px -2px rgba(16,32,56,.28);transition:filter .15s,box-shadow .15s,transform .12s;}
-.rsbar-home:hover{filter:brightness(.92);box-shadow:0 8px 22px -2px rgba(16,32,56,.34);transform:translate(-50%,-50%);}
-.rsbar-home:active{transform:translate(-50%,calc(-50% + 1px));}
-.rsbar-home:focus-visible{outline:2px solid rgba(255,255,255,.92);outline-offset:2px;}
+.rsbar-nav{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;
+  display:flex;align-items:center;gap:8px;margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;}
+.rsbar-home{display:inline-flex;align-items:center;gap:6px;color:#fff;background:#4d7c0f;border:1px solid #4d7c0f;
+  border-radius:999px;padding:6px 15px 6px 12px;text-decoration:none;font-weight:600;font-size:12px;
+  letter-spacing:.3px;line-height:1.4;white-space:nowrap;box-shadow:0 4px 14px -2px rgba(16,32,56,.28);
+  transition:filter .15s,box-shadow .15s,transform .12s;}
+.rsbar-home:hover{filter:brightness(.92);box-shadow:0 8px 22px -2px rgba(16,32,56,.34);}
+.rsbar-home:active{transform:translateY(1px);}
+.rsbar-home:focus-visible{outline:2px solid rgba(16,32,56,.35);outline-offset:2px;}
+.rsbar-pg{display:inline-flex;align-items:center;gap:4px;text-decoration:none;white-space:nowrap;
+  border-radius:999px;padding:6px 11px;font-weight:600;font-size:11.5px;letter-spacing:.2px;line-height:1.4;
+  color:var(--pgc);background:var(--pgbg);border:1px solid var(--pgbd);
+  box-shadow:0 2px 8px rgba(16,32,56,.06);
+  transition:background .16s,box-shadow .16s,transform .12s;}
+.rsbar-pg:hover{background:var(--pgh);box-shadow:0 6px 16px rgba(16,32,56,.13);}
+.rsbar-pg:active{transform:translateY(1px);}
+.rsbar-pg:focus-visible{outline:2px solid var(--pgbd);outline-offset:2px;}
+.rsbar-pg svg,.rsbar-home svg{flex:none;display:block;}
 .rs-note-fixed{position:fixed;bottom:0;z-index:8;margin:0;padding:10px 0 9px;background:var(--card);box-shadow:0 -10px 16px -10px rgba(16,32,56,.18);}
-@media (max-width:1080px){
-  .rsbar-home{position:static;transform:none;margin:0;padding:5px 13px;font-size:11.5px;}
-  .rsbar-home:hover{transform:none;}
-  .rsbar-home:active{transform:translateY(1px);}
+@media (max-width:1240px){
+  .brand{flex-wrap:wrap;}
+  .rsbar-nav{position:static;transform:none;flex:1 0 100%;order:9;
+    margin:7px 0 0;justify-content:flex-start;gap:6px;}
+  .rsbar-pg{padding:5px 9px;font-size:11px;}
+  .rsbar-home{padding:5px 13px 5px 11px;font-size:11.5px;}
 }
-@media print{.rsbar-home{display:none;}.rs-note-fixed{position:static;box-shadow:none;}}
+@media print{.rsbar-nav{display:none;}.rs-note-fixed{position:static;box-shadow:none;}}
 </style>
 <header class="brand">
     <div class="logo">FL</div>
@@ -221,7 +238,7 @@
       <h1>农田组价价构引擎 <span class="en">RateStruct Farmland</span></h1>
     </div>
 
-    <a class="rsbar-home" href="ratestruct.html" title="返回计价体系入口页">← 返回计价体系入口页</a>
+    <div class="rsbar-nav"><a class="rsbar-pg" href="rs-waterway.html" style="--pgc:#0e7490;--pgbg:#ebf3f6;--pgbd:#add0d9;--pgh:#dae9ee" title="上一套：水运工程"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 2.7H3.5a.9.9 0 0 0-.9.9v8.8a.9.9 0 0 0 .9.9h3.1"/><path d="M13.4 8H7.4"/><path d="M9.7 5.5L7.2 8l2.5 2.5"/></svg>水运工程</a><a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系入口页"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.6 8.8l4.6-3.7 4.6 3.7v5.9H1.6V8.8z"/><path d="M8.4 7.8l3.2-2.6 3.2 2.6v6.9H8.4"/></svg>计价体系入口</a><a class="rsbar-pg" href="rs-land.html" style="--pgc:#92400e;--pgbg:#f6efeb;--pgbd:#dabead;--pgh:#eee1da" title="下一套：土地整治">土地整治<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.4 2.7h3.1a.9.9 0 0 1 .9.9v8.8a.9.9 0 0 1-.9.9H9.4"/><path d="M2.6 8h6"/><path d="M6.3 5.5L8.8 8l-2.5 2.5"/></svg></a></div>
     <div class="rs-tail">
       <span class="ver">V1.0.4</span>
       <button type="button" class="rsmeta-btn" id="rsMetaBtn" aria-expanded="false" aria-controls="rsMetaPop"><i class="dot"></i>依据文号与出处</button>
