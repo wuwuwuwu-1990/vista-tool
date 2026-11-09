@@ -511,6 +511,7 @@
       <a href="#cat-cad" class="side-item" data-cat="cat-cad"><span class="ico" style="background:rgba(79,142,247,.16)">📐</span><span class="nm">结构CAD图</span><span class="cnt">6</span></a>
       <a href="#cat-ch" class="side-item" data-cat="cat-ch"><span class="ico" style="background:rgba(56,211,240,.16)">🗺️</span><span class="nm">测绘与图像</span><span class="cnt">1</span></a>
       <a href="#cat-tw" class="side-item" data-cat="cat-tw"><span class="ico" style="background:rgba(244,114,182,.16)">🧰</span><span class="nm">图文工具箱</span><span class="cnt">3</span></a>
+      <a href="#cat-xl" class="side-item" data-cat="cat-xl"><span class="ico" style="background:rgba(163,230,53,.16)">🎓</span><span class="nm">展示学习台</span><span class="cnt">1</span></a>
   </aside>
     <main class="content">
       <div class="sec-title">
@@ -893,6 +894,25 @@
       <div class="foot">
         <span class="chip" style="--cb:rgba(2,132,199,.45);--cc:#7dd3fc;--cbg:rgba(2,132,199,.14)">v1.0.8</span>
         <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">PDF优化</span>
+      </div>
+    </a>
+        </div>
+      </section>
+      <section id="cat-xl" class="cat-sec">
+        <div class="cat-title"><span class="dot" style="background:#a3e635"></span><span class="nm">展示学习台</span><span class="cnt">1 款</span></div>
+        <div class="grid">
+      <a class="card" href="rebarviz.html" style="--g1:#84cc16;--g2:#0d9488;--gs:rgba(132,204,22,.45);--a1:#a3e635;--a2:#2dd4bf;">
+      <div class="top">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 5.5v13M9.5 4v15M14.5 5.5v13M19.5 4v15" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M3 8h18M3 13h18M3 18h18" stroke="#fff" stroke-width="1.3" stroke-linecap="round" opacity=".6"/></svg>
+        </div>
+        <div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <h3>钢筋平法3D识图 RebarViz</h3>
+      <div class="desc" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">按 22G101 平法图集学配筋：梁 KL／柱 KZ／墙 Q／板 LB／节点详图／楼梯 LT 六类构件，钢筋逐根可点选，支持默认视角复位、剖切、测量标注与平法气泡（上部通长筋 4Φ25、箍筋加密区 Φ@100/200）；附钢筋下料表（按 22G101 算锚固与搭接长度、损耗率）与混凝土工程量统计，内置新手引导，全程本地离线。</div>
+      <div class="foot">
+        <span class="chip" style="--cb:rgba(163,230,53,.4);--cc:#bef264;--cbg:rgba(163,230,53,.12)">v1.0.0</span>
+        <span class="chip" style="--cb:rgba(255,255,255,.14);--cc:#9aa7c7;--cbg:rgba(255,255,255,.05)">平法识图</span>
       </div>
     </a>
         </div>
@@ -1512,6 +1532,7 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
+  {d:'2026-11-09', t:'新增：钢筋平法3D识图RebarViz'},
   {d:'2026-11-09', t:'新增：审核对比表格公式快写工具 EquiDraft'},
   {d:'2026-11-07', t:'新增：电杆杆上设备材料单价计算器'},
   {d:'2026-11-06', t:'新增：桩基钢筋笼三维计算系统 Nervus'},
@@ -1576,7 +1597,7 @@ function renderLog(){
 var CARD_META = {
   'sgjht.html': '2026-08-17', 'pltu.html': '2026-10-08', 'murus.html': '2026-08-19', 'murus_old.html': '2026-08-09', 'cqcost428.html': '2026-08-15',
   'cqcost19.html': '2026-08-15', 'cq24q.html': '2026-08-15', 'stampgen.html': '2026-08-15',
-  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07', 'ratestruct.html': '2026-11-08', 'equidraft.html': '2026-11-09'
+  'evalwrite.html': '2026-08-15', 'bracecad.html': '2026-09-04', 'batchimg.html': '2026-08-22', 'pdfdocsprint.html': '2026-08-31', 'scaffold.html': '2026-09-06', 'deeppit.html': '2026-11-02', 'cqcost306.html': '2026-09-07', 'sgyd.html': '2026-09-22', 'cisterna.html': '2026-10-30', 'survey3d.html': '2026-11-02', 'ningmo.html': '2026-11-04', 'poleprice.html': '2026-11-07', 'ratestruct.html': '2026-11-08', 'equidraft.html': '2026-11-09', 'rebarviz.html': '2026-11-09'
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
