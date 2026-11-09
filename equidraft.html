@@ -392,7 +392,7 @@ const FIELDS = [
   { key:'ps',   label:'送审单价',   def:'H', w:60,  grp:'送审',    sub:'单价(元)' },
   { key:'fs',   label:'送审合价',   def:'I', w:76,  grp:'送审',    sub:'合价(元)', calc:1 },
   { key:'q2',   label:'审定工程量', def:'J', w:64,  grp:'审定',    sub:'工程量' },
-  { key:'pa',   label:'审核单价',   def:'K', w:60,  grp:'审定',    sub:'单价(元)', follow:1 },
+  { key:'pa',   label:'审定单价',   def:'K', w:60,  grp:'审定',    sub:'单价(元)', follow:1 },
   { key:'fa',   label:'审定合价',   def:'L', w:76,  grp:'审定',    sub:'合价(元)', calc:1 },
   { key:'mq',   label:'审减工程量', def:'M', w:68,  grp:'审增审减', sub:'工程量',  calc:1 },
   { key:'mp',   label:'审减单价',   def:'N', w:60,  grp:'审增审减', sub:'单价(元)', calc:1 },
@@ -493,11 +493,11 @@ function rowCalc(r){
   let  pa = n('pa');
 
   if(nc){
-    if(pa == null) pa = (q2 === 0 ? 0 : ps);                 /* 无合同列：审核单价 跟 送审 */
+    if(pa == null) pa = (q2 === 0 ? 0 : ps);                 /* 无合同列：审定单价 跟 送审 */
   } else {
     if(qc == null) qc = q1;                                  /* 合同工程量 跟 送审 */
     if(pc == null) pc = ps;                                  /* 合同单价 跟 送审 */
-    if(pa == null) pa = (pc == null ? null : (q2 === 0 ? 0 : pc)); /* 审核单价 跟 合同 */
+    if(pa == null) pa = (pc == null ? null : (q2 === 0 ? 0 : pc)); /* 审定单价 跟 合同 */
   }
 
   return {
@@ -548,7 +548,7 @@ function calcFormula(r,key){
 function priceAtoms(kind){
   const u = refOf('unit');
   const dual = [{lit:'送审单价'},{expr:'TEXT('+refOf('ps')+',"0.00")'},{lit:'元/'},{expr:u},
-                {lit:'，审核单价'},{expr:'TEXT('+refOf('pa')+',"0.00")'},{lit:'元/'},{expr:u}];
+                {lit:'，审定单价'},{expr:'TEXT('+refOf('pa')+',"0.00")'},{lit:'元/'},{expr:u}];
   const one  = [{lit:'合同单价'},{expr:'TEXT('+refOf('pc')+',"0.00")'},{lit:'元/'},{expr:u}];
   if(kind==='dual') return dual;
   if(kind==='contract') return one;
@@ -597,7 +597,7 @@ function compile(kind){
 }
 function buildFormula(){
   const c = S.cfg, p = refOf('pc');
-  if(c.noContract) return '=' + compile('dual');       /* 没有合同列：直接写送审/审核单价 */
+  if(c.noContract) return '=' + compile('dual');       /* 没有合同列：直接写送审/审定单价 */
   if(c.form === 'compact') return '=' + compile('auto');
   if(c.form === 'single')  return '=' + compile('contract');
   return '=IF(OR(' + p + '=0,' + p + '=""),' + compile('dual') + ',' + compile('contract') + ')';
@@ -614,7 +614,7 @@ function buildSentence(){
   const d = diffOf(r) == null ? 0 : diffOf(r);
   const noPc = (c.noContract || P.pc==null || toNum(P.pc)===0);
   const price = (c.form !== 'single' && noPc)
-    ? '送审单价' + fmt(P.ps,2) + '元/' + unit + '，审核单价' + fmt(P.pa,2) + '元/' + unit
+    ? '送审单价' + fmt(P.ps,2) + '元/' + unit + '，审定单价' + fmt(P.pa,2) + '元/' + unit
     : '合同单价' + fmt(P.pc,2) + '元/' + unit;
   const word = c.smart ? (r2(d) > 0 ? '审增金额' : '审减金额') : c.word;
   const nm = getv(r,'name');
@@ -847,7 +847,7 @@ function renderSide(){
 
 function renderTokens(){
   const list = [['name','名称“”'],['nameRaw','名称'],['unit','单位'],['q1','送审量'],['q2','审定量'],
-                ['price','单价句'],['p','合同单价'],['ps','送审单价'],['pa','审核单价'],
+                ['price','单价句'],['p','合同单价'],['ps','送审单价'],['pa','审定单价'],
                 ['d','审减额'],['dd','差额原值'],['word','审增/审减']];
   $('#tokens').innerHTML = list.map(x=>'<button data-t="' + x[0] + '" title="插入 {' + x[0] + '}">' + x[1] + '</button>').join('');
 }
@@ -879,7 +879,7 @@ function updateFormula(){
       : '口径：工程量的位数写死在公式里 —— 计件（个 / 项 / 座 / 套 …）取整，m / m² / m³ / 亩 / kg 等取 <b>2 位</b>，公顷 / t / 吨 / km / 公里 等取 <b>3 位</b>，其余单位按 <b>'
         + S.cfg.fallback + ' 位</b>；单价与金额固定 2 位。')
     + (S.cfg.noContract
-      ? ' 表格没有合同列，句子按 <b>送审单价 + 审核单价</b> 表述，不套 <code>IF(OR(' + refOf('pc') + '=0…))</code> 分支；列号已自动前移。'
+      ? ' 表格没有合同列，句子按 <b>送审单价 + 审定单价</b> 表述，不套 <code>IF(OR(合同单价=0…))</code> 分支；列号已自动前移。'
       : '')
     + (S.cfg.smart
       ? ' 措辞按 ' + refOf('diff') + ' 的正负自动切换审增 / 审减。'
@@ -1130,7 +1130,7 @@ function bind(){
   $('#btnNoC').addEventListener('click', ()=>{
     if(S.cfg.noContract){ toast('当前就是「无合同列」'); return; }
     applyLayout(true);
-    toast('已切到「无合同列」：列号 A–M 连续，公式按送审单价 + 审核单价');
+    toast('已切到「无合同列」：列号 A–M 连续，公式按送审单价 + 审定单价');
   });
 
   /* 侧栏：工程量小数位 */
