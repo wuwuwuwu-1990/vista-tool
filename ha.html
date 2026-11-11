@@ -56,6 +56,10 @@ body{
 .rail{position:sticky;top:88px;display:flex;flex-direction:column;gap:12px;min-width:0;
   max-height:calc(100vh - 104px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
   padding-bottom:2px}
+/* 左栏是限高的纵向 flex，带 overflow:hidden 的天气卡会变成唯一能被压缩的卡片：
+   高度不够时被压扁、底部预报行被裁掉，压完总高正好填满容器，连滚动条都不出现。
+   子元素一律不收缩，各自保持内容高度，装不下交给 .rail 自己的滚动条。 */
+.rail > *{flex:0 0 auto}
 .rail::-webkit-scrollbar{width:6px}
 .rail::-webkit-scrollbar-thumb{background:rgba(120,120,128,.28);border-radius:3px}
 .rail::-webkit-scrollbar-track{background:transparent}
@@ -259,34 +263,46 @@ html[data-mode="dark"] .badge.hboff{color:#ff6b60}
 .iconbtn.arm{color:#fff;background:var(--accent);border-color:transparent}
 
 /* ── 统计条 ── */
-/* 7 张卡在 1440 宽下塞不进一行（1026px / 7 ≈ 146），硬塞就得把卡压到 137px。
-   改成 flex 换行 + 居中：一行能放几张放几张，剩下的那行居中，不留半排空档；
-   basis 取 190 而不是 168，是为了避开「6 张 + 1 张孤卡」这种最难看的断行；
-   单卡最宽 210px，避免只剩 2 张时被拉成两条巨幅（与上一行宽度基本一致）。 */
-.stats{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:18px 0 26px}
+/* 7 张一行：137 × 7 + 10 × 6 = 1019px，正好塞进 .main 的 1026px（1440 窗口）。
+   用 grid 自动等分，卡宽随窗口微调；不再 flex 换行，也就没有「6 张 + 1 张孤卡」。
+   139px 卡宽下：内边距 10 → 内容 119，图标 40 + 间距 8 → 文字区剩 71px。 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(137px,1fr));gap:10px;margin:18px 0 26px}
 .stat{
-  flex:1 1 190px;min-width:168px;max-width:210px;
-  background:var(--card);border:1px solid rgba(255,255,255,.34);border-radius:16px;padding:12px 14px;
-  box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;position:relative;overflow:hidden;
+  background:var(--card);border:1px solid rgba(255,255,255,.34);border-radius:16px;padding:10px;
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;position:relative;overflow:hidden;
 }
-/* 圆形底座代替原来那根 3px 竖条：图标本身就是语义，再加一根彩条是重复强调 */
+/* 圆形底座：拟物浮雕。底色 145° 白→灰渐变，右下暗影 + 左上亮影必须同时存在才成立，
+   再加顶部 inset 高光；比卡面略实（卡面 .54，这里 .72）+ 同族毛玻璃，透底卡上才撑得出实体感。
+   透明度写在渐变色的 alpha 上而不是元素 opacity —— 否则图标会跟着一起发灰。
+   投影 offset 2px / blur 5px，控制在卡片 overflow:hidden 的切角范围之内。 */
 .stat .si{
-  width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+  width:40px;height:40px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(0,113,227,.12);color:var(--accent);
+  background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(216,220,227,.72));
+  box-shadow:2px 2px 5px rgba(20,30,50,.15), -2px -2px 5px rgba(255,255,255,.95),
+             inset 0 1px 0 rgba(255,255,255,.98);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:var(--accent);
 }
-.stat .si svg{width:18px;height:18px}
-.stat.g .si{background:rgba(52,199,89,.13);color:var(--green)}
-.stat.o .si{background:rgba(255,159,10,.14);color:var(--orange)}
-.stat.r .si{background:rgba(255,59,48,.12);color:var(--red)}
-.stat.p .si{background:rgba(191,90,242,.13);color:var(--purple)}
+.stat .si svg{width:20px;height:20px}
+/* 只换图标颜色，不再覆盖 background —— 覆盖了浮雕就塌成一块平色 */
+.stat.g .si{color:var(--green)}
+.stat.o .si{color:var(--orange)}
+.stat.r .si{color:var(--red)}
+.stat.p .si{color:var(--purple)}
+/* 暗色：白→灰渐变换成深灰→近黑，暗影加重、亮影收到 .10，深底上才不会糊成一团 */
+html[data-mode="dark"] .stat .si{
+  background:linear-gradient(145deg,rgba(88,96,108,.82),rgba(38,42,50,.78));
+  box-shadow:2px 2px 5px rgba(0,0,0,.42), -2px -2px 5px rgba(255,255,255,.09),
+             inset 0 1px 0 rgba(255,255,255,.16);
+}
 .stat .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
 .stat .k{font-size:13px;color:var(--text2);font-weight:600;letter-spacing:.01em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat .s{font-size:10.5px;color:var(--text3);font-weight:500;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-.stat .v{font-size:23px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
-.stat .v small{font-size:12.5px;font-weight:500;color:var(--text2);letter-spacing:0}
+.stat .v{font-size:21px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.stat .v small{font-size:11.5px;font-weight:500;color:var(--text2);letter-spacing:0}
 
 /* ── 房间 ── */
 .room{margin:0 0 26px}
@@ -545,8 +561,7 @@ html[data-mode="light"] .toast{background:rgba(29,29,31,.93)}
   .search{flex:1 1 100%;min-width:0;order:-1}
   .seg button{padding:5px 9px}
   .iconbtn{width:34px;height:34px}
-  .stats{gap:9px}
-  .stat{flex-basis:150px;min-width:0;max-width:none}
+  .stats{grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:9px}
   .stat .v{font-size:20px}
   .grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:9px}
   .panel{padding:22px 20px 20px}
@@ -853,7 +868,7 @@ html[data-card="capsule"] .card .sv{
 }
 
 /* ══════════════════════════════════════════════════════════════
-   V1.0.17 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
+   V1.0.18 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
    ① 滚动闪烁 → 取消 scrolling 类切换，卡片不再挂 backdrop-filter
    ② 弹窗跳动 → scrollbar-gutter 预留槽位，锁滚动不改变列宽
    ③ 立体感   → 三层阴影 + 顶部内高光，并解开 .grid 的 paint 裁剪
@@ -955,8 +970,9 @@ html[data-mode="dark"] .card.on .bar i,html[data-mode="dark"] .card.act .bar i{b
   transform:scale(.96);
 }
 
-/* ── 统计条：保持一行，间距收紧 ── */
-.stats{gap:10px}
+/* ── 统计条：保持一行，间距收紧 ──
+   列宽必须在这里一起写：这条同名规则在文件后半段，只写 gap 会把上面的 137px 冲掉 */
+.stats{grid-template-columns:repeat(auto-fit,minmax(137px,1fr));gap:10px}
 .stat{border-radius:var(--radius-card)}
 
 /* ── 弹窗：内容超高时面板内滚动（页面本体仍锁死） ── */
@@ -984,7 +1000,7 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
   html[data-card="capsule"] .grid{align-items:stretch}
 }
 @media (max-width:720px){
-  .stat{flex-basis:140px;min-width:0}
+  .stats{grid-template-columns:repeat(auto-fit,minmax(112px,1fr))}
   html[data-card="capsule"] .grid{grid-template-columns:1fr}
   .ap-s button{font-size:11px;padding:6px 2px}
   .mask .panel{padding:22px 18px 18px;border-radius:24px}
@@ -1000,7 +1016,7 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.17</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.18</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1508,6 +1524,17 @@ function call(type, extra){
 
 function connect(){
   if(!S.url || !S.token) return;
+  /* 页面是 https、目标却是 http：浏览器按混合内容直接掐掉 ws://，
+     代码这边只会安静地重连 5 次然后显示「连接断开 / HA本地端离线」，
+     用户根本不知道是自己被浏览器拦了。这里提前比对协议并明确指出，不进退避循环。 */
+  const rawU = String(S.url).trim();
+  const normU = /^https?:\/\//i.test(rawU) ? rawU : ("http://" + rawU);
+  if(location.protocol === "https:" && /^http:\/\//i.test(normU)){
+    S.fatal = true;                 /* 浏览器层面就过不去，重连没有意义 */
+    setConn("off", "地址被浏览器拦截", "err", "HTTPS 页面无法连接非加密的局域网地址");
+    showSettings("当前页面为 HTTPS，无法连接非加密的局域网地址，请改用远程登录或加密地址");
+    return;
+  }
   try{ if(S.ws) S.ws.onclose = null, S.ws.close(); }catch(e){}
   clearTimeout(S.timer);
   setConn(S.retry >= RETRY_GIVEUP ? "off" : "wait",
@@ -2149,8 +2176,10 @@ function renderWeather(){
   const sa   = (sun && sun.attributes) || {};
   const rise = hhmmss(sa.next_rising), sets = hhmmss(sa.next_setting);
   const tips = [];
+  /* 只留一条：优先分钟级（「未来2小时不会下雨」），没有就退回 keypoint（「阴天，无需带雨伞」）。
+     着装提示（forecast_hourly）整段摘掉 —— 它原来夹在 if/else if 中间，
+     单独删 if 行会把后面挂着的 else if 一起带走，所以两行必须一起换。 */
   if(a.forecast_minutely) tips.push([MI.umbrella, a.forecast_minutely]);
-  if(a.forecast_hourly)   tips.push([MI.shirt, a.forecast_hourly]);
   else if(a.forecast_keypoint) tips.push([MI.umbrella, a.forecast_keypoint]);
 
   const now = new Date();
@@ -2209,8 +2238,17 @@ function pickStateImg(map, v){
 function planBase(isThumb){
   return '<img class="pimg" src="' + (isThumb ? RES_BASE_THUMB : RES_BASE) + '" alt="全屋概览" decoding="async">';
 }
-/* 图源：优先用内联资源，没有才走后端地址 */
-function resPlan(p){ return RES_PLAN[p] || RES_GLOW[p] || imgUrl(p); }
+/* 图源：优先内联资源（20 个灯图标 + 56 个状态图标全部已内联）。
+   查不到时按当前 HA 地址拼绝对路径 —— 绝不能留相对路径：
+   S.url 还没赋值时相对路径会落到工具箱域名下，就是 /local/home/*.png 404 的来源。
+   未连接时给 1×1 透明占位，宁可空着也不发一次必然失败的请求。 */
+const BLANK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+function resPlan(p){
+  const hit = RES_PLAN[p] || RES_GLOW[p];
+  if(hit) return hit;
+  const base = String(S.url || "").trim().replace(/\/+$/, "");
+  return base ? imgUrl(p) : BLANK_IMG;
+}
 /* 图标浮层文案：设备名 + 当前状态 */
 function planTipOf(e){
   if(!e.e) return e.n || "";
@@ -2554,10 +2592,15 @@ function stateText(eid){
     case "fan": return {t: tr(v), ex: (v==="on"&&a.percentage)? a.percentage+"%" : ""};
     case "sensor":{
       const u = a.unit_of_measurement || U[a.device_class] || "";
-      /* 甲醛这类读数常在 0.01~0.5 mg/m³，num() 的一位小数会把它抹成 0，
-         小于 1 的读数改留 3 位有效小数（0.019 而不是 0） */
+      /* 只有甲醛要三位小数：它是 0.019 mg/m³ 这种量级，一位小数会抹成 0。
+         其它读数（功率 0.123kW、电量 0.056kWh）保持原精度，否则满屏啰嗦。
+         判甲醛用「去掉设备名前缀的自身名字」，同设备的温度/湿度传感器不算。 */
+      const own = shortName(eid, devName(eid));
+      const isHcho = a.device_class === "hcho" ||
+                     (/甲醛|hcho|ch2o/i.test(own) && !/温度|湿度|电量|电压|信号|档位/.test(own));
       const n = Number(v);
-      const t = (isFinite(n) && n !== 0 && Math.abs(n) < 1) ? String(+n.toFixed(3)) : num(v);
+      const t = (isHcho && isFinite(n) && n !== 0 && Math.abs(n) < 1)
+        ? String(+n.toFixed(3)) : num(v);
       return {t, ex: u};
     }
     case "binary_sensor":{
@@ -2787,7 +2830,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.17 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.18 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -2795,8 +2838,8 @@ function renderAll(){
 
 function renderStats(){
   let coversOpen=0, coversAll=0, doorsOpen=0;
-  let temps=[], hums=[], offline=0;
-  const devSeen = new Set();
+  let temps=[], hums=[];
+  const devSeen = new Set(), devOff = new Set();
 
   /* 灯光：按户型图辉光层统计（亮起判定用实时状态 on），不再用 HA 的 light 域名实体数 */
   const lightsAll = PLAN_GLOW_EIDS.length;
@@ -2814,7 +2857,7 @@ function renderStats(){
     if(areaOf(eid) !== "__none__"){
       const key = devIdOf(eid) || ("single|" + eid);
       devSeen.add(key);
-      if(v==="unavailable") offline++;
+      if(v==="unavailable") devOff.add(key);
     }
     if(dom==="cover"){ coversAll++; if(v==="open"||v==="opening") coversOpen++; }
     if(dom==="binary_sensor"){
@@ -2837,17 +2880,18 @@ function renderStats(){
   }
   const avg = a=> a.length? (a.reduce((x,y)=>x+y,0)/a.length) : null;
   const tempAvg = avg(temps), humAvg = avg(hums);
-  const tMin = temps.length? Math.min(...temps):null, tMax = temps.length? Math.max(...temps):null;
   const devTotal = devSeen.size;
+  /* 离线也按 device_id 去重：一台设备挂三个实体都离线不能算三次，
+     否则会出现「设备总数 11、离线 12」的倒挂 */
+  const offline = devOff.size;
 
   const items = [
     {k:"设备总数", v: devTotal, c:"", ic:"home"},
-    {k:"离线实体", v: offline, c: offline>0?"r":"g", ic:"cloud"},
+    {k:"离线设备", v: offline, c: offline>0?"r":"g", ic:"cloud"},
     {k:"灯光开启", v: lightsOn+" <small>/ "+lightsAll+"</small>", c:"o", ic:"bulb"},
     {k:"窗帘开启", v: coversOpen+" <small>/ "+coversAll+"</small>", c:"p", ic:"curtain"},
     {k:"门窗敞开", v: doorsOpen, c: doorsOpen>0?"r":"g", ic:"door"},
-    {k:"室内温度", v: tempAvg!==null? num(tempAvg,1)+"<small>°C</small>":"—",
-     c:"", ic:"temp", s: (tMin!==null? "区间 "+num(tMin,1)+" – "+num(tMax,1)+"°C":"")},
+    {k:"室内温度", v: tempAvg!==null? num(tempAvg,1)+"<small>°C</small>":"—", c:"", ic:"temp"},
     {k:"平均湿度", v: humAvg!==null? num(humAvg,0)+"<small>%</small>":"", c:"", ic:"drop"}
   ];
   document.getElementById("stats").innerHTML = items.map(i=>
@@ -2868,7 +2912,7 @@ const STAT_ICON = {
 };
 function statIcon(k){
   const d = STAT_ICON[k];
-  return d ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" '+
+  return d ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
     'stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>' : '';
 }
 
@@ -3184,7 +3228,9 @@ document.getElementById("btnConnect").onclick = ()=>{
   localStorage.setItem(LS_URL, u); localStorage.setItem(LS_TOK, t);
   // 记住这一类地址（本地/远程各自一份），下次切换按钮直接取用
   localStorage.setItem(netKind(u) === "loc" ? LS_LOC : LS_REM, u);
-  S.url = u; S.token = t; S.retry = 0;
+  /* 令牌改对了必须把「令牌无效」的死亡标记清掉，否则一次网络抖动就会被 onclose 的
+     if(S.fatal) return 掐死重连，徽章一直停在「异常」，看起来像令牌没生效 */
+  S.url = u; S.token = t; S.retry = 0; S.fatal = false; S.biz = "";
   applyNet(); syncSeg();
   hideSettings(); connect();
 };
@@ -3198,7 +3244,10 @@ document.getElementById("btnClear").onclick = ()=>{
   e.style.display="block"; e.textContent="已清除。";
 };
 
-document.getElementById("btnRefresh").onclick = ()=>{ S.retry=0; connect(); toast("正在重新连接…"); };
+document.getElementById("btnRefresh").onclick = ()=>{
+  S.retry = 0; S.fatal = false; S.biz = "";      /* 手点刷新 = 用户认为配置没问题，死亡标记要清 */
+  connect(); toast("正在重新连接…");
+};
 
 document.getElementById("btnMode").onclick = ()=>{
   S.ctl = !S.ctl;
