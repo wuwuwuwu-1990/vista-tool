@@ -356,6 +356,9 @@ html[data-mode="dark"] .card.on .st{color:#ffb340}
 .card.off .st{color:var(--text2)}
 .card.bad .ic{background:rgba(255,59,48,.14);color:var(--red)}
 .card.bad .st{color:var(--red);font-size:14px}
+.card.warn .ic{background:rgba(255,159,10,.16);color:#ff9500}
+.card.warn .st{color:#d97706}
+html[data-mode="dark"] .card.warn .st{color:#ffb340}
 .card.na .st{font-size:14px;color:var(--text3)}
 
 /* 电源按钮 */
@@ -417,6 +420,17 @@ details.more[open] summary::before{transform:rotate(90deg)}
 .mrow.on .d{background:var(--orange);box-shadow:0 0 0 2.5px rgba(255,159,10,.18)}
 .mrow .mn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mrow .mv{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;flex:0 0 auto}
+/* 开门 / 门超时：暖色提示，和「离线 / 故障」的红分开 */
+.mrow .mv.w{color:#d97706}
+html[data-mode="dark"] .mrow .mv.w{color:#ffb340}
+/* 操作区（空气炸锅的开始 / 继续 / 暂停 / 停止） */
+.brow{display:flex;gap:6px;flex-wrap:wrap;padding:0 2px}
+.brow button{flex:1 1 calc(50% - 3px);border:1px solid var(--line2);background:transparent;
+  border-radius:10px;font-family:var(--font);font-size:12.5px;font-weight:500;color:var(--text);
+  padding:9px 0;cursor:pointer;transition:.14s;line-height:1}
+.brow button:hover{background:rgba(120,120,128,.11)}
+.brow button:active{transform:scale(.98)}
+.brow button.rd{opacity:.45;cursor:not-allowed}
 
 /* 空态 / 登录 */
 .panel{
@@ -868,7 +882,7 @@ html[data-card="capsule"] .card .sv{
 }
 
 /* ══════════════════════════════════════════════════════════════
-   V1.0.19 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
+   V1.0.20 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
    ① 滚动闪烁 → 取消 scrolling 类切换，卡片不再挂 backdrop-filter
    ② 弹窗跳动 → scrollbar-gutter 预留槽位，锁滚动不改变列宽
    ③ 立体感   → 三层阴影 + 顶部内高光，并解开 .grid 的 paint 裁剪
@@ -902,6 +916,7 @@ html{scrollbar-gutter:stable}
 .card.cool .ic{background-color:var(--ic-cool);color:var(--ic-cool-fg);box-shadow:inset 0 0 0 1px var(--ic-cool-bd)}
 .card.sens .ic{background-color:var(--ic-act); color:var(--ic-act-fg); box-shadow:inset 0 0 0 1px var(--ic-act-bd)}
 .card.bad .ic{background-color:var(--ic-bad);  color:var(--ic-bad-fg); box-shadow:inset 0 0 0 1px var(--ic-bad-bd)}
+.card.warn .ic{background-color:var(--ic-on);color:var(--ic-on-fg);box-shadow:inset 0 0 0 1px var(--ic-on-bd)}
 .card.off .ic,.card.na .ic{background-color:var(--ic-bg);color:var(--text3);box-shadow:inset 0 0 0 1px var(--ic-bd)}
 
 /* ── ⑥ 只让图标一处报信，文字回归正文色，进度条中性 ── */
@@ -1016,7 +1031,7 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.19</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.20</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1214,7 +1229,8 @@ const S = {
   areas: {}, devices: {}, reg: {},
   states: new Map(),          // entity_id -> state object
   q: "", filter: "all",
-  ctl: true,                  // 可控模式
+  ctl: true,                  // 可控模式（顶栏解锁，持久到关页面）
+  pctl: false,                // 弹窗级临时解锁：只对当前这个弹窗有效，关窗即失效
   detailEid: null,            // 当前详情面板实体
   busy: new Set()             // 正在执行指令的实体，避免重复点击
 };
@@ -1237,7 +1253,11 @@ const I = {
   box:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/>',
   hum:'<path d="M12 3s5.5 5.6 5.5 9.6A5.5 5.5 0 0 1 12 18a5.5 5.5 0 0 1-5.5-5.4C6.5 8.6 12 3 12 3Z"/>',
   power:'<path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/>',
-  hcho:'<circle cx="12" cy="7" r="2.5"/><circle cx="6.2" cy="16.6" r="2.5"/><circle cx="17.8" cy="16.6" r="2.5"/><path d="M10.6 9.2 8.1 14.4M13.4 9.2 15.9 14.4M8.7 16.6h6.6"/>'
+  hcho:'<circle cx="12" cy="7" r="2.5"/><circle cx="6.2" cy="16.6" r="2.5"/><circle cx="17.8" cy="16.6" r="2.5"/><path d="M10.6 9.2 8.1 14.4M13.4 9.2 15.9 14.4M8.7 16.6h6.6"/>',
+  /* 冰箱：双门 + 门把手 + 中缝 */
+  fridge:'<rect x="6" y="2.6" width="12" height="18.8" rx="2.4"/><path d="M6 9.4h12"/><path d="M9 5.2v2M9 11.8v3.2"/>',
+  /* 空气炸锅：炸篮 + 把手 + 上方热气 */
+  fryer:'<path d="M4.6 9.6h14.8l-1.5 8.2a2.7 2.7 0 0 1-2.7 2.2H8.8a2.7 2.7 0 0 1-2.7-2.2L4.6 9.6Z"/><path d="M3 9.6h18"/><path d="M9.4 20v1.4M14.6 20v1.4"/><path d="M8.8 6.6c0-1.3 1.2-1.7 1.2-2.9M12 6.6c0-1.3 1.2-1.7 1.2-2.9M15.2 6.6c0-1.3 1.2-1.7 1.2-2.9"/>'
 };
 const ICON_ROOM = '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>';
 
@@ -1263,6 +1283,7 @@ function iconOf(domain, r){
     case "binary_sensor": return (r&&r.device_class==="moisture")?I.hum:I.door;
     case "sensor":
       /* 甲醛读数不带 device_class，主读数改成甲醛浓度后图标也得跟着换，别还画温度计 */
+      if(r && /冰箱/.test(r.name || "")) return I.fridge;
       if(r && (r.device_class === "hcho" || /甲醛|hcho/i.test(r.name || ""))) return I.hcho;
       return (r&&r.device_class==="power")?I.power:I.sensor;
     case "switch": return I.switch;
@@ -1284,6 +1305,17 @@ const TRANSLATE = {
   "detected":"检测到","clear":"正常","wet":"漏水",
   "partlycloudy":"多云","cloudy":"阴","sunny":"晴","rainy":"雨","snowy":"雪","clear_night":"晴夜",
   "stuck":"卡住","paused_state":"暂停","discharging":"放电中"
+};
+
+/* 空气炸锅的状态枚举：米家只回英文，xiaomi_miot 原样透传，卡面大字就成了 cooking。
+   这里按设备语义翻成中文，以后换型号只要枚举名一致就自动生效。 */
+const AIRFRY_ST = {
+  "cooking":"烹饪中", "cooking completed":"烹饪完成", "cook completed":"烹饪完成",
+  "off":"待机", "on":"烹饪中",
+  "idle":"待机", "standby":"待机", "keep warm":"保温", "keep_warm":"保温",
+  "paused":"已暂停", "pause":"已暂停", "preheating":"预热中", "preheat":"预热中",
+  "reserved":"已预约", "reservation":"已预约", "finished":"已完成",
+  "working":"运行中", "turn pot":"请翻动"
 };
 
 function tr(v){
@@ -1376,7 +1408,12 @@ function clsOf(st, domain, eid){
     if(p !== null) return p > 2 ? "on" : "off";
     return (v==="open"||v==="opening") ? "on" : "off";
   }
-  if(domain==="binary_sensor") return (v==="on")?"bad":"off";
+  if(domain==="binary_sensor"){
+    if(v!=="on") return "off";
+    /* 开门是提示不是故障：门窗用暖色，红色只留给报警 / 故障 / 离线 */
+    const dc = attrOf(eid, "device_class");
+    return /^(door|window|opening|garage_door)$/.test(dc || "") ? "warn" : "bad";
+  }
   if(domain==="climate") return (v==="off")?"off":"cool";
   if(domain==="lock") return (v==="unlocked")?"bad":"off";
   if(v==="on") return "on";
@@ -1649,6 +1686,7 @@ function onState(d){
     const had = S.states.delete(d.entity_id);
     if(S.detailEid === d.entity_id){
       S.detailEid = "";
+      S.pctl = false;
       const m = document.getElementById("mask2");
       if(m) m.classList.remove("show");
     }
@@ -1675,6 +1713,29 @@ function onState(d){
 /* ══════════════ 控制 ══════════════ */
 const CTL_DOMAIN = new Set(["light","switch","fan","cover","climate","media_player","lock","humidifier","input_boolean","water_heater"]);
 
+/* 控制权限分两级：
+   S.ctl  = 顶栏解锁（持久，整页可点）；
+   S.pctl = 弹窗里点「解锁」得到的临时权限，关窗立刻失效 —— 卡片默认只读，
+            一次解锁不等于整个面板都放开。判定一律走 canCtl()。 */
+function canCtl(){ return !!(S.ctl || S.pctl); }
+
+/* 按钮按设备 ID 全量捞的时候，只留烹饪四键；HA 给米家设备挂的「信息」按钮
+   （entity_category=diagnostic）以及以后可能出现的重启/刷新一律不进操作区。 */
+const BTN_OK = /^(开始烹饪|继续烹饪|暂停|停止烹饪)$/;
+const BTN_ORDER = ["开始烹饪", "继续烹饪", "暂停", "停止烹饪"];
+function devButtons(did){
+  if(!did) return [];
+  const out = [];
+  for(const e of S.states.keys()){
+    if(e.slice(0, 7) !== "button.") continue;
+    const r = S.reg[e];
+    if(!r || r.device_id !== did) continue;
+    if(BTN_OK.test(shortName(e, devName(e)))) out.push(e);
+  }
+  out.sort((a, b)=> BTN_ORDER.indexOf(shortName(a, devName(a))) - BTN_ORDER.indexOf(shortName(b, devName(b))));
+  return out;
+}
+
 function toast(msg, ms){
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -1684,7 +1745,7 @@ function toast(msg, ms){
 }
 
 async function callService(domain, service, data, eid){
-  if(!S.ctl){ toast("只读模式 · 先点顶栏 🔒 解锁控制"); return false; }
+  if(!canCtl()){ toast("只读模式 · 先解锁控制"); return false; }
   const body = {domain: domain, service: service};
   if(data && Object.keys(data).length) body.service_data = data;
   if(eid) body.target = {entity_id: eid};
@@ -1749,7 +1810,11 @@ const SWITCHY = new Set(["switch","input_boolean"]);
 function keepSensor(eid){
   const dc = attrOf(eid, "device_class");
   if(SENSOR_KEEP.has(dc)) return true;
-  return /hcho|tvoc|voc|甲醛|噪声|噪音|辐照|pm1/i.test(nameOf(eid));
+  if(/hcho|tvoc|voc|甲醛|噪声|噪音|辐照|pm1/i.test(nameOf(eid))) return true;
+  /* 空气炸锅的状态 / 故障 / 翻动提醒是纯文本传感器，没有 device_class，
+     白名单一条都接不住；但它们正是这张卡的主读数，必须留在设备分组里 */
+  if(AIRFRY_RE.test(devName(eid) || "")) return true;
+  return false;
 }
 function readingOK(e){
   const dc = attrOf(e, "device_class");
@@ -1858,11 +1923,34 @@ function fixedName(raw){
   for(const [from, to] of NAME_FIX) if(k.indexOf(from) >= 0) return to;
   return raw;
 }
+/* ── 空气炸锅：英文型号名 → 小米官方中文名 ──────────────────
+   注册表名形如 "Mijia Smart Air Fryer Pro (Steam 6.5L)"。容量从括号里解析，
+   带 Steam 才叫「蒸烤版」，没有就只到 Pro —— 以后换型号不用改代码。 */
+const AIRFRY_RE = /air\s*fryer|空气炸锅/i;
+function airFryerName(raw){
+  const s2 = String(raw || "");
+  if(!AIRFRY_RE.test(s2)) return "";
+  const par = (s2.match(/[（(]([^）)]*)[）)]/) || [])[1] || "";
+  const cap = ((par.match(/(\d+(?:\.\d+)?)\s*L/i) || s2.match(/(\d+(?:\.\d+)?)\s*L/i)) || [])[1] || "";
+  const steam = /steam|蒸/i.test(par) || /steam/i.test(s2);
+  return "米家智能空气炸锅 Pro" + (steam ? " 蒸烤版" : "") + (cap ? " " + cap + "L" : "");
+}
+/* 注册表里的原始设备名（重写映射之前），nameOf 要用它把实体名前缀换掉 */
+function devRawName(eid){
+  const r = S.reg[eid];
+  const d = (r && r.device_id) ? S.devices[r.device_id] : null;
+  if(!d) return "";
+  const n = d.name_by_user || d.name || "";
+  return /^[0-9a-f]{6,}$/i.test(n) ? "" : n;
+}
+
 function devName(eid){
   const r = S.reg[eid];
   const d = (r && r.device_id) ? S.devices[r.device_id] : null;
   if(!d) return "";
   const n = d.name_by_user || d.name || "";
+  const af = airFryerName(n);                 /* 空气炸锅：英文型号名换成官方中文名 */
+  if(af) return af;
   const f = fixedName(n);
   if(f !== n) return f;
   /* 纯设备 ID 不当名字用（如 c03937b9d094） */
@@ -1878,6 +1966,10 @@ function nameOf(eid){
   const dn = devName(eid);
   n = String(n || "").replace(/^[0-9a-f]{6,}[ _-]+/i, "");   // 去掉名字前缀里的纯 ID
   if(dn && n){
+    /* 设备名被重写过（空气炸锅的英文型号名 → 中文官方名），实体名前缀也跟着换，
+       否则弹窗里每一行都顶着一长串 "Mijia Smart Air Fryer Pro (Steam 6.5L)" */
+    const raw = devRawName(eid);
+    if(raw && raw !== dn && n.indexOf(raw) === 0) n = dn + n.slice(raw.length);
     if(n === dn + " " + dn) n = dn;
     else if(n.startsWith(dn + " ") && n.slice(dn.length + 1) === dn) n = dn;
   }
@@ -1930,6 +2022,15 @@ const PRIO = ["climate","light","cover","media_player","fan","vacuum","lock","hu
               "camera","alarm_control_panel","switch","input_boolean"];
 const LOAD_RE = /插座|取暖器|电暖|热水器/;
 
+/* 冰箱门顺序：冷藏 → 冷冻 → 变温 → 吧台（其余按名字兜底） */
+function doorRank(e){
+  const own = shortName(e, devName(e));
+  if(/冷藏/.test(own)) return 0;
+  if(/冷冻/.test(own)) return 1;
+  if(/变温/.test(own)) return 2;
+  if(/吧台/.test(own)) return 3;
+  return 9;
+}
 function cardScore(eid){
   const i = PRIO.indexOf(eid.split(".")[0]);
   return i < 0 ? 90 : i;
@@ -1971,6 +2072,42 @@ function buildModel(){
     const sw = ents.filter(e=> e.split(".")[0]==="switch" && !BAD_ENT.test(e))
                   .sort((a,b)=> a.length-b.length);
     const isLoad = !!dev && LOAD_RE.test(dev) && sw.length > 0;
+
+    /* 空气炸锅：4 个 switch 会把卡片变成「4 路开关卡」，卡面就只剩 1/2/3/4 四个按钮，
+       根本看不到烹饪状态。改成「状态卡」——状态传感器当锚点，开关和参数全部收进弹窗。 */
+    if(AIRFRY_RE.test(dev)){
+      const anchor = ents.find(e=> e.split(".")[0]==="sensor" && /air_?fryer|空气炸锅/i.test(e + " " + nameOf(e)));
+      if(anchor){
+        const afSens = ents.filter(e=> e.split(".")[0]==="sensor" && e !== anchor && keepSensor(e));
+        const afMore = ents.filter(e=> e !== anchor && e.split(".")[0]!=="sensor")
+                          .sort((a,b)=> (a.split(".")[0]==="switch"?0:1) - (b.split(".")[0]==="switch"?0:1));
+        const card = { key, eid: anchor, name: dev, mains: [], sensors: afSens, more: afMore,
+                       load: false, kind: "fryer" };
+        const room = ensure(areaOf(anchor));
+        room.cards.push(card);
+        ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
+        continue;
+      }
+    }
+
+    /* 冰箱：13 条读数 + 8 个门传感器，没有可控主实体。
+       锚点换成「冷藏室实际温度」——弹窗底部的主实体属性看温度比看门有用；
+       卡面只报开门/关门 + 冷藏冷冻双温。 */
+    if(/冰箱/.test(dev)){
+      const fs = ents.filter(e=> e.split(".")[0]==="sensor" && keepSensor(e));
+      const doors = ents.filter(e=> e.split(".")[0]==="binary_sensor" && attrOf(e, "device_class") === "door")
+                        .sort((a,b)=> doorRank(a) - doorRank(b));
+      const ots = ents.filter(e=> e.split(".")[0]==="binary_sensor" && attrOf(e, "device_class") === "problem");
+      if(fs.length){
+        const anchor = fs.find(e=> /refrigerator_actual_temp/.test(e)) || fs[0];
+        const card = { key, eid: anchor, name: dev, mains: [], sensors: fs, more: [],
+                       doors, ots, load: false, kind: "fridge" };
+        const room = ensure(areaOf(anchor));
+        room.cards.push(card);
+        ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
+        continue;
+      }
+    }
 
     let use = mains;
     /* 设备里同时有空调/灯等主实体时，switch 只当附属项（否则「偏卧空调」会变成 5 路开关卡） */
@@ -2551,7 +2688,13 @@ const PHRASE_CN = {
   "motion detection":"移动侦测",
   "glimmer full color":"微光全彩",
   "charging state":"充电状态",
-  "battery level":"电池电量"
+  "battery level":"电池电量",
+  "no faults":"正常",
+  "no fault":"正常",
+  "no need turn over pot":"无需翻动",
+  "need turn over pot":"请翻动",
+  "turn over pot":"请翻动",
+  "cooking completed":"烹饪完成"
 };
 const SPLIT_WORD = /[._\s]+/;          /* 点 / 下划线 / 空格 统一当分隔符 */
 /* 单个词 → 中文：主表 GLOSS → 属性名表 → 属性值表 → 米家分段表
@@ -2638,6 +2781,15 @@ function stateText(eid){
     case "camera": return {t: (v==="unavailable"||v==="unknown")? "离线" : "在线", ex:""};
     case "fan": return {t: tr(v), ex: (v==="on"&&a.percentage)? a.percentage+"%" : ""};
     case "sensor":{
+      /* 空气炸锅：状态传感器回的是英文枚举，卡面大字必须换成中文 */
+      if(/air_?fryer/i.test(eid) ||
+         (/空气炸锅/.test(devName(eid) || "") && /空气炸锅|状态|status/i.test(shortName(eid, devName(eid)) || ""))){
+        const w = AIRFRY_ST[String(v).trim().toLowerCase()] || AIRFRY_ST[String(v).trim().toLowerCase().replace(/\s+/g, " ")];
+        if(w) return {t: w, ex:""};
+      }
+      /* 冰箱变温区没启用时设备回 -50 这个占位值，别当真实温度显示 */
+      if(a.device_class === "temperature" && v !== "" && isFinite(Number(v)) && Number(v) <= -50)
+        return {t:"未启用", ex:""};
       const u = a.unit_of_measurement || U[a.device_class] || "";
       /* 只有甲醛要三位小数：它是 0.019 mg/m³ 这种量级，一位小数会抹成 0。
          其它读数（功率 0.123kW、电量 0.056kWh）保持原精度，否则满屏啰嗦。
@@ -2646,8 +2798,10 @@ function stateText(eid){
       const isHcho = a.device_class === "hcho" ||
                      (/甲醛|hcho|ch2o/i.test(own) && !/温度|湿度|电量|电压|信号|档位/.test(own));
       const n = Number(v);
-      const t = (isHcho && isFinite(n) && n !== 0 && Math.abs(n) < 1)
-        ? String(+n.toFixed(3)) : num(v);
+      /* 纯文本读数（no faults / no need turn over pot）交给 num() 会被原样吐回英文，
+         非数字值必须先按整句 / 逐词表翻一遍 */
+      const t = !isFinite(n) ? tr(v) :
+        ((isHcho && n !== 0 && Math.abs(n) < 1) ? String(+n.toFixed(3)) : num(v));
       return {t, ex: u};
     }
     case "binary_sensor":{
@@ -2729,7 +2883,60 @@ function sensorCardHTML(card){
     '</div>';
 }
 
+/* 空气炸锅卡：大字是烹饪状态（中文），小字给剩余时间，再下一行给故障 / 翻动提醒 */
+function fryerCardHTML(card){
+  const eid = card.eid;
+  const st = S.states.get(eid);
+  const v = st ? String(st.state) : "";
+  const t = stateText(eid) || {};
+  const bad = (v === "unavailable" || v === "unknown");
+  const cooking = /cook|preheat|work/i.test(v) && !/completed/i.test(v);
+  const c = bad ? "na" : (cooking ? "on" : "off");
+  const isLeft = e=> /remaining|left_time|剩余时间/i.test(e + nameOf(e));
+  let left = "";
+  card.sensors.filter(isLeft).forEach(e=>{
+    const n = Number((S.states.get(e) || {}).state);
+    if(isFinite(n) && n > 0) left = "剩余 " + n + " 分钟";
+  });
+  const extras = card.sensors.filter(e=> !isLeft(e)).map(e=>{
+    const tt = stateText(e) || {};
+    return esc(shortName(e, card.name)) + " " + esc(tt.t || "");
+  }).join(" · ");
+  return '<div class="card sens '+c+'" data-eid="'+esc(eid)+'" data-key="'+esc(card.key)+'"'+
+      ' role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.fryer)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="st">'+esc(t.t || "—")+(left? ' <small>'+esc(left)+'</small>' : '')+'</div>'+
+      (extras ? '<div class="sv">'+extras+'</div>' : '')+
+    '</div>';
+}
+
+/* 冰箱卡：大字只报开门 / 关门（四扇门任一开即算开门），小字给冷藏 / 冷冻实际温度 */
+function fridgeCardHTML(card){
+  const doors = card.doors || [];
+  const anyOpen = doors.some(e=> (S.states.get(e) || {}).state === "on");
+  const off = S.states.get(card.eid);
+  const na = off && (off.state === "unavailable" || off.state === "unknown");
+  const temps = [];
+  const pick = (re, label)=>{
+    const e = (card.sensors || []).find(x=> re.test(x));
+    if(!e) return;
+    const n = Number((S.states.get(e) || {}).state);
+    if(!isFinite(n) || n <= -50) return;          /* -50 = 变温区未启用的占位值 */
+    temps.push(label + " " + num(n, 1) + "°C");
+  };
+  pick(/refrigerator_actual_temp/, "冷藏");
+  pick(/freezer_actual_temp/, "冷冻");
+  return '<div class="card sens '+(na ? "na" : (anyOpen ? "warn" : "off"))+'" data-eid="'+esc(card.eid)+'"'+
+      ' data-key="'+esc(card.key)+'" role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.fridge)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="st">'+esc(na ? "离线" : (anyOpen ? "开门" : "关门"))+'</div>'+
+      '<div class="sv">'+esc(temps.length ? temps.join(" · ") : "—")+'</div>'+
+    '</div>';
+}
+
 function cardHTML(card){
+  if(card.kind === "fryer") return fryerCardHTML(card);
+  if(card.kind === "fridge") return fridgeCardHTML(card);
   if(card.kind === "sensor") return sensorCardHTML(card);
   const eid = card.eid;
   const st = S.states.get(eid);
@@ -2781,6 +2988,8 @@ function patchCard(eid){
   if(!card) return;
   const node = document.querySelector('.card[data-key="'+CSS.escape(card.key)+'"]');
   if(!node) return;
+  if(card.kind === "fryer"){ node.outerHTML = fryerCardHTML(card); return; }
+  if(card.kind === "fridge"){ node.outerHTML = fridgeCardHTML(card); return; }
   if(card.kind === "sensor"){
     node.outerHTML = sensorCardHTML(card);
     return;
@@ -2876,7 +3085,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.19 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.20 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -2900,10 +3109,17 @@ function renderStats(){
     const dom = eid.split(".")[0], v = st.state;
     if(dom==="button"||dom==="update") continue;
     /* 「设备总数 / 离线实体」只统计已分配房间的设备：未分配区域在页面上本来就没有卡片 */
+    /* 离线口径 A2：先剔除 BAD_ENT 命中的配置/状态开关（摄像机控制、指示灯、夜视…），
+       它们常年 unavailable，会把一台好设备永远算成离线；
+       摄像头实体本身也一样，交给 cameraOnline() 单独判，与卡片同一套口径。 */
     if(areaOf(eid) !== "__none__"){
       const key = devIdOf(eid) || ("single|" + eid);
       devSeen.add(key);
-      if(v==="unavailable") devOff.add(key);
+      if(dom === "camera"){
+        if(cameraOnline(eid) !== true) devOff.add(key);
+      }else if(!BAD_ENT.test(eid) && v === "unavailable"){
+        devOff.add(key);
+      }
     }
     if(dom==="cover"){
       coversAll++;
@@ -2978,7 +3194,7 @@ function panelCtl(eid){
   const dom = eid.split(".")[0];
   const ok = st.state!=="unavailable" && st.state!=="unknown";
   if(!ok) return '<div class="rolock">设备当前不可用，无法下发指令</div>';
-  if(!S.ctl) return '<div class="rolock">当前为只读模式，控制已锁定<button data-act="unlock">解锁</button></div>';
+  if(!canCtl()) return '<div class="rolock">当前为只读模式，控制已锁定<button data-act="unlock">解锁</button></div>';
   if(!CTL_DOMAIN.has(dom)) return '';
 
   let h = '';
@@ -3084,7 +3300,12 @@ function dropRawPos(a, eid){
 }
 function attrRows(a, limit, eid){
   a = dropRawPos(a, eid);
-  const keys = Object.keys(a).filter(k=> k!=="friendly_name" && typeof a[k]!=="object" && a[k]!==null && a[k]!=="");
+  const keys = Object.keys(a).filter(k=>{
+    if(k==="friendly_name" || typeof a[k]==="object" || a[k]===null || a[k]==="") return false;
+    /* -50 是冰箱变温区「未启用」的占位值，属性表里也别露出来 */
+    if(/temp|温度/i.test(k) && isFinite(Number(a[k])) && Number(a[k]) <= -50) return false;
+    return true;
+  });
   return keys.slice(0, limit||40).map(k=>{
     const cn = attrCN(k);
     let v = String(valCN(a[k])).slice(0,46);
@@ -3096,7 +3317,7 @@ function entRow(e, canAll, pre){
   const t = stateText(e), on = isActive(e);
   const dom = e.split(".")[0];
   const s = S.states.get(e);
-  const use = canAll && S.ctl && CTL_DOMAIN.has(dom) && s && s.state!=="unavailable" && s.state!=="unknown";
+  const use = canAll && canCtl() && CTL_DOMAIN.has(dom) && s && s.state!=="unavailable" && s.state!=="unknown";
   return '<div class="mrow'+(on?" on":"")+(use?" ctl":"")+'" data-eid="'+esc(e)+'"'+
     (use? ' data-svc="'+esc(dom)+"|"+toggleSvc(dom)+'"':'')+'>'+
     '<i class="d"></i><span class="mn">'+esc(shortName(e, pre))+'</span><span class="mv">'+esc(t.t)+(t.ex? " "+esc(t.ex):"")+'</span></div>';
@@ -3116,19 +3337,53 @@ function renderDetail(){
     '<path d="M6 6l12 12M18 6L6 18"/></svg></button>';
 
   /* 一台设备一张卡：显示该设备下的全部实体 */
-  if(card && (card.mains.length > 1 || card.more.length > 0 || card.sensors.length > 0)){
+  if(card && (card.mains.length > 1 || card.more.length > 0 || card.sensors.length > 0 ||
+              (card.doors && card.doors.length))){
     const d = r.device_id ? S.devices[r.device_id] : null;
+    const dom0 = eid.split(".")[0];
+    const canRows = [].concat(card.mains, card.more).some(e=> CTL_DOMAIN.has(e.split(".")[0]));
     let h = '<h2>'+esc(card.name)+'</h2>'+
       '<p class="desc" style="margin-bottom:8px">'+esc(roomName(areaOf(eid)))+
         (d && d.manufacturer? ' · '+esc(d.manufacturer):'')+
         (d && d.model? ' · '+esc(d.model):'')+
-        ' · 可控 '+card.mains.length+' 项 / 配置 '+card.more.length+' 项</p>'+
-      (PANEL_CTL_DOMAIN.has(eid.split(".")[0])
+        ' · 可控 '+card.mains.length+' 项 / 配置 '+card.more.length+' 项'+
+        (S.pctl && !S.ctl ? ' · <b style="color:var(--accent)">已解锁（本次弹窗）</b>' : '')+'</p>'+
+      (PANEL_CTL_DOMAIN.has(dom0)
         ? '<div class="dgrid"><div class="t">主控</div>'+
           '<div style="padding:0 2px">'+panelCtl(eid)+'</div></div>' : '')+
-      '<div class="dgrid"><div class="t">可控（点一下切换）</div>'+
+      /* 纯开关设备（插座 / 空气炸锅的 4 个开关）没有「主控区」，
+         只读模式下也得有解锁入口，否则整个弹窗没有一个能点的地方。
+         ⚠️ 这层三目必须自己带括号：+ 比 ?: 结合得紧，漏了括号会把前面整段 h 当成条件，
+         弹窗只剩一个解锁条（标题、读数全没了）。 */
+      ((!PANEL_CTL_DOMAIN.has(dom0) && !canCtl() && canRows)
+        ? '<div class="rolock">当前为只读模式，控制已锁定<button data-act="unlock">解锁</button></div>' : '');
+
+    /* 操作区：只放烹饪四键，「信息」这类 diagnostic 按钮不进 */
+    const btns = devButtons(r.device_id);
+    if(btns.length){
+      h += '<div class="dgrid"><div class="t">操作</div><div class="brow">'+
+        btns.map(e=> '<button data-press="'+esc(e)+'"'+(canCtl()? '' : ' class="rd"')+'>'+
+          esc(shortName(e, card.name))+'</button>').join("")+'</div></div>';
+    }
+
+    if(card.mains.length){
+      h += '<div class="dgrid"><div class="t">可控（点一下切换）</div>'+
         '<div class="mgrid" style="max-height:30vh;overflow:auto">'+
         card.mains.map(e=> entRow(e, true, card.name)).join("")+'</div></div>';
+    }
+
+    /* 门状态：4 扇门的常态就在这里；门超时只有真的超时了才追加显示，
+       平时不占位，弹窗保持清爽 */
+    if(card.doors && card.doors.length){
+      const row = (e, warn)=> '<div class="mrow'+(warn? " on":"")+'" data-eid="'+esc(e)+'">'+
+        '<i class="d"></i><span class="mn">'+esc(shortName(e, card.name))+'</span>'+
+        '<span class="mv'+(warn? " w":"")+'">'+esc((stateText(e)||{}).t)+'</span></div>';
+      const rows = card.doors.map(e=> row(e, (S.states.get(e)||{}).state === "on")).join("")+
+        (card.ots || []).filter(e=> (S.states.get(e)||{}).state === "on")
+                        .map(e=> row(e, true)).join("");
+      h += '<div class="dgrid"><div class="t">门状态</div><div class="mgrid">'+rows+'</div></div>';
+    }
+
     if(card.sensors.length){
       h += '<div class="dgrid"><div class="t">读数</div><div class="mgrid">'+
         card.sensors.map(e=> entRow(e, false, card.name)).join("")+'</div></div>';
@@ -3244,7 +3499,7 @@ document.addEventListener("keydown", (ev)=>{
   const top = open[open.length - 1];
   if(top.id === "maskPlan"){ closePlan(); return; }
   top.classList.remove("show");
-  if(top.id === "mask2") S.detailEid = "";
+  if(top.id === "mask2"){ S.detailEid = ""; S.pctl = false; }
   if(top.id === "mask"){ const q = document.getElementById("q"); if(q) q.focus(); }
 });
 /* 卡片键盘操作：Tab 聚焦、Enter / 空格打开详情 */
@@ -3264,7 +3519,7 @@ document.querySelectorAll("#segNet button").forEach(b=>{
 document.getElementById("inUrl").addEventListener("input", syncSeg);
 document.getElementById("mask").onclick = (ev)=>{ if(ev.target.id==="mask") hideSettings(); };
 document.getElementById("mask2").onclick = (ev)=>{
-  if(ev.target.id==="mask2"){ S.detailEid=null; ev.currentTarget.classList.remove("show"); }
+  if(ev.target.id==="mask2"){ S.detailEid=null; S.pctl=false; ev.currentTarget.classList.remove("show"); }
 };
 
 document.getElementById("btnConnect").onclick = ()=>{
@@ -3347,8 +3602,21 @@ document.addEventListener("click", (ev)=>{
   const actEl = ev.target.closest("[data-act]");
   if(actEl){
     const act = actEl.getAttribute("data-act");
-    if(act==="unlock"){ S.ctl=true; applyCtl(); renderAll(); renderDetail(); toast("已解锁控制"); return; }
-    if(act==="closeDetail"){ S.detailEid=null; document.getElementById("mask2").classList.remove("show"); return; }
+    /* 弹窗里的解锁只作用于当前这个弹窗：关窗即失效，不写 localStorage、不动顶栏模式 */
+    if(act==="unlock"){ S.pctl = true; renderDetail(); toast("已解锁 · 只对本次弹窗有效"); return; }
+    if(act==="closeDetail"){
+      S.detailEid = null; S.pctl = false;
+      document.getElementById("mask2").classList.remove("show"); return;
+    }
+  }
+
+  /* 操作按钮（空气炸锅四键） */
+  const prEl = ev.target.closest("[data-press]");
+  if(prEl){
+    ev.stopPropagation();
+    if(!canCtl()){ toast("只读模式 · 先解锁控制"); return; }
+    callService("button", "press", {}, prEl.getAttribute("data-press"));
+    return;
   }
 
   /* 服务指令 */
@@ -3372,6 +3640,7 @@ document.addEventListener("click", (ev)=>{
     const eid = card.getAttribute("data-eid");
     if(!eid) return;
     S.detailEid = eid;
+    S.pctl = false;                 /* 换一台设备重新回到只读，权限不跟着走 */
     renderDetail();
     document.getElementById("mask2").classList.add("show");
   }
