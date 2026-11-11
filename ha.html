@@ -52,13 +52,12 @@ body{
 .wrap{margin:0 auto;padding:22px 30px 70px}
 
 /* ── 两栏骨架 ── */
-.shell{display:grid;grid-template-columns:326px minmax(0,1fr);gap:18px;align-items:start}
+.shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start}
+/* V1.0.26：左栏不再自带滚动条。scrollbar-gutter:stable 会在右缘永久预留 8–10px
+   槽位，那条空白就是它留下的。左栏卡片改由内容自身限高（户型图缩略 210、
+   天气卡 overflow:hidden、外观块默认收起）保证塞得进视口，不靠滚动兜。 */
 .rail{position:sticky;top:88px;display:flex;flex-direction:column;gap:12px;min-width:0;
-  max-height:calc(100vh - 104px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
-  padding-bottom:2px}
-/* 左栏是限高的纵向 flex，带 overflow:hidden 的天气卡会变成唯一能被压缩的卡片：
-   高度不够时被压扁、底部预报行被裁掉，压完总高正好填满容器，连滚动条都不出现。
-   子元素一律不收缩，各自保持内容高度，装不下交给 .rail 自己的滚动条。 */
+  overflow:visible;padding-bottom:2px}
 .rail > *{flex:0 0 auto}
 .rail::-webkit-scrollbar{width:6px}
 .rail::-webkit-scrollbar-thumb{background:rgba(120,120,128,.28);border-radius:3px}
@@ -92,11 +91,14 @@ html[data-mode="dark"] .pill.away .pv{color:#ffb340}
 html[data-mode="dark"] .pill.away .pv{background:rgba(255,159,10,.18)}
 
 
-/* 时钟 */
-.clkcard{padding:14px 16px 13px}
-.clkt{font-size:40px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+/* 时钟：两行式——左侧 40px 大字时间，右侧日期/星期两行，整块垂直居中 */
+.clkcard{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.clkt{font-size:40px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums;flex:0 0 auto}
 .clkt small{font-size:19px;font-weight:600;color:var(--text2);letter-spacing:-.02em}
-.clkd{margin-top:8px;font-size:12.5px;color:var(--text2);letter-spacing:.01em}
+.clkd{margin-top:0;display:flex;flex-direction:column;justify-content:center;gap:2px;
+  font-size:12.5px;color:var(--text2);letter-spacing:.01em;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clkd span{display:block;line-height:1.25}
 
 /* 天气（完整复刻后端 colorfulclouds 天气卡） */
 .wxcard{padding:13px 14px 12px;overflow:hidden}
@@ -305,10 +307,10 @@ html[data-mode="dark"] .badge.hboff{color:#ff6b60}
 .iconbtn.arm{color:#fff;background:var(--accent);border-color:transparent}
 
 /* ── 统计条 ── */
-/* 7 张一行：137 × 7 + 10 × 6 = 1019px，正好塞进 .main 的 1026px（1440 窗口）。
-   用 grid 自动等分，卡宽随窗口微调；不再 flex 换行，也就没有「6 张 + 1 张孤卡」。
-   139px 卡宽下：内边距 10 → 内容 119，图标 40 + 间距 8 → 文字区剩 71px。 */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:18px 0 26px;max-width:1320px}
+/* V1.0.26：固定 7 等分一行。auto-fit + minmax 在窄屏会退成 6+1 并留右侧空白，
+   改成 repeat(7,minmax(0,1fr)) 后无论窗口多宽都是整齐 7 张，宽度随容器等分。
+   去掉 max-width:1320 —— 它与 7 等分互斥，会把右区右侧留出一条空档。 */
+.stats{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin:18px 0 26px}
 .stat{
   background:var(--card);border:1px solid rgba(255,255,255,.34);border-radius:16px;padding:10px;
   box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;position:relative;overflow:hidden;
@@ -350,9 +352,10 @@ html[data-mode="dark"] .stat .si{
 .stat .v{font-size:21px;font-weight:600;letter-spacing:-.03em;line-height:1.1;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stat .v small{font-size:11.5px;font-weight:500;color:var(--text2);letter-spacing:0}
-/* 右半区图形：50×40 内联 SVG，颜色走 currentColor（随下面按分类色继承，暗色主题同样生效） */
+/* 右半区图形：SVG 撑满 .g 的盒子，尺寸只由 .g 决定（不再写死 50×40，
+   否则缩到 20×16 时里面仍是 50×40 被裁），颜色走 currentColor 随分类色继承 */
 .stat .g{width:50px;height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--accent)}
-.stat .g svg{width:50px;height:40px;display:block}
+.stat .g svg{width:100%;height:100%;display:block}
 .stat.g .g{color:var(--green)}
 .stat.o .g{color:var(--orange)}
 .stat.r .g{color:var(--red)}
@@ -654,10 +657,11 @@ html[data-mode="light"] .toast{background:rgba(29,29,31,.93)}
 
 /* ══════════ V1.0.10 收尾：背景透出后的可读性与观感 ══════════ */
 /* 左侧缩略图：提亮 + 内描边，弱化“一整块黑”的感觉 */
-.planwrap.thumb{border-radius:14px;
+/* V1.0.26：左栏去滚动后，缩略图必须限高（约 210），否则它按原比例撑高会把整栏顶出视口。 */
+.planwrap.thumb{border-radius:14px;max-height:210px;
   background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.02));
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.28), inset 0 0 24px rgba(0,0,0,.28)}
-.planwrap.thumb img.pimg{filter:none}
+.planwrap.thumb img.pimg{filter:none;width:100%;height:210px;object-fit:cover;object-position:center top}
 /* 大屏：遮罩更轻盈，弹窗自带柔光 */
 .planmask{background:rgba(6,16,20,.62)}
 .planbig{box-shadow:0 40px 120px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.14)}
@@ -676,6 +680,74 @@ body.no-glass .mask .panel,body.no-glass .wxcard{
 .card.sens .ic{background:rgba(52,199,89,.14);color:#28a745}
 .card .sv{margin-top:auto;font-size:10.5px;color:var(--text2);line-height:1.4;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── 国网电费卡（V1.0.26）──
+   ⚠️ 胶囊卡是「固定 72px 高 + 三行网格 + overflow:hidden」，额外塞 div 会掉进隐式行、
+   和 st/sv 叠在一起（第一版就是这么错的）。所以这里必须重写网格区域，把
+   .elebar（峰平谷条）和 .sfoot（户号）明确放进具名区域，行数不增、高度不变。 */
+.grid .card.elecard{grid-column:span 2}
+html[data-card="capsule"] .card.sens.elecard{
+  grid-template-columns:auto minmax(0,1fr) 116px;
+  grid-template-areas:"ic nm acc" "ic st bar";
+  grid-template-rows:auto auto;
+  column-gap:10px;row-gap:3px;align-content:center;
+}
+/* 峰平谷条：卡面与弹窗共用同一套底样式。⚠️ display:flex 必须写在通用类上，
+   只写在 .card.elecard 里的那次，弹窗内的 .elebar.big 会塌成 0 高度（图例有、条没了）。 */
+.elebar{display:flex;overflow:hidden;background:rgba(120,120,128,.16);border-radius:4px}
+.elebar i{display:block;height:100%}
+html[data-card="capsule"] .card.elecard .nm{align-self:end}
+html[data-card="capsule"] .card.elecard .st{
+  grid-area:st;align-self:start;font-size:19px;line-height:1.08;letter-spacing:-.02em}
+html[data-card="capsule"] .card.elecard .st small{font-size:10.5px;color:var(--text2);margin-left:2px}
+.card.elecard .elebar{grid-area:bar;align-self:center;display:flex;height:7px;border-radius:4px;
+  overflow:hidden;margin:0;background:rgba(120,120,128,.16)}
+.card.elecard .elebar i{display:block;height:100%}
+.card.elecard .sfoot{grid-area:acc;align-self:start;text-align:right;margin:0;padding:0;
+  font-size:9.5px;color:var(--text3);letter-spacing:.02em;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+@media (max-width:720px){
+  .grid .card.elecard{grid-column:auto}
+  html[data-card="capsule"] .card.sens.elecard{grid-template-columns:auto minmax(0,1fr) 84px}
+}
+
+/* ── 脚本动作卡（V1.0.26）──
+   整张卡带 data-svc，点任意位置即执行；「执行」只是可读标签，不是独立按钮。
+   ⚠️ 与国网卡同理：胶囊卡是固定 72px 的三行网格，.go / .sv 必须显式给具名区域，
+   否则会掉进隐式行，「执行」标签会飘到名称下方一行。 */
+html[data-card="capsule"] .card.sens.actcard{
+  grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-areas:"ic nm go" "ic sv sv";
+  grid-template-rows:auto auto;
+  column-gap:9px;row-gap:2px;align-content:center;
+}
+html[data-card="capsule"] .card.actcard .nm{align-self:center;-webkit-line-clamp:1}
+html[data-card="capsule"] .card.actcard .go{grid-area:go;align-self:center;margin:0}
+html[data-card="capsule"] .card.actcard .sv{
+  grid-area:sv;align-self:center;margin:0;text-align:right;
+  font-size:9.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-card="capsule"] .card.actcard:active{transform:scale(.985)}
+.card.actcard .go{
+  flex:0 0 auto;font-size:10.5px;font-weight:600;letter-spacing:.01em;
+  color:#28a745;background:rgba(52,199,89,.13);border-radius:20px;padding:3px 10px;
+  line-height:1.25;transition:.16s var(--ease)}
+.card.actcard:hover .go{background:rgba(52,199,89,.22)}
+.card.actcard.na .go{color:var(--text3);background:rgba(120,120,128,.13)}
+html[data-mode="dark"] .card.actcard .go{color:#4ade80;background:rgba(52,199,89,.18)}
+
+/* ── 燃气热水器三态卡（V1.0.26）──
+   大字只报 关机 / 待机 / 燃烧中，小字给 出水温度 · 进水温度。
+   .sens 模板本来就是「图标/名称/大字/贴底读数」四块，正好对上，不用重写网格。 */
+html[data-card="capsule"] .card.sens.heatercard .st{font-size:19px}
+.card.heatercard.burn .ic{background-color:var(--ic-on);color:var(--ic-on-fg);box-shadow:inset 0 0 0 1px var(--ic-on-bd)}
+html[data-card="capsule"] .card.sens.heatercard.burn .st{color:#e08600}
+html[data-mode="dark"][data-card="capsule"] .card.sens.heatercard.burn .st{color:#ffb340}
+/* 国网弹窗里的图表 / 图例 */
+.echart{padding:2px 0 0}
+.elechart{width:100%;height:auto;display:block;color:var(--text2)}
+.elebar.big{height:12px;border-radius:6px;margin-top:2px}
+.elegend{display:flex;flex-wrap:wrap;gap:10px;margin-top:7px;font-size:10.5px;color:var(--text2)}
+.elegend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 
 /* ═══════════════════════════════════════════════════════════════
    V1.0.11 · 同堂（Tongtang）主题系统
@@ -831,7 +903,16 @@ header{
   box-shadow:0 1px 3px rgba(0,0,0,.14)}
 
 /* ══════════ 外观面板（左栏最下，复刻同堂「个性化」） ══════════ */
-.appear{padding:13px 14px 14px;display:flex;flex-direction:column;gap:13px;flex:0 0 auto}
+/* V1.0.26：默认收起。左栏去掉滚动后必须省高度，这一块平时不用，折成一行标题。 */
+.appear{padding:11px 13px;display:flex;flex-direction:column;gap:0;flex:0 0 auto}
+.ap-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  border:0;background:transparent;padding:0;font-family:var(--font);font-size:12px;font-weight:600;
+  color:var(--text2);letter-spacing:.02em;cursor:pointer;transition:color .14s ease}
+.ap-toggle:hover{color:var(--text)}
+.ap-toggle svg{width:14px;height:14px;flex:0 0 auto;transition:transform .2s ease}
+.appear.open .ap-toggle svg{transform:rotate(180deg)}
+.ap-body{display:none;flex-direction:column;gap:13px;margin-top:13px}
+.appear.open .ap-body{display:flex}
 .ap-t{font-size:10.5px;font-weight:600;color:var(--text3);letter-spacing:.07em;margin:0 2px 7px}
 .ap-s{display:flex;gap:2px;background:var(--seg-bg);border-radius:11px;padding:3px}
 .ap-s button{
@@ -963,7 +1044,7 @@ html[data-card="capsule"] .card .sv{
 
 /* ── ② 锁滚动不再导致左栏重算 ── */
 html{scrollbar-gutter:stable}
-.rail{scrollbar-gutter:stable}
+/* V1.0.26：左栏已无滚动条，这里不再需要预留槽位（那条 8–10px 空白就是它）。 */
 
 /* ── ③ 解开 paint 裁剪（卡片阴影原来就是被它削平的） ── */
 .grid{contain:layout style}
@@ -1052,16 +1133,18 @@ html[data-mode="dark"] .card.on .bar i,html[data-mode="dark"] .card.act .bar i{b
 }
 
 /* ── 统计条：保持一行，间距收紧 ──
-   列宽必须在这里一起写：这条同名规则在文件后半段，只写 gap 会把上面的 137px 冲掉 */
-.stats{grid-template-columns:repeat(auto-fit,minmax(137px,1fr));gap:10px}
+   V1.0.26：列宽统一由 313 行的 repeat(7,minmax(0,1fr)) 决定，这里不再写列宽。
+   原先这条 minmax(137px,1fr) 压在上面，会把 7 等分冲回 auto-fit，6+1 与右侧空白就是这么来的。 */
+.stats{gap:10px}
 .stat{border-radius:var(--radius-card)}
 
 /* ── 弹窗：内容超高时面板内滚动（页面本体仍锁死） ── */
 .mask .panel{max-height:calc(100vh - 40px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
 .planmask .planbig{max-height:calc(100vh - 12px)}
-.mask .panel::-webkit-scrollbar{width:8px}
-.mask .panel::-webkit-scrollbar-thumb{background:rgba(120,120,128,.34);border-radius:6px;
-  border:2px solid transparent;background-clip:padding-box}
+/* V1.0.26：滚动条减重到 6px、轨道透明，避免从右上关闭钮中间穿过 */
+.mask .panel::-webkit-scrollbar{width:6px}
+.mask .panel::-webkit-scrollbar-thumb{background:rgba(120,120,128,.30);border-radius:3px}
+.mask .panel::-webkit-scrollbar-track{background:transparent}
 
 /* ── 滚动条 ── */
 html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
@@ -1091,22 +1174,56 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
    V1.0.25 · 收口层（15 项整改，全部覆盖在文件末尾，不动早先断点）
    ══════════════════════════════════════════════════════════════ */
 
-/* ── ① 统计卡：缩图形 / 图标 / 内外边距，文字拿回 ≥90px
-   160px 卡：padding 14 + icon 26 + gap 8 + graphic 20 + border 2 = 70 → 文字 90
-   180px 卡则更宽绰（110px）。图形缩到 20×16 仍能看清环形/点阵/竖条 ── */
+/* ── ① 统计卡尺寸：V1.0.26 按卡宽分三档 ──
+   卡宽 =（视口 − 60 外边距 − 左栏 − 18 − 60 卡间gap）/ 7，左栏 280（≥1400）或 240（1025–1399）：
+     · 视口 ≥1720 → 卡 ≥186  大方档：padding 10 / 图标 40 / 图形 44×36 / 数值 21
+     · 1400–1719  → 卡 140–186 中间档：padding 9  / 图标 34 / 图形 38×32 / 数值 20
+     · 其余（<140，1280 档约 129）紧凑档：padding 7 / 图标 26 / 图形 20×16 / 数值 19
+   紧凑档 160px 卡：padding 14 + icon 26 + gap 8 + graphic 20 + border 2 = 70 → 文字 90 ── */
+/* 紧凑档（默认，<140） */
 .stat{padding:7px;gap:4px}
 .stat .si{width:26px;height:26px}
 .stat .si svg{width:15px;height:15px}
-.stat .g,.stat .g svg{width:20px;height:16px}
+.stat .g{width:20px;height:16px}
 .stat .k{font-size:11.5px;letter-spacing:0}
 .stat .v{font-size:19px}
+/* 中间档（140–186）—— 图标与图形再收一档：1512 视口下卡只 153px，
+   图标 34 + 图形 38 会把文字区压到 51px，「18.0°C」当场被截成「18....」。 */
+@media (min-width:1400px){
+  .stat{padding:9px;gap:5px}
+  .stat .si{width:30px;height:30px}
+  .stat .si svg{width:16px;height:16px}
+  .stat .g{width:32px;height:28px}
+  .stat .k{font-size:12px;letter-spacing:0}
+  .stat .v{font-size:19px}
+}
+/* 大方档（≥186） */
+@media (min-width:1720px){
+  .stat{padding:10px;gap:8px}
+  .stat .si{width:40px;height:40px}
+  .stat .si svg{width:20px;height:20px}
+  .stat .g{width:44px;height:36px}
+  .stat .k{font-size:12.5px;letter-spacing:0}
+  .stat .v{font-size:21px}
+}
 
-/* ── ⑥ 户型图 / 大屏关闭按钮：统一 36px 圆形实心，右上对齐 ── */
+/* ── ⑥ 户型图 / 大屏关闭按钮：统一圆形实心，右上对齐 ── */
 .pbtn{width:36px;height:36px;border-radius:50%;border:0;background:var(--seg-bg);color:var(--text2);
   box-shadow:none;padding:0}
 .pbtn svg{width:16px;height:16px}
-.pclose{width:36px;height:36px;top:16px;right:16px}
-.pclose svg{width:16px;height:16px}
+/* V1.0.26：只给大屏的「关闭」钮上红色。.pbtn 同时被左栏缩略图的放大钮（#btnPlanBig）复用，
+   直接改 .pbtn 会让放大钮跟着变红——必须按 id 限定。
+   语义分工：红 = 关闭，琥珀 = 受限（只读小锁），两者不能混。 */
+#btnPlanClose{background:#FF3B30;color:#fff;box-shadow:0 2px 8px -2px rgba(255,59,48,.45)}
+#btnPlanClose:hover{background:#FF5A50;color:#fff;
+  box-shadow:0 0 0 3px rgba(255,59,48,.22),0 4px 14px -2px rgba(255,59,48,.60)}
+#btnPlanClose:active{background:#E53228;box-shadow:0 1px 4px -1px rgba(255,59,48,.50)}
+html[data-mode="dark"] #btnPlanClose{background:#FF453A}
+html[data-mode="dark"] #btnPlanClose:hover{background:#FF6A60}
+html[data-mode="dark"] #btnPlanClose:active{background:#E53228}
+/* 关闭钮尺寸：36 → 32，右移让出滚动条位置（配合 .dbody 的 margin-right:22px） */
+.pclose{width:32px;height:32px;top:16px;right:12px}
+.pclose svg{width:15px;height:15px}
 
 /* ── ⑧ 整页不滚：左栏固定不动，右区独立滚动（含 popup 锁内层、scrollbar-gutter 防跳） ── */
 @media (min-width:1025px){
@@ -1114,10 +1231,18 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
   .wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;padding:22px 30px 0;overflow:hidden}
   .wrap > header{flex:0 0 auto;position:static;margin:0 -30px 14px;padding:14px 30px}
   .shell{flex:1 1 auto;min-height:0;align-items:stretch}
-  .rail{position:static;max-height:none;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding-bottom:26px}
+  .rail{position:static;max-height:none;min-height:0;overflow:visible;padding-bottom:26px}
   #main{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding-bottom:44px}
   /* 弹窗打开时锁住内层滚动（页面本身已不滚，html.noscroll 改锁这两个内层容器） */
   html.noscroll .rail,html.noscroll #main{overflow:hidden}
+}
+/* V1.0.26 兜底①：矮屏装不下左栏时把滚动加回来，宁可出滚动条也不能被裁 */
+@media (min-width:1025px) and (max-height:800px){
+  .rail{overflow-y:auto;scrollbar-gutter:stable;overscroll-behavior:contain}
+}
+/* V1.0.26 兜底②：1280 档收窄左栏，给右区腾出宽度 */
+@media (min-width:1025px) and (max-width:1399px){
+  .shell{grid-template-columns:240px minmax(0,1fr)}
 }
 @media (max-width:1024px){
   /* 平板 / 手机回退：恢复整页滚动，左栏随文档流 */
@@ -1129,7 +1254,11 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
 }
 
 /* ── ⑩ 属性 / 实体行改两行式：名称一行、值一行，值不再被裁；只留纵向滚动 ── */
-.mgrid{grid-template-columns:1fr;gap:6px}
+/* V1.0.26：单列只给属性区（.attr）。V1.0.25 把 .mgrid 全局压成 1fr，
+   结果可控/读数/分组全变一列：炸锅 4 个开关排 4 行、打印机二十来项排二十来行。
+   现在恢复 479 行的多列（auto-fill minmax 190），只让「主实体属性 / 全部属性」单列。 */
+.mgrid{gap:6px}
+.mgrid.attr{grid-template-columns:1fr}
 .mrow{flex-wrap:wrap;gap:3px 7px;padding:8px 11px}
 .mrow .d{order:1}
 .mrow .mn{order:2;flex:1 1 auto;min-width:0;white-space:normal;overflow:visible;text-overflow:clip}
@@ -1146,11 +1275,16 @@ html[data-mode="dark"] .mrow.on{background:rgba(255,179,64,.12)}
   display:flex;flex-direction:column;overflow:hidden;
 }
 #detailPanel[data-kind="dev"] .dbody{
-  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:2px;
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+  /* V1.0.26：必须用 margin，不能用 padding-right。
+     滚动条贴在 padding box 的外沿，给 padding 只会把内容推开、滚动条仍在原位，
+     于是它正好从关闭钮（12–44）中间穿过。margin-right 把整个盒子左移，滚动条退到距右 48。 */
+  margin-right:22px;
 }
-#detailPanel[data-kind="dev"] .dbody::-webkit-scrollbar{width:8px}
+#detailPanel[data-kind="dev"] .dbody::-webkit-scrollbar{width:6px}
 #detailPanel[data-kind="dev"] .dbody::-webkit-scrollbar-thumb{
-  background:rgba(120,120,128,.34);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+  background:rgba(120,120,128,.30);border-radius:3px}
+#detailPanel[data-kind="dev"] .dbody::-webkit-scrollbar-track{background:transparent}
 
 /* ── ⑮ 顶栏锁定按钮：只读=琥珀实心（醒目提醒），可控=主题色实心 ── */
 .iconbtn.ro{color:#fff;background:#F59E0B;border-color:transparent;
@@ -1159,6 +1293,11 @@ html[data-mode="dark"] .mrow.on{background:rgba(255,179,64,.12)}
   box-shadow:0 4px 12px -3px rgba(245,158,11,.5)}
 html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 @keyframes roPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}50%{box-shadow:0 0 0 3px rgba(245,158,11,.20)}}
+/* V1.0.26：只读是常驻状态，呼吸动画一直挂着，动效敏感的用户关不掉。
+   降级只去掉动画，琥珀实心底色与锁形都保留，状态依然一眼可辨。 */
+@media (prefers-reduced-motion:reduce){
+  .iconbtn.ro{animation:none}
+}
 
 /* ── 小屏兜底：统计卡更窄时直接收起图形，别再挤文字 ── */
 @media (max-width:720px){
@@ -1177,7 +1316,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.25</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.26</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1228,7 +1367,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 
       <div class="clkcard">
         <div class="clkt" id="clkTime">--:--</div>
-        <div class="clkd" id="clkDate">加载中…</div>
+        <div class="clkd"><span id="clkDate">加载中…</span><span id="clkWeek"></span></div>
       </div>
 
       <div class="wxcard" id="wxcard">
@@ -1247,26 +1386,33 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       </div>
 
       <div class="appear" id="appear">
-        <div class="ap">
-          <div class="ap-t">外观</div>
-          <div class="ap-s" data-k="mode">
-            <button type="button" data-v="light">明亮</button>
-            <button type="button" data-v="dark">暗色</button>
-            <button type="button" data-v="auto">自动</button>
+        <button class="ap-toggle" id="apToggle" type="button" aria-expanded="false" aria-controls="apBody">
+          <span>外观与风格</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="ap-body" id="apBody">
+          <div class="ap">
+            <div class="ap-t">外观</div>
+            <div class="ap-s" data-k="mode">
+              <button type="button" data-v="light">明亮</button>
+              <button type="button" data-v="dark">暗色</button>
+              <button type="button" data-v="auto">自动</button>
+            </div>
           </div>
-        </div>
-        <div class="ap">
-          <div class="ap-t">风格</div>
-          <div class="ap-s" data-k="style">
-            <button type="button" data-v="ios17">iOS 17 经典</button>
-            <button type="button" data-v="ios26">iOS 26 玻璃</button>
+          <div class="ap">
+            <div class="ap-t">风格</div>
+            <div class="ap-s" data-k="style">
+              <button type="button" data-v="ios17">iOS 17 经典</button>
+              <button type="button" data-v="ios26">iOS 26 玻璃</button>
+            </div>
           </div>
-        </div>
-        <div class="ap">
-          <div class="ap-t">卡片</div>
-          <div class="ap-s" data-k="card">
-            <button type="button" data-v="square">方块</button>
-            <button type="button" data-v="capsule">胶囊</button>
+          <div class="ap">
+            <div class="ap-t">卡片</div>
+            <div class="ap-s" data-k="card">
+              <button type="button" data-v="square">方块</button>
+              <button type="button" data-v="capsule">胶囊</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1351,7 +1497,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.11
+   HA家庭智能控制系统 · V1.0.26
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -1421,7 +1567,13 @@ const I = {
   /* 打印机：机身 + 出纸口 + 纸张 */
   printer:'<path d="M7 8V4.2h10V8"/><rect x="3.5" y="8" width="17" height="8" rx="2"/><path d="M7 16h10v4.2H7z"/><path d="M6.5 11.4h.01M9 11.4h.01"/>',
   /* NAS：机箱 + 四盘位 + 指示灯 */
-  nas:'<rect x="4" y="3" width="16" height="18" rx="2.4"/><path d="M4 8.4h16M4 13.8h16"/><path d="M7 5.7h.01M7 11.1h.01M7 16.5h.01"/><path d="M12 19.2h6"/>'
+  nas:'<rect x="4" y="3" width="16" height="18" rx="2.4"/><path d="M4 8.4h16M4 13.8h16"/><path d="M7 5.7h.01M7 11.1h.01M7 16.5h.01"/><path d="M12 19.2h6"/>',
+  /* 脚本动作：指尖 + 涟漪（一次点击发一串指令） */
+  script:'<path d="M9 11V5.6a1.9 1.9 0 0 1 3.8 0V11"/><path d="M12.8 11V9.4a1.7 1.7 0 0 1 3.4 0V11"/>'+
+         '<path d="M16.2 11.4a1.6 1.6 0 0 1 3.2 0v3.4a6 6 0 0 1-6 6h-1.6a5.5 5.5 0 0 1-3.9-1.6L5 16.2a1.8 1.8 0 0 1 2.6-2.5L9 15"/>',
+  /* 燃气热水器：火焰 + 水箱 */
+  heater:'<path d="M12 3.4c2.6 3 4.4 5 4.4 7.6A4.4 4.4 0 0 1 12 15.4a4.4 4.4 0 0 1-4.4-4.4C7.6 8.4 9.4 6.4 12 3.4Z"/>'+
+         '<path d="M6 18.4h12a1.6 1.6 0 0 1 0 3.2H6a1.6 1.6 0 0 1 0-3.2Z"/>'
 };
 const ICON_ROOM = '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>';
 
@@ -1468,7 +1620,11 @@ const TRANSLATE = {
   "cleaning":"清扫中","docked":"回充中","returning":"返航中","charging":"充电中",
   "detected":"检测到","clear":"正常","wet":"漏水",
   "partlycloudy":"多云","cloudy":"阴","sunny":"晴","rainy":"雨","snowy":"雪","clear_night":"晴夜",
-  "stuck":"卡住","paused_state":"暂停","discharging":"放电中"
+  "stuck":"卡住","paused_state":"暂停","discharging":"放电中",
+  /* V1.0.26 真机复核后补：这些值是米家 select / 传感器状态的漏网之鱼，一直原样吐英文 */
+  "busy":"忙碌中","automatic":"自动","ok":"正常","stop":"停止","steam":"蒸","reversal":"反转",
+  "near":"近","level1":"1 档","level2":"2 档","level3":"3 档","level4":"4 档",
+  "quick single click":"快速单击","no motion":"无人活动","motion detected":"检测到移动"
 };
 
 /* 空气炸锅的状态枚举：米家只回英文，xiaomi_miot 原样透传，卡面大字就成了 cooking。
@@ -2014,13 +2170,17 @@ async function doService(dom, svc, eid, opts){
 }
 
 /* ══════════════ 数据整形 ══════════════ */
-const SKIP_DOMAIN = new Set(["button","update","automation","script","scene","text","notify","tts",
+/* script 已从 SKIP_DOMAIN 移除并加入 MAIN_DOMAIN（V1.0.26）：
+   只改第一处的话，groupMakesCard() 会因为 mains 为空把整组判成「不成卡」直接丢掉。
+   script 不进 CTL_DOMAIN —— 那是「常规开关类可控」名单，塞进去等于让所有脚本
+   在只读模式下也能被普通电源键点跑。脚本执行只走卡面自己的「执行」键。 */
+const SKIP_DOMAIN = new Set(["button","update","automation","scene","text","notify","tts",
   "todo","event","conversation","infrared","radio_frequency","image","tag","zone","input_button",
   "input_text","input_number","input_select","counter","timer","schedule","calendar"]);
 
 const MAIN_DOMAIN = new Set(["light","cover","climate","media_player","fan","vacuum","lock","camera",
   "humidifier","water_heater","person","device_tracker","weather","alarm_control_panel","remote",
-  "switch","input_boolean","siren","valve"]);
+  "switch","input_boolean","siren","valve","script"]);
 
 /* 检测类读数：卡片主读数优先级（安全类传感器排最前，功率/电量排最后） */
 const ALARM_DC = new Set(["motion","occupancy","opening","door","window","smoke","moisture","water",
@@ -2038,8 +2198,10 @@ function keepSensor(eid){
   /* 空气炸锅的状态 / 故障 / 翻动提醒是纯文本传感器，没有 device_class，
      白名单一条都接不住；但它们正是这张卡的主读数，必须留在设备分组里 */
   if(AIRFRY_RE.test(devName(eid) || "")) return true;
-  /* 路由器：外部 IP 没有 device_class，白名单接不住，但它是卡片信息之一 */
-  if(ROUTER_RE.test(devName(eid) || "") && /external_ip|公网|外网/i.test(eid + " " + nameOf(eid))) return true;
+  /* 路由器：外部 IP / 运行时长都没有 device_class（或 device_class=duration 不在白名单），
+     白名单一条都接不住，但它们是弹窗三段里的必填行 */
+  if(ROUTER_RE.test(devName(eid) || "") &&
+     /external_ip|公网|外网|uptime|运行时间/i.test(eid + " " + nameOf(eid))) return true;
   /* 得力打印机 / 极空间：rest 集成建的实体没有 device_class，白名单一条都接不住，
      但它们正是两张新卡的全部数据源 */
   if(/^sensor\.(deli_printer_|zs_)/.test(eid)) return true;
@@ -2297,7 +2459,21 @@ function devIdOf(eid){
 /* 设备归拢键：同一台设备的所有实体共用一把 key。
    打印机 / 极空间是 rest 集成建的实体，没有 device_id，按实体前缀归拢成一台，
    否则会被拆成十几张独立小卡、统计也会虚高。 */
+/* ── 国网电费实体放行（V1.0.26）──
+   26 个 sensor 里 24 个 device_class=energy，会被 SENSOR_CARD_DROP 挡掉；
+   剩下 10 个没有 device_class 的（余额、月/年电费、两张图表、抄表、日期、刷新时间）
+   又被 keepSensor 踢掉，vals 为空后整组在 buildModel 里被 continue 丢弃 —— 前端完全隐形。
+   ⚠️ 千万**不要**从 SENSOR_CARD_DROP 里删 energy、也不要给 keepSensor 加 energy 白名单：
+   那会让全屋插座的日/月电量全部冒出来当主读数。只在这里按前缀单独放行国网整组。 */
+function isGrid(eid){
+  if(/^sensor\.state_grid_/i.test(eid)) return true;
+  const d = S.devices[(S.reg[eid] || {}).device_id];
+  return !!(d && d.manufacturer === "国家电网");
+}
 function groupKey(eid){
+  /* 锐捷（V1.0.26）：HA 给它建了 3 条设备记录（主路由 / WAN / device_tracker），
+     按 device_id 分组会拆出 2~3 张同名「Ruijie router」卡片。这里统一并成一组。 */
+  if(/ruijie|锐捷/i.test(eid)) return "router|ruijie";
   const key = devIdOf(eid);
   if(key) return key;
   if(/^sensor\.deli_printer_/.test(eid)) return "printer|deli";
@@ -2309,6 +2485,8 @@ function groupKey(eid){
 function groupMakesCard(ents){
   const mains = ents.filter(e=> MAIN_DOMAIN.has(e.split(".")[0]) && !BAD_ENT.test(e));
   if(mains.length) return true;
+  /* 国网整组直接算作可成卡：它的实体全被两道过滤挡着，走下面那条 vals 判定会算成空组 */
+  if(ents.some(e=> isGrid(e))) return true;
   const vals = ents.filter(e=>{
     const d = e.split(".")[0];
     if(d === "binary_sensor") return true;
@@ -2324,7 +2502,7 @@ function groupEntities(){
     const dom = eid.split(".")[0];
     if(SKIP_DOMAIN.has(dom) || NO_CARD_DOMAIN.has(dom)) continue;
     if(HIDE_DEV_RE.test(devName(eid) || "") || HIDE_DEV_RE.test(nameOf(eid) || "")) continue;
-    if(dom==="sensor" && !keepSensor(eid)) continue;
+    if(dom==="sensor" && !isGrid(eid) && !keepSensor(eid)) continue;
     const key = groupKey(eid);
     if(!groups.has(key)) groups.set(key, []);
     groups.get(key).push(eid);
@@ -2431,21 +2609,65 @@ function buildModel(){
       continue;
     }
 
-    /* 路由器：WAN 状态当锚点，大字在线/断网/离线，小字上下行速度 */
+    /* 路由器：WAN 状态当锚点，大字在线/断网/离线，小字上下行速度。
+       V1.0.26 补三样弹窗要用的东西：运行时长（uptime）、最后可达（WAN 状态最后更新时间）、
+       设备定位（device_tracker），三者都进卡对象，弹窗不再回查 */
     if(ROUTER_RE.test(dev)){
       const wan = ents.find(e=> e.split(".")[0]==="binary_sensor" && /wan_status|connectivity|wan/i.test(e));
       const dl  = ents.find(e=> /download_speed|下载/i.test(e + " " + nameOf(e)));
       const ul  = ents.find(e=> /upload_speed|上传/i.test(e + " " + nameOf(e)));
       const ip  = ents.find(e=> /external_ip|公网|外网/i.test(e + " " + nameOf(e)));
-      const anchor = wan || dl || ul || ip;
+      const up  = ents.find(e=> e.split(".")[0]==="sensor" && /uptime|运行时间|正常运行时间/i.test(e + " " + nameOf(e)));
+      const trk = ents.find(e=> e.split(".")[0]==="device_tracker");
+      const anchor = wan || dl || ul || ip || up;
       if(anchor){
         const card = { key, eid: anchor, name: dev, mains: [], sensors: [], more: [],
-                       wan, dl, ul, ip, load: false, kind: "router" };
+                       wan, dl, ul, ip, up, trk, load: false, kind: "router" };
         const room = ensure(areaOf(anchor));
         room.cards.push(card);
         ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
         continue;
       }
+    }
+
+    /* 燃气热水器（V1.0.26）：water_heater.gas_water_heater 是主控，但真正的「开机/关机」
+       在 switch.…_onoffstatus 上、火焰在 binary_sensor.…_flamestatus 上，
+       三态卡要同时看这三个，所以整组实体一并塞进卡对象 hall，卡与弹窗自己挑。 */
+    if(ents.some(e=> e.split(".")[0] === "water_heater")){
+      const wh = ents.find(e=> e.split(".")[0] === "water_heater");
+      const card = { key, eid: wh, name: dev || nameOf(wh), mains: [], sensors: [], more: [],
+                     hall: ents.slice(), load: false, kind: "heater" };
+      const room = ensure(areaOf(wh));
+      room.cards.push(card);
+      ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
+      continue;
+    }
+
+    /* 国网电费（V1.0.26）：26 个实体整组收进一张专用卡，弹窗自己分四段渲染。
+       卡名固定「家庭电费」——设备名是脱敏地址（5******楼7层3号），放卡面没意义；
+       户号后四位留给副标题。 */
+    if(ents.some(e=> isGrid(e))){
+      const anchor = ents.find(e=> /_balance$/.test(e)) || ents[0];
+      const acc = (anchor.match(/^sensor\.state_grid_(\d+)_/) || [])[1] || "";
+      const card = { key, eid: anchor, name: "家庭电费", mains: [], sensors: [], more: [],
+                     grid: ents.slice(), load: false, kind: "grid", account: acc };
+      const room = ensure(areaOf(anchor));
+      room.cards.push(card);
+      ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
+      continue;
+    }
+
+    /* 脚本动作卡（V1.0.26）：米家红外那类「一次点击发一串码」的动作，
+       在 HA 里只有 script 实体可用。script 没有开关态，走通用分支会把卡面
+       印成 ISO 时间戳，所以单独出模板：图标 + 名称 + 「执行」+ 上次触发相对时间。 */
+    if(mains.length && mains.every(e=> e.split(".")[0] === "script")){
+      const e = mains[0];
+      const card = { key, eid: e, name: dev || nameOf(e), mains: [], sensors: [], more: [],
+                     load: false, kind: "script" };
+      const room = ensure(areaOf(e));
+      room.cards.push(card);
+      ents.forEach(x=>{ if(!S.cardOf.has(x)) S.cardOf.set(x, card); });
+      continue;
     }
 
     let use = mains;
@@ -2566,9 +2788,12 @@ function renderPeople(){
 const WD = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
 function tickClock(){
   const d = new Date(), p = n=> String(n).padStart(2,"0");
-  const t = document.getElementById("clkTime"), dt = document.getElementById("clkDate");
+  const t = document.getElementById("clkTime"), dt = document.getElementById("clkDate"),
+        dw = document.getElementById("clkWeek");
   if(t) t.innerHTML = p(d.getHours()) + ":" + p(d.getMinutes());   // 用户要求：不要秒
-  if(dt) dt.textContent = d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日 " + WD[d.getDay()];
+  /* V1.0.26：两行式——日期与星期分开写，右侧上下两行 */
+  if(dt) dt.textContent = d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日";
+  if(dw) dw.textContent = WD[d.getDay()];
 }
 
 /* 天气图标：后端 colorfulclouds 卡片自带的动态 SVG（20 种，内联） */
@@ -3240,6 +3465,17 @@ function stateText(eid){
       const n = Number(v);
       /* 纯文本读数（no faults / no need turn over pot）交给 num() 会被原样吐回英文，
          非数字值必须先按整句 / 逐词表翻一遍 */
+      /* ISO 时间戳（日出日落 / 门锁最后事件 / timestamp 传感器）不能原样印出来，
+         2026-11-11T16:28:59+00:00 在卡面放不下也不好读。1970 的是「未设置」占位 */
+      if(/^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}/.test(String(v))){
+        const d = new Date(String(v).replace(/^(\d{4}-\d{2}-\d{2})[t ]/, "$1T"));
+        if(isFinite(d.getTime())){
+          if(d.getFullYear() < 2000) return {t:"未设置", ex:""};
+          const hm = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+          const same = d.toDateString() === new Date().toDateString();
+          return {t: (same ? "今天 " : (d.getMonth()+1)+"/"+d.getDate()+" ") + hm, ex:""};
+        }
+      }
       const t = !isFinite(n) ? tr(v) :
         ((isHcho && n !== 0 && Math.abs(n) < 1) ? String(+n.toFixed(3)) : num(v));
       return {t, ex: u};
@@ -3402,6 +3638,12 @@ function fridgeCardHTML(card){
     '</div>';
 }
 
+/* 锐捷 B1300 的网关 IP 与设备 MAC：HA 的锐捷集成没暴露这两个值
+   （网关只能从 DHCP 页看，MAC 只藏在 device_tracker 的 entity_id 里），
+   按现场实际值固定。换设备时改这两行即可。 */
+const ROUTER_GW = "192.168.110.1";
+const ROUTER_MAC = "d4:31:27:bf:4d:bf";
+
 /* 路由器：大字在线/断网/离线（WAN 状态），小字上下行速度 */
 function routerCardHTML(card){
   const wan = card.wan ? (S.states.get(card.wan) || {}).state : null;
@@ -3419,6 +3661,36 @@ function routerCardHTML(card){
       '<div class="top"><div class="ic">'+svg(I.router)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
       '<div class="st">'+esc(na ? "离线" : (on ? "在线" : "断网"))+'</div>'+
       '<div class="sv">'+esc(subs || "—")+'</div>'+
+    '</div>';
+}
+
+/* 燃气热水器三态卡（V1.0.26）
+   海尔 JSQ31-16FECBDU1 的 water_heater 主控只有 off / gas 两态，
+   真正的「在烧火没有」在 binary_sensor.…_flamestatus 上，开关机在 switch.…_onoffstatus 上。
+   三态：关机（onoff=off 或 water_heater=off）/ 燃烧中（flame=on）/ 待机（已开机、没在烧）。 */
+function heaterCardHTML(card){
+  const all = card.hall || [];
+  const pick = (re)=> all.find(e=> re.test(e)) || null;
+  const st = (eid)=> eid ? (S.states.get(eid) || {}) : {};
+  const wh = st(card.eid);
+  const onoff = st(pick(/_onoffstatus$/));
+  const flame = st(pick(/_flamestatus$/));
+  const na = !wh.state || wh.state === "unavailable" || wh.state === "unknown";
+  const off = na || onoff.state === "off" || wh.state === "off";
+  const burn = !off && flame.state === "on";
+  const cls = na ? "na" : (burn ? "burn" : (off ? "off" : "act"));
+  const tgt = Number(wh.attributes && wh.attributes.temperature);
+  const oT = Number(st(pick(/_outwatertemp$/)).state);
+  const iT = Number(st(pick(/_inwatertemp$/)).state);
+  const subs = [];
+  if(isFinite(oT)) subs.push("出水 " + num(oT, 1) + "°C");
+  if(isFinite(iT)) subs.push("进水 " + num(iT, 1) + "°C");
+  const label = na ? "离线" : (off ? "关机" : (burn ? "燃烧中" : "待机"));
+  return '<div class="card sens heatercard '+cls+'" data-eid="'+esc(card.eid)+'"'+
+      ' data-key="'+esc(card.key)+'" role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.heater)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="st">'+esc(label)+(isFinite(tgt) && !na ? ' <small>'+num(tgt, 0)+'°C</small>' : '')+'</div>'+
+      '<div class="sv">'+esc(subs.join(" · ") || "—")+'</div>'+
     '</div>';
 }
 
@@ -3483,12 +3755,143 @@ function nasCardHTML(card){
     '</div>';
 }
 
+/* 国网电费卡（V1.0.26）：余额大字 + 本月用电 + 峰平谷迷你条 + 户号后四位。
+   数值全部从本卡自己的实体列表里取（card.grid），不跨卡查询。 */
+function eleVal(eids, suffix){
+  const re = new RegExp("_" + suffix + "$");
+  for(const e of eids){
+    if(!re.test(e)) continue;
+    const n = parseFloat((S.states.get(e) || {}).state);
+    return isFinite(n) ? n : null;
+  }
+  return null;
+}
+function gridCardHTML(card){
+  const eids = card.grid || [];
+  const bal = eleVal(eids, "balance");
+  const mon = eleVal(eids, "month_ele_num");
+  const p = eleVal(eids, "month_p_ele_num");
+  const n = eleVal(eids, "month_n_ele_num");
+  const v = eleVal(eids, "month_v_ele_num");
+  const na = bal === null;
+  const col = na ? "" : (bal < 5 ? "var(--red)" : (bal < 20 ? "var(--orange)" : ""));
+  const acc = String(card.account || "").slice(-4);
+  const segs = [p, n, v].map(x=> (isFinite(x) && x > 0 ? x : 0));
+  const tot = segs.reduce((a,b)=> a+b, 0);
+  let bar = "";
+  if(tot > 0){
+    bar = '<div class="elebar">' +
+      [[segs[0], "#BA7517"], [segs[1], "#378ADD"], [segs[2], "#1D9E75"]]
+        .map(([val, c])=> val > 0
+          ? '<i style="width:'+(val/tot*100).toFixed(2)+'%;background:'+c+'"></i>' : "")
+        .join("") + '</div>';
+  }
+  /* 胶囊卡固定 72px 高，只能放「图标 / 名称 / 一行状态 / 底部一行」，
+     所以布局是：nm=家庭电费，st=余额大字（带本月度数小字），bar=峰平谷条，acc=户号 */
+  return '<div class="card sens elecard '+(na ? "na" : "act")+'" data-eid="'+esc(card.eid)+'"'+
+      ' data-key="'+esc(card.key)+'" role="button" tabindex="0" aria-label="家庭电费">'+
+      '<div class="top"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"'+
+        ' stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+
+        '<path d="M13.2 3.2 6.4 13.4h4.6l-1.4 7.4 7.2-10.2h-4.8l1.2-7.4Z"/></svg></div>'+
+        '<div class="nm">家庭电费</div></div>'+
+      '<div class="st"'+(col ? ' style="color:'+col+'"' : '')+'>'+
+        (na ? "—" : num(bal,1) + ' <small>元</small>')+
+        (mon !== null ? ' <small>· 本月 '+num(mon,0)+' 度</small>' : '')+'</div>'+
+      bar+
+      (acc ? '<div class="sfoot">户号 '+esc(acc)+'</div>' : '')+
+    '</div>';
+}
+
+/* 国网趋势图（V1.0.26）：直接吃实体 .graph 属性，不另行请求。
+   日图：[{day:"20261012", ele, p_ele, n_ele, v_ele, t_ele}, …] × 30
+   月图：[{month:"202511", cost, ele, p_ele, n_ele, v_ele, t_ele}, …] × 12
+   line = 30 天折线（带面积），bar = 12 个月柱状（柱顶标当月电费）。 */
+function eleSpark(data, mode){
+  if(!Array.isArray(data) || !data.length)
+    return '<div class="mrow"><span class="mn">暂无数据</span></div>';
+  const W = 460, H = 100, PL = 8, PR = 8, PT = 14, PB = 18;
+  const vals = data.map(d=> Number(d.ele) || 0);
+  const mx = Math.max.apply(null, vals.concat([0.001]));
+  const iw = W - PL - PR, ih = H - PT - PB;
+  const X = i => PL + (data.length === 1 ? iw/2 : iw * i / (data.length - 1));
+  const Y = v => PT + ih - (v / mx) * ih;
+  const col = "#378ADD";
+  let s = '<svg viewBox="0 0 '+W+' '+H+'" class="elechart">';
+  if(mode === "line"){
+    let d = "";
+    data.forEach((it, i)=>{ d += (i ? " L" : "M") + X(i).toFixed(1) + " " + Y(vals[i]).toFixed(1); });
+    s += '<path d="'+d+' L'+X(data.length-1).toFixed(1)+' '+(PT+ih)+' L'+PL+' '+(PT+ih)+' Z" fill="rgba(55,138,221,.13)"/>';
+    s += '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
+    s += '<circle cx="'+X(data.length-1).toFixed(1)+'" cy="'+Y(vals[data.length-1]).toFixed(1)+'" r="2.6" fill="'+col+'"/>';
+    data.forEach((it, i)=>{
+      if(i % 6 && i !== data.length-1) return;
+      const k = String(it.day || "");
+      const lb = k.length >= 8 ? (parseInt(k.slice(4,6),10) + "/" + parseInt(k.slice(6,8),10)) : "";
+      if(lb) s += '<text x="'+X(i).toFixed(1)+'" y="'+(H-5)+'" text-anchor="middle" font-size="8"'+
+                  ' fill="currentColor" opacity=".45">'+lb+'</text>';
+    });
+  }else{
+    const bw = Math.max(4, iw / data.length * 0.62);
+    data.forEach((it, i)=>{
+      const x = PL + iw * (i + 0.5) / data.length - bw/2;
+      const h = Math.max(1, (vals[i] / mx) * ih);
+      s += '<rect x="'+x.toFixed(1)+'" y="'+(PT+ih-h).toFixed(1)+'" width="'+bw.toFixed(1)+
+           '" height="'+h.toFixed(1)+'" rx="2" fill="'+col+'" opacity=".88"/>';
+      const c = Number(it.cost);
+      if(isFinite(c) && c > 0)
+        s += '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(PT+ih-h-3).toFixed(1)+'" text-anchor="middle"'+
+             ' font-size="7.5" fill="currentColor" opacity=".55">'+Math.round(c)+'</text>';
+      if(i % 2) return;
+      const m = String(it.month || "");
+      if(m.length >= 6)
+        s += '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-5)+'" text-anchor="middle" font-size="8"'+
+             ' fill="currentColor" opacity=".45">'+parseInt(m.slice(4,6),10)+'月</text>';
+    });
+  }
+  return s + '</svg>';
+}
+
+/* 相对时间（脚本「上次触发」用）：今天内走分钟/小时，跨天走天数，超过 30 天报日期 */
+function relPast(iso){
+  if(!iso) return "";
+  const t = Date.parse(iso);
+  if(!isFinite(t)) return "";
+  const s = Math.round((Date.now() - t) / 1000);
+  if(s < 90) return "刚刚";
+  if(s < 3600) return Math.round(s / 60) + " 分钟前";
+  if(s < 86400) return Math.floor(s / 3600) + " 小时前";
+  if(s < 86400 * 30) return Math.floor(s / 86400) + " 天前";
+  const d = new Date(t);
+  return (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+}
+
+/* 脚本动作卡（V1.0.26）：整卡带 data-svc="script|turn_on"，点哪里都执行。
+   script 的 state 只有 on/off，on 表示「正在跑」（mode: single），
+   所以大字不用它，底行用小字报「上次触发」——这才是这个动作卡真正有信息量的东西。 */
+function scriptCardHTML(card){
+  const st = S.states.get(card.eid) || {};
+  const na = st.state === "unavailable";
+  const run = st.state === "on";
+  const lt = relPast((st.attributes || {}).last_triggered);
+  const foot = na ? "不可用" : (run ? "正在执行…" : (lt ? "上次 " + lt : "尚未执行过"));
+  return '<div class="card sens act actcard'+(na ? " na" : "")+'" data-eid="'+esc(card.eid)+'"'+
+      ' data-key="'+esc(card.key)+'" data-svc="script|turn_on" role="button" tabindex="0"'+
+      ' aria-label="执行 '+esc(card.name)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.script)+'</div><div class="nm">'+esc(card.name)+'</div>'+
+      '<span class="go">执行</span></div>'+
+      '<div class="sv">'+esc(foot)+'</div>'+
+    '</div>';
+}
+
 function cardHTML(card){
+  if(card.kind === "script") return scriptCardHTML(card);
   if(card.kind === "fryer") return fryerCardHTML(card);
   if(card.kind === "fridge") return fridgeCardHTML(card);
   if(card.kind === "router") return routerCardHTML(card);
+  if(card.kind === "heater") return heaterCardHTML(card);
   if(card.kind === "printer") return printerCardHTML(card);
   if(card.kind === "nas") return nasCardHTML(card);
+  if(card.kind === "grid") return gridCardHTML(card);
   if(card.kind === "sensor") return sensorCardHTML(card);
   const eid = card.eid;
   const st = S.states.get(eid);
@@ -3545,11 +3948,14 @@ function patchCard(eid){
   if(!card) return;
   const node = document.querySelector('.card[data-key="'+CSS.escape(card.key)+'"]');
   if(!node) return;
+  if(card.kind === "script"){ node.outerHTML = scriptCardHTML(card); return; }
   if(card.kind === "fryer"){ node.outerHTML = fryerCardHTML(card); return; }
   if(card.kind === "fridge"){ node.outerHTML = fridgeCardHTML(card); return; }
   if(card.kind === "router"){ node.outerHTML = routerCardHTML(card); return; }
+  if(card.kind === "heater"){ node.outerHTML = heaterCardHTML(card); return; }
   if(card.kind === "printer"){ node.outerHTML = printerCardHTML(card); return; }
   if(card.kind === "nas"){ node.outerHTML = nasCardHTML(card); return; }
+  if(card.kind === "grid"){ node.outerHTML = gridCardHTML(card); return; }
   if(card.kind === "sensor"){
     node.outerHTML = sensorCardHTML(card);
     return;
@@ -3647,11 +4053,12 @@ function renderAll(){
       '</section>';
   });
 
-  /* 分类下钻提示条：只看 XX · N 项 + 取消入口 */
+  /* 分类下钻提示条：V1.0.26 文案跟上行为 —— catHitCard 现在列的是「该分类全部（含离线）」，
+     不是「只看符合条件的几个」，所以去掉「只看」二字，只保留分类名 + 项数。 */
   const hint = document.getElementById("catHint");
   if(S.cat){
-    hint.innerHTML = '<span class="ci">只看 <b>'+esc(CAT_CN[S.cat]||S.cat)+'</b> · '+catCount+' 项</span>'+
-      '<button id="catClear" type="button">取消只看</button>';
+    hint.innerHTML = '<span class="ci"><b>'+esc(CAT_CN[S.cat]||S.cat)+'</b> · '+catCount+' 项</span>'+
+      '<button id="catClear" type="button">取消筛选</button>';
     hint.classList.add("show");
   }else{
     hint.innerHTML = "";
@@ -3674,7 +4081,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.25 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.26 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -3749,14 +4156,75 @@ function gTempBars(byRoom){  /* 各房间温度小柱 */
   }
   return '<svg viewBox="0 0 50 40">'+out+'</svg>';
 }
-function gArc(f){  /* 半环表 */
-  const r = 10, cx = 25, cy = 29;
-  const a = Math.PI*(1 - Math.max(0, Math.min(1, f)));
-  const ex = (cx + r*Math.cos(a)).toFixed(1), ey = (cy + r*Math.sin(a)).toFixed(1);
-  return '<svg viewBox="0 0 50 40">'+
-    '<path d="M15 29 A10 10 0 0 1 35 29" fill="none" stroke="rgba(120,120,128,.20)" stroke-width="4" stroke-linecap="round"/>'+
-    (f > 0.001 ? '<path d="M15 29 A10 10 0 0 1 '+ex+' '+ey+'" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' : '')+
-  '</svg>';
+/* V1.0.26：改全圆环。湿度是「占满多少」的比例，半环看不出与 100% 的距离，
+   全环从 12 点顺时针长出去，一眼就能读。
+   几何：viewBox 50×40，圆心 (25,20)、半径 13、描边 4 → 外径 30；
+   group 以圆心为中心放大 1.2 倍，外径正好 36，落在 50×40 的中央。
+   周长 2πr = 81.68，用 dasharray「已画长度 余下长度」控制进度。
+   ≤0.005 视为 0，整段不画（只留底环），避免出现一个 0.3px 的圆点。 */
+function gArc(f){
+  const p = (isFinite(f) ? Math.max(0, Math.min(1, f)) : 0);
+  const R = 13, C = 2 * Math.PI * R;          // 81.68
+  let out = '<svg viewBox="0 0 50 40">'+
+    '<g fill="none" stroke-width="4" transform="translate(25,20) scale(1.2) translate(-25,-20)">'+
+      '<circle cx="25" cy="20" r="'+R+'" stroke="rgba(120,120,128,.22)"/>';
+  if(p > 0.005){
+    out += '<circle cx="25" cy="20" r="'+R+'" stroke="#1D9E75" stroke-linecap="round"'+
+      ' stroke-dasharray="'+(C*p).toFixed(2)+' '+C.toFixed(2)+'"'+
+      ' transform="rotate(-90 25 20)"/>';     // -90 让起点落在 12 点
+  }
+  return out + '</g></svg>';
+}
+
+/* ── 国网电费（V1.0.26）──
+   户号不硬编码：按后缀正则在 S.states 里找 sensor.state_grid_<户号>_<后缀>。
+   这样换户号、多户号都不用改代码；找不到就返回 null，由调用方降级。 */
+function gridEnt(suffix){
+  const re = new RegExp("^sensor\\.state_grid_.+_" + suffix + "$");
+  for(const [eid, st] of S.states){ if(re.test(eid)) return st; }
+  return null;
+}
+function gridNum(suffix){
+  const st = gridEnt(suffix);
+  const x = st ? parseFloat(st.state) : NaN;
+  return isFinite(x) ? x : null;
+}
+/* 统计卡用的三件套。取不到余额时统一「—」+ 空 SVG：
+   不要回落成 0 元，也不要画一条全灰空槽——那会被读成「余额已为零」。 */
+function gridStat(){
+  const bal = gridNum("balance");
+  if(bal === null) return {v:"—", g:'<svg viewBox="0 0 50 40"></svg>', vs:""};
+  return {
+    v: num(bal,1) + "<small>元</small>",
+    vs: bal < 5 ? "var(--red)" : (bal < 20 ? "var(--orange)" : ""),
+    g: gEleStack(gridNum("month_p_ele_num"), gridNum("month_n_ele_num"), gridNum("month_v_ele_num"))
+  };
+}
+/* A 版图形：当月峰 / 平 / 谷三段堆叠条（46×12，y=14，圆角靠 clipPath 统一裁）。
+   三段色写死，不跟 currentColor —— .stat.r/.stat.o 会覆盖 .g 的颜色，余额报警转红时会串色。
+   不复用 gBars()：那个把值当 0–100 百分比除、且 slice(0,7) 只画 7 根，改它会连带窗帘卡。
+   B 版（12 个月柱 / 30 天折线）在 46px 宽度里每根只有 1–2px，一缩放就糊成色块，弃用，趋势留给弹窗。 */
+let _eleSeq = 0;
+function gEleStack(p, n, v){
+  const segs = [[p, "#BA7517"], [n, "#378ADD"], [v, "#1D9E75"]]
+    .map(([x, c]) => [isFinite(x) && x > 0 ? x : 0, c]);
+  const total = segs.reduce((s, [x]) => s + x, 0);
+  const cid = "elec" + (++_eleSeq);
+  let out = '<svg viewBox="0 0 50 40">'+
+    '<defs><clipPath id="'+cid+'"><rect x="2" y="14" width="46" height="12" rx="6"/></clipPath></defs>'+
+    '<rect x="2" y="14" width="46" height="12" rx="6" fill="rgba(120,120,128,.16)"/>';
+  if(total > 0){
+    out += '<g clip-path="url(#'+cid+')">';
+    let x = 2;
+    for(const [val, col] of segs){
+      if(val <= 0) continue;
+      const w = 46 * val / total;
+      out += '<rect x="'+x.toFixed(2)+'" y="14" width="'+w.toFixed(2)+'" height="12" fill="'+col+'"/>';
+      x += w;
+    }
+    out += '</g>';
+  }
+  return out + '</svg>';
 }
 
 /* 离线设备集合：按「设备分组键」判定（摄像头另走 cameraOnline），
@@ -3817,10 +4285,12 @@ function renderStats(){
   const tempAvg = avg(temps), humAvg = avg(hums);
 
   const items = [
+    /* 离线设备这一格已移除（V1.0.26）：「在线率」已经画在设备总数环里，
+       单独一格只是重复；位置让给「家庭电费」。
+       ⚠️ offline / devOff 变量必须保留 —— 第 1 张的 gRing 就用它们算在线率，
+       devOffSet() 也仍被分类下钻（含离线）复用，删变量会直接报错。 */
     {k:"设备总数", v: String(devTotal), c:"", ic:"home", cat:"",
      g: gRing(devTotal ? (devTotal-offline)/devTotal : 0)},
-    {k:"离线设备", v: String(offline), c: offline>0?"r":"g", ic:"cloud", cat:"",
-     g: gOff(offline)},
     {k:"灯光开启", v: lightsOn+" <small>/ "+lightsAll+"</small>", c:"o", ic:"bulb", cat:"light",
      g: gDots(Math.round(lightsAll ? lightsOn/lightsAll*12 : 0))},
     {k:"窗帘开启", v: coversOpen+" <small>/ "+coversAll+"</small>", c:"p", ic:"curtain", cat:"cover",
@@ -3830,15 +4300,20 @@ function renderStats(){
     {k:"室内温度", v: tempAvg!==null? num(tempAvg,1)+"<small>°C</small>":"—", c:"", ic:"temp", cat:"temp",
      g: gTempBars(tempByRoom)},
     {k:"平均湿度", v: humAvg!==null? num(humAvg,0)+"<small>%</small>":"—", c:"", ic:"drop", cat:"hum",
-     g: gArc(humAvg!==null? humAvg/100 : 0)}
+     g: gArc(humAvg!==null? humAvg/100 : 0)},
+    /* 国网电费：cat 留空不下钻，否则会误触发 S.cat 过滤整页设备卡 */
+    Object.assign({k:"家庭电费", c:"", ic:"bolt", cat:""}, gridStat())
   ];
   document.getElementById("stats").innerHTML = items.map(i=>{
     const sel = !!i.cat && S.cat === i.cat;
     const vt = String(i.v).replace(/<[^>]*>/g, "");
     return '<div class="stat '+i.c+(sel?' sel':'')+(i.cat?' cat':'')+'"'+
-      (i.cat? ' data-cat="'+i.cat+'" role="button" tabindex="0" aria-pressed="'+sel+'" title="只看'+i.k+'"' : '')+'>'+
+      (i.cat? ' data-cat="'+i.cat+'" role="button" tabindex="0" aria-pressed="'+sel+'" title="查看全部'+esc(i.k)+'"' : '')+'>'+
       '<span class="si">'+statIcon(i.ic)+'</span>'+
-      '<div class="tx"><span class="k">'+i.k+'</span><span class="v" title="'+esc(vt)+'">'+i.v+'</span></div>'+
+      /* 数值变色只能内联在 .v 上：现有的 .stat.r / .stat.o 只改 .si 和 .g，
+         补一条 .stat.r .v 的公共规则会让「门窗敞开」的数值也跟着变红，属计划外改动。 */
+      '<div class="tx"><span class="k">'+i.k+'</span><span class="v"'+
+        (i.vs? ' style="color:'+i.vs+'"' : '')+' title="'+esc(vt)+'">'+i.v+'</span></div>'+
       '<span class="g">'+i.g+'</span></div>';
   }).join("");
 }
@@ -3851,7 +4326,8 @@ const STAT_ICON = {
   curtain:'<path d="M3.4 4.2h17.2"/><path d="M5.6 4.2c1.9 3.2 1.9 12.4 0 15.6"/><path d="M18.4 4.2c-1.9 3.2-1.9 12.4 0 15.6"/><path d="M9.2 19.8h5.6"/>',
   door:'<path d="M3.6 19.8h16.8"/><path d="M6.2 19.8V5.6a1 1 0 0 1 1-1h5.6a1 1 0 0 1 1 1v14.2"/><path d="M11.1 12.5h.01"/><rect x="15.8" y="6" width="4.6" height="4.6" rx="1"/>',
   temp:'<path d="M10.2 14.2V5.6a1.8 1.8 0 1 1 3.6 0v8.6a3.9 3.9 0 1 1-3.6 0Z"/><path d="M12 9.4v6.2"/>',
-  drop:'<path d="M12 3.6c3.2 3.7 5.5 6.7 5.5 9.3A5.5 5.5 0 0 1 12 18.4a5.5 5.5 0 0 1-5.5-5.5c0-2.6 2.3-5.6 5.5-9.3Z"/>'
+  drop:'<path d="M12 3.6c3.2 3.7 5.5 6.7 5.5 9.3A5.5 5.5 0 0 1 12 18.4a5.5 5.5 0 0 1-5.5-5.5c0-2.6 2.3-5.6 5.5-9.3Z"/>',
+  bolt:'<path d="M13.2 3.2 6.4 13.4h4.6l-1.4 7.4 7.2-10.2h-4.8l1.2-7.4Z"/>'
 };
 function statIcon(k){
   const d = STAT_ICON[k];
@@ -3972,6 +4448,10 @@ function panelCtl(eid){
 const VAL_CN = {
   on:"开", off:"关", color_temp:"色温", white:"白光", heating:"加热中", cooling:"制冷中", fan_only:"送风", heat_cool:"自动冷暖",
   playing:"播放中", not_home:"离家", motion:"人体移动", carbon_monoxide:"一氧化碳", charging:"充电中", cleaning:"清扫中",
+  /* V1.0.26 真机复核后补：属性值里的英文枚举（原先一律退化成「—」） */
+  wet:"潮湿", stuck:"卡住", automatic:"自动", null:"未设置", ok:"正常", discharging:"放电中",
+  "arp-response":"ARP 应答", "quick single click":"快速单击", busy:"忙碌中",
+  onoff:"仅开关（不可调色）", brightness:"亮度", color_temp:"色温",
 };
 /* 单位中文表：数字 + 单位（"50 %" / "1.5 kW" / "1234 bps"）规则用 */
 const UNIT_CN = {
@@ -3979,7 +4459,11 @@ const UNIT_CN = {
   hz:"Hz", khz:"kHz", bps:"bps", kbps:"Kbps", mbps:"Mbps", kb:"KB", mb:"MB", gb:"GB", tb:"TB",
   s:"秒", sec:"秒", secs:"秒", min:"分钟", mins:"分钟", h:"小时", hr:"小时", hrs:"小时", ms:"毫秒",
   m:"米", cm:"厘米", mm:"毫米", km:"公里", m2:"平方米", m3:"立方米", l:"升", ml:"毫升",
-  kg:"千克", g:"克", pa:"Pa", kpa:"kPa", mpa:"MPa", ppm:"ppm", db:"dB", lux:"lx", lx:"lx", "%rh":"%RH"
+  kg:"千克", g:"克", pa:"Pa", kpa:"kPa", mpa:"MPa", ppm:"ppm", db:"dB", lux:"lx", lx:"lx", "%rh":"%RH",
+  /* V1.0.26 真机复核补：米家 / HA 自带传感器用到的其余单位 */
+  hours:"小时", minutes:"分钟", seconds:"秒", gram:"克", mib:"MiB", gib:"GiB",
+  hpa:"hPa", rpm:"转/分", arcdegrees:"度", "kib/s":"KiB/s", "b/s":"B/s",
+  "km/h":"km/h", "m/s":"m/s", "mg/m³":"mg/m³", "μg/m³":"μg/m³", "g/m³":"g/m³"
 };
 function unitCN(u){
   if(!u) return "";
@@ -3995,13 +4479,25 @@ function valCN(v, key){
   if(!s) return s;
   const k = s.toLowerCase();
   if(VAL_CN[k] !== undefined) return VAL_CN[k];
+  /* 单位值单独走单位表：unit_of_measurement 本身就是一个裸单位（"gb" / "hours" / "kib/s"），
+     套后面的「短英文翻不全 → —」会把它整条抹成破折号 */
+  if(/^(unit_of_measurement|temperature_unit)$/.test(key || "")) return unitCN(s);
   if(/^(https?:)?\/\//.test(s)) return s;
+  /* ISO 时间戳属性（timestamp / last_time_reachable / 各类 *_time）压成本地时间 */
+  if(/^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}/.test(s)){
+    const d = new Date(s.replace(/^(\d{4}-\d{2}-\d{2})[t ]/, "$1T"));
+    if(isFinite(d.getTime())){
+      if(d.getFullYear() < 2000) return "未设置";
+      const p2 = (x)=> String(x).padStart(2, "0");
+      return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())+" "+p2(d.getHours())+":"+p2(d.getMinutes());
+    }
+  }
   if(/[A-Za-z]/.test(s)){
     /* ① 整句表 / 整词表 */
     const p = cnPhrase(s);
     if(p) return p;
     /* ② 数字 + 单位：保留数字，单位中文化（查不到单位原样保留） */
-    const nu = s.match(/^(-?\d+(?:\.\d+)?)\s*([A-Za-z%°]{1,6})$/);
+    const nu = s.match(/^(-?\d+(?:\.\d+)?)\s*([A-Za-z%°µ³\/]{1,8})$/);
     if(nu) return nu[1] + (nu[2] ? " " + unitCN(nu[2]) : "");
     /* ③ 序号枚举：level_3 / gear2 / layer-1 → 档位 3 */
     const ord = s.match(/^([A-Za-z_]+?)[\s_-]*(\d+)$/);
@@ -4030,11 +4526,28 @@ function dropRawPos(a, eid){
 }
 /* 大数字白名单：这些属性名的值天然可能是 6 位以上（速率 / 固件 / 序列号 / 经纬度 / 计数…），
    不做「6 位数字=内部码」过滤；只有名单外的属性出现长数字才当垃圾码丢掉 */
-const BIG_NUM_OK = /speed|bps|rate|bytes|bitrate|throughput|uptime|duration|pages|serial|firmware|version|latitude|longitude|(^|_)lat($|_)|(^|_)lon($|_)|lng|gps|coord|accuracy|capacity|size|total|count|number|power|energy|current|voltage|frequency|area|distance|volume|flow|pressure|price|cost|timestamp|updated|created|memory|storage|disk|temp/i;
+/* 长数字白名单：命中这些属性名才允许 6 位以上数字通过（路由速度、固件版本、序列号、经纬度等）。
+   V1.0.26 收紧：原来 temp / power / current / total / size / number 是裸写的子串匹配，
+   `temperature_code`、`power_state_id` 这类内部枚举码会跟着整条放行。
+   改成「整词或后缀」——必须被 _ 或首尾包住，`cpu_temp`、`energy_total`、`file_size` 仍命中，
+   `tempxxx`、`totalxxx` 不再命中。 */
+const BIG_NUM_OK = new RegExp([
+  "speed","bps","rate","bytes","bitrate","throughput","uptime","duration","pages",
+  "serial","firmware","version","latitude","longitude","lng","gps","coord","accuracy",
+  "capacity","distance","volume","flow","pressure","price","cost",
+  "timestamp","updated","created","memory","storage","disk",
+  "voltage","frequency","energy","area",
+  "(^|_)(lat|lon|temp|power|current|total|count|number|size)($|_)"
+].join("|"), "i");
+/* 属性表里不展示的技术元数据：值恒为英文枚举或 mdi 图标名，对用户没有信息量 */
+const META_ATTR = /^(icon|device_class|state_class|entity_class|state_property|tracking_type|supported_features|supported_color_modes|assumed_state|capabilities|attribution|editable|entity_picture)$/i;
 function attrRows(a, limit, eid){
   a = dropRawPos(a, eid);
   const keys = Object.keys(a).filter(k=>{
     if(k==="friendly_name" || typeof a[k]==="object" || a[k]===null || a[k]==="") return false;
+    /* V1.0.26：纯技术元数据不进属性表。这类键的值永远是英文枚举或 mdi: 图标，
+       翻不出来也毫无信息量，之前整段显示成「—」把真正的读数挤没了。 */
+    if(META_ATTR.test(k)) return false;
     /* -50 是冰箱变温区「未启用」的占位值，属性表里也别露出来 */
     if(/temp|温度/i.test(k) && isFinite(Number(a[k])) && Number(a[k]) <= -50) return false;
     /* 内部错误码 / 内部枚举当垃圾：Invalid IID、submersion_state-2-1 这类不渲染。
@@ -4175,6 +4688,28 @@ async function selSubmit(opt){
   if(ok){ closeSel(); toast("已选择 " + selCN(opt)); }
 }
 
+/* 时长格式化（秒 → 天/小时/分），运行时长这类值动辄十几万秒，直接印数字没法看 */
+function durFmt(s){
+  const n = Number(s);
+  if(!isFinite(n) || n <= 0) return "—";
+  const d = Math.floor(n / 86400), h = Math.floor((n % 86400) / 3600), m = Math.floor((n % 3600) / 60);
+  if(d) return d + " 天 " + h + " 小时";
+  if(h) return h + " 小时 " + m + " 分";
+  return m + " 分钟";
+}
+/* 全量 states 里按正则捞一个实体 id。
+   有些读数被 visible() 挡在分组之外（锐捷的运行时长在注册表里是 diagnostic，
+   不进卡片），但弹窗要用，所以直接回查，不给它单独建卡。 */
+function findState(re){
+  for(const k of S.states.keys()) if(re.test(k)) return k;
+  return null;
+}
+/* 详情面板通用只读行（国网 / 锐捷 / 热水器三段四段共用） */
+function dRow(k, v){
+  return '<div class="mrow"><span class="mn">'+esc(k)+'</span>'+
+    '<span class="mv" style="user-select:text">'+esc(v == null || v === "" ? "—" : String(v))+'</span></div>';
+}
+
 function renderDetail(){
   const eid = S.detailEid;
   if(!eid) return;
@@ -4188,18 +4723,29 @@ function renderDetail(){
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'+
     '<path d="M6 6l12 12M18 6L6 18"/></svg></button>';
 
-  /* 一台设备一张卡：显示该设备下的全部实体 */
-  if(card && (card.mains.length > 1 || card.more.length > 0 || card.sensors.length > 0 ||
+  /* 一台设备一张卡：显示该设备下的全部实体。
+     V1.0.26 判据修正：原来是 card.mains.length > 1，要求至少两个主控实体。
+     单开关插座 mains 只有 1 个 switch（且就是锚点本身），被这条挡在门外，
+     落到下面的单实体出口，尺寸就不受 data-kind="dev" 管了。
+     改成「有主控实体即算设备卡」——mainsList 过滤掉锚点后可能为空，
+     所以判据用含锚点的 card.mains，而不是过滤后的长度。 */
+  const mainsRest = card ? card.mains.filter(e=> e !== eid) : [];
+  /* router / grid / heater 三种专用卡的主控、读数都不走 mains/sensors/more，
+     统一装在自定义字段里，所以判据要显式放行，否则会掉到下面的「单实体弹窗」，
+     那些专属段落（三段/四段）就全成死代码了。 */
+  const special = card && (card.kind === "router" || card.kind === "grid" || card.kind === "heater");
+  if(card && (special || card.mains.length > 0 || card.more.length > 0 || card.sensors.length > 0 ||
               (card.groups && card.groups.length) ||
               (card.doors && card.doors.length))){
     panel.setAttribute("data-kind", "dev");   /* 设备类弹窗：尺寸只认 #detailPanel[data-kind="dev"] */
     const d = r.device_id ? S.devices[r.device_id] : null;
     const dom0 = eid.split(".")[0];
-    const canRows = [].concat(card.mains, card.more).some(e=> CTL_DOMAIN.has(e.split(".")[0]));
+    const canRows = [].concat(card.mains, card.more).some(e=> CTL_DOMAIN.has(e.split(".")[0])) ||
+                    card.kind === "heater";
     /* 主控区已展示锚点（switch/light…）时，可控列表要去重，别让同一个开关出现两次；
        「可控 N 项」把主控那条也算上，否则纯插座会被误判成「此设备仅只读」 */
-    const showMain = PANEL_CTL_DOMAIN.has(dom0);
-    const mainsList = card.mains.filter(e=> e !== eid);
+    const showMain = PANEL_CTL_DOMAIN.has(dom0) && card.kind !== "heater";
+    const mainsList = mainsRest;   /* 已在判据前过滤好，别重复 filter */
     const ctlTotal = mainsList.length + (showMain && card.mains.indexOf(eid) >= 0 ? 1 : 0);
     /* 可控 / 配置 计数：可控为 0 时整段不输出，只留「配置 N 项」；
        两项都为 0 才写「此设备仅只读」 */
@@ -4212,7 +4758,7 @@ function renderDetail(){
         (d && d.model && !junkInfo(d.model)? ' · '+esc(d.model):'')+
         (ctlParts.length
           ? ' · '+ctlParts.join(' / ')
-          : ' · 此设备仅只读')+
+          : (special ? '' : ' · 此设备仅只读'))+
         (S.pctl && !S.ctl ? ' · <b style="color:var(--accent)">已解锁（本次弹窗）</b>' : '')+'</p>'+
       (showMain
         ? '<div class="dgrid"><div class="t">主控</div>'+
@@ -4268,8 +4814,155 @@ function renderDetail(){
         '<div class="mgrid">'+
         card.more.map(e=> entRow(e, true, card.name)).join("")+'</div></div>';
     }
+    /* ── 国网电费弹窗（V1.0.26）：四段 —— 余额与状态 / 当月构成 / 趋势图 / 明细 ── */
+    if(card.kind === "grid"){
+      const ge = card.grid || [];
+      const gv = (s)=> eleVal(ge, s);
+      const gPick = (s)=>{
+        const re = new RegExp("_" + s + "$");
+        return ge.find(x=> re.test(x)) || null;
+      };
+      const gAttrs = (s)=>{
+        const e = gPick(s);
+        return e ? ((S.states.get(e) || {}).attributes || {}) : {};
+      };
+      const gState = (s)=>{
+        const e = gPick(s);
+        return e ? ((S.states.get(e) || {}).state || "") : "";
+      };
+      const money = x => (x === null || x === undefined) ? "—" : num(x, 2) + " 元";
+      const row2 = (k2, v2) => '<div class="mrow"><span class="mn">'+k2+'</span>'+
+        '<span class="mv" style="user-select:text">'+v2+'</span></div>';
+
+      const bal = gv("balance"), esti = gv("esti_amt"), lastC = gv("last_month_ele_cost"),
+            owe = gv("history_owe"), monE = gv("month_ele_num"),
+            p = gv("month_p_ele_num"), n = gv("month_n_ele_num"), v = gv("month_v_ele_num"),
+            yrE = gv("year_ele_num"), yrC = gv("year_ele_cost"), meter = gv("last_month_meter_num");
+
+      /* 段一：余额与状态。esti_amt 当前是 unknown —— 显示「—」，绝不拿上月电费顶替 */
+      h += '<div class="dgrid"><div class="t">余额与状态</div><div class="mgrid">'+
+        [["账户余额", money(bal)], ["本月电费", money(esti)],
+         ["上月电费", money(lastC)], ["历史欠费", money(owe)]].map(([k2, v2])=> row2(k2, v2)).join("")+
+        '</div></div>';
+
+      /* 段二：当月峰平谷构成。重庆无尖峰，尖用电恒为 0，只画三段 */
+      const segs = [[p, "#BA7517", "峰"], [n, "#378ADD", "平"], [v, "#1D9E75", "谷"]];
+      const tot = segs.reduce((s2, [x])=> s2 + (x || 0), 0);
+      let sbar = '<div class="mrow"><span class="mn">暂无数据</span></div>';
+      if(tot > 0){
+        sbar = '<div class="elebar big">' + segs.map(([x, c])=> (x && x > 0)
+                 ? '<i style="width:'+(x/tot*100).toFixed(2)+'%;background:'+c+'"></i>' : "").join("") + '</div>'+
+               '<div class="elegend">' + segs.map(([x, c, t2])=> '<span><i style="background:'+c+'"></i>'+t2+' '+
+                 (x === null ? "—" : num(x,1)) + ' 度</span>').join("") + '</div>';
+      }
+      h += '<div class="dgrid"><div class="t">当月构成'+(monE !== null ? ' · 共 '+num(monE,1)+' 度' : '')+'</div>'+
+        '<div style="padding:2px 2px 0">'+sbar+'</div></div>';
+
+      /* 段三：两张趋势图，直接吃 .graph 属性，不再请求一次 */
+      h += '<div class="dgrid"><div class="t">近 30 天每日用电</div>'+
+        '<div class="echart">'+eleSpark(gAttrs("recent_30_daily_ele_list").graph, "line")+'</div></div>'+
+        '<div class="dgrid"><div class="t">近 12 个月用电（柱顶为当月电费）</div>'+
+        '<div class="echart">'+eleSpark(gAttrs("recent_12_monthly_ele_list").graph, "bar")+'</div></div>';
+
+      /* 段四：明细。抄表站点固定回 0，属无数据，那一行直接不显示 */
+      const det = [
+        ["年度累计用电", yrE === null ? "—" : num(yrE,2)+" 度"],
+        ["年度累计电费", money(yrC)],
+        ["上月抄表", (meter === null || meter === 0) ? "" : num(meter,0)+" 度"],
+        ["数据日期", gState("daily_lasted_date") || "—"],
+        ["刷新时间", gState("refresh_time") || "—"]
+      ].filter(([, v2])=> v2 !== "");
+      h += '<div class="dgrid"><div class="t">明细</div><div class="mgrid">'+
+        det.map(([k2, v2])=> row2(k2, v2)).join("")+'</div></div>';
+    }
+
+    /* ── 锐捷路由器弹窗（V1.0.26）：三段 —— 互联网接入 / 运行 / 设备信息 ── */
+    if(card.kind === "router"){
+      const gs = (e)=> e ? (S.states.get(e) || {}) : {};
+      const upE = card.up || findState(/ruijie.*uptime/i);
+      const wanS = gs(card.wan), upS = gs(upE);
+      const upN = Number(upS.state);
+      const lastSeen = wanS.last_updated || upS.last_updated || upS.last_changed || "";
+      const spd = (e)=>{ const n = Number(gs(e).state); return isFinite(n) ? num(n, 1) + " KiB/s" : "—"; };
+      const wanTxt = !card.wan ? "—"
+        : (wanS.state === "on" ? "已连接" : (wanS.state === "off" ? "已断开" : tr(wanS.state)));
+      const dv = S.devices[r.device_id] || {};
+      h += '<div class="dgrid"><div class="t">互联网接入</div><div class="mgrid">'+
+          dRow("外网 IP", gs(card.ip).state || "—") + dRow("网关", ROUTER_GW) +
+          dRow("WAN 状态", wanTxt)+
+        '</div></div>'+
+        '<div class="dgrid"><div class="t">运行</div><div class="mgrid">'+
+          dRow("运行时长", durFmt(upN)) +
+          dRow("最后可达", lastSeen ? relPast(lastSeen) : "—") +
+          dRow("下行速率", spd(card.dl)) + dRow("上行速率", spd(card.ul))+
+        '</div></div>'+
+        '<div class="dgrid"><div class="t">设备信息</div><div class="mgrid">'+
+          dRow("MAC 地址", ROUTER_MAC) +
+          dRow("型号", junkInfo(dv.model) ? "—" : (dv.model || "—")) +
+          dRow("厂商", junkInfo(dv.manufacturer) ? "—" : (dv.manufacturer || "—"))+
+        '</div></div>';
+    }
+
+    /* ── 燃气热水器弹窗（V1.0.26）：四段 —— 运行 / 温度 / 浴缸 / 维护与提醒 ── */
+    if(card.kind === "heater"){
+      const all = card.hall || [];
+      const pk = (re)=> all.find(e=> re.test(e)) || null;
+      const numOf = (re)=>{ const e = pk(re); const n = Number(((e && S.states.get(e)) || {}).state);
+        return e && isFinite(n) ? n : null; };
+      const isOn = (e)=>{ const s = ((e && S.states.get(e)) || {}).state; return s === "on"; };
+      const onoff = pk(/_onoffstatus$/), flame = pk(/_flamestatus$/), flow = pk(/_flowstatus$/);
+      const hot = pk(/_hightempremindstatus$/);
+      const wsa = (S.states.get(card.eid) || {}).attributes || {};
+      const tgt = Number(wsa.temperature), mn = Number(wsa.min_temp) || 32,
+            mx = Number(wsa.max_temp) || 60, step = Number(wsa.target_temp_step) || 1;
+      const oT = numOf(/_outwatertemp$/), iT = numOf(/_inwatertemp$/), pw = numOf(/_realtimepowerpct$/);
+      const live = isOn(onoff);
+
+      /* 段一：运行。开 / 关机走 switch.…_onoffstatus，那才是设备真正的电源键。
+         只读模式下不给按钮，由上面的 .rolock 条统一提示解锁 —— 摆着能点却弹提示更难受 */
+      h += '<div class="dgrid"><div class="t">运行</div>'+
+        (onoff && canCtl()
+          ? '<div class="ctlrow">'+
+            '<button data-svc="switch|turn_on" data-eid="'+esc(onoff)+'" class="'+(live ? 'pri' : '')+'">开机</button>'+
+            '<button data-svc="switch|turn_off" data-eid="'+esc(onoff)+'" class="'+(live ? '' : 'pri')+'">关机</button>'+
+            '</div>'
+          : '')+
+        '<div class="mgrid">'+
+          dRow("火焰", flame ? (isOn(flame) ? "点火中" : "未点火") : "—")+
+          dRow("水流", flow ? (isOn(flow) ? "有水流" : "无水") : "—")+
+          dRow("实时燃烧功率", pw === null ? "—" : num(pw, 0) + " %")+
+          ([pk(/_scourstate$/)].filter(Boolean).map(e=> entRow(e, true, card.name)).join(""))+
+        '</div></div>';
+
+      /* 段二：温度。目标温度直接下发 water_heater.set_temperature */
+      h += '<div class="dgrid"><div class="t">温度</div><div class="mgrid">'+
+          dRow("当前水温", oT === null ? "—" : num(oT, 1) + " °C")+
+          dRow("进水温度", iT === null ? "—" : num(iT, 1) + " °C")+
+          ([pk(/_ecojudgetemp$/)].filter(Boolean).map(e=> entRow(e, true, card.name)).join(""))+
+        '</div>';
+      if(isFinite(tgt) && canCtl()){
+        h += '<div class="sldwrap"><div class="lb"><span>目标温度</span><b id="sldVal">'+num(tgt, 0)+'°C</b></div>'+
+          '<div class="sld"><input type="range" min="'+mn+'" max="'+mx+'" step="'+step+'" value="'+tgt+'" '+
+          'data-sld="water_heater|set_temperature|temperature" data-eid="'+esc(card.eid)+'" data-unit="°C"></div></div>';
+      }
+      h += '</div>';
+
+      /* 段三：浴缸（注水到设定水量后自动停，与洗浴温度分开设） */
+      const tubT = pk(/_tanktargettemp$/), tubF = pk(/_tanktargetflux$/);
+      const tubRows = [tubT, tubF].filter(Boolean).map(e=> entRow(e, true, card.name)).join("");
+      h += '<div class="dgrid"><div class="t">浴缸</div><div class="mgrid">'+
+        (tubRows || dRow("浴缸功能", "此机型未提供"))+'</div></div>';
+
+      /* 段四：维护与提醒 */
+      h += '<div class="dgrid"><div class="t">维护与提醒</div><div class="mgrid">'+
+          [pk(/_fanselfcleaningstatus$/), pk(/_safeselfteststatus$/)]
+            .filter(Boolean).map(e=> entRow(e, true, card.name)).join("")+
+          dRow("50 度超温提醒", hot ? (isOn(hot) ? "已触发" : "正常") : "—")+
+        '</div></div>';
+    }
+
     h += '<div class="dgrid"><div class="t">主实体属性</div>'+
-      '<div class="mgrid">'+
+      '<div class="mgrid attr">'+
       (attrRows(a, 24, eid)||'<div class="mrow"><span class="mn">无更多属性</span></div>')+'</div></div>'+
       '<button class="btn ghost" data-act="closeDetail">关闭</button>';
     /* 内容包进 .dbody：面板固定高、内容区自滚（flex:1;min-height:0），关闭钮绝对定位在右上 */
@@ -4289,7 +4982,7 @@ function renderDetail(){
       (S.devices[r.device_id].model && !junkInfo(S.devices[r.device_id].model)? ' · '+esc(S.devices[r.device_id].model):'')+'</p>':'')+
     panelCtl(eid)+
     '<div class="dgrid"><div class="t">全部属性</div>'+
-      '<div class="mgrid" style="max-height:34vh;overflow-y:auto;overflow-x:hidden">'+
+      '<div class="mgrid attr" style="max-height:34vh;overflow-y:auto;overflow-x:hidden">'+
       (attrRows(a, 0, eid)||'<div class="mrow"><span class="mn">无更多属性</span></div>')+'</div></div>'+
     '<button class="btn ghost" data-act="closeDetail">关闭</button>';
 }
@@ -4686,6 +5379,17 @@ catch(e){ if(mqDark.addListener) mqDark.addListener(()=>{ if(THEME.mode==="auto"
     if(!k) return;
     THEME[k] = b.getAttribute("data-v");
     saveTheme(); applyTheme();
+  });
+})();
+
+/* V1.0.26：外观块默认收起，点标题展开。左栏去滚动后靠它省高度。 */
+(function(){
+  const host = document.getElementById("appear");
+  const btn  = document.getElementById("apToggle");
+  if(!host || !btn) return;
+  btn.addEventListener("click", ()=>{
+    const open = host.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
   });
 })();
 
