@@ -184,7 +184,37 @@ html[data-mode="dark"] .pill.away .pv{background:rgba(255,159,10,.18)}
   box-shadow:0 8px 26px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.10)}
 .plantip.show{opacity:1;transform:translateY(0)}
 .plantip b{font-weight:600}
-.plantip i{font-style:normal;opacity:.72;margin-left:6px;font-size:11px}
+.plantip i{font-style:normal;opacity:.5;margin-left:2px;font-size:11px}
+.plantip i::before{content:"· ";opacity:.6}
+
+/* ── 数值输入面板（毛玻璃，替代原生 prompt） ── */
+.numpanel{max-width:340px;padding:22px 20px 18px}
+.numpanel h3{margin:0 0 14px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.numpanel .npin{display:flex;align-items:center;justify-content:center;gap:8px;
+  background:rgba(120,120,128,.13);border:1px solid var(--line2);border-radius:14px;
+  padding:12px 14px;margin:0 0 10px}
+.numpanel .npin input{flex:1 1 auto;min-width:0;border:0;background:transparent;outline:none;
+  font-size:30px;font-weight:600;text-align:center;color:var(--text);font-family:inherit;
+  letter-spacing:-.02em;padding:0}
+.numpanel .npin input::-webkit-outer-spin-button,
+.numpanel .npin input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.numpanel .npin input{-moz-appearance:textfield;appearance:textfield}
+.numpanel .npin .nu{font-size:15px;color:var(--text2);flex:0 0 auto;min-width:34px;text-align:left}
+.numpanel .nstep{display:flex;gap:10px;justify-content:center;margin:10px 0 6px}
+.numpanel .nstep button{width:46px;height:40px;border-radius:12px;border:1px solid var(--line2);
+  background:rgba(120,120,128,.10);color:var(--text);font-size:19px;line-height:1;cursor:pointer;
+  font-family:inherit;transition:background .15s var(--ease)}
+.numpanel .nstep button:active{background:rgba(120,120,128,.22)}
+.numpanel .nrange{text-align:center;font-size:12px;color:var(--text3);margin:2px 0 12px}
+.numpanel .nerr{text-align:center;font-size:12px;color:var(--red);margin:-4px 0 10px;
+  min-height:16px;opacity:0;transition:opacity .15s}
+.numpanel .nerr.show{opacity:1}
+.numpanel .nbrow{display:flex;gap:10px}
+.numpanel .nbrow button{flex:1 1 0;height:42px;border-radius:13px;font-size:14px;font-weight:500;
+  font-family:inherit;cursor:pointer;transition:background .15s var(--ease)}
+.numpanel .nbrow .cancel{border:1px solid var(--line2);background:transparent;color:var(--text)}
+.numpanel .nbrow .ok{border:0;background:var(--accent);color:#fff}
+.numpanel .nbrow .ok:disabled{opacity:.45}
 
 /* ── 顶栏 ── */
 header{
@@ -356,7 +386,6 @@ html[data-mode="dark"] .card.on .st{color:#ffb340}
 .card.off .st{color:var(--text2)}
 .card.bad .ic{background:rgba(255,59,48,.14);color:var(--red)}
 .card.bad .st{color:var(--red);font-size:14px}
-.card.warn .ic{background:rgba(255,159,10,.16);color:#ff9500}
 .card.warn .st{color:#d97706}
 html[data-mode="dark"] .card.warn .st{color:#ffb340}
 .card.na .st{font-size:14px;color:var(--text3)}
@@ -882,7 +911,7 @@ html[data-card="capsule"] .card .sv{
 }
 
 /* ══════════════════════════════════════════════════════════════
-   V1.0.21 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
+   V1.0.23 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
    ① 滚动闪烁 → 取消 scrolling 类切换，卡片不再挂 backdrop-filter
    ② 弹窗跳动 → scrollbar-gutter 预留槽位，锁滚动不改变列宽
    ③ 立体感   → 三层阴影 + 顶部内高光，并解开 .grid 的 paint 裁剪
@@ -1031,7 +1060,7 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.21</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.23</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1189,6 +1218,11 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
   <div class="panel" id="detailPanel"></div>
 </div>
 
+<!-- 数值输入面板 -->
+<div class="mask" id="mask3">
+  <div class="panel numpanel" id="numPanel"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1259,7 +1293,11 @@ const I = {
   /* 空气炸锅：炸篮 + 把手 + 上方热气 */
   fryer:'<path d="M4.6 9.6h14.8l-1.5 8.2a2.7 2.7 0 0 1-2.7 2.2H8.8a2.7 2.7 0 0 1-2.7-2.2L4.6 9.6Z"/><path d="M3 9.6h18"/><path d="M9.4 20v1.4M14.6 20v1.4"/><path d="M8.8 6.6c0-1.3 1.2-1.7 1.2-2.9M12 6.6c0-1.3 1.2-1.7 1.2-2.9M15.2 6.6c0-1.3 1.2-1.7 1.2-2.9"/>',
   /* 路由器：主体 + 双指示灯 + 双天线 */
-  router:'<rect x="3.5" y="13" width="17" height="6.5" rx="2"/><path d="M6.8 16.2h.01M9.6 16.2h.01"/><path d="M12 13V9.8M8.4 8.2c1.1-1.2 2.3-1.7 3.6-1.7s2.5.5 3.6 1.7M5.8 5.8c1.9-2.1 4-3.1 6.2-3.1s4.3 1 6.2 3.1"/>'
+  router:'<rect x="3.5" y="13" width="17" height="6.5" rx="2"/><path d="M6.8 16.2h.01M9.6 16.2h.01"/><path d="M12 13V9.8M8.4 8.2c1.1-1.2 2.3-1.7 3.6-1.7s2.5.5 3.6 1.7M5.8 5.8c1.9-2.1 4-3.1 6.2-3.1s4.3 1 6.2 3.1"/>',
+  /* 打印机：机身 + 出纸口 + 纸张 */
+  printer:'<path d="M7 8V4.2h10V8"/><rect x="3.5" y="8" width="17" height="8" rx="2"/><path d="M7 16h10v4.2H7z"/><path d="M6.5 11.4h.01M9 11.4h.01"/>',
+  /* NAS：机箱 + 四盘位 + 指示灯 */
+  nas:'<rect x="4" y="3" width="16" height="18" rx="2.4"/><path d="M4 8.4h16M4 13.8h16"/><path d="M7 5.7h.01M7 11.1h.01M7 16.5h.01"/><path d="M12 19.2h6"/>'
 };
 const ICON_ROOM = '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>';
 
@@ -1320,6 +1358,38 @@ const AIRFRY_ST = {
   "working":"运行中", "turn pot":"请翻动"
 };
 
+/* select 整值对照表：米家回的是内部编码（AF-CHICKEN-WINGS / One Layer / Steam Frying），
+   逐词翻译会出「1 音箱」这类错译，所以按整值一一对应，查不到才回退 tr()。 */
+const SELECT_CN = {
+  /* 模式 mode */
+  "NULL":"无",
+  "AF-CUSTOM":"自定义炸", "AF-FROZEN-FRIES":"冷冻薯条", "AF-CHICKEN-WINGS":"炸鸡翅",
+  "AF-SWEET-POTATO":"烤红薯", "AF-BEEF-STEAK":"炸牛排", "AF-PORK-BELLY":"炸五花肉",
+  "AF-SHRIMP":"炸虾",
+  "STM-CUSTOM":"自定义蒸", "STM-SWEET-POTATO":"蒸红薯", "STM-CORN":"蒸玉米",
+  "STM-BUN":"蒸包子", "STM-EGG":"蒸蛋", "STM-EGG-CUSTARD":"蒸蛋羹",
+  "STM-FISH":"蒸鱼", "STM-SEAFOOD":"蒸海鲜", "STM-MEAT":"蒸肉",
+  "SF-CHICKEN-WINGS":"蒸汽炸鸡翅", "SF-FISH":"蒸汽炸鱼", "SF-VEGETABLES":"蒸汽炸蔬菜",
+  "SF-DUMPLINGS":"蒸汽炸饺子",
+  "BK-CUSTOM":"自定义烘焙", "BK-CHEESE-TART":"蛋挞", "BK-CAKE":"蛋糕",
+  "BK-PIZZA":"披萨", "BK-BREAD":"面包",
+  "SS-CUSTOM":"自定义炖", "SS-STEW":"炖菜", "SS-BABY-PORRIDGE":"宝宝粥",
+  "SS-MISCELLANEOUS-GRAINS":"杂粮", "SS-DESSERT":"甜品", "SS-BIRDS-NEST":"燕窝",
+  "VD-CUSTOM":"自定义低温", "VD-BEEF-STEAK":"低温牛排", "VD-CHICKEN-STEAK":"低温鸡排",
+  "VD-SALMON":"低温三文鱼", "VD-EGG":"低温蛋",
+  "RS-ROASTING":"烤制",
+  "AD-AIR-DRIED":"风干",
+  "FM-FERMENTATION":"发酵",
+  "TD-THAWED":"解冻",
+  "RH-AIR-FRY":"空气炸",
+  "AC-DRYING":"烘干", "AC-WATER-CLEANING":"除水", "AC-DEODORIZE":"除味",
+  /* 食材份量 target_cooking_measure */
+  "Null":"无", "One Layer":"单层", "Double Layer":"双层",
+  /* 烹饪模式 texture */
+  "Air Fryer":"空气炸", "Steam Frying":"蒸汽炸", "Steam":"蒸", "None":"无",
+  "Baking":"烘焙", "Steam Stew":"蒸炖", "Sous Vide Cooking":"低温慢煮"
+};
+
 function tr(v){
   if(v===null||v===undefined) return "—";
   const s=String(v);
@@ -1332,6 +1402,9 @@ function tr(v){
     const p = cnPhrase(s);
     if(p) return p;
   }
+  /* 全大写字母+数字的型号 / 序列号（LS2119E003、TAE1199280JG）原样返回，
+     不能被下面那行小写成 ls2119e003 */
+  if(/^[A-Z0-9\-_.]+$/.test(s) && /[A-Z]/.test(s)) return s;
   if(/^[a-z0-9_]+$/.test(l)) return l.replace(/_/g," ");
   return s;
 }
@@ -1721,10 +1794,14 @@ const CTL_DOMAIN = new Set(["light","switch","fan","cover","climate","media_play
             一次解锁不等于整个面板都放开。判定一律走 canCtl()。 */
 function canCtl(){ return !!(S.ctl || S.pctl); }
 
-/* 按钮按设备 ID 全量捞的时候，只留烹饪四键；HA 给米家设备挂的「信息」按钮
-   （entity_category=diagnostic）以及以后可能出现的重启/刷新一律不进操作区。 */
-const BTN_OK = /^(开始烹饪|继续烹饪|暂停|停止烹饪)$/;
-const BTN_ORDER = ["开始烹饪", "继续烹饪", "暂停", "停止烹饪"];
+/* 烹饪四键按「实体 ID 后缀」识别，与显示语言无关 —— 中文名一旦切英文或换型号后缀不同，
+   按名字匹配会让四个按钮静默消失且不报错。后缀固定：start_cook / resume_cook / pause / cancel_cooking */
+const BTN_SUFFIX = ["start_cook", "resume_cook", "pause", "cancel_cooking"];
+const BTN_OK = /_(start_cook|resume_cook|pause|cancel_cooking)$/i;
+function btnSuffixOf(e){
+  const m = String(e).match(BTN_OK);
+  return m ? m[1].toLowerCase() : "";
+}
 function devButtons(did){
   if(!did) return [];
   const out = [];
@@ -1732,9 +1809,9 @@ function devButtons(did){
     if(e.slice(0, 7) !== "button.") continue;
     const r = S.reg[e];
     if(!r || r.device_id !== did) continue;
-    if(BTN_OK.test(shortName(e, devName(e)))) out.push(e);
+    if(BTN_OK.test(e)) out.push(e);
   }
-  out.sort((a, b)=> BTN_ORDER.indexOf(shortName(a, devName(a))) - BTN_ORDER.indexOf(shortName(b, devName(b))));
+  out.sort((a, b)=> BTN_SUFFIX.indexOf(btnSuffixOf(a)) - BTN_SUFFIX.indexOf(btnSuffixOf(b)));
   return out;
 }
 
@@ -1818,6 +1895,9 @@ function keepSensor(eid){
   if(AIRFRY_RE.test(devName(eid) || "")) return true;
   /* 路由器：外部 IP 没有 device_class，白名单接不住，但它是卡片信息之一 */
   if(ROUTER_RE.test(devName(eid) || "") && /external_ip|公网|外网/i.test(eid + " " + nameOf(eid))) return true;
+  /* 得力打印机 / 极空间：rest 集成建的实体没有 device_class，白名单一条都接不住，
+     但它们正是两张新卡的全部数据源 */
+  if(/^sensor\.(deli_printer_|zs_)/.test(eid)) return true;
   return false;
 }
 function readingOK(e){
@@ -1855,7 +1935,9 @@ const SECOND_DOMAIN = new Set(["switch","number","select","sensor","binary_senso
 const ROOM_ORDER = ["客厅","主卧","次卧","偏卧","卧室","厨房","过道","阳台","武胜老家"];
 
 /* 房间归属修正：后端把设备放错房间时在这里改（key 可以是设备 id 或实体 id 片段） */
-const AREA_FIX = [["c03937b9d094", "偏卧"]];
+const AREA_FIX = [["c03937b9d094", "偏卧"],
+                  ["deli_printer_", "次卧"],
+                  ["sensor.zs_", "客厅"]];
 /* 房间归属修正（按前端名称匹配）：设备在后端没有区域时，这里按名字归房。
    匹配「设备名」和「实体名」，命中关键字即归到指定房间。 */
 const NAME_AREA_FIX = [
@@ -1928,18 +2010,14 @@ function fixedName(raw){
   return raw;
 }
 /* ── 空气炸锅：英文型号名 → 小米官方中文名 ──────────────────
-   注册表名形如 "Mijia Smart Air Fryer Pro (Steam 6.5L)"。容量从括号里解析，
-   带 Steam 才叫「蒸烤版」，没有就只到 Pro —— 以后换型号不用改代码。 */
+   统一叫「米家智能空气炸锅Pro」，不再拼「蒸烤版 / 容量」（用户 2026-11-11 定稿）。 */
 const AIRFRY_RE = /air\s*fryer|空气炸锅/i;
 /* 路由器：锐捷 upnp 集成，实体 ruijie_router_*（WAN 状态 / 外部 IP / 上下行速度） */
 const ROUTER_RE = /ruijie|锐捷|router|路由器|网关/i;
 function airFryerName(raw){
   const s2 = String(raw || "");
   if(!AIRFRY_RE.test(s2)) return "";
-  const par = (s2.match(/[（(]([^）)]*)[）)]/) || [])[1] || "";
-  const cap = ((par.match(/(\d+(?:\.\d+)?)\s*L/i) || s2.match(/(\d+(?:\.\d+)?)\s*L/i)) || [])[1] || "";
-  const steam = /steam|蒸/i.test(par) || /steam/i.test(s2);
-  return "米家智能空气炸锅 Pro" + (steam ? " 蒸烤版" : "") + (cap ? " " + cap + "L" : "");
+  return "米家智能空气炸锅Pro";
 }
 /* 注册表里的原始设备名（重写映射之前），nameOf 要用它把实体名前缀换掉 */
 function devRawName(eid){
@@ -2065,7 +2143,14 @@ function buildModel(){
     if(SKIP_DOMAIN.has(dom) || NO_CARD_DOMAIN.has(dom)) continue;
     if(HIDE_DEV_RE.test(devName(eid) || "") || HIDE_DEV_RE.test(nameOf(eid) || "")) continue;
     if(dom==="sensor" && !keepSensor(eid)) continue;
-    const key = devIdOf(eid) || ("single|" + eid);
+    /* 打印机 / 极空间是 rest 集成建的实体，没有 device_id，默认会被拆成十几张独立小卡。
+       这里按实体前缀手工归拢成一台设备。 */
+    let key = devIdOf(eid);
+    if(!key){
+      if(/^sensor\.deli_printer_/.test(eid)) key = "printer|deli";
+      else if(/^sensor\.zs_/.test(eid)) key = "nas|zspace";
+      else key = "single|" + eid;
+    }
     if(!groups.has(key)) groups.set(key, []);
     groups.get(key).push(eid);
   }
@@ -2088,7 +2173,8 @@ function buildModel(){
       const anchor = ents.find(e=> e.split(".")[0]==="sensor" && /air_?fryer|空气炸锅/i.test(e + " " + nameOf(e)));
       if(anchor){
         const afSens = ents.filter(e=> e.split(".")[0]==="sensor" && e !== anchor && keepSensor(e));
-        const afMore = ents.filter(e=> e !== anchor && e.split(".")[0]!=="sensor")
+        /* 四键已在「操作」区单独渲染，这里必须排掉 button 域，否则配置区又重复列一遍 */
+        const afMore = ents.filter(e=> e !== anchor && e.split(".")[0]!=="sensor" && e.split(".")[0]!=="button")
                           .sort((a,b)=> (a.split(".")[0]==="switch"?0:1) - (b.split(".")[0]==="switch"?0:1));
         const card = { key, eid: anchor, name: dev, mains: [], sensors: afSens, more: afMore,
                        load: false, kind: "fryer" };
@@ -2116,6 +2202,40 @@ function buildModel(){
         ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
         continue;
       }
+    }
+
+    /* 得力 P3100DN：rest 轮询，碳粉 / 页数 / 卡纸；三组实体全部收进弹窗 */
+    if(key === "printer|deli"){
+      const pick = (n)=> ents.find(e=> e === "sensor.deli_printer_" + n) || ents.find(e=> e.indexOf(n) >= 0);
+      const toner = pick("toner_level");
+      const anchor = toner || ents[0];
+      const groups = [
+        {t:"耗材", es: ents.filter(e=> /toner_level|toner_state|toner_serial|drum_life|theory_pages|actual_pages|coverage/.test(e))},
+        {t:"计数", es: ents.filter(e=> /total_pages|jam_count/.test(e))},
+        {t:"设备信息", es: ents.filter(e=> /status|serial|firmware/.test(e) && !/toner/.test(e))}
+      ].filter(g=> g.es.length);
+      const card = { key, eid: anchor, name: "得力 P3100DN 打印机", mains: [], sensors: [], more: [],
+                     groups, load: false, kind: "printer" };
+      const room = ensure(areaOf(anchor));
+      room.cards.push(card);
+      ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
+      continue;
+    }
+
+    /* 极空间 Z4Pro：rest 轮询，三组实体（系统 / 磁盘 / 网络） */
+    if(key === "nas|zspace"){
+      const anchor = ents.find(e=> /zs_max_disk_temp/.test(e)) || ents.find(e=> /zs_cpu_temp/.test(e)) || ents[0];
+      const groups = [
+        {t:"系统", es: ents.filter(e=> /zs_cpu_temp|zs_cpu_used|zs_mem_used_pct|zs_fan_speed|zs_uptime_h|zs_pool_ok_count/.test(e))},
+        {t:"磁盘", es: ents.filter(e=> /zs_disk\d_temp|zs_disk\d_used_pct|zs_max_disk_temp/.test(e))},
+        {t:"网络", es: ents.filter(e=> /zs_net_down_bps|zs_net_up_bps/.test(e))}
+      ].filter(g=> g.es.length);
+      const card = { key, eid: anchor, name: "极空间 Z4Pro", mains: [], sensors: [], more: [],
+                     groups, load: false, kind: "nas" };
+      const room = ensure(areaOf(anchor));
+      room.cards.push(card);
+      ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
+      continue;
     }
 
     /* 路由器：WAN 状态当锚点，大字在线/断网/离线，小字上下行速度 */
@@ -2173,7 +2293,8 @@ function buildModel(){
     const sensors = ents.filter(e=> e.split(".")[0]==="sensor" && keepSensor(e))
                         .sort((a,b)=> SENSOR_SHOW.indexOf(attrOf(a,"device_class")) - SENSOR_SHOW.indexOf(attrOf(b,"device_class")));
     const more = ents.filter(e=> !use.includes(e) && e !== primary &&
-                    e.split(".")[0]!=="sensor" && e.split(".")[0]!=="binary_sensor");
+                    e.split(".")[0]!=="sensor" && e.split(".")[0]!=="binary_sensor" &&
+                    e.split(".")[0]!=="button");
     const card = { key, eid: primary, name: dev || nameOf(primary),
                    mains: use, sensors, more, load: isLoad };
     room.cards.push(card);
@@ -2541,6 +2662,7 @@ function openPlan(){
 function openEnt(eid){
   if(!eid) return;
   if(!S.states.get(eid)){ toast("还没连上后端，连上后才能看详情"); return; }
+  S.pctl = false;                 /* 换设备一律回到只读：三个入口都走这里，权限不跟着走 */
   S.detailEid = eid;
   renderDetail();
   const m = document.getElementById("mask2");
@@ -2807,6 +2929,8 @@ function stateText(eid){
     case "camera": return {t: (v==="unavailable"||v==="unknown")? "离线" : "在线", ex:""};
     case "fan": return {t: tr(v), ex: (v==="on"&&a.percentage)? a.percentage+"%" : ""};
     case "sensor":{
+      /* 极空间磁盘温度在盘休眠 / 接口未读时回 0，显示 0 °C 会被误读成真实温度 */
+      if(/zs_(disk\d_)?temp|zs_max_disk_temp/.test(eid) && Number(v) === 0) return {t:"—", ex:""};
       /* 空气炸锅：状态传感器回的是英文枚举，卡面大字必须换成中文 */
       if(/air_?fryer/i.test(eid) ||
          (/空气炸锅/.test(devName(eid) || "") && /空气炸锅|状态|status/i.test(shortName(eid, devName(eid)) || ""))){
@@ -2816,7 +2940,9 @@ function stateText(eid){
       /* 冰箱变温区没启用时设备回 -50 这个占位值，别当真实温度显示 */
       if(a.device_class === "temperature" && v !== "" && isFinite(Number(v)) && Number(v) <= -50)
         return {t:"未启用", ex:""};
-      const u = a.unit_of_measurement || U[a.device_class] || "";
+      /* 米家单位是英文（minutes / gram），显示层统一转中文 */
+      let u = a.unit_of_measurement || U[a.device_class] || "";
+      u = u === "minutes" ? "分钟" : (u === "gram" ? "克" : (u === "seconds" ? "秒" : u));
       /* 只有甲醛要三位小数：它是 0.019 mg/m³ 这种量级，一位小数会抹成 0。
          其它读数（功率 0.123kW、电量 0.056kWh）保持原精度，否则满屏啰嗦。
          判甲醛用「去掉设备名前缀的自身名字」，同设备的温度/湿度传感器不算。 */
@@ -2841,6 +2967,18 @@ function stateText(eid){
                    gas:"正常", carbon_monoxide:"正常", safety:"正常", problem:"正常",
                    vibration:"静止", sound:"安静", light:"无光", power:"断电", plug:"未插"};
       return {t: (v === "on" ? (ON[dc] || "开") : (OFF[dc] || "关")), ex: ""};
+    }
+    case "select":{
+      /* 米家 select 回的是内部编码，必须走整值表；逐词翻译会把 One Layer 译成「1 音箱」 */
+      const cn = SELECT_CN[String(v)] || SELECT_CN[String(v).trim()];
+      return {t: cn || tr(v), ex:""};
+    }
+    case "number":{
+      const n = Number(v);
+      const u = a.unit_of_measurement || "";
+      const txt = isFinite(n) ? num(n, (Math.round(n) === n ? 0 : 1)) : tr(v);
+      const un = u === "minutes" ? " 分钟" : (u === "°C" ? " °C" : (u === "gram" ? " 克" : (u ? " " + u : "")));
+      return {t: txt + un, ex:""};
     }
     default: return {t: tr(v), ex:""};
   }
@@ -2928,11 +3066,28 @@ function fryerCardHTML(card){
     const tt = stateText(e) || {};
     return esc(shortName(e, card.name)) + " " + esc(tt.t || "");
   }).join(" · ");
+  /* 设定温度 / 目标时间原来只在弹窗里，提到卡面小字（与状态、剩余时间并列） */
+  const numOf = (re)=>{
+    const e = (card.more || []).find(x=> re.test(x));
+    if(!e) return "";
+    const stt = S.states.get(e) || {};
+    const n = stt.state;
+    const u = (stt.attributes || {}).unit_of_measurement || "";
+    if(n === undefined || n === null || n === "" || n === "unavailable" || n === "unknown") return "";
+    const v = num(Number(n), 0);
+    if(u === "minutes") return v + " 分钟";
+    if(u === "°C") return v + "°C";
+    return u ? v + " " + u : v;
+  };
+  const tTemp = numOf(/target_temperature/);
+  const tTime = numOf(/target_time/);
+  const spec = [tTemp ? "设定 " + tTemp : "", tTime].filter(Boolean).join(" · ");
+  const line = [spec, extras].filter(Boolean).join(" · ");
   return '<div class="card sens '+c+'" data-eid="'+esc(eid)+'" data-key="'+esc(card.key)+'"'+
       ' role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
       '<div class="top"><div class="ic">'+svg(I.fryer)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
       '<div class="st">'+esc(t.t || "—")+(left? ' <small>'+esc(left)+'</small>' : '')+'</div>'+
-      (extras ? '<div class="sv">'+extras+'</div>' : '')+
+      '<div class="sv">'+esc(line || "—")+'</div>'+
     '</div>';
 }
 
@@ -2980,10 +3135,73 @@ function routerCardHTML(card){
     '</div>';
 }
 
+/* 得力 P3100DN：大字碳粉剩余量（0% 配「缺粉」），小字已打印页数 · 卡纸次数
+   颜色分档：>=15% 正常灰 / 8~15% 橙 / <8% 红。这台现在 0%，红是真实状态。 */
+function printerCardHTML(card){
+  const gv = (re)=>{
+    const e = (card.groups || []).reduce((acc, g)=> acc.concat(g.es), []).find(x=> re.test(x));
+    if(!e) return null;
+    const st = S.states.get(e) || {};
+    return { st, e };
+  };
+  const lv = gv(/toner_level/);
+  const tp = gv(/total_pages/);
+  const jc = gv(/jam_count/);
+  const bad = (x)=> !x || x.st.state === "unavailable" || x.st.state === "unknown";
+  const na = bad(lv);
+  const level = (!na && isFinite(Number(lv.st.state))) ? Number(lv.st.state) : null;
+  const c = na ? "na" : (level !== null && level < 8 ? "bad" : (level !== null && level < 15 ? "warn" : "off"));
+  const big = na ? "离线" : (level !== null ? level + "%" : "—");
+  const tag = (na ? "" : (level !== null && level <= 0 ? "缺粉" : (level !== null && level < 8 ? "缺粉" : "")));
+  const np = (x)=>{ if(!x) return ""; const n = Number(x.st.state); return isFinite(n) ? num(n, 0) : ""; };
+  const parts = [];
+  if(np(tp)) parts.push("已打印 " + np(tp) + " 页");
+  if(np(jc)) parts.push("卡纸 " + np(jc) + " 次");
+  return '<div class="card sens '+c+'" data-eid="'+esc(card.eid)+'" data-key="'+esc(card.key)+'"'+
+      ' role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.printer)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="st">'+esc(big)+(tag ? ' <small>'+esc(tag)+'</small>' : '')+'</div>'+
+      '<div class="sv">'+esc(parts.join(" · ") || "—")+'</div>'+
+    '</div>';
+}
+
+/* 极空间 Z4Pro：大字最高磁盘温度，小字三格 CPU / 内存 / 最高盘使用率
+   磁盘使用率 >90% 走橙色阈值。 */
+function nasCardHTML(card){
+  const all = (card.groups || []).reduce((acc, g)=> acc.concat(g.es), []);
+  const one = (re)=> all.find(x=> re.test(x));
+  const val = (e)=>{ if(!e) return null; const st = S.states.get(e) || {};
+    const n = Number(st.state); return isFinite(n) ? n : null; };
+  const tE = one(/zs_max_disk_temp/);
+  const t = val(tE);
+  const cpu = val(one(/zs_cpu_used/));
+  const mem = val(one(/zs_mem_used_pct/));
+  const useds = all.filter(x=> /zs_disk\d_used_pct/.test(x)).map(val).filter(x=> x !== null);
+  const maxUse = useds.length ? Math.max.apply(null, useds) : null;
+  const stT = tE ? (S.states.get(tE) || {}) : {};
+  const na = !tE || stT.state === "unavailable" || stT.state === "unknown";
+  const tOk = t !== null && t > 0;
+  const hot = maxUse !== null && maxUse > 90;
+  const c = na ? "na" : (hot ? "warn" : "act");
+  const cells = [
+    cpu !== null ? "CPU " + num(cpu, 1) + "%" : "",
+    mem !== null ? "内存 " + num(mem, 1) + "%" : "",
+    maxUse !== null ? "盘用 " + num(maxUse, 1) + "%" : ""
+  ].filter(Boolean);
+  return '<div class="card sens '+c+'" data-eid="'+esc(card.eid)+'" data-key="'+esc(card.key)+'"'+
+      ' role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.nas)+'</div><div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="st">'+esc(na ? "离线" : (tOk ? num(t, 0) + " °C" : "—"))+(hot ? ' <small>磁盘告急</small>' : '')+'</div>'+
+      '<div class="sv">'+esc(cells.join(" · ") || "—")+'</div>'+
+    '</div>';
+}
+
 function cardHTML(card){
   if(card.kind === "fryer") return fryerCardHTML(card);
   if(card.kind === "fridge") return fridgeCardHTML(card);
   if(card.kind === "router") return routerCardHTML(card);
+  if(card.kind === "printer") return printerCardHTML(card);
+  if(card.kind === "nas") return nasCardHTML(card);
   if(card.kind === "sensor") return sensorCardHTML(card);
   const eid = card.eid;
   const st = S.states.get(eid);
@@ -3038,6 +3256,8 @@ function patchCard(eid){
   if(card.kind === "fryer"){ node.outerHTML = fryerCardHTML(card); return; }
   if(card.kind === "fridge"){ node.outerHTML = fridgeCardHTML(card); return; }
   if(card.kind === "router"){ node.outerHTML = routerCardHTML(card); return; }
+  if(card.kind === "printer"){ node.outerHTML = printerCardHTML(card); return; }
+  if(card.kind === "nas"){ node.outerHTML = nasCardHTML(card); return; }
   if(card.kind === "sensor"){
     node.outerHTML = sensorCardHTML(card);
     return;
@@ -3133,7 +3353,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.21 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.23 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -3365,10 +3585,74 @@ function entRow(e, canAll, pre){
   const t = stateText(e), on = isActive(e);
   const dom = e.split(".")[0];
   const s = S.states.get(e);
-  const use = canAll && canCtl() && CTL_DOMAIN.has(dom) && s && s.state!=="unavailable" && s.state!=="unknown";
-  return '<div class="mrow'+(on?" on":"")+(use?" ctl":"")+'" data-eid="'+esc(e)+'"'+
-    (use? ' data-svc="'+esc(dom)+"|"+toggleSvc(dom)+'"':'')+'>'+
+  const live = s && s.state!=="unavailable" && s.state!=="unknown";
+  const use = canAll && canCtl() && CTL_DOMAIN.has(dom) && live;
+  /* number 域不在 CTL_DOMAIN 里，单独接成「可点改」：点击弹出毛玻璃输入面板 */
+  const canNum = dom === "number" && canAll && canCtl() && live;
+  const clickable = use || canNum;
+  return '<div class="mrow'+(on?" on":"")+(clickable?" ctl":"")+'" data-eid="'+esc(e)+'"'+
+    (canNum? ' data-num="1"': (use? ' data-svc="'+esc(dom)+"|"+toggleSvc(dom)+'"':''))+'>'+
     '<i class="d"></i><span class="mn">'+esc(shortName(e, pre))+'</span><span class="mv">'+esc(t.t)+(t.ex? " "+esc(t.ex):"")+'</span></div>';
+}
+
+/* ══════════════ 数值输入面板（毛玻璃，替代原生 prompt） ══════════════ */
+function openNum(eid){
+  const st = S.states.get(eid) || {};
+  const a = st.attributes || {};
+  const cur = Number(st.state);
+  const mn = (typeof a.min === "number") ? a.min : 0;
+  const mx = (typeof a.max === "number") ? a.max : 100;
+  const step = (typeof a.step === "number" && a.step > 0) ? a.step : 1;
+  const u = a.unit_of_measurement || "";
+  const unitTxt = u === "minutes" ? "分钟" : (u === "°C" ? "°C" : (u === "gram" ? "克" : u));
+  S.numEid = eid;
+  S.numMeta = {mn: mn, mx: mx, step: step};
+  const panel = document.getElementById("numPanel");
+  panel.innerHTML =
+    '<h3>'+esc(nameOf(eid))+'</h3>'+
+    '<div class="npin"><input id="numIn" type="number" inputmode="decimal" value="'+
+      (isFinite(cur) ? cur : "")+'" min="'+mn+'" max="'+mx+'" step="'+step+'">'+
+      '<span class="nu">'+esc(unitTxt)+'</span></div>'+
+    '<div class="nstep"><button data-nstep="-1" aria-label="减小">−</button>'+
+      '<button data-nstep="1" aria-label="增大">+</button></div>'+
+    '<div class="nrange">范围 '+mn+' ~ '+mx+(unitTxt ? " "+esc(unitTxt) : "")+' · 步进 '+step+'</div>'+
+    '<div class="nerr" id="numErr"></div>'+
+    '<div class="nbrow"><button class="cancel" data-nact="cancel">取消</button>'+
+      '<button class="ok" data-nact="ok">确认</button></div>';
+  document.getElementById("mask3").classList.add("show");
+  setTimeout(()=>{ const i = document.getElementById("numIn"); if(i){ i.focus(); i.select && i.select(); } }, 40);
+}
+function closeNum(){
+  document.getElementById("mask3").classList.remove("show");
+  S.numEid = null; S.numMeta = null;
+}
+function numErr(msg){
+  const e = document.getElementById("numErr");
+  if(!e) return;
+  e.textContent = msg || "";
+  e.classList.toggle("show", !!msg);
+}
+function numStepBtn(dir){
+  const i = document.getElementById("numIn"), m = S.numMeta;
+  if(!i || !m) return;
+  let v = Number(i.value);
+  if(!isFinite(v)) v = m.mn;
+  v = Math.round((v + dir * m.step) * 1e6) / 1e6;
+  if(v < m.mn) v = m.mn;
+  if(v > m.mx) v = m.mx;
+  i.value = v;
+  numErr("");
+}
+async function numSubmit(){
+  const i = document.getElementById("numIn");
+  const m = S.numMeta, eid = S.numEid;
+  if(!i || !m || !eid) return;
+  const v = Number(i.value);
+  if(i.value === "" || !isFinite(v)){ numErr("请输入数字"); return; }
+  if(v < m.mn || v > m.mx){ numErr("超出范围 "+m.mn+" ~ "+m.mx); return; }
+  const ok = await callService("number", "set_value", {value: v}, eid);
+  if(ok){ closeNum(); toast("已设置 " + v); }
+  else numErr("下发失败，请重试");
 }
 
 function renderDetail(){
@@ -3386,6 +3670,7 @@ function renderDetail(){
 
   /* 一台设备一张卡：显示该设备下的全部实体 */
   if(card && (card.mains.length > 1 || card.more.length > 0 || card.sensors.length > 0 ||
+              (card.groups && card.groups.length) ||
               (card.doors && card.doors.length))){
     const d = r.device_id ? S.devices[r.device_id] : null;
     const dom0 = eid.split(".")[0];
@@ -3394,7 +3679,9 @@ function renderDetail(){
       '<p class="desc" style="margin-bottom:8px">'+esc(roomName(areaOf(eid)))+
         (d && d.manufacturer? ' · '+esc(d.manufacturer):'')+
         (d && d.model? ' · '+esc(d.model):'')+
-        ' · 可控 '+card.mains.length+' 项 / 配置 '+card.more.length+' 项'+
+        ((card.mains.length || card.more.length)
+          ? ' · 可控 '+card.mains.length+' 项 / 配置 '+card.more.length+' 项'
+          : ' · 此设备仅只读')+
         (S.pctl && !S.ctl ? ' · <b style="color:var(--accent)">已解锁（本次弹窗）</b>' : '')+'</p>'+
       (PANEL_CTL_DOMAIN.has(dom0)
         ? '<div class="dgrid"><div class="t">主控</div>'+
@@ -3436,6 +3723,15 @@ function renderDetail(){
       h += '<div class="dgrid"><div class="t">读数</div><div class="mgrid">'+
         card.sensors.map(e=> entRow(e, false, card.name)).join("")+'</div></div>';
     }
+    /* 打印机 / 极空间：实体按「耗材/计数/设备信息」「系统/磁盘/网络」分组列全 */
+    if(card.groups && card.groups.length){
+      card.groups.forEach(gr=>{
+        h += '<div class="dgrid"><div class="t">'+esc(gr.t)+'</div>'+
+          '<div class="mgrid" style="max-height:30vh;overflow:auto">'+
+          gr.es.map(e=> entRow(e, false, card.name)).join("")+'</div></div>';
+      });
+    }
+
     if(card.more.length){
       h += '<div class="dgrid"><div class="t">其余开关与配置</div>'+
         '<div class="mgrid" style="max-height:26vh;overflow:auto">'+
@@ -3548,6 +3844,7 @@ document.addEventListener("keydown", (ev)=>{
   if(top.id === "maskPlan"){ closePlan(); return; }
   top.classList.remove("show");
   if(top.id === "mask2"){ S.detailEid = ""; S.pctl = false; }
+  if(top.id === "mask3"){ closeNum(); }
   if(top.id === "mask"){ const q = document.getElementById("q"); if(q) q.focus(); }
 });
 /* 卡片键盘操作：Tab 聚焦、Enter / 空格打开详情 */
@@ -3568,6 +3865,9 @@ document.getElementById("inUrl").addEventListener("input", syncSeg);
 document.getElementById("mask").onclick = (ev)=>{ if(ev.target.id==="mask") hideSettings(); };
 document.getElementById("mask2").onclick = (ev)=>{
   if(ev.target.id==="mask2"){ S.detailEid=null; S.pctl=false; ev.currentTarget.classList.remove("show"); }
+};
+document.getElementById("mask3").onclick = (ev)=>{
+  if(ev.target.id==="mask3") closeNum();
 };
 
 document.getElementById("btnConnect").onclick = ()=>{
@@ -3604,6 +3904,7 @@ document.getElementById("btnRefresh").onclick = ()=>{
 
 document.getElementById("btnMode").onclick = ()=>{
   S.ctl = !S.ctl;
+  if(!S.ctl) S.pctl = false;      /* 顶栏切回只读时，弹窗临时权限必须一并收回，否则顶栏写「只读」、弹窗里还能点 */
   applyCtl();
   renderAll();
   if(S.detailEid) renderDetail();
@@ -3667,6 +3968,26 @@ document.addEventListener("click", (ev)=>{
     return;
   }
 
+  /* 数值行 → 毛玻璃输入面板（number 域不在 CTL_DOMAIN 里，单独一条路） */
+  const numEl = ev.target.closest("[data-num]");
+  if(numEl){
+    ev.stopPropagation();
+    if(!canCtl()){ toast("只读模式 · 先解锁控制"); return; }
+    openNum(numEl.getAttribute("data-eid"));
+    return;
+  }
+
+  /* 数值面板内：步进 / 取消 / 确认 */
+  const stepEl = ev.target.closest("[data-nstep]");
+  if(stepEl){ numStepBtn(Number(stepEl.getAttribute("data-nstep"))); return; }
+  const nactEl = ev.target.closest("[data-nact]");
+  if(nactEl){
+    const k = nactEl.getAttribute("data-nact");
+    if(k === "cancel") closeNum();
+    else if(k === "ok") numSubmit();
+    return;
+  }
+
   /* 服务指令 */
   const svcEl = ev.target.closest("[data-svc]");
   if(svcEl){
@@ -3682,15 +4003,12 @@ document.addEventListener("click", (ev)=>{
   const pel = ev.target.closest(".planel[data-eid]");
   if(pel){ openEnt(pel.getAttribute("data-eid")); return; }
 
-  /* 卡片 → 详情 */
+  /* 卡片 → 详情（统一走 openEnt，入口逻辑只写一处） */
   const card = ev.target.closest(".card");
   if(card){
     const eid = card.getAttribute("data-eid");
     if(!eid) return;
-    S.detailEid = eid;
-    S.pctl = false;                 /* 换一台设备重新回到只读，权限不跟着走 */
-    renderDetail();
-    document.getElementById("mask2").classList.add("show");
+    openEnt(eid);
   }
 });
 
