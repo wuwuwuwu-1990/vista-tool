@@ -868,7 +868,7 @@ html[data-card="capsule"] .card .sv{
 }
 
 /* ══════════════════════════════════════════════════════════════
-   V1.0.18 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
+   V1.0.19 · 收口层（全站唯一权威定义，不再用 !important 互相覆盖）
    ① 滚动闪烁 → 取消 scrolling 类切换，卡片不再挂 backdrop-filter
    ② 弹窗跳动 → scrollbar-gutter 预留槽位，锁滚动不改变列宽
    ③ 立体感   → 三层阴影 + 顶部内高光，并解开 .grid 的 paint 裁剪
@@ -1016,7 +1016,7 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.18</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.19</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1340,6 +1340,28 @@ function cameraOnline(eid){
   return null;
 }
 
+/* ── 窗帘位置校正 ────────────────────────────────────────────
+   个别设备（如 giot BLE Mesh 窗帘）在 xiaomi_miot 里带 position_reverse=true，
+   上报与下发都会被 100-x，表现为「设备全开、HA 说关闭」。这里统一换算成物理
+   口径（0=全遮，100=全拉开）。后端把 reverse 关掉后该属性消失，函数自动退化
+   为恒等映射，前端不需要二次改。 */
+function coverRevOf(eid){
+  const st = eid ? S.states.get(eid) : null;
+  return !!(st && st.attributes && st.attributes.position_reverse === true);
+}
+function coverPhysOf(eid){
+  const st = eid ? S.states.get(eid) : null;
+  const a = (st && st.attributes) || {};
+  const p = a.current_position;
+  if(typeof p !== "number") return null;
+  const q = (a.position_reverse === true) ? 100 - p : p;
+  return Math.max(0, Math.min(100, Math.round(q)));
+}
+function coverHaVal(eid, phys){
+  const v = Math.max(0, Math.min(100, Math.round(Number(phys) || 0)));
+  return coverRevOf(eid) ? 100 - v : v;
+}
+
 function clsOf(st, domain, eid){
   const v = String(st);
   /* 摄像头：先按同设备的控制开关判在线，不能直接跟着实体自己的 unavailable 走 */
@@ -1348,7 +1370,12 @@ function clsOf(st, domain, eid){
     return (on === true) ? "act" : "na";   /* 绿=在线，灰=离线 */
   }
   if(v==="unavailable"||v==="unknown") return "na";
-  if(domain==="cover") return (v==="open"||v==="opening")?"on":"off";
+  if(domain==="cover"){
+    if(v==="opening"||v==="closing") return "on";
+    const p = coverPhysOf(eid);
+    if(p !== null) return p > 2 ? "on" : "off";
+    return (v==="open"||v==="opening") ? "on" : "off";
+  }
   if(domain==="binary_sensor") return (v==="on")?"bad":"off";
   if(domain==="climate") return (v==="off")?"off":"cool";
   if(domain==="lock") return (v==="unlocked")?"bad":"off";
@@ -1361,6 +1388,7 @@ function isActive(eid){
   const st = S.states.get(eid); if(!st) return false;
   const v = st.state, dom = eid.split(".")[0];
   if(dom==="climate") return v!=="off" && v!=="unavailable" && v!=="unknown";
+  if(dom==="cover"){ const p = coverPhysOf(eid); if(p !== null) return p > 2; }
   return v==="on"||v==="open"||v==="opening"||v==="unlocked"||v==="playing"||v==="cleaning";
 }
 
@@ -1676,9 +1704,25 @@ function toggleSvc(dom){
 
 async function doService(dom, svc, eid){
   if(eid && S.busy.has(eid)) return;
+  let data = {};
+  /* 窗帘：开 / 关 / 切换一律改走 set_cover_position。
+     giot BLE Mesh 这类设备走 motor_control（open_cover / close_cover）时电机会动，
+     但设备不回写 target_position，HA 状态就冻结在旧值 —— 表现成「窗帘动了、屏幕不变」。
+     设定位置这条路能拿到状态回写，实测 2~6 秒同步。 */
+  if(dom === "cover" && eid){
+    if(svc === "open_cover"){
+      svc = "set_cover_position"; data.position = coverHaVal(eid, 100);
+    }else if(svc === "close_cover"){
+      svc = "set_cover_position"; data.position = coverHaVal(eid, 0);
+    }else if(svc === "toggle"){
+      const p = coverPhysOf(eid);
+      const wantOpen = !(p !== null && p > 2);
+      svc = "set_cover_position"; data.position = coverHaVal(eid, wantOpen ? 100 : 0);
+    }
+  }
   if(eid) S.busy.add(eid);
   try{
-    await callService(dom, svc, {}, eid);
+    await callService(dom, svc, data, eid);
   }finally{
     if(eid) setTimeout(()=> S.busy.delete(eid), 350);
   }
@@ -2579,8 +2623,11 @@ function stateText(eid){
       if(v==="on") return {t:"开", ex:(a.brightness? "亮度 "+Math.round(a.brightness/2.55)+"%" : (a.color_temp_kelvin? a.color_temp_kelvin+"K":""))};
       return {t:"关", ex:""};
     case "cover":{
-      const p = a.current_position;
-      return {t: tr(v), ex: (p!==undefined&&p!==null)? "开合 "+p+"%" : "", pos:p};
+      const p = coverPhysOf(eid);
+      if(v==="opening"||v==="closing") return {t: tr(v), ex:(p!==null? "开合 "+p+"%" : ""), pos:p};
+      const shown = (p!==null && v!=="unavailable" && v!=="unknown")
+        ? (p > 2 ? tr("open") : tr("closed")) : tr(v);
+      return {t: shown, ex: (p!==null)? "开合 "+p+"%" : "", pos:p};
     }
     case "climate":{
       const cur = a.current_temperature, tgt = a.temperature;
@@ -2623,8 +2670,7 @@ function barPct(eid){
   const st = S.states.get(eid); if(!st) return null;
   const dom = eid.split(".")[0], a = st.attributes || {};
   if(dom==="cover"){
-    const p = a.current_position;
-    return (typeof p === "number")? p : null;
+    return coverPhysOf(eid);
   }
   if(dom==="light" && st.state==="on"){
     const b = a.brightness;
@@ -2830,7 +2876,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.18 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.19 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -2859,7 +2905,11 @@ function renderStats(){
       devSeen.add(key);
       if(v==="unavailable") devOff.add(key);
     }
-    if(dom==="cover"){ coversAll++; if(v==="open"||v==="opening") coversOpen++; }
+    if(dom==="cover"){
+      coversAll++;
+      const cp = coverPhysOf(eid);
+      if(cp !== null ? cp > 2 : (v==="open"||v==="opening")) coversOpen++;
+    }
     if(dom==="binary_sensor"){
       const dc = attrOf(eid,"device_class");
       if((dc==="door"||dc==="window"||dc==="opening") && v==="on") doorsOpen++;
@@ -2937,8 +2987,8 @@ function panelCtl(eid){
       '<button data-svc="cover|open_cover" class="pri">打开</button>'+
       '<button data-svc="cover|stop_cover">暂停</button>'+
       '<button data-svc="cover|close_cover">关闭</button></div>';
-    const p = a.current_position;
-    if(typeof p === "number"){
+    const p = coverPhysOf(eid);
+    if(p !== null){
       h += '<div class="sldwrap"><div class="lb"><span>开合度</span><b id="sldVal">'+p+'%</b></div>'+
         '<div class="sld"><input type="range" min="0" max="100" step="1" value="'+p+'" '+
         'data-sld="cover|set_cover_position|position" data-eid="'+esc(eid)+'"></div></div>';
@@ -3344,7 +3394,9 @@ document.addEventListener("change", (ev)=>{
   const [dom, svc, key] = spec.split("|");
   const eid = s.getAttribute("data-eid");
   const scale = parseFloat(s.getAttribute("data-scale") || "1");
-  const data = {}; data[key] = Number(s.value) * scale;
+  let v = Number(s.value) * scale;
+  if(dom === "cover" && key === "position") v = coverHaVal(eid, v);
+  const data = {}; data[key] = v;
   callService(dom, svc, data, eid);
 });
 
