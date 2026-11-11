@@ -1025,6 +1025,39 @@ html[data-card="capsule"] .card .sv{
   word-break:break-word;
 }
 
+/* ── 多键动作卡（V1.0.28 第 4 条 · 美菱茶吧机）──
+   4 个 script 合成一张卡：容器不是按钮（cursor 回 default、不带 data-svc / data-eid），
+   4 个 <button type="button"> 各自带自己的服务与实体。 */
+.card.acts4{cursor:default;gap:8px}
+.card.acts4 .abts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto}
+.card.acts4 .abts button{
+  height:30px;border-radius:9px;border:1px solid var(--line2);background:transparent;
+  color:var(--text2);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;
+  padding:0;transition:.15s var(--ease);
+}
+.card.acts4 .abts button:hover{background:rgba(120,120,128,.16)}
+.card.acts4 .abts button:active{transform:scale(.97);background:rgba(120,120,128,.26)}
+.card.acts4 .ic{background:rgba(52,199,89,.15);color:#28a745}
+html[data-mode="dark"] .card.acts4 .ic{background:rgba(52,199,89,.18);color:#4ade80}
+/* 胶囊卡是固定 72px 的两行命名网格（"ic nm pw"/"ic st pw"），四个按钮根本塞不进去，
+   这一段重写 grid-template-areas 按 2×2 排：名称一行、按钮两行，图标竖跨三行。 */
+html[data-card="capsule"] .card.acts4{
+  grid-template-columns:36px minmax(0,1fr) minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);
+  grid-template-areas:"ic nm nm" "ic b1 b2" "ic b3 b4";
+  column-gap:8px;row-gap:2px;align-content:stretch;align-items:stretch;
+  padding:6px 12px 7px 10px;
+}
+/* 包装层在胶囊档里不占格子，四个按钮直接落进 b1~b4 */
+html[data-card="capsule"] .card.acts4 .abts{display:contents}
+html[data-card="capsule"] .card.acts4 .nm{align-self:center;font-size:11px;-webkit-line-clamp:1}
+html[data-card="capsule"] .card.acts4 .abts button{height:auto;min-height:0;border-radius:7px;
+  font-size:10.5px;line-height:1;padding:0}
+html[data-card="capsule"] .card.acts4 .abts button:nth-child(1){grid-area:b1}
+html[data-card="capsule"] .card.acts4 .abts button:nth-child(2){grid-area:b2}
+html[data-card="capsule"] .card.acts4 .abts button:nth-child(3){grid-area:b3}
+html[data-card="capsule"] .card.acts4 .abts button:nth-child(4){grid-area:b4}
+
 /* ══════════ 小屏 ══════════ */
 @media (max-width:1024px){
   .appear{grid-column:1/-1}
@@ -1212,6 +1245,18 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
   .stat .k{font-size:12px;letter-spacing:0}
   .stat .v{font-size:19px}
 }
+/* V1.0.28 第 3 条：1025–1288 改成两行四列后，卡宽反弹到 169–233px，
+   比 1512 视口下的 153px 还宽，可内部仍是紧凑档（图标 26 / 图形 20×16），看着发空。
+   给这一段单独套中档尺寸，别去动 1500 那条（1289–1499 仍是七列 137–146px，撑不住）。
+   预算：padding 18 + icon 32 + gap 5 + graphic 32 + border 2 = 89 → 169 卡还有 80px 给文字。 */
+@media (min-width:1025px) and (max-width:1288px){
+  .stat{padding:9px;gap:5px}
+  .stat .si{width:32px;height:32px}
+  .stat .si svg{width:17px;height:17px}
+  .stat .g{width:32px;height:28px}
+  .stat .k{font-size:12px;letter-spacing:0}
+  .stat .v{font-size:20px}
+}
 /* 大方档（≥186） */
 @media (min-width:1720px){
   .stat{padding:10px;gap:8px}
@@ -1334,7 +1379,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.27</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.28</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1515,7 +1560,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.27
+   HA家庭智能控制系统 · V1.0.28
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -1591,7 +1636,10 @@ const I = {
          '<path d="M16.2 11.4a1.6 1.6 0 0 1 3.2 0v3.4a6 6 0 0 1-6 6h-1.6a5.5 5.5 0 0 1-3.9-1.6L5 16.2a1.8 1.8 0 0 1 2.6-2.5L9 15"/>',
   /* 燃气热水器：火焰 + 水箱 */
   heater:'<path d="M12 3.4c2.6 3 4.4 5 4.4 7.6A4.4 4.4 0 0 1 12 15.4a4.4 4.4 0 0 1-4.4-4.4C7.6 8.4 9.4 6.4 12 3.4Z"/>'+
-         '<path d="M6 18.4h12a1.6 1.6 0 0 1 0 3.2H6a1.6 1.6 0 0 1 0-3.2Z"/>'
+         '<path d="M6 18.4h12a1.6 1.6 0 0 1 0 3.2H6a1.6 1.6 0 0 1 0-3.2Z"/>',
+  cup:'<path d="M6.2 9.6h11.6v5.6a4.2 4.2 0 0 1-4.2 4.2h-3.2a4.2 4.2 0 0 1-4.2-4.2Z"/>'+
+      '<path d="M17.8 10.9h1.1a2.45 2.45 0 0 1 0 4.9h-1.1"/>'+
+      '<path d="M9.5 3.2v2.3M12.4 2.6v2.9M15.3 3.2v2.3"/>'
 };
 const ICON_ROOM = '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>';
 
@@ -2149,13 +2197,14 @@ function toast(msg, ms){
 }
 
 async function callService(domain, service, data, eid, opts){
-  /* 只读锁：常规入口一律拦下；两类例外临时放行 ——
-     ① 全屋概览大屏（#planWrapBig）② 动作卡（.actcard，米家红外那种一键动作）。
-     都只对本次操作有效，不写 localStorage、不动顶栏模式。
-     ② 再打个 silentRO：动作卡本身就是「执行」键，弹「只读模式 · 先解锁」纯属噪音。 */
+  /* 只读锁：常规入口一律拦下；唯一的临时放行是全屋概览大屏（#planWrapBig）。
+     只对本次操作有效，不写 localStorage、不动顶栏模式。
+     ⚠️ V1.0.28 第 1 条：动作卡（.actcard）的放行整条撤回 —— 脚本会发红外码，
+     只读状态下必须和电源键一样被拦下，只弹「只读模式 · 先解锁控制」。
+     也正因为撤了，opts.silentRO 这条静默分支一并删掉，不留死代码。 */
   if(!canCtl()){
     if(!(opts && opts.allowRO)){ toast("只读模式 · 先解锁控制"); return false; }
-    if(!(opts && opts.silentRO)) toast("户型图临时放行 · 只对本次操作有效");
+    toast("户型图临时放行 · 只对本次操作有效");
   }
   const body = {domain: domain, service: service};
   if(data && Object.keys(data).length) body.service_data = data;
@@ -2505,6 +2554,11 @@ function groupKey(eid){
   /* 锐捷（V1.0.26）：HA 给它建了 3 条设备记录（主路由 / WAN / device_tracker），
      按 device_id 分组会拆出 2~3 张同名「Ruijie router」卡片。这里统一并成一组。 */
   if(/ruijie|锐捷/i.test(eid)) return "router|ruijie";
+  /* 茶吧机（V1.0.28 第 4 条）：4 个 script（取水 / 电源 / 加热 / 保温）在 HA 里
+     device_id 为空、都挂在客厅，groupKey 落到 single|<eid> 会各建一张卡 ——
+     等于把一台机器摊成 4 张。全屋 script 实体就这 4 个，按前缀归成一组 = 一台设备。
+     统计侧跟着从 4 台掉到 1 台，属预期（不去动 groupEntities）。 */
+  if(/^script\.cha_ba_ji_/.test(eid)) return "script|cha_ba_ji";
   const key = devIdOf(eid);
   if(key) return key;
   if(/^sensor\.deli_printer_/.test(eid)) return "printer|deli";
@@ -2690,6 +2744,29 @@ function buildModel(){
          groups.size 算，国网那组照旧算 1 台，不会掉数。 */
       ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
       continue;
+    }
+
+    /* 茶吧机四键动作卡（V1.0.28 第 4 条）：4 个 script 合成一张「美菱茶吧机」。
+       按钮顺序在字典序里是 保温/电源/加热/取水，靠排序必然错 —— 写死成
+       电源 → 取水 → 加热 → 保温（用户定的机器操作顺序）。
+       card.eid 取电源那个当锚点（房间归属、S.cardOf 回查都靠它）。
+       4 个 eid 同时塞进 card.mains：搜索框是按 card.mains 命中的，
+       不塞就搜「取水」找不到这张卡。 */
+    if(key === "script|cha_ba_ji"){
+      const ORDER = ["dian_yuan", "qu_shui", "jia_re", "bao_wen"];
+      const acts = ORDER.map(n=> "script.cha_ba_ji_" + n)
+                        .filter(e=> S.states.has(e))
+                        .map(e=> ({ eid: e, label: actLabel(e) }));
+      if(acts.length){
+        const anchor = acts[0].eid;
+        const card = { key, eid: anchor, name: "美菱茶吧机", acts,
+                       mains: acts.map(a=> a.eid), sensors: [], more: [],
+                       load: false, kind: "acts" };
+        const room = ensure(areaOf(anchor));
+        room.cards.push(card);
+        ents.forEach(x=>{ if(!S.cardOf.has(x)) S.cardOf.set(x, card); });
+        continue;
+      }
     }
 
     /* 脚本动作卡（V1.0.26）：米家红外那类「一次点击发一串码」的动作，
@@ -3169,10 +3246,17 @@ const PLAN_GLOW_EIDS = PLAN_ELS.filter(e=> e.g).map(e=> e.e);
 /* ══════════════ 分类判定（统计与下钻共用同一口径） ══════════════ */
 const PLAN_GLOW_SET = new Set(PLAN_GLOW_EIDS);
 const CAT_CN = { light:"灯光开启", cover:"窗帘开启", door:"门窗敞开", temp:"室内温度", hum:"平均湿度" };
-/* 温湿度「坏名单」：冰箱/热水/设置值等不算室温，与 renderStats 里原来的过滤完全一致 */
-function tempBad(nm, aid){
-  return aid === "__none__" ||
-    /冰箱|冷藏|冷冻|变温|设置|目标|设备温度|热水|出水|洗衣机|咖啡|烤箱|电箱/.test(nm);
+/* 温湿度「坏名单」：冰箱/热水/设置值等不算室温，与 renderStats 里原来的过滤完全一致。
+   V1.0.28 第 5 条：签名从 (名称, 区域) 改成只吃 eid，名称与区域内部自取 ——
+   entCat（算平均）和 catHitCard（算下钻）两处调用共用，参数各传各的迟早走偏。
+   新增：遥控器类（RM pro 这类红外/射频中继）自带的机身温度探头不是室内空气温度。
+   按 entity_id 的拼音段 `_yao_kong_` 判定，不按中文名「博联」匹配（设备一改名就失效）；
+   也不动 visible() / HIDE_EID_RES —— 博联的卡、设备总数、在线率都得照旧。 */
+const TEMP_BAD_EID = /_yao_kong_|_yaokong_/;
+function tempBad(eid){
+  if(areaOf(eid) === "__none__") return true;
+  if(TEMP_BAD_EID.test(eid)) return true;
+  return /冰箱|冷藏|冷冻|变温|设置|目标|设备温度|热水|出水|洗衣机|咖啡|烤箱|电箱/.test(nameOf(eid));
 }
 /* 窗帘 vs 开窗器：HA 里两者都是 cover，只能靠 device_class 分。
    curtain = 窗帘，window = 开窗器；米家老窗帘没有 device_class，按窗帘兜底。 */
@@ -3181,28 +3265,38 @@ function isCurtain(eid){
   if(!dc) return true;
   return dc === "curtain";
 }
-/* 门窗敞开的口径（V1.0.27 第 10 条，两处调用共用）：
+/* 门窗敞开的口径（V1.0.27 第 10 条 / V1.0.28 第 2 条，两处调用共用）：
    ① 开窗器：cover + device_class=window + position > 2
    ② 门锁：sensor，没有 device_class，靠 door_state 属性；只有 open 算开，
       stuck / unknown 一律算关（用户定的口径）
    冰箱那 4 个 binary_sensor 门从这里彻底出局 —— 「门窗敞开」是给家里的窗和门用的，
-   冰箱门开着不该报警。 */
+   冰箱门开着不该报警。
+
+   ⚠️ V1.0.28 第 2 条：同一把小米门锁上挂了 3 个带 door_state 属性的实体 ——
+     sensor.…_door_state_2（真身）/ sensor.…_lock_2（操作方式，值 automatic）/
+     button.…_info_2（信息按钮），三个状态同步。只放行 sensor 域时前两个都命中，
+     现在全是 stuck 所以显示 0 看不出来，门一开就会被计成 2。
+   口径改为「entity_id 必须是 _door_state，或 _door_state 后只跟一个纯数字序号」
+   （米家集成给的多实体设备会加 _2 / _3 后缀，真身实际叫 …_door_state_2），另两个一律不算。 */
+function isDoorLockEnt(eid){
+  if(eid.split(".")[0] !== "sensor") return false;
+  if(!/_door_state(_\d+)?$/.test(eid)) return false;
+  const a = (S.states.get(eid) || {}).attributes;
+  return !!a && a.door_state !== undefined;
+}
 function doorKind(eid){
   const st = S.states.get(eid);
   if(!st) return false;
-  const dom = eid.split(".")[0];
-  if(dom === "cover"){
+  if(eid.split(".")[0] === "cover"){
     if(attrOf(eid, "device_class") !== "window") return false;
     const p = coverPhysOf(eid);
     if(p !== null) return p > 2;
     return st.state === "open" || st.state === "opening";
   }
-  if(dom === "sensor"){
-    const ds = (st.attributes || {}).door_state;
-    if(ds === undefined || ds === null || ds === "") return false;
-    return String(ds).toLowerCase() === "open";
-  }
-  return false;
+  if(!isDoorLockEnt(eid)) return false;
+  const ds = st.attributes.door_state;
+  if(ds === undefined || ds === null || ds === "") return false;
+  return String(ds).toLowerCase() === "open";
 }
 /* 窗帘「开合度」显示值（统计卡竖条用）。
    position_reverse=true 的设备 HA 已经反过一次，coverPhysOf 再反一次会得到 0，
@@ -3237,7 +3331,7 @@ function entCat(eid, cat){
     if(dc !== "temperature" && dc !== "humidity") return false;
     const nv = parseFloat(v);
     if(!isFinite(nv)) return false;
-    if(tempBad(nameOf(eid), areaOf(eid))) return false;
+    if(tempBad(eid)) return false;
     if(cat === "temp") return dc === "temperature" && nv >= -10 && nv <= 45;
     return dc === "humidity" && nv >= 0 && nv <= 100;
   }
@@ -3258,10 +3352,11 @@ function catTypeMatch(eid, cat){
   if(cat === "light") return PLAN_GLOW_SET.has(eid);
   if(cat === "cover") return dom === "cover" && isCurtain(eid);   /* 开窗器不进窗帘下钻 */
   if(cat === "door"){
-    /* 类型判定：开窗器 + 带 door_state 的门锁（不看此刻开没开） */
+    /* 类型判定：开窗器 + door_state 门锁真身（不看此刻开没开）。
+       V1.0.28 第 2 条：门锁只认 _door_state 结尾那个，_lock_2 / button…_info_2 不算 ——
+       与 doorKind 同一口径，否则「卡上不算、点进去还算」两头打架。 */
     if(dom === "cover") return attrOf(eid, "device_class") === "window";
-    if(dom === "sensor") return ((S.states.get(eid) || {}).attributes || {}).door_state !== undefined;
-    return false;
+    return isDoorLockEnt(eid);
   }
   if(cat === "temp") return dom === "sensor" && attrOf(eid, "device_class") === "temperature";
   if(cat === "hum") return dom === "sensor" && attrOf(eid, "device_class") === "humidity";
@@ -3281,7 +3376,7 @@ function catHitCard(card, cat){
   if(!cat) return true;
   if(cardEids(card).some(e=>{
     if(!catTypeMatch(e, cat)) return false;
-    if(cat === "temp" || cat === "hum") return !tempBad(nameOf(e), areaOf(e));
+    if(cat === "temp" || cat === "hum") return !tempBad(e);
     return true;
   })) return true;
   /* 门锁这一类的补充：door_state 传感器本身不成卡（没有 device_class，被 keepSensor 挡掉），
@@ -4052,7 +4147,31 @@ function scriptCardHTML(card){
     '</div>';
 }
 
+/* 动作按钮标签：HA 里它的 friendly_name 是「茶吧机电源」这种，
+   去掉「茶吧机」前缀只留两个字（电源 / 取水 / 加热 / 保温）。 */
+function actLabel(eid){
+  const n = String(nameOf(eid) || "");
+  return n.replace(/^茶吧机/, "").trim() || n;
+}
+
+/* 多键动作卡（V1.0.28 第 4 条）：茶吧机 4 个脚本合成一张卡。
+   ⚠️ 容器上绝对不能带 data-svc —— 整卡带 data-svc 时点空隙会误触发第一个脚本；
+   也不能带 data-eid —— 点空白会弹一个空详情。服务与实体全挂在按钮上，各管各的。
+   ⚠️ 必须 <button type="button">：卡片里的 div 敲 Enter 不触发。
+   ⚠️ .actcard 只留着给样式用 —— 只读放行已按第 1 条整条撤回。 */
+function actsCardHTML(card){
+  const acts = card.acts || [];
+  return '<div class="card acts4 actcard" data-key="'+esc(card.key)+'">'+
+      '<div class="top"><div class="ic">'+svg(I.cup)+'</div>'+
+      '<div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="abts">'+ acts.map(a=>
+        '<button type="button" data-svc="script|turn_on" data-eid="'+esc(a.eid)+'"'+
+        ' title="执行 '+esc(nameOf(a.eid))+'">'+esc(a.label)+'</button>').join("") +'</div>'+
+    '</div>';
+}
+
 function cardHTML(card){
+  if(card.kind === "acts")   return actsCardHTML(card);
   if(card.kind === "script") return scriptCardHTML(card);
   if(card.kind === "fryer") return fryerCardHTML(card);
   if(card.kind === "fridge") return fridgeCardHTML(card);
@@ -4117,6 +4236,10 @@ function patchCard(eid){
   if(!card) return;
   const node = document.querySelector('.card[data-key="'+CSS.escape(card.key)+'"]');
   if(!node) return;
+  /* 多键动作卡没有「状态」可刷（按钮不带 on/off 态），也不该被重建 ——
+     掉进下面的通用分支会把 data-key 之外的东西一起改写，className 也会被覆盖成
+     "card xxx"，acts4/actcard 两个类当场丢失（2×2 布局立刻散掉），所以这里直接返回。 */
+  if(card.kind === "acts") return;
   if(card.kind === "script"){ node.outerHTML = scriptCardHTML(card); return; }
   if(card.kind === "fryer"){ node.outerHTML = fryerCardHTML(card); return; }
   if(card.kind === "fridge"){ node.outerHTML = fridgeCardHTML(card); return; }
@@ -4252,7 +4375,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.27 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.28 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -5518,11 +5641,7 @@ document.addEventListener("click", (ev)=>{
     const eid = holder && holder.getAttribute("data-eid");
     /* 全屋概览大屏：只读模式下临时放行（callService 会给轻提示） */
     const fromPlanBig = !!svcEl.closest("#planWrapBig");
-    /* 动作卡（米家红外一键动作，整张卡带 data-svc）：它本身就是「执行」键，
-       只读模式下也必须能按 —— 但绝不能把 script 塞进 CTL_DOMAIN，
-       那样等于让以后所有脚本都能被普通电源键在只读下点跑。 */
-    const fromAct = dom === "script" && (svcEl.classList.contains("actcard") || !!svcEl.closest(".actcard"));
-    doService(dom, svc, eid, fromAct ? {allowRO: true, silentRO: true} : {allowRO: fromPlanBig});
+    doService(dom, svc, eid, {allowRO: fromPlanBig});
     return;
   }
 
