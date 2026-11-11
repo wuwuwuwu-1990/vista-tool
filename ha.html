@@ -55,7 +55,9 @@ body{
 .shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start}
 /* V1.0.26：左栏不再自带滚动条。scrollbar-gutter:stable 会在右缘永久预留 8–10px
    槽位，那条空白就是它留下的。左栏卡片改由内容自身限高（户型图缩略 210、
-   天气卡 overflow:hidden、外观块默认收起）保证塞得进视口，不靠滚动兜。 */
+   天气卡 overflow:hidden）保证塞得进视口，不靠滚动兜。
+   V1.0.27：外观块改回默认展开（用户要求常驻），省高度只能靠高度断点兜 ——
+   视口高 ≤1000 时把左栏滚动加回来，见文件末尾的 1025/1000 兜底。 */
 .rail{position:sticky;top:88px;display:flex;flex-direction:column;gap:12px;min-width:0;
   overflow:visible;padding-bottom:2px}
 .rail > *{flex:0 0 auto}
@@ -318,6 +320,9 @@ html[data-mode="dark"] .badge.hboff{color:#ff6b60}
 /* 分类下钻卡：可点、可选中（accent 边框），设备总数/离线设备不并入 */
 .stat.cat{cursor:pointer}
 .stat.cat:hover{border-color:var(--line2)}
+/* 电费那格：不是分类下钻，只是「点开弹窗」，所以只给手型 + 同样的 hover 反馈，不加 sel */
+.stat.open{cursor:pointer}
+.stat.open:hover{border-color:var(--line2)}
 .stat.sel{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent)}
 /* 圆形底座：拟物浮雕。底色 145° 白→灰渐变，右下暗影 + 左上亮影必须同时存在才成立，
    再加顶部 inset 高光；比卡面略实（卡面 .54，这里 .72）+ 同族毛玻璃，透底卡上才撑得出实体感。
@@ -903,7 +908,9 @@ header{
   box-shadow:0 1px 3px rgba(0,0,0,.14)}
 
 /* ══════════ 外观面板（左栏最下，复刻同堂「个性化」） ══════════ */
-/* V1.0.26：默认收起。左栏去掉滚动后必须省高度，这一块平时不用，折成一行标题。 */
+/* V1.0.26 曾默认收起，靠它给左栏省 200px。V1.0.27 按用户要求改回默认展开
+   （class="appear open" 直接写在 HTML 上，不用 JS 补，否则首屏会先收起再弹开、
+   看得见一次高度突变）。省高度改由高度断点兜：视口高 ≤1000 时左栏恢复滚动。 */
 .appear{padding:11px 13px;display:flex;flex-direction:column;gap:0;flex:0 0 auto}
 .ap-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
   border:0;background:transparent;padding:0;font-family:var(--font);font-size:12px;font-weight:600;
@@ -1163,6 +1170,12 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
   /* 手机端胶囊单列，恢复等高更整齐 */
   html[data-card="capsule"] .grid{align-items:stretch}
 }
+/* V1.0.27：repeat(7,minmax(0,1fr)) 没有下限，1025–1288 这段每格只剩 92–130px，
+   扣掉图标 + 图形 + 内边距 70px，文字区只有 22px，「18.0°C」直接被截成「18....」。
+   这一段改成两行 4 列：卡宽从 92–130 反弹到 169–233，反而比 1512 视口还宽裕。 */
+@media (min-width:1025px) and (max-width:1288px){
+  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
 @media (max-width:720px){
   .stats{grid-template-columns:repeat(auto-fit,minmax(112px,1fr))}
   html[data-card="capsule"] .grid{grid-template-columns:1fr}
@@ -1187,9 +1200,11 @@ html{scrollbar-color:rgba(120,120,128,.42) transparent;scrollbar-width:thin}
 .stat .g{width:20px;height:16px}
 .stat .k{font-size:11.5px;letter-spacing:0}
 .stat .v{font-size:19px}
-/* 中间档（140–186）—— 图标与图形再收一档：1512 视口下卡只 153px，
-   图标 34 + 图形 38 会把文字区压到 51px，「18.0°C」当场被截成「18....」。 */
-@media (min-width:1400px){
+/* 中间档（1500–1719）—— 图标与图形再收一档：1512 视口下卡只 153px，
+   图标 34 + 图形 38 会把文字区压到 51px，「18.0°C」当场被截成「18....」。
+   V1.0.27：门槛从 1400 提到 1500。1400–1499 这段卡只有 137–146px，
+   撑不起这一档的图标尺寸，实测 1400 就把「18.0°C」截成「18.0°…」；退回紧凑档反而完整。 */
+@media (min-width:1500px){
   .stat{padding:9px;gap:5px}
   .stat .si{width:30px;height:30px}
   .stat .si svg{width:16px;height:16px}
@@ -1231,15 +1246,18 @@ html[data-mode="dark"] #btnPlanClose:active{background:#E53228}
   .wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;padding:22px 30px 0;overflow:hidden}
   .wrap > header{flex:0 0 auto;position:static;margin:0 -30px 14px;padding:14px 30px}
   .shell{flex:1 1 auto;min-height:0;align-items:stretch}
-  .rail{position:static;max-height:none;min-height:0;overflow:visible;padding-bottom:26px}
+  .rail{position:static;max-height:none;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+    padding-bottom:26px}
   #main{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding-bottom:44px}
   /* 弹窗打开时锁住内层滚动（页面本身已不滚，html.noscroll 改锁这两个内层容器） */
   html.noscroll .rail,html.noscroll #main{overflow:hidden}
 }
-/* V1.0.26 兜底①：矮屏装不下左栏时把滚动加回来，宁可出滚动条也不能被裁 */
-@media (min-width:1025px) and (max-height:800px){
-  .rail{overflow-y:auto;scrollbar-gutter:stable;overscroll-behavior:contain}
-}
+/* V1.0.27 兜底：外观块改回默认展开后，左栏内容高约 1025px（视口 1080 时可用只有 968），
+   1280×800 更极端（可用 688）。所以不再按高度分档，直接把overflow 交给 auto：
+   装得下时既不出滚动条、也不预留槽位（scrollbar-gutter 保持 auto，不是 stable），
+   装不下才出现 6px 细条 —— 总比外观块被裁掉一截强。
+   原先那条 max-height:800 的兜底因此并入上面 1025 的规则，不再单独写。 */
+
 /* V1.0.26 兜底②：1280 档收窄左栏，给右区腾出宽度 */
 @media (min-width:1025px) and (max-width:1399px){
   .shell{grid-template-columns:240px minmax(0,1fr)}
@@ -1316,7 +1334,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.26</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.27</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1385,8 +1403,8 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
         <div class="planwrap thumb" id="planWrap"><div class="plansk"></div></div>
       </div>
 
-      <div class="appear" id="appear">
-        <button class="ap-toggle" id="apToggle" type="button" aria-expanded="false" aria-controls="apBody">
+      <div class="appear open" id="appear">
+        <button class="ap-toggle" id="apToggle" type="button" aria-expanded="true" aria-controls="apBody">
           <span>外观与风格</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -1497,7 +1515,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.26
+   HA家庭智能控制系统 · V1.0.27
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -2090,6 +2108,17 @@ function featOf(eid){
             一次解锁不等于整个面板都放开。判定一律走 canCtl()。 */
 function canCtl(){ return !!(S.ctl || S.pctl); }
 
+/* 开 / 关两键大开关：灯、插座、风机、热水器共用同一套控件。
+   原先热水器那段是手写的「开机 / 关机」两个按钮，字号、间距、实心规则都跟着
+   .ctlrow 走却又不完全一致，两个截图并排一眼就能看出来不是一套东西。
+   eid 只在「按钮不在 [data-eid] 容器里」时才需要显式带上（热水器弹窗就是这种）。 */
+function pairCtl(dom, on, eid){
+  const t = eid ? ' data-eid="'+esc(eid)+'"' : '';
+  return '<div class="ctlrow">'+
+    '<button data-svc="'+esc(dom)+'|turn_on"'+t+' class="'+(on?'':'pri')+'">开</button>'+
+    '<button data-svc="'+esc(dom)+'|turn_off"'+t+' class="'+(on?'pri':'')+'">关</button></div>';
+}
+
 /* 烹饪四键按「实体 ID 后缀」识别，与显示语言无关 —— 中文名一旦切英文或换型号后缀不同，
    按名字匹配会让四个按钮静默消失且不报错。后缀固定：start_cook / resume_cook / pause / cancel_cooking */
 const BTN_SUFFIX = ["start_cook", "resume_cook", "pause", "cancel_cooking"];
@@ -2120,11 +2149,13 @@ function toast(msg, ms){
 }
 
 async function callService(domain, service, data, eid, opts){
-  /* 只读锁：常规入口一律拦下；全屋概览大屏（#planWrapBig）传 allowRO 时临时放行，
-     并给一条轻提示说明「只对本次操作有效」，不写 localStorage、不动顶栏模式 */
+  /* 只读锁：常规入口一律拦下；两类例外临时放行 ——
+     ① 全屋概览大屏（#planWrapBig）② 动作卡（.actcard，米家红外那种一键动作）。
+     都只对本次操作有效，不写 localStorage、不动顶栏模式。
+     ② 再打个 silentRO：动作卡本身就是「执行」键，弹「只读模式 · 先解锁」纯属噪音。 */
   if(!canCtl()){
     if(!(opts && opts.allowRO)){ toast("只读模式 · 先解锁控制"); return false; }
-    toast("户型图临时放行 · 只对本次操作有效");
+    if(!(opts && opts.silentRO)) toast("户型图临时放行 · 只对本次操作有效");
   }
   const body = {domain: domain, service: service};
   if(data && Object.keys(data).length) body.service_data = data;
@@ -2651,8 +2682,12 @@ function buildModel(){
       const acc = (anchor.match(/^sensor\.state_grid_(\d+)_/) || [])[1] || "";
       const card = { key, eid: anchor, name: "家庭电费", mains: [], sensors: [], more: [],
                      grid: ents.slice(), load: false, kind: "grid", account: acc };
-      const room = ensure(areaOf(anchor));
-      room.cards.push(card);
+      /* V1.0.27 第 13 条：不再 ensure(areaOf) + room.cards.push(card)。
+         国网设备在 HA 里的 area_id 就是「过道」，卡会孤零零落在过道里，
+         和走廊灯并排，很怪；入口改成统计条第 7 格「家庭电费」点击开弹窗。
+         ⚠️ card 对象和下面的 S.cardOf 登记必须保留：26 个实体全靠它进弹窗，
+         整段删掉弹窗就查不到卡了。也别去动 groupEntities —— 设备总数仍按
+         groups.size 算，国网那组照旧算 1 台，不会掉数。 */
       ents.forEach(e=>{ if(!S.cardOf.has(e)) S.cardOf.set(e, card); });
       continue;
     }
@@ -3139,6 +3174,47 @@ function tempBad(nm, aid){
   return aid === "__none__" ||
     /冰箱|冷藏|冷冻|变温|设置|目标|设备温度|热水|出水|洗衣机|咖啡|烤箱|电箱/.test(nm);
 }
+/* 窗帘 vs 开窗器：HA 里两者都是 cover，只能靠 device_class 分。
+   curtain = 窗帘，window = 开窗器；米家老窗帘没有 device_class，按窗帘兜底。 */
+function isCurtain(eid){
+  const dc = attrOf(eid, "device_class");
+  if(!dc) return true;
+  return dc === "curtain";
+}
+/* 门窗敞开的口径（V1.0.27 第 10 条，两处调用共用）：
+   ① 开窗器：cover + device_class=window + position > 2
+   ② 门锁：sensor，没有 device_class，靠 door_state 属性；只有 open 算开，
+      stuck / unknown 一律算关（用户定的口径）
+   冰箱那 4 个 binary_sensor 门从这里彻底出局 —— 「门窗敞开」是给家里的窗和门用的，
+   冰箱门开着不该报警。 */
+function doorKind(eid){
+  const st = S.states.get(eid);
+  if(!st) return false;
+  const dom = eid.split(".")[0];
+  if(dom === "cover"){
+    if(attrOf(eid, "device_class") !== "window") return false;
+    const p = coverPhysOf(eid);
+    if(p !== null) return p > 2;
+    return st.state === "open" || st.state === "opening";
+  }
+  if(dom === "sensor"){
+    const ds = (st.attributes || {}).door_state;
+    if(ds === undefined || ds === null || ds === "") return false;
+    return String(ds).toLowerCase() === "open";
+  }
+  return false;
+}
+/* 窗帘「开合度」显示值（统计卡竖条用）。
+   position_reverse=true 的设备 HA 已经反过一次，coverPhysOf 再反一次会得到 0，
+   可它的状态明明是 open —— 这时按状态兜底成 100，避免「3 幅开着、竖条只亮 2 根」。 */
+function coverShowPos(eid){
+  const st = S.states.get(eid) || {};
+  const p = coverPhysOf(eid);
+  const stOpen = st.state === "open" || st.state === "opening";
+  if(p === null) return stOpen ? 100 : 0;
+  if(p <= 2 && stOpen) return 100;
+  return p;
+}
 function entCat(eid, cat){
   const st = S.states.get(eid);
   if(!st) return false;
@@ -3146,14 +3222,15 @@ function entCat(eid, cat){
   if(cat === "light") return PLAN_GLOW_SET.has(eid) && v === "on";
   if(cat === "cover"){
     if(dom !== "cover") return false;
+    if(!isCurtain(eid)) return false;        /* 开窗器不算窗帘（第 11 条） */
     const p = coverPhysOf(eid);
-    return p !== null ? p > 2 : (v === "open" || v === "opening");
+    /* position_reverse=true 的设备（晾霸 CT05 那幅）HA 已经反过一次，
+       我们再 coverPhysOf 反一次会得到 0，于是「状态 open、位置 0%」互相打架。
+       计数以状态为准：报 open / opening 就算开，位置只用来兜「没有位置属性」的型号。 */
+    if(v === "open" || v === "opening") return true;
+    return p !== null ? p > 2 : false;
   }
-  if(cat === "door"){
-    if(dom !== "binary_sensor") return false;
-    const dc = attrOf(eid, "device_class");
-    return (dc==="door"||dc==="window"||dc==="opening") && v === "on";
-  }
+  if(cat === "door") return doorKind(eid);
   if(cat === "temp" || cat === "hum"){
     if(dom !== "sensor") return false;
     const dc = attrOf(eid, "device_class");
@@ -3179,11 +3256,12 @@ function hitCat(card, cat){
 function catTypeMatch(eid, cat){
   const dom = eid.split(".")[0];
   if(cat === "light") return PLAN_GLOW_SET.has(eid);
-  if(cat === "cover") return dom === "cover";
+  if(cat === "cover") return dom === "cover" && isCurtain(eid);   /* 开窗器不进窗帘下钻 */
   if(cat === "door"){
-    if(dom !== "binary_sensor") return false;
-    const dc = attrOf(eid, "device_class");
-    return dc==="door"||dc==="window"||dc==="opening";
+    /* 类型判定：开窗器 + 带 door_state 的门锁（不看此刻开没开） */
+    if(dom === "cover") return attrOf(eid, "device_class") === "window";
+    if(dom === "sensor") return ((S.states.get(eid) || {}).attributes || {}).door_state !== undefined;
+    return false;
   }
   if(cat === "temp") return dom === "sensor" && attrOf(eid, "device_class") === "temperature";
   if(cat === "hum") return dom === "sensor" && attrOf(eid, "device_class") === "humidity";
@@ -3201,11 +3279,20 @@ function catHasLive(cat){
    （含离线），而不是只给正在开启的那几台；温湿度仍按 tempBad 排除冰箱/设置值等非室温读数 */
 function catHitCard(card, cat){
   if(!cat) return true;
-  return cardEids(card).some(e=>{
+  if(cardEids(card).some(e=>{
     if(!catTypeMatch(e, cat)) return false;
     if(cat === "temp" || cat === "hum") return !tempBad(nameOf(e), areaOf(e));
     return true;
-  });
+  })) return true;
+  /* 门锁这一类的补充：door_state 传感器本身不成卡（没有 device_class，被 keepSensor 挡掉），
+     真身挂在同设备的「智能门锁」卡上。只按 cardEids 找，下钻里永远见不到门锁。
+     这里按分组键回查一次，把「同设备里有门窗类实体」的卡也算命中。 */
+  if(cat === "door" && card.key){
+    for(const eid of S.states.keys()){
+      if(catTypeMatch(eid, "door") && groupKey(eid) === card.key) return true;
+    }
+  }
+  return false;
 }
 
 /* ══════════════ 属性中文名 ══════════════ */
@@ -3243,6 +3330,61 @@ const ATTR_CN = {
   no_disturb:"勿扰模式", quick_countdown:"快速倒计时", last_triggered:"上次触发", last_updated:"最后更新", last_changed:"最后变化",
   next_dawn:"明日日出", next_dusk:"明日日落", next_midnight:"今晚零点", next_noon:"明日正午", next_rising:"下次升起", next_setting:"下次落下",
   event_type:"事件类型", event_types:"事件类型列表", event_data:"事件数据", entity_class:"实体分类",
+  /* ── V1.0.27 补词（第 4 条）：真机 665 个属性键里剩下这 150 来条带英文，
+     绝大多数是米家透传的复合子键。逐条给准确中文，比让 cnWords 逐词硬拼读着顺 ── */
+  list:"列表", sensor:"传感器", button:"按钮", play:"播放", detection:"侦测",
+  list_soft_wind:"柔风列表", purify_switch:"净化开关", turn_pot_config:"翻锅设置",
+  voice_change_state:"变声状态", voice_packet_id:"语音包 ID", image_rollover:"图像翻转",
+  wdr_mode:"宽动态模式", first_clean_time:"首次清扫时间", total_clean_times:"累计清扫次数",
+  wake_up_mode:"唤醒模式", whole_journey_time:"全程时长", capacity:"容量", func_config:"功能配置",
+  data_value:"数据值", msga:"消息 A", msgb:"消息 B", delay_remain_time:"剩余延时",
+  electricity_info:"用电信息", hcho_density:"甲醛浓度", relative_humidity:"相对湿度",
+  calibrated:"已校准", rains_close_window:"下雨自动关窗", sunrise_open_window:"日出自动开窗",
+  wind_sensation:"风感", fault_value:"故障值", access_mode:"接入方式", ip_address:"IP 地址",
+  dhcp_server_mac_adress:"DHCP 服务器 MAC", audio_id:"音频 ID", sleep_mode:"睡眠模式",
+  clean_cancel:"取消清扫", clean_rags_tip:"洗抹布提示", keep_sweeper_time:"清扫记录保留时长",
+  illumination:"光照度", mop_water_output_level:"拖布出水量", anti_flicker:"防闪烁",
+  wiring_method:"接线方式", mode:"模式", mode_desc:"模式说明", status:"状态", info:"信息",
+  air_management:"空气管理", ejected:"已弹出", disposition_set:"处置设置",
+  enable_time_period:"生效时段", enable:"启用", disable:"禁用",
+  play_loop_mode:"播放循环模式", self_check_results:"自检结果", manual_check_results:"手动检测结果",
+  examine:"检测", clean_process:"清扫过程", multi_light_work_mode:"多灯工作模式",
+  flex_switch:"柔性开关", pilot_switch:"引导开关", filter_life_level:"滤网寿命",
+  memory_card_management:"存储卡管理", panel_service:"面板服务", switch_sensor:"开关传感器",
+  filter_screen_detection_cycle:"滤网检测周期", filter_screen_detection_method:"滤网检测方式",
+  /* 无前缀的裸键：直接命中，不再走逐词拼 */
+  display_precision:"显示精度", release_url:"发布地址", radius:"半径", passive:"被动",
+  device_id:"设备 ID", host_name:"主机名", miot_error:"米家错误", operation_method:"操作方式",
+  operation_mode:"运行模式", away_mode:"外出模式", atmospheric_pressure:"大气压",
+  precipitation_24h:"24 小时降水", wind_direction_code:"风向代码", wind_speed_and_unit:"风速及单位",
+  app_link:"应用链接", break_point_restart:"断点续传", always_favorite_on:"常开收藏",
+  custom_no_motion_time:"自定义无人时长", detection_sensitivity:"探测灵敏度",
+  enable_manual_draw_curtain:"允许手动拉帘", external_serial_no:"外部序列号",
+  fourway_valve_switch:"四通阀开关", freshair_dark_switch:"新风暗光开关",
+  improve_heat_tar_temp_stop:"制热目标温度停机优化", last_time_reachable:"最后可达",
+  lightactivated_level:"光感档位", motion_detection_start_time:"侦测开始时间",
+  motion_detection_end_time:"侦测结束时间", pm_two_p_five_online:"PM2.5 在线",
+  prev_message:"上一条消息", prev_scene_id:"上一场景 ID", prev_value:"上一次的值",
+  real_heater_switch:"辅热开关", realindoor_fan_lever:"室内风机档位", remote_controllable:"可远程控制",
+  storage_free_space:"可用空间", storage_total_space:"总空间", storage_used_space:"已用空间",
+  vertical_swing_included_angle:"垂直摆风夹角", compressor_frequency:"压缩机频率",
+  outdoor_exhaust_temp:"室外排气温度", outdoor_mach_current:"外机电流", outdoor_mach_voltage:"外机电压",
+  ai_pm_two_point_five:"AI PM2.5", air_fresh_fan_level:"新风风档", air_fresh_fan_speed:"新风风速",
+  cooling_indoor_fan_noise_reduction:"制冷室内风机降噪", cooling_outdoor_fan_noise_reduction:"制冷室外风机降噪",
+  heating_indoor_fan_noise_reduction:"制热室内风机降噪", heating_outdoor_fan_noise_reduction:"制热室外风机降噪",
+  left_up_vertical_swing:"左上垂直摆风", left_down_vertical_swing:"左下垂直摆风",
+  right_up_vertical_swing:"右上垂直摆风", right_down_vertical_swing:"右下垂直摆风",
+  left_up_vertical_position:"左上垂直位置", left_down_vertical_position:"左下垂直位置",
+  right_up_vertical_position:"右上垂直位置", right_down_vertical_position:"右下垂直位置",
+  left_horizontal_position:"左侧水平位置", left_horizontal_swing:"左侧水平摆风",
+  right_horizontal_position:"右侧水平位置", right_horizontal_swing:"右侧水平摆风",
+  left_up_list_soft_wind:"左上柔风列表", left_down_list_soft_wind:"左下柔风列表",
+  right_up_list_soft_wind:"右上柔风列表", right_down_list_soft_wind:"右下柔风列表",
+  relieve_air_deflector_condensation:"防导风板凝露", relieve_outdoor_compressors_noise:"外机压缩机降噪",
+  run_dark_sleep:"暗光睡眠", xiaoai_id:"小爱 ID", lock_action:"开锁动作",
+  fingerprint_result:"指纹结果", msg_id:"消息 ID", ctime:"创建时间",
+  my_scene_three:"我的场景 3", my_scene_four:"我的场景 4", my_scene_five:"我的场景 5",
+  my_scene_seven:"我的场景 7", my_scene_eight:"我的场景 8",
 };
 const SEG_CN = {
   air_conditioner:"空调", air_fresh:"新风",
@@ -3265,7 +3407,8 @@ const SEG_CN = {
   gateway:"网关", storage:"存储", sd_status:"存储卡", 
   play_control:"播放控制", clock:"闹钟", user_defined_mode:"自定义模式", recommend_mode:"推荐模式",
   on_off_count:"开关次数", setting:"设置", window_opener2:"开窗器", extend:"扩展",
-  target_cooking_measure:"烹饪目标", auxiliary_switch:"辅助开关", clean_logs2:"清扫记录"
+  target_cooking_measure:"烹饪目标", auxiliary_switch:"辅助开关", clean_logs2:"清扫记录",
+  intelligent_speaker:"智能音箱"
 };
 /* ── 词表主表：单个英文词 → 中文，只在这里定义一次 ──
    ATTR_CN（属性名）/ SEG_CN（米家分段名）/ VAL_CN（属性值）/ TRANSLATE（实体状态）
@@ -3318,6 +3461,12 @@ const GLOSS = {
   red:"红", orange:"橙", yellow:"黄", green:"绿", cyan:"青", blue:"蓝", purple:"紫", pink:"粉",
   hot:"热", cold:"冷", cool:"冷", boost:"强力", turbo:"强劲",
   minute:"分钟", second:"秒", hour:"小时", percent:"百分比", celsius:"摄氏度", fahrenheit:"华氏度",
+  /* V1.0.27 补词（第 4 条）：户型图房间标签 + 米家消息/统计类裸键。
+     房间标签是 sensor.hu_xing_tu_fang_jian_biao_qian 的 state，
+     以前直接把 balcony/dining 这类英文原样印在户型图上。 */
+  balcony:"阳台", dining:"餐厅", entry:"入户", hallway:"走廊", kitchen:"厨房",
+  living:"客厅", master:"主卧", side:"偏卧",
+  ts:"时间戳", from:"来源", is_new:"是否新", order:"排序", reason:"原因", restored:"已恢复",
 };
 /* 英文整句表：米家透传名称（"Sweep Before Mopping" 这类）逐词拼会很别扭，整句优先 */
 const PHRASE_CN = {
@@ -3382,14 +3531,20 @@ function cnPhrase(str){
 }
 function attrCN(k){
   const raw = String(k);
-  const base = raw.replace(/-\d+(-\d+)?$/, "");
+  /* 米家把协议序号拼进属性名（switch-2.name-7 / filter_screen_detection_cycle-2-23.error）。
+     原来只剥结尾的 -数字，带点的键剥不掉，于是 filter-22.filter_life_level 整条翻不出来。
+     改成剥「点前或结尾」的任意一段序号。 */
+  const base = raw.replace(/-\d+(-\d+)?(?=\.|$)/g, "");
   if(ATTR_CN[base] !== undefined) return ATTR_CN[base];
   const low = base.toLowerCase();
   if(ATTR_CN[low] !== undefined) return ATTR_CN[low];
   const dot = base.indexOf(".");
   if(dot > 0){
     const seg = base.slice(0, dot), sub = base.slice(dot + 1);
-    const s = SEG_CN[seg] || ATTR_CN[seg] || GLOSS[seg] || SEG_CN[seg.replace(/-\d+$/,"")] || "";
+    /* 前缀也可能带序号（filter-22 / vd_light_a-2），剥掉再查一次 */
+    const seg0 = seg.replace(/-\d+$/, "");
+    const s = SEG_CN[seg] || ATTR_CN[seg] || GLOSS[seg] ||
+              SEG_CN[seg0] || GLOSS[seg0] || ATTR_CN[seg0] || "";
     const p = ATTR_CN[sub] || ATTR_CN[sub.toLowerCase()] || "";
     if(s && p) return s + " · " + p;
     if(s) return s + " · " + cnWords(sub);
@@ -3683,8 +3838,14 @@ function heaterCardHTML(card){
   const oT = Number(st(pick(/_outwatertemp$/)).state);
   const iT = Number(st(pick(/_inwatertemp$/)).state);
   const subs = [];
-  if(isFinite(oT)) subs.push("出水 " + num(oT, 1) + "°C");
-  if(isFinite(iT)) subs.push("进水 " + num(iT, 1) + "°C");
+  if(burn){
+    /* 只有真在烧的时候才报出水 / 进水。待机时出水探头测的是管内静水，等于室温，
+       报「出水 15.0°C」会被读成「正在出 15 度的水」——用户 2026-11-12 指出 */
+    if(isFinite(oT)) subs.push("出水 " + num(oT, 1) + "°C");
+    if(isFinite(iT)) subs.push("进水 " + num(iT, 1) + "°C");
+  }else if(!na && isFinite(oT)){
+    subs.push("未出水 · 水温 " + num(oT, 1) + "°C");
+  }
   const label = na ? "离线" : (off ? "关机" : (burn ? "燃烧中" : "待机"));
   return '<div class="card sens heatercard '+cls+'" data-eid="'+esc(card.eid)+'"'+
       ' data-key="'+esc(card.key)+'" role="button" tabindex="0" aria-label="'+esc(card.name)+'">'+
@@ -3756,11 +3917,16 @@ function nasCardHTML(card){
 }
 
 /* 国网电费卡（V1.0.26）：余额大字 + 本月用电 + 峰平谷迷你条 + 户号后四位。
-   数值全部从本卡自己的实体列表里取（card.grid），不跨卡查询。 */
+   数值全部从本卡自己的实体列表里取（card.grid），不跨卡查询。
+   ⚠️ V1.0.27 第 13 条起这张卡不再进任何房间：国网设备 area_id 就是「过道」，
+   一张电费卡孤零零落在过道里很怪，入口改成统计条第 7 格「家庭电费」点击开弹窗。
+   本函数与 patchCard 的 grid 分支因此是死代码 —— 故意留着，别顺手删：
+   buildModel 里 card 照旧构建、S.cardOf 照旧登记（26 个实体全靠它进弹窗），
+   将来想把卡放回房间，把 buildModel 那两句 ensure/push 加回来就复原了。 */
 function eleVal(eids, suffix){
-  const re = new RegExp("_" + suffix + "$");
   for(const e of eids){
-    if(!re.test(e)) continue;
+    /* 同上：必须整段全等，不能靠 /_suffix$/ —— 否则 last_month_ele_num 会冒充 month_ele_num */
+    if(gridSuffix(e) !== suffix) continue;
     const n = parseFloat((S.states.get(e) || {}).state);
     return isFinite(n) ? n : null;
   }
@@ -3775,7 +3941,8 @@ function gridCardHTML(card){
   const v = eleVal(eids, "month_v_ele_num");
   const na = bal === null;
   const col = na ? "" : (bal < 5 ? "var(--red)" : (bal < 20 ? "var(--orange)" : ""));
-  const acc = String(card.account || "").slice(-4);
+  /* 只留后四位：13 位完整户号会把 .sfoot 那一行占满，余额大字反而成了配角 */
+  const acc = String(card.account || "").replace(/\D/g, "").slice(-4);
   const segs = [p, n, v].map(x=> (isFinite(x) && x > 0 ? x : 0));
   const tot = segs.reduce((a,b)=> a+b, 0);
   let bar = "";
@@ -3841,10 +4008,12 @@ function eleSpark(data, mode){
       if(isFinite(c) && c > 0)
         s += '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(PT+ih-h-3).toFixed(1)+'" text-anchor="middle"'+
              ' font-size="7.5" fill="currentColor" opacity=".55">'+Math.round(c)+'</text>';
-      if(i % 2) return;
+      /* V1.0.27：12 根柱子全标月份（原来隔一根打一根，读不出连续走势）。
+         460 宽的图里 12 个标签只剩约 7px 余量，字号 8 → 7.5 更稳。
+         ⚠️ 上面 30 天折线那条 i % 6 是另一条分支，别一起改。 */
       const m = String(it.month || "");
       if(m.length >= 6)
-        s += '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-5)+'" text-anchor="middle" font-size="8"'+
+        s += '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-5)+'" text-anchor="middle" font-size="7.5"'+
              ' fill="currentColor" opacity=".45">'+parseInt(m.slice(4,6),10)+'月</text>';
     });
   }
@@ -3955,6 +4124,8 @@ function patchCard(eid){
   if(card.kind === "heater"){ node.outerHTML = heaterCardHTML(card); return; }
   if(card.kind === "printer"){ node.outerHTML = printerCardHTML(card); return; }
   if(card.kind === "nas"){ node.outerHTML = nasCardHTML(card); return; }
+  /* V1.0.27：grid 卡已不落在任何房间（见 gridCardHTML 上方注释），这一分支不会再被命中，
+     保留只为将来把卡放回房间时不用重写 —— 别删。 */
   if(card.kind === "grid"){ node.outerHTML = gridCardHTML(card); return; }
   if(card.kind === "sensor"){
     node.outerHTML = sensorCardHTML(card);
@@ -4081,7 +4252,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.26 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.27 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -4179,9 +4350,16 @@ function gArc(f){
 /* ── 国网电费（V1.0.26）──
    户号不硬编码：按后缀正则在 S.states 里找 sensor.state_grid_<户号>_<后缀>。
    这样换户号、多户号都不用改代码；找不到就返回 null，由调用方降级。 */
+/* 国网实体 id 的后缀：sensor.state_grid.<户号>_<后缀> → <后缀>。
+   ⚠️ 不能直接拿 /_<后缀>$/ 去匹配：last_month_ele_num 也以 month_ele_num 结尾，
+   弹窗「当月构成 · 共 X 度」会错取成上月的 261 度（V1.0.27 真机截图发现）。
+   户号是纯数字，用 [^_]+ 剥掉前缀，剩下的整段必须与后缀全等。 */
+function gridSuffix(eid){
+  const m = String(eid).match(/^sensor\.state_grid_[^_]+_(.+)$/i);
+  return m ? m[1] : "";
+}
 function gridEnt(suffix){
-  const re = new RegExp("^sensor\\.state_grid_.+_" + suffix + "$");
-  for(const [eid, st] of S.states){ if(re.test(eid)) return st; }
+  for(const [eid, st] of S.states){ if(gridSuffix(eid) === suffix) return st; }
   return null;
 }
 function gridNum(suffix){
@@ -4190,14 +4368,17 @@ function gridNum(suffix){
   return isFinite(x) ? x : null;
 }
 /* 统计卡用的三件套。取不到余额时统一「—」+ 空 SVG：
-   不要回落成 0 元，也不要画一条全灰空槽——那会被读成「余额已为零」。 */
+   不要回落成 0 元，也不要画一条全灰空槽——那会被读成「余额已为零」。
+   open:true 表示这一格可点开弹窗（V1.0.27 第 8 条）。不能改成 cat:"grid"：
+   那会触发 S.cat 下钻过滤，而分类里根本没有 grid 这一类，整页会被过滤成 0 项。 */
 function gridStat(){
   const bal = gridNum("balance");
-  if(bal === null) return {v:"—", g:'<svg viewBox="0 0 50 40"></svg>', vs:""};
+  if(bal === null) return {v:"—", g:'<svg viewBox="0 0 50 40"></svg>', vs:"", open:true};
   return {
     v: num(bal,1) + "<small>元</small>",
     vs: bal < 5 ? "var(--red)" : (bal < 20 ? "var(--orange)" : ""),
-    g: gEleStack(gridNum("month_p_ele_num"), gridNum("month_n_ele_num"), gridNum("month_v_ele_num"))
+    g: gEleStack(gridNum("month_p_ele_num"), gridNum("month_n_ele_num"), gridNum("month_v_ele_num")),
+    open: true
   };
 }
 /* A 版图形：当月峰 / 平 / 谷三段堆叠条（46×12，y=14，圆角靠 clipPath 统一裁）。
@@ -4210,11 +4391,13 @@ function gEleStack(p, n, v){
     .map(([x, c]) => [isFinite(x) && x > 0 ? x : 0, c]);
   const total = segs.reduce((s, [x]) => s + x, 0);
   const cid = "elec" + (++_eleSeq);
-  let out = '<svg viewBox="0 0 50 40">'+
-    '<defs><clipPath id="'+cid+'"><rect x="2" y="14" width="46" height="12" rx="6"/></clipPath></defs>'+
-    '<rect x="2" y="14" width="46" height="12" rx="6" fill="rgba(120,120,128,.16)"/>';
+  /* V1.0.27：底槽挪进 total > 0 里。三段全 0 时还画一条灰槽，会被读成「余额已为零」，
+     和「取不到数据」根本分不开 —— 没数据就什么都不画。 */
+  let out = '<svg viewBox="0 0 50 40">';
   if(total > 0){
-    out += '<g clip-path="url(#'+cid+')">';
+    out += '<defs><clipPath id="'+cid+'"><rect x="2" y="14" width="46" height="12" rx="6"/></clipPath></defs>'+
+      '<rect x="2" y="14" width="46" height="12" rx="6" fill="rgba(120,120,128,.16)"/>'+
+      '<g clip-path="url(#'+cid+')">';
     let x = 2;
     for(const [val, col] of segs){
       if(val <= 0) continue;
@@ -4225,6 +4408,15 @@ function gEleStack(p, n, v){
     out += '</g>';
   }
   return out + '</svg>';
+}
+
+/* 统计条「家庭电费」格的落点：从 S.cardOf 里反查哪张卡的 kind 是 grid。
+   不硬编码实体 ID（户号会换、实体名带户号），也顺便兜住「国网卡没建出来」的情况。 */
+function gridCardEid(){
+  for(const [, card] of S.cardOf){
+    if(card && card.kind === "grid" && card.eid) return card.eid;
+  }
+  return null;
 }
 
 /* 离线设备集合：按「设备分组键」判定（摄像头另走 cameraOnline），
@@ -4263,13 +4455,19 @@ function renderStats(){
     const dom = eid.split(".")[0], v = st.state;
     if(dom==="button"||dom==="update") continue;
     if(dom==="cover"){
-      coversAll++;
-      const cp = coverPhysOf(eid);
-      coversPos.push(cp === null ? (entCat(eid,"cover") ? 100 : 0) : cp);
-      if(entCat(eid, "cover")) coversOpen++;
+      /* 第 11 条：只有 device_class=curtain 才算窗帘，开窗器（window）不计；
+         第 10 条：开窗器反过来进「门窗敞开」，所以这里还得再看一次 doorKind */
+      if(isCurtain(eid)){
+        coversAll++;
+        /* 位置用 coverShowPos：position_reverse 那台光看 coverPhysOf 会得到 0，
+           但它状态是 open，竖条就会画成「关着」，和计数打架 */
+        coversPos.push(coverShowPos(eid));
+        if(entCat(eid, "cover")) coversOpen++;
+      }
+      if(doorKind(eid)) doorsOpen++;
     }
-    else if(dom==="binary_sensor"){ if(entCat(eid, "door")) doorsOpen++; }
     else if(dom==="sensor"){
+      if(doorKind(eid)) doorsOpen++;         /* 门锁：door_state=open 才算开 */
       if(entCat(eid, "temp")){
         const nv = parseFloat(v);
         temps.push(nv);
@@ -4307,8 +4505,12 @@ function renderStats(){
   document.getElementById("stats").innerHTML = items.map(i=>{
     const sel = !!i.cat && S.cat === i.cat;
     const vt = String(i.v).replace(/<[^>]*>/g, "");
-    return '<div class="stat '+i.c+(sel?' sel':'')+(i.cat?' cat':'')+'"'+
-      (i.cat? ' data-cat="'+i.cat+'" role="button" tabindex="0" aria-pressed="'+sel+'" title="查看全部'+esc(i.k)+'"' : '')+'>'+
+    /* 第 8 条：电费那格要能点开弹窗。它不能带 data-cat（会走进下钻），
+       所以单独用 data-open 标一个可点标记，走自己的分支。 */
+    const openA = i.open
+      ? ' data-open="grid" role="button" tabindex="0" title="查看电费详情"' : '';
+    return '<div class="stat '+i.c+(sel?' sel':'')+(i.cat?' cat':'')+(i.open?' open':'')+'"'+
+      (i.cat? ' data-cat="'+i.cat+'" role="button" tabindex="0" aria-pressed="'+sel+'" title="查看全部'+esc(i.k)+'"' : openA)+'>'+
       '<span class="si">'+statIcon(i.ic)+'</span>'+
       /* 数值变色只能内联在 .v 上：现有的 .stat.r / .stat.o 只改 .si 和 .g，
          补一条 .stat.r .v 的公共规则会让「门窗敞开」的数值也跟着变红，属计划外改动。 */
@@ -4357,9 +4559,7 @@ function panelCtl(eid){
   /* 开 / 关两键：按当前 state 决定哪个实心（之前 pri 写死在 turn_on 上，
      开着的时候「开」还是蓝的、「关」是灰的，看不出当前状态） */
   const onNow = st.state === "on";
-  const pair = (on)=> '<div class="ctlrow">'+
-    '<button data-svc="'+esc(dom)+'|turn_on" class="'+(on?'':'pri')+'">开</button>'+
-    '<button data-svc="'+esc(dom)+'|turn_off" class="'+(on?'pri':'')+'">关</button></div>';
+  const pair = (on)=> pairCtl(dom, on);
 
   let h = '';
   if(dom==="cover"){
@@ -4541,6 +4741,12 @@ const BIG_NUM_OK = new RegExp([
 ].join("|"), "i");
 /* 属性表里不展示的技术元数据：值恒为英文枚举或 mdi 图标名，对用户没有信息量 */
 const META_ATTR = /^(icon|device_class|state_class|entity_class|state_property|tracking_type|supported_features|supported_color_modes|assumed_state|capabilities|attribution|editable|entity_picture)$/i;
+/* 米家透传配置的命名空间（V1.0.27 第 3 条）：vendor.* / custom.* / screen_set.* …
+   合计 100 多个键，全是设备固件的内部参数表，值多为英文枚举或原始码。
+   META_ATTR 只挡 12 个精确键名，挡不住它们，所以再加一道前缀黑名单。
+   这些名字里的每一段在维修手册里都有意义，但对「看家里情况」这件事零信息量，
+   留着只会把真正的读数挤出可视区。 */
+const META_PREFIX = /^(vendor|custom|screen_set|system_parm|remote|remoter_ctrl|enhance|set|extra_attribute|curtain_scene_ctrl|iot_linkage|machine_state|vd_[a-z]+_[a-z]+|switch-\d+)\./i;
 function attrRows(a, limit, eid){
   a = dropRawPos(a, eid);
   const keys = Object.keys(a).filter(k=>{
@@ -4548,6 +4754,8 @@ function attrRows(a, limit, eid){
     /* V1.0.26：纯技术元数据不进属性表。这类键的值永远是英文枚举或 mdi: 图标，
        翻不出来也毫无信息量，之前整段显示成「—」把真正的读数挤没了。 */
     if(META_ATTR.test(k)) return false;
+    /* V1.0.27：米家内部配置整段挡掉（vendor.* / custom.* / set.* …），见 META_PREFIX */
+    if(META_PREFIX.test(k)) return false;
     /* -50 是冰箱变温区「未启用」的占位值，属性表里也别露出来 */
     if(/temp|温度/i.test(k) && isFinite(Number(a[k])) && Number(a[k]) <= -50) return false;
     /* 内部错误码 / 内部枚举当垃圾：Invalid IID、submersion_state-2-1 这类不渲染。
@@ -4819,8 +5027,7 @@ function renderDetail(){
       const ge = card.grid || [];
       const gv = (s)=> eleVal(ge, s);
       const gPick = (s)=>{
-        const re = new RegExp("_" + s + "$");
-        return ge.find(x=> re.test(x)) || null;
+        return ge.find(x=> gridSuffix(x) === s) || null;
       };
       const gAttrs = (s)=>{
         const e = gPick(s);
@@ -4835,14 +5042,21 @@ function renderDetail(){
         '<span class="mv" style="user-select:text">'+v2+'</span></div>';
 
       const bal = gv("balance"), esti = gv("esti_amt"), lastC = gv("last_month_ele_cost"),
-            owe = gv("history_owe"), monE = gv("month_ele_num"),
+            lastE = gv("last_month_ele_num"), owe = gv("history_owe"), monE = gv("month_ele_num"),
             p = gv("month_p_ele_num"), n = gv("month_n_ele_num"), v = gv("month_v_ele_num"),
             yrE = gv("year_ele_num"), yrC = gv("year_ele_cost"), meter = gv("last_month_meter_num");
 
-      /* 段一：余额与状态。esti_amt 当前是 unknown —— 显示「—」，绝不拿上月电费顶替 */
+      /* 段一：账户余额 / 年度电费 / 上月电费 / 上月用电。
+         · year_ele_cost 实体名叫「年度累计电费」，原来我写成「历史电费」，容易被读成
+           「历史累计（含往年）」；这里改名「年度电费」，字段没换。
+         · 上月用电以前没取（last_month_ele_num，今天 261.0 度），补上；
+           取不到写「—」而不是 0 度，别让「没数据」看起来像「用了 0 度」。
+         · 本月电费 esti_amt 现在恒为 unknown，摆在这一段只会天天显示「—」，
+           挪到下面明细段做条件输出。 */
       h += '<div class="dgrid"><div class="t">余额与状态</div><div class="mgrid">'+
-        [["账户余额", money(bal)], ["本月电费", money(esti)],
-         ["上月电费", money(lastC)], ["历史欠费", money(owe)]].map(([k2, v2])=> row2(k2, v2)).join("")+
+        [["账户余额", money(bal)], ["年度电费", money(yrC)],
+         ["上月电费", money(lastC)],
+         ["上月用电", lastE === null ? "—" : num(lastE,1)+" 度"]].map(([k2, v2])=> row2(k2, v2)).join("")+
         '</div></div>';
 
       /* 段二：当月峰平谷构成。重庆无尖峰，尖用电恒为 0，只画三段 */
@@ -4864,11 +5078,16 @@ function renderDetail(){
         '<div class="dgrid"><div class="t">近 12 个月用电（柱顶为当月电费）</div>'+
         '<div class="echart">'+eleSpark(gAttrs("recent_12_monthly_ele_list").graph, "bar")+'</div></div>';
 
-      /* 段四：明细。抄表站点固定回 0，属无数据，那一行直接不显示 */
+      /* 段四：明细。
+         · 「年度累计电费」已删：它和段一「年度电费」是同一个 year_ele_cost（2115.54），
+           同一个数在弹窗里出现两次，看着像两笔钱。
+         · 「本月电费」esti 恒为 unknown，只在真有值时输出一行。
+         · 抄表站点固定回 0，属无数据，那一行直接不显示。 */
       const det = [
         ["年度累计用电", yrE === null ? "—" : num(yrE,2)+" 度"],
-        ["年度累计电费", money(yrC)],
+        ["本月电费", esti === null ? "" : money(esti)],
         ["上月抄表", (meter === null || meter === 0) ? "" : num(meter,0)+" 度"],
+        ["历史欠费", owe === null ? "" : money(owe)],
         ["数据日期", gState("daily_lasted_date") || "—"],
         ["刷新时间", gState("refresh_time") || "—"]
       ].filter(([, v2])=> v2 !== "");
@@ -4918,15 +5137,12 @@ function renderDetail(){
       const oT = numOf(/_outwatertemp$/), iT = numOf(/_inwatertemp$/), pw = numOf(/_realtimepowerpct$/);
       const live = isOn(onoff);
 
-      /* 段一：运行。开 / 关机走 switch.…_onoffstatus，那才是设备真正的电源键。
+      /* 段一：运行。开 / 关走 switch.…_onoffstatus，那才是设备真正的电源键。
+         控件复用灯 / 插座那套 pairCtl 大开关（原来是手写的「开机 / 关机」两个按钮，
+         和别的设备弹窗不是一套东西）。
          只读模式下不给按钮，由上面的 .rolock 条统一提示解锁 —— 摆着能点却弹提示更难受 */
       h += '<div class="dgrid"><div class="t">运行</div>'+
-        (onoff && canCtl()
-          ? '<div class="ctlrow">'+
-            '<button data-svc="switch|turn_on" data-eid="'+esc(onoff)+'" class="'+(live ? 'pri' : '')+'">开机</button>'+
-            '<button data-svc="switch|turn_off" data-eid="'+esc(onoff)+'" class="'+(live ? '' : 'pri')+'">关机</button>'+
-            '</div>'
-          : '')+
+        (onoff && canCtl() ? pairCtl("switch", live, onoff) : '')+
         '<div class="mgrid">'+
           dRow("火焰", flame ? (isOn(flame) ? "点火中" : "未点火") : "—")+
           dRow("水流", flow ? (isOn(flow) ? "有水流" : "无水") : "—")+
@@ -5089,6 +5305,9 @@ document.addEventListener("keydown", (ev)=>{
   if(!el || el === document.body) return;
   const stat = el.closest ? el.closest(".stat[data-cat]") : null;
   if(stat && el === stat){ ev.preventDefault(); stat.click(); return; }
+  /* 电费那格同样要能用键盘打开 */
+  const openStat = el.closest ? el.closest(".stat[data-open]") : null;
+  if(openStat && el === openStat){ ev.preventDefault(); openStat.click(); return; }
   const card = el.closest ? el.closest(".card") : null;
   if(!card || el !== card) return;      // 焦点在卡片内的电源键时，交给按钮自己处理
   ev.preventDefault();
@@ -5223,6 +5442,17 @@ document.addEventListener("click", (ev)=>{
   const catClr = ev.target.closest("#catClear");
   if(catClr){ S.cat = null; renderAll(); return; }
 
+  /* 统计条「家庭电费」→ 直接开电费弹窗（V1.0.27 第 8 条）。
+     刻意不碰 S.cat：这一格不是分类下钻，顺手清掉筛选会把用户的选择弄丢。
+     取不到卡（国网实体还没加载 / 集成掉线）也要能点，只给一条提示，不静默。 */
+  const openEl = ev.target.closest(".stat[data-open]");
+  if(openEl){
+    const ge = gridCardEid();
+    if(ge) openEnt(ge);
+    else toast("暂无电费数据");
+    return;
+  }
+
   /* 解锁 / 关闭详情 */
   const actEl = ev.target.closest("[data-act]");
   if(actEl){
@@ -5288,7 +5518,11 @@ document.addEventListener("click", (ev)=>{
     const eid = holder && holder.getAttribute("data-eid");
     /* 全屋概览大屏：只读模式下临时放行（callService 会给轻提示） */
     const fromPlanBig = !!svcEl.closest("#planWrapBig");
-    doService(dom, svc, eid, {allowRO: fromPlanBig});
+    /* 动作卡（米家红外一键动作，整张卡带 data-svc）：它本身就是「执行」键，
+       只读模式下也必须能按 —— 但绝不能把 script 塞进 CTL_DOMAIN，
+       那样等于让以后所有脚本都能被普通电源键在只读下点跑。 */
+    const fromAct = dom === "script" && (svcEl.classList.contains("actcard") || !!svcEl.closest(".actcard"));
+    doService(dom, svc, eid, fromAct ? {allowRO: true, silentRO: true} : {allowRO: fromPlanBig});
     return;
   }
 
@@ -5382,7 +5616,7 @@ catch(e){ if(mqDark.addListener) mqDark.addListener(()=>{ if(THEME.mode==="auto"
   });
 })();
 
-/* V1.0.26：外观块默认收起，点标题展开。左栏去滚动后靠它省高度。 */
+/* V1.0.27：外观块改回默认展开，点标题收起。 */
 (function(){
   const host = document.getElementById("appear");
   const btn  = document.getElementById("apToggle");
