@@ -357,6 +357,24 @@ html[data-mode="dark"] .stat .si{
 .stat .v{font-size:21px;font-weight:600;letter-spacing:-.03em;line-height:1.1;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stat .v small{font-size:11.5px;font-weight:500;color:var(--text2);letter-spacing:0}
+/* V1.0.30 第 1 条修订：两位数 / 三位数余额时前缀与整行一起收窄。
+   ⚠️ V1.0.29 只把前缀降到 10.5px、字距 -1px，实测在 1512 视口不够：
+   那一档 .v 可用只有 61px，「余额2.1元」已占 60.5px，两位数 62px、三位数 67px
+   都会被省略号吃掉（1440 档有 72px，所以上一版只在 1440/3840 试就漏了）。
+   现在把 .v 的负字距加大（会同时作用到数字，「12.3」4 个字符省 2px），
+   三位数再把前缀降到 10px —— 1512 下实测两位数 58.8px、三位数 53.4px，留 2px 以上余量。
+   用 :has() 按前缀档位选整行，不必往 .v 上挂 class。 */
+.stat .v small.pfx2{font-size:10.5px;letter-spacing:-1.4px}
+.stat .v small.pfx2 ~ small{font-size:10.5px;letter-spacing:-1.4px}
+.stat .v:has(small.pfx2){letter-spacing:-1.9px}
+.stat .v small.pfx3{font-size:10px;letter-spacing:-1.4px}
+.stat .v small.pfx3 ~ small{font-size:10px;letter-spacing:-1.4px}
+.stat .v:has(small.pfx3){letter-spacing:-2px}
+/* 四位数（余额 ≥1000，充过值就会到）在 1512 档还差 2.4px，再收一档；
+   注意 .v 的负字距会作用到数字，别再加码，否则数字会粘连 */
+.stat .v small.pfx4{font-size:9.5px;letter-spacing:-1.6px}
+.stat .v small.pfx4 ~ small{font-size:9.5px;letter-spacing:-1.6px}
+.stat .v:has(small.pfx4){letter-spacing:-2.4px}
 /* 右半区图形：SVG 撑满 .g 的盒子，尺寸只由 .g 决定（不再写死 50×40，
    否则缩到 20×16 时里面仍是 50×40 被裁），颜色走 currentColor 随分类色继承 */
 .stat .g{width:50px;height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--accent)}
@@ -482,6 +500,19 @@ details.more summary::-webkit-details-marker{display:none}
 details.more summary::before{content:"▸";font-size:10px;transition:.2s;color:var(--text3)}
 details.more[open] summary::before{transform:rotate(90deg)}
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-top:9px}
+/* V1.0.29 第 4 条：极空间磁盘段按盘重排。
+   单列 5 行，每行 66px 盘号 | 温度 | 使用率，两列数值各自右对齐成组；
+   1.145fr : 1fr 是按实测「温度右缘 303px / 使用率右缘 510px」反推的配比。 */
+.mgrid.disk{grid-template-columns:1fr;gap:2px}
+.drow{display:grid;grid-template-columns:66px minmax(0,1.145fr) minmax(0,1fr);
+  align-items:center;height:43px;padding:0 10px;border-radius:10px;box-sizing:border-box;
+  background:rgba(120,120,128,.07);font-size:12px;color:var(--text2)}
+.drow .dn{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap}
+.drow .dc{display:flex;align-items:baseline;justify-content:flex-end;gap:6px;min-width:0;white-space:nowrap}
+.drow .lb{font-size:11px;font-weight:500;color:var(--text3);flex:0 0 auto}
+.drow .dv{font-size:12px;font-weight:600;color:var(--text2);overflow:hidden;text-overflow:ellipsis}
+.drow .dv.hot{color:var(--orange)}
+.drow.sum{background:rgba(120,120,128,.045)}
 .mrow{
   display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;
   background:rgba(120,120,128,.07);font-size:12px;color:var(--text2);
@@ -1050,7 +1081,17 @@ html[data-card="capsule"] .card.acts4{
 }
 /* 包装层在胶囊档里不占格子，四个按钮直接落进 b1~b4 */
 html[data-card="capsule"] .card.acts4 .abts{display:contents}
-html[data-card="capsule"] .card.acts4 .nm{align-self:center;font-size:11px;-webkit-line-clamp:1}
+/* V1.0.29 第 3 条：名称行右侧的「上次执行」灰字。放在 .nm 内部而不是 .top 里 ——
+   胶囊档 .top 是 display:contents，多一个子项会挤进 grid 把 b1~b4 顶歪。 */
+/* flex-wrap：宽档（胶囊）名称与灰字同排，灰字靠右；窄档（方块）放不下时
+   灰字自动落到下一行右对齐。两者都不收缩，名称与「多久之前」都不会被省略号吃掉。 */
+.card.acts4 .nm{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px}
+.card.acts4 .nmt{flex:0 0 auto;white-space:nowrap}
+.card.acts4 .last{margin-left:auto;flex:0 0 auto;white-space:nowrap;
+  font-size:10px;font-weight:500;color:var(--text3);letter-spacing:0}
+html[data-card="capsule"] .card.acts4 .nm{align-self:center;font-size:11px;
+  -webkit-line-clamp:1;display:flex}
+html[data-card="capsule"] .card.acts4 .last{font-size:9.5px}
 html[data-card="capsule"] .card.acts4 .abts button{height:auto;min-height:0;border-radius:7px;
   font-size:10.5px;line-height:1;padding:0}
 html[data-card="capsule"] .card.acts4 .abts button:nth-child(1){grid-area:b1}
@@ -1379,7 +1420,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.28</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.30</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1560,7 +1601,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.28
+   HA家庭智能控制系统 · V1.0.30
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -4154,6 +4195,39 @@ function actLabel(eid){
   return n.replace(/^茶吧机/, "").trim() || n;
 }
 
+/* V1.0.29 第 3 条：四合一之后补回「刚才按了什么、多久之前按的」。
+   只取 4 个 script 里 last_triggered 最新的那一条；从未执行过的（null）跳过。 */
+function lastActText(card){
+  let best = null;
+  (card.acts || []).forEach(a=>{
+    const st = S.states.get(a.eid) || {};
+    const iso = (st.attributes || {}).last_triggered;
+    const t = iso ? Date.parse(iso) : NaN;
+    if(!isFinite(t) || (best && t <= best.t)) return;
+    best = {t, iso, label: a.label || actLabel(a.eid)};
+  });
+  if(!best) return "上次 · 尚未执行";
+  const rp = relPast(best.iso);
+  return "上次 · " + best.label + (rp ? " " + rp : "");
+}
+
+/* V1.0.30 第 3 条：让「多久之前」自己走字。
+   S.cardOf 是 entity→card 的 Map，一张卡会被登记 4 次，按 card.key 去重，
+   只改 .last 的文本（不重排整卡，避免动画/焦点丢失）。 */
+function refreshActsFoot(){
+  /* S.cardOf 是 rebuild() 里才建的（不在 const S 的字面量里），没连后端时是 undefined，
+     30 秒定时器会在这里抛 TypeError，所以先挡一道 */
+  if(!S.cardOf) return;
+  const seen = new Set();
+  S.cardOf.forEach(c=>{
+    if(!c || c.kind !== "acts" || seen.has(c.key)) return;
+    seen.add(c.key);
+    const node = document.querySelector('.card.acts4[data-key="'+CSS.escape(c.key)+'"]');
+    const el = node && node.querySelector(".last");
+    if(el) el.textContent = lastActText(c);
+  });
+}
+
 /* 多键动作卡（V1.0.28 第 4 条）：茶吧机 4 个脚本合成一张卡。
    ⚠️ 容器上绝对不能带 data-svc —— 整卡带 data-svc 时点空隙会误触发第一个脚本；
    也不能带 data-eid —— 点空白会弹一个空详情。服务与实体全挂在按钮上，各管各的。
@@ -4163,7 +4237,8 @@ function actsCardHTML(card){
   const acts = card.acts || [];
   return '<div class="card acts4 actcard" data-key="'+esc(card.key)+'">'+
       '<div class="top"><div class="ic">'+svg(I.cup)+'</div>'+
-      '<div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="nm"><span class="nmt">'+esc(card.name)+'</span>'+
+      '<span class="last">'+esc(lastActText(card))+'</span></div></div>'+
       '<div class="abts">'+ acts.map(a=>
         '<button type="button" data-svc="script|turn_on" data-eid="'+esc(a.eid)+'"'+
         ' title="执行 '+esc(nameOf(a.eid))+'">'+esc(a.label)+'</button>').join("") +'</div>'+
@@ -4238,8 +4313,14 @@ function patchCard(eid){
   if(!node) return;
   /* 多键动作卡没有「状态」可刷（按钮不带 on/off 态），也不该被重建 ——
      掉进下面的通用分支会把 data-key 之外的东西一起改写，className 也会被覆盖成
-     "card xxx"，acts4/actcard 两个类当场丢失（2×2 布局立刻散掉），所以这里直接返回。 */
-  if(card.kind === "acts") return;
+     "card xxx"，acts4/actcard 两个类当场丢失（2×2 布局立刻散掉）。
+     V1.0.30 修订：不能整条 return —— 那样「上次 · 取水 2 分钟前」永远是页面打开时的那条，
+     按完按钮也不动。这里只重画那一行灰字，卡片本体不动。 */
+  if(card.kind === "acts"){
+    const l = node.querySelector(".last");
+    if(l) l.textContent = lastActText(card);
+    return;
+  }
   if(card.kind === "script"){ node.outerHTML = scriptCardHTML(card); return; }
   if(card.kind === "fryer"){ node.outerHTML = fryerCardHTML(card); return; }
   if(card.kind === "fridge"){ node.outerHTML = fridgeCardHTML(card); return; }
@@ -4375,7 +4456,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.28 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.30 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -4498,7 +4579,11 @@ function gridStat(){
   const bal = gridNum("balance");
   if(bal === null) return {v:"—", g:'<svg viewBox="0 0 50 40"></svg>', vs:"", open:true};
   return {
-    v: num(bal,1) + "<small>元</small>",
+    /* V1.0.30 第 1 条修订：数值前补「余额」。<small> 自带 color:var(--text2)，
+       所以报警时只有数字继承 vs 变红，前缀与「元」不会被染红；
+       两位数走 .pfx2、三位数（余额 ≥100）走 .pfx3 收窄，见样式区注释。 */
+    v: '<small'+(bal >= 1000 ? ' class="pfx4"' : bal >= 100 ? ' class="pfx3"'
+         : bal >= 10 ? ' class="pfx2"' : '')+'>余额</small>' + num(bal,1) + "<small>元</small>",
     vs: bal < 5 ? "var(--red)" : (bal < 20 ? "var(--orange)" : ""),
     g: gEleStack(gridNum("month_p_ele_num"), gridNum("month_n_ele_num"), gridNum("month_v_ele_num")),
     open: true
@@ -4926,6 +5011,48 @@ function entRow(e, canAll, pre){
     '<span class="mv" title="'+mv+'">'+mv+'</span></div>';
 }
 
+/* V1.0.29 第 4 条：极空间磁盘段按「盘」重排。
+   原来的 groups 正则筛完不排序，8 条塞进两列后同一行会串成
+   「磁盘2温度｜磁盘3温度」；且 zs_disk2_used_pct 根本不存在、
+   zs_max_disk_temp 又混在磁盘组里，越排越乱。
+   这里只在渲染层重组：盘号从实体名 /zs_disk(\d+)_(temp|used_pct)/ 提取，
+   按数字排序，缺使用率的盘给「—」；最高温单独作汇总行放最后。 */
+function diskRows(es){
+  const byNo = new Map();
+  let maxE = null;
+  es.forEach(e=>{
+    if(/zs_max_disk_temp/.test(e)){ maxE = e; return; }
+    const m = /zs_disk(\d+)_(temp|used_pct)/.exec(e);
+    if(!m) return;
+    if(!byNo.has(m[1])) byNo.set(m[1], {});
+    byNo.get(m[1])[m[2]] = e;
+  });
+  const tempOf = (e)=>{
+    if(!e) return "—";
+    const t = stateText(e);
+    return t.t ? t.t + (t.ex ? " " + t.ex : "") : "—";
+  };
+  const usedOf = (e)=>{
+    if(!e) return {t:"—", hot:false};
+    const st = S.states.get(e) || {};
+    const n = Number(st.state);
+    if(!isFinite(n)) return {t:"—", hot:false};
+    return {t: num(n,1) + " %", hot: n > 90};
+  };
+  const cell = (lb, txt, hot)=> '<div class="dc"><span class="lb">'+lb+'</span>'+
+    '<span class="dv'+(hot ? ' hot' : '')+'">'+esc(txt)+'</span></div>';
+  let out = "";
+  Array.from(byNo.keys()).sort((a,b)=> Number(a) - Number(b)).forEach(no=>{
+    const g = byNo.get(no);
+    const u = usedOf(g.used_pct);
+    out += '<div class="drow"><span class="dn">磁盘'+esc(no)+'</span>'+
+      cell("温度", tempOf(g.temp), false) + cell("使用率", u.t, u.hot) + '</div>';
+  });
+  if(maxE) out += '<div class="drow sum"><span class="dn">最高</span>'+
+    cell("温度", tempOf(maxE), false) + cell("使用率", "—", false) + '</div>';
+  return out;
+}
+
 /* ══════════════ 数值输入面板（毛玻璃，替代原生 prompt） ══════════════ */
 function openNum(eid){
   const st = S.states.get(eid) || {};
@@ -5131,12 +5258,20 @@ function renderDetail(){
       h += '<div class="dgrid"><div class="t">读数</div><div class="mgrid">'+
         card.sensors.map(e=> entRow(e, false, card.name)).join("")+'</div></div>';
     }
-    /* 打印机 / 极空间：实体按「耗材/计数/设备信息」「系统/磁盘/网络」分组列全 */
+    /* 打印机 / 极空间：实体按「耗材/计数/设备信息」「系统/磁盘/网络」分组列全。
+       V1.0.29 第 4 条：极空间「磁盘」组改走 diskRows() 按盘重排；
+       card.groups 本身不动 —— 卡面大字与「盘用」最大值还要靠它算。
+       pre 用「极空间」而不是 card.name「极空间 Z4Pro」：friendly_name 是
+       「极空间CPU温度」，前缀不匹配会让 shortName 把全名原样吐出来。 */
     if(card.groups && card.groups.length){
+      const rowPre = card.kind === "nas" ? "极空间" : card.name;
       card.groups.forEach(gr=>{
+        const isDisk = gr.t === "磁盘" && card.kind === "nas";
         h += '<div class="dgrid"><div class="t">'+esc(gr.t)+'</div>'+
-          '<div class="mgrid">'+
-          gr.es.map(e=> entRow(e, false, card.name)).join("")+'</div></div>';
+          '<div class="mgrid'+(isDisk ? ' disk' : '')+'">'+
+          (isDisk ? diskRows(gr.es)
+                  : gr.es.map(e=> entRow(e, false, rowPre)).join(""))+
+          '</div></div>';
       });
     }
 
@@ -5169,6 +5304,15 @@ function renderDetail(){
             p = gv("month_p_ele_num"), n = gv("month_n_ele_num"), v = gv("month_v_ele_num"),
             yrE = gv("year_ele_num"), yrC = gv("year_ele_cost"), meter = gv("last_month_meter_num");
 
+      /* V1.0.29 第 2 条：当前电价 = 上月电费 ÷ 上月用电。
+         ⚠️ 不能用年度电费 ÷ 年度累计用电：year_ele_num 已含本月尚未出账的电量，
+         分母偏大会把单价压低约 4.3%。实测这是当期档位价，不是历史平均单价。 */
+      const price = (lastC !== null && lastE !== null && lastE > 0) ? lastC / lastE : null;
+      /* ⚠️ 这里不能用 num(x,2)：num() 对 |x|>=100 一律 toFixed(0)，
+         会把 100.38 元压成「100 元」。电价与预估都是金额，必须保留两位小数。 */
+      const priceTxt = price === null ? "—" : price.toFixed(2) + " 元/度";
+      const estMonTxt = (price === null || monE === null) ? "" : "约 " + (monE * price).toFixed(2) + " 元";
+
       /* 段一：账户余额 / 年度电费 / 上月电费 / 上月用电。
          · year_ele_cost 实体名叫「年度累计电费」，原来我写成「历史电费」，容易被读成
            「历史累计（含往年）」；这里改名「年度电费」，字段没换。
@@ -5176,10 +5320,14 @@ function renderDetail(){
            取不到写「—」而不是 0 度，别让「没数据」看起来像「用了 0 度」。
          · 本月电费 esti_amt 现在恒为 unknown，摆在这一段只会天天显示「—」，
            挪到下面明细段做条件输出。 */
+      /* 6 项靠 .mgrid 的 minmax(190px,1fr) 铺成 2×3。「当前电价」用档位价，
+         「本月用电」补上后可直接和上月用电对照。 */
       h += '<div class="dgrid"><div class="t">余额与状态</div><div class="mgrid">'+
         [["账户余额", money(bal)], ["年度电费", money(yrC)],
          ["上月电费", money(lastC)],
-         ["上月用电", lastE === null ? "—" : num(lastE,1)+" 度"]].map(([k2, v2])=> row2(k2, v2)).join("")+
+         ["上月用电", lastE === null ? "—" : num(lastE,1)+" 度"],
+         ["当前电价", priceTxt],
+         ["本月用电", monE === null ? "—" : num(monE,1)+" 度"]].map(([k2, v2])=> row2(k2, v2)).join("")+
         '</div></div>';
 
       /* 段二：当月峰平谷构成。重庆无尖峰，尖用电恒为 0，只画三段 */
@@ -5209,6 +5357,7 @@ function renderDetail(){
       const det = [
         ["年度累计用电", yrE === null ? "—" : num(yrE,2)+" 度"],
         ["本月电费", esti === null ? "" : money(esti)],
+        ["本月预估电费", estMonTxt],
         ["上月抄表", (meter === null || meter === 0) ? "" : num(meter,0)+" 度"],
         ["历史欠费", owe === null ? "" : money(owe)],
         ["数据日期", gState("daily_lasted_date") || "—"],
@@ -5758,6 +5907,9 @@ catch(e){ if(mqDark.addListener) mqDark.addListener(()=>{ if(THEME.mode==="auto"
   applyNet();
   tickClock(); setInterval(tickClock, 1000);
   setInterval(()=>{ if(S.conn === "on") loadForecast(); }, 600000);   // 10 分钟刷新一次预报
+  /* V1.0.30 第 3 条：「上次 · N 分钟前」不是 HA 推状态推出来的，得自己走字。
+     30 秒刷一次足够（最小单位是「刚刚」→「1 分钟前」），比每秒重排便宜得多。 */
+  setInterval(refreshActsFoot, 30000);
   /* 先渲染一次左栏：没连后端时，户型图底图 / 9 个房间名 / 关闭态图标也立刻可见 */
   try{ renderLeft(); }catch(e){ console.warn("left preload", e); }
   try{ initScrollLock(); }catch(e){ console.warn("scroll lock", e); }
