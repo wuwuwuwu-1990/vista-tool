@@ -88,6 +88,8 @@ body{
 .pill.away{background:rgba(255,159,10,.14)}
 .pill.away .pv{background:rgba(255,159,10,.22);color:#a86500}
 .pill.away .ava{box-shadow:0 0 0 1.5px var(--card-solid),0 0 0 3px rgba(255,159,10,.5)}
+/* V1.0.32 第三态「离线」：头像环改灰，与在家绿 / 离家橙区分开 */
+.pill.off .ava{box-shadow:0 0 0 1.5px var(--card-solid),0 0 0 3px rgba(120,120,128,.45)}
 html[data-mode="dark"] .pill.home .pv{color:#4ade80}
 html[data-mode="dark"] .pill.away .pv{color:#ffb340}
 html[data-mode="dark"] .pill.away .pv{background:rgba(255,159,10,.18)}
@@ -1420,7 +1422,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.31</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.32</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1601,7 +1603,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.31
+   HA家庭智能控制系统 · V1.0.32
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -2170,7 +2172,7 @@ function onState(d){
   }));
   patchCard(d.entity_id);
   scheduleStats();
-  if(d.entity_id === WEATHER_EID || d.entity_id.startsWith("person.") || PLAN_EIDS.has(d.entity_id)) scheduleLeft();
+  if(d.entity_id === WEATHER_EID || d.entity_id.startsWith("person.") || d.entity_id.startsWith("device_tracker.") || PLAN_EIDS.has(d.entity_id)) scheduleLeft();
   if(S.detailEid === d.entity_id){
     const ae = document.activeElement;
     if(!(ae && ae.tagName === "INPUT" && ae.type === "range")) renderDetail();
@@ -2880,7 +2882,37 @@ function buildModel(){
 }
 
 /* ══════════════ 左栏：人物 / 时钟 / 天气 / 户型图 ══════════════ */
-const P_STATE = { home:"在家", not_home:"离家", unavailable:"不可用", unknown:"未知" };
+/* V1.0.32：人物三态（在家 / 离家 / 离线）。
+   person.* 的 state 会「冻住」——手机断网后 person 仍停在 home，
+   HA 重启后又会短暂变 unknown。所以按可信度逐级回落，命中即停：
+     ① person 自己 home                          → home
+     ② 任一关联 tracker 为 home                  → home
+     ③ 任一 tracker 的 last_time_reachable 在 12 分钟内 → home（断网三分钟仍算在家）
+     ④ person 自己 not_home                      → away
+     ⑤ 其余（unknown/unavailable/实体缺失）      → off
+   关联的 tracker 取 person 实体的 device_trackers 属性，不写死设备名。
+   原 P_STATE 四键映射（home/not_home/unavailable/unknown）随本版废弃：
+   它把「不可用」和「未知」都显示成字面词，玩家看不懂，也分不出真假。 */
+const P_ONLINE_MIN = 12;
+function personTri(eid){
+  const st = S.states.get(eid);
+  const v  = st ? st.state : "";
+  if(v === "home") return "home";
+  const a = (st && st.attributes) || {};
+  const trks = Array.isArray(a.device_trackers) ? a.device_trackers : [];
+  if(trks.some(t=>{ const s = S.states.get(t); return s && s.state === "home"; })) return "home";
+  const now = Date.now();
+  const fresh = trks.some(t=>{
+    const s = S.states.get(t);
+    const r = s && s.attributes && s.attributes.last_time_reachable;
+    if(!r) return false;
+    const ms = Date.parse(r);
+    return isFinite(ms) && (now - ms) < P_ONLINE_MIN * 60000;
+  });
+  if(fresh) return "home";
+  if(v === "not_home") return "away";
+  return "off";
+}
 const IMG_CACHE = new Map();
 
 /* 图片地址：拼 access_token 后交给 <img>/背景图直接加载 —— 不走 fetch，绕过浏览器 CORS */
@@ -2914,13 +2946,11 @@ function renderPeople(){
   if(!host) return;
   host.innerHTML = PERSON_LIST.map(p=>{
     const st = S.states.get(p.eid);
-    const v = st ? st.state : "";
-    const on = v === "home";
-    const away = !!v && v !== "home" && v !== "unknown" && v !== "unavailable";
-    const txt = v ? (P_STATE[v] || v) : "未连接";
+    const tri = personTri(p.eid);
+    const txt = tri === "home" ? "在家" : tri === "away" ? "离家" : "离线";
     const pic = (st && st.attributes && st.attributes.entity_picture) || "";
     const fallback = AVA[p.eid] || "";      // 内联头像：静态打开/断网也能显示
-    return '<div class="pill ' + (on?"home":away?"away":"") + '" data-eid="' + esc(p.eid) + '" role="button" tabindex="0">' +
+    return '<div class="pill ' + tri + '" data-eid="' + esc(p.eid) + '" role="button" tabindex="0">' +
       '<div class="ava" data-src="' + esc(pic) + '"' +
         (fallback ? ' style="background-image:url(' + fallback + ')"' : '') + '>' +
         (fallback ? '' : esc(p.name.charAt(0))) + '</div>' +
@@ -4456,7 +4486,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.31 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.32 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -4505,15 +4535,6 @@ function gBars(list){  /* 每幅窗帘一根竖条，按 position 百分比（0=
     out += '<rect x="'+x.toFixed(2)+'" y="'+(bot-h).toFixed(2)+'" width="'+bw.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="2" fill="currentColor"/>';
   });
   return '<svg viewBox="0 0 50 40">'+out+'</svg>';
-}
-function gDoor(open){  /* 门形框：门扇随开合角度转出 */
-  const ang = Math.min(open||0, 4)/4 * 62 * Math.PI/180;
-  const hx = 13, hy = 34, L = 25;
-  const tx = hx + L*Math.sin(ang), ty = hy - L*Math.cos(ang);
-  return '<svg viewBox="0 0 50 40">'+
-    '<path d="M13 8 V34 H36 V8" fill="none" stroke="rgba(120,120,128,.22)" stroke-width="2.2" stroke-linecap="round"/>'+
-    '<line x1="11" y1="34" x2="39" y2="34" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>'+
-    '<line x1="'+hx+'" y1="'+hy+'" x2="'+tx.toFixed(1)+'" y2="'+ty.toFixed(1)+'" stroke="currentColor" stroke-width="4.6" stroke-linecap="round"/></svg>';
 }
 function gTempBars(byRoom){  /* 各房间温度小柱 */
   const order = ["客厅","主卧","次卧","偏卧","厨房","阳台"];
@@ -4608,10 +4629,15 @@ function waterDue(){
   const list = Array.isArray(a["欠费明细"]) ? a["欠费明细"] : [];
   let w = 0, tr = 0, late = 0;
   for(const it of list){
-    w    += parseFloat(it["水费"])   || 0;
-    tr   += parseFloat(it["垃圾费"]) || 0;
-    late += parseFloat(it["滞纳金"]) || 0;
+    w  += parseFloat(it["水费"])   || 0;
+    tr += parseFloat(it["垃圾费"]) || 0;
   }
+  /* V1.0.32：滞纳金以实体属性「欠费滞纳金」为准 —— 那是水务系统算好的当期总额。
+     明细数组偶尔缺期、或某期没有滞纳金字段，逐期累加会静默变成 0.00，看起来像「没有滞纳金」；
+     属性拿不到（老数据 / 手动改过实体）才回落逐期累加。两者当前都是 0.36，等价。 */
+  const lateAttr = parseFloat(a["欠费滞纳金"]);
+  if(isFinite(lateAttr)) late = lateAttr;
+  else for(const it of list) late += parseFloat(it["滞纳金"]) || 0;
   return {due: due, water: w, trash: tr, late: late, attr: a, list: list};
 }
 /* 统计卡三件套，三个出口：欠费 >0 红数值 / =0 已缴清绿 / 取不到「—」+ 空 SVG。
@@ -4621,7 +4647,13 @@ function waterStat(){
   if(!d) return {v:"—", g:'<svg viewBox="0 0 50 40"></svg>', vs:"", open:"water"};
   const g = gWaterStack(d.water, d.trash, d.late);
   if(d.due <= 0) return {v:"已缴清", vs:"var(--green)", g:g, open:"water"};
-  return {v: money2(d.due) + "<small>元</small>", vs:"var(--red)", g:g, open:"water"};
+  /* V1.0.32：补「欠费」前缀，和电费那格的「余额」对齐。
+     分档沿用 .stat .v 的 pfx 机制 —— 1289 档只有 56.86px 可用宽，
+     两字前缀必然截断（见当日记录），这是已知取舍。 */
+  const pfx = d.due >= 1000 ? ' class="pfx4"' : d.due >= 100 ? ' class="pfx3"'
+            : d.due >= 10 ? ' class="pfx2"' : '';
+  return {v:'<small'+pfx+'>欠费</small>' + money2(d.due) + "<small>元</small>",
+          vs:"var(--red)", g:g, open:"water"};
 }
 
 /* A 版图形：当月峰 / 平 / 谷三段堆叠条（46×12，y=14，圆角靠 clipPath 统一裁）。
