@@ -1420,7 +1420,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.30</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.31</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1601,7 +1601,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.30
+   HA家庭智能控制系统 · V1.0.31
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -4456,7 +4456,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.30 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.31 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -4589,6 +4589,41 @@ function gridStat(){
     open: true
   };
 }
+
+/* ── 宜人供水水费（V1.0.31）──
+   数据源 sensor.shuifei_qianfei：state 是欠费总额，attributes「欠费明细」是逐期数组，
+   每期含 水费 / 垃圾费 / 滞纳金 / 用水 / 账期。三段构成从明细累加，不另取实体。 */
+/* 金额格式化：不能用 num() —— 它对 |x|>=100 直接 toFixed(0)，
+   欠费滚到三位数会变成「100 元」。金额一律两位小数。 */
+function money2(x){
+  const n = Number(x);
+  return isFinite(n) ? (Math.round(n*100)/100).toFixed(2) : "—";
+}
+function waterDue(){
+  const st = S.states.get("sensor.shuifei_qianfei");
+  if(!st) return null;
+  const due = parseFloat(st.state);
+  if(!isFinite(due)) return null;          /* unavailable / unknown 一律当「取不到」 */
+  const a = st.attributes || {};
+  const list = Array.isArray(a["欠费明细"]) ? a["欠费明细"] : [];
+  let w = 0, tr = 0, late = 0;
+  for(const it of list){
+    w    += parseFloat(it["水费"])   || 0;
+    tr   += parseFloat(it["垃圾费"]) || 0;
+    late += parseFloat(it["滞纳金"]) || 0;
+  }
+  return {due: due, water: w, trash: tr, late: late, attr: a, list: list};
+}
+/* 统计卡三件套，三个出口：欠费 >0 红数值 / =0 已缴清绿 / 取不到「—」+ 空 SVG。
+   open 传 "water"（不是 true）—— true 是电费的标记，两者要能分辨。 */
+function waterStat(){
+  const d = waterDue();
+  if(!d) return {v:"—", g:'<svg viewBox="0 0 50 40"></svg>', vs:"", open:"water"};
+  const g = gWaterStack(d.water, d.trash, d.late);
+  if(d.due <= 0) return {v:"已缴清", vs:"var(--green)", g:g, open:"water"};
+  return {v: money2(d.due) + "<small>元</small>", vs:"var(--red)", g:g, open:"water"};
+}
+
 /* A 版图形：当月峰 / 平 / 谷三段堆叠条（46×12，y=14，圆角靠 clipPath 统一裁）。
    三段色写死，不跟 currentColor —— .stat.r/.stat.o 会覆盖 .g 的颜色，余额报警转红时会串色。
    不复用 gBars()：那个把值当 0–100 百分比除、且 slice(0,7) 只画 7 根，改它会连带窗帘卡。
@@ -4612,6 +4647,32 @@ function gEleStack(p, n, v){
       const w = 46 * val / total;
       out += '<rect x="'+x.toFixed(2)+'" y="14" width="'+w.toFixed(2)+'" height="12" fill="'+col+'"/>';
       x += w;
+    }
+    out += '</g>';
+  }
+  return out + '</svg>';
+}
+
+/* 水费三段堆叠条（V1.0.31）：水费蓝 / 垃圾费灰 / 滞纳金橙。
+   结构整段照抄 gEleStack，不动它本身（电费卡还在用）。
+   全 0 时不画底槽 —— 空灰槽会被读成「有数据但为零」，和「取不到」分不开。 */
+let _watSeq = 0;
+function gWaterStack(w, tr, late){
+  const segs = [[w, "#378ADD"], [tr, "#888780"], [late, "#BA7517"]]
+    .map(([x, c]) => [isFinite(x) && x > 0 ? x : 0, c]);
+  const total = segs.reduce((s, [x]) => s + x, 0);
+  const cid = "wat" + (++_watSeq);
+  let out = '<svg viewBox="0 0 50 40">';
+  if(total > 0){
+    out += '<defs><clipPath id="'+cid+'"><rect x="2" y="14" width="46" height="12" rx="6"/></clipPath></defs>'+
+      '<rect x="2" y="14" width="46" height="12" rx="6" fill="rgba(120,120,128,.16)"/>'+
+      '<g clip-path="url(#'+cid+')">';
+    let x = 2;
+    for(const [val, col] of segs){
+      if(val <= 0) continue;
+      const sw = 46 * val / total;
+      out += '<rect x="'+x.toFixed(2)+'" y="14" width="'+sw.toFixed(2)+'" height="12" fill="'+col+'"/>';
+      x += sw;
     }
     out += '</g>';
   }
@@ -4655,7 +4716,7 @@ function renderStats(){
   let lightsOn = 0;
   for(const e of PLAN_GLOW_EIDS){ if(entCat(e, "light")) lightsOn++; }
 
-  let coversOpen=0, coversAll=0, doorsOpen=0;
+  let coversOpen=0, coversAll=0;
   const coversPos=[];                       /* 逐幅窗帘的 position，喂给 gBars 画竖条 */
   const temps=[], hums=[], tempByRoom=new Map();
   for(const [eid, st] of S.states){
@@ -4672,10 +4733,8 @@ function renderStats(){
         coversPos.push(coverShowPos(eid));
         if(entCat(eid, "cover")) coversOpen++;
       }
-      if(doorKind(eid)) doorsOpen++;
     }
     else if(dom==="sensor"){
-      if(doorKind(eid)) doorsOpen++;         /* 门锁：door_state=open 才算开 */
       if(entCat(eid, "temp")){
         const nv = parseFloat(v);
         temps.push(nv);
@@ -4701,12 +4760,12 @@ function renderStats(){
      g: gDots(Math.round(lightsAll ? lightsOn/lightsAll*12 : 0))},
     {k:"窗帘开启", v: coversOpen+" <small>/ "+coversAll+"</small>", c:"p", ic:"curtain", cat:"cover",
      g: gBars(coversPos)},
-    {k:"门窗敞开", v: String(doorsOpen), c: doorsOpen>0?"r":"g", ic:"door", cat:"door",
-     g: gDoor(doorsOpen)},
     {k:"室内温度", v: tempAvg!==null? num(tempAvg,1)+"<small>°C</small>":"—", c:"", ic:"temp", cat:"temp",
      g: gTempBars(tempByRoom)},
     {k:"平均湿度", v: humAvg!==null? num(humAvg,0)+"<small>%</small>":"—", c:"", ic:"drop", cat:"hum",
      g: gArc(humAvg!==null? humAvg/100 : 0)},
+    /* 宜人供水水费（V1.0.31）：cat 同样留空不下钻，理由同电费 */
+    Object.assign({k:"家庭水费", c:"", ic:"water", cat:""}, waterStat()),
     /* 国网电费：cat 留空不下钻，否则会误触发 S.cat 过滤整页设备卡 */
     Object.assign({k:"家庭电费", c:"", ic:"bolt", cat:""}, gridStat())
   ];
@@ -4714,9 +4773,12 @@ function renderStats(){
     const sel = !!i.cat && S.cat === i.cat;
     const vt = String(i.v).replace(/<[^>]*>/g, "");
     /* 第 8 条：电费那格要能点开弹窗。它不能带 data-cat（会走进下钻），
-       所以单独用 data-open 标一个可点标记，走自己的分支。 */
+       所以单独用 data-open 标一个可点标记，走自己的分支。
+       V1.0.31：两种可点格 —— 电费 open:true 走 gridCardEid 反查，
+       水费 open:"water" 直接开 sensor.shuifei_qianfei。按值输出，title 跟着改。 */
     const openA = i.open
-      ? ' data-open="grid" role="button" tabindex="0" title="查看电费详情"' : '';
+      ? ' data-open="'+(i.open === true ? "grid" : i.open)+'" role="button" tabindex="0"'+
+        ' title="'+(i.open === true ? "查看电费详情" : "查看"+esc(i.k)+"详情")+'"' : '';
     return '<div class="stat '+i.c+(sel?' sel':'')+(i.cat?' cat':'')+(i.open?' open':'')+'"'+
       (i.cat? ' data-cat="'+i.cat+'" role="button" tabindex="0" aria-pressed="'+sel+'" title="查看全部'+esc(i.k)+'"' : openA)+'>'+
       '<span class="si">'+statIcon(i.ic)+'</span>'+
@@ -4737,6 +4799,8 @@ const STAT_ICON = {
   door:'<path d="M3.6 19.8h16.8"/><path d="M6.2 19.8V5.6a1 1 0 0 1 1-1h5.6a1 1 0 0 1 1 1v14.2"/><path d="M11.1 12.5h.01"/><rect x="15.8" y="6" width="4.6" height="4.6" rx="1"/>',
   temp:'<path d="M10.2 14.2V5.6a1.8 1.8 0 1 1 3.6 0v8.6a3.9 3.9 0 1 1-3.6 0Z"/><path d="M12 9.4v6.2"/>',
   drop:'<path d="M12 3.6c3.2 3.7 5.5 6.7 5.5 9.3A5.5 5.5 0 0 1 12 18.4a5.5 5.5 0 0 1-5.5-5.5c0-2.6 2.3-5.6 5.5-9.3Z"/>',
+  /* V1.0.31：水费另起一条，不复用 drop —— 否则和「平均湿度」撞图标 */
+  water:'<path d="M12 3.6c3.2 3.7 5.5 6.7 5.5 9.3A5.5 5.5 0 0 1 12 18.4a5.5 5.5 0 0 1-5.5-5.5c0-2.6 2.3-5.6 5.5-9.3Z"/><path d="M9.3 13.6c.9.7 1.8.7 2.7 0s1.8-.7 2.7 0"/>',
   bolt:'<path d="M13.2 3.2 6.4 13.4h4.6l-1.4 7.4 7.2-10.2h-4.8l1.2-7.4Z"/>'
 };
 function statIcon(k){
@@ -5180,6 +5244,84 @@ function renderDetail(){
   const CLOSE_BTN = '<button class="pclose" data-act="closeDetail" title="关闭" aria-label="关闭">'+
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'+
     '<path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+
+  /* ── 家庭水费弹窗（V1.0.31）：五段 —— 欠费汇总 / 未缴明细 / 本期 / 账户 / 累计 ──
+     水费不是设备卡，S.cardOf 里查不到它，所以在设备卡分支之前提前返回，只出只读内容。
+     data-kind="dev" 是借设备弹窗的尺寸（540px 宽）和 .dbody 内容区自滚，不新增样式。 */
+  if(eid === "sensor.shuifei_qianfei"){
+    const wd = waterDue();
+    panel.setAttribute("data-kind", "dev");
+    if(!wd){
+      panel.innerHTML = CLOSE_BTN + '<div class="dbody"><p class="desc">暂无水费数据，请等下一次同步</p></div>';
+      return;
+    }
+    const a = wd.attr, L = wd.list;
+    const nOf = (id)=>{
+      const s = S.states.get(id), n = s ? parseFloat(s.state) : NaN;
+      return isFinite(n) ? n : null;
+    };
+    const yuan = (x)=> (x === null || x === undefined || x === "" || !isFinite(Number(x)))
+      ? "—" : money2(x) + " 元";
+    const w3 = (x)=>{ const n = parseFloat(x); return isFinite(n) ? num(n,1) + " m³" : "—"; };
+    /* 账期 202611 → 2026-11，避免「202611 用水」被看成流水号 */
+    const per = (p)=>{
+      const s = String(p === null || p === undefined ? "" : p);
+      return /^\d{6}$/.test(s) ? s.slice(0,4) + "-" + s.slice(4) : (s || "—");
+    };
+    const val = (k)=> (a[k] === null || a[k] === undefined || a[k] === "") ? "—" : a[k];
+
+    const danjia = nOf("sensor.shuifei_danjia"), yue = nOf("sensor.shuifei_yue");
+    const yong = nOf("sensor.shuifei_yongshui"), benqi = nOf("sensor.shuifei_jine");
+    const y12w = parseFloat(a["近12月用水"]), y12m = parseFloat(a["近12月费用"]);
+    /* 折合单价含垃圾费，和「水费单价」不是一回事，所以单独算、单独标 */
+    const pj = (isFinite(y12w) && isFinite(y12m) && y12w > 0) ? y12m / y12w : null;
+
+    let h = '';
+    h += '<div class="dgrid"><div class="t">欠费汇总</div><div class="mgrid">'+
+      dRow("欠费总额", yuan(wd.due)) +
+      dRow("欠费期数", (val("欠费期数") === "—" ? L.length : a["欠费期数"]) + " 期") +
+      dRow("滞纳金", yuan(wd.late)) +
+      dRow("水费单价", danjia === null ? "—" : money2(danjia) + " 元/m³")+
+      '</div></div>';
+
+    if(L.length){
+      h += '<div class="dgrid"><div class="t">未缴明细 · 共 '+L.length+' 期</div><div class="mgrid">'+
+        L.map((it)=>{
+          const sw = parseFloat(it["水费"]) || 0, sj = parseFloat(it["垃圾费"]) || 0,
+                sl = parseFloat(it["滞纳金"]) || 0;
+          const tg = per(it["账期"]) + " ";
+          return dRow(tg+"用水", w3(it["用水"])) + dRow(tg+"水费", yuan(sw)) +
+                 dRow(tg+"垃圾费", yuan(sj)) + dRow(tg+"滞纳金", yuan(sl)) +
+                 dRow(tg+"小计", yuan(sw + sj + sl));
+        }).join("")+
+        '</div></div>';
+    }
+
+    h += '<div class="dgrid"><div class="t">本期</div><div class="mgrid">'+
+      dRow("账期", per(a["账单期"])) +
+      dRow("本期用水", w3(yong)) +
+      dRow("本期应缴", yuan(benqi)) +
+      dRow("抄表起止", val("抄表起度")+" → "+val("抄表止度")) +
+      dRow("上期用水", w3(a["上期用水"])) +
+      dRow("上期金额", yuan(a["上期金额"]))+
+      '</div></div>';
+
+    h += '<div class="dgrid"><div class="t">账户</div><div class="mgrid">'+
+      dRow("户号", val("户号")) + dRow("户名", val("户名")) +
+      dRow("地址", val("地址")) + dRow("账户余额", yuan(yue))+
+      '</div></div>';
+
+    h += '<div class="dgrid"><div class="t">累计</div><div class="mgrid">'+
+      dRow("近 12 月用水", w3(y12w)) +
+      dRow("近 12 月费用", isFinite(y12m) ? yuan(y12m) : "—") +
+      dRow("折合单价", pj === null ? "—" : money2(pj) + " 元/m³") +
+      dRow("数据时间", val("数据时间")) +
+      dRow("令牌到期", val("令牌到期"))+
+      '</div></div>';
+
+    panel.innerHTML = CLOSE_BTN + '<div class="dbody">' + h + '</div>';
+    return;
+  }
 
   /* 一台设备一张卡：显示该设备下的全部实体。
      V1.0.26 判据修正：原来是 card.mains.length > 1，要求至少两个主控实体。
@@ -5719,6 +5861,8 @@ document.addEventListener("click", (ev)=>{
      取不到卡（国网实体还没加载 / 集成掉线）也要能点，只给一条提示，不静默。 */
   const openEl = ev.target.closest(".stat[data-open]");
   if(openEl){
+    /* V1.0.31：水费格直连自己的实体（不走 gridCardEid 反查），其余仍是国网电费 */
+    if(openEl.getAttribute("data-open") === "water"){ openEnt("sensor.shuifei_qianfei"); return; }
     const ge = gridCardEid();
     if(ge) openEnt(ge);
     else toast("暂无电费数据");
