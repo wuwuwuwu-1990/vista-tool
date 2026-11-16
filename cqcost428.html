@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>重庆造价咨询收费计算器_基于〔2013〕428号文_V2.2.15</title>
+<title>重庆造价咨询收费计算器_基于〔2013〕428号文_V2.2.16</title>
 <style>
 :root{
   --navy:#4C1D95; --navy2:#7C3AED; --blue:#8B5CF6; --blue-hover:#7C3AED;
@@ -76,7 +76,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 
 <header>
   <h1>重庆造价咨询收费计算器_基于〔2013〕428号文</h1>
-  <div><span class="ver">V2.2.15</span><span class="sub">渝价〔2013〕428号 · 按累进分档费率测算</span></div>
+  <div><span class="ver">V2.2.16</span><span class="sub">渝价〔2013〕428号 · 按累进分档费率测算</span></div>
   <div class="about" onclick="showAbout()">关于</div>
 </header>
 
@@ -159,7 +159,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
   </div>
 
   <footer>
-    <span>V2.2.15 · 渝价〔2013〕428号 · 按累进分档计费</span>
+    <span>V2.2.16 · 渝价〔2013〕428号 · 按累进分档计费</span>
     <span>支持 导出 XLSX / 导出 PNG 存档</span>
   </footer>
 </div>
@@ -167,7 +167,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 <!-- 关于 -->
 <div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
   <div class="modal">
-    <div class="modal-head">重庆造价咨询收费计算器_基于〔2013〕428号文<small>版本 V2.2.15 · 渝价〔2013〕428号</small></div>
+    <div class="modal-head">重庆造价咨询收费计算器_基于〔2013〕428号文<small>版本 V2.2.16 · 渝价〔2013〕428号</small></div>
     <div class="modal-body">
       <div style="font-weight:700;font-size:15px;margin-bottom:10px;">软件功能</div>
       <div class="ft">· 按渝价〔2013〕428号 累进分档费率测算造价咨询收费</div>
@@ -798,7 +798,7 @@ function exportXlsx(){
 
   var l3 = [{v:'计价方式',s:2}, {v:pricingText(r.pricing),s:3}, {v:'',s:3}, {v:'收费项目',s:2}, {v:r.project,s:3}, {v:'',s:3}, {v:'',s:3}];
   l3.nofit = true; l3.h = 24; rows.push(l3);
-  var l4 = [{v:'工程类别',s:2}, {v:r.category,s:3}, {v:'',s:3}, {v:'收费预估总计（万元）',s:2}, numCell(r.fee, 3), {v:'',s:3}, {v:'',s:3}];
+  var l4 = [{v:'工程类别',s:2}, {v:r.category,s:3}, {v:'',s:3}, {v:'收费预估总计',s:2}, {v: r.fee + ' 万元', s: 3}, {v:'',s:3}, {v:'',s:3}];
   l4.nofit = true; l4.h = 24; rows.push(l4);
 
   rows.push([{v:'收费项目 / 分档区间',s:4},{v:'500万以内',s:4},{v:'501–1000万',s:4},{v:'1001–5000万',s:4},{v:'5001万–1亿',s:4},{v:'1亿元以上',s:4},{v:'小计（万元）',s:4}]);
@@ -850,7 +850,7 @@ function exportPng(){
   ctx.fillStyle = '#fff'; ctx.font = 'bold 26px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
   ctx.fillText('重庆造价咨询收费计算器_基于〔2013〕428号文', pad, 26);
   ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 16px Consolas,monospace';
-  ctx.fillText('V2.2.15', pad, 64);
+  ctx.fillText('V2.2.16', pad, 64);
   ctx.fillStyle = '#DDD3F9'; ctx.font = '15px "Microsoft YaHei UI",sans-serif';
   ctx.fillText('渝价〔2013〕428号 · 按累进分档费率测算', pad + 88, 64);
   // 参数区
