@@ -3,7 +3,7 @@
 <head data-page-node-id="ouuaEqQjmHzImUEDEUlqIw">
 <meta charset="UTF-8" data-page-node-id="NOyRyvXXEO07t8iwuEeYwE">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="8WVPuaIT2CAM7XZxhbQkYj">
-<title>酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号_V1.0.2</title>
+<title>酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号_V1.0.3</title>
 <style>
 :root{
   --navy:#7C2D12; --navy2:#C2410C; --blue:#EA580C; --blue-hover:#C2410C;
@@ -73,7 +73,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 
 <header data-page-node-id="0n6KlByrleOMPUwvMptULp">
   <h1 data-page-node-id="zsWuDyEAdN0z72Ih9QfCfP">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号</h1>
-  <div data-page-node-id="yalONCRZCdJ2ScE86QL8wX"><span class="ver" data-page-node-id="UeTqweZp6fcd7rKjLny6NK">V1.0.2</span><span class="sub" data-page-node-id="rvKq5KWZELISDKreDxbji5">政府性投资评审（审计）服务费用 · 累进分档</span></div>
+  <div data-page-node-id="yalONCRZCdJ2ScE86QL8wX"><span class="ver" data-page-node-id="UeTqweZp6fcd7rKjLny6NK">V1.0.3</span><span class="sub" data-page-node-id="rvKq5KWZELISDKreDxbji5">政府性投资评审（审计）服务费用 · 累进分档</span></div>
   <a class="about dl-link" href="酉阳府函〔2011〕306号关于进一步规范政府性投资评审（审计）服务费用管理的批复.doc" download title="下载批复原文">文件下载</a>
   <div class="about" onclick="showAbout()" data-page-node-id="gIh9MBkubZphxZmD6H8Ard">关于</div>
 </header>
@@ -146,7 +146,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
   </div>
 
   <footer data-page-node-id="JvlUvx0C68nxgL8FEIjgtY">
-    <span data-page-node-id="P5QBXkdob295uDOJKnZqcc">V1.0.2 · 酉阳府函〔2011〕306号 · 2011年10月1日起执行</span>
+    <span data-page-node-id="P5QBXkdob295uDOJKnZqcc">V1.0.3 · 酉阳府函〔2011〕306号 · 2011年10月1日起执行</span>
     <span data-page-node-id="psfyB4Y3N60ReciFgrP0jK">支持 导出 XLSX / 导出 PNG 存档</span>
   </footer>
 </div>
@@ -154,7 +154,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 <!-- 关于 -->
 <div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()" data-page-node-id="mTMh9QukFDy5rWZ1ThuMz9">
   <div class="modal" data-page-node-id="7jRrrAG67kiofoRtNjjG9m">
-    <div class="modal-head" data-page-node-id="cYxiBVM98Sa5MMQMDacs3u">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号<small data-page-node-id="iQFI7uJLVxqAULs2HcAGLU">版本 V1.0.2 · 酉阳府函〔2011〕306号</small></div>
+    <div class="modal-head" data-page-node-id="cYxiBVM98Sa5MMQMDacs3u">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号<small data-page-node-id="iQFI7uJLVxqAULs2HcAGLU">版本 V1.0.3 · 酉阳府函〔2011〕306号</small></div>
     <div class="modal-body" data-page-node-id="i3HiOTiFBSekzK5QZYvyGy">
       <div style="font-weight:700;font-size:15px;margin-bottom:10px;" data-page-node-id="MxLMtvM0PEfAoDZeAc8UqB">软件功能</div>
       <div class="ft" data-page-node-id="aFUV7m1PG2e38AzXmuKfpe">· 按酉阳府函〔2011〕306号《关于进一步规范政府性投资评审（审计）服务费用管理的批复》制作</div>
@@ -728,7 +728,7 @@ function calculate(){
   rows.push(['【总计】评审（审计）服务费（万元）', ['','','','','', fmt(total)], fmt(total)]);
   renderTable(rows);
 
-  lastResult = {name: getProjectName(), project: project, category: category, standard: fmt(std.total), basic: fmt(basic), reduceFee: reduceFee ? fmt(reduceFee) : '无', total: fmt(total), floor: floorApplied, discount: discount.toFixed(2)+'%', rows: rows};
+  lastResult = {base: fmt(amount), name: getProjectName(), project: project, category: category, standard: fmt(std.total), basic: fmt(basic), reduceFee: reduceFee ? fmt(reduceFee) : '无', total: fmt(total), floor: floorApplied, discount: discount.toFixed(2)+'%', rows: rows};
 }
 
 function renderTable(rows){
@@ -778,12 +778,13 @@ function rateTablePng(){
 function exportXlsx(){
   if (!lastResult){ alert('请先完成计算后再导出。'); return; }
   var r = lastResult, N = 8, rows = [];
-  var merges = ['A1:H1','B2:H2','B3:H3','B4:H4','B5:C5','E5:H5','B6:C6','E6:H6'];
+  var merges = ['A1:H1','B2:H2','B3:H3','B4:H4','B5:H5','B6:C6','E6:H6','B7:C7','E7:H7'];
 
   var t = [{v: '评审（审计）服务费计算表（酉阳府函〔2011〕306号）', s: 1}];
   t.nofit = true; t.h = 34; rows.push(t);
 
-  rows.push(mergeInfo('工程名称', r.name || '（未填写）', 30));
+  rows.push(mergeInfo('工程名称', r.name || '（未填写）', 30));
+  rows.push(mergeInfo('计费基数（万元）', r.base + ' 万元', 24));
   rows.push(mergeInfo('收费项目', r.project));
   rows.push(mergeInfo('工程类别', r.category));
 
@@ -842,7 +843,7 @@ function exportPng(){
   ctx.fillStyle = '#fff'; ctx.font = 'bold 22px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
   ctx.fillText('酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号', pad, 24);
   ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 15px Consolas,monospace';
-  ctx.fillText('V1.0.2', pad, 60);
+  ctx.fillText('V1.0.3', pad, 60);
   ctx.fillStyle = '#FFE7D1'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
   ctx.fillText('政府性投资评审（审计）服务费用 · 酉阳府函〔2011〕306号', pad + 80, 60);
   ctx.fillStyle = '#3B2A20'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
