@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>重庆造价咨询收费计算器_基于〔2023〕19号文_V1.0.5</title>
+<title>重庆造价咨询收费计算器_基于〔2023〕19号文_V1.0.6</title>
 <style>
 :root{
   --navy:#4C1D95; --navy2:#7C3AED; --blue:#8B5CF6; --blue-hover:#7C3AED;
@@ -68,7 +68,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 
 <header>
   <h1>重庆造价咨询收费计算器_基于〔2023〕19号文</h1>
-  <div><span class="ver">V1.0.5</span><span class="sub">渝建价发〔2023〕19号 · 差异化监管参考费用标准</span></div>
+  <div><span class="ver">V1.0.6</span><span class="sub">渝建价发〔2023〕19号 · 差异化监管参考费用标准</span></div>
   <div class="about" onclick="showAbout()">关于</div>
 </header>
 
@@ -141,7 +141,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
   </div>
 
   <footer>
-    <span>V1.0.5 · 渝建价发〔2023〕19号 附件1 · 累进分档计费</span>
+    <span>V1.0.6 · 渝建价发〔2023〕19号 附件1 · 累进分档计费</span>
     <span>支持 导出 XLSX / 导出 PNG 存档</span>
   </footer>
 </div>
@@ -149,7 +149,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 <!-- 关于 -->
 <div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
   <div class="modal">
-    <div class="modal-head">重庆造价咨询收费计算器_基于〔2023〕19号文<small>版本 V1.0.5 · 渝建价发〔2023〕19号</small></div>
+    <div class="modal-head">重庆造价咨询收费计算器_基于〔2023〕19号文<small>版本 V1.0.6 · 渝建价发〔2023〕19号</small></div>
     <div class="modal-body">
       <div style="font-weight:700;font-size:15px;margin-bottom:10px;">软件功能</div>
       <div class="ft">· 按渝建价发〔2023〕19号 附件1 参考费用标准累进分档测算</div>
@@ -708,7 +708,7 @@ function calculate(){
     rows.push(['差异化监管分类', [cls.name,cls.name,cls.name,cls.name,cls.name], cls.name]);
   }
   renderTable(rows);
-  lastResult = {name: getProjectName(), project: project, category: category, standard: fmt(std.total), total: fmt(total), discount: discount.toFixed(2)+'%', actualDiscount: fmt(actualDiscount)+'%', cls: cls.name, clsNote: cls.note, rows: rows};
+  lastResult = {base: fmt(amount), name: getProjectName(), project: project, category: category, standard: fmt(std.total), total: fmt(total), discount: discount.toFixed(2)+'%', actualDiscount: fmt(actualDiscount)+'%', cls: cls.name, clsNote: cls.note, rows: rows};
 }
 
 function renderTable(rows){
@@ -751,12 +751,13 @@ function rateTablePng(){
 function exportXlsx(){
   if (!lastResult){ alert('请先完成计算后再导出。'); return; }
   var r = lastResult, N = 7, rows = [];
-  var merges = ['A1:G1','B2:G2','B3:G3','B4:G4','B5:C5','E5:G5','B6:C6','E6:G6'];
+  var merges = ['A1:G1','B2:G2','B3:G3','B4:G4','B5:G5','B6:C6','E6:G6','B7:C7','E7:G7'];
 
   var t = [{v: '造价咨询费用计算表（渝建价发〔2023〕19号）', s: 1}];
   t.nofit = true; t.h = 34; rows.push(t);
 
   rows.push(mergeInfo('工程名称', r.name || '（未填写）', 30));
+  rows.push(mergeInfo('计费基数（万元）', r.base + ' 万元', 24));
   rows.push(mergeInfo('收费项目', r.project));
   rows.push(mergeInfo('工程类别', r.category));
 
@@ -812,7 +813,7 @@ function exportPng(){
   ctx.fillStyle = '#fff'; ctx.font = 'bold 23px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
   ctx.fillText('重庆造价咨询收费计算器_基于〔2023〕19号文', pad, 24);
   ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 15px Consolas,monospace';
-  ctx.fillText('V1.0.5', pad, 58);
+  ctx.fillText('V1.0.6', pad, 58);
   ctx.fillStyle = '#DDD3F9'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
   ctx.fillText('渝建价发〔2023〕19号 · 差异化监管参考费用标准', pad + 78, 58);
   ctx.fillStyle = '#2A1E4A'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
