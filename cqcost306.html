@@ -3,7 +3,7 @@
 <head data-page-node-id="ouuaEqQjmHzImUEDEUlqIw">
 <meta charset="UTF-8" data-page-node-id="NOyRyvXXEO07t8iwuEeYwE">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="8WVPuaIT2CAM7XZxhbQkYj">
-<title>酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号_V1.0.0</title>
+<title>酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号_V1.0.1</title>
 <style>
 :root{
   --navy:#7C2D12; --navy2:#C2410C; --blue:#EA580C; --blue-hover:#C2410C;
@@ -73,7 +73,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 
 <header data-page-node-id="0n6KlByrleOMPUwvMptULp">
   <h1 data-page-node-id="zsWuDyEAdN0z72Ih9QfCfP">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号</h1>
-  <div data-page-node-id="yalONCRZCdJ2ScE86QL8wX"><span class="ver" data-page-node-id="UeTqweZp6fcd7rKjLny6NK">V1.0.0</span><span class="sub" data-page-node-id="rvKq5KWZELISDKreDxbji5">政府性投资评审（审计）服务费用 · 累进分档</span></div>
+  <div data-page-node-id="yalONCRZCdJ2ScE86QL8wX"><span class="ver" data-page-node-id="UeTqweZp6fcd7rKjLny6NK">V1.0.1</span><span class="sub" data-page-node-id="rvKq5KWZELISDKreDxbji5">政府性投资评审（审计）服务费用 · 累进分档</span></div>
   <a class="about dl-link" href="酉阳府函〔2011〕306号关于进一步规范政府性投资评审（审计）服务费用管理的批复.doc" download title="下载批复原文">文件下载</a>
   <div class="about" onclick="showAbout()" data-page-node-id="gIh9MBkubZphxZmD6H8Ard">关于</div>
 </header>
@@ -119,7 +119,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
     <button class="btn btn-primary" onclick="calculate()" data-page-node-id="mAfFwv2g2y33Nmsi1BkMxE">开始计算</button>
     <button class="btn btn-ghost" onclick="clearAll()" data-page-node-id="7jaa90wfdl5mlicR65kK9Q">重置</button>
     <button class="btn btn-ghost right" onclick="exportPng()" data-page-node-id="Gtwz56lAXmYKUdLYgBeqOL">导出 PNG</button>
-    <button class="btn btn-ghost" onclick="exportCsv()" data-page-node-id="vmwo3M6KPNoMJ3be76NyZA">导出 CSV</button>
+    <button class="btn btn-ghost" onclick="exportXlsx()" data-page-node-id="vmwo3M6KPNoMJ3be76NyZA">导出 XLSX</button>
   </div>
 
   <!-- 结果 -->
@@ -146,15 +146,15 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
   </div>
 
   <footer data-page-node-id="JvlUvx0C68nxgL8FEIjgtY">
-    <span data-page-node-id="P5QBXkdob295uDOJKnZqcc">V1.0.0 · 酉阳府函〔2011〕306号 · 2011年10月1日起执行</span>
-    <span data-page-node-id="psfyB4Y3N60ReciFgrP0jK">支持 导出 CSV / 导出 PNG 存档</span>
+    <span data-page-node-id="P5QBXkdob295uDOJKnZqcc">V1.0.1 · 酉阳府函〔2011〕306号 · 2011年10月1日起执行</span>
+    <span data-page-node-id="psfyB4Y3N60ReciFgrP0jK">支持 导出 XLSX / 导出 PNG 存档</span>
   </footer>
 </div>
 
 <!-- 关于 -->
 <div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()" data-page-node-id="mTMh9QukFDy5rWZ1ThuMz9">
   <div class="modal" data-page-node-id="7jRrrAG67kiofoRtNjjG9m">
-    <div class="modal-head" data-page-node-id="cYxiBVM98Sa5MMQMDacs3u">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号<small data-page-node-id="iQFI7uJLVxqAULs2HcAGLU">版本 V1.0.0 · 酉阳府函〔2011〕306号</small></div>
+    <div class="modal-head" data-page-node-id="cYxiBVM98Sa5MMQMDacs3u">酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号<small data-page-node-id="iQFI7uJLVxqAULs2HcAGLU">版本 V1.0.1 · 酉阳府函〔2011〕306号</small></div>
     <div class="modal-body" data-page-node-id="i3HiOTiFBSekzK5QZYvyGy">
       <div style="font-weight:700;font-size:15px;margin-bottom:10px;" data-page-node-id="MxLMtvM0PEfAoDZeAc8UqB">软件功能</div>
       <div class="ft" data-page-node-id="aFUV7m1PG2e38AzXmuKfpe">· 按酉阳府函〔2011〕306号《关于进一步规范政府性投资评审（审计）服务费用管理的批复》制作</div>
@@ -164,7 +164,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
       <div class="ft" data-page-node-id="Tt575hi55oxxCFOo7eD38s">· 结算评审有审减的另按审减金额 × 3% 计审减效益费</div>
       <div class="ft" data-page-node-id="gGgQgQxEdT60LqUrFDdATo">· 保底：预算评审不足 1500 元按 1500 元；结算不足 2000 元按 2000 元</div>
       <div class="ft" data-page-node-id="8fDmUaDAsxiaU6CGeNEsgq">· 概算编审咨询费 = 同等预算标准 × 30%</div>
-      <div class="ft" data-page-node-id="T26EAMvZzrJk621WnBrIPA">· 一键导出 CSV 数据表 · 一键导出 PNG 截图存档</div>
+      <div class="ft" data-page-node-id="T26EAMvZzrJk621WnBrIPA">· 一键导出 XLSX 数据表（含收费标准 PNG） · 一键导出 PNG 截图存档</div>
       <div class="dev" data-page-node-id="wlSJcde62ntnaxm4MdVA4r">开发者：吴工 ｜ QQ：641296512</div>
       <div class="dev2" data-page-node-id="dQU08TnnsRsgorvqOlmOLT">按酉阳府函〔2011〕306号 计费规则制作，如有疑问欢迎联系。</div>
     </div>
@@ -173,6 +173,433 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 </div>
 
 <script>
+/* ============================================================
+   XLSX 导出内核（零依赖，Store-only ZIP + OOXML）
+   支持：列宽、行高、边框、字体、填充、合并、内嵌 PNG 图片
+   ============================================================ */
+var XL = (function(){
+  var CRC_T = null;
+  function crcTable(){
+    if (CRC_T) return CRC_T;
+    CRC_T = [];
+    for (var n = 0; n < 256; n++){
+      var c = n;
+      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      CRC_T[n] = c >>> 0;
+    }
+    return CRC_T;
+  }
+  function crc32(u8){
+    var t = crcTable(), c = 0 ^ (-1);
+    for (var i = 0; i < u8.length; i++) c = (c >>> 8) ^ t[(c ^ u8[i]) & 0xFF];
+    return (c ^ (-1)) >>> 0;
+  }
+  function u8cat(list){
+    var len = 0, i;
+    for (i = 0; i < list.length; i++) len += list[i].length;
+    var out = new Uint8Array(len), off = 0;
+    for (i = 0; i < list.length; i++){ out.set(list[i], off); off += list[i].length; }
+    return out;
+  }
+  function zip(files){
+    var enc = new TextEncoder(), parts = [], central = [], offset = 0;
+    var dt = 0x21, dd = ((2026 - 1980) << 9) | (11 << 5) | 16;
+    files.forEach(function(f){
+      var name = enc.encode(f.name), data = f.data, crc = crc32(data);
+      var lh = new Uint8Array(30 + name.length);
+      var dv = new DataView(lh.buffer);
+      dv.setUint32(0, 0x04034b50, true);
+      dv.setUint16(4, 20, true); dv.setUint16(6, 0x0800, true); dv.setUint16(8, 0, true);
+      dv.setUint16(10, dt, true); dv.setUint16(12, dd, true);
+      dv.setUint32(14, crc, true); dv.setUint32(18, data.length, true); dv.setUint32(22, data.length, true);
+      dv.setUint16(26, name.length, true); dv.setUint16(28, 0, true);
+      lh.set(name, 30);
+      parts.push(lh, data);
+
+      var cd = new Uint8Array(46 + name.length);
+      var cv = new DataView(cd.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true); cv.setUint16(10, 0, true);
+      cv.setUint16(12, dt, true); cv.setUint16(14, dd, true);
+      cv.setUint32(16, crc, true); cv.setUint32(20, data.length, true); cv.setUint32(24, data.length, true);
+      cv.setUint16(28, name.length, true);
+      cv.setUint32(42, offset, true);
+      cd.set(name, 46);
+      central.push(cd);
+      offset += lh.length + data.length;
+    });
+    var cdBuf = u8cat(central);
+    var eocd = new Uint8Array(22), ev = new DataView(eocd.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cdBuf.length, true); ev.setUint32(16, offset, true);
+    return u8cat(parts.concat([cdBuf, eocd]));
+  }
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+  function colName(n){
+    var s = '';
+    while (n > 0){ var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - m) / 26); }
+    return s;
+  }
+  function dataUrlToBytes(url){
+    var b64 = String(url).split(',')[1], bin = atob(b64);
+    var u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return u;
+  }
+  function strBytes(s){ return new TextEncoder().encode(s); }
+
+  /* opts:
+     sheetName, cols:[widthChars], rows:[[{v,s,n}|null]], merges:['A1:G1'],
+     image:{dataUrl,row,col,cx,cy,name}, colors:{title,headerFill,sectionFill,border}
+  */
+  function build(opts){
+    var C = opts.colors || {};
+    var titleC = (C.title || '4C1D95'), headFill = (C.headerFill || 'F1EBFC'), secFill = (C.sectionFill || 'EDE5FB');
+    var borderC = (C.border || 'B9A9D9');
+    var cols = opts.cols || [], rows = opts.rows || [];
+    var nCols = cols.length, nRows = rows.length;
+
+    var fonts = [
+      '<font><sz val="11"/><color rgb="FF2A1E4A"/><name val="等线"/></font>',
+      '<font><b/><sz val="14"/><color rgb="FF' + titleC + '"/><name val="等线"/></font>',
+      '<font><b/><sz val="10.5"/><color rgb="FF2A1E4A"/><name val="等线"/></font>',
+      '<font><sz val="10.5"/><color rgb="FF2A1E4A"/><name val="等线"/></font>',
+      '<font><b/><sz val="10.5"/><color rgb="FF' + titleC + '"/><name val="等线"/></font>'
+    ];
+    var fills = [
+      '<fill><patternFill patternType="none"/></fill>',
+      '<fill><patternFill patternType="gray125"/></fill>',
+      '<fill><patternFill patternType="solid"><fgColor rgb="FF' + headFill + '"/><bgColor indexed="64"/></patternFill></fill>',
+      '<fill><patternFill patternType="solid"><fgColor rgb="FF' + secFill + '"/><bgColor indexed="64"/></patternFill></fill>'
+    ];
+    var bd = '<left style="thin"><color rgb="FF' + borderC + '"/></left><right style="thin"><color rgb="FF' + borderC + '"/></right><top style="thin"><color rgb="FF' + borderC + '"/></top><bottom style="thin"><color rgb="FF' + borderC + '"/></bottom><diagonal/>';
+    var borders = ['<border><left/><right/><top/><bottom/><diagonal/></border>', '<border>' + bd + '</border>'];
+
+    /* cellXfs 顺序：0 默认 1 标题 2 粗体无框 3 正文无框 4 表头 5 正文左 6 正文中 7 分节左 8 分节中 9 数字 10 粗体有框 */
+    var xfs = [
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf>',
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>',
+      '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>',
+      '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="176" fontId="3" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>',
+      '<xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>',
+      '<xf numFmtId="176" fontId="2" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'
+    ];
+    var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+      + '<numFmts count="1"><numFmt numFmtId="176" formatCode="0.0000"/></numFmts>'
+      + '<fonts count="' + fonts.length + '">' + fonts.join('') + '</fonts>'
+      + '<fills count="' + fills.length + '">' + fills.join('') + '</fills>'
+      + '<borders count="' + borders.length + '">' + borders.join('') + '</borders>'
+      + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+      + '<cellXfs count="' + xfs.length + '">' + xfs.join('') + '</cellXfs>'
+      + '<cellStyles count="1"><cellStyle name="常规" xfId="0" builtinId="0"/></cellStyles>'
+      + '</styleSheet>';
+
+    var colsXml = '<cols>';
+    for (var i = 0; i < nCols; i++){
+      var w = Number(cols[i]) || 12;
+      colsXml += '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>';
+    }
+    colsXml += '</cols>';
+
+    var rowXml = [];
+    for (var ri = 0; ri < nRows; ri++){
+      var cells = rows[ri] || [], line = '';
+      var h = 18;
+      for (var ci = 0; ci < nCols; ci++){
+        var c = cells[ci];
+        if (!c) continue;
+        var ref = colName(ci + 1) + (ri + 1);
+        var s = (c.s == null ? 6 : c.s);
+        if (c.v === '' || c.v == null){
+          /* 空单元格也要落样式，否则表格里的空白格会缺框线 */
+          line += '<c r="' + ref + '" s="' + s + '"/>';
+          continue;
+        }
+        if (c.n && !isNaN(parseFloat(c.v))){
+          line += '<c r="' + ref + '" s="' + (c.s === 9 ? 9 : s) + '"><v>' + parseFloat(c.v) + '</v></c>';
+        } else {
+          line += '<c r="' + ref + '" s="' + s + '" t="inlineStr"><is><t xml:space="preserve">' + esc(c.v) + '</t></is></c>';
+        }
+        if (c.h && c.h > h) h = c.h;
+      }
+      if (cells.h && cells.h > h) h = cells.h;
+      rowXml.push('<row r="' + (ri + 1) + '" ht="' + h + '" customHeight="1">' + line + '</row>');
+    }
+    var sheetData = '<sheetData>' + rowXml.join('') + '</sheetData>';
+
+    var merges = opts.merges || [], mergeXml = '';
+    if (merges.length){
+      mergeXml = '<mergeCells count="' + merges.length + '">' + merges.map(function(m){
+        return '<mergeCell ref="' + m + '"/>';
+      }).join('') + '</mergeCells>';
+    }
+
+    var drawingXml = '', drawingRel = '', mediaPart = null, sheetRelPart = null, ctDrawing = '', ctPng = '';
+    if (opts.image && opts.image.dataUrl){
+      var im = opts.image;
+      var cx = Math.round(im.cx), cy = Math.round(im.cy);
+      drawingXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        + '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        + '<xdr:oneCellAnchor>'
+        + '<xdr:from><xdr:col>' + (im.col || 0) + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + (im.row || 0) + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>'
+        + '<xdr:ext cx="' + cx + '" cy="' + cy + '"/>'
+        + '<xdr:pic>'
+        + '<xdr:nvPicPr><xdr:cNvPr id="2" name="' + esc(im.name || '收费标准表') + '"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>'
+        + '<xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>'
+        + '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>'
+        + '</xdr:pic><xdr:clientData/></xdr:oneCellAnchor></xdr:wsDr>';
+
+      drawingRel = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/>'
+        + '</Relationships>';
+      sheetRelPart = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>'
+        + '</Relationships>';
+      mediaPart = dataUrlToBytes(im.dataUrl);
+      ctDrawing = '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
+      ctPng = '<Default Extension="png" ContentType="image/png"/>';
+    }
+
+    var sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<dimension ref="A1:' + colName(nCols) + nRows + '"/>'
+      + '<sheetViews><sheetView showGridLines="0" workbookViewId="0"/></sheetViews>'
+      + '<sheetFormatPr defaultRowHeight="16.5"/>'
+      + colsXml + sheetData + mergeXml
+      + '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>'
+      + (drawingXml ? '<drawing r:id="rId1"/>' : '')
+      + '</worksheet>';
+
+    var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+      + '<Default Extension="xml" ContentType="application/xml"/>' + ctPng
+      + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      + '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+      + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+      + ctDrawing
+      + '</Types>';
+
+    var rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+      + '</Relationships>';
+
+    var wb = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<sheets><sheet name="' + esc(opts.sheetName || '计算表') + '" sheetId="1" r:id="rId1"/></sheets></workbook>';
+
+    var wbRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+      + '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+      + '</Relationships>';
+
+    var files = [
+      {name: '[Content_Types].xml', data: strBytes(ct)},
+      {name: '_rels/.rels', data: strBytes(rootRels)},
+      {name: 'xl/workbook.xml', data: strBytes(wb)},
+      {name: 'xl/_rels/workbook.xml.rels', data: strBytes(wbRels)},
+      {name: 'xl/styles.xml', data: strBytes(styles)},
+      {name: 'xl/worksheets/sheet1.xml', data: strBytes(sheetXml)}
+    ];
+    if (drawingXml){
+      files.push({name: 'xl/worksheets/_rels/sheet1.xml.rels', data: strBytes(sheetRelPart)});
+      files.push({name: 'xl/drawings/drawing1.xml', data: strBytes(drawingXml)});
+      files.push({name: 'xl/drawings/_rels/drawing1.xml.rels', data: strBytes(drawingRel)});
+      files.push({name: 'xl/media/image1.png', data: mediaPart});
+    }
+    return new Blob([zip(files)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  }
+
+  function download(blob, filename){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1500);
+  }
+
+  /* 文本宽度估算：中文按 2，其余按 1 */
+  function textW(s){
+    var w = 0;
+    for (var i = 0; i < s.length; i++){
+      var code = s.charCodeAt(i);
+      w += (code > 0x2E80) ? 2 : 1;
+    }
+    return w;
+  }
+  /* 按内容自适应列宽 / 行高：rows[i].nofit = true 的行（标题、合并信息行）不参与宽度计算 */
+  function fit(rows, nCols, opt){
+    opt = opt || {};
+    var min = opt.min || 9, max = opt.max || 30, firstMax = opt.firstMax || 34;
+    var widths = [], i;
+    for (i = 0; i < nCols; i++) widths.push(min);
+    rows.forEach(function(cells){
+      if (!cells || cells.nofit) return;
+      for (var ci = 0; ci < nCols; ci++){
+        var c = cells[ci];
+        if (!c || c.v == null || c.v === '') continue;
+        var w = textW(String(c.v)) + 2.5;
+        if (w > widths[ci]) widths[ci] = w;
+      }
+    });
+    for (i = 0; i < nCols; i++){
+      widths[i] = Math.min(i === 0 ? firstMax : max, Math.max(min, widths[i]));
+      widths[i] = Math.round(widths[i] * 10) / 10;
+    }
+    rows.forEach(function(cells){
+      if (!cells) return;
+      var lines = 1;
+      for (var ci = 0; ci < nCols; ci++){
+        var c = cells[ci];
+        if (!c || c.v == null || c.v === '') continue;
+        if (cells.nofit) continue;
+        var cw = Math.max(4, widths[ci] - 1.5);
+        var ln = Math.ceil(textW(String(c.v)) / cw);
+        if (ln > lines) lines = ln;
+      }
+      if (cells.h) return;           /* 已显式指定行高 */
+      cells.h = Math.max(18, Math.min(84, lines * 15 + 6));
+    });
+    return widths;
+  }
+
+  /* 收费标准表 → PNG（用于贴进 xlsx 最下方） */
+  function rateTable(cfg){
+    var S = 2, pad = 26;
+    var headers = cfg.headers || [], body = cfg.rows || [];
+    var accent = cfg.accent || '#7C3AED', dark = cfg.accentDark || '#4C1D95';
+    var borderC = cfg.border || '#C9BAE6', headBg = cfg.headBg || '#F1EBFC';
+    var textC = cfg.text || '#2A1E4A', muted = cfg.muted || '#7A6B96';
+    var cv = document.createElement('canvas'), ctx = cv.getContext('2d');
+    function F(sz, b){ return (b ? 'bold ' : '') + sz + 'px "Microsoft YaHei","PingFang SC",sans-serif'; }
+
+    ctx.font = F(12.5);
+    var nCol = headers.length, widths = [];
+    for (var i = 0; i < nCol; i++) widths.push(ctx.measureText(headers[i]).width + 28);
+    body.forEach(function(r){
+      for (var j = 0; j < nCol; j++){
+        var t = String(r[j] == null ? '' : r[j]);
+        ctx.font = F(12.5);
+        var w = ctx.measureText(t).width + 28;
+        if (w > widths[j]) widths[j] = w;
+      }
+    });
+    widths[0] = Math.min(Math.max(widths[0], 150), 300);
+    if (nCol > 2) widths[1] = Math.min(Math.max(widths[1], 110), 300);
+    for (i = 2; i < nCol; i++) widths[i] = Math.min(Math.max(widths[i], 76), 108);
+
+    function wrap(text, maxW){
+      var out = [], cur = '';
+      for (var k = 0; k < text.length; k++){
+        var test = cur + text.charAt(k);
+        if (ctx.measureText(test).width > maxW && cur){ out.push(cur); cur = text.charAt(k); }
+        else cur = test;
+      }
+      if (cur) out.push(cur);
+      return out.length ? out : [''];
+    }
+
+    var tableW = 0;
+    for (i = 0; i < nCol; i++) tableW += widths[i];
+    var W = pad * 2 + tableW;
+    var titleH = cfg.title ? 34 : 0, subH = cfg.subtitle ? 22 : 0;
+    var headH = 40, gap = 10;
+    var rowData = body.map(function(r){
+      var maxLines = 1, cells = [];
+      for (var j = 0; j < nCol; j++){
+        ctx.font = F(12.5);
+        var lines = j < 2 ? wrap(String(r[j] == null ? '' : r[j]), widths[j] - 18) : [String(r[j] == null ? '' : r[j])];
+        cells.push(lines);
+        if (lines.length > maxLines) maxLines = lines.length;
+      }
+      return {cells: cells, h: Math.max(30, maxLines * 17 + 13)};
+    });
+    var bodyH = rowData.reduce(function(a, r){ return a + r.h; }, 0);
+    var footH = cfg.footer ? 30 : 0;
+    var H = pad * 2 + titleH + subH + gap + headH + bodyH + footH;
+
+    cv.width = W * S; cv.height = H * S;
+    ctx.scale(S, S);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+
+    var y = pad;
+    ctx.textBaseline = 'middle';
+    if (cfg.title){
+      ctx.fillStyle = dark; ctx.font = F(18, 1);
+      ctx.fillText(cfg.title, pad, y + titleH / 2 - 2);
+      y += titleH;
+    }
+    if (cfg.subtitle){
+      ctx.fillStyle = muted; ctx.font = F(12);
+      ctx.fillText(cfg.subtitle, pad, y + subH / 2 - 2);
+      y += subH;
+    }
+    y += gap;
+
+    var x = pad;
+    ctx.fillStyle = headBg; ctx.fillRect(pad, y, tableW, headH);
+    ctx.strokeStyle = borderC; ctx.lineWidth = 1;
+    ctx.strokeRect(pad + 0.5, y + 0.5, tableW - 1, headH - 1);
+    var cx = pad;
+    for (i = 0; i < nCol; i++){
+      if (i > 0) ctx.beginPath(), ctx.moveTo(cx, y), ctx.lineTo(cx, y + headH), ctx.stroke();
+      ctx.fillStyle = textC; ctx.font = F(12.5, 1);
+      var ht = wrap(headers[i], widths[i] - 16);
+      var ty = y + headH / 2 - (ht.length - 1) * 9;
+      ht.forEach(function(l){ ctx.fillText(l, cx + 10, ty); ty += 18; });
+      cx += widths[i];
+    }
+    y += headH;
+
+    rowData.forEach(function(rd, ri){
+      if (ri % 2 === 1){ ctx.fillStyle = '#FAF7FF'; ctx.fillRect(pad, y, tableW, rd.h); }
+      ctx.strokeStyle = borderC;
+      ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(pad + tableW, y); ctx.stroke();
+      cx = pad;
+      for (var j = 0; j < nCol; j++){
+        if (j > 0){ ctx.beginPath(); ctx.moveTo(cx, y); ctx.lineTo(cx, y + rd.h); ctx.stroke(); }
+        ctx.fillStyle = j === 0 ? textC : textC;
+        ctx.font = F(12.5, j === 0);
+        var lines = rd.cells[j], ly = y + rd.h / 2 - (lines.length - 1) * 9;
+        lines.forEach(function(l){ ctx.fillText(l, cx + 10, ly); ly += 18; });
+        cx += widths[j];
+      }
+      y += rd.h;
+    });
+    ctx.strokeStyle = borderC;
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(pad + tableW, y); ctx.stroke();
+    ctx.strokeRect(pad + 0.5, pad + titleH + subH + gap + 0.5, tableW - 1, headH + bodyH - 1);
+
+    if (cfg.footer){
+      ctx.fillStyle = muted; ctx.font = F(11.5);
+      ctx.fillText(cfg.footer, pad, y + 18);
+    }
+    return {dataUrl: cv.toDataURL('image/png'), w: W, h: H, tablePx: tableW};
+  }
+
+  return {build: build, download: download, textW: textW, colName: colName, fit: fit, rateTable: rateTable};
+})();
+
 // ============ 数据（酉阳府函〔2011〕306号） ============
 // 6 档分界（万元）：100万以下 / 101-500 / 501-1000 / 1001-5000 / 5001万-1亿 / 1亿以上
 // 费率单位 ‰（千分率）；公路铁路已按 70% 折算；概算编审 = 预算标准 × 30%
@@ -322,28 +749,71 @@ function renderTable(rows){
   });
 }
 
-// ============ 导出 CSV ============
-function exportCsv(){
+// ============ 导出 XLSX（自包含生成，无外部依赖） ============
+function isNum(v){ return v !== '' && v != null && /^-?\d+(\.\d+)?$/.test(String(v)); }
+function numCell(v, s){ return isNum(v) ? {v: parseFloat(v), n: true, s: s || 9} : {v: String(v == null ? '' : v), s: 6}; }
+function mergeInfo(a, b, h){ var x = [{v: a, s: 2}, {v: b, s: 3}]; x.nofit = true; x.h = h || 24; return x; }
+
+function rateStr(v){
+  var t = (Math.round(v * 1000) / 1000).toFixed(3).replace(/0+$/, '');
+  return t.slice(-1) === '.' ? t + '0' : t;
+}
+function rateTablePng(){
+  var body = [];
+  Object.keys(RATES).forEach(function(p){
+    Object.keys(RATES[p]).forEach(function(c){
+      body.push([p, c].concat(RATES[p][c].map(function(v){ return rateStr(v); })));
+    });
+  });
+  return XL.rateTable({
+    title: '收费标准（酉阳府函〔2011〕306号）',
+    subtitle: '费率单位：‰　｜　公路、铁路项目已按 70% 折算，概算编审按预算标准 30%',
+    headers: ['收费项目','工程类别','100万以下','101–500万','501–1000万','1001–5000万','5001万–1亿','1亿元以上'],
+    rows: body,
+    accent: '#C2410C', accentDark: '#7C2D12', headBg: '#FEEDE3', border: '#E8C4AC', text: '#3B2416', muted: '#8A6A55',
+    footer: '注：本表费率仅作参考，实际收费由双方在合同中约定。'
+  });
+}
+
+function exportXlsx(){
   if (!lastResult){ alert('请先完成计算后再导出。'); return; }
-  var r = lastResult;
-  var name = r.name || '评审服务费计算表';
-  var lines = [];
-  lines.push(name + '-评审（审计）服务费计算表（酉阳府函〔2011〕306号）');
-  lines.push('收费项目,' + r.project);
-  lines.push('工程类别,' + r.category);
-  lines.push('按表标准收费（万元）,' + r.standard);
-  lines.push('基本收费（万元）,' + r.basic);
-  lines.push('审减效益费,' + r.reduceFee);
-  lines.push('服务费总计（万元）,' + r.total);
-  lines.push('');
-  lines.push('收费项目 / 分档区间,100万以下,101-500万,501-1000万,1001-5000万,5001万-1亿,1亿元以上,小计（万元）');
-  r.rows.forEach(function(row){ lines.push([row[0]].concat(row[1] || []).concat([row[2]]).join(',')); });
-  var blob = new Blob(['\ufeff' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name + '.csv';
-  a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
+  var r = lastResult, N = 8, rows = [];
+  var merges = ['A1:H1','B2:H2','B3:H3','B4:H4','B5:C5','E5:H5','B6:C6','E6:H6'];
+
+  var t = [{v: '评审（审计）服务费计算表（酉阳府函〔2011〕306号）', s: 1}];
+  t.nofit = true; t.h = 34; rows.push(t);
+
+  rows.push(mergeInfo('工程名称', r.name || '（未填写）', 30));
+  rows.push(mergeInfo('收费项目', r.project));
+  rows.push(mergeInfo('工程类别', r.category));
+
+  var l5 = [{v:'按表标准收费（万元）',s:2}, numCell(r.standard, 3), {v:'',s:3}, {v:'服务费总计（万元）',s:2}, numCell(r.total, 3), {v:'',s:3}, {v:'',s:3}, {v:'',s:3}];
+  l5.nofit = true; l5.h = 24; rows.push(l5);
+  var l6 = [{v:'基本收费（万元）',s:2}, numCell(r.basic, 3), {v:'',s:3}, {v:'审减效益费',s:2}, {v:r.reduceFee,s:3}, {v:'',s:3}, {v:'',s:3}, {v:'',s:3}];
+  l6.nofit = true; l6.h = 24; rows.push(l6);
+
+  rows.push([{v:'收费项目 / 分档区间',s:4},{v:'100万以下',s:4},{v:'101–500万',s:4},{v:'501–1000万',s:4},{v:'1001–5000万',s:4},{v:'5001万–1亿',s:4},{v:'1亿元以上',s:4},{v:'小计（万元）',s:4}]);
+
+  r.rows.forEach(function(row){
+    var label = row[0];
+    var cells = [{v: label, s: (label.indexOf('【') === 0 || label.indexOf('总计') === 0) ? 7 : 5}];
+    var vals = (row[1] && typeof row[1] !== 'string') ? row[1] : [];
+    for (var j = 0; j < 6; j++) cells.push(numCell(vals[j]));
+    cells.push(isNum(row[2]) ? {v: parseFloat(row[2]), n: true, s: 12} : {v: String(row[2] == null ? '' : row[2]), s: 11});
+    rows.push(cells);
+  });
+  rows.push([{v:'',s:3}]);
+
+  var cols = XL.fit(rows, N, {min: 10, max: 15, firstMax: 34});
+  var png = rateTablePng();
+  var tablePx = cols.reduce(function(a, w){ return a + Math.round(w * 8); }, 0);
+  var imgH = Math.round(tablePx * png.h / png.w);
+  var blob = XL.build({
+    sheetName: '计算表', cols: cols, rows: rows, merges: merges,
+    image: {dataUrl: png.dataUrl, row: rows.length, col: 0, cx: tablePx * 9525, cy: imgH * 9525, name: '收费标准表'},
+    colors: {title: '7C2D12', headerFill: 'FEEDE3', sectionFill: 'FBE0D0', border: 'DCB79F'}
+  });
+  XL.download(blob, (r.name || '评审服务费计算表') + '.xlsx');
 }
 
 // ============ 导出 PNG ============
@@ -372,7 +842,7 @@ function exportPng(){
   ctx.fillStyle = '#fff'; ctx.font = 'bold 22px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
   ctx.fillText('酉阳财政造价咨询收费计算器_基于酉阳府函〔2011〕306号', pad, 24);
   ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 15px Consolas,monospace';
-  ctx.fillText('V1.0.0', pad, 60);
+  ctx.fillText('V1.0.1', pad, 60);
   ctx.fillStyle = '#FFE7D1'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
   ctx.fillText('政府性投资评审（审计）服务费用 · 酉阳府函〔2011〕306号', pad + 80, 60);
   ctx.fillStyle = '#3B2A20'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
