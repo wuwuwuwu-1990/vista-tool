@@ -1,13 +1,23 @@
 name: Sync to Aliyun Mirror
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+# 同一时间只跑一个同步：多次连续 push 时排队执行，避免多个 rsync 并发互相覆盖
+# （2026-11-16 事故：4 次快速 push 触发 4 个并发 rsync，镜像站出现新旧混合）
+concurrency:
+  group: mirror-sync-main
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Rsync to Aliyun server
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
@@ -18,3 +28,11 @@ jobs:
           ssh-keyscan -H 47.109.99.227 >> ~/.ssh/known_hosts 2>/dev/null || true
           rsync -az --delete --exclude='.git' --exclude='.github' -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" ./ root@47.109.99.227:/var/www/tools/
           echo "MIRROR_SYNC_DONE"
+
+      - name: Verify mirror
+        run: |
+          sleep 5
+          echo "--- 镜像站首页卡片版本号 ---"
+          curl -s --max-time 20 "https://srv.wbc2023.top/index.html?t=${GITHUB_SHA}" \
+            | grep -o '>v[0-9][0-9.]*<' | head -6 || echo "(未取到版本号，稍后人工确认)"
+          echo "MIRROR_VERIFY_DONE"
