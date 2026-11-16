@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23d90000%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2245%22%20font-size%3D%2236%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22bold%22%3E%E7%AB%A0%3C%2Ftext%3E%3C%2Fsvg%3E">
-<title>竣工章生成器 V2.1</title>
+<title>竣工章生成器 V2.2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -101,7 +101,12 @@ body{
 .f-tools button:active{background:#e4ecf9}
 .f-tools button.wide{width:auto; padding:0 8px}
 .f-tools .sp{width:1px; height:14px; background:#eceef2}
-.mini-reset{margin-left:auto}
+.f-tools button.mini-sync{
+  margin-left:auto; width:auto; padding:0 9px; height:21px; line-height:19px;
+  color:#2f6df0; background:#f5f9ff; border-color:#c8d8f6;
+}
+.f-tools button.mini-sync:hover{background:#e9f1ff; border-color:#a6c0ee; color:#1d4ed8}
+.f-tools button.mini-reset{margin-left:6px; width:auto; padding:0 8px}
 
 /* 可输入的调节数值（字号 / 字距 / 位置） */
 .num{
@@ -138,10 +143,10 @@ body{
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand">竣工章生成器<small>V2.1</small></div>
+    <div class="brand">竣工章生成器<small>V2.2</small></div>
     <div class="side-title">章 种</div>
     <ul class="stamp-list" id="stampList"></ul>
-    <div class="side-foot">V2.1 · 单文件离线</div>
+    <div class="side-foot">V2.2 · 单文件离线</div>
   </aside>
 
   <main class="main">
@@ -154,7 +159,6 @@ body{
         <label class="sel">字体
           <select id="fontSelect"></select>
         </label>
-        <button class="btn ghost" id="syncBtn" onclick="syncToOthers()" title="把本章调好的字号、字距、位置按各章尺寸等比套用到其他章的同名字段（不含已填写的文字）">↗ 同步调整到其他章</button>
         <button class="btn ghost" onclick="clearAll()">清空</button>
         <button class="btn primary" onclick="exportPNG()">导出透明 PNG</button>
       </div>
@@ -239,8 +243,6 @@ function updateMeta(){
   document.getElementById('stampTitle').textContent = s.name;
   document.getElementById('stampMeta').textContent =
     s.canvasWidth + ' × ' + s.canvasHeight + ' px　打印约 ' + mmW + ' × ' + mmH + ' mm（300dpi）';
-  const btn = document.getElementById('syncBtn');
-  if (btn) btn.textContent = '↗ 本章调整同步到其他 ' + (stamps.length - 1) + ' 章';
 }
 
 function renderStampList(){
@@ -308,6 +310,7 @@ function renderForm(){
           <input class="num pos" id="posy_${f.key}" type="number" step="1" min="-400" max="400" value="${curPos.y}"
             onfocus="this.select()" onchange="setNum('posy','${f.key}',this.value)" onkeydown="numEnter(event)" title="垂直偏移 px，可直接输入">
         </span>
+        <button class="wide mini-sync" onclick="applyToSiblings('${f.key}')" title="把这个字段调好的字号、字距、位置套用到本章其他可填字段">⇉ 套用到本章其他字段</button>
         <button class="wide mini-reset" onclick="resetField('${f.key}')" title="把这个字段的字号、字距、位置恢复默认">↺ 复位</button>
       </div>
     </div>`;
@@ -416,42 +419,28 @@ function toast(msg){
   toastTimer = setTimeout(() => el.classList.remove('on'), 2400);
 }
 
-/* ===== 把本章调好的字号 / 字距 / 位置，按各章尺寸等比套到其他章的同名字段 ===== */
-function syncToOthers(){
-  const src = curStamp();
-  const targets = stamps.filter(s => s.id !== src.id);
-  if (!targets.length) return toast('只有一个章，无需同步');
+/* ===== 本章内套用：把这个字段调好的字号 / 字距 / 位置，复制给本章其他可填字段 ===== */
+function applyToSiblings(key){
+  const stamp = curStamp();
+  const src = stamp.textFields.find(f => f.key === key);
+  if (!src) return;
+  const fs = getFontOverride(stamp.id, key) || src.baseFontSize;
+  const sp = getSpacingOverride(stamp.id, key);
+  const po = getPosOverride(stamp.id, key);
 
-  let touched = 0;
-  targets.forEach(t => {
-    const ratio = t.canvasWidth / src.canvasWidth;   // 章越小，偏移与字距等比收小
-    t.textFields.forEach(tf => {
-      const sf = src.textFields.find(x => x.key === tf.key);
-      if (!sf) return;
-      const fs = (fontOverrides[src.id] && fontOverrides[src.id][sf.key]) || 0;
-      const sp = (spacingOverrides[src.id] && spacingOverrides[src.id][sf.key]) || 0;
-      const po = (posOverrides[src.id] && posOverrides[src.id][sf.key]) || {x:0, y:0};
-      if (!fs && !sp && !po.x && !po.y) return;      // 本章没调过这个字段，跳过
+  const targets = fillableFields(stamp).filter(f => f.key !== key);
+  if (!targets.length) return toast('本章只有这一个可填字段，无需套用');
 
-      if (fs){
-        const scale = fs / sf.baseFontSize;            // 相对基准字号的倍率
-        (fontOverrides[t.id] || (fontOverrides[t.id] = {}))[tf.key] =
-          Math.max(6, Math.round(tf.baseFontSize * scale));
-      }
-      if (sp){
-        (spacingOverrides[t.id] || (spacingOverrides[t.id] = {}))[tf.key] = Math.round(sp * ratio);
-      }
-      if (po.x || po.y){
-        (posOverrides[t.id] || (posOverrides[t.id] = {}))[tf.key] =
-          { x: Math.round(po.x * ratio), y: Math.round(po.y * ratio) };
-      }
-      touched++;
-    });
+  targets.forEach(f => {
+    (fontOverrides[stamp.id] || (fontOverrides[stamp.id] = {}))[f.key] = fs;
+    (spacingOverrides[stamp.id] || (spacingOverrides[stamp.id] = {}))[f.key] = sp;
+    (posOverrides[stamp.id] || (posOverrides[stamp.id] = {}))[f.key] = { x: po.x, y: po.y };
   });
 
-  if (!touched) return toast('本章还没有调整，先改一下字号 / 字距 / 位置再同步');
+  renderForm();                      // 让其他字段的数值框同步显示新值
   drawPreview();
-  toast('已把 ' + touched + ' 个字段的字号 / 字距 / 位置按章尺寸等比同步到其他 ' + targets.length + ' 个章（文字不跟着走）');
+  toast('已把「' + src.label + '」的字号 ' + fs + ' / 字距 ' + sp + ' / 位置 ' + po.x + ',' + po.y
+        + ' 套用到本章另外 ' + targets.length + ' 个字段');
 }
 
 /* 单字段复位（新增：只恢复这一个字段） */
