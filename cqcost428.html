@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>重庆造价咨询收费计算器_基于〔2013〕428号文_V2.2.14</title>
+<title>重庆造价咨询收费计算器_基于〔2013〕428号文_V2.2.15</title>
 <style>
 :root{
   --navy:#4C1D95; --navy2:#7C3AED; --blue:#8B5CF6; --blue-hover:#7C3AED;
@@ -15,9 +15,9 @@ body{font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft Ya
 .mono{font-family:Consolas,monospace;}
 /* 顶栏渐变 */
 header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 28px 16px;position:relative;border-bottom:2px solid #A78BFA;}
-header h1{font-size:22px;font-weight:700;letter-spacing:.5px;}
-header .ver{color:#FFD88A;font-weight:700;font-size:14px;margin-top:4px;}
-header .sub{color:#DDD3F9;font-size:13px;margin-top:3px;}
+header h1{font-size:21px;font-weight:700;letter-spacing:.3px;}
+header .ver{color:#FFD88A;font-weight:700;font-size:14px;margin-top:4px;display:inline-block;}
+header .sub{color:#DDD3F9;font-size:13px;margin-top:3px;display:inline-block;margin-left:10px;}
 header .about{position:absolute;right:28px;top:50%;transform:translateY(-50%);color:#DDD3F9;font-weight:700;font-size:14px;cursor:pointer;user-select:none;}
 header .about:hover{color:#fff;text-decoration:underline;}
 /* 容器 */
@@ -75,9 +75,8 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 <body>
 
 <header>
-  <h1>重庆造价咨询收费计算器</h1>
-  <div class="ver">V2.2.14</div>
-  <div class="sub">按累进分档费率测算 · 渝价〔2013〕428号</div>
+  <h1>重庆造价咨询收费计算器_基于〔2013〕428号文</h1>
+  <div><span class="ver">V2.2.15</span><span class="sub">渝价〔2013〕428号 · 按累进分档费率测算</span></div>
   <div class="about" onclick="showAbout()">关于</div>
 </header>
 
@@ -160,7 +159,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
   </div>
 
   <footer>
-    <span>V2.2.14 · 渝价〔2013〕428号 · 按累进分档计费</span>
+    <span>V2.2.15 · 渝价〔2013〕428号 · 按累进分档计费</span>
     <span>支持 导出 XLSX / 导出 PNG 存档</span>
   </footer>
 </div>
@@ -168,7 +167,7 @@ footer{margin-top:8px;padding:8px 0 14px;border-top:1px solid var(--border);disp
 <!-- 关于 -->
 <div class="modal-mask" id="aboutMask" onclick="if(event.target===this)closeAbout()">
   <div class="modal">
-    <div class="modal-head">重庆造价咨询收费计算器<small>版本 V2.2.14 · 渝价〔2013〕428号</small></div>
+    <div class="modal-head">重庆造价咨询收费计算器_基于〔2013〕428号文<small>版本 V2.2.15 · 渝价〔2013〕428号</small></div>
     <div class="modal-body">
       <div style="font-weight:700;font-size:15px;margin-bottom:10px;">软件功能</div>
       <div class="ft">· 按渝价〔2013〕428号 累进分档费率测算造价咨询收费</div>
@@ -849,11 +848,11 @@ function exportPng(){
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, titleH);
   ctx.fillStyle = '#A78BFA'; ctx.fillRect(0, titleH - 2, W, 2);
   ctx.fillStyle = '#fff'; ctx.font = 'bold 26px "Microsoft YaHei UI",sans-serif'; ctx.textBaseline = 'top';
-  ctx.fillText('重庆造价咨询收费计算器', pad, 26);
+  ctx.fillText('重庆造价咨询收费计算器_基于〔2013〕428号文', pad, 26);
   ctx.fillStyle = '#FFD88A'; ctx.font = 'bold 16px Consolas,monospace';
-  ctx.fillText('V2.2.14', pad, 64);
+  ctx.fillText('V2.2.15', pad, 64);
   ctx.fillStyle = '#DDD3F9'; ctx.font = '15px "Microsoft YaHei UI",sans-serif';
-  ctx.fillText('按累进分档费率测算 · 渝价〔2013〕428号', pad + 88, 64);
+  ctx.fillText('渝价〔2013〕428号 · 按累进分档费率测算', pad + 88, 64);
   // 参数区
   ctx.fillStyle = '#2A1E4A'; ctx.font = '14px "Microsoft YaHei UI",sans-serif';
   var name = r.name || '（未填写工程名称）';
