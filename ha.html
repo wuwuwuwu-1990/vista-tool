@@ -1101,6 +1101,70 @@ html[data-card="capsule"] .card.acts4 .abts button:nth-child(2){grid-area:b2}
 html[data-card="capsule"] .card.acts4 .abts button:nth-child(3){grid-area:b3}
 html[data-card="capsule"] .card.acts4 .abts button:nth-child(4){grid-area:b4}
 
+/* ── 电视遥控卡（V1.0.33）──
+   卡面只放 4 个最常用键（电源 / 主页 / 返回 / 静音），完整 12 键收进点击卡片后的
+   详情弹窗。按钮结构与 .acts4 一致，但**容器带 data-eid**（指向 media_player）——
+   这里和茶吧机恰好相反：点空白处要能打开电视详情，才不会点空了没反应。
+   ⚠️ 胶囊档仍必须把 .abts 设 display:contents 并给每个按钮显式 grid-area，
+   否则按钮会掉进隐式行、被 72px 裁掉。 */
+.card.tvcard{cursor:pointer;gap:8px}
+.card.tvcard .abts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto}
+.card.tvcard .abts button{
+  height:30px;border-radius:9px;border:1px solid var(--line2);background:transparent;
+  color:var(--text2);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;
+  padding:0;transition:.15s var(--ease);
+}
+.card.tvcard .abts button:hover{background:rgba(120,120,128,.16)}
+.card.tvcard .abts button:active{transform:scale(.97);background:rgba(120,120,128,.26)}
+.card.tvcard .ic{background:rgba(90,120,220,.15);color:#4a63d8}
+html[data-mode="dark"] .card.tvcard .ic{background:rgba(90,120,220,.2);color:#8ea4ff}
+html[data-card="capsule"] .card.tvcard{
+  grid-template-columns:36px minmax(0,1fr) minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);
+  grid-template-areas:"ic nm nm" "ic b1 b2" "ic b3 b4";
+  column-gap:8px;row-gap:2px;align-content:stretch;align-items:stretch;
+  padding:6px 12px 7px 10px;
+}
+html[data-card="capsule"] .card.tvcard .abts{display:contents}
+html[data-card="capsule"] .card.tvcard .nm{align-self:center;font-size:11px;-webkit-line-clamp:1;display:flex}
+html[data-card="capsule"] .card.tvcard .abts button{height:auto;min-height:0;border-radius:7px;
+  font-size:10.5px;line-height:1;padding:0}
+html[data-card="capsule"] .card.tvcard .abts button:nth-child(1){grid-area:b1}
+html[data-card="capsule"] .card.tvcard .abts button:nth-child(2){grid-area:b2}
+html[data-card="capsule"] .card.tvcard .abts button:nth-child(3){grid-area:b3}
+html[data-card="capsule"] .card.tvcard .abts button:nth-child(4){grid-area:b4}
+
+/* 详情弹窗里的完整遥控：左栏功能键 2×3，右栏十字方向盘 */
+.tvrc{display:flex;gap:16px;margin-top:10px;align-items:flex-start}
+.tvrc .fn{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1 1 auto}
+.tvrc .fn button{
+  height:34px;border-radius:10px;border:1px solid var(--line2);background:transparent;
+  color:var(--text1);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;
+  padding:0;transition:.15s var(--ease);
+}
+.tvrc .fn button:hover{background:rgba(120,120,128,.16)}
+.tvrc .fn button:active{transform:scale(.97);background:rgba(120,120,128,.26)}
+.tvrc .dpad{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,38px);
+  grid-template-rows:repeat(3,38px);gap:4px}
+.tvrc .dpad button{
+  border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--text1);
+  font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;padding:0;
+  transition:.15s var(--ease);
+}
+.tvrc .dpad button:hover{background:rgba(120,120,128,.16)}
+.tvrc .dpad button:active{transform:scale(.94);background:rgba(120,120,128,.26)}
+.tvrc .dpad .u{grid-area:1/2}.tvrc .dpad .l{grid-area:2/1}
+.tvrc .dpad .o{grid-area:2/2;border-radius:12px}
+.tvrc .dpad .r{grid-area:2/3}.tvrc .dpad .d{grid-area:3/2}
+/* 功能键 7 个（电源/静音/主页/返回/菜单/音量±）是奇数，两列排最后一行只剩一个，
+   让「菜单」跨两列刚好凑成 4 行整齐的 2×4。 */
+.tvrc .fn button.w2{grid-column:span 2}
+/* 窄屏竖排：必须 stretch，否则 .fn 会收缩到文字宽、按钮被压成一条窄条 */
+@media (max-width:720px){
+  .tvrc{flex-direction:column-reverse;align-items:stretch;gap:12px}
+  .tvrc .dpad{align-self:center}
+}
+
 /* ══════════ 小屏 ══════════ */
 @media (max-width:1024px){
   .appear{grid-column:1/-1}
@@ -1422,7 +1486,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.32</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.33</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1603,7 +1667,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.32
+   HA家庭智能控制系统 · V1.0.33
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -1651,6 +1715,8 @@ const I = {
   cover:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M12 4v16M7 8v8M17 8v8"/>',
   climate:'<rect x="2.5" y="5" width="19" height="9" rx="2.5"/><path d="M6 17.5c.8 0 .8 1.4 1.6 1.4M12 17.5c.8 0 .8 1.4 1.6 1.4M18 17.5c.8 0 .8 1.4 1.6 1.4"/><path d="M6 9.5h12"/>',
   media:'<circle cx="12" cy="12" r="9"/><path d="M10 8.8l5.4 3.2-5.4 3.2z"/>',
+  /* 电视（V1.0.33）：屏幕 + 底座支脚，和 media 的圆形播放键区分开 */
+  tv:'<rect x="2.6" y="4.4" width="18.8" height="12.6" rx="2.2"/><path d="M8.4 20.4h7.2M12 17v3.4"/>',
   fan:'<circle cx="12" cy="12" r="2"/><path d="M12 10c0-3 1-5 3-5s2.5 3 0 5.5M14 12c3 0 5 1 5 3s-3 2.5-5.5 0M12 14c0 3-1 5-3 5s-2.5-3 0-5.5M10 12c-3 0-5-1-5-3s3-2.5 5.5 0"/>',
   vacuum:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 3.5v3"/>',
   lock:'<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
@@ -2810,6 +2876,24 @@ function buildModel(){
         ents.forEach(x=>{ if(!S.cardOf.has(x)) S.cardOf.set(x, card); });
         continue;
       }
+    }
+
+    /* 电视遥控卡（V1.0.33）：media_player 与 12 个 button 同属一台设备，
+       但 button 被 SKIP_DOMAIN 挡在分组外 —— 这里从 media_player 反查同名前缀把它们捞回来。
+       卡面只取前 4 个（电源/主页/返回/静音），完整 12 键塞进 card.tvAll 供弹窗用。 */
+    const tvAnc = ents.find(e=> e.split(".")[0]==="media_player");
+    const tvAll = tvKeysOf(tvAnc);
+    if(tvAnc && tvAll.length >= 4){
+      const card = { key, eid: tvAnc, name: dev || nameOf(tvAnc),
+                     tv: tvAll.slice(0,4), tvAll,
+                     mains: [tvAnc], sensors: [], more: [],
+                     load: false, kind: "tv" };
+      const room = ensure(areaOf(tvAnc));
+      room.cards.push(card);
+      ents.forEach(x=>{ if(!S.cardOf.has(x)) S.cardOf.set(x, card); });
+      /* 12 个 button 也登记：详情弹窗与搜索都靠 S.cardOf 回查，漏登就查不到卡 */
+      tvAll.forEach(a=>{ if(!S.cardOf.has(a.eid)) S.cardOf.set(a.eid, card); });
+      continue;
     }
 
     /* 脚本动作卡（V1.0.26）：米家红外那类「一次点击发一串码」的动作，
@@ -4275,7 +4359,47 @@ function actsCardHTML(card){
     '</div>';
 }
 
+/* ── 电视遥控（V1.0.33）──
+   button 域在 SKIP_DOMAIN 里，groupEntities 根本不收，12 个键进不了任何分组。
+   所以只能从全量 states 里按 media_player 的同名前缀反查：
+   `media_player.hai_xin_dian_shi` → `button.hai_xin_dian_shi_*`。
+   查不到同名组就返回空数组，别的 media_player 不受影响。
+   顺序按真实遥控器写死 —— 字典序会排成 上/下/下…，没法用。 */
+const TV_KEYS = [
+  ["dian_yuan","电源"],["zhu_ye","主页"],["fan_hui","返回"],["jing_yin","静音"],
+  ["cai_dan","菜单"],["que_ding","确定"],
+  ["yin_liang_jia","音量+"],["yin_liang_jian","音量−"],
+  ["shang","上"],["xia","下"],["zuo","左"],["you","右"]
+];
+function tvKeysOf(eid){
+  if(!eid || eid.split(".")[0] !== "media_player") return [];
+  const base = eid.replace(/^media_player\./, "button.") + "_";
+  const out = [];
+  TV_KEYS.forEach(([suf, label])=>{
+    const k = base + suf;
+    if(S.states.has(k)) out.push({ eid: k, label });
+  });
+  return out;
+}
+function tvButtonHTML(a, cls){
+  return '<button type="button"'+(cls ? ' class="'+cls+'"' : '')+' data-svc="button|press"'+
+         ' data-eid="'+esc(a.eid)+'" title="'+esc(nameOf(a.eid) || a.label)+'">'+esc(a.label)+'</button>';
+}
+/* 卡面 4 键；容器带 data-eid 让「点空白」能落到 openEnt(电视)，
+   详情里再给完整 12 键（见 ctlHTML 的 media_player 分支）。 */
+function tvCardHTML(card){
+  const keys = card.tv || [];
+  return '<div class="card tvcard actcard" data-key="'+esc(card.key)+'"'+
+      ' data-eid="'+esc(card.eid)+'" role="button" tabindex="0"'+
+      ' aria-label="'+esc(card.name)+' 遥控">'+
+      '<div class="top"><div class="ic">'+svg(I.tv)+'</div>'+
+      '<div class="nm">'+esc(card.name)+'</div></div>'+
+      '<div class="abts">'+ keys.map(tvButtonHTML).join("") +'</div>'+
+    '</div>';
+}
+
 function cardHTML(card){
+  if(card.kind === "tv")     return tvCardHTML(card);
   if(card.kind === "acts")   return actsCardHTML(card);
   if(card.kind === "script") return scriptCardHTML(card);
   if(card.kind === "fryer") return fryerCardHTML(card);
@@ -4351,6 +4475,9 @@ function patchCard(eid){
     if(l) l.textContent = lastActText(card);
     return;
   }
+  /* 电视遥控卡：卡面四键都是瞬时命令，卡上没有可刷的状态字。
+     掉进下面的通用分支会被写成 off 并把 tvcard/actcard 两个类覆盖掉，直接返回。 */
+  if(card.kind === "tv") return;
   if(card.kind === "script"){ node.outerHTML = scriptCardHTML(card); return; }
   if(card.kind === "fryer"){ node.outerHTML = fryerCardHTML(card); return; }
   if(card.kind === "fridge"){ node.outerHTML = fridgeCardHTML(card); return; }
@@ -4486,7 +4613,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.32 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.33 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -4932,6 +5059,24 @@ function panelCtl(eid){
       h += '<div class="sldwrap"><div class="lb"><span>音量</span><b id="sldVal">'+v+'%</b></div>'+
         '<div class="sld"><input type="range" min="0" max="100" step="1" value="'+v+'" '+
         'data-sld="media_player|volume_set|volume_level" data-eid="'+esc(eid)+'" data-scale="0.01" data-unit="%"></div></div>';
+    }
+    /* 电视完整遥控（V1.0.33）：同设备存在同名 button 组时才出现，别的播放器不受影响。
+       左栏功能键（含音量±），右栏十字方向盘 —— 按真遥控器的位置摆，盲按才对得上。 */
+    const rcKeys = tvKeysOf(eid);
+    if(rcKeys.length >= 4){
+      const base = eid.replace(/^media_player\./, "button.") + "_";
+      const pick = (s)=> rcKeys.find(x=> x.eid === base + s);
+      const fn = ["dian_yuan","jing_yin","zhu_ye","fan_hui","cai_dan","yin_liang_jian","yin_liang_jia"]
+                 .map(pick).filter(Boolean);
+      const dp = [["shang","u"],["zuo","l"],["que_ding","o"],["you","r"],["xia","d"]]
+                 .map(([s, c])=>{ const a = pick(s); return a ? {a, c} : null; })
+                 .filter(Boolean);
+      h += '<div class="tvrc">'+
+        '<div class="fn">'+ fn.map(a=> tvButtonHTML(a, a.label === "菜单" ? "w2" : "")).join("") +'</div>'+
+        (dp.length ? '<div class="dpad">'+ dp.map(x=>
+            '<button type="button" data-svc="button|press" data-eid="'+esc(x.a.eid)+'"'+
+            ' class="'+x.c+'" title="'+esc(x.a.label)+'">'+esc(x.a.label)+'</button>').join("") +'</div>' : '')+
+      '</div>';
     }
   }else if(dom==="lock"){
     const locked = st.state === "locked";
