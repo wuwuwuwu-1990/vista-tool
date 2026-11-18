@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>建设组价价构引擎RateStruct Building V1.0.14</title>
+<title>建设组价价构引擎RateStruct Building V1.0.15</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232f6df0'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -251,7 +251,7 @@
 
     <div class="rsbar-nav"><a class="rsbar-pg" href="rs-telecom.html" style="--pgc:#6d28d9;--pgbg:#f3edfc;--pgbd:#cdb6f2;--pgh:#e8def9" title="上一套：通信工程"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 2.7H3.5a.9.9 0 0 0-.9.9v8.8a.9.9 0 0 0 .9.9h3.1"/><path d="M13.4 8H7.4"/><path d="M9.7 5.5L7.2 8l2.5 2.5"/></svg>通信工程</a><a class="rsbar-home" href="ratestruct.html" title="返回 RateStruct 计价体系总览页"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.6 8.8l4.6-3.7 4.6 3.7v5.9H1.6V8.8z"/><path d="M8.4 7.8l3.2-2.6 3.2 2.6v6.9H8.4"/></svg>计价体系总览</a><a class="rsbar-pg" href="rs-highway.html" style="--pgc:#475569;--pgbg:#eff1f2;--pgbd:#c0c5cc;--pgh:#e2e5e8" title="下一套：公路工程">公路工程<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.4 2.7h3.1a.9.9 0 0 1 .9.9v8.8a.9.9 0 0 1-.9.9H9.4"/><path d="M2.6 8h6"/><path d="M6.3 5.5L8.8 8l-2.5 2.5"/></svg></a></div>
     <div class="rs-tail">
-      <span class="ver">V1.0.14</span>
+      <span class="ver">V1.0.15</span>
       <button type="button" class="rsmeta-btn" id="rsMetaBtn" aria-expanded="false" aria-controls="rsMetaPop"><i class="dot"></i>依据文号与出处</button>
       <div class="rsmeta-pop" id="rsMetaPop" role="dialog" aria-label="依据发布信息">
         <div class="rsmeta-hd">依据发布信息<span>5 项 · 文号／实施日期／出处</span></div>
@@ -336,7 +336,7 @@
   </div>
   </main>
 
-  <p class="brand-foot">建设组价价构引擎 RateStruct Building　V1.0.14</p>
+  <p class="brand-foot">建设组价价构引擎 RateStruct Building　V1.0.15</p>
   <div id="toast" class="toast"></div>
 
 <script>
@@ -697,13 +697,13 @@
     const settle = (docType === "settle") ? "实际合格" : "";
     if(refItems.length && pricing.length){
       return "依据" + joinAnd(refItems) + "的规定，按照" + joinAll(pricing) +
-             "及相关配套文件重新组价；并按上述工程量清单计量计价规则计算" + settle + "工程量。";
+             "及相关配套文件进行组价；并按上述工程量清单计量计价规则计算" + settle + "工程量。";
     }
     if(refItems.length){
       return "依据" + joinAnd(refItems) + "的规定计算" + settle + "工程量。";
     }
     if(pricing.length){
-      return "按照" + joinAll(pricing) + "及相关配套文件重新组价。";
+      return "按照" + joinAll(pricing) + "及相关配套文件进行组价。";
     }
     return "（请在左栏勾选计量依据、在中栏勾选组价定额）";
   }
