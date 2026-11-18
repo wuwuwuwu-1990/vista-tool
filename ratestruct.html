@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>工程组价价构引擎RateStruct · 计价体系入口</title>
+<title>工程组价价构引擎RateStruct · 计价体系总览</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232f6df0'/%3E%3Cstop offset='1' stop-color='%235b8def'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M11 8.5 16 15 21 8.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 15v9.5M12 17.8h8M12 21.4h8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -164,7 +164,7 @@
       <span class="nm">建设工程</span>
       <span class="en">BUILDING</span>
       <span class="ax">2018 计价 / 2021 概算 · 2013／2024 清单<br>27 本定额 · 8 条依据</span>
-      <span class="ft"><b>V1.0.14</b><i>主力体系</i></span>
+      <span class="ft"><b>V1.0.15</b><i>主力体系</i></span>
     </a>
 
     <!-- 公路 -->
@@ -182,7 +182,7 @@
       <span class="nm">公路工程</span>
       <span class="en">HIGHWAY</span>
       <span class="ax">部颁 2018 / 重庆养护 2018<br>14 条定额 · 3 条依据</span>
-      <span class="ft"><b>V1.0.4</b><i>预算 · 养护不编概算</i></span>
+      <span class="ft"><b>V1.0.5</b><i>预算 · 养护不编概算</i></span>
     </a>
 
     <!-- 水利 -->
@@ -201,7 +201,7 @@
       <span class="nm">水利工程</span>
       <span class="en">HYDRO</span>
       <span class="ax">重庆 2021 / 水利部 2025<br>21 条定额 · 4 条依据</span>
-      <span class="ft"><b>V1.0.4</b><i>预算 · 概算</i></span>
+      <span class="ft"><b>V1.0.5</b><i>预算 · 概算</i></span>
     </a>
 
     <!-- 水运 -->
@@ -221,7 +221,7 @@
       <span class="nm">水运工程</span>
       <span class="en">WATERWAY</span>
       <span class="ax">内河 / 沿海 / 疏浚<br>30 条定额 · 3 条依据</span>
-      <span class="ft"><b>V1.0.4</b><i>预算 · 概算</i></span>
+      <span class="ft"><b>V1.0.5</b><i>预算 · 概算</i></span>
     </a>
 
     <!-- 农田 -->
@@ -239,7 +239,7 @@
       <span class="nm">农田工程</span>
       <span class="en">FARMLAND</span>
       <span class="ax">农业农村部 2026 / 土地整治 2011<br>17 条定额 · 4 条依据</span>
-      <span class="ft"><b>V1.0.4</b><i>土地整治仅预算</i></span>
+      <span class="ft"><b>V1.0.5</b><i>土地整治仅预算</i></span>
     </a>
 
     <!-- 土地整治 -->
@@ -257,7 +257,7 @@
       <span class="nm">土地整治</span>
       <span class="en">LAND</span>
       <span class="ax">重庆 2023 / 国家 2011<br>19 条定额 · 4 条依据</span>
-      <span class="ft"><b>V1.0.4</b><i>仅预算</i></span>
+      <span class="ft"><b>V1.0.5</b><i>仅预算</i></span>
     </a>
 
     <!-- 电力 -->
@@ -277,7 +277,7 @@
       <span class="nm">电力工程</span>
       <span class="en">POWER</span>
       <span class="ax">火电 / 电网 2025 版<br>51 条定额 · 4 条依据</span>
-      <span class="ft"><b>V1.0.3</b><i>预算 · 概算</i></span>
+      <span class="ft"><b>V1.0.4</b><i>预算 · 概算</i></span>
     </a>
 
     <!-- 通信 -->
@@ -297,13 +297,13 @@
       <span class="nm">通信工程</span>
       <span class="en">TELECOM</span>
       <span class="ax">设备安装 / 线路管道<br>18 条定额 · 4 条依据</span>
-      <span class="ft"><b>V1.0.3</b><i>概算以预算代编</i></span>
+      <span class="ft"><b>V1.0.4</b><i>概算以预算代编</i></span>
     </a>
 
   </main>
 
   <p class="entry-foot">
-    <b>V1.0.4</b> · 8 套计价体系 · 197 条定额与编制办法 · 34 条计量依据 · 单文件离线
+    <b>V1.0.5</b> · 8 套计价体系 · 197 条定额与编制办法 · 34 条计量依据 · 单文件离线
     <button class="entry-about" id="entryAbout" type="button">使用说明</button>
   </p>
 
@@ -312,7 +312,7 @@
 <div class="mask" id="mAbout">
   <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mAboutT">
     <h3 id="mAboutT">关于这套工具</h3>
-    <p>八个体系共用同一副交互骨架——左栏计量依据、中栏组价依据、右栏输出，勾选即生成「重新组价＋清单计量」两段式计价说明条款。</p>
+    <p>八个体系共用同一副交互骨架——左栏计量依据、中栏组价依据、右栏输出，勾选即生成「进行组价＋清单计量」两段式计价说明条款。</p>
     <p><b>输出规则：</b>条目写作《名称》（代号），顿号分隔，两段之间用分号，末尾唯一句号；代号为空时只出书名号、不留空括号；相邻同文号条目自动合并括注。</p>
     <p><b>各体系彼此独立：</b>依据库、版本号与本地缓存键都不共用（如建设为 <code>quota_list_v2</code>、公路为 <code>hw_quota_v1</code>），在某一体系里改名或新增条目，不会影响其他体系。</p>
     <p><b>使用方式：</b>全部为单文件 HTML，无 CDN、无网络请求，可离线双击打开，也可发邮件或内网分发。进入任一体系后，页面左上角「← 体系入口」可随时回到本页。</p>
