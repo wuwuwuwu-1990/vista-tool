@@ -102,7 +102,7 @@
   body[data-theme="aurora"] .about-log .log-item{border-color:rgba(96,116,168,.14);}
   body[data-theme="aurora"] .about-log .log-item .ld{color:#4f7fd6;}
   body[data-theme="aurora"] .about-log .log-item .lt{color:#33415e;}
-  body[data-theme="aurora"] .secret-panel{background:rgba(214,220,238,.5);}
+  body[data-theme="aurora"] .secret-panel .sp-blur{background:rgba(214,220,238,.5);}
   body[data-theme="aurora"] .secret-panel .sp-brand b{color:#1b2540;}
   body[data-theme="aurora"] .secret-panel .sp-brand span{color:rgba(44,58,88,.55);}
   body[data-theme="aurora"] .secret-panel .sp-sec h2{color:#1b2540;}
@@ -253,15 +253,16 @@
   .card{position:relative;height:100%;max-width:400px;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;overflow:hidden;
        background:var(--card);border:1px solid var(--card-b);
-       transform-style:preserve-3d;opacity:0;
+       will-change:transform;opacity:0;
        transition:transform .25s ease,border-color .35s ease,box-shadow .25s ease,background .4s ease,color .4s ease;}
   .card.in{opacity:1;}
   .card:hover{background:rgba(255,255,255,.09);}
-  .card::after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;pointer-events:none;z-index:2;
+  /* 光晕：真实元素承载，位移由 JS 直接写 transform（只走合成，不触发样式重算） */
+  .card .glow{position:absolute;width:250px;height:250px;border-radius:50%;pointer-events:none;z-index:2;
        background:radial-gradient(circle,rgba(255,255,255,.18),transparent 62%);
-       left:50%;top:50%;transform:translate(calc(var(--gx,0px) - 50%),calc(var(--gy,0px) - 50%)) translateZ(26px);
-       opacity:0;transition:opacity .3s;}
-  .card:hover::after{opacity:1;}
+       left:50%;top:50%;transform:translate(-50%,-50%);
+       opacity:0;transition:opacity .3s;will-change:transform,opacity;}
+  .card:hover .glow{opacity:1;}
   .card.dragging{opacity:.55;transform:scale(.96);cursor:grabbing;}
   .card{cursor:grab;}
   .card::before{content:"";position:absolute;inset:0;border-radius:16px;padding:1px;opacity:0;transition:opacity .25s;
@@ -323,11 +324,20 @@
   .modal .err{color:#f87171;font-size:12px;margin-top:10px;min-height:18px;}
   /* 私密导航页 */
   .secret-panel{position:fixed;inset:0;flex-direction:column;z-index:98;overflow-y:auto;
-       background:rgba(13,18,38,.45);backdrop-filter:blur(26px) saturate(1.5);
-       -webkit-backdrop-filter:blur(26px) saturate(1.5);
+       background:transparent;
        opacity:0;visibility:hidden;transition:opacity .32s ease,visibility .32s;}
+  /* 毛玻璃独立成"卡片背后"的一层：卡片不再是它的后代，hover 时不会触发全屏重新模糊 */
+  /* 省电/诊断开关：地址加 ?flat=1 关掉面板毛玻璃，?nofx=1 关掉卡片悬停动效 */
+  html.no-blur .secret-panel .sp-blur{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#0d1226;}
+  html.no-blur body[data-theme="aurora"] .secret-panel .sp-blur{background:#e7ecf7;}
+  html.no-fx .card{transition:none!important;}
+  html.no-fx .card:hover{box-shadow:none!important;}
+  html.no-fx .card .glow{display:none!important;}
+  .secret-panel .sp-blur{position:fixed;inset:0;z-index:0;pointer-events:none;
+       background:rgba(13,18,38,.58);
+       backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
   .secret-panel.show{opacity:1;visibility:visible;display:flex;}
-  .secret-panel .sp-inner{opacity:0;transform:translateY(18px) scale(.98);
+  .secret-panel .sp-inner{position:relative;z-index:1;opacity:0;transform:translateY(18px) scale(.98);
        transition:opacity .35s ease .06s,transform .35s cubic-bezier(.34,1.56,.64,1) .06s;}
   .secret-panel.show .sp-inner{opacity:1;transform:translateY(0) scale(1);}
   .secret-panel .sp-head{display:flex;align-items:center;justify-content:space-between;
@@ -957,6 +967,7 @@
 </div>
 <!-- 私密导航页 -->
 <div class="secret-panel" id="secretPanel">
+  <div class="sp-blur"></div>
   <div class="sp-inner">
   <div class="sp-head">
     <div class="sp-brand">
@@ -1055,6 +1066,13 @@ document.addEventListener('DOMContentLoaded', function(){
     btn.classList.remove('pulse'); void btn.offsetWidth; btn.classList.add('pulse');
   });
 });
+
+// ===== 性能开关（?flat=1 关面板毛玻璃 / ?nofx=1 关卡片悬停动效）=====
+(function(){
+  var q = location.search || '';
+  if (/[?&]flat=1/.test(q)) document.documentElement.classList.add('no-blur');
+  if (/[?&]nofx=1/.test(q)) document.documentElement.classList.add('no-fx');
+})();
 
 // ===== 我的私密 =====
 var SECRET_PWD = '199024';
@@ -1454,19 +1472,18 @@ function toggleSnd(){
 paintSnd();
 // 事件委托（含动态生成的私密卡片），同一张卡只在进入时响一次
 document.addEventListener('mouseover', function(e){
-  var el = e.target;
-  while (el && el !== document.body){
-    if (el.classList && el.classList.contains('card')){
-      if (el !== _sfxLastCard){
-        _sfxLastCard = el;
-        var i = Array.prototype.indexOf.call(document.querySelectorAll('.card'), el);
-        sfxTick(i < 0 ? 0 : i);
-      }
-      return;
-    }
-    el = el.parentNode;
+  var el = e.target && e.target.closest ? e.target.closest('.card') : null;
+  if (!el){ _sfxLastCard = null; return; }
+  if (el === _sfxLastCard) return;
+  _sfxLastCard = el;
+  // 索引缓存在元素上：鼠标快速划过时不再每次都 querySelectorAll 全量卡片
+  var i = el.__sfxIdx;
+  if (i == null){
+    i = Array.prototype.indexOf.call(document.querySelectorAll('.card'), el);
+    if (i < 0) i = 0;
+    el.__sfxIdx = i;
   }
-  _sfxLastCard = null;
+  sfxTick(i);
 });
 
 // ===== 主题切换 =====
@@ -1553,23 +1570,40 @@ document.addEventListener('click', function(e){
 
 // ===== ② 卡片 3D 倾斜 + 光晕跟随（主页与私密区共用）=====
 function bindCardFX(card){
-  card.addEventListener('mousemove', function(e){
-    if (card.classList.contains('dragging')) return;
-    var r = card.getBoundingClientRect();
-    var px = (e.clientX - r.left) / r.width;
-    var py = (e.clientY - r.top) / r.height;
+  var glow = card.querySelector('.glow');
+  if (!glow){ glow = document.createElement('span'); glow.className = 'glow'; card.appendChild(glow); }
+  var rect = null, rectAt = 0, raf = 0, mx = 0, my = 0;
+
+  function apply(){
+    raf = 0;
+    if (!rect) return;
+    var w = rect.width, h = rect.height;
+    if (!w || !h) return;
+    var px = (mx - rect.left) / w;
+    var py = (my - rect.top) / h;
+    if (px < -0.15 || px > 1.15 || py < -0.15 || py > 1.15) return;
     var rx = (0.5 - py) * 10;
     var ry = (px - 0.5) * 12;
-    // GPU优化：光晕偏移用合成属性 transform 驱动（只更新合成层，不触发重绘）
-    card.style.setProperty('--gx', ((px - 0.5) * r.width) + 'px');
-    card.style.setProperty('--gy', ((py - 0.5) * r.height) + 'px');
-    // GPU优化：仅鼠标交互期间临时提升合成层，平时不占显存
-    card.style.willChange = 'transform';
     card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px)';
+    // 直接写合成属性（不用 --gx/--gy 自定义属性，避免整卡样式重算）
+    glow.style.transform = 'translate(-50%,-50%) translate(' + ((px - 0.5) * w).toFixed(1) + 'px,' + ((py - 0.5) * h).toFixed(1) + 'px)';
+  }
+
+  card.addEventListener('mouseenter', function(){
+    rect = card.getBoundingClientRect(); rectAt = performance.now();
+  });
+  card.addEventListener('mousemove', function(e){
+    if (card.classList.contains('dragging')) return;
+    mx = e.clientX; my = e.clientY;
+    // rect 缓存 250ms，滚动/布局变化后自动重取，平时不做强制重排
+    if (!rect || performance.now() - rectAt > 250){ rect = card.getBoundingClientRect(); rectAt = performance.now(); }
+    if (!raf) raf = requestAnimationFrame(apply);   // 一帧最多算一次
   });
   card.addEventListener('mouseleave', function(){
+    if (raf){ cancelAnimationFrame(raf); raf = 0; }
+    rect = null;
     card.style.transform = '';
-    card.style.willChange = '';
+    glow.style.transform = 'translate(-50%,-50%)';
   });
 }
 (function(){
