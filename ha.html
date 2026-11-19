@@ -654,6 +654,14 @@ html[data-mode="dark"] .seg2 button[data-k="rem"][aria-pressed="true"] b{color:#
   margin-left:auto;border:0;background:var(--orange);color:#fff;font-family:var(--font);
   font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;
 }
+/* 窗帘位置校准（V1.0.47）：固件只回目标值、不回实际位置，给个手动对齐入口 */
+.calib{
+  margin-top:14px;padding:11px 12px;border-radius:11px;
+  background:rgba(255,159,10,.09);border:1px solid rgba(255,159,10,.26);
+}
+.calib p{margin:0;font-size:11.5px;line-height:1.65;color:var(--text2)}
+.calib b{color:var(--text);font-weight:600}
+.calib .ctlrow{margin:10px 0 0}
 
 footer{margin-top:34px;text-align:center;font-size:11.5px;color:var(--text3);line-height:1.7}
 .skel{height:104px;border-radius:var(--radius);background:linear-gradient(90deg,var(--card) 25%,rgba(120,120,128,.12) 37%,var(--card) 63%);
@@ -1494,7 +1502,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.46</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.47</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1675,7 +1683,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.46
+   HA家庭智能控制系统 · V1.0.47
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -4709,7 +4717,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.46 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.47 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -5107,6 +5115,18 @@ function panelCtl(eid){
       h += '<div class="sldwrap"><div class="lb"><span>开合度</span><b id="sldVal">'+p+'%</b></div>'+
         '<div class="sld"><input type="range" min="0" max="100" step="1" value="'+p+'" '+
         'data-sld="cover|set_cover_position|position" data-eid="'+esc(eid)+'"></div></div>';
+    }
+    /* 位置校准（V1.0.47）：带 target2current_position 的机型（次卧 giot BLE Mesh）
+       固件读不到 current_position，HA 只能拿最后一次下发的目标值顶替。用手动/遥控器
+       拉过之后目标值不会更新，屏幕就会停在旧位置。这里给一个显式对齐入口：
+       点哪个键，窗帘就去哪个位置（已在位则不动），同时把 target_position 刷正。 */
+    if(a.target2current_position === true){
+      h += '<div class="calib"><p>固件不回报实际位置，上方 <b>'+p+'%</b> 是最后下发的目标值，不是实测。'+
+        '手动或遥控器拉过之后，按实际状态点一下校准（会执行到该位置）。</p>'+
+        '<div class="ctlrow">'+
+          '<button data-cal="0">实为全关</button>'+
+          '<button data-cal="100">实为全开</button>'+
+        '</div></div>';
     }
   }else if(dom==="light"){
     h += pair(onNow);
@@ -6235,6 +6255,21 @@ document.addEventListener("click", (ev)=>{
     const k = nactEl.getAttribute("data-nact");
     if(k === "cancel") closeNum();
     else if(k === "ok") numSubmit();
+    return;
+  }
+
+  /* 窗帘位置校准（V1.0.47）：把 target_position 回写成用户确认的实际状态。
+     单独一条路，不走 data-svc —— 那里只传 dom|svc，带不了 position 参数。 */
+  const calEl = ev.target.closest("[data-cal]");
+  if(calEl){
+    ev.stopPropagation();
+    if(!canCtl()){ toast("只读模式 · 先解锁控制"); return; }
+    const holder = calEl.closest("[data-eid]");
+    const ceid = holder && holder.getAttribute("data-eid");
+    if(!ceid) return;
+    const want = Number(calEl.getAttribute("data-cal")) >= 50 ? 100 : 0;
+    callService("cover", "set_cover_position", {position: coverHaVal(ceid, want)}, ceid);
+    toast("已按「" + (want ? "全开" : "全关") + "」校准位置");
     return;
   }
 
