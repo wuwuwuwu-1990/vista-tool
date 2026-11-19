@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>红章抠图工具 v1.0.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b3302a'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23fff' stroke-width='4'/%3E%3Cpath d='M32 19.5l3.6 7.6 8.3.9-6.2 5.6 1.8 8.2L32 37.7l-7.5 4.1 1.8-8.2-6.2-5.6 8.3-.9z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#efece4; --panel:#fbfaf6; --line:#d8d2c4; --line2:#ebe6da;
+    --text:#23201c; --sub:#6b6459; --mute:#928a7c;
+    --accent:#b3302a; --accent-hi:#98261f; --accent-soft:#f7e7e3;
+    --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04), 0 10px 28px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text); overflow:hidden;
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+      "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    font-size:13px; -webkit-font-smoothing:antialiased;
+  }
+  button,input,select{font-family:inherit}
+  .mono{font-family:"SF Mono",-apple-system,BlinkMacSystemFont,Menlo,Consolas,monospace}
+
+  /* ---------- 顶栏 ---------- */
+  .topbar{
+    height:56px; display:flex; align-items:center; gap:16px; padding:0 18px;
+    background:rgba(251,250,246,.86); backdrop-filter:saturate(180%) blur(20%);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid var(--line); position:relative; z-index:30;
+  }
+  .brand{display:flex; align-items:center; gap:9px}
+  .brand .logo{
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--accent);
+    display:flex;align-items:center;justify-content:center;color:var(--accent);
+    font-size:10px;font-weight:600;
+  }
+  .brand h1{font-size:14px;font-weight:600;margin:0;letter-spacing:.2px}
+  .brand .ver{font-size:11px;color:var(--mute);margin-left:-4px}
+  .actions{display:flex;gap:8px;margin-left:6px}
+  .status{margin-left:auto;font-size:12px;color:var(--sub)}
+
+  /* ---------- 按钮：圆角矩形 + 红色填充 ---------- */
+  .btn{
+    height:32px; padding:0 15px; border-radius:9px; border:1px solid var(--accent);
+    background:var(--accent); color:#fff; font-size:12.5px; font-weight:500; cursor:pointer;
+    transition:background .15s, box-shadow .15s, transform .06s;
+  }
+  .btn:hover{background:var(--accent-hi); border-color:var(--accent-hi)}
+  .btn:active{transform:scale(.985)}
+  .btn:disabled{background:#d8aca6; border-color:#d8aca6; cursor:not-allowed}
+  .btn.sm{height:28px; padding:0 12px; font-size:12px; border-radius:8px}
+
+  /* ---------- 布局 ---------- */
+  .layout{display:flex; height:calc(100% - 56px)}
+  .panel{
+    width:322px; min-width:322px; background:var(--panel); border-right:1px solid var(--line);
+    overflow-y:auto; padding:6px 14px 40px;
+  }
+  .panel::-webkit-scrollbar{width:8px}
+  .panel::-webkit-scrollbar-thumb{background:#dcdce1;border-radius:4px}
+
+  .group{border-bottom:1px solid var(--line2); padding-bottom:10px}
+  .group:last-of-type{border-bottom:none}
+  .group h2{
+    font-size:11px; font-weight:600; letter-spacing:.6px; color:var(--mute);
+    margin:14px 2px 8px; display:flex; align-items:center; gap:6px;
+  }
+  .group h2 .badge{font-size:9.5px;padding:1px 6px;border-radius:5px;background:var(--accent-soft);color:var(--accent);letter-spacing:0}
+
+  .row{display:flex; align-items:center; gap:8px; padding:4px 2px; flex-wrap:wrap}
+  .row .lbl{flex:1; font-size:12.5px; color:#333; line-height:1.35}
+  .row .val{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;color:var(--sub);min-width:48px;text-align:right;font-variant-numeric:tabular-nums}
+  .row input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:2px;
+    background:#ddd6c6; outline:none; margin:2px 0 4px; flex-basis:100%;
+  }
+  .row input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px;height:14px;border-radius:50%;
+    background:#fff; border:1px solid #c9c9ce; box-shadow:0 1px 3px rgba(0,0,0,.16); cursor:pointer;
+  }
+  .row input[type=range]::-moz-range-thumb{
+    width:12px;height:12px;border-radius:50%;background:#fff;border:1px solid #c9c9ce;cursor:pointer;
+  }
+
+  .q{
+    width:15px;height:15px;flex:none;border-radius:50%;border:1px solid #d3ccbd;background:#fff;
+    color:var(--mute); font-size:9.5px; line-height:1; cursor:help; padding:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .q:hover{border-color:var(--accent);color:var(--accent)}
+
+  .text-in{
+    flex-basis:100%; width:100%; height:30px; padding:0 10px; border:1px solid var(--line);
+    border-radius:8px; font-size:12.5px; outline:none; background:#fff; letter-spacing:.6px;
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+  }
+  .text-in:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+
+  .seg{display:flex; background:#eae4d6; border-radius:8px; padding:2px; gap:2px}
+  .seg label{flex:1; margin:0; cursor:pointer}
+  .seg input{display:none}
+  .seg span{
+    display:block; text-align:center; font-size:12px; line-height:24px; height:24px;
+    border-radius:6px; color:var(--sub); transition:.15s;
+  }
+  .seg input:checked+span{background:var(--accent); color:#fff; font-weight:500}
+
+  .switch{position:relative;width:34px;height:20px;flex:none}
+  .switch input{opacity:0;width:0;height:0}
+  .switch span{position:absolute;inset:0;background:#ddd6c6;border-radius:20px;transition:.2s;cursor:pointer}
+  .switch span:before{
+    content:"";position:absolute;width:16px;height:16px;left:2px;top:2px;background:#fff;
+    border-radius:50%;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2);
+  }
+  .switch input:checked + span{background:var(--accent)}
+  .switch input:checked + span:before{transform:translateX(14px)}
+
+  .hint{font-size:11px;color:var(--mute);margin:8px 2px 0;line-height:1.6}
+  .panel-foot{padding:14px 2px 0}
+
+  /* ---------- 舞台 ---------- */
+  .stage{flex:1; display:flex; flex-direction:column; min-width:0}
+
+  .stagebar{
+    height:46px; display:flex; align-items:center; gap:10px; padding:0 16px;
+    background:rgba(251,250,246,.72); border-bottom:1px solid var(--line); flex:0 0 auto;
+  }
+  .stagebar .lbl{font-size:11.5px;color:var(--mute)}
+  .stagebar .seg{width:168px}
+  .stagebar .seg.small{width:112px}
+  .stagebar .divider{width:1px;height:16px;background:var(--line);margin:0 4px}
+  .stagebar .spacer{flex:1}
+  .stagebar input[type=color]{
+    width:30px;height:24px;padding:0;border:1px solid var(--line);border-radius:6px;
+    background:none;cursor:pointer;
+  }
+  .stagebar .hex{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;color:var(--sub)}
+
+  .views{
+    flex:1; display:flex; gap:14px; padding:16px; min-height:0; overflow:auto; position:relative;
+    background:
+      linear-gradient(45deg,#e4ddcd 25%,transparent 25%,transparent 75%,#e4ddcd 75%),
+      linear-gradient(45deg,#e4ddcd 25%,transparent 25%,transparent 75%,#e4ddcd 75%);
+    background-size:18px 18px; background-position:0 0,9px 9px; background-color:#f2eee4;
+  }
+  .card{
+    flex:1; min-width:260px; display:flex; flex-direction:column; min-height:0;
+    background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+  }
+  .card-hd{
+    height:34px; display:flex; align-items:center; padding:0 14px; flex:0 0 auto;
+    font-size:10.5px; letter-spacing:.8px; color:var(--mute); border-bottom:1px solid var(--line2);
+  }
+  .card-bd{
+    flex:1; min-height:0; overflow:auto; display:flex; align-items:center; justify-content:center;
+    padding:12px; background:var(--panel);
+  }
+  .card-bd canvas{max-width:100%; max-height:100%; display:block}
+  .card-bd.checker{
+    background-color:#fff;
+    background-image:
+      linear-gradient(45deg,#e3ded2 25%,transparent 25%),
+      linear-gradient(-45deg,#e3ded2 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#e3ded2 75%),
+      linear-gradient(-45deg,transparent 75%,#e3ded2 75%);
+    background-size:18px 18px; background-position:0 0,0 9px,9px -9px,-9px 0;
+  }
+  .card-bd.dark{background:#2b2b2b}
+
+  .empty{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:10px; color:var(--mute); text-align:center; z-index:5;
+    background:#f2eee4;
+  }
+  .empty b{display:block;color:var(--text);font-size:15px;font-weight:600;margin-bottom:2px}
+  .empty .drop{
+    margin-top:12px; padding:26px 34px; border:1.5px dashed #d5d5db; border-radius:14px;
+    background:rgba(251,250,246,.75); cursor:pointer;
+  }
+  .empty .drop:hover{border-color:var(--accent);color:var(--accent)}
+
+  #drop{
+    position:absolute; inset:12px; display:none; align-items:center; justify-content:center;
+    background:rgba(179,48,42,.07); border:2px dashed var(--accent); border-radius:var(--radius);
+    z-index:9; font-weight:600; font-size:15px; color:var(--accent);
+  }
+  body.dragging #drop{display:flex}
+
+  /* ---------- 底栏 ---------- */
+  .bottombar{
+    height:50px; display:flex; align-items:center; gap:10px; padding:0 16px; flex:0 0 auto;
+    background:rgba(251,250,246,.92); border-top:1px solid var(--line); overflow:hidden;
+  }
+  #stats{display:flex; align-items:center; flex-wrap:wrap; gap:0; font-size:11.5px; color:var(--sub); overflow:hidden}
+  #stats .kv{display:flex; align-items:baseline; gap:5px; white-space:nowrap}
+  #stats .kv i{font-style:normal;color:var(--mute);font-size:11px}
+  #stats .kv b{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+  #stats .vs{width:1px;height:12px;background:var(--line);margin:0 9px;flex:none}
+  .bottombar .right{margin-left:auto; display:flex; gap:8px}
+
+  /* ---------- 悬浮气泡 ---------- */
+  #tip{
+    position:fixed; z-index:99; max-width:300px; padding:10px 12px; border-radius:10px;
+    background:#1d1d1f; color:#f5f5f7; font-size:12px; line-height:1.65;
+    box-shadow:0 12px 34px rgba(0,0,0,.28); opacity:0; pointer-events:none;
+    transform:translateY(3px); transition:opacity .13s, transform .13s; display:block;
+  }
+  #tip.on{opacity:1; transform:translateY(0)}
+  #tip .tt{display:block;font-weight:600;margin-bottom:3px;color:#fff;font-size:12.5px}
+  #tip .td{color:#c7c7cc}
+
+  @media (max-width:980px){
+    .layout{flex-direction:column;height:auto}
+    body{overflow:auto}
+    .panel{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--line);max-height:46vh}
+    .views{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">章</span>
+    <h1>红章抠图工具</h1>
+    <span class="ver">v1.0.0</span>
+  </div>
+  <div class="actions">
+    <button class="btn" id="btnOpen">打开文件</button>
+    <button class="btn" id="btnClear">清除文件</button>
+    <button class="btn" id="btn1x" disabled>导出 PNG</button>
+  </div>
+  <div class="status">本地运行 · 图片不出机</div>
+</header>
+
+<div class="layout">
+  <aside class="panel">
+
+    <div class="group">
+      <h2>红墨分解<span class="badge">Step 1</span></h2>
+      <div class="row">
+        <span class="lbl">红墨起点</span>
+        <span class="val" id="v_off">18</span>
+        <button class="q" data-t="红墨起点" data-d="以 R − max(G,B) 作为红墨浓度。浓度低于这个值一律当纸张白底处理。扫描件偏灰时调大，章色偏淡时调小。">?</button>
+        <input type="range" id="off" min="0" max="80" step="1" value="18">
+      </div>
+      <div class="row">
+        <span class="lbl">红墨跨度</span>
+        <span class="val" id="v_span">150</span>
+        <button class="q" data-t="红墨跨度" data-d="从「红墨起点」到完全不透明之间的浓度跨度。跨度小→章色更饱满但边缘发脏；跨度大→边缘柔和但浅色章体容易丢。">?</button>
+        <input type="range" id="span" min="60" max="300" step="5" value="150">
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>黑字分离<span class="badge">Step 2</span></h2>
+      <div class="row">
+        <span class="lbl">亮度上限</span>
+        <span class="val" id="v_vThr">152</span>
+        <button class="q" data-t="亮度上限" data-d="RGB 三通道最大值的上限，低于它才算「暗像素」，是判定黑字的一半条件。压在红章上的字会变成深红，亮度不高，所以这条要留得宽一些。">?</button>
+        <input type="range" id="vThr" min="60" max="240" step="2" value="152">
+      </div>
+      <div class="row">
+        <span class="lbl">红度上限</span>
+        <span class="val" id="v_inkThr">165</span>
+        <button class="q" data-t="红度上限" data-d="同样用 R − max(G,B)。红度也低于这个值才算黑字，是另一半条件。调小→只挖最黑的字；调大→连章体边缘也一起挖掉。">?</button>
+        <input type="range" id="inkThr" min="40" max="240" step="5" value="165">
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>成膜<span class="badge">Step 3</span></h2>
+      <div class="row">
+        <span class="lbl">二值化阈值</span>
+        <span class="val" id="v_binThr">62</span>
+        <button class="q" data-t="二值化阈值" data-d="最关键的一个。挖掉黑字后留下的空缺靠邻域扩散补值，补出来的灰度高于这个阈值才算章体。调低→边缘更完整但会长毛刺；调高→干净但细笔画会断。">?</button>
+        <input type="range" id="binThr" min="30" max="200" step="1" value="62">
+      </div>
+      <div class="row">
+        <span class="lbl">实心块最小面积</span>
+        <span class="val" id="v_minSolid">4000</span>
+        <button class="q" data-t="实心块最小面积" data-d="只对「面积够大且在圆心附近」的连通块做内部孔洞填充，用来补五角星被字压穿的空洞。设成 0 完全关闭。太小会把字的封闭腔填死。">?</button>
+        <input type="range" id="minSolid" min="0" max="20000" step="500" value="4000">
+      </div>
+      <div class="row">
+        <span class="lbl">桥接核半径</span>
+        <span class="val" id="v_closeK">3</span>
+        <button class="q" data-t="桥接核半径" data-d="先膨胀后腐蚀，把被黑字切断的笔画连起来。半径 2~3 比较安全，拉到 4 以上会把字腔糊死、把相邻笔画粘成一坨。">?</button>
+        <input type="range" id="closeK" min="0" max="8" step="1" value="3">
+      </div>
+      <div class="row">
+        <span class="lbl">边缘柔化</span>
+        <span class="val" id="v_soft">1</span>
+        <button class="q" data-t="边缘柔化" data-d="对透明度通道做一次小半径均值模糊，消除硬锯齿。0 = 保留像素级原始边缘；1~2 = 适合缩放显示。">?</button>
+        <input type="range" id="soft" min="0" max="3" step="1" value="1">
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>外圈补口<span class="badge">Step 4</span></h2>
+      <div class="row">
+        <span class="lbl">最大缺口角度</span>
+        <span class="val" id="v_gapDeg">25</span>
+        <button class="q" data-t="最大缺口角度" data-d="外圈被黑字压断的地方按角度补弧。只补「环变薄 且 该角度确实有黑字压过」的位置，所以原章自带的防伪白缝不会被误补。超过这个角度认为是大段空白，不补。设 0 关闭。">?</button>
+        <input type="range" id="gapDeg" min="0" max="40" step="1" value="25">
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>防伪编码补配<span class="badge">补配</span></h2>
+      <div class="row">
+        <span class="lbl">编码内容</span>
+        <button class="q" data-t="编码内容" data-d="章体弧线上那串数字（一般 13 位）。扫描件上原码残缺、或被黑字压断时，把正确编码抄进来，工具会先擦掉原来的残码区域，再沿弧线重排一遍。留空则不做任何处理。">?</button>
+        <input class="text-in" type="text" id="code" maxlength="20" placeholder="例如 5002425015725">
+      </div>
+      <div class="row">
+        <span class="lbl">编码半径比</span>
+        <span class="val" id="v_codeRatio">0.875</span>
+        <button class="q" data-t="编码半径比" data-d="编码所在圆环的半径 ÷ 章外径。常见 0.85~0.92。码离外圈太近就调大，压到字上就调小。">?</button>
+        <input type="range" id="codeRatio" min="0.60" max="0.98" step="0.005" value="0.875">
+      </div>
+      <div class="row">
+        <span class="lbl">起始角度</span>
+        <span class="val" id="v_codeAngle">120</span>
+        <button class="q" data-t="起始角度" data-d="第一个字符的位置。画布坐标：0° 在三点钟方向，正数顺时针。底部编码一般从 110°~130° 开始。">?</button>
+        <input type="range" id="codeAngle" min="-180" max="180" step="1" value="120">
+      </div>
+      <div class="row">
+        <span class="lbl">字号</span>
+        <span class="val" id="v_codeSize">22</span>
+        <button class="q" data-t="字号" data-d="编码字符的像素高度。章外径 800 px 左右时，20~24 比较接近原码。">?</button>
+        <input type="range" id="codeSize" min="8" max="48" step="1" value="22">
+      </div>
+      <div class="row">
+        <span class="lbl">字距</span>
+        <span class="val" id="v_codeSpace">0.90</span>
+        <button class="q" data-t="字距" data-d="字符沿弧线的间距倍率。排得太挤调大，超出弧段调小。">?</button>
+        <input type="range" id="codeSpace" min="0.50" max="1.60" step="0.05" value="0.90">
+      </div>
+      <div class="row">
+        <span class="lbl">方向</span>
+        <button class="q" data-t="方向" data-d="字符沿弧线排列的方向。角度递减＝从右下往左下读，多数章是这个方向；角度递增反之。">?</button>
+        <div class="seg" id="dirSeg" style="flex-basis:100%;margin-top:2px">
+          <label><input type="radio" name="codeDir" value="-1" checked><span>角度递减</span></label>
+          <label><input type="radio" name="codeDir" value="1"><span>角度递增</span></label>
+        </div>
+      </div>
+      <div class="row">
+        <span class="lbl">擦除宽度</span>
+        <span class="val" id="v_eraseW">1.6</span>
+        <button class="q" data-t="擦除宽度" data-d="擦除残码时沿弧线清出的带宽，单位是字号倍数。太小→原码盖不干净；太大→会咬到外圈或字环。1.4~1.8 之间比较稳。">?</button>
+        <input type="range" id="eraseW" min="1.0" max="2.6" step="0.1" value="1.6">
+      </div>
+      <div class="row">
+        <span class="lbl">先擦除原有残码</span>
+        <button class="q" data-t="先擦除原有残码" data-d="开启后先用透明通道清掉原码所在弧段，再写新码，不留白底。若原码本身完好、只想叠加，可关闭。">?</button>
+        <label class="switch"><input type="checkbox" id="codeErase" checked><span></span></label>
+      </div>
+      <div class="hint">擦除走透明通道，不会在章上留下白底。</div>
+    </div>
+
+    <div class="panel-foot">
+      <button class="btn" id="btnReset" style="width:100%">恢复默认参数</button>
+    </div>
+  </aside>
+
+  <section class="stage">
+    <div class="stagebar">
+      <span class="lbl">预览底色</span>
+      <div class="seg" id="bgSeg">
+        <label><input type="radio" name="bg" value="checker" checked><span>透明</span></label>
+        <label><input type="radio" name="bg" value="white"><span>白</span></label>
+        <label><input type="radio" name="bg" value="dark"><span>深</span></label>
+      </div>
+      <span class="divider"></span>
+      <span class="lbl">出图</span>
+      <div class="seg" id="modeSeg" style="width:120px">
+        <label><input type="radio" name="mode" value="flat" checked><span>平色</span></label>
+        <label><input type="radio" name="mode" value="tex"><span>纹理</span></label>
+      </div>
+      <input type="color" id="color" value="#e2282a">
+      <span class="hex" id="colorHex">#E2282A</span>
+      <div class="spacer"></div>
+      <span class="lbl">参数改动实时重算</span>
+    </div>
+
+    <div class="views">
+      <div class="empty" id="empty">
+        <div>
+          <b>还没有图像</b>
+          把扫描件拖进来，或 Ctrl+V 粘贴
+          <div class="drop" id="dropZone">点击打开文件 · 支持 JPG / PNG / WEBP</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">SOURCE</div>
+        <div class="card-bd"><canvas id="cvIn"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">SEAL · RGBA</div>
+        <div class="card-bd checker" id="frameOut"><canvas id="cvOut"></canvas></div>
+      </div>
+
+      <div id="drop">松手载入</div>
+    </div>
+
+    <div class="bottombar">
+      <div id="stats">等待载入图片…</div>
+    </div>
+  </section>
+</div>
+
+<input type="file" id="file" accept="image/*" hidden>
+
+<script>
+(function(){
+  "use strict";
+
+  var cvIn = document.getElementById('cvIn');
+  var cvOut = document.getElementById('cvOut');
+  var ctxIn = cvIn.getContext('2d', {willReadFrequently:true});
+  var ctxOut = cvOut.getContext('2d');
+  var emptyEl = document.getElementById('empty');
+  var statsEl = document.getElementById('stats');
+  var btn1x = document.getElementById('btn1x');
+
+  var W = 0, H = 0, srcData = null, lastGeom = null;
+  var MAXDIM = 2200;
+  var timer = null;
+
+  var DEFAULTS = {
+    off:18, span:150, vThr:152, inkThr:165, binThr:62,
+    minSolid:4000, closeK:3, soft:1, gapDeg:25,
+    codeRatio:0.875, codeAngle:120, codeSize:22, codeSpace:0.90, eraseW:1.6
+  };
+
+  function $(id){ return document.getElementById(id); }
+
+  function readParams(){
+    return {
+      off: +$('off').value,
+      span: +$('span').value,
+      vThr: +$('vThr').value,
+      inkThr: +$('inkThr').value,
+      binThr: +$('binThr').value,
+      minSolid: +$('minSolid').value,
+      closeK: +$('closeK').value,
+      soft: +$('soft').value,
+      gapDeg: +$('gapDeg').value,
+      code: $('code').value.trim(),
+      codeRatio: +$('codeRatio').value,
+      codeAngle: +$('codeAngle').value,
+      codeSize: +$('codeSize').value,
+      codeSpace: +$('codeSpace').value,
+      codeDir: +document.querySelector('input[name=codeDir]:checked').value,
+      eraseW: +$('eraseW').value,
+      codeErase: $('codeErase').checked,
+      mode: document.querySelector('input[name=mode]:checked').value,
+      color: $('color').value
+    };
+  }
+
+  function hexToRgb(h){
+    var v = h.replace('#','');
+    return [parseInt(v.substr(0,2),16), parseInt(v.substr(2,2),16), parseInt(v.substr(4,2),16)];
+  }
+
+  // ---------- 载入 / 清除 ----------
+  function loadFile(file){
+    if(!file || !/^image\//.test(file.type)) return;
+    var url = URL.createObjectURL(file);
+    var im = new Image();
+    im.onload = function(){
+      var sc = Math.min(1, MAXDIM / Math.max(im.naturalWidth, im.naturalHeight));
+      W = Math.max(1, Math.round(im.naturalWidth * sc));
+      H = Math.max(1, Math.round(im.naturalHeight * sc));
+      cvIn.width = W; cvIn.height = H;
+      cvOut.width = W; cvOut.height = H;
+      ctxIn.drawImage(im, 0, 0, W, H);
+      srcData = ctxIn.getImageData(0, 0, W, H);
+      emptyEl.style.display = 'none';
+      btn1x.disabled = false;
+      URL.revokeObjectURL(url);
+      if(sc < 1){
+        statsEl.innerHTML = '原图 ' + im.naturalWidth + '×' + im.naturalHeight +
+          ' → 缩至 <b>' + W + '×' + H + '</b> 运算';
+      }
+      run();
+    };
+    im.onerror = function(){ URL.revokeObjectURL(url); alert('这张图读不出来，换个格式试试'); };
+    im.src = url;
+  }
+
+  function clearAll(){
+    srcData = null; lastGeom = null; W = 0; H = 0;
+    cvIn.width = 1; cvIn.height = 1;
+    cvOut.width = 1; cvOut.height = 1;
+    ctxIn.clearRect(0, 0, 1, 1);
+    ctxOut.clearRect(0, 0, 1, 1);
+    emptyEl.style.display = 'flex';
+    btn1x.disabled = true;
+    statsEl.textContent = '等待载入图片…';
+    $('file').value = '';
+  }
+
+  // ---------- 形态学（可分离盒式）----------
+  function morph(m, k, isMax){
+    if(k <= 0) return;
+    var i, x, y, v0, x0, x1, y0, y1;
+    var tmp = new Uint8Array(m.length);
+    for(y = 0; y < H; y++){
+      var row = y * W;
+      for(x = 0; x < W; x++){
+        v0 = isMax ? 0 : 1;
+        x0 = x - k < 0 ? 0 : x - k;
+        x1 = x + k > W - 1 ? W - 1 : x + k;
+        for(i = x0; i <= x1; i++){
+          var v = m[row + i];
+          if(isMax){ if(v > v0) v0 = v; } else { if(v < v0) v0 = v; }
+        }
+        tmp[row + x] = v0;
+      }
+    }
+    for(x = 0; x < W; x++){
+      for(y = 0; y < H; y++){
+        v0 = isMax ? 0 : 1;
+        y0 = y - k < 0 ? 0 : y - k;
+        y1 = y + k > H - 1 ? H - 1 : y + k;
+        for(i = y0; i <= y1; i++){
+          var v2 = tmp[i * W + x];
+          if(isMax){ if(v2 > v0) v0 = v2; } else { if(v2 < v0) v0 = v2; }
+        }
+        m[y * W + x] = v0;
+      }
+    }
+  }
+
+  // ---------- 扩散填补（代替 inpaint）----------
+  function growFill(a, mask){
+    var n = a.length;
+    var known = new Uint8Array(n);
+    var i;
+    for(i = 0; i < n; i++) known[i] = mask[i] ? 0 : 1;
+    var buf = new Int32Array(n);
+    var val = new Float32Array(n);
+    for(var it = 0; it < 80; it++){
+      var c = 0;
+      for(var y = 0; y < H; y++){
+        var row = y * W;
+        for(var x = 0; x < W; x++){
+          var q = row + x;
+          if(known[q]) continue;
+          var s = 0, k = 0, mx = 0;
+          if(x > 0 && known[q - 1]){ s += a[q - 1]; if(a[q - 1] > mx) mx = a[q - 1]; k++; }
+          if(x < W - 1 && known[q + 1]){ s += a[q + 1]; if(a[q + 1] > mx) mx = a[q + 1]; k++; }
+          if(y > 0 && known[q - W]){ s += a[q - W]; if(a[q - W] > mx) mx = a[q - W]; k++; }
+          if(y < H - 1 && known[q + W]){ s += a[q + W]; if(a[q + W] > mx) mx = a[q + W]; k++; }
+          if(k > 0){ buf[c] = q; val[c] = 0.35 * (s / k) + 0.65 * mx; c++; }
+        }
+      }
+      if(c === 0) break;
+      for(i = 0; i < c; i++){ a[buf[i]] = val[i]; known[buf[i]] = 1; }
+    }
+  }
+
+  // ---------- 连通域 ----------
+  function labelComponents(m){
+    var n = m.length;
+    var lab = new Int32Array(n); lab.fill(-1);
+    var stack = new Int32Array(n);
+    var areas = [], cxs = [], cys = [];
+    var cur = 0;
+    for(var s = 0; s < n; s++){
+      if(m[s] !== 1 || lab[s] !== -1) continue;
+      var sp = 0; stack[sp++] = s; lab[s] = cur;
+      var cnt = 0, sx = 0, sy = 0;
+      while(sp > 0){
+        var q = stack[--sp]; cnt++;
+        var x = q % W, y = (q - x) / W;
+        sx += x; sy += y;
+        var t;
+        if(x > 0){ t = q - 1; if(m[t] === 1 && lab[t] === -1){ lab[t] = cur; stack[sp++] = t; } }
+        if(x < W - 1){ t = q + 1; if(m[t] === 1 && lab[t] === -1){ lab[t] = cur; stack[sp++] = t; } }
+        if(y > 0){ t = q - W; if(m[t] === 1 && lab[t] === -1){ lab[t] = cur; stack[sp++] = t; } }
+        if(y < H - 1){ t = q + W; if(m[t] === 1 && lab[t] === -1){ lab[t] = cur; stack[sp++] = t; } }
+      }
+      areas.push(cnt); cxs.push(sx / cnt); cys.push(sy / cnt);
+      cur++;
+    }
+    return { lab: lab, areas: areas, cxs: cxs, cys: cys };
+  }
+
+  // ---------- 实心块孔洞填充 ----------
+  function fillCenterHoles(m, info, cx, cy, rad, minArea){
+    var n = m.length, i, x, y, q, t;
+    var lab = info.lab, areas = info.areas, cxs = info.cxs, cys = info.cys;
+
+    var out = new Uint8Array(n);
+    var st = new Int32Array(n);
+    var sp = 0;
+    function seed(idx){ if(m[idx] === 0 && out[idx] === 0){ out[idx] = 1; st[sp++] = idx; } }
+    for(x = 0; x < W; x++){ seed(x); seed((H - 1) * W + x); }
+    for(y = 0; y < H; y++){ seed(y * W); seed(y * W + W - 1); }
+    while(sp > 0){
+      q = st[--sp];
+      x = q % W; y = (q - x) / W;
+      if(x > 0){ t = q - 1; if(m[t] === 0 && out[t] === 0){ out[t] = 1; st[sp++] = t; } }
+      if(x < W - 1){ t = q + 1; if(m[t] === 0 && out[t] === 0){ out[t] = 1; st[sp++] = t; } }
+      if(y > 0){ t = q - W; if(m[t] === 0 && out[t] === 0){ out[t] = 1; st[sp++] = t; } }
+      if(y < H - 1){ t = q + W; if(m[t] === 0 && out[t] === 0){ out[t] = 1; st[sp++] = t; } }
+    }
+
+    var ok = new Uint8Array(areas.length);
+    for(i = 0; i < areas.length; i++){
+      if(areas[i] < minArea) continue;
+      var dd = Math.sqrt((cxs[i] - cx) * (cxs[i] - cx) + (cys[i] - cy) * (cys[i] - cy));
+      if(dd < rad * 0.30) ok[i] = 1;
+    }
+
+    var seen = new Uint8Array(n);
+    var reg = new Int32Array(n);
+    var filled = 0;
+    for(var s = 0; s < n; s++){
+      if(m[s] !== 0 || out[s] === 1 || seen[s] === 1) continue;
+      var sp2 = 0, rp = 0;
+      st[sp2++] = s; seen[s] = 1;
+      var big = false;
+      while(sp2 > 0){
+        q = st[--sp2]; reg[rp++] = q;
+        x = q % W; y = (q - x) / W;
+        if(x > 0) checkNb(q - 1);
+        if(x < W - 1) checkNb(q + 1);
+        if(y > 0) checkNb(q - W);
+        if(y < H - 1) checkNb(q + W);
+      }
+      if(big){ for(i = 0; i < rp; i++) m[reg[i]] = 1; filled++; }
+    }
+    return filled;
+
+    function checkNb(t2){
+      if(m[t2] === 0 && out[t2] === 0 && seen[t2] === 0){ seen[t2] = 1; st[sp2++] = t2; }
+      else if(m[t2] === 1){ var L = lab[t2]; if(L >= 0 && ok[L]) big = true; }
+    }
+  }
+
+  // ---------- 外圈补口（只补被黑字压断的地方，保留防伪白缝）----------
+  function repairRing(m, cx, cy, rad, maxDeg, textMask){
+    if(maxDeg <= 0) return 0;
+    var N = 1080, R = rad - 8;
+    var prof = new Uint16Array(N), hit = new Uint8Array(N), k, r, th, x, y;
+    for(k = 0; k < N; k++){
+      th = k / N * Math.PI * 2;
+      var ca = Math.cos(th), sa = Math.sin(th), cnt = 0, tx = 0;
+      for(r = R - 15; r <= R + 15; r += 1){
+        x = Math.round(cx + r * ca); y = Math.round(cy + r * sa);
+        if(x < 0 || x >= W || y < 0 || y >= H) continue;
+        var idx = y * W + x;
+        if(m[idx] === 1) cnt++;
+        if(textMask[idx] === 1) tx = 1;
+      }
+      prof[k] = cnt; hit[k] = tx;
+    }
+    var tmpArr = [];
+    for(k = 0; k < N; k++) if(prof[k] > 0) tmpArr.push(prof[k]);
+    tmpArr.sort(function(a, b){ return a - b; });
+    var med = tmpArr.length ? tmpArr[tmpArr.length >> 1] : 0;
+    var thin = Math.max(3, Math.round(med * 0.7));
+
+    // 关键：环变薄 且 该角度确实有黑字压过，才算断口
+    var weak = new Uint8Array(N);
+    for(k = 0; k < N; k++) weak[k] = (prof[k] < thin && hit[k] === 1) ? 1 : 0;
+
+    var gaps = [], st = -1;
+    for(k = 0; k < N * 2; k++){
+      var idx2 = k % N;
+      if(weak[idx2]){
+        if(st < 0) st = idx2;
+        else if(k - st >= N) st = -1;
+      } else if(st >= 0){
+        gaps.push([st, k - st]);
+        st = -1;
+      }
+    }
+    var drawn = 0;
+    for(var g = 0; g < gaps.length; g++){
+      var s0 = gaps[g][0], len = gaps[g][1];
+      var deg = len * 360 / N;
+      if(deg <= 0 || deg > maxDeg) continue;
+      for(k = 0; k <= len; k++){
+        th = ((s0 + k) % N) / N * Math.PI * 2;
+        var c2 = Math.cos(th), s2 = Math.sin(th);
+        for(r = R - 13; r <= R + 13; r += 1){
+          x = Math.round(cx + r * c2); y = Math.round(cy + r * s2);
+          if(x >= 0 && x < W && y >= 0 && y < H) m[y * W + x] = 1;
+        }
+      }
+      drawn++;
+    }
+    return drawn;
+  }
+
+  // ---------- 均值模糊 ----------
+  function boxBlur(a, k, W2, H2){
+    var n = a.length, tmp = new Uint8ClampedArray(n);
+    var i, x, y, s, cnt, x0, x1, y0, y1;
+    for(y = 0; y < H2; y++){
+      var row = y * W2;
+      for(x = 0; x < W2; x++){
+        s = 0; cnt = 0;
+        x0 = x - k < 0 ? 0 : x - k;
+        x1 = x + k > W2 - 1 ? W2 - 1 : x + k;
+        for(i = x0; i <= x1; i++){ s += a[row + i]; cnt++; }
+        tmp[row + x] = s / cnt;
+      }
+    }
+    for(x = 0; x < W2; x++){
+      for(y = 0; y < H2; y++){
+        s = 0; cnt = 0;
+        y0 = y - k < 0 ? 0 : y - k;
+        y1 = y + k > H2 - 1 ? H2 - 1 : y + k;
+        for(i = y0; i <= y1; i++){ s += tmp[i * W2 + x]; cnt++; }
+        a[y * W2 + x] = s / cnt;
+      }
+    }
+  }
+
+  // ---------- 主流程 ----------
+  function run(){
+    if(!srcData) return;
+    var t0 = performance.now();
+    var p = readParams();
+    var n = W * H, i, x, y;
+    var d = srcData.data;
+    var ink = new Float32Array(n);
+    var V = new Float32Array(n);
+
+    for(i = 0; i < n; i++){
+      var r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
+      var mg = g > b ? g : b;
+      ink[i] = r - mg;
+      V[i] = r > mg ? r : mg;
+    }
+
+    var a0 = new Float32Array(n);
+    for(i = 0; i < n; i++){
+      var v = (ink[i] - p.off) / p.span;
+      a0[i] = v < 0 ? 0 : (v > 1 ? 1 : v);
+    }
+
+    var minx = W, maxx = -1, miny = H, maxy = -1;
+    for(y = 0; y < H; y++){
+      for(x = 0; x < W; x++){
+        if(a0[y * W + x] > 0.35){
+          if(x < minx) minx = x; if(x > maxx) maxx = x;
+          if(y < miny) miny = y; if(y > maxy) maxy = y;
+        }
+      }
+    }
+    if(maxx < 0){
+      statsEl.innerHTML = '<span style="color:#b3302a">没找到红色区域</span><br>把「红墨起点」调小、「红墨跨度」调大再试';
+      ctxOut.clearRect(0, 0, W, H);
+      return;
+    }
+    var cx = (minx + maxx) / 2, cy = (miny + maxy) / 2;
+    var rad = Math.max(maxx - minx, maxy - miny) / 2;
+    var r2 = (rad + 10) * (rad + 10);
+    lastGeom = { cx: cx, cy: cy, rad: rad };
+
+    var mask = new Uint8Array(n);
+    var textCnt = 0;
+    for(y = 0; y < H; y++){
+      var dy = y - cy;
+      for(x = 0; x < W; x++){
+        var dx = x - cx;
+        if(dx * dx + dy * dy > r2) continue;
+        i = y * W + x;
+        if(V[i] < p.vThr && ink[i] < p.inkThr){ mask[i] = 1; textCnt++; }
+      }
+    }
+
+    var aI = new Float32Array(a0);
+    for(i = 0; i < n; i++) if(mask[i]) aI[i] = 0;
+    if(textCnt > 0) growFill(aI, mask);
+
+    var m = new Uint8Array(n);
+    for(i = 0; i < n; i++) m[i] = (aI[i] * 255 > p.binThr) ? 1 : 0;
+
+    var solidFilled = 0;
+    if(p.minSolid > 0){
+      var info = labelComponents(m);
+      solidFilled = fillCenterHoles(m, info, cx, cy, rad, p.minSolid);
+    }
+
+    var gaps = repairRing(m, cx, cy, rad, p.gapDeg, mask);
+
+    if(p.closeK > 0){ morph(m, p.closeK, true); morph(m, p.closeK, false); }
+
+    var alpha = new Uint8ClampedArray(n);
+    var cover = 0;
+    var disk2 = (rad + 8) * (rad + 8);
+    for(y = 0; y < H; y++){
+      var dy2 = y - cy;
+      for(x = 0; x < W; x++){
+        var i2 = y * W + x;
+        var dx2 = x - cx;
+        var inside = (dx2 * dx2 + dy2 * dy2) <= disk2;
+        if(m[i2] && inside){ alpha[i2] = 255; cover++; } else { alpha[i2] = 0; }
+      }
+    }
+    if(p.soft > 0) boxBlur(alpha, p.soft, W, H);
+
+    var out = ctxOut.createImageData(W, H);
+    var od = out.data;
+    var c3 = hexToRgb(p.color);
+    var sr = c3[0], sg = c3[1], sb = c3[2];
+
+    for(i = 0; i < n; i++){
+      var A = alpha[i];
+      var rr, gg, bb;
+      if(p.mode === 'flat'){
+        rr = sr; gg = sg; bb = sb;
+      } else {
+        var tv = (V[i] - 60) / 140;
+        tv = tv < 0 ? 0 : (tv > 1 ? 1 : tv);
+        rr = sr * (1 - tv) + d[i * 4] * tv;
+        gg = sg * (1 - tv) + d[i * 4 + 1] * tv;
+        bb = sb * (1 - tv) + d[i * 4 + 2] * tv;
+      }
+      od[i * 4] = rr; od[i * 4 + 1] = gg; od[i * 4 + 2] = bb; od[i * 4 + 3] = A;
+    }
+    ctxOut.putImageData(out, 0, 0);
+
+    var codeDrawn = drawCode(p, cx, cy, rad);
+
+    var ms = Math.round(performance.now() - t0);
+    var parts = [
+      ['圆心', '(' + cx.toFixed(0) + ', ' + cy.toFixed(0) + ')'],
+      ['外径', (rad * 2).toFixed(0) + ' px'],
+      ['黑字', textCnt.toLocaleString()],
+      ['补口', gaps + ' 处'],
+      ['实心块', solidFilled],
+      ['占比', (100 * cover / n).toFixed(1) + '%']
+    ];
+    if(codeDrawn) parts.push(['防伪码', codeDrawn + ' 字']);
+    parts.push(['耗时', ms + ' ms']);
+    statsEl.innerHTML = parts.map(function(x){
+      return '<span class="kv"><i>' + x[0] + '</i><b>' + x[1] + '</b></span>';
+    }).join('<span class="vs"></span>');
+  }
+
+  // ---------- 防伪编码沿弧补配 ----------
+  function drawCode(p, cx, cy, rad){
+    var txt = p.code;
+    if(!txt) return 0;
+    var r = rad * p.codeRatio;
+    if(r < 10) return 0;
+    var size = p.codeSize;
+    var stepDeg = (size * p.codeSpace / r) * 180 / Math.PI;
+    var dir = p.codeDir;
+    var span = stepDeg * txt.length;
+
+    ctxOut.save();
+
+    if(p.codeErase){
+      var a1 = (p.codeAngle - 1.6 * stepDeg * dir) * Math.PI / 180;
+      var a2 = (p.codeAngle + dir * (span + 1.6 * stepDeg)) * Math.PI / 180;
+      ctxOut.globalCompositeOperation = 'destination-out';
+      ctxOut.lineWidth = size * p.eraseW;
+      ctxOut.lineCap = 'butt';
+      ctxOut.beginPath();
+      ctxOut.arc(cx, cy, r, Math.min(a1, a2), Math.max(a1, a2));
+      ctxOut.stroke();
+      ctxOut.globalCompositeOperation = 'source-over';
+    }
+
+    ctxOut.fillStyle = p.color;
+    ctxOut.textAlign = 'center';
+    ctxOut.textBaseline = 'middle';
+    ctxOut.font = '600 ' + size + 'px -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif';
+
+    for(var i = 0; i < txt.length; i++){
+      var th = (p.codeAngle + dir * (i + 0.5) * stepDeg) * Math.PI / 180;
+      ctxOut.save();
+      ctxOut.translate(cx + r * Math.cos(th), cy + r * Math.sin(th));
+      ctxOut.rotate(th - Math.PI / 2);
+      ctxOut.fillText(txt.charAt(i), 0, 0);
+      ctxOut.restore();
+    }
+    ctxOut.restore();
+    return txt.length;
+  }
+
+  // ---------- 交互 ----------
+  var ids = ['off','span','vThr','inkThr','binThr','minSolid','closeK','soft','gapDeg',
+             'codeRatio','codeAngle','codeSize','codeSpace','eraseW'];
+  ids.forEach(function(id){
+    var el = $(id), lab = $('v_' + id);
+    el.addEventListener('input', function(){
+      lab.textContent = (+el.value).toString();
+      schedule();
+    });
+  });
+
+  function schedule(){
+    clearTimeout(timer);
+    timer = setTimeout(run, 120);
+  }
+
+  $('code').addEventListener('input', schedule);
+  $('codeErase').addEventListener('change', schedule);
+
+  document.querySelectorAll('input[name=mode],input[name=bg],input[name=codeDir]').forEach(function(el){
+    el.addEventListener('change', function(){
+      if(el.name === 'bg'){
+        $('frameOut').className = 'card-bd ' + (el.value === 'checker' ? 'checker' : el.value);
+      } else {
+        run();
+      }
+    });
+  });
+
+  $('color').addEventListener('input', function(){
+    $('colorHex').textContent = this.value.toUpperCase();
+    schedule();
+  });
+
+  $('btnReset').addEventListener('click', function(){
+    Object.keys(DEFAULTS).forEach(function(k){
+      $(k).value = DEFAULTS[k];
+      if($('v_' + k)) $('v_' + k).textContent = DEFAULTS[k];
+    });
+    schedule();
+  });
+
+  $('btnOpen').addEventListener('click', function(){ $('file').click(); });
+  $('btnClear').addEventListener('click', clearAll);
+
+  function download(scale){
+    if(!srcData) return;
+    var c = document.createElement('canvas');
+    c.width = W * scale; c.height = H * scale;
+    var g = c.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(cvOut, 0, 0, c.width, c.height);
+    c.toBlob(function(blob){
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '印章_' + Date.now() + '.png';
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+    }, 'image/png');
+  }
+  btn1x.addEventListener('click', function(){ download(1); });
+
+  // 帮助气泡（悬停触发）
+  var tipEl = null;
+  function ensureTip(){
+    if(!tipEl){
+      tipEl = document.createElement('div');
+      tipEl.id = 'tip';
+      document.body.appendChild(tipEl);
+    }
+    return tipEl;
+  }
+  function showTip(btn){
+    var el = ensureTip();
+    el.innerHTML = '<span class="tt">' + (btn.getAttribute('data-t') || '') + '</span>' +
+                   '<span class="td">' + (btn.getAttribute('data-d') || '') + '</span>';
+    el.classList.add('on');
+    var r = btn.getBoundingClientRect();
+    var w = 300;
+    el.style.width = w + 'px';
+    var left = r.right + 12;
+    if(left + w > window.innerWidth - 12) left = Math.max(10, r.left - w - 12);
+    el.style.left = left + 'px';
+    var top = r.top - 4;
+    var h = el.offsetHeight || 90;
+    if(top + h > window.innerHeight - 10) top = Math.max(10, window.innerHeight - h - 10);
+    el.style.top = top + 'px';
+  }
+  function hideTip(){ if(tipEl) tipEl.classList.remove('on'); }
+  document.querySelectorAll('.q').forEach(function(b){
+    b.addEventListener('mouseenter', function(){ showTip(b); });
+    b.addEventListener('mouseleave', hideTip);
+    b.addEventListener('focus', function(){ showTip(b); });
+    b.addEventListener('blur', hideTip);
+  });
+  window.addEventListener('scroll', hideTip, true);
+
+  document.addEventListener('click', function(e){
+    if(e.target.closest && e.target.closest('.empty')) $('file').click();
+  });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') hideTip(); });
+
+  // 拖放 / 粘贴
+  var dragDepth = 0;
+  window.addEventListener('dragenter', function(e){ e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
+  window.addEventListener('dragover', function(e){ e.preventDefault(); });
+  window.addEventListener('dragleave', function(e){ e.preventDefault(); if(--dragDepth <= 0){ dragDepth = 0; document.body.classList.remove('dragging'); } });
+  window.addEventListener('drop', function(e){
+    e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  window.addEventListener('paste', function(e){
+    var items = e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(var i = 0; i < items.length; i++){
+      if(items[i].type.indexOf('image') === 0){ loadFile(items[i].getAsFile()); break; }
+    }
+  });
+  $('file').addEventListener('change', function(){ if(this.files[0]) loadFile(this.files[0]); });
+
+})();
+</script>
+</body>
+</html>
