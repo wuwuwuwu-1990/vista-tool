@@ -1488,7 +1488,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.37</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.38</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1669,7 +1669,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.37
+   HA家庭智能控制系统 · V1.0.38
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -3033,10 +3033,22 @@ function renderPeople(){
   host.innerHTML = PERSON_LIST.map(p=>{
     const st = S.states.get(p.eid);
     const tri = personTri(p.eid);
-    const txt = tri === "home" ? "在家" : tri === "away" ? "离家" : "离线";
+    /* V1.0.38：unknown 不等于「不在家」。手机 App 被系统杀后台后 tracker 会变 unknown，
+       原来一律写「离线」，看着像人不在家，其实只是没数据。这里单独写「未上报」，
+       并把最后一次上报时间挂到 title 上，鼠标停一下就知道断在哪天。 */
+    const raw = st ? String(st.state) : "";
+    const noData = raw === "unknown" || raw === "unavailable" || raw === "";
+    const txt = tri === "home" ? "在家" : tri === "away" ? "离家" : (noData ? "未上报" : "离线");
+    let tip = "";
+    if(tri === "off" && raw === "unknown" && st && st.last_updated){
+      const d = new Date(st.last_updated), p2 = n=> String(n).padStart(2, "0");
+      tip = "位置自 " + (d.getMonth() + 1) + "-" + d.getDate() + " " + p2(d.getHours()) + ":" +
+            p2(d.getMinutes()) + " 起未再上报（手机 App 可能在后台被系统清掉了）";
+    }
     const pic = (st && st.attributes && st.attributes.entity_picture) || "";
     const fallback = AVA[p.eid] || "";      // 内联头像：静态打开/断网也能显示
-    return '<div class="pill ' + tri + '" data-eid="' + esc(p.eid) + '" role="button" tabindex="0">' +
+    return '<div class="pill ' + tri + '" data-eid="' + esc(p.eid) + '"' +
+      (tip ? ' title="' + esc(tip) + '"' : '') + ' role="button" tabindex="0">' +
       '<div class="ava" data-src="' + esc(pic) + '"' +
         (fallback ? ' style="background-image:url(' + fallback + ')"' : '') + '>' +
         (fallback ? '' : esc(p.name.charAt(0))) + '</div>' +
@@ -4617,7 +4629,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.37 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.38 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
