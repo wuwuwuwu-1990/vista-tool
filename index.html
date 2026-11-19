@@ -81,7 +81,6 @@
   body[data-theme="aurora"] .card::after{background:radial-gradient(circle,rgba(255,255,255,.7),transparent 62%);}
   /* 卡片 chip 与私密标签原本是给深色底调的浅色，浅色底上统一压暗 + 提饱和 */
   body[data-theme="aurora"] .card .chip,
-  body[data-theme="aurora"] .secret-panel .sp-card .tag{filter:brightness(.6) saturate(1.45);}
   body[data-theme="aurora"] nav{box-shadow:0 8px 26px rgba(96,116,168,.18);}
   body[data-theme="aurora"] .theme-picker .tp.on{background:rgba(255,255,255,.95);color:#2f4a7a;
        box-shadow:0 3px 10px rgba(120,140,190,.3);}
@@ -110,15 +109,7 @@
   body[data-theme="aurora"] .secret-panel .sp-sec span{color:rgba(44,58,88,.55);}
   body[data-theme="aurora"] .secret-panel .sp-cat-title .nm{color:#1b2540;}
   body[data-theme="aurora"] .secret-panel .sp-cat-title .cnt{color:rgba(44,58,88,.55);border-left-color:rgba(120,140,180,.3);}
-  body[data-theme="aurora"] .secret-panel .sp-chip{color:rgba(44,58,88,.72);background:rgba(255,255,255,.66);border-color:rgba(255,255,255,.92);}
-  body[data-theme="aurora"] .secret-panel .sp-chip:hover{background:#fff;color:#1b2540;}
-  body[data-theme="aurora"] .secret-panel .sp-chip.on{color:#fff;background:var(--c,#4f8ef7);border-color:transparent;}
   body[data-theme="aurora"] .secret-panel .sp-close{color:rgba(44,58,88,.65);border-color:rgba(120,140,180,.3);background:rgba(255,255,255,.7);}
-  body[data-theme="aurora"] .secret-panel .sp-card{background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.95);}
-  body[data-theme="aurora"] .secret-panel .sp-card:hover{box-shadow:0 16px 40px rgba(96,116,168,.26);border-color:#fff;}
-  body[data-theme="aurora"] .secret-panel .sp-card h4{color:#1b2540;}
-  body[data-theme="aurora"] .secret-panel .sp-card p{color:rgba(44,58,88,.72);}
-  body[data-theme="aurora"] .secret-panel .sp-card .meta{color:rgba(44,58,88,.6);}
   body[data-theme="aurora"] .secret-panel .sp-empty{border-color:rgba(120,140,180,.32);color:rgba(44,58,88,.6);background:rgba(255,255,255,.45);}
   html{scroll-behavior:smooth;}
   body{min-height:100vh;font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
@@ -354,42 +345,30 @@
   .secret-panel .sp-sec .bar{width:4px;height:16px;border-radius:2px;background:var(--sp-bar);}
   .secret-panel .sp-sec h2{font-size:15px;font-weight:600;color:#eef2fb;}
   .secret-panel .sp-sec span{font-size:11.5px;color:rgba(238,242,251,.55);margin-left:auto;}
-  /* 私密区分类：胶囊筛选 + 分组标题（版式对齐主页 cat-title） */
-  .secret-panel .sp-cats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px;}
-  .secret-panel .sp-chip{
-    display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:20px;
-    font-size:12.5px;line-height:1;cursor:pointer;user-select:none;
-    color:rgba(238,242,251,.78);background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.16);
-    transition:background .16s,border-color .16s,color .16s,box-shadow .16s;
-  }
-  .secret-panel .sp-chip:hover{background:rgba(255,255,255,.14);color:#fff;}
-  .secret-panel .sp-chip b{font-weight:600;font-size:11px;opacity:.62;margin-left:1px;}
-  .secret-panel .sp-chip.on{color:#fff;font-weight:600;border-color:transparent;
-    background:var(--c,#4f8ef7);box-shadow:0 4px 14px rgba(0,0,0,.28);}
-  .secret-panel .sp-chip.on b{opacity:.85;}
+  /* 私密区布局：左栏分类（对齐主页 side-nav）+ 右栏分组网格（卡片与主页同款 .card） */
+  .secret-panel .sp-layout{display:flex;gap:22px;align-items:flex-start;}
+  .secret-panel .sp-nav{flex:0 0 220px;position:sticky;top:6px;}
+  .secret-panel .sp-nav .side-head{font-size:16px;font-weight:700;color:var(--txt);letter-spacing:1px;padding:0 0 14px 14px;}
+  .secret-panel .sp-nav .side-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:6px;border-radius:12px;
+       color:var(--muted);text-decoration:none;font-size:18px;cursor:pointer;border:1px solid transparent;transition:all .2s;}
+  .secret-panel .sp-nav .side-item .ico{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;line-height:1;}
+  .secret-panel .sp-nav .side-item .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .secret-panel .sp-nav .side-item .cnt{margin-left:auto;font-size:12px;color:var(--muted);opacity:.75;}
+  .secret-panel .sp-nav .side-item:hover{color:var(--txt);background:var(--card);border-color:var(--card-b);}
+  .secret-panel .sp-nav .side-item.active{color:var(--txt);background:var(--card);border-color:var(--card-b);
+       box-shadow:inset 3px 0 0 var(--ac,var(--cyan));}
+  .secret-panel .sp-nav .side-item.active .cnt{color:var(--cyan);}
+  .secret-panel .sp-content{flex:1;min-width:0;}
   .secret-panel .sp-group{margin-bottom:28px;}
   .secret-panel .sp-group:last-child{margin-bottom:0;}
   .secret-panel .sp-cat-title{display:flex;align-items:center;gap:9px;margin:0 0 14px;}
   .secret-panel .sp-cat-title .dot{width:4px;height:16px;border-radius:2px;flex:none;}
-  .secret-panel .sp-cat-title .nm{font-size:14.5px;font-weight:600;letter-spacing:.6px;color:#eef2fb;}
-  .secret-panel .sp-cat-title .cnt{font-size:11.5px;color:rgba(238,242,251,.5);
-    border-left:1px solid rgba(255,255,255,.16);padding-left:12px;}
-  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(288px,1fr));gap:16px;}
-  .secret-panel .sp-card{height:100%;max-width:400px;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
-       padding:20px 18px 18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);
-       transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;}
-  .secret-panel .sp-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.45);border-color:rgba(255,255,255,.4);}
-  .secret-panel .sp-card .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
-       background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 8px 22px var(--gs);margin-bottom:14px;}
-  .secret-panel .sp-card .ic svg{width:24px;height:24px;}
-  .secret-panel .sp-card h4{font-size:15.5px;font-weight:600;margin-bottom:7px;color:#eef2fb;line-height:1.4;min-height:44px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .secret-panel .sp-card p{font-size:12px;color:rgba(238,242,251,.6);line-height:1.7;height:82px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;}
-  .secret-panel .sp-card .sp-bottom{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:auto;padding-top:14px;}
-  .secret-panel .sp-card .tag{font-size:11px;padding:4px 12px;border-radius:20px;align-self:auto;
-       border:1px solid var(--cb);color:var(--cc);background:var(--cbg);}
-  .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;letter-spacing:.5px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
-  .secret-panel .sp-card .meta{font-size:11px;color:rgba(238,242,251,.55);opacity:.85;margin-top:8px;letter-spacing:.5px;display:flex;align-items:center;gap:4px;}
+  .secret-panel .sp-cat-title .nm{font-size:14.5px;font-weight:600;letter-spacing:.6px;color:var(--txt);}
+  .secret-panel .sp-cat-title .cnt{font-size:11.5px;color:var(--muted);
+    border-left:1px solid var(--card-b);padding-left:12px;}
+  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .secret-panel .card{opacity:1;}
+  .secret-panel .card{cursor:pointer;}
   .secret-panel .sp-empty{border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:40px;text-align:center;color:rgba(238,242,251,.55);font-size:13px;line-height:2;background:rgba(255,255,255,.04);}
   /* 私密面板头部右侧：更新日志入口 + 退出按钮 */
   .secret-panel .sp-actions{display:flex;align-items:center;gap:10px;}
@@ -410,10 +389,18 @@
   body[data-theme="aurora"] .secret-panel .sp-log-btn{color:rgba(44,58,88,.72);border-color:rgba(120,140,180,.3);background:rgba(255,255,255,.7);}
   body[data-theme="aurora"] .secret-panel .sp-log-btn:hover{color:#4f3d96;border-color:rgba(122,99,216,.5);background:rgba(255,255,255,.94);}
   body[data-theme="aurora"] .secret-panel .sp-log-btn .num{background:rgba(122,99,216,.16);color:#4f3d96;}
+  @media (max-width:1000px){
+    .secret-panel .sp-layout{flex-direction:column;align-items:stretch;}
+    .secret-panel .sp-content{width:100%;}
+    .secret-panel .sp-nav{flex:none;width:100%;position:static;display:flex;flex-wrap:wrap;gap:6px;}
+    .secret-panel .sp-nav .side-head{display:none;}
+    .secret-panel .sp-nav .side-item{margin-bottom:0;font-size:13px;padding:8px 12px;}
+    .secret-panel .sp-nav .side-item .ico{width:18px;height:18px;font-size:11px;}
+  }
   @media (max-width:720px){
     .secret-panel .sp-head{padding:20px 16px 0;}
     .secret-panel .sp-body{padding:24px 16px 60px;}
-    .secret-panel .sp-grid{grid-template-columns:1fr 1fr;gap:12px;}
+    .secret-panel .sp-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
     .nav-right .ver{display:none;}
     .theme-picker .tp{padding:5px 9px;font-size:11px;}
@@ -479,7 +466,8 @@
   .cat-title .nm{font-size:15px;font-weight:600;letter-spacing:1px;}
   .cat-title .cnt{font-size:11.5px;color:var(--muted);border-left:1px solid var(--card-b);padding-left:12px;margin-left:8px;}
   @media (max-width:1000px){
-    .layout{flex-direction:column;}
+    .layout{flex-direction:column;align-items:stretch;}
+    .layout .content{width:100%;}
     .side-nav{flex:none;width:100%;position:static;display:flex;flex-wrap:wrap;gap:6px;}
     .side-nav .side-head{display:none;}
     .side-nav .side-item{margin-bottom:0;}
@@ -987,18 +975,22 @@
     </div>
   </div>
   <div class="sp-body">
-    <div class="sp-sec">
-      <div class="bar"></div>
-      <h2>私密工具</h2>
-      <span id="spCount"></span>
+    <div class="sp-layout">
+      <aside class="sp-nav" id="spNav"></aside>
+      <main class="sp-content">
+        <div class="sp-sec">
+          <div class="bar"></div>
+          <h2>私密工具</h2>
+          <span id="spCount"></span>
+        </div>
+        <div id="spGrid"></div>
+        <div class="sp-sec" style="margin-top:34px;">
+          <div class="bar"></div>
+          <h2>使用说明</h2>
+        </div>
+        <div class="sp-empty">此空间为私有工具导航，仅本人可见。<br>如需添加私密工具，请联系开发者维护本页面。</div>
+      </main>
     </div>
-    <div class="sp-cats" id="spCats"></div>
-    <div id="spGrid"></div>
-    <div class="sp-sec" style="margin-top:34px;">
-      <div class="bar"></div>
-      <h2>使用说明</h2>
-    </div>
-    <div class="sp-empty">此空间为私有工具导航，仅本人可见。<br>如需添加私密工具，请联系开发者维护本页面。</div>
   </div>
   </div>
 </div>
@@ -1070,10 +1062,10 @@ var SECRET_KEY = 'vista_secret_unlocked';
 
 /* 私密区分类：顺序即展示顺序，色值用于分组色条与筛选胶囊 */
 var SECRET_CATS = [
-  { id: '选房与房源', color: '#38bdf8' },
-  { id: '工程与文档', color: '#34d399' },
-  { id: '服务与运维', color: '#a78bfa' },
-  { id: '生活与影像', color: '#f472b6' }
+  { id: '选房与房源', color: '#38bdf8', ico: '🏠' },
+  { id: '工程与文档', color: '#34d399', ico: '📄' },
+  { id: '服务与运维', color: '#a78bfa', ico: '🛠️' },
+  { id: '生活与影像', color: '#f472b6', ico: '🎬' }
 ];
 var spFilter = '';
 // 私密工具（可在此扩展）
@@ -1277,53 +1269,79 @@ function closeSecret(){
   document.getElementById('secretPanel').classList.remove('show');
   document.body.style.overflow = '';
 }
-function renderSecretCats(){
-  var box = document.getElementById('spCats');
+function renderSecretNav(){
+  var box = document.getElementById('spNav');
   if (!box) return;
   box.innerHTML = '';
+
+  var head = document.createElement('div');
+  head.className = 'side-head';
+  head.textContent = '工具分类';
+  box.appendChild(head);
+
+  // 「全部」项
   var all = document.createElement('div');
-  all.className = 'sp-chip' + (spFilter === '' ? ' on' : '');
-  all.style.setProperty('--c', '#4f8ef7');
-  all.innerHTML = '全部<b>' + SECRET_TOOLS.length + '</b>';
+  all.className = 'side-item' + (spFilter === '' ? ' active' : '');
+  all.style.setProperty('--ac', '#4f8ef7');
+  all.innerHTML = '<span class="ico" style="background:rgba(79,142,247,.16)">🗂️</span>'
+    + '<span class="nm">全部工具</span><span class="cnt">' + SECRET_TOOLS.length + '</span>';
   all.onclick = function(){ setSpFilter(''); };
   box.appendChild(all);
+
   SECRET_CATS.forEach(function(c){
     var n = SECRET_TOOLS.filter(function(t){ return t.cat === c.id; }).length;
     if (!n) return;
     var el = document.createElement('div');
-    el.className = 'sp-chip' + (spFilter === c.id ? ' on' : '');
-    el.style.setProperty('--c', c.color);
-    el.innerHTML = c.id + '<b>' + n + '</b>';
+    el.className = 'side-item' + (spFilter === c.id ? ' active' : '');
+    el.style.setProperty('--ac', c.color);
+    el.innerHTML = '<span class="ico" style="background:' + hexA(c.color, .16) + '">' + (c.ico || '•') + '</span>'
+      + '<span class="nm">' + c.id + '</span><span class="cnt">' + n + '</span>';
     el.onclick = function(){ setSpFilter(c.id); };
     box.appendChild(el);
   });
 }
+
+/* 把十六进制色转成半透明 rgba，用于侧栏图标的浅色底 */
+function hexA(hex, a){
+  var h = (hex || '#4f8ef7').replace('#', '');
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
 function setSpFilter(cat){
   spFilter = cat;
-  renderSecretCats();
+  renderSecretNav();
   renderSecretTools();
 }
 function buildSecretCard(t){
   var a = document.createElement('a');
-  a.className = 'sp-card';
+  a.className = 'card in';                       // 复用主页卡片样式，宽高与公开工具完全一致
   a.href = t.href;
   a.target = '_blank';
   a.rel = 'noopener';
   a.style.setProperty('--g1', t.g1);
   a.style.setProperty('--g2', t.g2);
   a.style.setProperty('--gs', t.gs);
-  a.style.setProperty('--cb', 'rgba(255,255,255,.14)');
-  a.style.setProperty('--cc', '#9aa7c7');
-  a.style.setProperty('--cbg', 'rgba(255,255,255,.05)');
-  a.innerHTML = '<div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></div>'
-    + '<h4>' + t.name + '</h4><p>' + t.desc + '</p>'
-    + '<div class="sp-bottom"><span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>'
-    + '<div class="meta"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg> 更新于 ' + (t.upd || '—') + '</div></div>';
+  a.style.setProperty('--a1', t.g1);
+  a.style.setProperty('--a2', t.g2);
+  var title = String(t.name || '').replace(/\s+v[\d.]+$/i, '');   // 版本交给下面 chip 显示
+  a.innerHTML =
+      '<div class="top"><div class="icon">'
+    + '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg>'
+    + '</div><div class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'
+    + '<h3>' + title + '</h3>'
+    + '<div class="desc">' + t.desc + '</div>'
+    + '<div class="foot">'
+      + '<span class="chip" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>'
+      + '<span class="chip">' + (t.cat || '私密') + '</span>'
+    + '</div>'
+    + '<div class="meta"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg> 更新于 ' + (t.upd || '—') + '</div>';
+  bindCardFX(a);
   return a;
 }
 function renderSecretTools(){
   var wrap = document.getElementById('spGrid');
-  renderSecretCats();
+  renderSecretNav();
   document.getElementById('spCount').textContent = '共 ' + SECRET_TOOLS.length + ' 项';
   wrap.innerHTML = '';
 
@@ -1438,10 +1456,10 @@ paintSnd();
 document.addEventListener('mouseover', function(e){
   var el = e.target;
   while (el && el !== document.body){
-    if (el.classList && (el.classList.contains('card') || el.classList.contains('sp-card'))){
+    if (el.classList && el.classList.contains('card')){
       if (el !== _sfxLastCard){
         _sfxLastCard = el;
-        var i = Array.prototype.indexOf.call(document.querySelectorAll('.card, .sp-card'), el);
+        var i = Array.prototype.indexOf.call(document.querySelectorAll('.card'), el);
         sfxTick(i < 0 ? 0 : i);
       }
       return;
@@ -1533,35 +1551,35 @@ document.addEventListener('click', function(e){
   });
 })();
 
-// ===== ② 卡片 3D 倾斜 + 光晕跟随 =====
-(function(){
-  var cards = document.querySelectorAll('.card');
-  cards.forEach(function(card){
-    card.addEventListener('mousemove', function(e){
-      if (card.classList.contains('dragging')) return;
-      var r = card.getBoundingClientRect();
-      var px = (e.clientX - r.left) / r.width;
-      var py = (e.clientY - r.top) / r.height;
-      var rx = (0.5 - py) * 10;
-      var ry = (px - 0.5) * 12;
-      // GPU优化：光晕偏移用合成属性 transform 驱动（只更新合成层，不触发重绘）
-      card.style.setProperty('--gx', ((px - 0.5) * r.width) + 'px');
-      card.style.setProperty('--gy', ((py - 0.5) * r.height) + 'px');
-      // GPU优化：仅鼠标交互期间临时提升合成层，平时不占显存
-      card.style.willChange = 'transform';
-      card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px)';
-    });
-    card.addEventListener('mouseleave', function(){
-      card.style.transform = '';
-      card.style.willChange = '';
-    });
+// ===== ② 卡片 3D 倾斜 + 光晕跟随（主页与私密区共用）=====
+function bindCardFX(card){
+  card.addEventListener('mousemove', function(e){
+    if (card.classList.contains('dragging')) return;
+    var r = card.getBoundingClientRect();
+    var px = (e.clientX - r.left) / r.width;
+    var py = (e.clientY - r.top) / r.height;
+    var rx = (0.5 - py) * 10;
+    var ry = (px - 0.5) * 12;
+    // GPU优化：光晕偏移用合成属性 transform 驱动（只更新合成层，不触发重绘）
+    card.style.setProperty('--gx', ((px - 0.5) * r.width) + 'px');
+    card.style.setProperty('--gy', ((py - 0.5) * r.height) + 'px');
+    // GPU优化：仅鼠标交互期间临时提升合成层，平时不占显存
+    card.style.willChange = 'transform';
+    card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px)';
   });
+  card.addEventListener('mouseleave', function(){
+    card.style.transform = '';
+    card.style.willChange = '';
+  });
+}
+(function(){
+  document.querySelectorAll('.cat-sec .card').forEach(bindCardFX);
 })();
 
 // ===== ⑤ 工具搜索过滤 =====
 function filterTools(q){
   q = (q || '').trim().toLowerCase();
-  var cards = document.querySelectorAll('.card');
+  var cards = document.querySelectorAll('.cat-sec .card');
   var shown = 0;
   cards.forEach(function(card){
     var txt = card.textContent.toLowerCase();
@@ -1746,7 +1764,7 @@ var CARD_META = {
 };
 (function(){
   var _tc = document.querySelector('.sec-count');
-  if (_tc) _tc.textContent = '共 ' + document.querySelectorAll('.card').length + ' 款';
+  if (_tc) _tc.textContent = '共 ' + document.querySelectorAll('.cat-sec .card').length + ' 款';
   document.querySelectorAll('.card').forEach(function(card){
     var href = card.getAttribute('href') || '';
     // 新标签页打开
