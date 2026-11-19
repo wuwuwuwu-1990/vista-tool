@@ -506,8 +506,9 @@
     </div>
     <div class="nav-right">
     <div class="theme-picker" id="themePicker" title="切换界面主题">
+      <button class="tp on" data-t="auto" onclick="setTheme('auto')" title="按重庆酉阳的日出日落自动切换">自动<span class="tp-s">日夜</span></button>
       <button class="tp" data-t="space" onclick="setTheme('space')">深空<span class="tp-s">科技</span></button>
-      <button class="tp on" data-t="business" onclick="setTheme('business')">商务<span class="tp-s">深蓝</span></button>
+      <button class="tp" data-t="business" onclick="setTheme('business')">商务<span class="tp-s">深蓝</span></button>
       <button class="tp" data-t="aurora" onclick="setTheme('aurora')">柔光<span class="tp-s">渐变</span></button>
     </div>
 
@@ -1493,22 +1494,139 @@ document.addEventListener('mouseover', function(e){
   sfxTick(i);
 });
 
-// ===== 主题切换 =====
-var THEMES = ['space','business','aurora'];
-var THEME_VER = 'v4';  // 主题：space/business/aurora，递增作废旧记忆  // 默认主题版本，变更默认主题时递增以作废旧记忆
+// ===== 主题切换（含按酉阳日出日落自动切换）=====
+var THEMES = ['space','business','aurora','auto'];
+var THEME_VER = 'v4';  // space/business/aurora/auto，递增作废旧记忆
+var YA_LAT = 28.8397, YA_LNG = 108.7673;   // 重庆酉阳（钟多街道）
+var YA_CN = 8 * 3600000;                   // 北京时间 UTC+8
+var SUN_H0 = -0.833;                       // 日出/日落判定：太阳中心在地平线下 0.833°
+var DUSK_DELAY = 30 * 60000;               // 日落后 30 分钟才转深色（留黄昏缓冲）
+var themePick = 'business';                // 用户选择（可能是 'auto'）
+var autoTimer = null;
+
+// 太阳高度角（度），低精度公式，误差约 0.01°（<1 分钟）
+function sunAlt(ms){
+  var rad = Math.PI/180;
+  var n = ms/86400000 + 2440587.5 - 2451545.0;
+  var L = 280.460 + 0.9856474*n;
+  var g = 357.528 + 0.9856003*n;
+  var lam = (L + 1.915*Math.sin(g*rad) + 0.020*Math.sin(2*g*rad)) * rad;
+  var eps = (23.439 - 0.0000004*n) * rad;
+  var dec = Math.asin(Math.sin(eps)*Math.sin(lam));
+  var ra = Math.atan2(Math.cos(eps)*Math.sin(lam), Math.cos(lam))/rad;
+  var gmst = (280.46061837 + 360.98564736629*n) % 360;
+  var H = (((gmst + YA_LNG - ra) % 360) + 540) % 360 - 180;
+  var alt = Math.asin(Math.sin(YA_LAT*rad)*Math.sin(dec) +
+                      Math.cos(YA_LAT*rad)*Math.cos(dec)*Math.cos(H*rad))/rad;
+  return alt;
+}
+// 在 [t0,t1] 内二分找太阳高度穿过 SUN_H0 的时刻
+function sunCross(t0, t1){
+  var f0 = sunAlt(t0) - SUN_H0;
+  for (var k = 0; k < 42; k++){
+    var tm = (t0 + t1) / 2, fm = sunAlt(tm) - SUN_H0;
+    if ((f0 < 0) === (fm < 0)) { t0 = tm; f0 = fm; } else { t1 = tm; }
+  }
+  return (t0 + t1) / 2;
+}
+// 酉阳"北京时间某日 0 点"的时间戳（与设备时区无关）
+function yaDayStart(now){
+  return Math.floor((now + YA_CN) / 86400000) * 86400000 - YA_CN;
+}
+// 酉阳该日的日出 / 日落时间戳
+function yaSunTimes(dayStart){
+  var STEP = 20*60000, rise = null, set = null;
+  var prev = dayStart, prevUp = sunAlt(prev) > SUN_H0;
+  for (var t = dayStart + STEP; t <= dayStart + 86400000; t += STEP){
+    var up = sunAlt(t) > SUN_H0;
+    if (!prevUp && up && rise === null) rise = sunCross(prev, t);
+    if (prevUp && !up && set === null && rise !== null) set = sunCross(prev, t);
+    prev = t; prevUp = up;
+  }
+  return { rise: rise, set: set };
+}
+function yaDayTimes(now){
+  var a = yaSunTimes(yaDayStart(now));
+  if (a.rise === null || a.set === null) return null;   // 极昼极夜（酉阳不会发生）
+  return { rise: a.rise, set: a.set, dusk: a.set + DUSK_DELAY };
+}
+// 自动档当前应该是哪个主题：日出→日落后30分钟 是白天（柔光），其余夜间（商务深蓝）
+function autoThemeNow(now){
+  now = now || Date.now();
+  var t = yaDayTimes(now);
+  if (!t) return 'business';
+  return (now >= t.rise && now < t.dusk) ? 'aurora' : 'business';
+}
+// 下一次该切换的时刻
+function autoNextSwitch(now){
+  now = now || Date.now();
+  var t = yaDayTimes(now);
+  if (!t) return null;
+  if (now < t.rise) return t.rise;
+  if (now < t.dusk) return t.dusk;
+  var nx = yaDayTimes(yaDayStart(now) + 86400000);
+  return nx ? nx.rise : null;
+}
+function hhmm(ms){
+  var d = new Date(ms + YA_CN);
+  var h = d.getUTCHours(), m = d.getUTCMinutes();
+  return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+// 「自动」按钮上显示当前处于白天还是夜间，title 里给当天日出日落
+function updateAutoLabel(actual){
+  var btn = document.querySelector('.theme-picker .tp[data-t="auto"]');
+  if (!btn) return;
+  var sub = btn.querySelector('.tp-s');
+  if (sub) sub.textContent = (actual === 'aurora') ? '白天' : '夜间';
+  var t = yaDayTimes(Date.now());
+  btn.title = t
+    ? '自动（重庆酉阳）· 日出 ' + hhmm(t.rise) + ' / 日落 ' + hhmm(t.set) + ' · 日落后 30 分钟转深色'
+    : '自动（重庆酉阳）';
+}
+// 只在「自动」档才挂定时器，精确等到下一个切换点
+function scheduleAuto(){
+  if (autoTimer){ clearTimeout(autoTimer); autoTimer = null; }
+  if (themePick !== 'auto') return;
+  var now = Date.now();
+  var next = autoNextSwitch(now);
+  if (!next || next <= now){ return; }
+  var delay = Math.min(next - now + 800, 2147000000);
+  autoTimer = setTimeout(function(){
+    autoTimer = null;
+    var actual = autoThemeNow();
+    document.body.setAttribute('data-theme', actual);
+    updateAutoLabel(actual);
+    scheduleAuto();
+  }, delay);
+}
+// 从后台回来 / 休眠唤醒：定时器可能被节流，重新对齐
+function syncAutoNow(){
+  if (themePick !== 'auto') return;
+  var actual = autoThemeNow();
+  if (document.body.getAttribute('data-theme') !== actual){
+    document.body.setAttribute('data-theme', actual);
+  }
+  updateAutoLabel(actual);
+  scheduleAuto();
+}
 function setTheme(t, save){
-  document.body.setAttribute('data-theme', t);
+  themePick = t;
+  var actual = (t === 'auto') ? autoThemeNow() : t;
+  document.body.setAttribute('data-theme', actual);
   document.querySelectorAll('.theme-picker .tp').forEach(function(b){
     b.classList.toggle('on', b.getAttribute('data-t') === t);
   });
+  updateAutoLabel(actual);
   if (save !== false){
     try {
       localStorage.setItem('vista_theme', t);
       localStorage.setItem('vista_theme_ver', THEME_VER);
     } catch(e){}
   }
+  scheduleAuto();
   // 流星雨为 CSS 动画，随主题自动显隐，无需 JS 启停
 }
+
 
 
 function openAbout(){
@@ -1821,9 +1939,9 @@ var CARD_META = {
 })();
 // 页面加载：检测更新日志角标（有未读更新则「关于」显示绿点）
 updateLogBadge();
-// ===== 主题初始化：恢复用户上次选择（默认商务深蓝），首次加载即应用特效 =====
+// ===== 主题初始化：恢复用户上次选择（新访客默认「自动」：白天柔光、夜间商务深蓝）=====
 (function(){
-  var t = 'business';
+  var t = 'auto';
   try {
     var saved = localStorage.getItem('vista_theme');
     var ver = localStorage.getItem('vista_theme_ver');
@@ -1834,7 +1952,10 @@ updateLogBadge();
 // ===== GPU优化：标签页不可见时暂停循环动效（流星雨/光晕），切回恢复 =====
 document.addEventListener('visibilitychange', function(){
   document.body.classList.toggle('anim-paused', document.hidden);
+  if (!document.hidden) syncAutoNow();
 });
+window.addEventListener('focus', syncAutoNow);
+window.addEventListener('pageshow', syncAutoNow);
 </script>
 </body>
 <!-- build-refresh 2026-11-02T10:15 -->
