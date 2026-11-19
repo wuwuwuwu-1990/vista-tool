@@ -108,6 +108,11 @@
   body[data-theme="aurora"] .secret-panel .sp-brand span{color:rgba(44,58,88,.55);}
   body[data-theme="aurora"] .secret-panel .sp-sec h2{color:#1b2540;}
   body[data-theme="aurora"] .secret-panel .sp-sec span{color:rgba(44,58,88,.55);}
+  body[data-theme="aurora"] .secret-panel .sp-cat-title .nm{color:#1b2540;}
+  body[data-theme="aurora"] .secret-panel .sp-cat-title .cnt{color:rgba(44,58,88,.55);border-left-color:rgba(120,140,180,.3);}
+  body[data-theme="aurora"] .secret-panel .sp-chip{color:rgba(44,58,88,.72);background:rgba(255,255,255,.66);border-color:rgba(255,255,255,.92);}
+  body[data-theme="aurora"] .secret-panel .sp-chip:hover{background:#fff;color:#1b2540;}
+  body[data-theme="aurora"] .secret-panel .sp-chip.on{color:#fff;background:var(--c,#4f8ef7);border-color:transparent;}
   body[data-theme="aurora"] .secret-panel .sp-close{color:rgba(44,58,88,.65);border-color:rgba(120,140,180,.3);background:rgba(255,255,255,.7);}
   body[data-theme="aurora"] .secret-panel .sp-card{background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.95);}
   body[data-theme="aurora"] .secret-panel .sp-card:hover{box-shadow:0 16px 40px rgba(96,116,168,.26);border-color:#fff;}
@@ -349,7 +354,28 @@
   .secret-panel .sp-sec .bar{width:4px;height:16px;border-radius:2px;background:var(--sp-bar);}
   .secret-panel .sp-sec h2{font-size:15px;font-weight:600;color:#eef2fb;}
   .secret-panel .sp-sec span{font-size:11.5px;color:rgba(238,242,251,.55);margin-left:auto;}
-  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;}
+  /* 私密区分类：胶囊筛选 + 分组标题（版式对齐主页 cat-title） */
+  .secret-panel .sp-cats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px;}
+  .secret-panel .sp-chip{
+    display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:20px;
+    font-size:12.5px;line-height:1;cursor:pointer;user-select:none;
+    color:rgba(238,242,251,.78);background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.16);
+    transition:background .16s,border-color .16s,color .16s,box-shadow .16s;
+  }
+  .secret-panel .sp-chip:hover{background:rgba(255,255,255,.14);color:#fff;}
+  .secret-panel .sp-chip b{font-weight:600;font-size:11px;opacity:.62;margin-left:1px;}
+  .secret-panel .sp-chip.on{color:#fff;font-weight:600;border-color:transparent;
+    background:var(--c,#4f8ef7);box-shadow:0 4px 14px rgba(0,0,0,.28);}
+  .secret-panel .sp-chip.on b{opacity:.85;}
+  .secret-panel .sp-group{margin-bottom:28px;}
+  .secret-panel .sp-group:last-child{margin-bottom:0;}
+  .secret-panel .sp-cat-title{display:flex;align-items:center;gap:9px;margin:0 0 14px;}
+  .secret-panel .sp-cat-title .dot{width:4px;height:16px;border-radius:2px;flex:none;}
+  .secret-panel .sp-cat-title .nm{font-size:14.5px;font-weight:600;letter-spacing:.6px;color:#eef2fb;}
+  .secret-panel .sp-cat-title .cnt{font-size:11.5px;color:rgba(238,242,251,.5);
+    border-left:1px solid rgba(255,255,255,.16);padding-left:12px;}
+  .secret-panel .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(288px,1fr));gap:16px;}
   .secret-panel .sp-card{height:100%;max-width:400px;display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:16px;
        padding:20px 18px 18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);
        transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;}
@@ -966,7 +992,8 @@
       <h2>私密工具</h2>
       <span id="spCount"></span>
     </div>
-    <div class="sp-grid" id="spGrid"></div>
+    <div class="sp-cats" id="spCats"></div>
+    <div id="spGrid"></div>
     <div class="sp-sec" style="margin-top:34px;">
       <div class="bar"></div>
       <h2>使用说明</h2>
@@ -1040,9 +1067,19 @@ document.addEventListener('DOMContentLoaded', function(){
 // ===== 我的私密 =====
 var SECRET_PWD = '199024';
 var SECRET_KEY = 'vista_secret_unlocked';
+
+/* 私密区分类：顺序即展示顺序，色值用于分组色条与筛选胶囊 */
+var SECRET_CATS = [
+  { id: '选房与房源', color: '#38bdf8' },
+  { id: '工程与文档', color: '#34d399' },
+  { id: '服务与运维', color: '#a78bfa' },
+  { id: '生活与影像', color: '#f472b6' }
+];
+var spFilter = '';
 // 私密工具（可在此扩展）
 var SECRET_TOOLS = [
   {
+    cat: '选房与房源',
     name: '渝选房 v1.4.1',
     desc: '重庆主城智能选房：多维筛选（区域/总价/面积/地铁线）、十维深度分析、AI 多模型推荐、噪声分析、百度地图定位。',
     href: 'yxf141.html', upd: '2026-08-14',
@@ -1051,6 +1088,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(56,189,248,.4)', tagText: '#7dd3fc', tagBg: 'rgba(56,189,248,.1)'
   },
   {
+    cat: '选房与房源',
     name: '重庆8000楼盘 v1.7',
     desc: '重庆 8000+ 楼盘优劣势速查表：区域房价、楼盘对比、优势劣势一览，快速筛选目标楼盘。',
     href: 'cq8000.html', upd: '2026-08-15',
@@ -1059,6 +1097,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(251,191,36,.4)', tagText: '#fcd34d', tagBg: 'rgba(251,191,36,.1)'
   },
   {
+    cat: '选房与房源',
     name: '渝居优选 v1.3.19',
     desc: '重庆主城智能选房：十大板块深度分析+十维综合评分，金福云航拍实景自动登录，高德地图底图（内置Key+小区标注）+已选房源导航。',
     href: 'yjyx.html', upd: '2026-09-05',
@@ -1067,6 +1106,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(52,211,153,.4)', tagText: '#6ee7b7', tagBg: 'rgba(52,211,153,.1)'
   },
   {
+    cat: '选房与房源',
     name: '渝居优选·手机版',
     desc: '渝居优选手机适配版：深色玻璃弹窗、航拍全屏智印绿风格、顶栏适配状态栏、自动登录、高德内置 Key+POI 定位。',
     href: 'yjyx-m.html', upd: '2026-09-05',
@@ -1075,6 +1115,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(45,212,191,.4)', tagText: '#5eead4', tagBg: 'rgba(45,212,191,.1)'
   },
   {
+    cat: '选房与房源',
     name: '房览速记 v1.0.27',
     desc: '抖音/安居客房源随手记：内置云端令牌打开即同步（记录级合并·多端不丢）；修复弹窗滚动背景联动；两行精简卡玻璃弹窗。',
     href: 'fanglian.html', upd: '2026-09-05',
@@ -1083,6 +1124,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(45,212,191,.4)', tagText: '#5eead4', tagBg: 'rgba(45,212,191,.1)'
   },
   {
+    cat: '工程与文档',
     name: '筑笺札记个人工程资料库 v1.0.13',
     desc: '个人工程资料库：工程资料 117 条 + 评审资料 112 条一站式检索，年份筛选/关键词搜索/备注检索（含[已出报告]、经办人名、地名+经办人）/类型统计看板。',
     href: 'zqzhaji.html', upd: '2026-08-26',
@@ -1091,6 +1133,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(74,222,128,.4)', tagText: '#86efac', tagBg: 'rgba(74,222,128,.1)'
   },
   {
+    cat: '服务与运维',
     name: 'WorkBuddy每日领取助手 v1.2',
     desc: 'WorkBuddy 积分每日自动领取：云端每天自动签到 + 只读状态 + 签到日历（领取日期累积标记）',
     href: 'wbcheckin.html', upd: '2026-09-02',
@@ -1099,6 +1142,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(74,222,128,.4)', tagText: '#86efac', tagBg: 'rgba(74,222,128,.1)'
   }
   ,{
+    cat: '选房与房源',
     name: '金福云VR自动登录入口 v1.1',
     desc: '金福云航拍/个人主页自动登录直达：内置账号 POST 登录即跳转，预连接+fetch 静默提速，支持 ?uid= 自定义主页。',
     href: 'jinfuyun_entry.html', upd: '2026-09-02',
@@ -1107,6 +1151,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(34,211,238,.4)', tagText: '#7dd3fc', tagBg: 'rgba(34,211,238,.1)'
   }
   ,{
+    cat: '服务与运维',
     name: '阿里云服务器价值全景',
     desc: 'ECS 99计划价值地图：已部署服务状态 + P0/P1/P2分级用途 + 备案转正三选项 + 落地路线图与带宽/内存天花板提醒。',
     href: 'aliyun_srv.html', upd: '2026-09-04',
@@ -1115,6 +1160,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(139,92,246,.45)', tagText: '#c4b5fd', tagBg: 'rgba(139,92,246,.12)'
   }
   ,{
+    cat: '工程与文档',
     name: '木材检测报告工具 v3.60',
     desc: '细木工板检测报告（GB/T 5849-2016）：原件扫描彩色底图+电子印章，24 处字段原位抹除可改，贴合原件排版一键导出 PDF，云端参数模板复用。',
     href: 'woodreport.html', upd: '2026-09-08',
@@ -1123,6 +1169,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(251,191,36,.5)', tagText: '#fbbf24', tagBg: 'rgba(251,191,36,.12)'
   }
   ,{
+    cat: '生活与影像',
     name: '在线浏览全景照片 v1.1.4',
     desc: '360°全景照片管理：上传/打开图片即看/重命名列表，一键传阿里云服务器图床（srv.wbc2023.top/img/），分享一键复制「照片名称-全景照片+链接」；⚡低清秒开 + 加载百分比；☁看过即缓存，再开本地秒出（LRU 自动淘汰）；安卓APP页内直达下载；手机窄屏布局修复（列表按钮排完整显示）；资源库云端多设备同步。',
     href: 'pano.html', upd: '2026-09-20',
@@ -1131,6 +1178,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(74,222,128,.4)', tagText: '#86efac', tagBg: 'rgba(74,222,128,.1)'
   }
   ,{
+    cat: '生活与影像',
     name: '泊成家庭纪事 v1.0.12',
     desc: '家庭静态网页管理器：网页名称下方一键重命名/删除，点整张卡片即在软件内打开；云端同步与文件存储全走自有服务器 srv.wbc2023.top（记录级合并 + /img 图床），添加网址/同步/安卓APP/设置全在顶栏；v1.0.11 列表条目改版（去掉「进入网页」按钮与「文件名·大小」行）；v1.0.12 点右上角版本号可强制刷新、回到前台自动更新到最新版，手机上不再残留旧界面；绿白主题，与网页版数据互通。',
     href: 'bocheng.html', upd: '2026-09-28',
@@ -1139,6 +1187,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(74,222,128,.4)', tagText: '#86efac', tagBg: 'rgba(74,222,128,.1)'
   }
   ,{
+    cat: '服务与运维',
     name: '翻墙机场导入 Clash 便捷系统 v1.1.2',
     desc: '机场订阅一键导入本机 Clash（clash:// 唤起 Verge / CFW / ClashX / Meta），隔一天到期提示与倒计时；云端自动同步已内置（定时抓取 → AES-256-GCM 加密 → 打开页面自动解密填入），另有剪贴板智能识别、订阅源脱敏显示、同步台账与本地导出。苹果字体 · 单文件离线 · 数据仅存本机。',
     href: 'fqjc.html', upd: '2026-10-31',
@@ -1147,6 +1196,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(122,162,255,.45)', tagText: '#93b8ff', tagBg: 'rgba(122,162,255,.12)'
   }
   ,{
+    cat: '生活与影像',
     name: '大乐透选号器 v1.0.4',
     desc: '近 500 期官方一等奖数据选号：冷热配比自由拆分（热/温/冷三档可调）、和值/奇偶/大小/重号/连号五项过滤，单式·复式·胆拖·18~88元六款套餐票，一键生成模拟真实热敏票面并导出高清截图；点「获取最新数据」即联网自动更新（官方接口优先、云端快照兜底）。苹果字体 · 单文件离线。',
     href: 'dlt.html', upd: '2026-10-31',
@@ -1155,6 +1205,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(248,113,113,.45)', tagText: '#fca5a5', tagBg: 'rgba(248,113,113,.12)'
   }
   ,{
+    cat: '生活与影像',
     name: 'HA家庭智能控制系统 v1.0.40',
     desc: '全屋智能中控面板：户型图实时辉光 + 分区设备卡片，灯光/窗帘/空调/传感器点开即弹属性面板与主控；iOS 26 玻璃与 iOS 17 经典双风格、明亮/暗色双外观，WebSocket 实时同步，顶栏常显 HA 本地端在线状态。苹果字体 · 单文件离线 · 首次打开填一次长期令牌；v1.0.42 电脑图标摆正——上一版给机身加了 -2.2° 斜角想做出立体感，结果看着是往左歪，这版去掉斜角、顶边水平；v1.0.41 电脑图标彻底告别锯齿——不再缩放系统位图，改为纯矢量重绘两台显示器（银灰机身渐变 + 暗屏 + 支架底座，两态统一 144×130 外框切换不跳），任何尺寸边缘都平滑；v1.0.40 电脑图标重制——两台电脑改用 SHELL32 256px 原档重建，关机态不再是硬邦邦的深蓝方块，改为跟随原图标轮廓的暗屏（白勾消失、电源灯熄灭），并给女主加了换 MAC 的保底识别；v1.0.39 女主改按家里 WiFi 判断——手机 App 被系统清后台也不影响，只要连上家里网络就算在家；v1.0.38 人物状态不再误报——手机 App 被系统清后台后 tracker 会变 unknown，原来一律写「离线」看着像人不在家，现在单列「未上报」并在悬停里给出最后一次上报时间；v1.0.37 全屋概览两处微调——电视图标缩到 5.6%（原 6.4% 压场子），燃气热水器图标接上 water_heater 主控、点一下弹出运行/温度/浴缸/维护四段状态（开关机、火焰与水流、出水与进水温度、目标温度滑条）；v1.0.36 图标换装——电视改用实拍抠图两态（开态城市夜景、息屏态纯黑面板加深色底边缘冷光），电脑改用系统 SHELL32 里的「此电脑」（开态青光晕 / 关态暗蓝屏、绿灯熄灭），燃气热水器图标放大到 5.0%；v1.0.35 电视状态图标落在客厅电视柜上两态显示，点图标直接打开设备详情；v1.0.33 新增电视遥控卡片：客厅「海信电视」卡 2×2 放电源/主页/返回/静音，点开弹窗是完整 12 键（功能键四行两列 + 3×3 十字方向盘），卡面沿用胶囊 72px 高度、四档卡片风格一致；button 域原在跳过名单里，改由 media_player 反查同名前缀组卡，并加按下后不改写卡面类的早退保护；保留 v1.0.32 的水费「欠费」前缀与人物三态（在家绿 / 离家橙 / 离线灰）、v1.0.31 家庭水费卡五段弹窗。',
     href: 'ha.html', upd: '2026-11-19',
@@ -1163,6 +1214,7 @@ var SECRET_TOOLS = [
     tagColor: 'rgba(129,140,248,.45)', tagText: '#a5b4fc', tagBg: 'rgba(129,140,248,.12)'
   }
   ,{
+    cat: '工程与文档',
     name: '红章抠图工具 v1.0.0',
     desc: '扫描件红章一键抠成透明 PNG：红墨分解 → 黑字分离 → 成膜四步参数可调，外圈被字压断处按角度补弧（保留原章防伪白缝），五角星被压穿的空洞自动实心填充；残缺防伪编码先擦后沿弧重排；平色/纹理双出图，拖拽或 Ctrl+V 粘贴即用，纯本地运算图片不出机。',
     href: 'hzkt.html', upd: '2026-11-19',
@@ -1225,28 +1277,99 @@ function closeSecret(){
   document.getElementById('secretPanel').classList.remove('show');
   document.body.style.overflow = '';
 }
-function renderSecretTools(){
-  var grid = document.getElementById('spGrid');
-  document.getElementById('spCount').textContent = '共 ' + SECRET_TOOLS.length + ' 项';
-  grid.innerHTML = '';
-  SECRET_TOOLS.forEach(function(t){
-    var a = document.createElement('a');
-    a.className = 'sp-card';
-    a.href = t.href;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.style.setProperty('--g1', t.g1);
-    a.style.setProperty('--g2', t.g2);
-    a.style.setProperty('--gs', t.gs);
-    a.style.setProperty('--cb', 'rgba(255,255,255,.14)');
-    a.style.setProperty('--cc', '#9aa7c7');
-    a.style.setProperty('--cbg', 'rgba(255,255,255,.05)');
-    a.innerHTML = '<div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></div>'
-      + '<h4>' + t.name + '</h4><p>' + t.desc + '</p>'
-      + '<div class="sp-bottom"><span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>'
-      + '<div class="meta"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg> 更新于 ' + (t.upd || '—') + '</div></div>';
-    grid.appendChild(a);
+function renderSecretCats(){
+  var box = document.getElementById('spCats');
+  if (!box) return;
+  box.innerHTML = '';
+  var all = document.createElement('div');
+  all.className = 'sp-chip' + (spFilter === '' ? ' on' : '');
+  all.style.setProperty('--c', '#4f8ef7');
+  all.innerHTML = '全部<b>' + SECRET_TOOLS.length + '</b>';
+  all.onclick = function(){ setSpFilter(''); };
+  box.appendChild(all);
+  SECRET_CATS.forEach(function(c){
+    var n = SECRET_TOOLS.filter(function(t){ return t.cat === c.id; }).length;
+    if (!n) return;
+    var el = document.createElement('div');
+    el.className = 'sp-chip' + (spFilter === c.id ? ' on' : '');
+    el.style.setProperty('--c', c.color);
+    el.innerHTML = c.id + '<b>' + n + '</b>';
+    el.onclick = function(){ setSpFilter(c.id); };
+    box.appendChild(el);
   });
+}
+function setSpFilter(cat){
+  spFilter = cat;
+  renderSecretCats();
+  renderSecretTools();
+}
+function buildSecretCard(t){
+  var a = document.createElement('a');
+  a.className = 'sp-card';
+  a.href = t.href;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.style.setProperty('--g1', t.g1);
+  a.style.setProperty('--g2', t.g2);
+  a.style.setProperty('--gs', t.gs);
+  a.style.setProperty('--cb', 'rgba(255,255,255,.14)');
+  a.style.setProperty('--cc', '#9aa7c7');
+  a.style.setProperty('--cbg', 'rgba(255,255,255,.05)');
+  a.innerHTML = '<div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2.5" stroke="#fff" stroke-width="1.9"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg></div>'
+    + '<h4>' + t.name + '</h4><p>' + t.desc + '</p>'
+    + '<div class="sp-bottom"><span class="tag" style="--cb:' + (t.tagColor || 'rgba(56,211,240,.35)') + ';--cc:' + (t.tagText || '#7dd3fc') + ';--cbg:' + (t.tagBg || 'rgba(56,211,240,.1)') + '">' + t.tag + '</span>'
+    + '<div class="meta"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg> 更新于 ' + (t.upd || '—') + '</div></div>';
+  return a;
+}
+function renderSecretTools(){
+  var wrap = document.getElementById('spGrid');
+  renderSecretCats();
+  document.getElementById('spCount').textContent = '共 ' + SECRET_TOOLS.length + ' 项';
+  wrap.innerHTML = '';
+
+  var shown = 0;
+  SECRET_CATS.forEach(function(c){
+    if (spFilter && spFilter !== c.id) return;
+    var items = SECRET_TOOLS.filter(function(t){ return t.cat === c.id; });
+    if (!items.length) return;
+    shown += items.length;
+
+    var grp = document.createElement('div');
+    grp.className = 'sp-group';
+    var title = document.createElement('div');
+    title.className = 'sp-cat-title';
+    title.innerHTML = '<span class="dot" style="background:' + c.color + '"></span>'
+      + '<span class="nm">' + c.id + '</span>'
+      + '<span class="cnt">' + items.length + ' 项</span>';
+    var grid = document.createElement('div');
+    grid.className = 'sp-grid';
+    items.forEach(function(t){ grid.appendChild(buildSecretCard(t)); });
+    grp.appendChild(title);
+    grp.appendChild(grid);
+    wrap.appendChild(grp);
+  });
+
+  // 兜底：没打分类的（以后新加工具忘了写 cat）也能显示出来
+  var rest = SECRET_TOOLS.filter(function(t){
+    return !SECRET_CATS.some(function(c){ return c.id === t.cat; });
+  });
+  if (rest.length && !spFilter){
+    shown += rest.length;
+    var g2 = document.createElement('div');
+    g2.className = 'sp-group';
+    var t2 = document.createElement('div');
+    t2.className = 'sp-cat-title';
+    t2.innerHTML = '<span class="dot" style="background:#94a3b8"></span>'
+      + '<span class="nm">其他</span><span class="cnt">' + rest.length + ' 项</span>';
+    var gd2 = document.createElement('div');
+    gd2.className = 'sp-grid';
+    rest.forEach(function(t){ gd2.appendChild(buildSecretCard(t)); });
+    g2.appendChild(t2); g2.appendChild(gd2); wrap.appendChild(g2);
+  }
+
+  if (!shown){
+    wrap.innerHTML = '<div class="sp-empty">该分类下暂无工具。</div>';
+  }
 }
 document.getElementById('pwdMask').addEventListener('click', function(e){
   if (e.target === this) closePwd();
@@ -1548,7 +1671,6 @@ function filterTools(q){
 
 // ===== ⑦ 公告栏 + 更新日志 =====
 var NEWS_LOG = [
-  {d:'2026-11-19', t:'升级：工程组价价构引擎 RateStruct 全系列（建设 V1.0.15／公路・水利・水运・农田・土地整治 V1.0.5／电力・通信 V1.0.4）—— 输出条款措辞统一：把「及相关配套文件<b>重新组价</b>」改为「及相关配套文件<b>进行组价</b>」，预算类／结算类两条末句、以及只勾定额不勾清单时的降级句一并同步；语义不变，读起来更像编制说明的常规写法'},
   {d:'2026-11-09', t:'新增：钢筋平法3D识图RebarViz'},
   {d:'2026-11-09', t:'新增：审核对比表格公式快写工具 EquiDraft'},
   {d:'2026-11-07', t:'新增：电杆杆上设备材料单价计算器'},
