@@ -1492,6 +1492,46 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
   .stat .si{width:28px;height:28px}
 }
 </style>
+
+<style>
+/* ===== 灯具开启呼吸（E 双层 + 光环，周期 2.0s；光一律收在圆盘内） ===== */
+:root{--brDur:2s}
+
+/* 圆盘裁切：所有光都被裁在盘内，绝不外溢 */
+.planel.lampon{border-radius:50%;overflow:hidden}
+/* 餐厅吊灯是竖长矩形盘，不参与圆形裁切 */
+.planel.lampon.lamprect{border-radius:9px;overflow:hidden}
+
+/* 第一层：整盘暖光呼吸 */
+.planel.lampon::after{
+  content:"";position:absolute;inset:2%;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle closest-side,rgba(255,216,146,.46) 0%,rgba(255,204,118,.56) 66%,rgba(255,192,88,.50) 100%);
+  animation:brGlow var(--brDur) ease-in-out infinite;
+}
+/* 第二层：扩散光环，从盘心推向盘边后消失 */
+.planel.lampon::before{
+  content:"";position:absolute;inset:4%;border-radius:50%;pointer-events:none;z-index:0;
+  border:2.5px solid rgba(255,208,120,.95);
+  animation:brRing var(--brDur) cubic-bezier(.2,.66,.36,1) infinite;
+}
+.planel.lampon.lamprect::after{inset:2.5% 22%;border-radius:9px}
+.planel.lampon.lamprect::before{inset:5% 23%;border-radius:8px}
+/* 第三层：灯体本身微亮 */
+.planel.lampon>img{position:relative;z-index:1;animation:brLamp var(--brDur) ease-in-out infinite}
+
+@keyframes brGlow{0%,100%{opacity:.04}50%{opacity:.88}}
+@keyframes brRing{0%{opacity:1;transform:scale(.3)}80%{opacity:.55;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+@keyframes brLamp{0%,100%{filter:brightness(1)}50%{filter:brightness(1.10)}}
+
+/* 关态与未点亮的灯一律不动 */
+.planel:not(.lampon)::after,.planel:not(.lampon)::before{content:none}
+
+/* 系统"减少动态效果"时关闭呼吸 */
+@media (prefers-reduced-motion: reduce){
+  .planel.lampon::after,.planel.lampon::before,.planel.lampon>img{animation:none}
+  .planel.lampon::before{content:none}
+}
+</style>
 </head>
 <body>
 
@@ -1502,7 +1542,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.62</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.63</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1683,7 +1723,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.62
+   HA家庭智能控制系统 · V1.0.63
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -3429,11 +3469,13 @@ function planThumbHTML(){
     if(!src) src = e.im || "";
     if(!src) continue;
     const lit = e.sh && e.si ? (e.si[e.sh] === src) : false;
+    const lampOn = !!(e.si && e.si.on && v === "on" && /灯/.test(e.n || ""));
+    const lampRect = /平板灯竖/.test(src);
     const hasEnt = !!(e.e && S.states.get(e.e));
     const dom = (e.e || "").split(".")[0];
     const canToggle = hasEnt && e.tap && CTL_DOMAIN.has(dom);
     const tip = planTipOf(e);
-    icons += '<div class="planel' + (canToggle ? ' tap' : '') + (lit ? " dksh" : "") + '"' +
+    icons += '<div class="planel' + (canToggle ? ' tap' : '') + (lit ? " dksh" : "") + (lampOn ? " lampon" : "") + (lampRect ? " lamprect" : "") + '"' +
       (canToggle ? ' data-svc="' + esc(dom) + "|" + toggleSvc(dom) + '"' : '') +
       (hasEnt ? ' data-eid="' + esc(e.e) + '"' : '') +
       (tip ? ' data-tip="' + esc(tip) + '"' : '') +
@@ -3457,13 +3499,15 @@ function planBigHTML(){
     if(!src) src = e.im || "";
     if(!src) continue;
     const lit = e.sh && e.si ? (e.si[e.sh] === src) : false;
+    const lampOn = !!(e.si && e.si.on && v === "on" && /灯/.test(e.n || ""));
+    const lampRect = /平板灯竖/.test(src);
     const hasEnt = !!(e.e && S.states.get(e.e));
     const dom = (e.e || "").split(".")[0];
     /* 全屋概览本就是看状态的入口：只读模式下也允许点图标临时开关，不再被 S.ctl 一刀切掉，
        真正的权限校验在 callService 里按「是否来自大屏」单独放行 */
     const canToggle = hasEnt && e.tap && CTL_DOMAIN.has(dom);
     const tip = planTipOf(e);
-    icons += '<div class="planel' + (canToggle ? ' tap' : '') + (lit ? ' dksh' : '') + '"' +
+    icons += '<div class="planel' + (canToggle ? ' tap' : '') + (lit ? ' dksh' : '') + (lampOn ? ' lampon' : '') + (lampRect ? ' lamprect' : '') + '"' +
       (canToggle ? ' data-svc="' + esc(dom) + "|" + toggleSvc(dom) + '"' : '') +
       (hasEnt ? ' data-eid="' + esc(e.e) + '"' : '') +
       (tip ? ' data-tip="' + esc(tip) + '"' : '') +
@@ -4752,7 +4796,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.62 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.63 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
