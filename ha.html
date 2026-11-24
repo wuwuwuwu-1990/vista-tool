@@ -1496,30 +1496,47 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
    只展示、不拦截点击（pointer-events:none），所以没有事件监听。
    动效只碰 width / transform，不用 backdrop-filter、不碰 box-shadow 动画：
    这两个是唯一会持续吃掉合成器预算的属性。 */
+/* ══════════ V1.0.70：跟外观走，明亮下是白瓷胶囊，不再固定实色黑 ══════════
+   白底 + inset 内描边 + 极淡投影，跟卡片的同族白对得上；
+   暗色外观单独覆盖回 #16181d。描边只用 box-shadow —— border 会吃掉
+   2px 内容高度，而轨道每项正好 34px，底边会被裁掉。 */
 #island{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  height:34px;width:38px;border-radius:17px;background:#16181d;color:#fff;
+  height:34px;width:38px;border-radius:17px;
+  background:rgba(255,255,255,.94);color:var(--text);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.07);
   overflow:hidden;pointer-events:none;z-index:3;
   display:flex;align-items:center;justify-content:center;box-sizing:border-box;
   transition:width .30s cubic-bezier(.32,.72,0,1),border-radius .30s,background-color .25s;
 }
+html[data-mode="dark"] #island{
+  background:#16181d;color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.09), 0 4px 14px rgba(0,0,0,.45);
+}
 #island[data-s="run"]{width:232px;justify-content:flex-start}
-#island[data-k="alarm"]{background:#7a1f1f;border-radius:11px}
-#island .idot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex:none}
-#island[data-k="alarm"] .idot{background:#ff9b90}
+#island[data-k="alarm"]{background:#c0271d;color:#fff;border-radius:11px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), 0 3px 12px rgba(192,39,29,.30)}
+html[data-mode="dark"] #island[data-k="alarm"]{background:#7a1f1f;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10), 0 4px 14px rgba(0,0,0,.45)}
+#island .idot{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}
+html[data-mode="dark"] #island .idot{background:#4ade80}
+#island[data-k="alarm"] .idot{background:rgba(255,255,255,.92)}
 #island .itrack{display:flex;flex-direction:column;align-self:flex-start;
   will-change:transform;transition:transform .42s cubic-bezier(.4,0,.2,1)}
 #island .iitem{height:34px;width:232px;flex:none;box-sizing:border-box;
   display:flex;align-items:center;gap:8px;padding:0 13px}
-#island .iitem i{width:6px;height:6px;border-radius:50%;background:#4ade80;flex:none}
-#island[data-k="alarm"] .iitem i{background:#ff9b90}
-#island .iit{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#island .iis{font-size:11px;color:#9ca3af;white-space:nowrap;flex:none;margin-left:auto}
-#island[data-k="alarm"] .iis{color:#ffcec8}
-/* 环境底稿：不想让人误以为是事件，点变小灰、主文字压到 78% 明度 */
-#island[data-k="base"] .iitem i{background:#5b6472}
-#island[data-k="base"] .iit{color:#c8cdd6}
-#island[data-k="base"] .iis{color:#8b94a3}
+#island .iitem i{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}
+html[data-mode="dark"] #island .iitem i{background:#4ade80}
+#island[data-k="alarm"] .iitem i{background:rgba(255,255,255,.92)}
+#island .iit{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit}
+#island .iis{font-size:11px;color:var(--text2);white-space:nowrap;flex:none;margin-left:auto}
+html[data-mode="dark"] #island .iis{color:#9ca3af}
+#island[data-k="alarm"] .iis{color:rgba(255,255,255,.88)}
+/* 环境底稿：整条轨道压到 78% 明度 + 小灰点 —— 一眼跟真事件分开，
+   两套外观共用一条规则，不必各写一份颜色 */
+#island[data-k="base"] .itrack{opacity:.86}
+#island[data-k="base"] .iitem i{background:#9aa1ac}
+html[data-mode="dark"] #island[data-k="base"] .iitem i{background:#5b6472}
 @media (max-width:1180px){ #island{display:none} }
 @media (prefers-reduced-motion: reduce){ #island,#island .itrack{transition:none} }
 
@@ -1629,7 +1646,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.69</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.70</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1811,7 +1828,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.69
+   HA家庭智能控制系统 · V1.0.70
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -5425,7 +5442,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.69 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.70 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
