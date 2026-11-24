@@ -244,7 +244,7 @@ header{
   position:sticky;top:0;z-index:50;margin:-22px -30px 18px;padding:14px 30px;
   border-bottom:1px solid transparent;
 }
-.hrow{display:flex;align-items:center;gap:14px;margin:0 auto;flex-wrap:wrap}
+.hrow{display:flex;align-items:center;gap:14px;margin:0 auto;flex-wrap:wrap;position:relative}
 .logo{
   width:40px;height:40px;border-radius:12px;flex:0 0 auto;
   background:linear-gradient(145deg,#0a84ff,#5e5ce6 55%,#bf5af2);
@@ -1491,6 +1491,34 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
   .stat{padding:8px;gap:6px}
   .stat .si{width:28px;height:28px}
 }
+
+/* ══════════════════ V1.0.68：顶栏灵动岛 ══════════════════
+   只展示、不拦截点击（pointer-events:none），所以没有事件监听。
+   动效只碰 width / transform，不用 backdrop-filter、不碰 box-shadow 动画：
+   这两个是唯一会持续吃掉合成器预算的属性。 */
+#island{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  height:34px;width:38px;border-radius:17px;background:#16181d;color:#fff;
+  overflow:hidden;pointer-events:none;z-index:3;
+  display:flex;align-items:center;justify-content:center;box-sizing:border-box;
+  transition:width .30s cubic-bezier(.32,.72,0,1),border-radius .30s,background-color .25s;
+}
+#island[data-s="run"]{width:232px;justify-content:flex-start}
+#island[data-k="alarm"]{background:#7a1f1f;border-radius:11px}
+#island .idot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex:none}
+#island[data-k="alarm"] .idot{background:#ff9b90}
+#island .itrack{display:flex;flex-direction:column;align-self:flex-start;
+  will-change:transform;transition:transform .42s cubic-bezier(.4,0,.2,1)}
+#island .iitem{height:34px;width:232px;flex:none;box-sizing:border-box;
+  display:flex;align-items:center;gap:8px;padding:0 13px}
+#island .iitem i{width:6px;height:6px;border-radius:50%;background:#4ade80;flex:none}
+#island[data-k="alarm"] .iitem i{background:#ff9b90}
+#island .iit{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#island .iis{font-size:11px;color:#9ca3af;white-space:nowrap;flex:none;margin-left:auto}
+#island[data-k="alarm"] .iis{color:#ffcec8}
+@media (max-width:1180px){ #island{display:none} }
+@media (prefers-reduced-motion: reduce){ #island,#island .itrack{transition:none} }
+
 </style>
 
 <style>
@@ -1597,7 +1625,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.67</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.68</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1607,6 +1635,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
         </div>
       </div>
       <div class="spacer"></div>
+      <div id="island" data-s="mini" data-k="none" aria-hidden="true"><i class="idot"></i></div>
       <div class="tools">
         <div class="search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:15px;height:15px;color:var(--text3)">
@@ -1778,7 +1807,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.67
+   HA家庭智能控制系统 · V1.0.68
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -2318,6 +2347,7 @@ async function boot(){
     loadForecast();
     renderAll();
     if(S.detailEid) renderDetail();
+    isleRender();
   }catch(e){
     setConn("on","读取失败","err","读取失败");
     console.error(e);
@@ -2349,12 +2379,150 @@ function onState(d){
     last_updated: d.new_state.last_updated
   }));
   patchCard(d.entity_id);
+  isleTouch(d.entity_id, old.state);
   scheduleStats();
   if(d.entity_id === WEATHER_EID || d.entity_id.startsWith("person.") || d.entity_id.startsWith("device_tracker.") || PLAN_EIDS.has(d.entity_id)) scheduleLeft();
   if(S.detailEid === d.entity_id){
     const ae = document.activeElement;
     if(!(ae && ae.tagName === "INPUT" && ae.type === "range")) renderDetail();
   }
+}
+
+
+/* ══════════════════ V1.0.68：顶栏灵动岛（滚动播放） ══════════════════
+   内容只有两类：安全告警、家务进程。告警一旦出现就独占轮播并转红底，
+   告警清空后自动回到黑底的进程轮播；两类都为空时收成 38px 小点兼作在线指示。
+   同一时刻只占一个槽位，多个条目按 4.2 秒一轮向上滚动，首项克隆到末尾实现无缝回卷。 */
+const ISLE = { n: 0, idx: 0, sig: "", timer: null, brief: [] };
+const ISLE_DWELL = 4200;
+const ISLE_RUN = /^(washing|rinse|rinsing|spin|spinning|drying|dry)$/;
+
+function isleSt(id){ const x = S.states.get(id); return x ? String(x.state) : ""; }
+function isleAt(id){ const x = S.states.get(id); return (x && x.attributes) || {}; }
+
+/* 一次性事件（洗衣刚结束这类），存活 90 秒后自动退场 */
+function isleBrief(key, t, sub){
+  const now = Date.now();
+  ISLE.brief = ISLE.brief.filter(function(b){ return b.until > now && b.key !== key; });
+  ISLE.brief.unshift({ k: key, alarm: 0, t: t, s: sub, until: now + 90000 });
+}
+
+function isleItems(){
+  const out = [];
+
+  /* —— 安全告警：不自动消失，必须人来处理 —— */
+  if(isleSt("binary_sensor.lumi_bmcn01_7ed4_submersion_sensor_2") === "on") out.push({ k:"water", alarm:1, t:"水浸 · 厨房", s:"立即处理" });
+  if(isleSt("binary_sensor.lumi_mcn02_dc44_smoke_status_2") === "on")      out.push({ k:"smoke", alarm:1, t:"烟感 · 厨房", s:"立即处理" });
+  [["bar_door_overtime","吧台门"],["flex_zone_door_overtime","变温区"],
+   ["freezer_door_overtime","冷冻室"],["refrigerator_door_overtime","冷藏室"]].forEach(function(d){
+    if(isleSt("binary_sensor.210006732398414_" + d[0]) === "on")
+      out.push({ k:"door_" + d[0], alarm:1, t:"冰箱门未关", s:d[1] });
+  });
+  if(isleSt("binary_sensor.youyang_warning") === "on") out.push({ k:"warn", alarm:1, t:"天气预警", s:"注意防范" });
+  if(S.states.has("binary_sensor.ruijie_router_wan_status") && isleSt("binary_sensor.ruijie_router_wan_status") === "off")
+    out.push({ k:"wan", alarm:1, t:"外网已断开", s:"检查线路" });
+
+  /* —— 刚发生的事：排在进程之前，够醒目但不占红底 —— */
+  const now = Date.now();
+  ISLE.brief.forEach(function(b){ if(b.until > now) out.push(b); });
+
+  /* —— 家务进程：有始有终，进行中常显 —— */
+  const wst = isleSt("sensor.208907220895682_status");
+  const WT = { washing:"洗涤中", rinse:"漂洗中", rinsing:"漂洗中",
+               spin:"脱水中", spinning:"脱水中", drying:"烘干中", dry:"烘干中" };
+  if(WT[wst]){
+    const n = parseInt(isleSt("sensor.208907220895682_time_remaining"), 10);
+    out.push({ k:"wash", alarm:0, t:WT[wst], s:(isFinite(n) && n > 0) ? ("剩 " + n + " 分") : "运行中" });
+  }
+
+  const vs = isleSt("vacuum.xiaomi_d110ch_f906_robot_cleaner_2");
+  const VT = { cleaning:"扫地中", returning:"回充中", paused:"已暂停", error:"清扫故障" };
+  if(VT[vs]){
+    const bt = parseInt(isleAt("vacuum.xiaomi_d110ch_f906_robot_cleaner_2").battery_level, 10);
+    out.push({ k:"vac", alarm:0, t:VT[vs],
+               s:(vs === "cleaning" && isFinite(bt)) ? ("电量 " + bt + "%") : "" });
+  }
+
+  const cs = isleSt("cover.ktkj_kcwv01_d4e3_window_opener_2");
+  if(cs === "closing" || cs === "opening")
+    out.push({ k:"win", alarm:0, t:"偏卧窗户", s:(cs === "closing" ? "关闭中" : "打开中") });
+
+  return out;
+}
+
+function isleRender(){
+  const box = document.getElementById("island");
+  if(!box) return;
+
+  const all = isleItems();
+  const alarms = all.filter(function(x){ return x.alarm; });
+  const list = alarms.length ? alarms : all;
+
+  if(!list.length){
+    if(ISLE.timer){ clearInterval(ISLE.timer); ISLE.timer = null; }
+    if(ISLE.sig === "") return;                 /* 已经是小点了，别再重写 DOM */
+    ISLE.sig = ""; ISLE.n = 0; ISLE.idx = 0;
+    box.dataset.k = "none";
+    box.dataset.s = "mini";
+    box.innerHTML = '<i class="idot"></i>';
+    return;
+  }
+
+  const sig = (alarms.length ? "A|" : "N|") +
+    list.map(function(x){ return x.k; }).join(",") + "#" +
+    list.map(function(x){ return x.t + "/" + x.s; }).join(",");
+
+  if(sig !== ISLE.sig){
+    ISLE.sig = sig;
+    ISLE.idx = 0;
+    ISLE.n = list.length;
+    const rows = list.map(function(x){
+      return '<div class="iitem"><i></i><span class="iit">' + esc(x.t) + '</span>' +
+             (x.s ? '<span class="iis">' + esc(x.s) + '</span>' : '') + '</div>';
+    });
+    if(list.length > 1) rows.push(rows[0]);     /* 克隆首项：滚到末尾后无感回卷，不倒放 */
+    box.dataset.k = alarms.length ? "alarm" : "run";
+    box.dataset.s = "run";
+    box.innerHTML = '<div class="itrack">' + rows.join("") + '</div>';
+  }
+
+  if(list.length > 1){
+    if(!ISLE.timer) ISLE.timer = setInterval(isleStep, ISLE_DWELL);
+  }else if(ISLE.timer){
+    clearInterval(ISLE.timer); ISLE.timer = null;
+  }
+}
+
+function isleStep(){
+  const tr = document.querySelector("#island .itrack");
+  if(!tr || ISLE.n < 2) return;
+  ISLE.idx++;
+  tr.style.transform = "translateY(" + (-34 * ISLE.idx) + "px)";
+  if(ISLE.idx >= ISLE.n){
+    setTimeout(function(){
+      if(!tr.isConnected) return;
+      tr.style.transition = "none";
+      tr.style.transform = "translateY(0)";
+      ISLE.idx = 0;
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ tr.style.transition = ""; }); });
+    }, 470);
+  }
+}
+
+/* 只在相关实体变化时才重算，不为其它 680 多个实体白跑一遍 */
+function isleTouch(eid, prev){
+  if(eid === "sensor.208907220895682_status"){
+    const now = isleSt(eid);
+    if(ISLE_RUN.test(String(prev || "")) && !ISLE_RUN.test(now)){ isleBrief("wash_done", "洗好了", "记得晾"); return isleRender(); }
+  }
+  if(eid.indexOf("sensor.208907220895682") !== 0 &&
+     eid.indexOf("vacuum.") !== 0 &&
+     eid.indexOf("cover.ktkj_kcwv01_d4e3") !== 0 &&
+     eid.indexOf("binary_sensor.lumi_") !== 0 &&
+     eid.indexOf("binary_sensor.210006732398414_") !== 0 &&
+     eid !== "binary_sensor.youyang_warning" &&
+     eid !== "binary_sensor.ruijie_router_wan_status") return;
+  isleRender();
 }
 
 /* ══════════════ 控制 ══════════════ */
@@ -5184,7 +5352,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.67 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.68 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
