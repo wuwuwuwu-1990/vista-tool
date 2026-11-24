@@ -1646,7 +1646,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.70</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.71</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1828,7 +1828,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.70
+   HA家庭智能控制系统 · V1.0.71
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -3632,12 +3632,31 @@ function fmtClock(iso){
   const p2 = n=> String(n).padStart(2, "0");
   return (d.getMonth()+1) + "-" + p2(d.getDate()) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes());
 }
-function amapUrl(lat, lon, key){
+/* V1.0.71：地图只画一个锚点 ——
+   在家画「家」（绿 A），室内 GPS 漂 100 多米，画上去只会让人以为定位错了；
+   离家画「我」（红 B），家在哪用文字给方位和距离。
+   （实测高德静态图在缩放 <15 时会静默丢掉非中心的 markers，所以不做双标记） */
+function amapPin(lat, lon, color, label){
   const g = wgsGcj(lat, lon);
-  const ll = g[1].toFixed(6) + "," + g[0].toFixed(6);
+  return "large," + color + "," + label + ":" + g[1].toFixed(6) + "," + g[0].toFixed(6);
+}
+function amapUrl(lat, lon, key, home, tri){
+  const atHome = tri === "home";
+  const c = atHome ? wgsGcj(home[0], home[1]) : wgsGcj(lat, lon);
+  const ll = c[1].toFixed(6) + "," + c[0].toFixed(6);
+  const mk = atHome ? amapPin(home[0], home[1], "0x2E7D32", "A")
+                    : amapPin(lat, lon, "0xFF3B30", "B");
   return "https://restapi.amap.com/v3/staticmap?location=" + ll +
-         "&zoom=16&size=400*225&scale=2&markers=large,0xFF3B30,A:" + ll +
+         "&zoom=16&size=400*225&scale=2&markers=" + mk +
          "&key=" + encodeURIComponent(key);
+}
+/* 家在人所在位置的哪个方向（给「离家」时用文字补足，地图上只有一个点） */
+function bearingTxt(home, lat, lon){
+  const dLat = home[0] - lat;
+  const dLon = (home[1] - lon) * Math.cos(lat * Math.PI / 180);
+  const deg = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
+  const CN = ["北","东北","东","东南","南","西南","西","西北"];
+  return CN[Math.round(deg / 45) % 8];
 }
 function locHtml(eid){
   const p = (PERSON_LIST.find(x=> x.eid === eid)) || { eid: eid, name: "成员" };
@@ -3663,17 +3682,23 @@ function locHtml(eid){
     mapInner = '<div class="msg"><b>需要高德「Web服务」Key</b><br>去高德开放平台创建 Key（类型选 Web服务），<br>粘贴到下框保存即可显示地图。</div>';
   }else{
     hasMap = true;
-    mapInner = '<img id="locImg" alt="定位地图" src="' + amapUrl(d.lat, d.lon, key) + '">' +
-               '<i class="pin"></i>';
+    mapInner = '<img id="locImg" alt="定位地图" src="' +
+               amapUrl(d.lat, d.lon, key, H, tri) + '">';
   }
 
   let foot = "";
   if(d){
     const km = distKm(H[0], H[1], d.lat, d.lon);
+    const atHome = tri === "home";
+    const distTxt = km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(2) + " km";
     foot = '<div class="locft">' +
-      '<span>距家 <b>' + (km < 1 ? Math.round(km*1000) + " m" : km.toFixed(2) + " km") + '</b></span>' +
+      '<span>距家 <b>' + (atHome ? "在家" : distTxt) + '</b></span>' +
       '<span>精度 <b>' + (d.acc == null ? "—" : Math.round(d.acc) + " m") + '</b></span>' +
       '<span>上报 <b>' + fmtClock(d.upd) + '</b></span>' +
+      '<span class="sp"></span>' +
+      (atHome
+        ? '<span>在家按家的位置显示，手机本次偏差 <b>' + Math.round(km*1000) + ' m</b> 未采用</span>'
+        : '<span>家在其<b>' + bearingTxt(H, d.lat, d.lon) + ' ' + distTxt + '</b></span>') +
       '<span class="sp"></span>' +
       '<span>' + d.lat.toFixed(5) + ", " + d.lon.toFixed(5) + '</span>' +
     '</div>';
@@ -5442,7 +5467,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.70 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.71 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
