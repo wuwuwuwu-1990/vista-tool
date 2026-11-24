@@ -1536,11 +1536,12 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <style>
 /* ===== 云台球机水平旋转（M1 缓速巡航 ±52° / 6s；关闭态静止） =====
    镜头层与底图同为 200x200 画布，transform-origin 取镜头中心（68.54%），
-   translateX + scaleX 模拟球面投影：转侧时镜头滑向侧面并被压扁。 */
+   translateX + scaleX 模拟球面投影：转侧时镜头滑向侧面并被压扁；
+   不加 translateY —— 球机只左右转，镜头不上下浮动。 */
 .planel.camrot>img.camLens{position:absolute;left:0;top:0;width:100%;height:auto;
   transform-origin:50% 68.54%;will-change:transform}
 .planel.camrot.camspin>img.camLens{animation:camPan 6s linear infinite}
-@keyframes camPan{0.00%{transform:translateX(0.000%) translateY(0.000%) scaleX(1.000)}4.17%{transform:translateX(2.520%) translateY(0.038%) scaleX(0.973)}8.33%{transform:translateX(4.746%) translateY(0.141%) scaleX(0.899)}12.50%{transform:translateX(6.480%) translateY(0.277%) scaleX(0.801)}16.67%{transform:translateX(7.659%) translateY(0.409%) scaleX(0.707)}20.83%{transform:translateX(8.320%) translateY(0.502%) scaleX(0.640)}25.00%{transform:translateX(8.531%) translateY(0.536%) scaleX(0.616)}29.17%{transform:translateX(8.320%) translateY(0.502%) scaleX(0.640)}33.33%{transform:translateX(7.659%) translateY(0.409%) scaleX(0.707)}37.50%{transform:translateX(6.480%) translateY(0.277%) scaleX(0.801)}41.67%{transform:translateX(4.746%) translateY(0.141%) scaleX(0.899)}45.83%{transform:translateX(2.520%) translateY(0.038%) scaleX(0.973)}50.00%{transform:translateX(0.000%) translateY(0.000%) scaleX(1.000)}54.17%{transform:translateX(-2.520%) translateY(0.038%) scaleX(0.973)}58.33%{transform:translateX(-4.746%) translateY(0.141%) scaleX(0.899)}62.50%{transform:translateX(-6.480%) translateY(0.277%) scaleX(0.801)}66.67%{transform:translateX(-7.659%) translateY(0.409%) scaleX(0.707)}70.83%{transform:translateX(-8.320%) translateY(0.502%) scaleX(0.640)}75.00%{transform:translateX(-8.531%) translateY(0.536%) scaleX(0.616)}79.17%{transform:translateX(-8.320%) translateY(0.502%) scaleX(0.640)}83.33%{transform:translateX(-7.659%) translateY(0.409%) scaleX(0.707)}87.50%{transform:translateX(-6.480%) translateY(0.277%) scaleX(0.801)}91.67%{transform:translateX(-4.746%) translateY(0.141%) scaleX(0.899)}95.83%{transform:translateX(-2.520%) translateY(0.038%) scaleX(0.973)}100.00%{transform:translateX(-0.000%) translateY(0.000%) scaleX(1.000)}}
+@keyframes camPan{0.00%{transform:translateX(0.000%) scaleX(1.000)}4.17%{transform:translateX(2.520%) scaleX(0.973)}8.33%{transform:translateX(4.746%) scaleX(0.899)}12.50%{transform:translateX(6.480%) scaleX(0.801)}16.67%{transform:translateX(7.659%) scaleX(0.707)}20.83%{transform:translateX(8.320%) scaleX(0.640)}25.00%{transform:translateX(8.531%) scaleX(0.616)}29.17%{transform:translateX(8.320%) scaleX(0.640)}33.33%{transform:translateX(7.659%) scaleX(0.707)}37.50%{transform:translateX(6.480%) scaleX(0.801)}41.67%{transform:translateX(4.746%) scaleX(0.899)}45.83%{transform:translateX(2.520%) scaleX(0.973)}50.00%{transform:translateX(0.000%) scaleX(1.000)}54.17%{transform:translateX(-2.520%) scaleX(0.973)}58.33%{transform:translateX(-4.746%) scaleX(0.899)}62.50%{transform:translateX(-6.480%) scaleX(0.801)}66.67%{transform:translateX(-7.659%) scaleX(0.707)}70.83%{transform:translateX(-8.320%) scaleX(0.640)}75.00%{transform:translateX(-8.531%) scaleX(0.616)}79.17%{transform:translateX(-8.320%) scaleX(0.640)}83.33%{transform:translateX(-7.659%) scaleX(0.707)}87.50%{transform:translateX(-6.480%) scaleX(0.801)}91.67%{transform:translateX(-4.746%) scaleX(0.899)}95.83%{transform:translateX(-2.520%) scaleX(0.973)}100.00%{transform:translateX(-0.000%) scaleX(1.000)}}
 
 @media (prefers-reduced-motion: reduce){
   .planel.camrot>img.camLens{animation:none}
@@ -1556,7 +1557,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.64</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.65</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1737,7 +1738,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.64
+   HA家庭智能控制系统 · V1.0.65
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -4825,7 +4826,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.64 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.65 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
