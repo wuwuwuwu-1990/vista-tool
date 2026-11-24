@@ -1546,6 +1546,46 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 @media (prefers-reduced-motion: reduce){
   .planel.camrot>img.camLens{animation:none}
 }
+
+/* ══ V1.0.66 定位地图弹层 ══ */
+#maskLoc .panel{padding:0;width:min(94vw,392px);max-width:none;overflow:hidden;border-radius:24px}
+.loc{display:flex;flex-direction:column;width:100%}
+.lochd{display:flex;align-items:center;gap:10px;padding:14px 14px 10px}
+.lochd .lava{width:34px;height:34px;border-radius:50%;flex:0 0 auto;background-color:rgba(120,120,128,.22);
+  background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--text2)}
+.lochd .lt{flex:1;min-width:0}
+.lochd .lt b{display:block;font-size:14px;line-height:1.2;font-weight:600}
+.lochd .lt span{display:block;font-size:11px;color:var(--text2);margin-top:3px}
+.locx{width:26px;height:26px;border-radius:50%;border:0;flex:0 0 auto;cursor:pointer;
+  background:rgba(120,120,128,.16);color:var(--text2);font-size:16px;line-height:1;padding:0}
+.locx:active{transform:scale(.94)}
+.locmap{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;
+  background:rgba(120,120,128,.12);display:flex;align-items:center;justify-content:center}
+.locmap img{width:100%;height:100%;object-fit:cover;display:block}
+.locmap .pin{position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-15px 0 0 -6.5px;
+  border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#e8484a;
+  box-shadow:0 2px 6px rgba(0,0,0,.32),0 0 0 3px rgba(255,255,255,.88)}
+.locmap .msg{padding:0 22px;text-align:center;font-size:12px;line-height:1.65;color:var(--text2)}
+.locmap .msg b{display:block;color:var(--text);font-weight:600;margin-bottom:3px;font-size:12.5px}
+/* 没图时收起高度，别留一大片空白 */
+.locmap.compact{aspect-ratio:auto;height:124px}
+/* 深色主题：玻璃面板在深底上会泛灰，白字压不住，这里给个实底 */
+html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image:none;
+  border-color:rgba(255,255,255,.1);box-shadow:0 22px 64px rgba(0,0,0,.62)}
+.locargs{display:flex;flex-direction:column;gap:5px;padding:10px 14px 0}
+.locargs input{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;font-size:12px;
+  border:1px solid rgba(120,120,128,.3);background:rgba(120,120,128,.1);color:var(--text);outline:none}
+.locargs input:focus{border-color:#2f6df0}
+.locargs .hint{font-size:10.5px;line-height:1.5;color:var(--text2)}
+.locft{display:flex;flex-wrap:wrap;gap:3px 10px;padding:10px 14px 0;font-size:11px;color:var(--text2)}
+.locft b{color:var(--text);font-weight:600}
+.locft .sp{width:100%;height:0}
+.locbt{display:flex;gap:8px;padding:10px 14px 14px}
+.locbt button{flex:1;padding:9px 0;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid rgba(120,120,128,.28);background:rgba(120,120,128,.1);color:var(--text);transition:.15s}
+.locbt button:active{transform:scale(.98)}
+.locbt button.pri{background:#2f6df0;border-color:transparent;color:#fff}
 </style>
 </head>
 <body>
@@ -1557,7 +1597,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.65</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.66</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1738,7 +1778,7 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.65
+   HA家庭智能控制系统 · V1.0.66
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -3049,6 +3089,52 @@ function buildModel(){
    关联的 tracker 取 person 实体的 device_trackers 属性，不写死设备名。
    原 P_STATE 四键映射（home/not_home/unavailable/unknown）随本版废弃：
    它把「不可用」和「未知」都显示成字面词，玩家看不懂，也分不出真假。 */
+/* ══════════════ V1.0.66：命名区域（办公室 / 公司 …） ══════════════
+   tracker 进入命名 zone 后，HA 会实时给出 attributes.in_zones，
+   但 state 要等下一次上报才重算（所以 in_zones 已经是 zone.ban_gong_shi
+   时 state 仍可能停在 not_home）。这里统一读 in_zones，比读 state 快一步。 */
+function zoneLabel(zid){
+  const z = S.states.get(zid);
+  const nm = (z && z.attributes && z.attributes.friendly_name) || "";
+  return nm || String(zid).replace(/^zone\./, "");
+}
+function personArea(eid){
+  const st = S.states.get(eid);
+  if(!st) return "";
+  const list = [];
+  list.push(eid);
+  const a = st.attributes || {};
+  const trks = Array.isArray(a.device_trackers) ? a.device_trackers : [];
+  /* 有 in_zones 属性的排前面（HassTools 这类 GPS 源才带它） */
+  trks.slice().sort((x, y)=>{
+    const sx = S.states.get(x), sy = S.states.get(y);
+    const nx = sx && Array.isArray(sx.attributes && sx.attributes.in_zones) ? 1 : 0;
+    const ny = sy && Array.isArray(sy.attributes && sy.attributes.in_zones) ? 1 : 0;
+    return ny - nx;
+  }).forEach(t=> list.push(t));
+  for(let i = 0; i < list.length; i++){
+    const s2 = S.states.get(list[i]);
+    if(!s2) continue;
+    const zs = s2.attributes && s2.attributes.in_zones;
+    if(Array.isArray(zs)){
+      for(let k = 0; k < zs.length; k++){
+        if(zs[k] === "zone.home") continue;
+        const nm = zoneLabel(zs[k]);
+        if(nm) return nm;
+      }
+    }
+    /* 老式 tracker 进 zone 会把 state 直接写成区域名 */
+    const v = String(s2.state || "");
+    if(v && v !== "home" && v !== "not_home" && v !== "unknown" && v !== "unavailable"){
+      for(const [zid, zv] of S.states){
+        if(zid.indexOf("zone.") !== 0) continue;
+        const nm = (zv.attributes && zv.attributes.friendly_name) || "";
+        if(nm === v) return nm;
+      }
+    }
+  }
+  return "";
+}
 const P_ONLINE_MIN = 12;
 function personTri(eid){
   const st = S.states.get(eid);
@@ -3058,9 +3144,14 @@ function personTri(eid){
   const trks = Array.isArray(a.device_trackers) ? a.device_trackers : [];
   if(trks.some(t=>{ const s = S.states.get(t); return s && s.state === "home"; })) return "home";
   const now = Date.now();
+  /* V1.0.66：明确报 not_home 的追踪器不再被 last_time_reachable「翻案」。
+     路由器源在手机休眠时会先写 not_home、但可达时间还停在十几分钟前，
+     老逻辑据此判「在家」，正是男主人在办公室却显示在家的第二个原因。 */
   const fresh = trks.some(t=>{
     const s = S.states.get(t);
-    const r = s && s.attributes && s.attributes.last_time_reachable;
+    if(!s) return false;
+    if(s.state === "not_home") return false;
+    const r = s.attributes && s.attributes.last_time_reachable;
     if(!r) return false;
     const ms = Date.parse(r);
     return isFinite(ms) && (now - ms) < P_ONLINE_MIN * 60000;
@@ -3076,6 +3167,10 @@ function wifeNetFallback(){
   for(const [eid, st] of S.states){
     if(eid.indexOf("device_tracker.") !== 0) continue;
     if(st.state !== "home") continue;
+    /* V1.0.66：GPS 实体不进兜底。兜底本意是路由器换随机 MAC 时接新实体，
+       GPS 实体不会因换 MAC 改 ID；而 device_tracker.see 生成的僵尸 GPS
+       会一直冻在 home，正是误判"在家"的病根。 */
+    if(((st.attributes || {}).source_type) === "gps") continue;
     if(eid === "device_tracker.realme_gt5_pro") continue;      /* 男主那台 */
     const fn = (st.attributes && st.attributes.friendly_name) || "";
     if(fn.indexOf("男主") >= 0) continue;
@@ -3095,6 +3190,7 @@ function husNetFallback(){
     if(eid.indexOf("device_tracker.") !== 0) continue;
     if(st.state !== "home") continue;
     if(known.indexOf(eid) >= 0) continue;
+    if(((st.attributes || {}).source_type) === "gps") continue;   /* V1.0.66：同 wifeNetFallback，GPS 不兜底 */
     if(eid === "device_tracker.realme_gt5_pro_2") continue;   /* 女主那台，别认错人 */
     const fn = (st.attributes && st.attributes.friendly_name) || "";
     if(fn.indexOf("女主") >= 0) continue;
@@ -3146,6 +3242,186 @@ function preloadImg(url){
 
 
 const AVA = {"person.admin":"data:image/webp;base64,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","person.nu_zhu":"data:image/webp;base64,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"};
+/* ══════════════ V1.0.66：定位地图弹层 ══════════════
+   数据源：person 或它挂的 tracker 的 latitude / longitude（HA 存 WGS84）。
+   底图：高德静态图 API（GCJ-02），必须做 WGS84→GCJ-02 纠偏，否则偏 300~500 m。
+   Key：高德开放平台「Web服务」类型，存 localStorage，用户自填，不写进文件。 */
+const LOC_KEY_LS = "amap_key_v1";
+function amapKey(){
+  try{ return (localStorage.getItem(LOC_KEY_LS) || "").trim(); }catch(e){ return ""; }
+}
+/* WGS84 → GCJ-02（国测局偏移），境外坐标原样返回 */
+function wgsGcj(lat, lon){
+  if(lon < 72.004 || lon > 137.8347 || lat < 0.8293 || lat > 55.8271) return [lat, lon];
+  const PI = Math.PI, a = 6378245.0, ee = 0.00669342162296594323;
+  const tLat = (x, y)=>{
+    let r = -100.0 + 2.0*x + 3.0*y + 0.2*y*y + 0.1*x*y + 0.2*Math.sqrt(Math.abs(x));
+    r += (20.0*Math.sin(6.0*x*PI) + 20.0*Math.sin(2.0*x*PI)) * 2.0 / 3.0;
+    r += (20.0*Math.sin(y*PI) + 40.0*Math.sin(y/3.0*PI)) * 2.0 / 3.0;
+    r += (160.0*Math.sin(y/12.0*PI) + 320*Math.sin(y*PI/30.0)) * 2.0 / 3.0;
+    return r;
+  };
+  const tLon = (x, y)=>{
+    let r = 300.0 + x + 2.0*y + 0.1*x*x + 0.1*x*y + 0.1*Math.sqrt(Math.abs(x));
+    r += (20.0*Math.sin(6.0*x*PI) + 20.0*Math.sin(2.0*x*PI)) * 2.0 / 3.0;
+    r += (20.0*Math.sin(x*PI) + 40.0*Math.sin(x/3.0*PI)) * 2.0 / 3.0;
+    r += (150.0*Math.sin(x/12.0*PI) + 300.0*Math.sin(x/30.0*PI)) * 2.0 / 3.0;
+    return r;
+  };
+  let dLat = tLat(lon - 105.0, lat - 35.0);
+  let dLon = tLon(lon - 105.0, lat - 35.0);
+  const rad = lat / 180.0 * PI;
+  let magic = Math.sin(rad); magic = 1 - ee * magic * magic;
+  const sq = Math.sqrt(magic);
+  dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sq) * PI);
+  dLon = (dLon * 180.0) / (a / sq * Math.cos(rad) * PI);
+  return [lat + dLat, lon + dLon];
+}
+function distKm(a, b, c, d){
+  const R = 6371.0, p1 = a*Math.PI/180, p2 = c*Math.PI/180;
+  const dp = p2 - p1, dl = (d - b)*Math.PI/180;
+  const h = Math.sin(dp/2)*Math.sin(dp/2) + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function homeLL(){
+  const z = S.states.get("zone.home");
+  const a = (z && z.attributes) || {};
+  if(a.latitude != null && a.longitude != null) return [ +a.latitude, +a.longitude ];
+  return [28.834707, 108.76738];
+}
+/* 取某个人的最好一份坐标：person 自带优先，否则取挂载 tracker 里最新的一条 */
+function locOf(eid){
+  const st = S.states.get(eid);
+  if(!st) return null;
+  const pick = (s)=>{
+    const a = s.attributes || {};
+    if(a.latitude == null || a.longitude == null) return null;
+    return { lat: +a.latitude, lon: +a.longitude,
+             acc: a.gps_accuracy == null ? null : +a.gps_accuracy,
+             upd: s.last_updated, src: s.entity_id };
+  };
+  const own = pick(st);
+  const trks = Array.isArray((st.attributes||{}).device_trackers) ? st.attributes.device_trackers : [];
+  let best = own;
+  trks.forEach(t=>{
+    const s2 = S.states.get(t);
+    if(!s2) return;
+    const c = pick(s2);
+    if(!c) return;
+    if(!best || String(c.upd) > String(best.upd)) best = c;
+  });
+  return best;
+}
+function fmtClock(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  if(!isFinite(d.getTime())) return "—";
+  const p2 = n=> String(n).padStart(2, "0");
+  return (d.getMonth()+1) + "-" + p2(d.getDate()) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes());
+}
+function amapUrl(lat, lon, key){
+  const g = wgsGcj(lat, lon);
+  const ll = g[1].toFixed(6) + "," + g[0].toFixed(6);
+  return "https://restapi.amap.com/v3/staticmap?location=" + ll +
+         "&zoom=16&size=400*225&scale=2&markers=large,0xFF3B30,A:" + ll +
+         "&key=" + encodeURIComponent(key);
+}
+function locHtml(eid){
+  const p = (PERSON_LIST.find(x=> x.eid === eid)) || { eid: eid, name: "成员" };
+  const st = S.states.get(eid);
+  const tri = personTri(eid);
+  const area = tri === "away" ? personArea(eid) : "";
+  const d = locOf(eid);
+  const H = homeLL();
+  const triTxt = tri === "home" ? "在家" : tri === "away" ? (area ? "在" + area : "离家") : "离线";
+  const ava = (st && st.attributes && st.attributes.entity_picture) || "";
+  const fb = AVA[eid] || "";
+  const key = amapKey();
+
+  let mapInner;
+  let hasMap = false;
+  if(!d){
+    mapInner = '<div class="msg"><b>还没有坐标</b><br>这个人的定位源暂时没上报过经纬度。<br>手机上的定位开关打开后会自动出现。</div>';
+  }else if(!key){
+    mapInner = '<div class="msg"><b>需要高德「Web服务」Key</b><br>去高德开放平台创建 Key（类型选 Web服务），<br>粘贴到下框保存即可显示地图。</div>';
+  }else{
+    hasMap = true;
+    mapInner = '<img id="locImg" alt="定位地图" src="' + amapUrl(d.lat, d.lon, key) + '">' +
+               '<i class="pin"></i>';
+  }
+
+  let foot = "";
+  if(d){
+    const km = distKm(H[0], H[1], d.lat, d.lon);
+    foot = '<div class="locft">' +
+      '<span>距家 <b>' + (km < 1 ? Math.round(km*1000) + " m" : km.toFixed(2) + " km") + '</b></span>' +
+      '<span>精度 <b>' + (d.acc == null ? "—" : Math.round(d.acc) + " m") + '</b></span>' +
+      '<span>上报 <b>' + fmtClock(d.upd) + '</b></span>' +
+      '<span class="sp"></span>' +
+      '<span>' + d.lat.toFixed(5) + ", " + d.lon.toFixed(5) + '</span>' +
+    '</div>';
+  }
+
+  const args = '<div class="locargs">' +
+      '<input id="locKey" type="text" placeholder="粘贴高德 Web服务 Key（32 位）" value="' + esc(key) + '">' +
+      '<div class="hint">Key 只存在本机浏览器（localStorage），不会写进页面文件。' +
+      (key ? ' 已配置，可直接改。' : '') + '</div>' +
+    '</div>';
+
+  return '<div class="loc">' +
+    '<div class="lochd">' +
+      '<div class="lava"' + (ava ? ' data-src="' + esc(ava) + '"' : '') +
+        (fb ? ' style="background-image:url(' + fb + ')"' : '') + '>' + (fb ? '' : esc(p.name.charAt(0))) + '</div>' +
+      '<div class="lt"><b>' + esc(p.name) + '</b><span>' + esc(triTxt) + '</span></div>' +
+      '<button class="locx" id="locClose" title="关闭">×</button>' +
+    '</div>' +
+    '<div class="locmap' + (hasMap ? '' : ' compact') + '">' + mapInner + '</div>' + foot + args +
+    '<div class="locbt">' +
+      '<button id="locRefresh">刷新</button>' +
+      '<button class="pri" id="locSave">保存 Key 并加载</button>' +
+    '</div>' +
+  '</div>';
+}
+function openLoc(eid){
+  const panel = document.getElementById("locPanel");
+  const mask = document.getElementById("maskLoc");
+  if(!panel || !mask) return;
+  panel.innerHTML = locHtml(eid);
+  panel.setAttribute("data-eid", eid);
+  mask.classList.add("show");
+  bindLoc();
+  const av = panel.querySelector(".lava[data-src]");
+  if(av){
+    const src = av.getAttribute("data-src");
+    if(src){ const u = imgURL(src); if(u) av.style.backgroundImage = "url(" + u + ")"; }
+  }
+}
+function bindLoc(){
+  const panel = document.getElementById("locPanel");
+  const mask = document.getElementById("maskLoc");
+  const close = document.getElementById("locClose");
+  if(close) close.onclick = ()=> mask.classList.remove("show");
+  const save = document.getElementById("locSave");
+  if(save) save.onclick = ()=>{
+    const inp = document.getElementById("locKey");
+    const v = (inp && inp.value || "").trim();
+    try{ localStorage.setItem(LOC_KEY_LS, v); }catch(e){}
+    if(!v){ toast("Key 已清空，地图将不显示"); }
+    else if(v.length < 20){ toast("这个 Key 看起来偏短，先试着加载"); }
+    else { toast("Key 已保存"); }
+    openLoc(panel.getAttribute("data-eid"));
+  };
+  const rf = document.getElementById("locRefresh");
+  if(rf) rf.onclick = ()=>{
+    const img = document.getElementById("locImg");
+    if(img){ const src = img.getAttribute("src"); img.setAttribute("src", src + "&_t=" + Date.now()); }
+    else openLoc(panel.getAttribute("data-eid"));
+  };
+  if(mask && !mask.getAttribute("data-bound")){
+    mask.setAttribute("data-bound", "1");
+    mask.addEventListener("click", ev=>{ if(ev.target === mask) mask.classList.remove("show"); });
+  }
+}
 function renderPeople(){
   const host = document.getElementById("ppl");
   if(!host) return;
@@ -3169,8 +3445,12 @@ function renderPeople(){
        并把最后一次上报时间挂到 title 上，鼠标停一下就知道断在哪天。 */
     const raw = st ? String(st.state) : "";
     const noData = raw === "unknown" || raw === "unavailable" || raw === "";
+    /* V1.0.66：人在命名区域（办公室/公司…）时把地名念出来，别再一律写"离家" */
+    const area = tri === "away" ? personArea(p.eid) : "";
+    const areaTxt = area ? (area.length > 6 ? area.slice(0, 6) : area) : "";
     const txt = tri === "home" ? (nightBed ? "在家·离线" : "在家")
-              : tri === "away" ? "离家" : (noData ? "未上报" : "离线");
+              : tri === "away" ? (areaTxt ? "在" + areaTxt : "离家")
+              : (noData ? "未上报" : "离线");
     let tip = "";
     const p2 = n=> String(n).padStart(2, "0");
     const fmtT = ts=>{ const d = new Date(ts); return (d.getMonth() + 1) + "-" + d.getDate() + " " + p2(d.getHours()) + ":" + p2(d.getMinutes()); };
@@ -3183,7 +3463,9 @@ function renderPeople(){
         : "晚上次卧窗帘已关：判断他在家休息；他的手机没连家里 WiFi，所以状态标为离线";
       else if(fbk) tip = "按家里 WiFi 判断：" + prn + "手机换了网络标识（随机 MAC），已自动接上新的那台设备";
       else if(tri === "home") tip = "按家里 WiFi 判断：" + prn + "的手机正连着家中网络";
-      else if(tri === "away") tip = "按家里 WiFi 判断：家里网络上看不到" + prn + "的手机（出门，或手动关了 WiFi）";
+      else if(tri === "away") tip = area
+        ? ("GPS 定位在「" + area + "」附近，距家较远，按离家处理")
+        : ("按家里 WiFi 判断：家里网络上看不到" + prn + "的手机（出门，或手动关了 WiFi）");
       else tip = (st && st.last_updated)
         ? "按家里 WiFi 判断：最后一次看到" + prn + "的手机是 " + fmtT(st.last_updated) + "，此刻没扫到"
         : "按家里 WiFi 判断：暂时没扫到" + prn + "的手机";
@@ -4826,7 +5108,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.65 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.66 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -6104,13 +6386,18 @@ document.getElementById("btnSet").onclick = ()=> showSettings("");
     const p = ev.target.closest(".pill[data-eid]");
     if(!p) return;
     ev.stopPropagation();
-    openEnt(p.getAttribute("data-eid"));
+    /* V1.0.66：人物胶囊改为打开定位地图，其它实体仍走详情面板 */
+    const peid = p.getAttribute("data-eid");
+    if(peid && peid.indexOf("person.") === 0) openLoc(peid);
+    else openEnt(peid);
   };
   ppl.onkeydown = (ev)=>{
     if(ev.key !== "Enter" && ev.key !== " ") return;
     const p = ev.target.closest(".pill[data-eid]");
     if(!p) return;
-    ev.preventDefault(); openEnt(p.getAttribute("data-eid"));
+    ev.preventDefault(); const keid = p.getAttribute("data-eid");
+      if(keid && keid.indexOf("person.") === 0) openLoc(keid);
+      else openEnt(keid);;
   };
 })();
 /* 户型图悬停浮层 */
@@ -6537,5 +6824,6 @@ catch(e){ if(mqDark.addListener) mqDark.addListener(()=>{ if(THEME.mode==="auto"
   }
 })();
 </script>
+<div class="mask" id="maskLoc"><div class="panel" id="locPanel"></div></div>
 </body>
 </html>
