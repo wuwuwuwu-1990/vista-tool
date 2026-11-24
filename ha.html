@@ -1516,6 +1516,10 @@ html[data-mode="dark"] .iconbtn.ro{background:#FFB340;color:#3a2600}
 #island .iit{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #island .iis{font-size:11px;color:#9ca3af;white-space:nowrap;flex:none;margin-left:auto}
 #island[data-k="alarm"] .iis{color:#ffcec8}
+/* 环境底稿：不想让人误以为是事件，点变小灰、主文字压到 78% 明度 */
+#island[data-k="base"] .iitem i{background:#5b6472}
+#island[data-k="base"] .iit{color:#c8cdd6}
+#island[data-k="base"] .iis{color:#8b94a3}
 @media (max-width:1180px){ #island{display:none} }
 @media (prefers-reduced-motion: reduce){ #island,#island .itrack{transition:none} }
 
@@ -1625,7 +1629,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.68</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.69</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1807,7 +1811,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.68
+   HA家庭智能控制系统 · V1.0.69
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -2421,6 +2425,9 @@ function isleItems(){
   if(isleSt("binary_sensor.youyang_warning") === "on") out.push({ k:"warn", alarm:1, t:"天气预警", s:"注意防范" });
   if(S.states.has("binary_sensor.ruijie_router_wan_status") && isleSt("binary_sensor.ruijie_router_wan_status") === "off")
     out.push({ k:"wan", alarm:1, t:"外网已断开", s:"检查线路" });
+  /* V1.0.69：余额见底是"该充钱了"，不该混在环境底稿里随手滚过去 */
+  const bal0 = parseFloat(isleSt("sensor.state_grid_5000300567172_balance"));
+  if(isFinite(bal0) && bal0 < 20) out.push({ k:"ele_low", alarm:1, t:"电费余额不足", s:bal0.toFixed(1) + " 元" });
 
   /* —— 刚发生的事：排在进程之前，够醒目但不占红底 —— */
   const now = Date.now();
@@ -2447,6 +2454,65 @@ function isleItems(){
   if(cs === "closing" || cs === "opening")
     out.push({ k:"win", alarm:0, t:"偏卧窗户", s:(cs === "closing" ? "关闭中" : "打开中") });
 
+  /* V1.0.69：告警、一次性事件、家务全都没有时，退到常驻底稿 —— 岛不再空着变点 */
+  if(!out.length) return isleBase();
+
+  return out;
+}
+
+/* ══════════════════ V1.0.69：常驻底稿 ══════════════════
+   家里没事可讲的时候，播室外天气、空气质量、电费余额、室内温湿度。
+   这是"环境底噪"，所以用小灰点 + 略淡的主文字，跟真实事件区分开；
+   某项数据源缺失就跳过该项，四项全缺时退到在家人数，保证岛永远有内容；
+   一个实体都没读到（没连上 HA）则返回空，保持小点，绝不报假数据。 */
+const ISLE_WX = { sunny:"晴", "clear-night":"晴", partlycloudy:"多云", cloudy:"阴",
+  rainy:"雨", pouring:"大雨", snowy:"雪", "snowy-rainy":"雨夹雪", fog:"雾",
+  hail:"冰雹", lightning:"雷阵雨", windy:"大风", "windy-variant":"大风", exceptional:"异常" };
+
+function islePm(v){
+  if(!isFinite(v)) return "";
+  if(v <= 35) return "空气优";
+  if(v <= 75) return "空气良";
+  if(v <= 115) return "轻度污染";
+  if(v <= 150) return "中度污染";
+  if(v <= 250) return "重度污染";
+  return "严重污染";
+}
+
+function isleBase(){
+  const out = [];
+
+  const t  = parseFloat(isleSt("sensor.youyang_temperature"));
+  const wx = ISLE_WX[isleSt("weather.youyang")] || "";
+  if(isFinite(t))
+    out.push({ k:"b_wx", alarm:0, base:1, t:(wx ? wx + " " : "") + t.toFixed(1) + "°", s:"室外" });
+
+  const pm = parseFloat(isleSt("sensor.youyang_pm25"));
+  const pg = islePm(pm);
+  if(pg) out.push({ k:"b_pm", alarm:0, base:1, t:"PM2.5 " + pm.toFixed(0), s:pg });
+
+  const bal = parseFloat(isleSt("sensor.state_grid_5000300567172_balance"));
+  if(isFinite(bal) && bal >= 20)
+    out.push({ k:"b_ele", alarm:0, base:1, t:"电费余额", s:bal.toFixed(1) + " 元" });
+
+  /* 室内温湿度跟统计条同一口径（entCat + 平均），否则会出现"岛说 14.9°、统计条说 16.0°" */
+  let ts = 0, tn = 0, hs = 0, hn = 0;
+  S.states.forEach(function(x, id){
+    const v = parseFloat(x.state);
+    if(!isFinite(v)) return;
+    if(entCat(id, "temp")){ ts += v; tn++; }
+    else if(entCat(id, "hum")){ hs += v; hn++; }
+  });
+  if(tn)
+    out.push({ k:"b_in", alarm:0, base:1, t:"室内 " + (ts / tn).toFixed(1) + "°",
+               s:hn ? ("湿度 " + Math.round(hs / hn) + "%") : "" });
+
+  if(!out.length){
+    if(!S.states.size) return out;            /* 没连上：留给小点，别编数据 */
+    let n = 0;
+    S.states.forEach(function(x, id){ if(id.indexOf("person.") === 0 && String(x.state) === "home") n++; });
+    out.push({ k:"b_home", alarm:0, base:1, t:(n ? "在家 " + n + " 人" : "无人在家"), s:"" });
+  }
   return out;
 }
 
@@ -2481,7 +2547,9 @@ function isleRender(){
              (x.s ? '<span class="iis">' + esc(x.s) + '</span>' : '') + '</div>';
     });
     if(list.length > 1) rows.push(rows[0]);     /* 克隆首项：滚到末尾后无感回卷，不倒放 */
-    box.dataset.k = alarms.length ? "alarm" : "run";
+    /* base = 全是环境底稿，跟"真有事"用不同配色 */
+    const onlyBase = !alarms.length && list.every(function(x){ return x.base; });
+    box.dataset.k = alarms.length ? "alarm" : (onlyBase ? "base" : "run");
     box.dataset.s = "run";
     box.innerHTML = '<div class="itrack">' + rows.join("") + '</div>';
   }
@@ -2521,7 +2589,12 @@ function isleTouch(eid, prev){
      eid.indexOf("binary_sensor.lumi_") !== 0 &&
      eid.indexOf("binary_sensor.210006732398414_") !== 0 &&
      eid !== "binary_sensor.youyang_warning" &&
-     eid !== "binary_sensor.ruijie_router_wan_status") return;
+     eid !== "binary_sensor.ruijie_router_wan_status" &&
+     eid !== "weather.youyang" &&
+     eid !== "sensor.state_grid_5000300567172_balance" &&
+     eid.indexOf("sensor.youyang_") !== 0 &&
+     eid.indexOf("sensor.duka_hf1_0902_") !== 0 &&
+     eid.indexOf("person.") !== 0) return;
   isleRender();
 }
 
@@ -5352,7 +5425,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.68 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.69 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
