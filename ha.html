@@ -1597,7 +1597,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.66</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.67</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1778,7 +1778,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.66
+   HA家庭智能控制系统 · V1.0.67
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -3136,6 +3136,45 @@ function personArea(eid){
   return "";
 }
 const P_ONLINE_MIN = 12;
+/* V1.0.67：这个人的所有定位源是不是「拿不到可信位置」。
+   判据：person 自身没有坐标，挂载的 tracker 也都没有坐标、没有 home 状态，
+   而且没有 GPS 源明确报 not_home。
+   ⚠️ 局域网扫描源（nmap，source_type=router）的 not_home 不算证据 —— 它只代表 ping 不到。
+   ⚠️ HA 在「所有源都无数据」时会默认给 person 一个 not_home，那个值同样不能当「离家」看。 */
+function personNoData(eid){
+  const st = S.states.get(eid);
+  if(!st) return true;
+  const a = st.attributes || {};
+  if(a.latitude != null && a.longitude != null) return false;
+  const trks = Array.isArray(a.device_trackers) ? a.device_trackers : [];
+  for(let i = 0; i < trks.length; i++){
+    const s2 = S.states.get(trks[i]);
+    if(!s2) continue;
+    const a2 = s2.attributes || {};
+    const v2 = String(s2.state == null ? "" : s2.state);
+    /* 有坐标 = 真有数据（GPS 打出来的点，最可信） */
+    if(a2.latitude != null && a2.longitude != null) return false;
+    /* 在线 = 有数据 */
+    if(v2 === "home") return false;
+    /* GPS 源明确报 not_home = 可信的离家证据 */
+    if(v2 === "not_home" && a2.source_type === "gps") return false;
+    /* ⚠️ 局域网扫描源（nmap，source_type=router）报 not_home 只说明「ping 不到」：
+       手机休眠、只开流量、换随机 MAC 都会这样，不能当「人不在家」的证据。
+       女主手机实测正是如此 —— nmap 报 not_home，人却就在家里。 */
+  }
+  return true;
+}
+/* V1.0.67：人工兜底。有的成员手机长期没有任何信号（只连流量、后台被系统清掉），
+   自动判据永远拿不到数据，这时用 HA 里的手动开关表态。
+   铁律：真实数据永远优先 —— 只有判定为「无数据」时才看这个开关；手机一旦恢复上报，
+   开关自动失效，绝不会盖住真实位置。 */
+const MANUAL_HOME = { "person.nu_zhu": "input_boolean.nu_zhu_zai_jia" };
+function manualHome(eid){
+  const m = MANUAL_HOME[eid];
+  if(!m) return false;
+  const s = S.states.get(m);
+  return !!(s && s.state === "on");
+}
 function personTri(eid){
   const st = S.states.get(eid);
   const v  = st ? st.state : "";
@@ -3157,6 +3196,8 @@ function personTri(eid){
     return isFinite(ms) && (now - ms) < P_ONLINE_MIN * 60000;
   });
   if(fresh) return "home";
+  /* V1.0.67：无数据时先看人工兜底，否则判「离线」——绝不把「没信号」写成「离家」 */
+  if(personNoData(eid)) return manualHome(eid) ? "home" : "off";
   if(v === "not_home") return "away";
   return "off";
 }
@@ -3245,9 +3286,23 @@ const AVA = {"person.admin":"data:image/webp;base64,UklGRhwUAABXRUJQVlA4IBAUAABw
 /* ══════════════ V1.0.66：定位地图弹层 ══════════════
    数据源：person 或它挂的 tracker 的 latitude / longitude（HA 存 WGS84）。
    底图：高德静态图 API（GCJ-02），必须做 WGS84→GCJ-02 纠偏，否则偏 300~500 m。
-   Key：高德开放平台「Web服务」类型，存 localStorage，用户自填，不写进文件。 */
+   Key：高德开放平台「Web服务」类型。
+   存储（V1.0.67 起）：优先读 HA 的 input_text.amap_key —— 家里所有设备打开面板自动出图，
+   不必每台浏览器重填；localStorage 退为兜底缓存（HA 未配置或断线时仍能用上次填过的）。
+   面板里改 Key 会经 input_text.set_value 写回 HA，换 Key 不必改文件、不必重启。 */
 const LOC_KEY_LS = "amap_key_v1";
+const LOC_KEY_EID = "input_text.amap_key";
+/* HA 里没配过这个 helper 时，state 会是 unknown / unavailable，一律当空处理 */
+function haAmapKey(){
+  const st = (S.states && S.states.get) ? S.states.get(LOC_KEY_EID) : null;
+  if(!st) return "";
+  const v = String(st.state == null ? "" : st.state).trim();
+  if(!v || v === "unknown" || v === "unavailable") return "";
+  return v;
+}
 function amapKey(){
+  const h = haAmapKey();
+  if(h) return h;
   try{ return (localStorage.getItem(LOC_KEY_LS) || "").trim(); }catch(e){ return ""; }
 }
 /* WGS84 → GCJ-02（国测局偏移），境外坐标原样返回 */
@@ -3341,7 +3396,11 @@ function locHtml(eid){
   let mapInner;
   let hasMap = false;
   if(!d){
-    mapInner = '<div class="msg"><b>还没有坐标</b><br>这个人的定位源暂时没上报过经纬度。<br>手机上的定位开关打开后会自动出现。</div>';
+    mapInner = personNoData(eid)
+      ? '<div class="msg"><b>没有可用的定位数据</b><br>' +
+        (manualHome(eid) ? '当前按 HA 手动开关判为「在家」。<br>' : '') +
+        '她的手机既没被局域网扫到、GPS 也没上报过。<br>手机恢复上报后这里会自动出现地图。</div>'
+      : '<div class="msg"><b>还没有坐标</b><br>这个人的定位源暂时没上报过经纬度。<br>手机上的定位开关打开后会自动出现。</div>';
   }else if(!key){
     mapInner = '<div class="msg"><b>需要高德「Web服务」Key</b><br>去高德开放平台创建 Key（类型选 Web服务），<br>粘贴到下框保存即可显示地图。</div>';
   }else{
@@ -3362,10 +3421,15 @@ function locHtml(eid){
     '</div>';
   }
 
+  const hk = haAmapKey();
   const args = '<div class="locargs">' +
       '<input id="locKey" type="text" placeholder="粘贴高德 Web服务 Key（32 位）" value="' + esc(key) + '">' +
-      '<div class="hint">Key 只存在本机浏览器（localStorage），不会写进页面文件。' +
-      (key ? ' 已配置，可直接改。' : '') + '</div>' +
+      '<div class="hint">' +
+        (hk ? 'Key 已存入 HA（input_text.amap_key），家里所有设备打开都有图。'
+            : (key ? '当前用的是本机浏览器缓存的 Key，点保存会同步到 HA。'
+                   : 'HA 里还没配 Key，保存后会同步到 HA，所有设备自动出图。')) +
+        ' 改完点保存即可。' +
+      '</div>' +
     '</div>';
 
   return '<div class="loc">' +
@@ -3405,11 +3469,22 @@ function bindLoc(){
   if(save) save.onclick = ()=>{
     const inp = document.getElementById("locKey");
     const v = (inp && inp.value || "").trim();
+    /* 只读模式下不往 HA 写：访客打开面板不该能改掉全家的 Key */
+    if(!canCtl()){ toast("只读模式 · 先解锁控制"); return; }
     try{ localStorage.setItem(LOC_KEY_LS, v); }catch(e){}
-    if(!v){ toast("Key 已清空，地图将不显示"); }
-    else if(v.length < 20){ toast("这个 Key 看起来偏短，先试着加载"); }
-    else { toast("Key 已保存"); }
-    openLoc(panel.getAttribute("data-eid"));
+    if(v.length < 20){
+      toast("这个 Key 看起来偏短，先试着加载");
+      openLoc(panel.getAttribute("data-eid"));
+      return;
+    }
+    save.disabled = true;
+    save.textContent = "正在写入 HA…";
+    callService("input_text", "set_value", { value: v }, LOC_KEY_EID).then(ok=>{
+      if(ok) toast("已存入 HA · 家里所有设备通用", 2600);
+      else toast("写入 HA 失败，已存本机浏览器", 3000);
+      const p2 = document.getElementById("locPanel");
+      if(p2) openLoc(p2.getAttribute("data-eid"));
+    });
   };
   const rf = document.getElementById("locRefresh");
   if(rf) rf.onclick = ()=>{
@@ -3458,7 +3533,8 @@ function renderPeople(){
       /* V1.0.40：按家里 WiFi 判断 —— 手机 App 被杀后台也不影响，只要连上家里网络就算在家 */
       /* V1.0.48：男主共用这套文案，「她」按人换成「他」 */
       const prn = isWife ? "她" : "他";
-      if(nightBed) tip = isWife
+      if(manualHome(p.eid) && personNoData(p.eid)) tip = "按 HA 手动开关判为在家：她的手机既没连家里 WiFi，GPS 也没上报过";
+      else if(nightBed) tip = isWife
         ? "晚上主卧布帘已关：判断她在家休息；她的手机没连家里 WiFi，所以状态标为离线"
         : "晚上次卧窗帘已关：判断他在家休息；他的手机没连家里 WiFi，所以状态标为离线";
       else if(fbk) tip = "按家里 WiFi 判断：" + prn + "手机换了网络标识（随机 MAC），已自动接上新的那台设备";
@@ -5108,7 +5184,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.66 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.67 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
