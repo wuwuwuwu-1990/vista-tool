@@ -1540,6 +1540,35 @@ html[data-mode="dark"] #island[data-k="base"] .iitem i{background:#5b6472}
 @media (max-width:1180px){ #island{display:none} }
 @media (prefers-reduced-motion: reduce){ #island,#island .itrack{transition:none} }
 
+/* ══════════ V1.0.75 灵动岛：可点开详情 + 预警不再独占 ══════════ */
+#island{pointer-events:auto;cursor:pointer}
+#island .iitem[data-w] .iit{font-weight:600}
+/* 预警条目的点用橙、底稿条目的点用灰（红底告警模式除外，仍全白点） */
+#island:not([data-k="alarm"]) .iitem[data-w] i{background:var(--orange)}
+#island:not([data-k="alarm"]) .iitem[data-b] i{background:#9aa1ac}
+html[data-mode="dark"] #island:not([data-k="alarm"]) .iitem[data-w] i{background:#e8912a}
+html[data-mode="dark"] #island:not([data-k="alarm"]) .iitem[data-b] i{background:#5b6472}
+/* 全屋动态面板 */
+#maskIsle .isle-panel{width:min(94vw,430px);max-width:none;padding:0;overflow:hidden;border-radius:24px}
+#maskIsle .isle-hd{display:flex;align-items:center;justify-content:space-between;padding:15px 16px 10px 18px}
+#maskIsle .isle-hd b{font-size:15px;letter-spacing:.01em}
+#maskIsle .isle-x{border:0;background:transparent;color:var(--text2);font-size:17px;line-height:1;cursor:pointer;padding:5px 8px;border-radius:9px}
+#maskIsle .isle-x:hover{background:rgba(120,120,128,.14)}
+#maskIsle .isle-body{max-height:min(66vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 12px 14px}
+#maskIsle .isle-sec>h4{margin:10px 6px 5px;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--text2)}
+#maskIsle .ir{display:flex;gap:9px;padding:9px 10px;border-radius:12px}
+#maskIsle .ir+.ir{margin-top:2px}
+#maskIsle .ir>i{width:7px;height:7px;border-radius:50%;flex:none;margin-top:6px;background:var(--green)}
+#maskIsle .ir.al>i{background:#c0271d}
+#maskIsle .ir.wr>i{background:var(--orange)}
+#maskIsle .ir.ba>i{background:#9aa1ac}
+html[data-mode="dark"] #maskIsle .ir.ba>i{background:#5b6472}
+#maskIsle .irm{flex:1;min-width:0}
+#maskIsle .irt{font-size:13px;font-weight:500;color:var(--text)}
+#maskIsle .irs{font-size:12px;color:var(--text2);margin-left:8px;white-space:nowrap}
+#maskIsle .ird{display:block;font-size:12px;line-height:1.55;color:var(--text2);margin-top:5px}
+#maskIsle .isle-empty{padding:30px 12px;text-align:center;color:var(--text2);font-size:13px}
+
 </style>
 
 <style>
@@ -1658,7 +1687,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
       <div class="ttl">
         <h1>HA家庭智能控制系统</h1>
         <div class="sub">
-          <span>V1.0.74</span><span class="badge ro" id="modeBadge">只读</span>
+          <span>V1.0.75</span><span class="badge ro" id="modeBadge">只读</span>
           <span class="badge loc" id="netBadge">本地登录</span>
           <span id="connTxt" style="display:flex;align-items:center;gap:6px">
             <i class="dot" id="connDot"></i><span id="connLabel">未连接</span>
@@ -1668,7 +1697,7 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
         </div>
       </div>
       <div class="spacer"></div>
-      <div id="island" data-s="mini" data-k="none" aria-hidden="true"><i class="idot"></i></div>
+      <div id="island" data-s="mini" data-k="none" role="button" title="点开查看全屋动态"><i class="idot"></i></div>
       <div class="tools">
         <div class="search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:15px;height:15px;color:var(--text3)">
@@ -1835,12 +1864,23 @@ html[data-mode="dark"] #maskLoc .panel{background-color:#1c1f26;background-image
   <div class="panel numpanel" id="selPanel"></div>
 </div>
 
+<!-- 灵动岛详情（全屋动态） -->
+<div class="mask" id="maskIsle">
+  <div class="panel isle-panel">
+    <div class="isle-hd">
+      <b>全屋动态</b>
+      <button class="isle-x" id="btnIsleClose" title="关闭" aria-label="关闭">✕</button>
+    </div>
+    <div class="isle-body" id="isleBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════════
-   HA家庭智能控制系统 · V1.0.74
+   HA家庭智能控制系统 · V1.0.75
    连接 Home Assistant WebSocket：实时展示 + 设备控制。
    只读模式下不发送任何 call_service。
    ══════════════════════════════════════════════════════════════ */
@@ -2451,7 +2491,14 @@ function isleItems(){
     if(isleSt("binary_sensor.210006732398414_" + d[0]) === "on")
       out.push({ k:"door_" + d[0], alarm:1, t:"冰箱门未关", s:d[1] });
   });
-  if(isleSt("binary_sensor.youyang_warning") === "on") out.push({ k:"warn", alarm:1, t:"天气预警", s:"注意防范" });
+  /* V1.0.75：天气预警只是"提示"，不该独占岛位（一条预警能占好几小时，岛就废了）；
+     改成 warn 级，与底稿一起滚，但排在最前、点用橙色；面板里带出全名与完整描述。 */
+  if(isleSt("binary_sensor.youyang_warning") === "on"){
+    const wat = isleAt("binary_sensor.youyang_warning");
+    const wtt = String(wat.title || "天气预警");
+    const war = (wat.alarms && wat.alarms[0]) || {};
+    out.push({ k:"warn", warn:1, t:wtt, s:"注意防范", desc:(war.description || "") });
+  }
   if(S.states.has("binary_sensor.ruijie_router_wan_status") && isleSt("binary_sensor.ruijie_router_wan_status") === "off")
     out.push({ k:"wan", alarm:1, t:"外网已断开", s:"检查线路" });
   /* V1.0.69：余额见底是"该充钱了"，不该混在环境底稿里随手滚过去 */
@@ -2484,7 +2531,9 @@ function isleItems(){
     out.push({ k:"win", alarm:0, t:"偏卧窗户", s:(cs === "closing" ? "关闭中" : "打开中") });
 
   /* V1.0.69：告警、一次性事件、家务全都没有时，退到常驻底稿 —— 岛不再空着变点 */
-  if(!out.length) return isleBase();
+  /* V1.0.75：只有"硬告警"才独占；没有硬告警时，把底稿垫在后面一起滚 */
+  const hard0 = out.some(function(x){ return x.alarm; });
+  if(!hard0) isleBase().forEach(function(b){ out.push(b); });
 
   return out;
 }
@@ -2551,6 +2600,8 @@ function isleRender(){
 
   const all = isleItems();
   const alarms = all.filter(function(x){ return x.alarm; });
+  const warns = all.filter(function(x){ return x.warn; });
+  /* V1.0.75：硬告警独占不滚；否则全部（预警 + 家务 + 底稿）一起滚 */
   const list = alarms.length ? alarms : all;
 
   if(!list.length){
@@ -2572,13 +2623,14 @@ function isleRender(){
     ISLE.idx = 0;
     ISLE.n = list.length;
     const rows = list.map(function(x){
-      return '<div class="iitem"><i></i><span class="iit">' + esc(x.t) + '</span>' +
+      const at = (x.warn ? ' data-w="1"' : '') + (x.base ? ' data-b="1"' : '');
+      return '<div class="iitem"' + at + '><i></i><span class="iit">' + esc(x.t) + '</span>' +
              (x.s ? '<span class="iis">' + esc(x.s) + '</span>' : '') + '</div>';
     });
     if(list.length > 1) rows.push(rows[0]);     /* 克隆首项：滚到末尾后无感回卷，不倒放 */
-    /* base = 全是环境底稿，跟"真有事"用不同配色 */
-    const onlyBase = !alarms.length && list.every(function(x){ return x.base; });
-    box.dataset.k = alarms.length ? "alarm" : (onlyBase ? "base" : "run");
+    /* base = 全是环境底稿，跟"真有事"用不同配色；V1.0.75 有天气预警时标 warn */
+    const onlyBase = !alarms.length && !warns.length && list.every(function(x){ return x.base; });
+    box.dataset.k = alarms.length ? "alarm" : (warns.length ? "warn" : (onlyBase ? "base" : "run"));
     box.dataset.s = "run";
     box.innerHTML = '<div class="itrack">' + rows.join("") + '</div>';
   }
@@ -2588,6 +2640,51 @@ function isleRender(){
   }else if(ISLE.timer){
     clearInterval(ISLE.timer); ISLE.timer = null;
   }
+}
+
+
+/* ══════════════ V1.0.75：点灵动岛 → 全屋动态面板 ══════════════ */
+function islePanelData(){
+  const items = isleItems().slice();
+  /* isleItems 在有硬告警时不会补底稿，面板里仍要把环境底稿列出来 */
+  if(!items.some(function(x){ return x.base; }))
+    isleBase().forEach(function(b){ items.push(b); });
+  return items;
+}
+function islePanelHTML(){
+  const items = islePanelData();
+  if(!items.length) return '<div class="isle-empty">还没连上后端，暂无数据</div>';
+  function row(x, cls){
+    const d = x.desc ? '<span class="ird">' + esc(x.desc) + '</span>' : '';
+    return '<div class="ir ' + (cls || '') + '"><i></i><div class="irm">' +
+      '<span class="irt">' + esc(x.t) + '</span>' +
+      (x.s ? '<span class="irs">' + esc(x.s) + '</span>' : '') + d + '</div></div>';
+  }
+  const alarms = items.filter(function(x){ return x.alarm; });
+  const warns  = items.filter(function(x){ return x.warn; });
+  const runs   = items.filter(function(x){ return !x.alarm && !x.warn && !x.base; });
+  const bases  = items.filter(function(x){ return x.base; });
+  let h = '';
+  if(alarms.length) h += '<div class="isle-sec"><h4>需要处理</h4>' + alarms.map(function(x){ return row(x, 'al'); }).join('') + '</div>';
+  if(warns.length)  h += '<div class="isle-sec"><h4>天气提示</h4>' + warns.map(function(x){ return row(x, 'wr'); }).join('') + '</div>';
+  if(runs.length)   h += '<div class="isle-sec"><h4>正在运行</h4>' + runs.map(function(x){ return row(x, 'ru'); }).join('') + '</div>';
+  if(bases.length)  h += '<div class="isle-sec"><h4>家中环境</h4>' + bases.map(function(x){ return row(x, 'ba'); }).join('') + '</div>';
+  return h;
+}
+function openIsle(){
+  const m = document.getElementById("maskIsle");
+  const b = document.getElementById("isleBody");
+  if(!m || !b) return;
+  b.innerHTML = islePanelHTML();
+  m.classList.add("show");
+  if(!m.getAttribute("data-bound")){
+    m.setAttribute("data-bound", "1");
+    m.addEventListener("click", function(ev){ if(ev.target === m) closeIsle(); });
+  }
+}
+function closeIsle(){
+  const m = document.getElementById("maskIsle");
+  if(m) m.classList.remove("show");
 }
 
 function isleStep(){
@@ -5481,7 +5578,7 @@ function renderAll(){
   }
   host.innerHTML = html;
   document.getElementById("foot").innerHTML =
-    'HA家庭智能控制系统 · V1.0.74 · '+(S.ctl? '可控面板':'只读模式')+' · '+
+    'HA家庭智能控制系统 · V1.0.75 · '+(S.ctl? '可控面板':'只读模式')+' · '+
     (netKind(S.url||"")==="loc" ? '本地登录（局域网）' : '远程登录（公网）')+' · '+
     Object.keys(S.areas).length +' 个区域 / '+ S.states.size +' 个实体<br>'+
     '数据与指令均由 Home Assistant WebSocket 直连，不经过任何第三方服务';
@@ -6946,6 +7043,9 @@ document.querySelectorAll("#seg button").forEach(b=>{
 
 /* ── 全局点击代理：指令按钮 → 卡片详情 ── */
 document.addEventListener("click", (ev)=>{
+  /* V1.0.75：点顶栏灵动岛 → 全屋动态面板；面板内的关闭按钮 */
+  if(ev.target.closest("#island")){ openIsle(); return; }
+  if(ev.target.closest("#btnIsleClose")){ closeIsle(); return; }
   /* 统计卡下钻：点分类卡只显示该类，再点取消（设备总数/离线设备不带 data-cat，不触发） */
   const catEl = ev.target.closest(".stat[data-cat]");
   if(catEl){
