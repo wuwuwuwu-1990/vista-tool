@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>岸维水工CAD自动成图系统 ShoreVizCAD v1.0.20</title>
+<title>岸维水工CAD自动成图系统 ShoreVizCAD v1.0.21</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230b5f96%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2312a4b8%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M10%2040%20L20%2040%20L26%2022%20L34%2050%20L40%2034%20L54%2034%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3C/svg%3E">
 <style>/* ===== 岸维水工CAD自动成图系统 ShoreVizCAD · 设计令牌 ===== */
 :root{
@@ -260,7 +260,7 @@ table.rec input[type=checkbox]{accent-color:var(--primary); width:12px;height:12
     <div class="brand-txt">
       <span class="brand-title">岸维水工CAD自动成图系统</span>
       <span class="brand-sub">ShoreVizCAD</span>
-      <span class="ver" id="verTag">v1.0.20</span>
+      <span class="ver" id="verTag">v1.0.21</span>
     </div>
   </div>
   <div class="topbar-spacer"></div>
@@ -1005,12 +1005,12 @@ const P_SHA = [
     return {
       id: 'SH-01',
       /* 全部默认值对齐 ★★★样板图_t3.dxf（左岸挡墙 断面）：
-         墙身高 3.945 / 基础厚 1.0 / 顶宽 0.835 / 临水面坡 1:0.35 / 前趾 0.501 /
+         墙身高 3.945 / 基础厚 1.0 / 顶宽 0.800（v1.0.21 待改项②：原 0.835） / 临水面坡 1:0.35 / 前趾 0.501 /
          压顶 100 / 垫层 100 / 临水面地面高出基顶 0.668 / 背水面露出 0.6 /
          左右开挖坡 1:1、1:0.75 / 排水管 2 层（首层 1.0、间距 1.5、i=0.1）
          ★ v1.0.17 待改项⑦：H 改成【垫层顶→墙顶】口径 = 旧净高 3.945 + H2 1.0 = 4.945，
            几何结果与 v1.0.16 完全一致（yt = 100 + 4945 = 5045，旧式 = 100+1000+3945 = 5045）。 */
-      H: 4.945, H2: 1.0, B1: 0.835, n: 0.35, m: 0,
+      H: 4.945, H2: 1.0, B1: 0.800, n: 0.35, m: 0,
       toe: 0.501, heel: 0,
       capH: 0.1, slabH: 0.1,
       hc: 0.668, dr: 0.6,
@@ -1088,7 +1088,11 @@ const P_SHA = [
       [0, g.yb], [g.xLexb, g.yb], [g.xLexc, g.ygL], [g.xgLw, g.ygL], [g.xW, g.yb]
     ]);
     const fillR = polyArea([[g.xR, g.y0], [g.xR, g.ygR], [g.xRexc, g.ygR]]);
-    return { wall, foot, slab, cap, apron, total: wall + foot + slab + cap,
+    /* v1.0.21 待改项⑧（用户 2026-11-27 明确）：
+       「每延米砌体截面积就是墙身 + 基础」，垫层与压顶都是 C20 砼、不是浆砌块石，剔除；
+       砌体合计不含块石护脚（apron 仍单独返回，不并入 total）。
+       slab / cap 仍各自返回，日后要报砼工程量随时可取。 */
+    return { wall, foot, slab, cap, apron, total: wall + foot,
       B2: g.B2 / 1000, Bb: g.Bb / 1000,
       excA, fillL, fillR, fillSum: fillL + fillR };
   }
@@ -1365,12 +1369,24 @@ const P_SHA = [
     };
     /* exo/exe 一并带上，界面预览据此画界线（预览原本写死 EXO=2/EXE=75，
        与 DXF 样式本来就对不上；现在两边同源） */
+    /* v1.0.21 待改项③：长度为 0（取整后图上就写「0」）的尺寸一律不画。
+       判据用「取整后的标注文字是否就是 0」（dv === '0'，即实际 < 5mm）—— 与图上数字同源，
+       不会出现「文字写 0 却还画着一道零长尺寸」的毛刺。
+       直接在 pushV / pushH 里拦，等于把用户点名的两道
+       （背水面墙顶露出 ygR→yt、临水面地面高出基础顶 yb→ygL）
+       和同源的其它零长尺寸（hc=0 时下方尺寸链也会冒出一道 0）一并处理。
+       零长尺寸的两端点本来就重合，跳过它不会让尺寸链断开。 */
+    const skip0 = (a, b) => dv(Math.abs(b - a)) === '0';
+    /* exo/exe 一并带上，界面预览据此画界线（预览原本写死 EXO=2/EXE=75，
+       与 DXF 样式本来就对不上；现在两边同源） */
     const pushV = (x, ya, yb2, xd, style) => {
+      if (skip0(ya, yb2)) return;
       const st = style || S_B, ex = DIM_EX[st] || DIM_EX[S_B];
       push({ t: 'dim', layer: L.dim, p1: [x, ya], p2: [x, yb2], dp: [xd, (ya + yb2) / 2],
         txt: dv(yb2 - ya), style: st, exo: ex.exo, exe: ex.exe });
     };
     const pushH = (xa, xb, y, yd, style) => {
+      if (skip0(xa, xb)) return;
       const st = style || S_B, ex = DIM_EX[st] || DIM_EX[S_B];
       push({ t: 'dim', layer: L.dim, p1: [xa, y], p2: [xb, y], dp: [(xa + xb) / 2, yd],
         txt: dv(xb - xa), style: st, exo: ex.exo, exe: ex.exe });
@@ -1380,26 +1396,31 @@ const P_SHA = [
       pushV(g.xR, g.yt, g.ycap, xdRO, S_R);
       pushV(g.xR, g.yc, g.yt, xdRO, S_R);
       pushV(g.xR, g.y0, g.yc, xdRO, S_R);
-      pushV(g.xR, g.ygR, g.yt, xdRI, S_RI);
+      pushV(g.xR, g.ygR, g.yt, xdRI, S_RI);      /* dr=0 时零长，已由 pushV 自动跳过 */
       /* 左侧 5 道（v1.0.17 待改项⑧：取消原来 y0→yb 的合并段 1200，
          拆成「垫层 100 + 基础 1100」两段，与右侧外链口径一致）
          以 H=4.5 / H2=1.1 / hc=0.4 为例：100 / 1100 / 400 / 3000 / 100 */
       pushV(0, g.yt, g.ycap, xdL, S_L);
       pushV(0, g.ygL, g.yt, xdL, S_L);
-      pushV(0, g.yb, g.ygL, xdL, S_L);
+      pushV(0, g.yb, g.ygL, xdL, S_L);           /* hc=0 时零长，已由 pushV 自动跳过 */
       pushV(0, g.yc, g.yb, xdL, S_L);
       pushV(0, g.y0, g.yc, xdL, S_L);
-      /* 上方 5 道 */
+      /* 上方 5 道（v1.0.21 待改项①：第 4 道「800」改为标注【挡墙顶宽】xWT→xRT；
+         第 3 道随之收到墙顶临水侧角点，尺寸链 −1100 | 0 | 501 | xWT | xRT | xRexc 连续无缺口） */
       pushH(g.xLexb, 0, g.ygR, ydT, S_TOP);
       pushH(0, g.toe, g.ygR, ydT, S_TOP);
-      pushH(g.toe, g.xCapL, g.ygR, ydT, S_TOP);
-      pushH(g.xCapL, g.xR, g.ygR, ydT, S_TOP);
+      pushH(g.toe, g.xWT, g.ygR, ydT, S_TOP);
+      pushH(g.xWT, g.xRT, g.ygR, ydT, S_TOP);
       pushH(g.xR, g.xRexc, g.ygR, ydT, S_TOP);
-      /* 下方 6 道（外 2 + 内 4） */
+      /* 下方 6 道（外 2 + 内 4）
+         hc=0 时左开挖线与基础顶、地面线的交点重合（xLexc == xLexb），
+         内链左侧两段会退化成「0 + 与外链重复的 1100」，这两段只在 hc>0 时才有意义。 */
       pushH(g.xLexc, 0, g.yc, ydBO);
       pushH(0, g.xR, g.yc, ydBO);
-      pushH(g.xLexc, g.xLexb, g.yc, ydBI);
-      pushH(g.xLexb, 0, g.yc, ydBI);
+      if (!skip0(g.xLexc, g.xLexb)) {
+        pushH(g.xLexc, g.xLexb, g.yc, ydBI);
+        pushH(g.xLexb, 0, g.yc, ydBI);
+      }
       pushH(0, g.toe, g.yc, ydBI);
       pushH(g.toe, g.xR, g.yc, ydBI);
       /* 墙背回填线 1 道 */
@@ -1418,12 +1439,13 @@ const P_SHA = [
        dir：+1 文字在肘点右侧，-1 在左侧。
        ly ：v1.0.16（待改项④）该处引线专属图层 —— 折线、文字、标注点三者同层，
             这样在 CAD 里关掉某一层就只隐掉那一处标注。 */
-    const lead = (target, dx1, dy1, dir, name, ly) => {
+    const lead = (target, dx1, dy1, dir, name, ly, pad) => {
       const LY = ly || L.leadFoot;
       const elbow = [target[0] + dx1, target[1] + dy1];
       const tw = textWidth(name, HT);
-      /* 基线长 = 文字宽 + 150mm 留白（两端各 75），方向由 dir 决定 —— 天正同口径 */
-      const len = (tw + 150) * (dir < 0 ? -1 : 1);
+      /* 基线长 = 文字宽 + 留白（默认 150，两端各 75），方向由 dir 决定 —— 天正同口径 */
+      const PD = pad == null ? 150 : pad;
+      const len = (tw + PD) * (dir < 0 ? -1 : 1);
       const end = [elbow[0] + len, elbow[1]];
       push({ t: 'poly', layer: LY, pts: [target, elbow, end], close: false });
       /* 文字左对齐到基线的外端（+75mm 让位），dir 正负都成立 */
@@ -1433,8 +1455,13 @@ const P_SHA = [
       push({ t: 'insert', layer: LY, name: '引线点', x: target[0], y: target[1], sx: 0.03 });
       return end;
     };
-    /* ① 块石护脚（护脚三角重心位置） */
-    lead([-0.32 * Math.abs(g.xLexb), 0.67 * g.yb], -560, -470, -1, '块石护脚', L.leadFoot);
+    /* ① 块石护脚（护脚三角内）
+       v1.0.21 待改项④（方案 A）：标注点由 0.67·yb 下移到 0.42·yb、肘点相对位移由 −470 收到 −340，
+       斜段穿出坡面的位置从 y≈561 降到 y≈431，与「1:1」坡度文字（沿坡面 y≈486~836）拉开净距。
+       实测折线↔文字最近净距 269 → 364mm（1.28 → 1.73 ×坡度字高 210）。
+       注：受「1:1 文字下角就在这条引线上方」的几何限制，此拓扑最多只能到 ~372，
+       再想拉大必须动坡度文字（原方案 B）或改引线走法（原方案 C）。 */
+    lead([-0.32 * Math.abs(g.xLexb), 0.42 * g.yb], -560, -340, -1, '块石护脚', L.leadFoot);
     /* ② M10 浆砌块石挡墙 —— 落点必须落在墙身填充内部。
        旧写法 g.xW + g.n*0.6H + 280：0.6H 处墙面 x = 501 + 0.35×2367 = 1329，
        再 +280 只深入墙身 280mm，仅占墙身宽度 1387mm 的 20% —— 渲染出来正好贴着
@@ -1444,10 +1471,24 @@ const P_SHA = [
     lead([xw60 + (g.xR - xw60) * 0.5, g.yb + 0.6 * g.hw], -818, 821, -1, 'M10浆砌块石挡墙', L.leadWall);
     /* ③ 开挖料回填（护脚上方）—— 取回填块【中心】，不再用轮廓控制点（会压在边界线上）。
        v1.0.15 用户要求：引线文字上移到左上方空白区（肘点 y 由 2183 抬到约 2847），
-       避开「2500」那道尺寸的左界线（x=−1768，可见段 y 1908~2681）从文字中间穿过。 */
-    lead([-0.40 * Math.abs(g.xLexb), g.yb + g.hcM * 0.52], -907, 1400, -1, '开挖料回填', L.leadFillL);
-    /* ④ 开挖料回填（墙背）—— 同样取块中心 */
-    lead([g.xR + 0.43 * (g.ygR - g.yb), g.yb + 0.72 * (g.ygR - g.yb)], 814, -450, 1, '开挖料回填', L.leadFillR);
+       避开「2500」那道尺寸的左界线（x=−1768，可见段 y 1908~2681）从文字中间穿过。
+       v1.0.21 待改项⑥「折线偏长」：标注点由 0.52·hcM 上移到 0.80·hcM（0.85 会正好压在回填块轮廓上）、
+       dy1 由 1400 收到 1082，斜段 1668 → 1412、合计 2403 → 2147（−11%）。再往下压会被上面那条界线的
+       顶端 2681 卡住，想再短只能换文字落点（原 D 方案），本轮不做。 */
+    lead([-0.40 * Math.abs(g.xLexb), g.yb + g.hcM * 0.80], -907, 1082, -1, '开挖料回填', L.leadFillL);
+    /* ④ 开挖料回填（墙背）—— 同样取块中心
+       v1.0.21 待改项⑤：肘点按几何反算，保证文字整体落在右开挖线【右侧】、近边净距 75mm（半个字高）。
+       引注点不动。反算式：肘点 x = 该处开挖线 x（取文字顶部高程）+ 75（文字让位）− 75（基线留白），
+       即文本左端恰好压在开挖线右侧 75mm 处；excR / xR / ygR 变化时自动跟随，不会再压线。 */
+    {
+      const tgt = [g.xR + 0.43 * (g.ygR - g.yb), g.yb + 0.72 * (g.ygR - g.yb)];
+      const dyR = -450;
+      const ygSafe = Math.max(1, g.ygR);
+      const lineX = y => g.xR + (y / ygSafe) * (g.xRexc - g.xR);
+      const textTop = tgt[1] + dyR + 55 + HT;
+      const dxR = lineX(textTop) - tgt[0];
+      lead(tgt, dxR, dyR, 1, '开挖料回填', L.leadFillR);
+    }
     /* ⑤ C20 砼压顶 —— 从压顶【左端】向左上引，避开墙背那条竖直尺寸界线。
        原来从压顶中部 +335/+471 向右上引，肘点 y 到 5566、文字顶到 5771，
        而方案 C 把顶部尺寸线收到 ygR+1300（=5745），两者正面撞车；
@@ -1750,6 +1791,8 @@ const P_SHA = [
          · 字高【固定 1000 模型单位 = 1.0 m】（用户 2026-11-27 指定，原 200）——
            不随 denom 缩放，各断面看起来一样大；位置留白按图纸 15mm（15 × denom）折算。
          · 位置【左上角】：x 取整组包围盒左边界、左对齐（72=0），y 在整组最高点之上。
+         · v1.0.21 待改项⑨（用户 2026-11-27）：整体再上移【一个字符高度 = NOTE_H = 1000 模型 mm】，
+           1:40 出图时与最上方尺寸线的纸面间距由 15mm 变为 40mm（其中 25mm 为字高本身）。
          · 提示计入 bbox / $EXTMAX，否则打开后提示落在视口外看不到。 */
     const NOTE_STR = '提示：CAD 未自动计算填充，若填充未正确显示请修改比例再改回';
     const NOTE_H = 1000;
@@ -1795,7 +1838,7 @@ const P_SHA = [
       const den0 = s0.denom > 0 ? s0.denom : 20;
       const note = { t: 'text', layer: LAYER.titleText, color: 2,
         x: gx0 - staged[0].dx,                       /* 左上角：整组最左，左对齐 */
-        y: worldTop - staged[0].dy + 15 * den0,
+        y: worldTop - staged[0].dy + 15 * den0 + NOTE_H,   /* 待改项⑨：再上移一个字高 */
         h: NOTE_H, str: NOTE_STR, align: 'left' };
       /* 只拼进本次导出的临时命令表，不回写 s.cmds —— 界面预览不受影响 */
       staged[0].cmds = staged[0].cmds.concat([note]);
@@ -2880,17 +2923,22 @@ const P_SHA = [
       el.onchange = () => { o()[k] = el.checked; cache.key = ''; draw(); save(); };
     });
   }
+  /* v1.0.21 待改项⑦（用户 2026-11-27）：面积类指标一律四舍五入保留 2 位小数。
+     不用 toFixed —— 它有二进制误差（1.005.toFixed(2) 得 "1.00"），这里显式 half-up。
+     合计口径 A：先按原值相加再取整（不是先取整再相加）。 */
+  const n2 = v => Math.round((v + 1e-9) * 100) / 100;
+  const f2 = v => n2(v).toFixed(2);
   function checks() {
     const r = state.recs[state.cur]; if (!r) return;
     const a = S.area(r);
     $('k_B2').textContent = a.B2.toFixed(3) + ' m';
     $('k_Bb').textContent = a.Bb.toFixed(3) + ' m';
-    $('k_A1').textContent = a.wall.toFixed(3) + ' m²';
-    $('k_A2').textContent = a.foot.toFixed(3) + ' m²';
-    $('k_V').textContent = a.total.toFixed(3) + ' m³/m';
-    $('k_EXC').textContent = a.excA.toFixed(3) + ' m²';
-    $('k_FILL_LR').textContent = a.fillL.toFixed(3) + ' / ' + a.fillR.toFixed(3) + ' m²';
-    $('k_FILL').textContent = a.fillSum.toFixed(3) + ' m²';
+    $('k_A1').textContent = f2(a.wall) + ' m²';
+    $('k_A2').textContent = f2(a.foot) + ' m²';
+    $('k_V').textContent = f2(a.total) + ' m³/m';
+    $('k_EXC').textContent = f2(a.excA) + ' m²';
+    $('k_FILL_LR').textContent = f2(a.fillL) + ' / ' + f2(a.fillR) + ' m²';
+    $('k_FILL').textContent = f2(a.fillSum) + ' m²';
     $('k_D').textContent = (r.drainN | 0) + ' 层 · DN' + Math.round(r.drainD);
     const box = $('chkOk');
     let msg = '几何自洽；参数可直接出图', cls = 'chk';
@@ -3133,8 +3181,8 @@ const P_SHA = [
     const rows = [head].concat(state.recs.map(r => {
       const a = S.area(r);
       return [r.id, r.H, r.H2, r.B1, +a.B2.toFixed(3), +a.Bb.toFixed(3), r.n, r.m, r.toe, r.heel, r.dr, r.hc,
-      r.drainN, r.drainD, r.drainI, r.drainFirst, r.drainGap, r.excL, r.excR, +a.total.toFixed(3),
-      +a.excA.toFixed(3), +a.fillL.toFixed(3), +a.fillR.toFixed(3), +a.fillSum.toFixed(3)];
+      r.drainN, r.drainD, r.drainI, r.drainFirst, r.drainGap, r.excL, r.excR, n2(a.total),
+      n2(a.excA), n2(a.fillL), n2(a.fillR), n2(a.fillSum)];
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '断面清单');
@@ -3350,7 +3398,7 @@ const P_SHA = [
 
   $('btnAbout').onclick = () => dlg('关于 岸维水工CAD自动成图系统', `
     <div class="exp-note">
-      <b>ShoreVizCAD v1.0.20</b> · 单文件离线运行，不联网、不上传任何数据。<br><br>
+      <b>ShoreVizCAD v1.0.21</b> · 单文件离线运行，不联网、不上传任何数据。<br><br>
       <b>工作方式</b>：读取样板图 DXF 的图层、字体、线宽、标注样式 → 依据断面参数表批量生成护岸挡墙断面 →
       输出符合天正制图习惯的标准 DXF 与 PNG。<br><br>
       <b>图纸要素</b>：墙身轮廓、基础、排水管（穿墙下斜 i）、反滤层、回填、开挖工作面、尺寸标注（真实 DIMENSION 实体）、
