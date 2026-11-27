@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>岸维水工CAD自动成图系统 ShoreVizCAD v1.0.21</title>
+<title>岸维水工CAD自动成图系统 ShoreVizCAD v1.0.22</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230b5f96%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2312a4b8%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M10%2040%20L20%2040%20L26%2022%20L34%2050%20L40%2034%20L54%2034%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3C/svg%3E">
 <style>/* ===== 岸维水工CAD自动成图系统 ShoreVizCAD · 设计令牌 ===== */
 :root{
@@ -260,7 +260,7 @@ table.rec input[type=checkbox]{accent-color:var(--primary); width:12px;height:12
     <div class="brand-txt">
       <span class="brand-title">岸维水工CAD自动成图系统</span>
       <span class="brand-sub">ShoreVizCAD</span>
-      <span class="ver" id="verTag">v1.0.21</span>
+      <span class="ver" id="verTag">v1.0.22</span>
     </div>
   </div>
   <div class="topbar-spacer"></div>
@@ -519,7 +519,7 @@ window.__TPL__={"file": "★★★样板图_t3.dxf", "acadver": "AC1027", "heade
 (function (global) {
   'use strict';
 
-  const VERSION = '1.0.18';
+  const VERSION = '1.0.22';
 
   /* ================= 数值 ================= */
   const round = (v, n) => { const p = Math.pow(10, n); return Math.round(v * p + (v >= 0 ? 1e-9 : -1e-9)) / p; };
@@ -1193,8 +1193,14 @@ const P_SHA = [
     /* 字高（mm，与 t3 一致：引线 150 / 坡度 210 / 图名 250 / 单位 180） */
     const HT = 150, HS = 210, HG = 250, HU = 180;
     /* 顶部标注两段长度（用户 2026-11-26）：尺寸线到右地面线的间距 / 界线在尺寸线以下的
-       主体长度。界线总长 = TOP_BODY + DIMEXE(105) = 355，与断面参数（含墙顶露出）无关。 */
-    const TOP_GAP = 1300, TOP_BODY = 250;
+       主体长度。界线总长 = TOP_BODY + DIMEXE(105) = 355，与断面参数（含墙顶露出）无关。
+       v1.0.22（方案 A）：再加一条【压顶顶面保底净距】TOP_CLEAR。
+       原实现 ydT = ygR + TOP_GAP 完全跟随背水面地面线，dr 一变大（≥1.2m）尺寸线就落到
+       压顶顶面上、再大直接压进墙身。现改为 Math.max(地面线基准, 压顶顶面 + TOP_CLEAR)：
+         · dr ≤ 0.6（默认）时两项相等或地面线基准更大 → 输出与 v1.0.21 逐字节相同；
+         · dr > 0.6 时锁在压顶上方 600，不再继续下移。
+       TOP_CLEAR = 600 取自默认断面 dr=0.6 时尺寸线到压顶顶面的实际净距，因此默认图零变化。 */
+    const TOP_GAP = 1300, TOP_BODY = 250, TOP_CLEAR = 600;
 
     /* ---------- 1) 挡墙主体闭合线（红，全局宽度 0.02 = 20mm） ---------- */
     push({ t: 'poly', layer: L.wall, gw: 0.02, pts: [
@@ -1340,17 +1346,22 @@ const P_SHA = [
     /* 尺寸线位置：位置回到 v1.0.12 口径（左 −2239 / 右外 +3951），
        顶部以右地面线 ygR 为基准 —— ygR 随「背水面墙顶露出」上下移动时，顶部 5 道
        尺寸线整体跟随，界线形态不变。
+       v1.0.22 补充：跟随的同时有【压顶顶面 + 600】的保底净距（见 TOP_CLEAR），
+       否则 dr ≥ 1.2 时尺寸线会落到压顶顶面甚至压进墙身。
        ★ 界线偏移改为「按方位分别可控」：DIMEXO/DIMEXE 是样式级参数，骨架里已按方位
          建了 5 份样式（_TCH_ARCH / _TOP / _L / _R / _RI），每道标注按方位指定样式名。
          值是天正口径（图纸 mm），乘 dimscale 0.07 后的模型 mm 见 DIM_EX。 */
     const DIM_BACK_OFF = 332;   /* 2500 那道尺寸线相对地面线的高度（v1.0.16 待改项⑤） */
     const xdRO = g.xR + 3951, xdRI = g.xR + 1034, xdL = -2239;
-    const ydT = g.ygR + TOP_GAP, ydBO = g.y0 - 835, ydBI = g.y0 - 489;
+    const ydT = Math.max(g.ygR + TOP_GAP, g.ycap + TOP_CLEAR), ydBO = g.y0 - 835, ydBI = g.y0 - 489;
     /* 顶部界线「相对动态」（用户 2026-11-26）：不写死 1050，而由尺寸线到地面线的间距
        反算，使界线总长恒为 TOP_BODY + DIMEXE = 250 + 105 = 355。
        当前 TOP_GAP=1300 → exo=1050，与 v1.0.14 输出完全一致；日后若调 TOP_GAP，
-       界线自动保持 355，不必手工同步样式表（DIMSTYLE 里的 42 组码由 buildDxf 同步改写）。 */
-    const exoTop = TOP_GAP - TOP_BODY;
+       界线自动保持 355，不必手工同步样式表（DIMSTYLE 里的 42 组码由 buildDxf 同步改写）。
+       v1.0.22：exo 改为按【实际使用的间距】派生（ydT − ygR）。dr 大时 ydT 被压顶净距
+       顶上去了，若仍用 TOP_GAP 反算，界线就会比 355 短甚至为负；用实际间距才能保持
+       「界线永远只是在尺寸线下方一小段」的既有形态（dr=1.2 时 exo 由 1050 增到 1650）。 */
+    const exoTop = (ydT - g.ygR) - TOP_BODY;
     const DIM_EX = {
       '_TCH_ARCH':    { exo: 140,    exe: 105 },   // 通用：底部 + 墙背
       '_TCH_ARCH_TOP':{ exo: exoTop, exe: 105 },   // 顶部 5 道（推导值，当前 1050）
@@ -3398,7 +3409,7 @@ const P_SHA = [
 
   $('btnAbout').onclick = () => dlg('关于 岸维水工CAD自动成图系统', `
     <div class="exp-note">
-      <b>ShoreVizCAD v1.0.21</b> · 单文件离线运行，不联网、不上传任何数据。<br><br>
+      <b>ShoreVizCAD v1.0.22</b> · 单文件离线运行，不联网、不上传任何数据。<br><br>
       <b>工作方式</b>：读取样板图 DXF 的图层、字体、线宽、标注样式 → 依据断面参数表批量生成护岸挡墙断面 →
       输出符合天正制图习惯的标准 DXF 与 PNG。<br><br>
       <b>图纸要素</b>：墙身轮廓、基础、排水管（穿墙下斜 i）、反滤层、回填、开挖工作面、尺寸标注（真实 DIMENSION 实体）、
